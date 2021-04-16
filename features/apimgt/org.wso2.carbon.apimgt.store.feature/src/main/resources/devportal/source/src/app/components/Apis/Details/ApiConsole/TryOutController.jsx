@@ -841,6 +841,94 @@ function TryOutController(props) {
                         </Box>
                     </Grid>
                 )}
+            {(isPrototypedAPI && !api.enableStore)
+                    && (
+                        <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
+                            <Grid xs={12} md={6} item>
+                                {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
+                                        || (labels && labels.length > 0))
+                                        && (
+                                            <>
+                                                <Typography
+                                                    variant='h5'
+                                                    color='textPrimary'
+                                                    className={classes.categoryHeading}
+                                                >
+                                                    <FormattedMessage
+                                                        id='api.console.gateway.heading'
+                                                        defaultMessage='Gateway'
+                                                    />
+                                                </Typography>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    label={(
+                                                        <FormattedMessage
+                                                            defaultMessage='Environment'
+                                                            id='Apis.Details.ApiConsole.environment'
+                                                        />
+                                                    )}
+                                                    value={selectedEnvironment || (environments && environments[0])}
+                                                    name='selectedEnvironment'
+                                                    onChange={handleChanges}
+                                                    helperText={(
+                                                        <FormattedMessage
+                                                            defaultMessage='Please select an environment'
+                                                            id='Apis.Details.ApiConsole.SelectAppPanel.environment'
+                                                        />
+                                                    )}
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                >
+                                                    {environments && environments.length > 0 && (
+                                                        <MenuItem value='' disabled className={classes.menuItem}>
+                                                            <em>
+                                                                <FormattedMessage
+                                                                    id='api.gateways'
+                                                                    defaultMessage='API Gateways'
+                                                                />
+                                                            </em>
+                                                        </MenuItem>
+                                                    )}
+                                                    {environments && (
+                                                        environments.map((env) => (
+                                                            <MenuItem
+                                                                value={env}
+                                                                key={env}
+                                                                className={classes.menuItem}
+                                                            >
+                                                                {env}
+                                                            </MenuItem>
+                                                        )))}
+                                                    {containerMngEnvMenuItems}
+                                                    {labels && labels.length > 0 && (
+                                                        <MenuItem value='' disabled>
+                                                            <em>
+                                                                <FormattedMessage
+                                                                    id='gateways'
+                                                                    defaultMessage='Gateways'
+                                                                    className={classes.menuItem}
+                                                                />
+                                                            </em>
+                                                        </MenuItem>
+                                                    )}
+                                                    {labels && (
+                                                        labels.map((label) => (
+                                                            <MenuItem
+                                                                value={label}
+                                                                key={label}
+                                                                className={classes.menuItem}
+                                                            >
+                                                                {label}
+                                                            </MenuItem>
+                                                        ))
+                                                    )}
+                                                </TextField>
+                                            </>
+                                        )}
+                            </Grid>
+                        </Box>
+                    )}
         </IntlProvider>
     );
 }
