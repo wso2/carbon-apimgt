@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,12 +31,12 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.EndpointCertificatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateValidityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

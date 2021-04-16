@@ -1,8 +1,8 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.KeyManagerListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.KeyManagersApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.KeyManagersApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.KeyManagersApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

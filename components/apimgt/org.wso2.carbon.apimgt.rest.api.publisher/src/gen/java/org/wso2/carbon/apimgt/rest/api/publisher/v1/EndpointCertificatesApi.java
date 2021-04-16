@@ -1,12 +1,12 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import java.io.File;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.EndpointCertificatesApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.EndpointCertificatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.EndpointCertificatesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

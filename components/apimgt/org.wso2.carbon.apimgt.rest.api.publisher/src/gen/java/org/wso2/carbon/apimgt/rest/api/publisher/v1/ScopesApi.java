@@ -1,11 +1,11 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ScopesApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SharedScopeUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.ScopesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.ScopesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

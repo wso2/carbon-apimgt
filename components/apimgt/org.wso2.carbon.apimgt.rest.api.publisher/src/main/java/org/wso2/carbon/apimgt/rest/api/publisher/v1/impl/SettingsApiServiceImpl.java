@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -28,9 +28,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SettingsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.SettingsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;

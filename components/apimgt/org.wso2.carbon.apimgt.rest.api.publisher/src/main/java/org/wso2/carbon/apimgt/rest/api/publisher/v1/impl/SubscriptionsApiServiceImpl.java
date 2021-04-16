@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,13 +37,13 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMonetizationUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriberInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

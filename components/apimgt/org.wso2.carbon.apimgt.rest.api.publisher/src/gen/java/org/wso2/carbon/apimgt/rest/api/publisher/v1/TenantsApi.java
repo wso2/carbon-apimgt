@@ -1,9 +1,9 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TenantListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.TenantsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.TenantsApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TenantListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.TenantsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.TenantsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

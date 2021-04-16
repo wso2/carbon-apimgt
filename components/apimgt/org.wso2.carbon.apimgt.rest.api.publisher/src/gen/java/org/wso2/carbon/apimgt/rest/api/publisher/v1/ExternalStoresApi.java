@@ -1,9 +1,9 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ExternalStoresApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ExternalStoresApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExternalStoreDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.ExternalStoresApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.ExternalStoresApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

@@ -1,9 +1,9 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.SearchApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.SearchApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.SearchApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

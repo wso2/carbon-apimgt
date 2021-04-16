@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,10 +30,10 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SearchResultMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.SearchApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.SearchResultMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;

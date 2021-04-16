@@ -16,7 +16,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;

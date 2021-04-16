@@ -25,7 +25,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
     <packaging>war</packaging>
     <name>WSO2 API Manager Publisher REST API - v2</name>
     <description>WSO2 API Manager REST API for API Publisher</description>
@@ -138,7 +138,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.common</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -181,8 +181,8 @@
                             <inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
                             <language>jaxrs-cxf-cdi</language>
                             <configOptions>
-                                <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1</apiPackage>
-                                <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1.dto</modelPackage>
+                                <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher</apiPackage>
+                                <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>

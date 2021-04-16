@@ -1,11 +1,11 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1;
+package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ThrottlingPoliciesApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionPolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlingPolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.ThrottlingPoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.impl.ThrottlingPoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
