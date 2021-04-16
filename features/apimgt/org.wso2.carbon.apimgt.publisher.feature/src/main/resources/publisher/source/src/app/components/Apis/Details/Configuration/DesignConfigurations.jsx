@@ -187,14 +187,16 @@ function configReducer(state, configAction) {
         case 'github_repo':
         case 'slack_url': {
             const targetProperty = nextState.additionalProperties.find((property) => property.name === action);
+            const updatedProperty = {
+                name: action,
+                value,
+                display: true,
+            };
             if (targetProperty) {
-                targetProperty.value = value;
+                nextState.additionalProperties = [
+                    ...nextState.additionalProperties.filter((property) => property.name !== action), updatedProperty];
             } else {
-                nextState.additionalProperties.push({
-                    name: action,
-                    value,
-                    display: true,
-                });
+                nextState.additionalProperties.push(updatedProperty);
             }
             return nextState;
         }
@@ -221,7 +223,7 @@ export default function DesignConfigurations() {
         apiConfig.additionalProperties.find((prop) => prop.name === 'slack_url'),
         apiConfig.additionalProperties.find((prop) => prop.name === 'github_repo'),
     ],
-    apiConfig.additionalProperties);
+    [apiConfig.additionalProperties]);
     const invalidTagsExist = apiConfig.tags.find((tag) => {
         return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag));
     });
