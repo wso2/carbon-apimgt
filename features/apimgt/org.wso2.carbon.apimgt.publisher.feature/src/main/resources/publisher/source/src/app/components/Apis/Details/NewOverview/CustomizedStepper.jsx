@@ -136,6 +136,10 @@ const useStyles = makeStyles((theme) => ({
         pointerEvents: 'none',
         color: theme.palette.text.primary,
     },
+    textLink: {
+        color: '#0060B6',
+        textDecoration: 'none',
+    },
 }));
 
 /**
@@ -249,39 +253,38 @@ export default function CustomizedStepper() {
                                 </Grid>
                             </Box>
                         </Grid>
-                        <Grid
-                            container
-                            direction='row'
-                            alignItems='center'
-                            justify='center'
-                        >
-                            <Box mt={1} ml={2}>
-                                <Link
-                                    underline='none'
-                                    component={RouterLink}
-                                    to={devportalUrl}
+                        <Box mt={1} ml={2}>
+                            <a
+                                target='_blank'
+                                className={classes.textLink}
+                                rel='noopener noreferrer'
+                                href={devportalUrl}
+                            >
+                                <Grid
+                                    container
+                                    direction='row'
+                                    alignItems='center'
+                                    justify='center'
                                 >
-                                    <Typography variant='h7'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.view.devportal'
-                                            defaultMessage='View in devportal'
-                                        />
-                                    </Typography>
-                                </Link>
-                            </Box>
-                            <Box ml={1} mt={1}>
-                                <a
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    href={devportalUrl}
-                                >
-                                    <LaunchIcon
-                                        color='primary'
-                                        fontSize='small'
-                                    />
-                                </a>
-                            </Box>
-                        </Grid>
+                                    <Grid item>
+                                        <Typography variant='h7' display='inline'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.view.devportal'
+                                                defaultMessage='View in devportal'
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Box ml={1}>
+                                            <LaunchIcon
+                                                color='primary'
+                                                fontSize='small'
+                                            />
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </a>
+                        </Box>
                     </>
                 );
             case 'PROTOTYPED':
