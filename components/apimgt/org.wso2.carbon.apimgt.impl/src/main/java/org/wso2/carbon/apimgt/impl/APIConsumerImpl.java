@@ -3328,7 +3328,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIProduct product = null;
             String context = null;
             if (apiIdentifier != null) {
-                api = getAPI(apiIdentifier);
+                // Retrieving the API without the permission check.
+                // Because, there can be scenarios where API is no longer visible to the user, but the subscription exists.
+                // Therefore, we need to allow the user to delete the subscription.
+                api = getLightweightAPIWithoutPermissionCheck(apiIdentifier);
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
                 product = getAPIProduct(apiProdIdentifier);

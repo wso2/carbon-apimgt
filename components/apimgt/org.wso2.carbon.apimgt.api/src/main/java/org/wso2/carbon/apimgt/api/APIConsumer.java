@@ -712,6 +712,15 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Returns details of an API information in low profile without the permission chack
+     *
+     * @param identifier APIIdentifier
+     * @return An API object related to the given identifier or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    API getLightweightAPIWithoutPermissionCheck(APIIdentifier identifier) throws APIManagementException;
     
     /**
      * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,

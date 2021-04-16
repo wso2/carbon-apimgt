@@ -717,6 +717,66 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    /**
+     * Get minimal details of API by API identifier without checking the permission
+     *
+     * @param identifier APIIdentifier object
+     * @return API of the provided APIIdentifier
+     * @throws APIManagementException
+     */
+    public API getLightweightAPIWithoutPermissionCheck(APIIdentifier identifier) throws APIManagementException {
+        String apiPath = APIUtil.getAPIPath(identifier);
+
+        boolean tenantFlowStarted = false;
+
+        try {
+            String tenantDomain = getTenantDomain(identifier);
+
+            startTenantFlow(tenantDomain);
+            tenantFlowStarted = true;
+
+            Registry registry = getSystemRegistry(identifier);
+
+            if (registry != null) {
+                Resource apiResource = registry.get(apiPath);
+                String artifactId = apiResource.getUUID();
+                if (artifactId == null) {
+                    throw new APIManagementException("artifact id is null for : " + apiPath);
+                }
+                GenericArtifactManager artifactManager = getAPIGenericArtifactManager(identifier, registry);
+                GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+                return getApiInformation(registry,apiArtifact);
+            } else {
+                String msg = "Failed to get registry from api identifier: " + identifier;
+                throw new APIManagementException(msg);
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get API from : " + apiPath;
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+    }
+
+    public Registry getSystemRegistry(APIIdentifier identifier) throws APIManagementException{
+        try {
+            String tenantDomain = getTenantDomain(identifier);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                int id = getTenantManager().getTenantId(tenantDomain);
+                // explicitly load the tenant's registry
+                APIUtil.loadTenantRegistry(id);
+                return getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                return getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+            }
+        } catch (RegistryException |org.wso2.carbon.user.api.UserStoreException  e) {
+            String msg = "Failed to get the API from registry.";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     protected void endTenantFlow() {
         PrivilegedCarbonContext.endTenantFlow();
     }

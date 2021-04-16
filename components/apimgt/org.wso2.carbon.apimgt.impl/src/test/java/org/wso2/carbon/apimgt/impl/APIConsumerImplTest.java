@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.impl;
 
@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -116,16 +117,17 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
+@PrepareForTest({PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
         ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class})
-@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
+@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
     private ApiMgtDAO apiMgtDAO;
     private UserRealm userRealm;
     private RealmService realmService;
+    private PrivilegedCarbonContext privilegedCarbonContext;
     private ServiceReferenceHolder serviceReferenceHolder;
     private TenantManager tenantManager;
     private UserStoreManager userStoreManager;
@@ -143,6 +145,8 @@ public class APIConsumerImplTest {
 
     @Before
     public void init() throws UserStoreException, RegistryException, APIManagementException {
+        System.setProperty(CARBON_HOME, "");
+        privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         userRealm = Mockito.mock(UserRealm.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -158,12 +162,15 @@ public class APIConsumerImplTest {
         authorizationManager = Mockito.mock(AuthorizationManager.class);
         keyManagerConfigurationDTO = Mockito.mock(KeyManagerConfigurationDTO.class);
         PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(ApplicationUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
         PowerMockito.mockStatic(RegistryUtils.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.when(privilegedCarbonContext.getUsername()).thenReturn("admin");
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -1140,7 +1147,7 @@ public class APIConsumerImplTest {
     }
 
     @Test
-    public void testRemoveSubscription() throws APIManagementException, WorkflowException {
+    public void testRemoveSubscription() throws APIManagementException, WorkflowException, RegistryException {
         String uuid = UUID.randomUUID().toString();
         Subscriber subscriber = new Subscriber("sub1");
         Application application = new Application("app1", subscriber);
@@ -1159,6 +1166,20 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscription for UUID"));
         }
+        String path = "testPath";
+        Mockito.when(APIUtil.getAPIPath((APIIdentifier) Mockito.anyObject())).thenReturn(path);
+        Resource resource = new ResourceImpl();
+        resource.setUUID(UUID.randomUUID().toString());
+        Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifactImpl.class);
+        Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn("carbon.super");
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        API api = new API(new APIIdentifier("admin", "test", "1.0.0"));
+        PowerMockito.when(APIUtil.getAPIInformation((GenericArtifact)(Mockito.anyObject()),
+                (UserRegistry)(Mockito.anyObject()))).thenReturn(api);
         apiConsumer.removeSubscription(subscribedAPINew);
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationNameFromId(Mockito.anyInt());
         String workflowExtRef = "test_wf_ref";
