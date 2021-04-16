@@ -172,9 +172,13 @@ const APICreateStreamingAPI = (props) => {
             policies,
         };
 
+        let endpointType = 'http';
+        if ((apiType && apiType.toUpperCase() === 'WS') || (protocol && protocol.toUpperCase() === 'WS')) {
+            endpointType = 'ws';
+        }
         if (endpoint) {
             apiData.endpointConfig = {
-                endpoint_type: protocol === 'WS' ? 'ws' : 'http',
+                endpoint_type: endpointType,
                 sandbox_endpoints: {
                     url: endpoint,
                 },
