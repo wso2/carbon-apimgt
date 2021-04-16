@@ -139,11 +139,11 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.parent.basedir}/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml</inputSpec>
+                            <inputSpec>${project.parent.basedir}/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml</inputSpec>
                             <language>jaxrs-cxf-cdi</language>
                             <configOptions>
-                                <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1</apiPackage>
-                                <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1.dto</modelPackage>
+                                <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher</apiPackage>
+                                <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>
@@ -209,8 +209,8 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.rest.api.publisher.dto.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

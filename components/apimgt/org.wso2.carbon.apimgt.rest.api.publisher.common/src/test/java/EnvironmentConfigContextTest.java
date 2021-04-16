@@ -22,9 +22,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.EnvironmentConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.EnvironmentConfigContext;
 
 public class EnvironmentConfigContextTest {
 

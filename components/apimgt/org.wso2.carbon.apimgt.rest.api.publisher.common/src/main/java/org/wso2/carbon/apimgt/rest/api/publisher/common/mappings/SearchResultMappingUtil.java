@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,12 +31,12 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductSearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APISearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultListDTO;
 
 import java.util.Map;
 

@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateBuilderImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.APITemplateBuilderImpl;
 
 import java.io.File;
 import java.util.LinkedHashSet;

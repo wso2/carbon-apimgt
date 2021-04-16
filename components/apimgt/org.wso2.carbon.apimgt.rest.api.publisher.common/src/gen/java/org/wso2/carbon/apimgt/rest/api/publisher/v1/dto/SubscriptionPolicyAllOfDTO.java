@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,9 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CustomAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionThrottlePolicyPermissionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 

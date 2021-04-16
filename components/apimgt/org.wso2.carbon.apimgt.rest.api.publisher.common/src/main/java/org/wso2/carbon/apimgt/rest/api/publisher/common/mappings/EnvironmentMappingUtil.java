@@ -18,13 +18,13 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.VHostDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
