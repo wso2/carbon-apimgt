@@ -24,9 +24,14 @@ public class PersistenceService {
 
         String loggedInUserName= AuthenticationContext.getLoggedInUserName();
         String loggedInTenanDomain = AuthenticationContext.getLoggedInTenanDomain();
+
         if(loggedInTenanDomain!=null & loggedInTenanDomain!=null){
             Organization org = new Organization(loggedInTenanDomain);
-            String[] roles  = APIUtil.getFilteredUserRoles(loggedInUserName);
+
+            //String[] roles  = APIUtil.getListOfRoles(loggedInUserName);
+            String[] roles = new String[1];
+            roles[0] = "system/wso2.anonymous.role";
+
             Map<String, Object> properties = APIUtil.getUserProperties(loggedInUserName);
             UserContext userCtx = new UserContext(loggedInUserName, org, properties, roles);
             String searchQuery = "";

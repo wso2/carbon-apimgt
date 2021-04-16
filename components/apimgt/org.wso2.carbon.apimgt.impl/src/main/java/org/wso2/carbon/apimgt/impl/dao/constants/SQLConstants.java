@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
 
-    public static final String GET_API_TYPE = "SELECT API.API_TYPE FROM AM_API API WHERE API.API_UUID = ? ";
+
     public static final String GET_API_TIME_DETAILS = "SELECT API.API_UUID,API.CREATED_TIME,API.UPDATED_TIME,API.API_TYPE FROM AM_API API WHERE API.API_UUID = ?";
 
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =

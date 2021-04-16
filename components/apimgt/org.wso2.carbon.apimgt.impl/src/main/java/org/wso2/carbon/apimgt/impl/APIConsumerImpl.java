@@ -283,7 +283,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public List<Label> getLabelDataFromDAO() throws APIManagementException {
         List<Label> labels = ApiMgtDAO.getInstance().getAllLabels(MultitenantUtils.getTenantDomain("wso2.anonymous.user"));
-
         return labels;
     }
 
@@ -319,23 +318,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return scopeList;
     }
 
-    @Override
-    public Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException,UserStoreException{
-        APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
-        String  provider = apiIdentifier.getProviderName();
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomainName);
 
-        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
-        return definedTiers;
-    }
-
-    @Override
-    public String getApiTypeFromDAO(String id) {
-        String type = ApiMgtDAO.getInstance().getApiType(id);
-        return type;
-    }
 
     @Override
     public Time getTimeDetailsFromDAO(String s) {

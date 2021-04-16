@@ -43,9 +43,9 @@ public interface APIConsumer extends APIManager {
     List<Scope> getScopeDataDromDAO(String Id) throws APIManagementException;
 
 
-    Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException, UserStoreException;
+    //Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException, UserStoreException;
 
-    String getApiTypeFromDAO(String Id) ;
+    //String getApiTypeFromDAO(String Id) ;
 
     Time getTimeDetailsFromDAO(String Id);
 

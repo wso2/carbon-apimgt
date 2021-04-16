@@ -214,22 +214,6 @@ public class ApiMgtDAO {
         return INSTANCE;
     }
 
-    public String getApiType(String Id){
-        String type = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_TYPE)) {
-            statement.setString(1, Id);
-
-            ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                type = resultSet.getString("API_TYPE");
-            }
-        } catch (SQLException e) {
-
-        }
-        return type;
-    }
     public Time getApiTimeDetails(String Id){
         String uuid = null;
         String createTime = null;

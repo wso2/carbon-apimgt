@@ -30,11 +30,7 @@ public class TierDTO {
         this.stopOnQuotaReached = stopOnQuotaReached;
         this.monetizationAttributes = monetizationAttributes;
     }
-//    public String setApiId(String apiId){
-//        this.apiId = apiId;
-//        return apiId;
-//    }
-//
+
     public String getId() {
         return apiId;
     }

@@ -170,6 +170,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<version>3.2.3</version>
 				<configuration>
 					<warName>api#am#devportal#graphql#v1</warName>
 				</configuration>
@@ -177,6 +178,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.3.5.RELEASE</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

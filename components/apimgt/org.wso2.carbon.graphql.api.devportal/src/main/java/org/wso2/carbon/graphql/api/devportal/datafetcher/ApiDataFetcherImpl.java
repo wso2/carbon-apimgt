@@ -27,49 +27,9 @@ public class ApiDataFetcherImpl {
 
     public DataFetcher getApiListing(){
         return env-> {
-            int start = env.getArgument("start");
             int offset = env.getArgument("offset");
-            return apiService.getAllApis(start,offset);
-        };
-    }
-
-    public DataFetcher getApiDefinition(){
-        return env->{
-            ApiDTO api = env.getSource();
-            return apiService.getApiDefinition(api.getUuid());
-        };
-    }
-
-    public DataFetcher getApiFromArtifact(){
-        return env->{
-            String uuid = env.getArgument("id");
-            return apiService.getApi(uuid);
-        };
-    }
-
-    public DataFetcher getCreatedTime(){
-        return env->{
-            ApiDTO api = env.getSource();
-            Map<String, ContextDTO> contextDTOMap = env.getContext();
-            String createdTime = null;
-            if(contextDTOMap.get(api.getUuid())==null){
-                contextDTOMap.put(api.getUuid(), apiService.getApiTimeDetails(api.getUuid()));
-            }
-            createdTime = contextDTOMap.get(api.getUuid()).getCreatedTime();
-            return createdTime;
-        };
-    }
-
-    public DataFetcher getLastUpdate(){
-        return env->{
-            ApiDTO api = env.getSource();
-            Map<String, ContextDTO> contextDTOMap = env.getContext();
-            String lastUpdate = null;
-            if(contextDTOMap.get(api.getUuid())==null){
-                contextDTOMap.put(api.getUuid(), apiService.getApiTimeDetails(api.getUuid()));
-            }
-            lastUpdate = contextDTOMap.get(api.getUuid()).getLastUpdate();
-            return lastUpdate;
+            int  limit= env.getArgument("limit");
+            return apiService.getAllApis(offset,limit);
         };
     }
     public DataFetcher  getApiRating(){
@@ -81,7 +41,6 @@ public class ApiDataFetcherImpl {
     public DataFetcher getTierDetails(){
         return env->{
             TierNameDTO tierNameDTO = env.getSource();
-
             return tierService.getTierDetailsFromDAO(tierNameDTO.getApiId(),tierNameDTO.getName());
         };
     }
@@ -92,13 +51,40 @@ public class ApiDataFetcherImpl {
             return apiService.getMonetizationLabel(tiers);
         };
     }
+    public DataFetcher getCreatedTime(){
+        return env->{
+            ApiDTO api = env.getSource();
+            Map<String, ContextDTO> contextDTOMap = env.getContext();
+            ContextDTO contextDTO = contextDTOMap.get(api.getUuid());
+            if(contextDTO==null){
+                contextDTO = apiService.getApiTimeDetails(api.getUuid());
+                contextDTOMap.put(api.getUuid(), contextDTO);
+            }
+            return contextDTO.getCreatedTime();
+        };
+    }
+
+    public DataFetcher getLastUpdate(){
+        return env->{
+            ApiDTO api = env.getSource();
+            Map<String, ContextDTO> contextDTOMap = env.getContext();
+            ContextDTO contextDTO = contextDTOMap.get(api.getUuid());
+            if(contextDTO==null){
+                contextDTO = apiService.getApiTimeDetails(api.getUuid());
+                contextDTOMap.put(api.getUuid(), contextDTO);
+            }
+            return contextDTO.getLastUpdate();
+        };
+    }
 
     public DataFetcher getOperationInformation(){
         return env->{
             ApiDTO api = env.getSource();
             Map<String, ContextDTO> contextDTOMap = env.getContext();
-            if(contextDTOMap.get(api.getUuid())==null){
-                contextDTOMap.put(api.getUuid(), apiService.getApiTimeDetails(api.getUuid()));
+            ContextDTO contextDTO = contextDTOMap.get(api.getUuid());
+            if(contextDTO==null){
+                contextDTO = apiService.getApiTimeDetails(api.getUuid());
+                contextDTOMap.put(api.getUuid(), contextDTO);
             }
             return operationService.getOperationDetails(contextDTOMap, api.getUuid());
 
@@ -117,7 +103,19 @@ public class ApiDataFetcherImpl {
         };
     }
 
+    public DataFetcher getApiDefinition(){
+        return env->{
+            ApiDTO api = env.getSource();
+            return apiService.getApiDefinition(api.getUuid());
+        };
+    }
 
+    public DataFetcher getApiFromArtifact(){
+        return env->{
+            String uuid = env.getArgument("id");
+            return apiService.getApi(uuid);
+        };
+    }
 
 
 
