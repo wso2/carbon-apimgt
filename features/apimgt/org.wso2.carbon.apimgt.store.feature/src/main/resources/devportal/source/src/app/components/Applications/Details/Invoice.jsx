@@ -29,6 +29,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import { withStyles } from '@material-ui/core/styles';
+import { string } from 'prop-types';
 
 const styles = (theme) => ({
     dialogWrapper: {
@@ -53,7 +54,7 @@ const options = {
 };
 
 function Invoice(props) {
-    const { subscriptionId, isMonetizedAPI, isDynamicUsagePolicy, classes } = props;
+    const { subscriptionId, isMonetizedAPI, isDynamicUsagePolicy, classes, tiers } = props;
     const [showPopup, setShowPopup] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [invoice, setInvoice] = useState(null);
@@ -101,6 +102,7 @@ function Invoice(props) {
                 color="default"
                 onClick={handlePopup}
                 startIcon={<Icon>receipt</Icon>}
+                disabled={tiers.length === 0}
             >
                 <FormattedMessage
                     id='Applications.Details.Invoice.view.btn'
@@ -146,8 +148,12 @@ function Invoice(props) {
     );
 }
 
+Invoice.defaultProps = {
+    tiers: [],
+}
 Invoice.propTypes = {
     subscriptionId: PropTypes.string.isRequired,
+    tiers: PropTypes.arrayOf(string),
 };
 
 export default withStyles(styles)(Invoice);
