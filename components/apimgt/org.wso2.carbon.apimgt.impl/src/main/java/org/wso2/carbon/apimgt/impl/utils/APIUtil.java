@@ -7708,7 +7708,8 @@ public final class APIUtil {
     }
 
     public static WebsubSubscriptionConfiguration getDefaultWebsubSubscriptionConfiguration() {
-        return new WebsubSubscriptionConfiguration(false,"", "", "");
+        return new WebsubSubscriptionConfiguration(false, "",
+                APIConstants.DEFAULT_WEBSUB_SIGNING_ALGO, APIConstants.DEFAULT_WEBSUB_SIGNATURE_HEADER);
     }
 
     /**
