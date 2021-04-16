@@ -564,6 +564,10 @@ public abstract class AbstractAPIManager implements APIManager {
                 } else {
                     registry = this.registry;
                 }
+                if (((UserRegistry) registry).getTenantId() != id) {
+                    registry = getRegistryService().getGovernanceSystemRegistry(id);
+                    this.registry = registry;
+                }
             } else {
                 registry = this.registry;
             }
