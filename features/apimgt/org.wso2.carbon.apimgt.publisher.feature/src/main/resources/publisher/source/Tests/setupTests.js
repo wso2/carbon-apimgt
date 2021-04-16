@@ -23,7 +23,7 @@ import SwaggerParser from '@apidevtools/swagger-parser';
 import path from 'path';
 
 const CARBON_APIMGT_ROOT = path.join(__dirname, '../../../../../../../../../');
-const SWAGGER_RELATIVE_PATH = 'components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml';
+const SWAGGER_RELATIVE_PATH = 'components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml';
 const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
 
 // React 16 Enzyme adapter
