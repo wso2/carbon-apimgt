@@ -923,6 +923,14 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+                oldFile.delete();
+            }
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+                oldFile.delete();
+            }
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
@@ -984,6 +992,14 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+                oldFile.delete();
+            }
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+                oldFile.delete();
+            }
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, updatedCertsArray);
         } catch (APIImportExportException e) {
