@@ -22,6 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -67,10 +68,6 @@ const styles = (theme) => ({
         margin: 0,
         display: 'inline-flex',
         lineHeight: '38px',
-    },
-    deployButton: {
-        fontFamily: '"Open Sans", "Helvetica", "Arial", "sans-serif"',
-        fontSize: 'smaller',
     },
 });
 
@@ -383,22 +380,17 @@ class LifeCycleUpdate extends Component {
                             Publish
                         </Button>
                         <Link
-                            className={classes.deployButton}
                             component={RouterLink}
                             to={'/apis/' + api.id + '/deployments'}
                         >
-                            <Grid
-                                container
-                                direction='row'
-                                justify='center'
-                            >
-                                <Grid item>
-                                    Deployments
-                                </Grid>
-                                <Grid>
-                                    <LaunchIcon fontSize='small' />
-                                </Grid>
-                            </Grid>
+                            <Box fontSize='button.fontSize' display='flex' fontFamily='fontFamily'>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.publish.content.info.deployments'
+                                    defaultMessage='Deployments'
+                                />
+                                <LaunchIcon fontSize='small' />
+                            </Box>
+
                         </Link>
                     </DialogActions>
                 </Dialog>

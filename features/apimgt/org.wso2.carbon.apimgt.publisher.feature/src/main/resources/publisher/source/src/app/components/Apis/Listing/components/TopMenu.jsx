@@ -174,11 +174,11 @@ function TopMenu(props) {
                 {showToggle && (
                     <Box height={32} m='auto'>
                         <ButtonGroup color='primary' aria-label='outlined primary button group'>
-                            <IconButton onClick={() => setListType('list')} aria-label='list'>
-                                <GridOn color={listType === 'list' ? 'primary' : 'disabled'} />
+                            <IconButton onClick={() => setListType('grid')} aria-label='list'>
+                                <GridOn color={listType === 'grid' ? 'primary' : 'disabled'} />
                             </IconButton>
-                            <IconButton onClick={() => setListType('grid')} aria-label='grid'>
-                                <List color={listType === 'grid' ? 'primary' : 'disabled'} />
+                            <IconButton onClick={() => setListType('list')} aria-label='grid'>
+                                <List color={listType === 'list' ? 'primary' : 'disabled'} />
                             </IconButton>
                         </ButtonGroup>
                     </Box>

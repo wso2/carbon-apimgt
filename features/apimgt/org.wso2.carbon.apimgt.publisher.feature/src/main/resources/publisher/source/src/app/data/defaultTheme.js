@@ -262,7 +262,7 @@ export default {
                 },
             },
             listing: {
-                deleteButtonColor: 'none',
+                deleteButtonColor: '#000',
             },
         },
         serviceCatalog: {

@@ -49,8 +49,11 @@ const styles = (theme) => ({
     delete: {
         color: theme.custom.apis.listing.deleteButtonColor,
         cursor: 'pointer',
-        padding: 0,
-        display: 'contents',
+        padding: theme.spacing(0.4),
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
+        justifyContent: 'center',
     },
     linkText: {
         fontSize: theme.typography.fontSize,
@@ -192,7 +195,7 @@ class DeleteApiButton extends React.Component {
                         className={classNames({ [classes.inlineBlock]: updateData, [classes.flexBox]: !updateData })}
                     >
                         {!updateData && (<VerticalDivider height={70} />)}
-                        <>
+                        <Box className={classes.delete}>
                             <IconButton
                                 id='itest-id-deleteapi-icon-button'
                                 onClick={this.handleRequestOpen}
@@ -206,7 +209,6 @@ class DeleteApiButton extends React.Component {
                                 <DeleteIcon />
                             </IconButton>
                             <Box
-                                color='text.secondary'
                                 fontFamily='fontFamily'
                                 fontSize='caption.fontSize'
                             >
@@ -217,7 +219,7 @@ class DeleteApiButton extends React.Component {
                                 />
 
                             </Box>
-                        </>
+                        </Box>
                     </Box>
                 </ScopeValidation>
                 <Dialog open={this.state.openMenu}>

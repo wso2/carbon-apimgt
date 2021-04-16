@@ -474,19 +474,15 @@ export default function CustomizedStepper() {
                                                                 defaultMessage=' Business Plan'
                                                             />
                                                         </Typography>
+                                                        <Box ml={1}>
+                                                            <LinkIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Box>
                                                     </Link>
                                                 </Grid>
                                             </Box>
-                                            <Grid item>
-                                                <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                                    <Box ml={1}>
-                                                        <LinkIcon
-                                                            color='primary'
-                                                            fontSize='small'
-                                                        />
-                                                    </Box>
-                                                </Link>
-                                            </Grid>
                                         </Grid>
                                     </Box>
                                 </div>
