@@ -2701,10 +2701,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Get the subscriptions from the latest api version first
         Collections.sort(sortedAPIs, comparator);
-        for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
-            String oldVersion = sortedAPIs.get(i).getId().getVersion();
-            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion);
-        }
+        apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), sortedAPIs);
     }
 
     /**
@@ -4291,6 +4288,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException {
         apiMgtDAO.updateTierPermissions(tierName, permissionType, roles, tenantId);
+    }
+
+    @Override
+    public void deleteTierPermissions(String tierName) throws APIManagementException {
+        apiMgtDAO.deleteThrottlingPermissions(tierName, tenantId);
     }
 
     @Override
@@ -8885,13 +8887,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 compoundResult.addAll(docMap.entrySet());
                 compoundResult.addAll(productDocMap.entrySet());
                 compoundResult.sort(new ContentSearchResultNameComparator());
+                result.put("length", results.getTotalCount() );
+            } else {
+                result.put("length", compoundResult.size() );
             }
 
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);
         }
         result.put("apis", compoundResult);
-        result.put("length", compoundResult.size() );
         return result;
     }
 

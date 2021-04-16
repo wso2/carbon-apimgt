@@ -52,7 +52,6 @@ const RestAPIMenu = (props) => {
             xs={12}
             sm={5}
             md={3}
-            lg={2}
         >
             <Component
                 id={id}
@@ -90,7 +89,6 @@ const RestAPIMenu = (props) => {
                             <Box
                                 alignItems='center'
                                 justifyContent='center'
-                                display={{ xs: 'none', sm: 'flex' }}
                             >
                                 <img
                                     width='190px'

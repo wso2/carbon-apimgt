@@ -89,6 +89,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
     public static final String API_OVERVIEW_ADVERTISE_ONLY = "overview_advertiseOnly";
+    public static final String API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR = "overview_vendor";
     public static final String API_OVERVIEW_ENDPOINT_CONFIG = "overview_endpointConfig";
 
     public static final String API_OVERVIEW_SUBSCRIPTION_AVAILABILITY = "overview_subscriptionAvailability";
@@ -226,7 +227,6 @@ public final class APIConstants {
 
     // Prefix used for saving the custom properties related with APIs
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
-    public static final String API_RELATED_CUSTOM_PROPERTIES_SURFIX = "__display";
 
     /**
      * CustomIndexer property to indicate whether it is gone through API Custom Indexer.

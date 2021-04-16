@@ -148,6 +148,7 @@ function CreateApi(props) {
         definitionType,
         serviceVersion,
         serviceUrl,
+        usage,
     } = props;
     const classes = useStyles();
     const intl = useIntl();
@@ -197,17 +198,14 @@ function CreateApi(props) {
     }
 
     const initialState = {
-        name: serviceDisplayName ? serviceDisplayName.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') : serviceDisplayName,
-        context: getContextFromServiceUrl(serviceUrl),
+        name: serviceDisplayName
+            ? serviceDisplayName.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') + (usage === 0 ? '' : usage + 1)
+            : serviceDisplayName + (usage === 0 ? '' : usage + 1),
+        context: getContextFromServiceUrl(serviceUrl) + (usage === 0 ? '' : usage + 1),
         version: serviceVersion,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    const toggleOpen = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setOpen(!open);
-    };
     const handleClose = () => {
         setOpen(false);
     };
@@ -314,11 +312,12 @@ function CreateApi(props) {
         }
     }
 
-    useEffect(() => {
-        validate('name', name);
+    const toggleOpen = (event) => {
         validate('context', context);
-        validate('version', version);
-    }, []);
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen(!open);
+    };
 
     const runAction = () => {
         const promisedCreateApi = API.createApiFromService(serviceKey, { ...state, policies }, type);
@@ -339,7 +338,7 @@ function CreateApi(props) {
                     defaultMessage: 'Error while creating API from service',
                     id: 'ServiceCatalog.CreateApi.error.create.api',
                 }));
-                setPageError('ServiceCatalog.CreateApi.error.create.api');
+                setPageError('Error while creating API from service');
             }
             console.error(error);
         });

@@ -159,6 +159,16 @@
                 {% else %}
                 <GatewayWSEndpoint></GatewayWSEndpoint>
                 {% endif %}
+                <!-- Endpoint URLs of the WebSub APIs hosted in this API Gateway -->
+                {% if environment_name.websub_event_receiver_http_endpoint is defined and environment_name.websub_event_receiver_https_endpoint is defined %}
+                <GatewayWebSubEndpoint>{{environment_name.websub_event_receiver_http_endpoint}},{{environment_name.websub_event_receiver_https_endpoint}}</GatewayWebSubEndpoint>
+                {% elif environment_name.websub_event_receiver_http_endpoint is not defined and environment_name.websub_event_receiver_https_endpoint is defined %}
+                <GatewayWebSubEndpoint>{{environment_name.websub_event_receiver_https_endpoint}}</GatewayWebSubEndpoint>
+                {% elif environment_name.websub_event_receiver_http_endpoint is defined and environment_name.websub_event_receiver_https_endpoint is not defined %}
+                <GatewayWebSubEndpoint>{{environment_name.websub_event_receiver_http_endpoint}}</GatewayWebSubEndpoint>
+                {% else %}
+                <GatewayWebSubEndpoint></GatewayWebSubEndpoint>
+                {% endif %}
                 <VirtualHosts>
                     {% for vhost in environment_name.virtual_host %}
                     <VirtualHost>
@@ -166,6 +176,8 @@
                         <HttpsEndpoint>{{vhost.https_endpoint}}</HttpsEndpoint>
                         <WsEndpoint>{{vhost.ws_endpoint}}</WsEndpoint>
                         <WssEndpoint>{{vhost.wss_endpoint}}</WssEndpoint>
+                        <WebSubHttpEndpoint>{{vhost.websub_event_receiver_http_endpoint}}</WebSubHttpEndpoint>
+                        <WebSubHttpsEndpoint>{{vhost.websub_event_receiver_https_endpoint}}</WebSubHttpsEndpoint>
                     </VirtualHost>
                     {% endfor %}
                 </VirtualHosts>
@@ -904,6 +916,7 @@
         <EnableJWTClaimConditions>{{apim.throttling.enable_jwt_claim_based_throttling}}</EnableJWTClaimConditions>
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
         <SkipRedeployingPolicies>RequestPreProcessorExecutionPlan{% for policy in apim.throttling.skip_redeploying_policies %}{{ "," if loop.first }}{{policy}}{{ "," if not loop.last }}{% endfor %}</SkipRedeployingPolicies>
+        <EnablePolicyDeployment>{{apim.throttling.enable_policy_deployment}}</EnablePolicyDeployment>
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>
@@ -1252,7 +1265,7 @@
 
     {% if apim.sync_runtime_artifacts.gateway is defined %}
     <SyncRuntimeArtifactsGateway>
-        <Enable>true</Enable>
+        <Enable>{{apim.sync_runtime_artifacts.gateway.enable}}</Enable>
         {% if apim.sync_runtime_artifacts.gateway.gateway_labels is defined %}
         <GatewayLabels>
             {% for attribute in apim.sync_runtime_artifacts.gateway.gateway_labels %}

@@ -141,9 +141,10 @@ class LifeCycleUpdate extends Component {
         promisedUpdate
             .then((response) => {
                 /* TODO: Handle IO erros ~tmkb */
+                // get the latest state of the API
+                this.context.updateAPI();
                 const newState = response.body.lifecycleState.state;
                 const { workflowStatus } = response.body;
-                this.context.updateAPI({ enableStore: true });
                 this.setState({ newState });
                 const { intl } = this.props;
 

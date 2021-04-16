@@ -589,6 +589,9 @@ public class SQLConstants {
             "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
             "   AND TENANT_ID = ?";
 
+    public static final String DELETE_THROTTLE_TIER_PERMISSION_SQL = "DELETE FROM AM_THROTTLE_TIER_PERMISSIONS WHERE " +
+            "THROTTLE_TIER_PERMISSIONS_ID = ? AND TENANT_ID = ?";
+
     public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
             " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
             " FROM AM_THROTTLE_TIER_PERMISSIONS " +
@@ -1391,14 +1394,15 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
-            "   API.CONTEXT AS CONTEXT" +
+            "   API.CONTEXT AS CONTEXT," +
+            "   API.API_VERSION AS VERSION" +
             " FROM" +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_API API " +
             " WHERE" +
             "   API.API_PROVIDER = ?" +
             "   AND API.API_NAME = ?" +
-            "   AND API.API_VERSION = ?" +
+            "   AND API.API_VERSION IN (_API_VERSION_LIST_)" +
             "   AND API.API_ID = SUB.API_ID";
 
     public static final String GET_APPLICATION_DATA_SQL =

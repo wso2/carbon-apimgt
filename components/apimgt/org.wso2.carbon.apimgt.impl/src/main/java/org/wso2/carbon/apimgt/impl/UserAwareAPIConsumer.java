@@ -134,4 +134,12 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 //        checkAccessControlPermission(identifier);
         return apiTypeWrapper;
     }
+
+    @Override
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+        API api = super.getLightweightAPI(identifier, orgId);
+        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(),
+                api.getVisibleRoles());
+        return api;
+    }
 }

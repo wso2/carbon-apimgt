@@ -19,7 +19,7 @@
 import React, {
     useEffect, useState,
 } from 'react';
-import { FormattedMessage, IntlProvider } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -436,7 +436,7 @@ function TryOutController(props) {
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
     const isPublished = api.lifeCycleStatus.toLowerCase() === 'published';
-    const showSecurityType = isPublished || (isPrototypedAPI && api.enableStore === true);
+    const showSecurityType = isPublished || isPrototypedAPI;
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -448,7 +448,7 @@ function TryOutController(props) {
     const authHeader = `${authorizationHeader}: ${prefix}`;
 
     return (
-        <IntlProvider locale='en'>
+        <>
             <Grid x={12} md={6} className={classes.centerItems}>
                 <Box>
                     {securitySchemeType !== 'TEST' && (
@@ -759,6 +759,7 @@ function TryOutController(props) {
                                             <>
                                                 <Typography
                                                     variant='h5'
+                                                    component='h3'
                                                     color='textPrimary'
                                                     className={classes.categoryHeading}
                                                 >
@@ -817,7 +818,7 @@ function TryOutController(props) {
                         </Box>
                     </Grid>
                 )}
-        </IntlProvider>
+        </>
     );
 }
 

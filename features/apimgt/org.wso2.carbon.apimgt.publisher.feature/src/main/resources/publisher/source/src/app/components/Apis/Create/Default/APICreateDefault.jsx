@@ -148,7 +148,6 @@ function APICreateDefault(props) {
                 },
             };
         }
-        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
         if (isWebSocket) {
             apiData.type = 'WS';
         }

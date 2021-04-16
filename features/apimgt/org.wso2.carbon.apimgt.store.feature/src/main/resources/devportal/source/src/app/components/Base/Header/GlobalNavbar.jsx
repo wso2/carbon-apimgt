@@ -40,7 +40,7 @@ function GlobalNavBar(props) {
     const { custom: { landingPage: { active: landingPageActive, activeForAnonymous } } } = theme;
     const isUserFound = AuthManager.getUser();
     return (
-        <List className={classes.listRootInline} component='nav' aria-label='Secondary navigation' role='navigation'>
+        <List className={classes.listRootInline} component='nav' aria-label='primary navigation' role='navigation'>
             {landingPageActive && ((isUserFound && !activeForAnonymous) || activeForAnonymous)
                 && (
                     <Link

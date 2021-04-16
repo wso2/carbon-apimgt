@@ -17,11 +17,19 @@
  */
 
 import React, { useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
+import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
+import Utils from 'AppData/Utils';
+import { FileCopy } from '@material-ui/icons';
 
 /**
  * Renders the callback URL for WebSub and URI mapping for WebSocket.
@@ -32,10 +40,13 @@ export default function Runtime(props) {
     const {
         operation, operationsDispatcher, target, verb, api,
     } = props;
+    const { settings } = useAppContext();
+    const { allEnvRevision } = useRevisionContext();
+    const allEnvDeployments = Utils.getAllEnvironmentDeployments(settings.environment, allEnvRevision);
 
-    const buildCallbackURL = () => {
+    const buildCallbackURL = (protocol, host, port) => {
         const context = api.context.substr(0, 1) !== '/' ? '/' + api.context : api.context;
-        let url = 'http://{GATEWAY_HOST}:9021';
+        let url = `${protocol}://${host || '{GATEWAY_HOST}'}:${port || `{websub_event_receiver_${protocol}_endpoint}`}`;
         url += context;
         url += '/' + api.version;
         url += '/webhooks_events_receiver_resource?topic=';
@@ -93,22 +104,67 @@ export default function Runtime(props) {
                     <Grid item md={6} />
                 </>
             )}
-            {api.type === 'WEBSUB' && (
+            {api.type === 'WEBSUB' && settings.environment.map((env) => (
                 <>
                     <Grid item md={1} />
                     <Grid item md={10}>
+                        <Typography variant='subtitle1'>{env.displayName}</Typography>
                         <TextField
                             margin='dense'
                             fullWidth
-                            label='Callback URL'
+                            label='HTTP Callback URL'
                             disabled
-                            value={buildCallbackURL()}
+                            value={buildCallbackURL('http', allEnvDeployments[env.name].vhost.host,
+                                allEnvDeployments[env.name].vhost.websubHttpPort)}
                             variant='outlined'
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        <CopyToClipboard
+                                            text={buildCallbackURL('http',
+                                                allEnvDeployments[env.name].vhost.host,
+                                                allEnvDeployments[env.name].vhost.websubHttpPort)}
+                                        >
+                                            <IconButton>
+                                                <Icon>
+                                                    <FileCopy />
+                                                </Icon>
+                                            </IconButton>
+                                        </CopyToClipboard>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <TextField
+                            margin='dense'
+                            fullWidth
+                            label='HTTPS Callback URL'
+                            disabled
+                            value={buildCallbackURL('https', allEnvDeployments[env.name].vhost.host,
+                                allEnvDeployments[env.name].vhost.websubHttpsPort)}
+                            variant='outlined'
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        <CopyToClipboard
+                                            text={buildCallbackURL('https',
+                                                allEnvDeployments[env.name].vhost.host,
+                                                allEnvDeployments[env.name].vhost.websubHttpsPort)}
+                                        >
+                                            <IconButton>
+                                                <Icon>
+                                                    <FileCopy />
+                                                </Icon>
+                                            </IconButton>
+                                        </CopyToClipboard>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                     </Grid>
                     <Grid item md={1} />
                 </>
-            )}
+            ))}
         </>
     );
 }

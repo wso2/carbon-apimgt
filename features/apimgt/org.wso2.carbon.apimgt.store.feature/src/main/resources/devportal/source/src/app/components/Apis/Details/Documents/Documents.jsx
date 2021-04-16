@@ -212,7 +212,7 @@ function Documents(props) {
     if (!documentList) {
         return (
             <>
-                <Typography variant='h4' className={classes.titleSub}>
+                <Typography variant='h4' component='h2' className={classes.titleSub}>
                     <FormattedMessage
                         id='Apis.Details.Documents.Documentation.title'
                         defaultMessage='API Documentation'
@@ -225,7 +225,7 @@ function Documents(props) {
     if (documentList && documentList.length === 0) {
         return (
             <>
-                <Typography variant='h4' className={classes.titleSub}>
+                <Typography variant='h4' component='h2' className={classes.titleSub}>
                     <FormattedMessage
                         id='Apis.Details.Documents.Documentation.title'
                         defaultMessage='API Documentation'

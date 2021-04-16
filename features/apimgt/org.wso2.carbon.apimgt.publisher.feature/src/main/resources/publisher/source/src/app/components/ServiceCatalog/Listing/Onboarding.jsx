@@ -111,6 +111,8 @@ function Onboarding() {
                         variant='outlined'
                         color='primary'
                         href='https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/'
+                        target='_blank'
+                        rel='noopener noreferrer'
                         endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
                     >
                         <FormattedMessage

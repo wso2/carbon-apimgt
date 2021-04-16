@@ -184,7 +184,6 @@ const APICreateStreamingAPI = (props) => {
             };
         }
 
-        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
 
         const newAPI = new API(apiData);
         const promisedCreatedAPI = newAPI

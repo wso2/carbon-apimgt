@@ -442,6 +442,7 @@ function Overview(props) {
                                         serviceDisplayName={service.name}
                                         serviceVersion={service.version}
                                         serviceUrl={service.serviceUrl}
+                                        usage={service.usage}
                                         isOverview
                                     />
                                 </Box>

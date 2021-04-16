@@ -330,7 +330,7 @@ class CommonListing extends React.Component {
                     </div>
                 )}
 
-                <main
+                <div
                     className={classNames(
                         classes.content,
                         { [classes.contentWithoutTags]: !(tagPaneVisible || categoryPaneVisible) || !showLeftMenu },
@@ -344,7 +344,7 @@ class CommonListing extends React.Component {
                             <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                         </div>
                         <div className={classes.mainTitleWrapper} id='mainTitleWrapper'>
-                            <Typography variant='h4' Component='h1' className={classes.mainTitle}>
+                            <Typography variant='h4' component='h1' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
                         </div>
@@ -414,7 +414,7 @@ class CommonListing extends React.Component {
                                 </div>
                             </div>
                         )}
-                </main>
+                </div>
             </>
         );
     }

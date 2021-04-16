@@ -172,7 +172,7 @@ module.exports = (env, argv) => {
             Settings: 'Settings',
         },
         plugins: [
-            new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: ['!gotoSymbol'] }),
+            new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml', 'markdown'], features: ['!gotoSymbol'] }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 inject: false,

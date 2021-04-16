@@ -351,6 +351,8 @@ public final class APIConstants {
     public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
+    public static final String API_RELATED_CUSTOM_PROPERTIES_SURFIX = "__display";
+
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
 
@@ -678,6 +680,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_PASSWORD = "Password";
     public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
     public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
+    public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
@@ -686,6 +689,8 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT = "HttpsEndpoint";
     public static final String API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT = "WsEndpoint";
     public static final String API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT = "WssEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT = "WebSubHttpEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
@@ -795,6 +800,7 @@ public final class APIConstants {
     public static final String API_STORE_API_KEY_SIGN_KEY_STORE = API_STORE + "APIKeyKeystore";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
+    public static final String ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
@@ -1893,6 +1899,7 @@ public final class APIConstants {
         public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
         public static final String TRUE = "true";
         public static final String ADD = "add";
+        public static final String ENABLE_POLICY_DEPLOYMENT = "EnablePolicyDeployment";
     }
 
     /**
