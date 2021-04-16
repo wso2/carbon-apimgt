@@ -376,7 +376,6 @@ class SubscriptionTableData extends React.Component {
                                 color="default"
                                 onClick={this.handleRequestOpen}
                                 startIcon={<Icon>delete</Icon>}
-                                disabled={tiers.length === 0}
                             >
                                 <FormattedMessage
                                     id='Applications.Details.SubscriptionTableData.delete.text'
