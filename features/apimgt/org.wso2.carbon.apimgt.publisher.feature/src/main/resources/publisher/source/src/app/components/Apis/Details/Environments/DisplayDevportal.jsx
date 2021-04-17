@@ -64,7 +64,7 @@ export default function DisplayDevportal(props) {
         <Switch
             checked={check}
             onChange={handleDisplayOnDevPortal}
-            disabled={api.isRevision || isRestricted(['apim:api_create'], api)}
+            disabled={api.isRevision || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
             name={name}
         />
     );

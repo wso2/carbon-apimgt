@@ -367,7 +367,7 @@ export default function Environments() {
     };
 
     const handleClickOpen = () => {
-        if (!isRestricted(['apim:api_create'], api)) {
+        if (!isRestricted(['apim:api_create', 'apim:api_publish'], api)) {
             setOpen(true);
         }
     };
@@ -1068,7 +1068,7 @@ export default function Environments() {
                                     )}
                                     size='small'
                                     type='submit'
-                                    disabled={isRestricted(['apim:api_create'], api)}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     startIcon={<RestoreIcon />}
                                 >
                                     <FormattedMessage
@@ -1083,7 +1083,7 @@ export default function Environments() {
                                     )}
                                     disabled={(allEnvRevision && allEnvRevision.filter(
                                         (o1) => o1.id === allRevisions[revision].id,
-                                    ).length !== 0) || isRestricted(['apim:api_create'], api)}
+                                    ).length !== 0) || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1110,7 +1110,7 @@ export default function Environments() {
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
-                                    disabled={isRestricted(['apim:api_create'], api)}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     type='submit'
                                     startIcon={<RestoreIcon />}
                                 >
@@ -1126,7 +1126,7 @@ export default function Environments() {
                                     )}
                                     disabled={(allEnvRevision && allEnvRevision.filter(
                                         (o1) => o1.id === allRevisions[revision].id,
-                                    ).length !== 0) || isRestricted(['apim:api_create'], api)}
+                                    ).length !== 0) || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1293,7 +1293,7 @@ export default function Environments() {
                 <Grid container>
                     <Button
                         onClick={toggleDeployRevisionPopup}
-                        disabled={isRestricted(['apim:api_create'], api)}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         variant='contained'
                         color='primary'
                         size='large'
@@ -1573,7 +1573,7 @@ export default function Environments() {
                             color='primary'
                             disabled={SelectedEnvironment.length === 0
                                 || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)
-                                || isRestricted(['apim:api_create'], api)}
+                                || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.deploy.deploy'
@@ -1915,7 +1915,8 @@ export default function Environments() {
                                                             className={classes.button1}
                                                             variant='outlined'
                                                             disabled={api.isRevision
-                                                                || isRestricted(['apim:api_create'], api)}
+                                                                || isRestricted(['apim:api_create',
+                                                                    'apim:api_publish'], api)}
                                                             onClick={() => undeployRevision(
                                                                 allEnvDeployments[row.name].revision.id, row.name,
                                                             )}
