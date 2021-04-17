@@ -1,11 +1,11 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1;
+package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.KeyManagersApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerWellKnownResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.KeyManagersApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.impl.KeyManagersApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;

@@ -1,7 +1,7 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1;
+package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.*;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -9,18 +9,18 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionStatusDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
 
 import java.util.List;
 
