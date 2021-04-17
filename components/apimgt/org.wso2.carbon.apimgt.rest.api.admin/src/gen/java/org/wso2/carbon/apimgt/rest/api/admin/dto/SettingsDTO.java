@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SettingsKeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
 
