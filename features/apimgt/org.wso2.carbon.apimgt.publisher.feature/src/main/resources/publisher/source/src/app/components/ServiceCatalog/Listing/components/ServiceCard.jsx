@@ -10,6 +10,7 @@ import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 import Avatar from '@material-ui/core/Avatar';
 import { Link as RouterLink } from 'react-router-dom';
+import { isRestricted } from 'AppData/AuthManager';
 import Link from '@material-ui/core/Link';
 import Tooltip from '@material-ui/core/Tooltip';
 import Chip from '@material-ui/core/Chip';
@@ -190,24 +191,26 @@ export default function ServiceCard(props) {
                                 </Box>
                             </Grid>
                         </Box>
-                        <Grid item>
-                            <CreateAPIButton
-                                isIconButton
-                                serviceDisplayName={service.name}
-                                serviceKey={service.serviceKey}
-                                definitionType={service.definitionType}
-                                serviceVersion={service.version}
-                                serviceUrl={service.serviceUrl}
-                                usage={service.usage}
-                            />
-                            <DeleteServiceButton
-                                id='itest-service-card-delete'
-                                serviceDisplayName={service.name}
-                                serviceId={service.id}
-                                onDelete={onDelete}
-                                isIconButton
-                            />
-                        </Grid>
+                        {!isRestricted(['apim:api_create']) && (
+                            <Grid item>
+                                <CreateAPIButton
+                                    isIconButton
+                                    serviceDisplayName={service.name}
+                                    serviceKey={service.serviceKey}
+                                    definitionType={service.definitionType}
+                                    serviceVersion={service.version}
+                                    serviceUrl={service.serviceUrl}
+                                    usage={service.usage}
+                                />
+                                <DeleteServiceButton
+                                    id='itest-service-card-delete'
+                                    serviceDisplayName={service.name}
+                                    serviceId={service.id}
+                                    onDelete={onDelete}
+                                    isIconButton
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 </Box>
             </Link>
