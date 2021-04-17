@@ -1,11 +1,11 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleAllOfDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleAllOfDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
 import javax.validation.constraints.*;
 
 
