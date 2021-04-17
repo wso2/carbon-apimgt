@@ -1,13 +1,13 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.HeaderConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.IPConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.JWTClaimsConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.QueryParameterConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.HeaderConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.JWTClaimsConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.QueryParameterConditionDTO;
 import javax.validation.constraints.*;
 
 /**
