@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +25,10 @@ import org.json.simple.JSONObject;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RoleAliasDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RoleAliasListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;

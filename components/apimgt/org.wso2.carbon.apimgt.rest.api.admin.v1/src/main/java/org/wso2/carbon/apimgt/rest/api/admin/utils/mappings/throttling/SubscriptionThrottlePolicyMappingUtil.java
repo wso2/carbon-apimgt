@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
@@ -26,11 +26,11 @@ import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;

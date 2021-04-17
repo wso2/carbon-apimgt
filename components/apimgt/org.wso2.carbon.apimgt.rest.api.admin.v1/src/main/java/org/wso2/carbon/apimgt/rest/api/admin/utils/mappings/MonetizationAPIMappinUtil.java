@@ -15,11 +15,11 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationUsagePublishInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PublishStatusDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MonetizationUsagePublishInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.PublishStatusDTO;
 
 /**
  * This class manage mapping to DTO of monetization usage publisher

@@ -15,12 +15,12 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

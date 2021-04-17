@@ -15,12 +15,12 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 

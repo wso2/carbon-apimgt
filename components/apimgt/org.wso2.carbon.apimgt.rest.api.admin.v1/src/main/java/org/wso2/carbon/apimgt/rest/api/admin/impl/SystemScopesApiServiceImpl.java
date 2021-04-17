@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,11 +14,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.SystemScopesApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RoleAliasListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ScopeSettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.SystemScopesMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 

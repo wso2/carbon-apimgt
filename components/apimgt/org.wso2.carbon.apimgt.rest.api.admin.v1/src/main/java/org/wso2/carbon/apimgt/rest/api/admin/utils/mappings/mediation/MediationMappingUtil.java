@@ -15,12 +15,12 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.mediation;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.mediation;
 
 import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils;
+package org.wso2.carbon.apimgt.rest.api.admin.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -29,9 +29,9 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 

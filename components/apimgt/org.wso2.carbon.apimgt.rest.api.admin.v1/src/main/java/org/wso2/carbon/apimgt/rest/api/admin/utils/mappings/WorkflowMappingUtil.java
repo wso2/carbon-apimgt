@@ -14,11 +14,11 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Workflow;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowListDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 

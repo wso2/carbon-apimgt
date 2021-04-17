@@ -15,13 +15,13 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BotDetectionAlertSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BotDetectionAlertSubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BotDetectionDataDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BotDetectionDataListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

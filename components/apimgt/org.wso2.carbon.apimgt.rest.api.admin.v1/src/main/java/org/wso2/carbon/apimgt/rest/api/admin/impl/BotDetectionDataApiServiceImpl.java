@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,9 +26,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.BotDetectionDataApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BotDetectionDataListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.BotDetectionMappingUtil;
 
 import java.util.List;
 

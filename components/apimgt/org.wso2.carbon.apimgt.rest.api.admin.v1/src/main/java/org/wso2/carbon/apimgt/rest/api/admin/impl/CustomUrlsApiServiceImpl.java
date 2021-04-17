@@ -14,16 +14,16 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.CustomUrlsApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomUrlInfoDevPortalDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.CustomUrlsApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomUrlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomUrlInfoDevPortalDTO;
 
 import java.util.Map;
 

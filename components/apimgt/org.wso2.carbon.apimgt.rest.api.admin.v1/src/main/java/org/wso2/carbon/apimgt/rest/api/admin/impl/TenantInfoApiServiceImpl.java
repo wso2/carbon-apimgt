@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -22,8 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantInfoApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TenantInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.TenantInfoApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TenantInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 

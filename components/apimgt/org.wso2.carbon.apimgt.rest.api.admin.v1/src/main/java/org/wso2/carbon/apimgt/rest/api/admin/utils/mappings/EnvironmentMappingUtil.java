@@ -15,13 +15,13 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.VHostDTO;
 
 import java.util.ArrayList;
 import java.util.List;

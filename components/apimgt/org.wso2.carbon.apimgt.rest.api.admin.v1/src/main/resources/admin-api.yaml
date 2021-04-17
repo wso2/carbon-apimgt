@@ -17,7 +17,7 @@ info:
   title: WSO2 API Manager - Admin
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Admin Portal**.
-    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources/admin-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
+    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
     The Admin REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking

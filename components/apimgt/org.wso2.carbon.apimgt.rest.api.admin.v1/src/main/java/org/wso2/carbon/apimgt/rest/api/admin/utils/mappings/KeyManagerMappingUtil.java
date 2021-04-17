@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -10,13 +10,13 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ClaimMappingEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerWellKnownResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TokenValidationDTO;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils;
+package org.wso2.carbon.apimgt.rest.api.admin.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;

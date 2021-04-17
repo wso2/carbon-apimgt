@@ -15,16 +15,16 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 
 import java.util.ArrayList;
 import java.util.List;

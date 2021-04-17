@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -35,10 +35,10 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.PoliciesApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.mediation.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.PoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.mediation.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

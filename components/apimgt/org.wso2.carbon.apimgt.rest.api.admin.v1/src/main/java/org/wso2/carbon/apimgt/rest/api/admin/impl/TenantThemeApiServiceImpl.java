@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.TenantThemeApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

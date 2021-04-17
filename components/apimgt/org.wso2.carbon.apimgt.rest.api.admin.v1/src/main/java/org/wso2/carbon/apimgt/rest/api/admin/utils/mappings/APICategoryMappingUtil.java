@@ -15,11 +15,11 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.APICategoryListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

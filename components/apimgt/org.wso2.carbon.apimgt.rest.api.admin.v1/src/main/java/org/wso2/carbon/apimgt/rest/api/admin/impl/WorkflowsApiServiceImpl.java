@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,11 +29,11 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.WorkflowsApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.WorkflowMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.WorkflowsApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.WorkflowMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

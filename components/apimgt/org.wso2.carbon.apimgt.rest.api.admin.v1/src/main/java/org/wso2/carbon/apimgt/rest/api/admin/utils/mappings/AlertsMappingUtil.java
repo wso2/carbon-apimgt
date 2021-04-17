@@ -16,10 +16,10 @@
  *  under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertTypesListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AlertTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AlertTypesListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

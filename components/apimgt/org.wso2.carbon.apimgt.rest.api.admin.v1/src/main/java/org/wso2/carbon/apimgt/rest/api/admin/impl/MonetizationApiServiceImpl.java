@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationUsagePublishAgent;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.MonetizationApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.MonetizationAPIMappinUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.MonetizationApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.MonetizationAPIMappinUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.text.DateFormat;

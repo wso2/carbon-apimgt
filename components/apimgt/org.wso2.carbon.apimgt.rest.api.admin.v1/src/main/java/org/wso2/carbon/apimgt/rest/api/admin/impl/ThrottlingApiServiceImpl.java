@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -36,15 +36,15 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO.ConditionTypeEnum;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.BlockingConditionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.GlobalThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.SubscriptionThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.ThrottlingApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO.ConditionTypeEnum;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.RestApiAdminUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.BlockingConditionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.GlobalThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.SubscriptionThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;

@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -28,9 +28,9 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SettingsKeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;

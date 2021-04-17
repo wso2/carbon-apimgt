@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling;
+package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,19 +35,19 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BandwidthLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EventCountLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.HeaderConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.IPConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.JWTClaimsConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.QueryParameterConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.EventCountLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.HeaderConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.JWTClaimsConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.QueryParameterConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RequestCountLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
 import java.util.ArrayList;

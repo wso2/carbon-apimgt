@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,11 +18,11 @@ import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.KeyManagersApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerWellKnownResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

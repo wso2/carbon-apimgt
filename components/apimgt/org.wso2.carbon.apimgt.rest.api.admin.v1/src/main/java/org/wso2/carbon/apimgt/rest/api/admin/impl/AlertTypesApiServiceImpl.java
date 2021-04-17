@@ -10,9 +10,9 @@ import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertTypesApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertTypesListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.AlertsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.AlertTypesApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AlertTypesListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.AlertsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
