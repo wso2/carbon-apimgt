@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.admin.v1;
+package org.wso2.carbon.apimgt.rest.api.admin;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionDTO;
