@@ -25,6 +25,7 @@ import Configurations from 'Config';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
+import { isRestricted } from 'AppData/AuthManager';
 import MUIDataTable from 'mui-datatables';
 import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
@@ -277,22 +278,24 @@ function ServicesTableView(props) {
                         } = dataRow;
                         return (
                             <>
-                                <Box display='flex' flexDirection='row'>
-                                    <CreateApi
-                                        serviceId={id}
-                                        serviceKey={serviceKey}
-                                        definitionType={definitionType}
-                                        serviceDisplayName={name}
-                                        serviceVersion={version}
-                                        serviceUrl={serviceUrl}
-                                        usage={usage}
-                                    />
-                                    <Delete
-                                        serviceDisplayName={name}
-                                        serviceId={id}
-                                        onDelete={onDelete}
-                                    />
-                                </Box>
+                                {!isRestricted(['apim:api_create']) && (
+                                    <Box display='flex' flexDirection='row'>
+                                        <CreateApi
+                                            serviceId={id}
+                                            serviceKey={serviceKey}
+                                            definitionType={definitionType}
+                                            serviceDisplayName={name}
+                                            serviceVersion={version}
+                                            serviceUrl={serviceUrl}
+                                            usage={usage}
+                                        />
+                                        <Delete
+                                            serviceDisplayName={name}
+                                            serviceId={id}
+                                            onDelete={onDelete}
+                                        />
+                                    </Box>
+                                )}
                             </>
                         );
                     }

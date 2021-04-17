@@ -132,7 +132,7 @@ function Subscriptions(props) {
                         type='submit'
                         variant='contained'
                         color='primary'
-                        disabled={api.isRevision || isRestricted(['apim:api_create'], api)}
+                        disabled={api.isRevision || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         onClick={() => saveAPI()}
                     >
                         <FormattedMessage

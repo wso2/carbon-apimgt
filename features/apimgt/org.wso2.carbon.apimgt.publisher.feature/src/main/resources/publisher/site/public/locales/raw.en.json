@@ -3321,9 +3321,6 @@
   "Apis.Listing.components.ImageGenerator.ThumbnailView.cancel.btn": {
     "defaultMessage": "CANCEL"
   },
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.design": {
-    "defaultMessage": "Design"
-  },
   "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": {
     "defaultMessage": "Remove"
   },

@@ -367,7 +367,7 @@ export default function DesignConfigurations() {
         setIsUpdating(false);
     }
     const isDisabled = isUpdating || api.isRevision || invalidTagsExist
-    || isRestricted(['apim:api_create'], api)
+    || isRestricted(['apim:api_create', 'apim:api_publish'], api)
     || (apiConfig.visibility === 'RESTRICTED'
         && apiConfig.visibleRoles.length === 0);
     return (

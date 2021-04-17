@@ -6983,12 +6983,6 @@
       "value": "CANCEL"
     }
   ],
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.design": [
-    {
-      "type": 0,
-      "value": "Design"
-    }
-  ],
   "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": [
     {
       "type": 0,
