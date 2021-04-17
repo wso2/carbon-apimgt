@@ -181,7 +181,7 @@ class ThumbnailView extends Component {
             open: false,
             file: null,
             thumbnail: null,
-            selectedTab: 'design',
+            selectedTab: 'upload',
             category: MaterialIcons.categories[0].name,
             selectedIcon: null,
             selectedIconUpdate: null,
@@ -244,7 +244,7 @@ class ThumbnailView extends Component {
                 /* eslint prefer-destructuring: ["error", {VariableDeclarator: {object: true}}] */
                 fileObj = file[0];
             } else if (selectedTab === 'remove') {
-                fileObj = new File([], 'FileName.json', { type: 'application/json' });
+                fileObj = new File([], 'FileName.jpg', { type: 'application/json' });
             } else {
                 if (!selectedIconUpdate && !colorUpdate && !backgroundIndexUpdate) {
                     Alert.error(intl.formatMessage({
@@ -420,16 +420,6 @@ class ThumbnailView extends Component {
                             value={this.state.selectedTab}
                             onChange={this.handleChange}
                         >
-                            <FormControlLabel
-                                value='design'
-                                control={<Radio color='primary' />}
-                                label={(
-                                    <FormattedMessage
-                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.design'
-                                        defaultMessage='Design'
-                                    />
-                                )}
-                            />
                             <FormControlLabel
                                 value='upload'
                                 control={<Radio color='primary' />}
