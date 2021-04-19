@@ -106,7 +106,7 @@ function Onboarding() {
                         />
                     )}
                 >
-                    &nbsp;&nbsp;
+                    {' '}
                     <Button
                         className={classes.actionStyle}
                         size='small'
@@ -120,7 +120,7 @@ function Onboarding() {
                             defaultMessage='Micro Integrator'
                         />
                     </Button>
-                    &nbsp;&nbsp;
+                    {' '}
                     <Button
                         className={classes.actionStyle}
                         size='small'
@@ -137,7 +137,7 @@ function Onboarding() {
                             defaultMessage='Streaming Integrator'
                         />
                     </Button>
-                    &nbsp;&nbsp;
+                    {' '}
                 </OnboardingMenuCard>
                 {/* Deploy Sample Service */}
                 <OnboardingMenuCard
