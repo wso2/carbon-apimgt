@@ -895,7 +895,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @GET
     @Path("/export")
     @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
+    @Produces({ "application/json", "application/zip" })
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
