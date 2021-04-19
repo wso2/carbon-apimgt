@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -366,12 +367,16 @@ public class GatewayUtils {
 
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
         if (messageContext.isResponse()) {
             messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_RESPONSE);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, APIMgtGatewayConstants.BAD_RESPONSE);
         } else {
             messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, APIMgtGatewayConstants.BAD_REQUEST);
         }
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, APIMgtGatewayConstants.THREAT_DESC);
         Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
