@@ -36,6 +36,18 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: theme.spacing(4),
         paddingRight: theme.spacing(4),
     },
+    actionStyleGetStartedMI: {
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(0.5),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+    },
+    actionStyleGetStartedSI: {
+        marginLeft: theme.spacing(0.5),
+        marginRight: theme.spacing(1),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
+    },
 }));
 
 /**
@@ -107,8 +119,7 @@ function Onboarding() {
                     )}
                 >
                     <Button
-                        style={{ marginLeft: '10px' }}
-                        className={classes.actionStyle}
+                        className={classes.actionStyleGetStartedMI}
                         size='small'
                         variant='outlined'
                         color='primary'
@@ -121,8 +132,7 @@ function Onboarding() {
                         />
                     </Button>
                     <Button
-                        style={{ marginLeft: '10px', marginRight: '10px' }}
-                        className={classes.actionStyle}
+                        className={classes.actionStyleGetStartedSI}
                         size='small'
                         variant='outlined'
                         color='primary'
