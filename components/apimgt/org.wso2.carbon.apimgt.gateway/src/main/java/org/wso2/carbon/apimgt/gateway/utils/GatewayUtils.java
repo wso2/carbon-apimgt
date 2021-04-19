@@ -376,7 +376,7 @@ public class GatewayUtils {
             messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, APIMgtGatewayConstants.BAD_REQUEST);
         }
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
-        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, APIMgtGatewayConstants.THREAT_DESC);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, desc);
         Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
