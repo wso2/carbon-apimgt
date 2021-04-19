@@ -18,7 +18,6 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
-import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -36,7 +35,6 @@ class API extends Resource {
             this.version = version;
             this.context = context;
             this.isDefaultVersion = false;
-            this.gatewayEnvironments = ['Production and Sandbox']; //todo: load the environments from settings API
             this.transport = ['http', 'https'];
             this.visibility = 'PUBLIC';
             this.endpointConfig = {
@@ -1241,11 +1239,12 @@ class API extends Resource {
         return promised_getDocContent;
     }
 
-    getDocuments(api_id, callback) {
+    getDocuments(api_id, callback, limit=1000) {
         const promise_get_all = this.client.then(client => {
             return client.apis['API Documents'].getAPIDocuments(
                 {
                     apiId: api_id,
+                    limit,
                 },
                 this._requestMetaData(),
             );
@@ -1580,6 +1579,22 @@ class API extends Resource {
     }
 
     /**
+     * Get all replies for a particular comment
+     * @param {string} apiId api id of the api for which the comment is added
+     * @param {string} commentId id of the comment
+     * @param {string} limit number of replies to retrieve
+     * @param {string} offset the starting point of replies
+     * @returns {promise} promise
+     */
+    getAllCommentReplies(apiId, commentId, limit, offset) {
+        return this.client.then((client) => {
+            return client.apis.Comments.getRepliesOfComment({
+                commentId, apiId, limit, offset,
+            }, this._requestMetaData());
+        });
+    }
+
+    /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted
@@ -1844,7 +1859,7 @@ class API extends Resource {
      */
     getSwagger(id = this.id, environmentName = '') {
         const payload = { apiId: id };
-        if(environmentName) {
+        if (environmentName) {
             payload[environmentName] = environmentName;
         }
         return this.client.then((client) => {
@@ -1988,6 +2003,16 @@ class API extends Resource {
      * @returns
      */
     getDeployedRevisions() {
+        if (this.isRevision) {
+            return this.client.then(client => {
+                return client.apis['API Revisions'].getAPIRevisionDeployments({
+                    apiId: this.revisionedApiId,
+                },
+                ).then(res => {
+                    return { body: res.body.filter(a => a.revisionUuid === this.id) }
+                });
+            });
+        }
         return this.client.then(client => {
             return client.apis['API Revisions'].getAPIRevisionDeployments({
                 apiId: this.id,
@@ -2112,7 +2137,7 @@ class API extends Resource {
                         apiId: apiId,
                         deploymentId: deploymentId
                     },
-                    { requestBody: body},
+                    { requestBody: body },
                     this._requestMetaData(),
                 );
             });
@@ -2132,7 +2157,7 @@ class API extends Resource {
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData},
+                { requestBody: apiMetaData },
                 this._requestMetaData()
             );
         });

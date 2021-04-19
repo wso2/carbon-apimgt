@@ -62,7 +62,6 @@ export default class API extends Resource {
      */
     getAPIById(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            console.log(client);
             return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
         });
         if (callback) {

@@ -420,7 +420,13 @@
   "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+    }
+  ],
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": [
+    {
+      "type": 0,
+      "value": "Create an API by providing a Name, a Version and a Context"
     }
   ],
   "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": [
@@ -1171,12 +1177,6 @@
       "value": "Try Out"
     }
   ],
-  "Apis.Details.ApiConsole.SelectAppPanel.environment": [
-    {
-      "type": 0,
-      "value": "Please select an environment"
-    }
-  ],
   "Apis.Details.ApiConsole.deployments.api.gateways": [
     {
       "type": 0,
@@ -1191,8 +1191,20 @@
   ],
   "Apis.Details.ApiConsole.deployments.no": [
     {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
       "type": 0,
-      "value": "API is not deployed yet! Please deploy the API before trying out"
+      "value": " is not deployed yet! Please deploy the "
+    },
+    {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
+      "type": 0,
+      "value": " before trying out"
     }
   ],
   "Apis.Details.ApiConsole.environment": [
@@ -1210,7 +1222,7 @@
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Business Information of the API"
+      "value": "Business Information of the API Product"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.business.info": [
@@ -1283,6 +1295,12 @@
     {
       "type": 0,
       "value": "Provide the name of the technical owner"
+    }
+  ],
+  "Apis.Details.Comments.Comment.load.more.replies": [
+    {
+      "type": 0,
+      "value": "Show More Replies"
     }
   ],
   "Apis.Details.Comments.Comment.something.went.wrong": [
@@ -1519,6 +1537,12 @@
       "value": "Backend"
     }
   ],
+  "Apis.Details.Configuration.Configuration.section.events": [
+    {
+      "type": 0,
+      "value": "Events"
+    }
+  ],
   "Apis.Details.Configuration.Configuration.section.initial.request": [
     {
       "type": 0,
@@ -1555,7 +1579,7 @@
       "value": "Save"
     }
   ],
-  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
+  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.\n                                                    product.endpoint": [
     {
       "type": 0,
       "value": "Please refer respective APIs for endpoint information"
@@ -1771,6 +1795,24 @@
       "value": "Press `Enter` after typing the origin name,to add a new origin"
     }
   ],
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.content.button": [
+    {
+      "type": 0,
+      "value": "Edit description"
+    }
+  ],
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.description.of": [
+    {
+      "type": 0,
+      "value": "Description :"
+    }
+  ],
+  "Apis.Details.Configuration.components.DescriptionEditor.update.cont.button": [
+    {
+      "type": 0,
+      "value": "Update Content"
+    }
+  ],
   "Apis.Details.Configuration.components.Endpoints.dynamic": [
     {
       "type": 0,
@@ -1841,42 +1883,6 @@
     {
       "type": 0,
       "value": "Select one or more Key Managers"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.add.content.button": [
-    {
-      "type": 0,
-      "value": "Add Content"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.cancel.button": [
-    {
-      "type": 0,
-      "value": "Cancel"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.content.button": [
-    {
-      "type": 0,
-      "value": "Edit Content"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.of": [
-    {
-      "type": 0,
-      "value": "Edit Description of"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of": [
-    {
-      "type": 0,
-      "value": "Edit Overview of"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.update.content.button": [
-    {
-      "type": 0,
-      "value": "Update Content"
     }
   ],
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": [
@@ -2170,7 +2176,7 @@
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": [
     {
       "type": 0,
-      "value": "Sample &amp; SDK"
+      "value": "Sample and SDK"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": [
@@ -2272,7 +2278,7 @@
   "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": [
     {
       "type": 0,
-      "value": "Error when validating the document source file name"
+      "value": "Document source file name cannot contain spaces or special characters"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.source.inline": [
@@ -3669,6 +3675,30 @@
       "value": "Script"
     }
   ],
+  "Apis.Details.Environments\n                                                                                .deploy.vhost": [
+    {
+      "type": 0,
+      "value": "VHost"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                    .select.table": [
+    {
+      "type": 0,
+      "value": "Select Revision"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                    .select.vhost": [
+    {
+      "type": 0,
+      "value": "Select Access URL"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                .deploy.button": [
+    {
+      "type": 0,
+      "value": "Deploy"
+    }
+  ],
   "Apis.Details.Environments.Environments.APIGateways": [
     {
       "type": 0,
@@ -3711,12 +3741,6 @@
       "value": "Create"
     }
   ],
-  "Apis.Details.Environments.Environments.deploy.button": [
-    {
-      "type": 0,
-      "value": "Deploy"
-    }
-  ],
   "Apis.Details.Environments.Environments.deploy.cancel": [
     {
       "type": 0,
@@ -3753,10 +3777,16 @@
       "value": "Create revisions and deploy in Gateway Environments"
     }
   ],
-  "Apis.Details.Environments.Environments.display.in.devportal": [
+  "Apis.Details.Environments.Environments.display.devportal": [
     {
       "type": 0,
-      "value": "Display in Developer Portal"
+      "value": "Display Gateway Access URLs in developer portal."
+    }
+  ],
+  "Apis.Details.Environments.Environments.gateway\n                                                    .deployed.revision": [
+    {
+      "type": 0,
+      "value": "Deployed Revision"
     }
   ],
   "Apis.Details.Environments.Environments.gateway.accessUrl": [
@@ -3771,10 +3801,10 @@
       "value": "Action"
     }
   ],
-  "Apis.Details.Environments.Environments.gateway.deployed.revision": [
+  "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": [
     {
       "type": 0,
-      "value": "Deployed Revision"
+      "value": "Add a description to the revision"
     }
   ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
@@ -3919,22 +3949,16 @@
       "value": "count"
     }
   ],
-  "Apis.Details.Environments.Environments.select.table": [
-    {
-      "type": 0,
-      "value": "Select Revision"
-    }
-  ],
-  "Apis.Details.Environments.Environments.select.vhost": [
-    {
-      "type": 0,
-      "value": "Select Access URL"
-    }
-  ],
   "Apis.Details.Environments.Environments.undeploy.btn": [
     {
       "type": 0,
       "value": "Undeploy"
+    }
+  ],
+  "Apis.Details.Environments.Environments.visibility.in.devportal": [
+    {
+      "type": 0,
+      "value": "Gateway URL Visibility"
     }
   ],
   "Apis.Details.Environments.deploy.vhost": [
@@ -4053,12 +4077,6 @@
     {
       "type": 0,
       "value": "Endpoint provided"
-    }
-  ],
-  "Apis.Details.LifeCycle.CheckboxLabels.gateway.environments.selected": [
-    {
-      "type": 0,
-      "value": "Gateway Environment(s) selected"
     }
   ],
   "Apis.Details.LifeCycle.LifeCycle.change.not.allowed": [
@@ -4205,6 +4223,24 @@
       "value": "Select a plan for the API product."
     }
   ],
+  "Apis.Details.LifeCycle.components": [
+    {
+      "type": 0,
+      "value": "Publish API without deployments"
+    }
+  ],
+  "Apis.Details.LifeCycle.publish.content": [
+    {
+      "type": 0,
+      "value": "The API will not be available for consumption unless it is deployed."
+    }
+  ],
+  "Apis.Details.LifeCycle.publish.content.info.deployments": [
+    {
+      "type": 0,
+      "value": "Deployments"
+    }
+  ],
   "Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error": [
     {
       "type": 0,
@@ -4287,6 +4323,12 @@
     {
       "type": 0,
       "value": "Mediation policy added successfully"
+    }
+  ],
+  "Apis.Details.MediationPolicies.EditMediationPolicy.download": [
+    {
+      "type": 0,
+      "value": "Download"
     }
   ],
   "Apis.Details.MediationPolicies.Mediation": [
@@ -4805,6 +4847,12 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.\n                                                                    CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deploy": [
     {
       "type": 0,
@@ -4815,12 +4863,6 @@
     {
       "type": 0,
       "value": "Develop"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
-    {
-      "type": 0,
-      "value": "Endpoint"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.Test": [
@@ -4862,7 +4904,13 @@
   "Apis.Details.Overview.CustomizedStepper.publish": [
     {
       "type": 0,
-      "value": "Published (Current API)"
+      "value": "Published"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.publish.current.api": [
+    {
+      "type": 0,
+      "value": "(Current API)"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.retired": [
@@ -4967,10 +5015,22 @@
       "value": "Name"
     }
   ],
+  "Apis.Details.Properties.Properties.\n                                property.name.exists": [
+    {
+      "type": 0,
+      "value": "Property name already exists"
+    }
+  ],
   "Apis.Details.Properties.Properties.\n                                show.add.property.invalid.error": [
     {
       "type": 0,
       "value": "Invalid property name"
+    }
+  ],
+  "Apis.Details.Properties.Properties.\n                            property.name.exists": [
+    {
+      "type": 0,
+      "value": "Property name already exists"
     }
   ],
   "Apis.Details.Properties.Properties.\n                    no.changes.to.save": [
@@ -4983,12 +5043,6 @@
     {
       "type": 0,
       "value": "Property name/value can not be empty"
-    }
-  ],
-  "Apis.Details.Properties.Properties.\n                    property.name.exists": [
-    {
-      "type": 0,
-      "value": "Property name already exists"
     }
   ],
   "Apis.Details.Properties.Properties.\n                    property.name.keyword.error": [
@@ -5048,7 +5102,7 @@
   "Apis.Details.Properties.Properties.api.product.properties": [
     {
       "type": 0,
-      "value": "API Properties"
+      "value": "API Product Properties"
     }
   ],
   "Apis.Details.Properties.Properties.api.properties": [
@@ -5335,6 +5389,12 @@
       "value": "Select the Format of Data Type"
     }
   ],
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": [
+    {
+      "type": 0,
+      "value": "No Data Type"
+    }
+  ],
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": [
     {
       "type": 0,
@@ -5416,7 +5476,7 @@
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name": [
     {
       "type": 0,
-      "value": "Name"
+      "value": "Name/Content Type"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error": [
@@ -6223,6 +6283,72 @@
       "value": "Name"
     }
   ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.Security.tooltip": [
+    {
+      "type": 0,
+      "value": "This will enable/disable Application Level securities defined in the Runtime Configurations page."
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.api.scope.available": [
+    {
+      "type": 0,
+      "value": "No API scopes available"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.sharedpi.scope.available": [
+    {
+      "type": 0,
+      "value": "No shared scopes available"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.create.new.scope": [
+    {
+      "type": 0,
+      "value": "Create New Scope"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.helperText": [
+    {
+      "type": 0,
+      "value": "Select a scope to control permissions to this operation"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.default": [
+    {
+      "type": 0,
+      "value": "Operation scope"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.notAvailable": [
+    {
+      "type": 0,
+      "value": "No scope available"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.local": [
+    {
+      "type": 0,
+      "value": "API Scopes"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.shared": [
+    {
+      "type": 0,
+      "value": "Shared Scopes"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.subTitle": [
+    {
+      "type": 0,
+      "value": "(Security & Scopes)"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.title": [
+    {
+      "type": 0,
+      "value": "Operation Governance"
+    }
+  ],
   "Apis.Details.TryOutConsole.token.label": [
     {
       "type": 0,
@@ -6521,6 +6647,12 @@
       "value": "Context"
     }
   ],
+  "Apis.Listing.ApiTableView.items.per.page": [
+    {
+      "type": 0,
+      "value": "Items per page"
+    }
+  ],
   "Apis.Listing.ApiTableView.name": [
     {
       "type": 0,
@@ -6578,7 +6710,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": [
     {
       "type": 0,
-      "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
+      "value": "Choose your option to create an API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
@@ -6806,7 +6938,7 @@
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
-      "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
+      "value": "Combine multiple API resources in to a single API"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [
@@ -6851,10 +6983,16 @@
       "value": "CANCEL"
     }
   ],
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.design": [
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": [
     {
       "type": 0,
-      "value": "Design"
+      "value": "Remove"
+    }
+  ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": [
+    {
+      "type": 0,
+      "value": "Remove"
     }
   ],
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": [
@@ -6938,13 +7076,19 @@
   "Apis.Listing.components.TopMenu.apiproduct.singular": [
     {
       "type": 0,
-      "value": "API Product"
+      "value": "API product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
     {
       "type": 0,
       "value": "API Products"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.apiproducts.results": [
+    {
+      "type": 0,
+      "value": "API products"
     }
   ],
   "Apis.Listing.components.TopMenu.apis": [
@@ -6974,13 +7118,19 @@
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
-      "value": "Search Results"
+      "value": "Search results"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results.singular": [
     {
       "type": 0,
-      "value": "Search Result"
+      "value": "Search result"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.unified.search": [
+    {
+      "type": 0,
+      "value": "Unified search"
     }
   ],
   "Apis.Listing.import.from.service.catalog.title": [
@@ -7179,28 +7329,22 @@
       "value": "Description [ Syntax - description:xxxx ]"
     }
   ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option8": [
-    {
-      "type": 0,
-      "value": "Documentation Content [ Syntax - doc:xxxx ]"
-    }
-  ],
   "Base.Header.headersearch.HeaderSearch.tooltip.title": [
     {
       "type": 0,
       "value": "Search Options for APIs and APIProducts"
     }
   ],
-  "Base.Header.navbar.GlobalNavBar.APIs": [
-    {
-      "type": 0,
-      "value": "APIs"
-    }
-  ],
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": [
     {
       "type": 0,
-      "value": "Service Catalog"
+      "value": "Services"
+    }
+  ],
+  "Base.Header.navbar.GlobalNavBar.analytics": [
+    {
+      "type": 0,
+      "value": "Analytics"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
@@ -7754,7 +7898,7 @@
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
     {
       "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+      "value": "Create and Deploy your first Integration Service"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.learn.link": [

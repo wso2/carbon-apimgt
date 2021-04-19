@@ -34,12 +34,24 @@
             serverUrl = utils.getServerURL();
         }
     }
+    var referrer = "/apis";
+    var state = request.getParameter("state");
+    if (state != null) {
+        var tenant = state.split("?")[1];
+        if (tenant != null) {
+            var tenantDomain = tenant.split("=")[1];
+            var isAnonymousEnabled = utils.isTenantDevportalAnonymous(tenantDomain);
+            if (isAnonymousEnabled) {
+                referrer = state;
+            }
+        }
+    }
     var postLogoutRedirectURI = appUtils.getTenantBasedLogoutCallBack();
     if (postLogoutRedirectURI == null) {
          postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     }
     if (request.getParameter("error") === "login_required" ) {
-            response.sendRedirect(postLogoutRedirectURI);
+            response.sendRedirect(postLogoutRedirectURI + "?referrer=" + referrer);
     } else if (request.getParameter("code") != null) {
         var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
         if (loginCallbackUrl == null) {

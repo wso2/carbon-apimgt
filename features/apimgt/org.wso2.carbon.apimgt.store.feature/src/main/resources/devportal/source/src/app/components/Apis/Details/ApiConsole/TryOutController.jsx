@@ -19,7 +19,7 @@
 import React, {
     useEffect, useState,
 } from 'react';
-import { FormattedMessage, IntlProvider } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -73,6 +73,7 @@ const styles = makeStyles((theme) => ({
     },
     tryoutHeading: {
         fontWeight: 400,
+        display: 'block',
     },
     genKeyButton: {
         width: theme.spacing(20),
@@ -435,7 +436,7 @@ function TryOutController(props) {
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
     const isPublished = api.lifeCycleStatus.toLowerCase() === 'published';
-    const showSecurityType = isPublished || (isPrototypedAPI && api.enableStore === true);
+    const showSecurityType = isPublished || isPrototypedAPI;
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
@@ -447,7 +448,7 @@ function TryOutController(props) {
     const authHeader = `${authorizationHeader}: ${prefix}`;
 
     return (
-        <IntlProvider locale='en'>
+        <>
             <Grid x={12} md={6} className={classes.centerItems}>
                 <Box>
                     {securitySchemeType !== 'TEST' && (
@@ -455,7 +456,7 @@ function TryOutController(props) {
                             <Box mb={1}>
                                 <Typography variant='body1'>
                                     <Box display='flex' alignItems='center'>
-                                        {(selectedKMObject && selectedKMObject.enabled) && (
+                                        {(keyManagers.length > 1 && selectedKMObject && selectedKMObject.enabled) && (
                                             <FormattedMessage
                                                 id='Apis.Details.ApiConsole.TryOutController.default.km.msg.one'
                                                 defaultMessage='The Resident Key Manager is selected for try out console.'
@@ -487,13 +488,19 @@ function TryOutController(props) {
                     )}
                     {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
                         <>
-                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                            <Typography variant='h5' component='h2' color='textPrimary' className={classes.categoryHeading}>
                                 <FormattedMessage
                                     id='api.console.security.heading'
                                     defaultMessage='Security'
                                 />
                             </Typography>
-                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
+                            <Typography
+                                variant='h6'
+                                component='label'
+                                id='security-type'
+                                color='textSecondary'
+                                className={classes.tryoutHeading}
+                            >
                                 <FormattedMessage
                                     id='api.console.security.type.heading'
                                     defaultMessage='Security Type'
@@ -504,6 +511,7 @@ function TryOutController(props) {
                                     name='securityScheme'
                                     value={securitySchemeType}
                                     onChange={handleChanges}
+                                    aria-labelledby='security-type'
                                     row
                                 >
                                     <FormControlLabel
@@ -751,6 +759,7 @@ function TryOutController(props) {
                                             <>
                                                 <Typography
                                                     variant='h5'
+                                                    component='h3'
                                                     color='textPrimary'
                                                     className={classes.categoryHeading}
                                                 >
@@ -809,7 +818,7 @@ function TryOutController(props) {
                         </Box>
                     </Grid>
                 )}
-        </IntlProvider>
+        </>
     );
 }
 

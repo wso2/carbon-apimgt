@@ -31,13 +31,13 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -97,6 +97,7 @@ public class APIManagerConfiguration {
     public static final String JMS_PORT = "jms.port";
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
+    public static final String WEBSUB_DEFAULT_GATEWAY_URL = "http://localhost:9021";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
@@ -413,6 +414,14 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
                     }
+                    OMElement webSubGatewayEndpoint = environmentElem
+                            .getFirstChildWithName(new QName(APIConstants.API_WEBSUB_GATEWAY_ENDPOINT));
+                    if (webSubGatewayEndpoint != null) {
+                        environment.setWebSubGatewayEndpoint(
+                                APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
+                    } else {
+                        environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
+                    }
                     OMElement description =
                             environmentElem.getFirstChildWithName(new QName("Description"));
                     if (description != null) {
@@ -437,8 +446,20 @@ public class APIManagerConfiguration {
                                 APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
                         String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
                                 APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+                        String webSubHttpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT)).getText());
+                        String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
 
-                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
+                        /*
+                         Prefix websub endpoints with 'websub_' so that the endpoint URL
+                         would begin with: 'websub_http://', since API type is identified by the URL protocol below.
+                         */
+                        webSubHttpEp = "websub_" + webSubHttpEp;
+                        webSubHttpsEp = "websub_" + webSubHttpsEp;
+
+                        VHost vhost = VHost.fromEndpointUrls(new String[]{
+                                httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
                         vhosts.add(vhost);
                     }
 
@@ -1003,6 +1024,11 @@ public class APIManagerConfiguration {
                 throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
                         .getText().split(APIConstants.DELEM_COMMA));
             }
+            OMElement enablePolicyDeployElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
+            if (enablePolicyDeployElement != null) {
+                throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -1450,9 +1476,16 @@ public class APIManagerConfiguration {
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
             }
-            OMElement jwtUserClaimsElement =omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
-            if (jwtUserClaimsElement != null ){
+            OMElement jwtUserClaimsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
+            if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+            }
+            OMElement enableTenantBaseSigningElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
+            if (enableTenantBaseSigningElement != null) {
+                jwtConfigurationDto.
+                        setTenantBasedSigningEnabled(Boolean.parseBoolean(enableTenantBaseSigningElement.getText()));
             }
             OMElement gatewayJWTConfigurationElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
@@ -1802,15 +1835,6 @@ public class APIManagerConfiguration {
             log.debug("Data Source Element is not set. Set to default Data Source");
         }
 
-        OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer
-                        .PUBLISH_DIRECTLY_TO_GW_CONFIG));
-        if (publishDirectlyToGatewayElement != null) {
-            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
-                    JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
-        } else {
-            log.debug("Publish directly to gateway is not set. Set to default true");
-        }
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
@@ -1866,7 +1890,7 @@ public class APIManagerConfiguration {
 
         OMElement eventWaitingTimeElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EVENT_WAITING_TIME_CONFIG));
-        if (eventWaitingTimeElement!= null) {
+        if (eventWaitingTimeElement != null) {
             long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
             gatewayArtifactSynchronizerProperties.setEventWaitingTime(eventWaitingTime);
         } else {

@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         alignItems: 'center',
         width: '100%',
+        border: `solid 1px ${theme.palette.grey[300]}`,
         '& .MuiInputBase-root:before,  .MuiInputBase-root:hover': {
             borderBottom: 'none !important',
             color: theme.palette.primary.main,
@@ -107,54 +108,51 @@ function Environments(props) {
     };
 
     const getDefaultVersionUrl = () => {
-        if (selectedEndpoint !== null) {
-            const { defaultVersionURLs } = selectedEndpoint;
-            if (defaultVersionURLs
-                && (defaultVersionURLs.https
-                    || defaultVersionURLs.http
-                    || defaultVersionURLs.ws
-                    || defaultVersionURLs.wss)) {
-                return (
-                    <>
-                        {`
+        const { defaultVersionURLs } = selectedEndpoint;
+        if (defaultVersionURLs
+            && (defaultVersionURLs.https
+                || defaultVersionURLs.http
+                || defaultVersionURLs.ws
+                || defaultVersionURLs.wss)) {
+            return (
+                <>
+                    {`
             ${intl.formatMessage({
-                        id: 'Apis.Details.Environments.default.url',
-                        defaultMessage: '( Default Version ) ',
-                    })}
+                    id: 'Apis.Details.Environments.default.url',
+                    defaultMessage: '( Default Version ) ',
+                })}
             ${(defaultVersionURLs.https || defaultVersionURLs.http || defaultVersionURLs.ws || defaultVersionURLs.wss)}`}
-                        <Tooltip
-                            title={
-                                urlCopied
-                                    ? intl.formatMessage({
-                                        defaultMessage: 'Copied',
-                                        id: 'Apis.Details.Environments.copied',
-                                    })
-                                    : intl.formatMessage({
-                                        defaultMessage: 'Copy to clipboard',
-                                        id: 'Apis.Details.Environments.copy.to.clipboard',
-                                    })
-                            }
-                            placement='right'
-                            className={classes.iconStyle}
-                        >
-                            <CopyToClipboard
-                                text={defaultVersionURLs.https
+                    <Tooltip
+                        title={
+                            urlCopied
+                                ? intl.formatMessage({
+                                    defaultMessage: 'Copied',
+                                    id: 'Apis.Details.Environments.copied',
+                                })
+                                : intl.formatMessage({
+                                    defaultMessage: 'Copy to clipboard',
+                                    id: 'Apis.Details.Environments.copy.to.clipboard',
+                                })
+                        }
+                        interactive
+                        placement='right'
+                        className={classes.iconStyle}
+                    >
+                        <CopyToClipboard
+                            text={defaultVersionURLs.https
                                 || defaultVersionURLs.http
                                 || defaultVersionURLs.ws
                                 || defaultVersionURLs.wss}
-                                // text={endpoint.URLs.http}
-                                onCopy={() => onCopy('urlCopied')}
-                            >
-                                <IconButton aria-label='Copy to clipboard'>
-                                    <Icon color='secondary'>file_copy</Icon>
-                                </IconButton>
-                            </CopyToClipboard>
-                        </Tooltip>
-                    </>
-                );
-            } else {
-                return null;
-            }
+                            // text={endpoint.URLs.http}
+                            onCopy={() => onCopy('urlCopied')}
+                        >
+                            <IconButton aria-label='Copy the Default Version URL to clipboard'>
+                                <Icon color='secondary'>file_copy</Icon>
+                            </IconButton>
+                        </CopyToClipboard>
+                    </Tooltip>
+                </>
+            );
         } else {
             return null;
         }
@@ -167,21 +165,29 @@ function Environments(props) {
     // }
     return (
         <Box display='flex' flexDirection='column' width='100%'>
-            <Box mr={5} display='flex' alignItems='center' width='100%' flexDirection='row'>
+            <Box mr={5} display='flex' area-label='API URL details' alignItems='center' width='100%' flexDirection='row'>
                 {selectedEndpoint && (
                     <>
-                        <Typography variant='subtitle2' gutterBottom align='left' className={classes.sectionTitle}>
+                        <Typography
+                            variant='subtitle2'
+                            component='label'
+                            for='gateway-envirounment'
+                            gutterBottom
+                            align='left'
+                            className={classes.sectionTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Environments.label.url'
                                 defaultMessage='URL'
                             />
                         </Typography>
-                        <Paper component='form' className={classes.root}>
+                        <Paper id='gateway-envirounment' component='form' className={classes.root}>
                             {api.endpointURLs.length > 1 && (
                                 <>
                                     <Select
                                         value={selectedEndpoint.environmentName}
                                         onChange={updateSelectedEndpoint}
+                                        aria-label='Select the Gateway Environment'
                                     >
                                         {api.endpointURLs.map((endpoint) => (
                                             <MenuItem value={endpoint.environmentName}>
@@ -214,6 +220,7 @@ function Environments(props) {
                                                 id: 'Apis.Details.Environments.copy.to.clipboard',
                                             })
                                     }
+                                    interactive
                                     placement='right'
                                     className={classes.iconStyle}
                                 >
@@ -225,7 +232,7 @@ function Environments(props) {
                                         // text={endpoint.URLs.http}
                                         onCopy={() => onCopy('urlCopied')}
                                     >
-                                        <IconButton aria-label='Copy to clipboard'>
+                                        <IconButton aria-label='Copy the API URL to clipboard'>
                                             <Icon color='secondary'>file_copy</Icon>
                                         </IconButton>
                                     </CopyToClipboard>
@@ -235,7 +242,7 @@ function Environments(props) {
                     </>
                 )}
                 {!selectedEndpoint && (api.lifeCycleStatus !== 'PROTOTYPED') && (
-                    <Typography variant='subtitle2' gutterBottom align='left' className={classes.sectionTitle}>
+                    <Typography variant='subtitle2' component='p' gutterBottom align='left' className={classes.sectionTitle}>
                         <FormattedMessage
                             id='Apis.Details.Environments.label.noendpoint'
                             defaultMessage='No endpoints yet.'

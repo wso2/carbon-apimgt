@@ -47,7 +47,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP" +
@@ -66,7 +66,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME," +
                     "   ATTRIBUTES.NAME AS ATTRIBUTE_NAME," +
-                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE"+
+                    "   ATTRIBUTES.VALUE AS ATTRIBUTE_VALUE" +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP" +
@@ -88,16 +88,41 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_SUBSCRIPTION_SQL =
             "SELECT " +
-                    "   SUBSCRIPTION_ID AS SUB_ID," +
-                    "   TIER_ID AS TIER," +
-                    "   API_ID AS API_ID," +
-                    "   APPLICATION_ID AS APP_ID," +
-                    "   SUB_STATUS AS STATUS" +
+                    "   AM_SUBSCRIPTION.UUID AS SUBSCRIPTION_UUID," +
+                    "   AM_SUBSCRIPTION.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   AM_SUBSCRIPTION.TIER_ID AS TIER," +
+                    "   AM_SUBSCRIPTION.API_ID AS API_ID," +
+                    "   AM_SUBSCRIPTION.APPLICATION_ID AS APP_ID," +
+                    "   AM_APPLICATION.UUID AS APPLICATION_UUID," +
+                    "   AM_API.API_UUID AS API_UUID," +
+                    "   AM_SUBSCRIPTION.SUB_STATUS AS STATUS" +
                     " FROM " +
-                    "   AM_SUBSCRIPTION" +
+                    "   AM_SUBSCRIPTION," +
+                    "   AM_APPLICATION," +
+                    "   AM_API" +
                     " WHERE " +
-                    "   API_ID = ? AND " +
-                    "   APPLICATION_ID = ? ";
+                    "AM_SUBSCRIPTION.APPLICATION_ID = AM_APPLICATION.APPLICATION_ID AND " +
+                    "AM_SUBSCRIPTION.API_ID = AM_API.API_ID AND " +
+                    "AM_SUBSCRIPTION.API_ID = ? AND AM_SUBSCRIPTION.APPLICATION_ID = ? ";
+
+    public static final String GET_SUBSCRIPTION_APP_UUID_API_UUID_SQL =
+            "SELECT " +
+                    "   AM_SUBSCRIPTION.UUID AS SUBSCRIPTION_UUID," +
+                    "   AM_SUBSCRIPTION.SUBSCRIPTION_ID AS SUB_ID," +
+                    "   AM_SUBSCRIPTION.TIER_ID AS TIER," +
+                    "   AM_SUBSCRIPTION.API_ID AS API_ID," +
+                    "   AM_SUBSCRIPTION.APPLICATION_ID AS APP_ID," +
+                    "   AM_APPLICATION.UUID AS APPLICATION_UUID," +
+                    "   AM_API.API_UUID AS API_UUID," +
+                    "   AM_SUBSCRIPTION.SUB_STATUS AS STATUS" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION," +
+                    "   AM_APPLICATION," +
+                    "   AM_API" +
+                    " WHERE " +
+                    "AM_SUBSCRIPTION.APPLICATION_ID = AM_APPLICATION.APPLICATION_ID AND " +
+                    "AM_SUBSCRIPTION.API_ID = AM_API.API_ID AND " +
+                    "AM_API.API_UUID = ? AND AM_APPLICATION.UUID = ? ";
 
     public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
@@ -130,7 +155,6 @@ public class SubscriptionValidationSQLConstants {
                     "FROM " +
                     "   AM_POLICY_APPLICATION";
 
-
     public static final String GET_ALL_API_POLICIES_SQL =
             "SELECT" +
                     "   POLICY.POLICY_ID," +
@@ -155,78 +179,6 @@ public class SubscriptionValidationSQLConstants {
                     " ON " +
                     "   POLICY.POLICY_ID = COND.POLICY_ID";
 
-    public static final String GET_ALL_APIS_SQL =
-            "SELECT " +
-                    "   APIS.API_UUID," +
-                    "      APIS.API_ID," +
-                    "      APIS.API_PROVIDER," +
-                    "      APIS.API_NAME," +
-                    "      APIS.API_TIER," +
-                    "      APIS.API_VERSION," +
-                    "      APIS.CONTEXT," +
-                    "      APIS.API_TYPE," +
-                    "      APIS.URL_MAPPING_ID," +
-                    "      APIS.HTTP_METHOD," +
-                    "      APIS.AUTH_SCHEME," +
-                    "      APIS.URL_PATTERN," +
-                    "      APIS.RES_TIER," +
-                    "      APIS.SCOPE_NAME," +
-                    "      DEF.PUBLISHED_DEFAULT_API_VERSION" +
-                    " FROM " +
-                    "  (" +
-                    "    SELECT " +
-                    "      API.API_UUID," +
-                    "      API.API_ID," +
-                    "      API.API_PROVIDER," +
-                    "      API.API_NAME," +
-                    "      API.API_TIER," +
-                    "      API.API_VERSION," +
-                    "      API.CONTEXT," +
-                    "      API.API_TYPE," +
-                    "      URL.URL_MAPPING_ID," +
-                    "      URL.HTTP_METHOD," +
-                    "      URL.AUTH_SCHEME," +
-                    "      URL.URL_PATTERN," +
-                    "      URL.THROTTLING_TIER AS RES_TIER," +
-                    "      SCOPE.SCOPE_NAME" +
-                    "    FROM " +
-                    "      AM_API API," +
-                    "      AM_API_URL_MAPPING URL" +
-                    "      LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING SCOPE ON" +
-                    "      URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "    WHERE " +
-                    "      API.API_ID = URL.API_ID" +
-                    "    UNION " +
-                    "    SELECT " +
-                    "      API.API_UUID," +
-                    "      API.API_ID," +
-                    "      API.API_PROVIDER," +
-                    "      API.API_NAME," +
-                    "      API.API_TIER," +
-                    "      API.API_VERSION," +
-                    "      API.CONTEXT," +
-                    "      API.API_TYPE," +
-                    "      URL.URL_MAPPING_ID," +
-                    "      URL.HTTP_METHOD," +
-                    "      URL.AUTH_SCHEME," +
-                    "      URL.URL_PATTERN," +
-                    "      URL.THROTTLING_TIER AS RES_TIER," +
-                    "      SCOPE.SCOPE_NAME" +
-                    "    FROM " +
-                    "      AM_API API," +
-                    "      AM_API_PRODUCT_MAPPING PROD," +
-                    "      AM_API_URL_MAPPING URL" +
-                    "      LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING SCOPE ON" +
-                    "      URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "    WHERE " +
-                    "      URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID" +
-                    "      AND API.API_ID = URL.API_ID" +
-                    "      AND URL.API_ID = PROD.API_ID" +
-                    "  ) APIS " +
-                    "  LEFT JOIN AM_API_DEFAULT_VERSION DEF ON APIS.API_NAME = DEF.API_NAME" +
-                    "  AND APIS.API_PROVIDER = DEF.API_PROVIDER AND " +
-                    "  APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
-
     public static final String GET_ALL_AM_KEY_MAPPINGS_SQL =
             "SELECT " +
                     "   APPLICATION_ID," +
@@ -236,38 +188,33 @@ public class SubscriptionValidationSQLConstants {
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING";
 
-    public static final String GET_AM_KEY_MAPPING_SQL =
-            "SELECT " +
-                    "   APPLICATION_ID," +
-                    "   CONSUMER_KEY," +
-                    "   KEY_TYPE," +
-                    "   STATE " +
-                    " FROM " +
-                    "   AM_APPLICATION_KEY_MAPPING" +
-                    " WHERE " +
-                    "APPLICATION_ID = ? " +
-                    "AND KEY_TYPE = ? ";
-
-    public static final String GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL = "SELECT AM_APPLICATION_KEY_MAPPING" +
-            ".APPLICATION_ID,AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY,AM_APPLICATION_KEY_MAPPING.KEY_TYPE," +
-            "AM_KEY_MANAGER.NAME AS KEY_MANAGER,AM_APPLICATION_KEY_MAPPING.STATE FROM " +
-            "AM_APPLICATION_KEY_MAPPING,AM_KEY_MANAGER WHERE AM_KEY_MANAGER.UUID=AM_APPLICATION_KEY_MAPPING" +
-            ".KEY_MANAGER AND AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY = ? AND AM_KEY_MANAGER.NAME = ? AND " +
-            "AM_KEY_MANAGER.TENANT_DOMAIN  = ? ";
+    public static final String GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL = "SELECT AM_APPLICATION.UUID, " +
+            "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID,AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY," +
+            "AM_APPLICATION_KEY_MAPPING.KEY_TYPE,AM_KEY_MANAGER.NAME AS KEY_MANAGER,AM_APPLICATION_KEY_MAPPING.STATE " +
+            "FROM " +
+            "AM_APPLICATION_KEY_MAPPING,AM_KEY_MANAGER,AM_APPLICATION WHERE AM_KEY_MANAGER" +
+            ".UUID = AM_APPLICATION_KEY_MAPPING.KEY_MANAGER AND AM_APPLICATION_KEY_MAPPING" +
+            ".APPLICATION_ID = AM_APPLICATION.APPLICATION_ID AND AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY = ? AND " +
+            "AM_KEY_MANAGER.NAME = ?  AND AM_KEY_MANAGER.TENANT_DOMAIN  = ? ";
 
     public static final String GET_TENANT_SUBSCRIPTIONS_SQL =
             "SELECT " +
+                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
                     "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
                     "   SUBS.TIER_ID AS TIER," +
                     "   SUBS.API_ID AS API_ID," +
                     "   APP.APPLICATION_ID AS APP_ID," +
+                    "   APP.UUID AS APPLICATION_UUID," +
+                    "   API.API_UUID AS API_UUID," +
                     "   SUBS.SUB_STATUS AS STATUS," +
                     "   SUB.TENANT_ID AS TENANT_ID" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_APPLICATION APP," +
+                    "   AM_API API," +
                     "   AM_SUBSCRIBER SUB" +
                     " WHERE " +
+                    "   SUBS.API_ID = API.API_ID AND " +
                     "   SUBS.APPLICATION_ID = APP.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND " +
                     "   SUB.TENANT_ID = ? ";
@@ -281,7 +228,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.QUOTA_TYPE AS QUOTA_TYPE," +
                     "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH," +
                     "   APS.TENANT_ID AS TENANT_ID," +
-                    "   APS.MAX_DEPTH AS MAX_DEPTH,"+
+                    "   APS.MAX_DEPTH AS MAX_DEPTH," +
                     "   APS.MAX_COMPLEXITY AS MAX_COMPLEXITY, " +
                     "   APS.QUOTA_TYPE AS QUOTA_TYPE, " +
                     "   APS.QUOTA AS QUOTA, " +
@@ -314,7 +261,6 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   APS.NAME = ? AND " +
                     "   APS.TENANT_ID = ?";
-
 
     public static final String GET_TENANT_APPLICATION_POLICIES_SQL =
             "SELECT " +
@@ -412,7 +358,7 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_CONDITION_GROUP COND " +
                     " ON " +
                     "   POLICY.POLICY_ID = COND.POLICY_ID";
-    
+
     public static final String GET_TENANT_API_POLICY_SQL =
             "SELECT" +
                     "   POLICY.POLICY_ID," +
@@ -437,265 +383,6 @@ public class SubscriptionValidationSQLConstants {
                     " ON " +
                     "   POLICY.POLICY_ID = COND.POLICY_ID" +
                     " WHERE POLICY.TENANT_ID = ? AND POLICY.NAME = ?";
-
-    public static final String GET_TENANT_APIS_SQL =
-            "SELECT" +
-                    "   APIS.API_UUID," +
-                    "   APIS.API_ID," +
-                    "   APIS.API_PROVIDER," +
-                    "   APIS.API_NAME," +
-                    "   APIS.API_TIER," +
-                    "   APIS.API_VERSION," +
-                    "   APIS.CONTEXT," +
-                    "   APIS.API_TYPE," +
-                    "   APIS.URL_MAPPING_ID," +
-                    "   APIS.HTTP_METHOD," +
-                    "   APIS.AUTH_SCHEME," +
-                    "   APIS.URL_PATTERN," +
-                    "   APIS.RES_TIER," +
-                    "   APIS.SCOPE_NAME," +
-                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
-                    "FROM" +
-                    "   (" +
-                    "      SELECT" +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME " +
-                    "      FROM" +
-                    "         AM_API API," +
-                    "         AM_API_URL_MAPPING URL " +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "      WHERE" +
-                    "         API.API_ID = URL.API_ID " +
-                    "         AND CONTEXT LIKE ? " +
-                    "      UNION ALL" +
-                    "      SELECT" +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME " +
-                    "      FROM" +
-                    "         AM_API API," +
-                    "         AM_API_PRODUCT_MAPPING PROD," +
-                    "         AM_API_URL_MAPPING URL " +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "      WHERE" +
-                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
-                    "         AND API.API_ID = PROD.API_ID " +
-                    "         AND CONTEXT LIKE ? " +
-                    "   )" +
-                    "    APIS " +
-                    "   LEFT JOIN" +
-                    "      AM_API_DEFAULT_VERSION DEF " +
-                    "      ON APIS.API_NAME = DEF.API_NAME " +
-                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
-                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
-
-    public static final String GET_ST_APIS_SQL =
-            "SELECT" +
-                    "   APIS.API_UUID," +
-                    "   APIS.API_ID," +
-                    "   APIS.API_PROVIDER," +
-                    "   APIS.API_NAME," +
-                    "   APIS.API_TIER," +
-                    "   APIS.API_VERSION," +
-                    "   APIS.CONTEXT," +
-                    "   APIS.API_TYPE," +
-                    "   APIS.URL_MAPPING_ID," +
-                    "   APIS.HTTP_METHOD," +
-                    "   APIS.AUTH_SCHEME," +
-                    "   APIS.URL_PATTERN," +
-                    "   APIS.RES_TIER," +
-                    "   APIS.SCOPE_NAME," +
-                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
-                    "FROM" +
-                    "   (" +
-                    "      SELECT" +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME " +
-                    "      FROM" +
-                    "         AM_API API," +
-                    "         AM_API_URL_MAPPING URL " +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "      WHERE" +
-                    "         API.API_ID = URL.API_ID " +
-                    "         AND CONTEXT NOT LIKE ? " +
-                    "      UNION" +
-                    "      SELECT" +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME " +
-                    "      FROM" +
-                    "         AM_API API," +
-                    "         AM_API_PRODUCT_MAPPING PROD," +
-                    "         AM_API_URL_MAPPING URL " +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE " +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
-                    "      WHERE" +
-                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID " +
-                    "         AND API.API_ID = PROD.API_ID " +
-                    "         AND CONTEXT NOT LIKE ? " +
-                    "   )" +
-                    "    APIS " +
-                    "   LEFT JOIN" +
-                    "      AM_API_DEFAULT_VERSION DEF " +
-                    "      ON APIS.API_NAME = DEF.API_NAME " +
-                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER " +
-                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
-
-    public static final String GET_API_SQL =
-            "SELECT " +
-                    "   APIS.API_UUID," +
-                    "   APIS.API_ID," +
-                    "   APIS.API_PROVIDER," +
-                    "   APIS.API_NAME," +
-                    "   APIS.API_TIER," +
-                    "   APIS.API_VERSION," +
-                    "   APIS.CONTEXT," +
-                    "   APIS.API_TYPE," +
-                    "   APIS.URL_MAPPING_ID," +
-                    "   APIS.HTTP_METHOD," +
-                    "   APIS.AUTH_SCHEME," +
-                    "   APIS.URL_PATTERN," +
-                    "   APIS.RES_TIER," +
-                    "   APIS.SCOPE_NAME," +
-                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
-                    "FROM " +
-                    "   (" +
-                    "      SELECT " +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME" +
-                    "      FROM " +
-                    "         AM_API API," +
-                    "         AM_API_URL_MAPPING URL" +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "      WHERE" +
-                    "         API.API_ID = URL.API_ID" +
-                    "         AND API.API_VERSION = ?" +
-                    "         AND API.CONTEXT = ?" +
-                    "   )" +
-                    "   APIS " +
-                    "   LEFT JOIN " +
-                    "      AM_API_DEFAULT_VERSION DEF" +
-                    "      ON APIS.API_NAME = DEF.API_NAME" +
-                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
-                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
-
-    public static final String GET_API_REVISION_SQL =
-            "SELECT " +
-                    "   APIS.API_ID," +
-                    "   APIS.API_PROVIDER," +
-                    "   APIS.API_NAME," +
-                    "   APIS.API_TIER," +
-                    "   APIS.API_VERSION," +
-                    "   APIS.CONTEXT," +
-                    "   APIS.API_TYPE," +
-                    "   APIS.URL_MAPPING_ID," +
-                    "   APIS.HTTP_METHOD," +
-                    "   APIS.AUTH_SCHEME," +
-                    "   APIS.URL_PATTERN," +
-                    "   APIS.RES_TIER," +
-                    "   APIS.SCOPE_NAME," +
-                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
-                    "FROM " +
-                    "   (" +
-                    "      SELECT " +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME" +
-                    "      FROM " +
-                    "         AM_API API," +
-                    "         AM_API_URL_MAPPING URL" +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "      WHERE" +
-                    "         API.API_ID = URL.API_ID" +
-                    "         AND API.API_VERSION = ?" +
-                    "         AND API.CONTEXT = ?" +
-                    "         AND URL.REVISION_UUID = ?" +
-                    "   )" +
-                    "   APIS " +
-                    "   LEFT JOIN " +
-                    "      AM_API_DEFAULT_VERSION DEF" +
-                    "      ON APIS.API_NAME = DEF.API_NAME" +
-                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
-                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     //todo merge with above DET_API
     public static final String GET_API_PRODUCT_SQL =
@@ -753,61 +440,13 @@ public class SubscriptionValidationSQLConstants {
                     "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     public static final String GET_TENANT_AM_KEY_MAPPING_SQL =
-            "SELECT " +
-                    "   MAPPING.APPLICATION_ID," +
-                    "   MAPPING.CONSUMER_KEY," +
-                    "   MAPPING.KEY_TYPE," +
-                    "   KEYM.NAME AS KEY_MANAGER," +
-                    "   MAPPING.STATE" +
+            "SELECT APP.UUID,MAPPING.APPLICATION_ID, MAPPING.CONSUMER_KEY,MAPPING.KEY_TYPE,KEYM.NAME AS KEY_MANAGER," +
+                    "MAPPING.STATE" +
                     " FROM " +
-                    "   AM_APPLICATION_KEY_MAPPING MAPPING," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_SUBSCRIBER SUB," +
-                    "   AM_KEY_MANAGER KEYM"+
+                    "   AM_APPLICATION_KEY_MAPPING MAPPING,AM_APPLICATION APP,AM_SUBSCRIBER SUB,AM_KEY_MANAGER KEYM" +
                     " WHERE " +
-                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND" +
-                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
-                    "   MAPPING.KEY_MANAGER = KEYM.UUID" +
-                    "   AND SUB.TENANT_ID = ?";
-
-    public static final String GET_ALL_API_URL_MAPPING_SQL =
-            "SELECT " +
-                    "   URL_MAPPING_ID," +
-                    "   API_ID," +
-                    "   HTTP_METHOD," +
-                    "   AUTH_SCHEME," +
-                    "   URL_PATTERN," +
-                    "   THROTTLING_TIER AS POLICY" +
-                    " FROM " +
-                    "   AM_API_URL_MAPPING";
-
-    public static final String GET_TENANT_API_URL_MAPPING_SQL =
-            "SELECT " +
-                    "   URL.URL_MAPPING_ID AS URL_MAPPING_ID," +
-                    "   URL.API_ID AS API_ID," +
-                    "   URL.HTTP_METHOD AS HTTP_METHOD," +
-                    "   URL.AUTH_SCHEME AS AUTH_SCHEME," +
-                    "   URL.THROTTLING_TIER AS POLICY" +
-                    " FROM " +
-                    "   AM_API_URL_MAPPING URL," +
-                    "   AM_API API" +
-                    " WHERE " +
-                    "   URL.API_ID = API.API_ID AND " +
-                    "   API.CONTEXT LIKE ? ";
-
-    public static final String GET_ST_API_URL_MAPPING_SQL =
-            "SELECT " +
-                    "   URL.URL_MAPPING_ID AS URL_MAPPING_ID," +
-                    "   URL.API_ID AS API_ID," +
-                    "   URL.HTTP_METHOD AS HTTP_METHOD," +
-                    "   URL.AUTH_SCHEME AS AUTH_SCHEME," +
-                    "   URL.THROTTLING_TIER AS POLICY" +
-                    " FROM " +
-                    "   AM_API_URL_MAPPING URL," +
-                    "   AM_API API" +
-                    " WHERE " +
-                    "   URL.API_ID = API.API_ID AND " +
-                    "   API.CONTEXT NOT LIKE ? ";
+                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID AND SUB.TENANT_ID = ?";
 
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =
             " SELECT " +
@@ -846,107 +485,45 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_API_BY_UUID_SQL =
             "SELECT " +
-                    "   APIS.API_UUID," +
-                    "   APIS.API_ID," +
-                    "   APIS.API_PROVIDER," +
-                    "   APIS.API_NAME," +
-                    "   APIS.API_TIER," +
-                    "   APIS.API_VERSION," +
-                    "   APIS.CONTEXT," +
-                    "   APIS.API_TYPE," +
-                    "   APIS.URL_MAPPING_ID," +
-                    "   APIS.HTTP_METHOD," +
-                    "   APIS.AUTH_SCHEME," +
-                    "   APIS.URL_PATTERN," +
-                    "   APIS.RES_TIER," +
-                    "   APIS.SCOPE_NAME," +
-                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
+                    "AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                    ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
+                    "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
                     "FROM " +
-                    "   (" +
-                    "      SELECT " +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME" +
-                    "      FROM " +
-                    "         AM_API API," +
-                    "         AM_API_URL_MAPPING URL" +
-                    "         LEFT JOIN" +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "      WHERE" +
-                    "         API.API_ID = URL.API_ID" +
-                    "         AND API.API_UUID = ?" +
-                    "   )" +
-                    "   APIS " +
-                    "   LEFT JOIN " +
-                    "      AM_API_DEFAULT_VERSION DEF" +
-                    "      ON APIS.API_NAME = DEF.API_NAME" +
-                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
-                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
+                    "AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID = AM_REVISION.API_UUID " +
+                    "LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING " +
+                    "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID " +
+                    "WHERE AM_API.API_UUID = ? ";
 
-    //todo merge with above DET_API
-    public static final String GET_API_PRODUCT_BY_UUID_SQL =
-            "SELECT " +
-                    "   APIS.API_UUID," +
-                    "   APIS.API_ID," +
-                    "   APIS.API_PROVIDER," +
-                    "   APIS.API_NAME," +
-                    "   APIS.API_TIER," +
-                    "   APIS.API_VERSION," +
-                    "   APIS.CONTEXT," +
-                    "   APIS.API_TYPE," +
-                    "   APIS.URL_MAPPING_ID," +
-                    "   APIS.HTTP_METHOD," +
-                    "   APIS.AUTH_SCHEME," +
-                    "   APIS.URL_PATTERN," +
-                    "   APIS.RES_TIER," +
-                    "   APIS.SCOPE_NAME," +
-                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
-                    "FROM " +
-                    "   (" +
-                    "      SELECT " +
-                    "         API.API_UUID," +
-                    "         API.API_ID," +
-                    "         API.API_PROVIDER," +
-                    "         API.API_NAME," +
-                    "         API.API_TIER," +
-                    "         API.API_VERSION," +
-                    "         API.CONTEXT," +
-                    "         API.API_TYPE," +
-                    "         URL.URL_MAPPING_ID," +
-                    "         URL.HTTP_METHOD," +
-                    "         URL.AUTH_SCHEME," +
-                    "         URL.URL_PATTERN," +
-                    "         URL.THROTTLING_TIER AS RES_TIER," +
-                    "         SCOPE.SCOPE_NAME" +
-                    "      FROM " +
-                    "         AM_API API," +
-                    "         AM_API_PRODUCT_MAPPING PROD," +
-                    "         AM_API_URL_MAPPING URL" +
-                    "         LEFT JOIN " +
-                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
-                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    "      WHERE " +
-                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID" +
-                    "         AND API.API_ID = PROD.API_ID" +
-                    "         AND API.API_UUID = ?" +
-                    "   )" +
-                    "   APIS " +
-                    "   LEFT JOIN " +
-                    "      AM_API_DEFAULT_VERSION DEF " +
-                    "      ON APIS.API_NAME = DEF.API_NAME" +
-                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
-                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
+    public static final String GET_DEFAULT_VERSION_API_SQL = "SELECT PUBLISHED_DEFAULT_API_VERSION FROM " +
+            "AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ? AND PUBLISHED_DEFAULT_API_VERSION = ?";
 
+    public static final String GET_URI_TEMPLATES_BY_API_SQL = "SELECT AM_API_URL_MAPPING.HTTP_METHOD," +
+            "AM_API_URL_MAPPING.AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
+            "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING" +
+            " ON AM_API_URL_MAPPING.URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING.URL_MAPPING_ID WHERE " +
+            "AM_API_URL_MAPPING.API_ID = ? AND AM_API_URL_MAPPING.REVISION_UUID = ?";
+
+    public static final String GET_ALL_APIS_BY_ORGANIZATION = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API" +
+            ".CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION" +
+            ".REVISION_UUID AS REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME FROM AM_API LEFT " +
+            "JOIN AM_REVISION ON AM_API.API_UUID = AM_REVISION.API_UUID LEFT JOIN  AM_DEPLOYMENT_REVISION_MAPPING " +
+            "ON AM_REVISION.REVISION_UUID = AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+    public static final String GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL = "SELECT AM_API.API_PROVIDER,AM_API" +
+            ".API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API.API_TIER,AM_API.API_VERSION,AM_API" +
+            ".API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME " +
+            "AS DEPLOYMENT_NAME FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+            "AM_DEPLOYMENT_REVISION_MAPPING ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+
+    public static final String  GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL = "SELECT AM_API_URL_MAPPING.URL_MAPPING_ID," +
+            "AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING.AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN," +
+            "AM_API_URL_MAPPING.THROTTLING_TIER,AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT" +
+            " JOIN AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING.URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING" +
+            ".URL_MAPPING_ID WHERE AM_API_URL_MAPPING.URL_MAPPING_ID IN (SELECT URL_MAPPING_ID FROM " +
+            "AM_API_PRODUCT_MAPPING WHERE API_ID = ? )";
+    public static final String  GET_API_BY_CONTEXT_AND_VERSION_SQL = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME," +
+            "AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API.API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API" +
+            ".STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS " +
+            "DEPLOYMENT_NAME FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+            "AM_DEPLOYMENT_REVISION_MAPPING ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID" +
+            " WHERE AM_API.CONTEXT = ? AND AM_API.API_VERSION= ?";
 }

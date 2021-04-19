@@ -254,6 +254,10 @@ class Credentials extends React.Component {
                 this.setState({ isSubscribing: false });
             })
             .catch((error) => {
+                Alert.error(intl.formatMessage({
+                    id: 'Applications.Details.Subscriptions.error.occurred.during.subscription.not.201',
+                    defaultMessage: 'Error occurred during subscription',
+                }));
                 console.log('Error while creating the subscription.');
                 console.error(error);
                 this.setState({ isSubscribing: false });
@@ -343,6 +347,8 @@ class Credentials extends React.Component {
         const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2')
          && !api.securityScheme.includes('api_key');
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+        const isSetAllorResidentKeyManagers = (api.keyManagers && api.keyManagers.includes('all'))
+            || (api.keyManagers && api.keyManagers.includes('Resident Key Manager'));
         const renderCredentialInfo = () => {
             if (isPrototypedAPI) {
                 return (
@@ -402,7 +408,7 @@ class Credentials extends React.Component {
                                 resourcePath={resourcePaths.SUBSCRIPTIONS}
                                 resourceMethod={resourceMethods.POST}
                             >
-                                <Typography variant='h5'>
+                                <Typography variant='h5' component='h2'>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'subscribe.to.application'}
@@ -425,7 +431,8 @@ class Credentials extends React.Component {
                                                 />
                                             </Typography>
                                             <Link
-                                                to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null
+                                                to={(isOnlyMutualSSL || isOnlyBasicAuth
+                                                    || !isSetAllorResidentKeyManagers) ? null
                                                     : `/apis/${api.id}/credentials/wizard`}
                                                 style={!api.isSubscriptionAvailable
                                                     ? { pointerEvents: 'none' } : null}
@@ -435,7 +442,7 @@ class Credentials extends React.Component {
                                                     color='primary'
                                                     className={classes.buttonElm}
                                                     disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
-                                                        || isOnlyBasicAuth}
+                                                        || isOnlyBasicAuth || !isSetAllorResidentKeyManagers}
                                                 >
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.'
@@ -491,7 +498,7 @@ class Credentials extends React.Component {
                                     */}
                         {subscribedApplications && subscribedApplications.length > 0 && (
                             <>
-                                <Typography variant='h5' className={classes.subsListTitle}>
+                                <Typography variant='h5' component='h2' className={classes.subsListTitle}>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'api.credentials.subscribed.apps.title'}
@@ -562,16 +569,13 @@ class Credentials extends React.Component {
         return (
             <Grid container>
                 <Grid item md={12} lg={11}>
-                    <Grid container spacing={5}>
+                    <Grid container spacing={2}>
                         <Grid item md={12}>
-                            <Typography onClick={this.handleExpandClick} variant='h4' component='h2' className={classes.titleSub}>
-                                <FormattedMessage
-                                    id='Apis.Details.Credentials.Credentials.api.credentials'
-                                    defaultMessage='Subscriptions'
-                                />
+                            <Typography onClick={this.handleExpandClick} variant='h4' component='div' className={classes.titleSub}>
                                 {applicationsAvailable.length > 0 && (
                                     <Link
-                                        to={(isOnlyMutualSSL || isOnlyBasicAuth || isPrototypedAPI) ? null
+                                        to={(isOnlyMutualSSL || isOnlyBasicAuth || isPrototypedAPI
+                                            || !isSetAllorResidentKeyManagers) ? null
                                             : `/apis/${api.id}/credentials/wizard`}
                                         style={!api.isSubscriptionAvailable
                                             ? { pointerEvents: 'none' } : null}
@@ -580,7 +584,8 @@ class Credentials extends React.Component {
                                         <Button
                                             color='secondary'
                                             disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
-                                                 || isOnlyBasicAuth || isPrototypedAPI}
+                                                 || isOnlyBasicAuth || isPrototypedAPI
+                                                 || !isSetAllorResidentKeyManagers}
                                             size='small'
                                         >
                                             <Icon>add_circle_outline</Icon>

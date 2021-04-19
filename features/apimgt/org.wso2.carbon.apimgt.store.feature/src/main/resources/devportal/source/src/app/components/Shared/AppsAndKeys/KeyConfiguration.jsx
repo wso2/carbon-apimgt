@@ -207,7 +207,13 @@ const KeyConfiguration = (props) => {
 
     const getPreviousValue = (config) => {
         const { additionalProperties } = keyRequest;
-        const isPreviousValueSet = !!(additionalProperties && ( additionalProperties[config.name] || additionalProperties[config.name] == '' ));
+        let isPreviousValueSet;
+        if (config.type == 'input' && !config.multiple) {
+            isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]
+                || additionalProperties[config.name] === ''));
+        } else {
+            isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]));
+        }
         let defaultValue = config.default;
         if (config.multiple && typeof defaultValue === 'string' && defaultValue === '') {
             defaultValue = [];

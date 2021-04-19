@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
@@ -39,6 +40,7 @@ import PropTypes from 'prop-types';
 import MUIDataTable from 'mui-datatables';
 import InfoIcon from '@material-ui/icons/Info';
 import UserIcon from '@material-ui/icons/Person';
+
 
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
@@ -653,6 +655,7 @@ class SubscriptionsTable extends Component {
         if (claimsObject) {
             return (
                 <div className={classes.root}>
+                    {claimsObject.name}
                     <Grid container spacing={1}>
                         <Grid item>
                             <UserIcon color='primary' />
@@ -739,8 +742,15 @@ class SubscriptionsTable extends Component {
                     sort: false,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
+                            let claimsObject;
+                            if (subscriberClaims) {
+                                claimsObject = subscriberClaims[tableMeta.rowData[0]];
+                            }
                             return (
-                                <div>
+                                <Box display='flex'>
+                                    <Box pr={1}>
+                                        {subscriberClaims && claimsObject && claimsObject.name}
+                                    </Box>
                                     <Tooltip
                                         interactive
                                         placement='top'
@@ -751,7 +761,7 @@ class SubscriptionsTable extends Component {
                                             <>
                                                 {subscriberClaims && (
                                                     <div>
-                                                        {this.renderClaims(subscriberClaims[tableMeta.rowData[0]])}
+                                                        {this.renderClaims(claimsObject)}
                                                     </div>
                                                 )}
                                             </>
@@ -768,7 +778,7 @@ class SubscriptionsTable extends Component {
                                             </Grid>
                                         </Grid>
                                     </Tooltip>
-                                </div>
+                                </Box>
                             );
                         }
                         return null;

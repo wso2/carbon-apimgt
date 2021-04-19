@@ -65,15 +65,8 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
      * @return APIManagerConfiguration object
      */
     protected APIManagerConfiguration getAPIManagerConfiguration() {
-        APIManagerConfiguration apiManagerConfiguration = new APIManagerConfiguration();
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("amConfig.xml").getFile());
-        try {
-            apiManagerConfiguration.load(file.getPath().toString());
-        } catch (APIManagementException e) {
-            log.error("Error while reading configs from file api-manager.xml", e);
-        }
-        return apiManagerConfiguration;
+
+        return new APIManagerConfiguration();
     }
 
     protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {

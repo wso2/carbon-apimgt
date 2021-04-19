@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { withRouter } from 'react-router';
+import { useTheme } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import OnboardingMenuCard from 'AppComponents/Shared/Onboarding/OnboardingMenuCard';
 import Onboarding from 'AppComponents/Shared/Onboarding/Onboarding';
@@ -34,6 +35,8 @@ import Alert from 'AppComponents/Shared/MuiAlert';
  * @extends {Component}
  */
 function SampleAPI() {
+    const theme = useTheme();
+    const { apiproductAddIcon } = theme.custom.landingPage.icons;
     return (
         <Onboarding
             title={(
@@ -45,11 +48,7 @@ function SampleAPI() {
             subTitle={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPIProduct.description'
-                    defaultMessage={
-                        'The API resources in an API product can come from'
-                            + ' one or more APIs, so you can mix and match resources from multiple'
-                            + ' API resources to create specialized feature sets.'
-                    }
+                    defaultMessage='Combine multiple API resources in to a single API'
                 />
             )}
         >
@@ -72,6 +71,7 @@ function SampleAPI() {
                 id='itest-id-create-api-product'
                 to='/api-products/create'
                 name='API Product'
+                iconName={apiproductAddIcon}
             />
         </Onboarding>
     );

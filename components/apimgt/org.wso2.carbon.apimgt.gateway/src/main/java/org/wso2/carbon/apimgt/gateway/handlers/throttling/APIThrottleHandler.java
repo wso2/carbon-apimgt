@@ -1103,10 +1103,6 @@ public class APIThrottleHandler extends AbstractHandler {
         Utils.sendFault(messageContext, httpErrorCode);
     }
 
-    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String errorDescription) {
-        Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
-    }
-
     protected int resolveTenantId() {
         return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
     }

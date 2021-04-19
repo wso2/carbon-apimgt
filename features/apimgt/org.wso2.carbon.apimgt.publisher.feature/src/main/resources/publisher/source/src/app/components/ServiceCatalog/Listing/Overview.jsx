@@ -48,6 +48,7 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import SwaggerUI from 'AppComponents/Apis/Details/APIDefinition/swaggerUI/SwaggerUI';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
+import { isRestricted } from 'AppData/AuthManager';
 import YAML from 'js-yaml';
 import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -435,15 +436,18 @@ function Overview(props) {
                             </Grid>
                             <Grid item md={2}>
                                 <Box display='flex' flexDirection='column'>
-                                    <CreateApi
-                                        history={history}
-                                        serviceId={service.id}
-                                        serviceKey={service.serviceKey}
-                                        serviceDisplayName={service.name}
-                                        serviceVersion={service.version}
-                                        serviceUrl={service.serviceUrl}
-                                        isOverview
-                                    />
+                                    {!isRestricted(['apim:api_create']) && (
+                                        <CreateApi
+                                            history={history}
+                                            serviceId={service.id}
+                                            serviceKey={service.serviceKey}
+                                            serviceDisplayName={service.name}
+                                            serviceVersion={service.version}
+                                            serviceUrl={service.serviceUrl}
+                                            usage={service.usage}
+                                            isOverview
+                                        />
+                                    )}
                                 </Box>
                             </Grid>
                         </Grid>

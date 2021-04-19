@@ -36,6 +36,8 @@ const CONSTS = {
         httpsPort: 443,
         wsPort: 9099,
         wssPort: 8099,
+        websubHttpPort: 9021,
+        websubHttpsPort: 8021,
     },
 };
 

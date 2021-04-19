@@ -1663,6 +1663,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1716,6 +1718,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1844,7 +1848,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:comment_view
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
@@ -1913,8 +1918,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_publish
+            - apim:comment_write
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1967,7 +1971,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:comment_view
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
@@ -2037,7 +2042,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_publish
+            - apim:comment_write
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2075,7 +2080,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_publish
+            - apim:comment_write
+            - apim:admin
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2128,7 +2134,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:comment_view
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
@@ -6710,6 +6717,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -6763,6 +6772,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -7834,6 +7845,12 @@ components:
           type: array
           items:
             type: string
+        createdTime:
+          type: string
+          example : 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example : 2021-02-11 09:57:25
 
     Topic:
       title: Topic object
@@ -7929,19 +7946,12 @@ components:
           type: string
           readOnly: true
           example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
-        testKey:
-          type: string
-          readOnly: true
-          example: 8swdwj9080edejhj
         responseCachingEnabled:
           type: boolean
           example: true
         cacheTimeout:
           type: integer
           example: 300
-        destinationStatsEnabled:
-          type: string
-          example: Disabled
         hasThumbnail:
           type: boolean
           example: false
@@ -7963,11 +7973,6 @@ components:
         enableSchemaValidation:
           type: boolean
           example: false
-        enableStore:
-          type: boolean
-          example: true
-          x-otherScopes:
-            - apim:api_publish
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
@@ -8058,18 +8063,6 @@ components:
           example: []
           items:
             type: string
-        endpointSecurity:
-          $ref: '#/components/schemas/APIEndpointSecurity'
-        gatewayEnvironments:
-          type: array
-          description: |
-            List of gateway environments the API is available
-          example:
-            - Production and Sandbox
-          items:
-            type: string
-          x-otherScopes:
-            - apim:api_publish
         mediationPolicies:
           type: array
           example:
@@ -8099,10 +8092,17 @@ components:
           items:
             type: string
         additionalProperties:
-          type: object
-          additionalProperties:
-            type: string
+          type: array
           description: Map of custom properties of API
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
           x-otherScopes:
             - apim:api_publish
         monetization:
@@ -8543,13 +8543,6 @@ components:
         enableSchemaValidation:
           type: boolean
           example: false
-        enableStore:
-          type: boolean
-          example: true
-        testKey:
-          type: string
-          readOnly: true
-          example: 8swdwj9080edejhj
         isRevision:
           type: boolean
           example: false
@@ -8605,14 +8598,6 @@ components:
           description: The user roles that are able to view/modify as API Product
             publisher or creator.
           example: []
-          items:
-            type: string
-        gatewayEnvironments:
-          type: array
-          description: |
-            List of gateway environments the API Product is available
-          example:
-            - Production and Sandbox
           items:
             type: string
         apiType:
@@ -8682,9 +8667,16 @@ components:
           x-otherScopes:
             - apim:api_publish
         additionalProperties:
-          type: object
-          additionalProperties:
-            type: string
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
           description: Map of custom properties of API
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
@@ -9651,6 +9643,12 @@ components:
         wssPort:
           type: integer
           example: 8099
+        websubHttpPort:
+          type: integer
+          example: 9021
+        websubHttpsPort:
+          type: integer
+          example: 8021
     FileInfo:
       title: File Information including meta data
       type: object
@@ -9675,22 +9673,6 @@ components:
           type: integer
           format: int64
           example: 1000
-    APIEndpointSecurity:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Accepts one of the following, basic or digest.
-          example: BASIC
-          enum:
-            - BASIC
-            - DIGEST
-        username:
-          type: string
-          example: admin
-        password:
-          type: string
-          example: password
     APIBusinessInformation:
       type: object
       properties:
@@ -9713,6 +9695,10 @@ components:
     WebsubSubscriptionConfiguration:
       type: object
       properties:
+        enable:
+          type: boolean
+          default: false
+          description: Toggle enable WebSub subscription configuration
         secret:
           type: string
           description: Secret key to be used for subscription
@@ -10829,6 +10815,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:
@@ -11547,3 +11539,5 @@ components:
             apim:api_product_import_export: Import and export API Products related operations
             apim:api_generate_key: Generate Internal Key
             apim:admin: Manage all admin operations
+            apim:comment_view: Read permission to comments
+            apim:comment_write: Write permission to comments

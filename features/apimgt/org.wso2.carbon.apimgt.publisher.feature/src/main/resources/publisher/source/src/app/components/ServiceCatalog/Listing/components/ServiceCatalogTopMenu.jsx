@@ -44,7 +44,7 @@ function ServiceCatalogTopMenu(props) {
             display='flex'
             alignItems='center'
             height={72}
-            borderColor='grey.500'
+            borderColor='text.secondary'
         >
             <Grid
                 container

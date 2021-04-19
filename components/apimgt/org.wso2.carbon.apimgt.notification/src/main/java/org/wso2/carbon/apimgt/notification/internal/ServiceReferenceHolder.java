@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.notification.internal;
 
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 
@@ -32,6 +33,7 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private Map<String, EventHandler> eventHandlerMap = new HashMap<>();
     private EventStreamService eventStreamService;
+    private APIManagerConfigurationService apiManagerConfigurationService;
 
     private ServiceReferenceHolder() {
 
@@ -67,5 +69,13 @@ public class ServiceReferenceHolder {
     public EventStreamService getEventStreamService() {
 
         return eventStreamService;
+    }
+
+    public APIManagerConfigurationService getAPIManagerConfigurationService() {
+        return apiManagerConfigurationService;
+    }
+
+    public void setAPIManagerConfigurationService(APIManagerConfigurationService apiManagerConfigurationService) {
+        this.apiManagerConfigurationService = apiManagerConfigurationService;
     }
 }
