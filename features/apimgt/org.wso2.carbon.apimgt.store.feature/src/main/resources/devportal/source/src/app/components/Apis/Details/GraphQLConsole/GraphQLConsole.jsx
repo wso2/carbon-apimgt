@@ -25,9 +25,6 @@ import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import AuthManager from 'AppData/AuthManager';
 import Icon from '@material-ui/core/Icon';
-import { Icon as Icons } from '@iconify/react';
-import postmanIcon from '@iconify/icons-simple-icons/postman';
-import Button from '@material-ui/core/Button';
 import fileDownload from 'js-file-download';
 import converter from 'graphql-to-postman';
 import GraphQLUI from './GraphQLUI';
@@ -36,7 +33,6 @@ import { ApiContext } from '../ApiContext';
 import Api from '../../../../data/api';
 import Progress from '../../../Shared/Progress';
 
-let graphQLSchema;
 
 const useStyles = makeStyles((theme) => ({
     buttonIcon: {
@@ -66,7 +62,7 @@ export default function GraphQLConsole() {
     const classes = useStyles();
     const { api } = useContext(ApiContext);
     const environmentObject = api.endpointURLs;
-    const [URLs, setURLs] = useState(environmentObject[0].URLs);
+    const [URLs, setURLs] = useState(environmentObject.length > 0 ? environmentObject[0].URLs : null);
     const [securitySchemeType, setSecurityScheme] = useState('OAUTH');
     const [notFound, setNotFound] = useState(false);
     const [username, setUsername] = useState('');
@@ -179,9 +175,6 @@ export default function GraphQLConsole() {
             }
         });
     }
-    function handleSchema(schema) {
-        graphQLSchema = schema;
-    }
 
     if (api == null) {
         return <Progress />;
@@ -256,22 +249,6 @@ export default function GraphQLConsole() {
                     environmentObject={environmentObject}
                     api={api}
                 />
-                <Paper />
-                <Grid container>
-                    <Grid xs={11} item />
-                    <Grid xs={1} item>
-                        <Button size='small' onClick={() => grapgQLToPostman(graphQLSchema, URLs)}>
-                            <Icons icon={postmanIcon} width={30} height={30} />
-                            <FormattedMessage
-                                id='Apis.Details.GraphQLConsole.GraphQLConsole.download.postman'
-                                defaultMessage='Postman collection'
-                            />
-
-                        </Button>
-
-                    </Grid>
-
-                </Grid>
             </Paper>
             <Paper className={classes.paper}>
                 <GraphQLUI
@@ -279,7 +256,6 @@ export default function GraphQLConsole() {
                     URLs={URLs}
                     securitySchemeType={securitySchemeType}
                     accessTokenProvider={accessTokenProvider}
-                    handleSchema={handleSchema}
                 />
             </Paper>
         </>

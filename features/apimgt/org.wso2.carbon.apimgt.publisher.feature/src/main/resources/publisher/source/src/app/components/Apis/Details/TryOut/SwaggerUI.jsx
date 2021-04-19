@@ -19,6 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import 'swagger-ui-react/swagger-ui.css';
+import './swagger-ui-overrides.css';
 import SwaggerUILib from 'swagger-ui-react';
 
 const disableAuthorizeAndInfoPlugin = function () {
@@ -47,7 +48,10 @@ const SwaggerUI = (props) => {
             const { url } = req;
             const { context } = api;
             const patternToCheck = `${context}/*`;
-            req.headers[authorizationHeader] = accessTokenProvider();
+            const accessToken = accessTokenProvider();
+            if (accessToken) {
+                req.headers[authorizationHeader] = accessToken;
+            }
             if (url.endsWith(patternToCheck)) {
                 req.url = url.substring(0, url.length - 2);
             } else if (url.includes(patternToCheck + '?')) { // Check for query parameters.

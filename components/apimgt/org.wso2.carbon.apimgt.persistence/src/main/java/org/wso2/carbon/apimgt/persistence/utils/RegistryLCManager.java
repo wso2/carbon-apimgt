@@ -47,6 +47,10 @@ public class RegistryLCManager {
 
     private static Log log = LogFactory.getLog(RegistryLCManager.class);
     private static final int ENTITY_EXPANSION_LIMIT = 0;
+    private static final String STATE_ID_PROTOTYPED = "Prototyped";
+    private static final String STATE_ID_PUBLISHED = "Published";
+    private static final String TRANSITION_TARGET_PROTOTYPED = "Prototyped";
+    private static final String TRANSITION_TARGET_PUBLISHED = "Published";
     private Map<String, String> stateTransitionMap = new HashMap<String, String>();
     private Map<String, StateInfo> stateInfoMap = new HashMap<String, StateInfo>();
     private HashMap<String, LifeCycleTransition> stateHashMap = new HashMap<String, LifeCycleTransition>();
@@ -81,11 +85,21 @@ public class RegistryLCManager {
                     if ("transition".equals(transition.getNodeName())) {
                         Node target = transition.getAttributes().getNamedItem("target");
                         Node action = transition.getAttributes().getNamedItem("event");
-                        if (target != null && action != null) {
-                            lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
-                                    action.getNodeValue());
-                            stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
-                            actions.add(action.getNodeValue());
+                        if (id.getNodeValue().equals(STATE_ID_PROTOTYPED)
+                                && (target.getNodeValue().equals(TRANSITION_TARGET_PROTOTYPED)
+                                || target.getNodeValue().equals(TRANSITION_TARGET_PUBLISHED))) {
+                            // skip adding "Publish" and "Deploy as a Prototype" transitions as having those transitions
+                            // in Prototyped state is invalid
+                        } else if (id.getNodeValue().equals(STATE_ID_PUBLISHED)
+                                && target.getNodeValue().equals(TRANSITION_TARGET_PUBLISHED)) {
+                            // skip adding "Publish" transition as having this transition in Published state is invalid
+                        } else {
+                            if (target != null && action != null) {
+                                lifeCycleTransition.addTransition(target.getNodeValue().toUpperCase(),
+                                        action.getNodeValue());
+                                stateTransitionMap.put(action.getNodeValue(), target.getNodeValue().toUpperCase());
+                                actions.add(action.getNodeValue());
+                            }
                         }
                     }
                     if ("datamodel".equals(transition.getNodeName())) {

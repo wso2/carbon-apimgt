@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { useTheme } from '@material-ui/core/styles';
 import DocThumbClassic from 'AppComponents/Apis/Listing/components/ImageGenerator/APICards/DocThumbClassic';
@@ -29,12 +28,14 @@ import DocThumbPlain from 'AppComponents/Apis/Listing/components/ImageGenerator/
 export default function DocThumb(props) {
     const theme = useTheme();
     const { custom } = theme;
+    const { classes, doc } = props;
+
     if (!custom.thumbnailTemplates || !custom.thumbnailTemplates.active) {
         return (
-            <DocThumbClassic {...props} />
+            <DocThumbClassic classes={classes} doc={doc} />
         );
     }
     return (
-        <DocThumbPlain {...props} />
+        <DocThumbPlain doc={doc} />
     );
 }

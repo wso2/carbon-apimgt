@@ -57,7 +57,8 @@
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
             <entry key="map.cxf.interceptor.fault" value="true" />
             <!-- This is added to restrict the size of attachments sent through the requests. -->
-            <entry key="attachment-max-size" value="10485760"/>
+            <entry key="attachment-max-size" value="#{systemProperties['rest.api.admin.attachment.max.size'] != null ?
+              systemProperties['rest.api.admin.attachment.max.size'] :  T(java.lang.Integer).toString(10485760) }"/>
         </jaxrs:properties>
     </jaxrs:server>
 

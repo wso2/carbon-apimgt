@@ -48,7 +48,7 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import SwaggerUI from 'AppComponents/Apis/Details/APIDefinition/swaggerUI/SwaggerUI';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
-import Slide from '@material-ui/core/Slide';
+import { isRestricted } from 'AppData/AuthManager';
 import YAML from 'js-yaml';
 import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -235,6 +235,9 @@ function Overview(props) {
                     }));
                 }
             });
+        } else {
+            // The service definition is already loaded. Hence open editor.
+            setOpenReadOnlyDefinition(true);
         }
     };
 
@@ -247,15 +250,6 @@ function Overview(props) {
      * */
     function closeEditor() {
         setOpenReadOnlyDefinition(false);
-    }
-
-    /**
-     * Handles the transition of the drawer.
-     * @param {object} props1 list of props
-     * @return {object} The Slide transition component
-     * */
-    function transition(props1) {
-        return <Slide direction='up' {...props1} />;
     }
 
     const listingRedirect = () => {
@@ -442,15 +436,18 @@ function Overview(props) {
                             </Grid>
                             <Grid item md={2}>
                                 <Box display='flex' flexDirection='column'>
-                                    <CreateApi
-                                        history={history}
-                                        serviceId={service.id}
-                                        serviceKey={service.serviceKey}
-                                        serviceDisplayName={service.name}
-                                        serviceVersion={service.version}
-                                        serviceUrl={service.serviceUrl}
-                                        isOverview
-                                    />
+                                    {!isRestricted(['apim:api_create']) && (
+                                        <CreateApi
+                                            history={history}
+                                            serviceId={service.id}
+                                            serviceKey={service.serviceKey}
+                                            serviceDisplayName={service.name}
+                                            serviceVersion={service.version}
+                                            serviceUrl={service.serviceUrl}
+                                            usage={service.usage}
+                                            isOverview
+                                        />
+                                    )}
                                 </Box>
                             </Grid>
                         </Grid>
@@ -555,7 +552,6 @@ function Overview(props) {
                                                     fullScreen
                                                     open={openReadOnlyDefinition}
                                                     onClose={closeEditor}
-                                                    TransitionComponent={transition}
                                                 >
                                                     <Paper square className={classes.popupHeader}>
                                                         <IconButton

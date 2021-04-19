@@ -72,10 +72,19 @@ export default function ResponseCaching(props) {
     const [apiFromContext] = useAPI();
     const isResponseCachingEnabled = api.responseCachingEnabled;
 
+    const generateElement = (isEnabled) => {
+        if (isEnabled) {
+            return (
+                <ExpandMoreIcon />
+            );
+        }
+        return (null);
+    };
+
     return (
         <>
             <WrappedExpansionPanel className={classes.expansionPanel} id='responseCaching'>
-                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <ExpansionPanelSummary expandIcon={generateElement(api.responseCachingEnabled)}>
                     <Typography className={classes.subHeading} variant='h6'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.response.caching'

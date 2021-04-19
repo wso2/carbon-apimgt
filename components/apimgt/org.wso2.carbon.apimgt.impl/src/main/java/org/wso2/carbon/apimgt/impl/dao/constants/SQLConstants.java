@@ -319,7 +319,8 @@ public class SQLConstants {
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
-            "   API.API_ID AS API_ID " +
+             "   API.API_ID AS API_ID," +
+             "   API.API_UUID AS API_UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
             "   AM_API API " +
@@ -590,6 +591,9 @@ public class SQLConstants {
             " WHERE " +
             "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
             "   AND TENANT_ID = ?";
+
+    public static final String DELETE_THROTTLE_TIER_PERMISSION_SQL = "DELETE FROM AM_THROTTLE_TIER_PERMISSIONS WHERE " +
+            "THROTTLE_TIER_PERMISSIONS_ID = ? AND TENANT_ID = ?";
 
     public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
             " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
@@ -1394,14 +1398,15 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
-            "   API.CONTEXT AS CONTEXT" +
+            "   API.CONTEXT AS CONTEXT," +
+            "   API.API_VERSION AS VERSION" +
             " FROM" +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_API API " +
             " WHERE" +
             "   API.API_PROVIDER = ?" +
             "   AND API.API_NAME = ?" +
-            "   AND API.API_VERSION = ?" +
+            "   AND API.API_VERSION IN (_API_VERSION_LIST_)" +
             "   AND API.API_ID = SUB.API_ID";
 
     public static final String GET_APPLICATION_DATA_SQL =
@@ -2824,6 +2829,9 @@ public class SQLConstants {
 
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
     public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
+    public static final String RETRIEVE_API_INFO_FROM_UUID = "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, " +
+            "CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, " +
+            "REVISIONS_CREATED, STATUS FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
     public static final String UPDATE_REVISION_CREATED_BY_API_SQL = "UPDATE AM_API SET REVISIONS_CREATED = ? WHERE " +
@@ -3478,6 +3486,7 @@ public class SQLConstants {
                 "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, " +
                 "SERVICE_DEFINITION) " +
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
         public static final String UPDATE_SERVICE_BY_KEY = "UPDATE AM_SERVICE_CATALOG SET " +
                 "MD5 = ?," +
                 "SERVICE_NAME = ?," +
@@ -3489,31 +3498,30 @@ public class SQLConstants {
                 "MUTUAL_SSL_ENABLED = ?," +
                 "LAST_UPDATED_TIME = ?," +
                 "UPDATED_BY = ?," +
-                "SERVICE_DEFINITION = ?" +
+                "SERVICE_DEFINITION = ? " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
+
         public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "AND TENANT_ID = ?";
-        public static final String DELETE_SERVICE_BY_SERVICE_KEY = "DELETE FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = " +
-                "? AND TENANT_ID = ?";
-        public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT * FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? " +
-                "AND TENANT_ID = ?";
-        public static final String GET_SERVICE_BY_NAME_AND_VERSION = "SELECT * FROM AM_SERVICE_CATALOG " +
-                "WHERE SERVICE_NAME = ? AND SERVICE_VERSION = ?";
-        public static final String GET_SERVICE = "SELECT * FROM AM_SERVICE_CATALOG " +
-                "WHERE SERVICE_NAME = ? AND SERVICE_VERSION = ? AND DEFINITION_TYPE = ? AND DISPLAY_NAME = ?";
+
+        public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT UUID, SERVICE_NAME, SERVICE_KEY, MD5, " +
+                "   SERVICE_VERSION, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE, " +
+                "   MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION " +
+                "   FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
+
         public static final String GET_SERVICE_MD5_BY_NAME_AND_VERSION = "SELECT MD5 FROM AM_SERVICE_CATALOG " +
                 "WHERE SERVICE_NAME = ? AND SERVICE_VERSION = ? AND TENANT_ID = ?";
+
         public static final String GET_SERVICE_MD5_BY_SERVICE_KEY = "SELECT MD5 FROM AM_SERVICE_CATALOG " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
 
         public static final String ADD_ENDPOINT_RESOURCES = "INSERT INTO AM_SERVICE_CATALOG (UUID, SERVICE_DEFINITION," +
                 " METADATA) VALUES (?,?,?)";
-        public static final String UPDATE_ENDPOINT_RESOURCES = "UPDATE AM_SERVICE_CATALOG SET SERVICE_DEFINITION = ?, " +
-                "METADATA = ? WHERE UUID = ?";
-        public static final String GET_ENDPOINT_RESOURCES_BY_KEY = "SELECT * FROM AM_SERVICE_CATALOG " +
-                "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
-        public static final String GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION = "SELECT * FROM AM_SERVICE_CATALOG " +
-                "WHERE SERVICE_NAME = ? AND SERVICE_VERSION = ? AND TENANT_ID = ?";
+
+        public static final String GET_SERVICE_BY_NAME_AND_VERSION = "SELECT UUID, SERVICE_NAME, SERVICE_KEY, MD5," +
+                " SERVICE_VERSION, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE," +
+                " MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION " +
+                " FROM AM_SERVICE_CATALOG WHERE SERVICE_NAME = ? AND SERVICE_VERSION = ? AND TENANT_ID = ?";
 
         public static final String GET_SERVICE_BY_SERVICE_ID = "SELECT " +
                 "   UUID, " +
@@ -3544,7 +3552,7 @@ public class SQLConstants {
                 "   AM_API.API_PROVIDER " +
                 "   FROM AM_API INNER JOIN AM_API_SERVICE_MAPPING ON " +
                 "   AM_API_SERVICE_MAPPING.API_ID = AM_API.API_ID " +
-                "   WHERE SERVICE_KEY = ?";
+                "   WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
 
         public static final String GET_SERVICE_KEY_BY_SERVICE_UUID = "SELECT SERVICE_KEY FROM AM_SERVICE_CATALOG WHERE" +
                 "   UUID = ? AND TENANT_ID = ?";

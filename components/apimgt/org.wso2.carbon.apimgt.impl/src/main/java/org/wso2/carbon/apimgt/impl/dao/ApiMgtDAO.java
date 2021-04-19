@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -100,7 +101,6 @@ import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -155,15 +155,18 @@ import java.util.regex.Pattern;
  * This class represent the ApiMgtDAO.
  */
 public class ApiMgtDAO {
+
     private static final Log log = LogFactory.getLog(ApiMgtDAO.class);
     private static ApiMgtDAO INSTANCE = null;
-
+    private final Object scopeMutex = new Object();
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
 
-    private final Object scopeMutex = new Object();
-
     private ApiMgtDAO() {
+
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
         String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
         if (caseSensitiveComparison != null) {
@@ -173,7 +176,22 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
+    /**
+     * Method to get the instance of the ApiMgtDAO.
+     *
+     * @return {@link ApiMgtDAO} instance
+     */
+    public static ApiMgtDAO getInstance() {
+
+        if (INSTANCE == null) {
+            INSTANCE = new ApiMgtDAO();
+        }
+
+        return INSTANCE;
+    }
+
     public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         List<String> versionList = new ArrayList<String>();
@@ -197,20 +215,6 @@ public class ApiMgtDAO {
         return versionList;
     }
 
-
-    /**
-     * Method to get the instance of the ApiMgtDAO.
-     *
-     * @return {@link ApiMgtDAO} instance
-     */
-    public static ApiMgtDAO getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new ApiMgtDAO();
-        }
-
-        return INSTANCE;
-    }
-
     /**
      * Persist the details of the token generation request (allowed domains & validity period) to be used back
      * when approval has been granted.
@@ -222,6 +226,7 @@ public class ApiMgtDAO {
      */
     public void createApplicationRegistrationEntry(ApplicationRegistrationWorkflowDTO dto, boolean onlyKeyMappingEntry)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement queryPs = null;
@@ -294,7 +299,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Get Subscribed APIs for given userId
      *
@@ -303,6 +307,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get Subscribed APIs
      */
     public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIManagementException {
+
         List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -347,6 +352,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get key info for given API
      */
     public APIKeyInfoDTO[] getSubscribedUsersForAPI(APIInfoDTO apiInfoDTO) throws APIManagementException {
+
         APIKeyInfoDTO[] apiKeyInfoDTOs = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -376,9 +382,9 @@ public class ApiMgtDAO {
         return apiKeyInfoDTOs;
     }
 
-
     private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
                                             String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
+
         boolean isAnyContentAware = false;
         // only check if using CEP based throttling.
         ResultSet resultSet = null;
@@ -421,6 +427,7 @@ public class ApiMgtDAO {
     }
 
     public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -471,6 +478,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getSubscriberName(String subscriptionId) throws APIManagementException {
+
         int subscriberId = getSubscriberIdBySubscriptionUUID(subscriptionId);
         Subscriber subscriber = getSubscriber(subscriberId);
         if (subscriber != null) {
@@ -487,6 +495,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private int getSubscriberIdBySubscriptionUUID(String subscriptionId) throws APIManagementException {
+
         int subscirberId = 0;
         String query = SQLConstants.GET_SUBSCRIBER_ID_BY_SUBSCRIPTION_UUID_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -615,6 +624,7 @@ public class ApiMgtDAO {
     }
 
     public void updateSubscriber(Subscriber subscriber) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -649,6 +659,7 @@ public class ApiMgtDAO {
     }
 
     public Subscriber getSubscriber(int subscriberId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -675,137 +686,28 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public int addSubscription(ApiTypeWrapper apiTypeWrapper, int applicationId, String status, String subscriber)
+    public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
             throws APIManagementException {
-        Connection conn = null;
-        final boolean isProduct = apiTypeWrapper.isAPIProduct();
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        PreparedStatement preparedStForInsert = null;
-        ResultSet rs = null;
         int subscriptionId = -1;
-        int id = -1;
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            Identifier identifier;
-
-            //Query to check if this subscription already exists
-            String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
-            if (!isProduct) {
-                identifier = apiTypeWrapper.getApi().getId();
-                id = getAPIID(apiTypeWrapper.getApi().getId(), conn);
-            } else {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-                id = apiTypeWrapper.getApiProduct().getProductId();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try {
+                conn.setAutoCommit(false);
+                subscriptionId = addSubscription(conn, apiTypeWrapper, application, status, subscriber);
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
-            ps = conn.prepareStatement(checkDuplicateQuery);
-            ps.setInt(1, id);
-            ps.setInt(2, applicationId);
-
-            resultSet = ps.executeQuery();
-            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            //If the subscription already exists
-            if (resultSet.next()) {
-                String subStatus = resultSet.getString("SUB_STATUS");
-                String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
-
-                String applicationName = getApplicationNameFromId(applicationId);
-
-                if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
-                        APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
-                        APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
-                        APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
-
-                    //Throw error saying subscription already exists.
-                    log.error("Subscription already exists for API/API Prouct " + apiTypeWrapper.getName() + " in " +
-                            "Application " +
-                            applicationName);
-                    throw new SubscriptionAlreadyExistingException("Subscription already exists for API/API Prouct " +
-                            apiTypeWrapper.getName() + " in Application " +
-                            applicationName);
-
-                } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
-                        .SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus)) {
-                    deleteSubscriptionByApiIDAndAppID(id, applicationId, conn);
-                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
-                        .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                    log.error("Subscription to API/API Prouct " + apiTypeWrapper.getName() + " through application " +
-                            applicationName + " was blocked");
-                    throw new SubscriptionBlockedException("Subscription to API/API Product " + apiTypeWrapper.getName() + " through " +
-                            "application " + applicationName + " was blocked");
-                } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {
-                    throw new SubscriptionBlockedException("Subscription to API " + apiTypeWrapper.getName()
-                            + " through application " + applicationName + " was rejected");
-                }
-            }
-
-            //This query to update the AM_SUBSCRIPTION table
-            String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
-
-            //Adding data to the AM_SUBSCRIPTION table
-            //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-            preparedStForInsert = conn.prepareStatement(sqlQuery, new String[]{"SUBSCRIPTION_ID"});
-            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                preparedStForInsert = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
-            }
-            String tier;
-            if (!isProduct) {
-                tier = apiTypeWrapper.getApi().getId().getTier();
-                preparedStForInsert.setString(1, tier);
-                preparedStForInsert.setString(10, tier);
-            } else {
-                tier = apiTypeWrapper.getApiProduct().getId().getTier();
-                preparedStForInsert.setString(1, tier);
-                preparedStForInsert.setString(10, tier);
-            }
-            preparedStForInsert.setInt(2, id);
-            preparedStForInsert.setInt(3, applicationId);
-            preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
-            preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-            preparedStForInsert.setString(6, subscriber);
-
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            preparedStForInsert.setTimestamp(7, timestamp);
-            preparedStForInsert.setTimestamp(8, timestamp);
-            preparedStForInsert.setString(9, UUID.randomUUID().toString());
-
-            preparedStForInsert.executeUpdate();
-            rs = preparedStForInsert.getGeneratedKeys();
-            while (rs.next()) {
-                //subscriptionId = rs.getInt(1);
-                subscriptionId = Integer.parseInt(rs.getString(1));
-            }
-
-            // finally commit transaction
-            conn.commit();
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    tenantId, tenantDomain, subscriptionId, id, applicationId, tier,
-                    (status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED));
-            APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e1);
-                }
-            }
             handleException("Failed to add subscriber data ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-            APIMgtDBUtil.closeAllConnections(preparedStForInsert, null, rs);
         }
         return subscriptionId;
     }
 
     public int updateSubscription(ApiTypeWrapper apiTypeWrapper, String inputSubscriptionUUId, String status,
                                   String requestedThrottlingTier) throws APIManagementException {
+
         Connection conn = null;
         final boolean isProduct = apiTypeWrapper.isAPIProduct();
         ResultSet resultSet = null;
@@ -861,6 +763,7 @@ public class ApiMgtDAO {
      */
     public void removeSubscription(Identifier identifier, int applicationId)
             throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -913,6 +816,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void removeSubscription(SubscribedAPI subscription, Connection conn) throws APIManagementException {
+
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStForUpdateOrDelete = null;
@@ -951,7 +855,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Removes a subscription by id by force without considering the subscription blocking state of the user
      *
@@ -959,6 +862,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -988,6 +892,7 @@ public class ApiMgtDAO {
     }
 
     public void removeAllSubscriptions(APIIdentifier apiIdentifier) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         int apiId;
@@ -1051,6 +956,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -1064,18 +970,20 @@ public class ApiMgtDAO {
             SubscribedAPI subscribedAPI = null;
             if (resultSet.next()) {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getLightweightApplicationById(applicationId);
+                Application application = getLightweightApplicationById(conn, applicationId);
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
+                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
                     APIIdentifier apiIdentifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiIdentifier.setId(resultSet.getInt("API_ID"));
+                    apiIdentifier.setUuid(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
@@ -1103,6 +1011,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -1117,7 +1026,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
 
                 int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getApplicationById(applicationId);
+                Application application = getLightweightApplicationById(conn, applicationId);
 
                 if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
@@ -1146,9 +1055,9 @@ public class ApiMgtDAO {
                 Timestamp createdTime = resultSet.getTimestamp("CREATED_TIME");
                 subscribedAPI.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
                 try {
-                    Timestamp updated_time = resultSet.getTimestamp("UPDATED_TIME");
+                    Timestamp updatedTime = resultSet.getTimestamp("UPDATED_TIME");
                     subscribedAPI.setUpdatedTime(
-                            updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                            updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                 } catch (SQLException e) {
                     // fixing Timestamp issue with default value '0000-00-00 00:00:00'for existing applications created
                     subscribedAPI.setUpdatedTime(subscribedAPI.getCreatedTime());
@@ -1172,6 +1081,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get Subscriber from subscriber id
      */
     public Subscriber getSubscriber(String subscriberName) throws APIManagementException {
+
         Connection conn = null;
         Subscriber subscriber = null;
         PreparedStatement ps = null;
@@ -1216,6 +1126,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to retrieve topics of the web hook API
      */
     public Set<Topic> getAPITopics(String apiId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -1251,6 +1162,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to retrieve web hook topc subscriptions
      */
     public Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -1292,6 +1204,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -1336,6 +1249,7 @@ public class ApiMgtDAO {
      */
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
             throws APIManagementException {
+
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
         Connection connection = null;
         PreparedStatement ps = null;
@@ -1429,6 +1343,7 @@ public class ApiMgtDAO {
 
     public Set<String> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
+
         PreparedStatement getIncludedApisInProduct = null;
         PreparedStatement getSubscribedApisAndProducts = null;
         ResultSet resultSet = null;
@@ -1483,6 +1398,7 @@ public class ApiMgtDAO {
 
     public Integer getSubscriptionCount(Subscriber subscriber, String applicationName, String groupingId)
             throws APIManagementException {
+
         Integer subscriptionCount = 0;
         Connection connection = null;
         PreparedStatement ps = null;
@@ -1553,6 +1469,7 @@ public class ApiMgtDAO {
 
     public Integer getSubscriptionCountByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
             throws APIManagementException {
+
         Integer subscriptionCount = 0;
         Connection connection = null;
         PreparedStatement ps = null;
@@ -1629,6 +1546,7 @@ public class ApiMgtDAO {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
                                                          int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException {
+
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
         String sqlQuery =
                 appendSubscriptionQueryWhereClause(groupingId, SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_SQL);
@@ -1673,6 +1591,7 @@ public class ApiMgtDAO {
     }
 
     private String appendSubscriptionQueryWhereClause(final String groupingId, String sqlQuery) {
+
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
             if (multiGroupAppSharingEnabled) {
                 String[] groupIDArray = groupingId.split(",");
@@ -1711,6 +1630,7 @@ public class ApiMgtDAO {
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber, String applicationName,
                                                PreparedStatement statement) throws SQLException {
+
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
 
@@ -1744,6 +1664,7 @@ public class ApiMgtDAO {
 
     private void initSubscribedAPI(SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet resultSet)
             throws SQLException {
+
         subscribedAPI.setUUID(resultSet.getString("SUB_UUID"));
         subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
         subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
@@ -1769,6 +1690,7 @@ public class ApiMgtDAO {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId,
                                                          int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException {
+
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
         Connection connection = null;
         PreparedStatement ps = null;
@@ -1864,6 +1786,7 @@ public class ApiMgtDAO {
      */
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId)
             throws APIManagementException {
+
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
         //identify subscribeduser used email/ordinalusername
@@ -1887,7 +1810,7 @@ public class ApiMgtDAO {
 
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
-                    initSubscribedAPIDetailed(subscribedAPI, subscriber, result);
+                    initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
                     subscribedAPIs.add(subscribedAPI);
                 } else {
                     APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
@@ -1895,7 +1818,7 @@ public class ApiMgtDAO {
                             result.getString("API_VERSION"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
-                    initSubscribedAPIDetailed(subscribedAPI, subscriber, result);
+                    initSubscribedAPIDetailed(connection,subscribedAPI, subscriber, result);
                     subscribedAPIs.add(subscribedAPI);
                 }
             }
@@ -1908,6 +1831,7 @@ public class ApiMgtDAO {
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber,
                                                PreparedStatement statement) throws SQLException {
+
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
 
@@ -1936,8 +1860,9 @@ public class ApiMgtDAO {
         return statement.executeQuery();
     }
 
-    private void initSubscribedAPIDetailed(SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet result)
+    private void initSubscribedAPIDetailed(Connection connection, SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet result)
             throws SQLException, APIManagementException {
+
         subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
         subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
         subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
@@ -1957,16 +1882,16 @@ public class ApiMgtDAO {
         application.setUUID(result.getString("APP_UUID"));
 
         if (multiGroupAppSharingEnabled) {
-            application.setGroupId(getGroupId(application.getId()));
+            application.setGroupId(getGroupId(connection, application.getId()));
             application.setOwner(result.getString("OWNER"));
         }
 
         subscribedAPI.setApplication(application);
     }
 
-
     private Map<String, Map<String, OAuthApplicationInfo>> getOAuthApplications(
             String tenantDomain, int applicationId) throws APIManagementException {
+
         Map<String, Map<String, OAuthApplicationInfo>> map = new HashMap<>();
         Map<String, OAuthApplicationInfo> prodApp = getClientOfApplication(tenantDomain, applicationId, "PRODUCTION");
         map.put("PRODUCTION", prodApp);
@@ -1980,6 +1905,7 @@ public class ApiMgtDAO {
     private Map<String, OAuthApplicationInfo> getClientOfApplication(String tenntDomain,
                                                                      int applicationID, String keyType)
             throws APIManagementException {
+
         String sqlQuery = SQLConstants.GET_CLIENT_OF_APPLICATION_SQL;
         Map<String, OAuthApplicationInfo> keyTypeWiseOAuthApps = new HashMap<>();
         Connection connection = null;
@@ -2004,7 +1930,6 @@ public class ApiMgtDAO {
                 }
             }
 
-
         } catch (SQLException e) {
             handleException("Failed to get  client of application. SQL error", e);
         } finally {
@@ -2022,6 +1947,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<String> getConsumerKeysOfApplication(int applicationId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -2050,6 +1976,7 @@ public class ApiMgtDAO {
 
     public void updateTierPermissions(String tierName, String permissionType, String roles, int tenantId)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement insertOrUpdatePS = null;
@@ -2097,6 +2024,7 @@ public class ApiMgtDAO {
     }
 
     public Set<TierPermissionDTO> getTierPermissions(int tenantId) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
@@ -2131,6 +2059,7 @@ public class ApiMgtDAO {
     }
 
     public TierPermissionDTO getTierPermission(String tierName, int tenantId) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
@@ -2164,6 +2093,7 @@ public class ApiMgtDAO {
     }
 
     public TierPermissionDTO getThrottleTierPermission(String tierName, int tenantId) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
@@ -2196,9 +2126,9 @@ public class ApiMgtDAO {
         return tierPermission;
     }
 
-
     public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement insertOrUpdatePS = null;
@@ -2245,7 +2175,32 @@ public class ApiMgtDAO {
         }
     }
 
+    public void deleteThrottlingPermissions(String tierName, int tenantId) throws APIManagementException {
+        int tierPermissionId = -1;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL)) {
+            ps.setString(1, tierName);
+            ps.setInt(2, tenantId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    tierPermissionId = resultSet.getInt("THROTTLE_TIER_PERMISSIONS_ID");
+                }
+            }
+            if (tierPermissionId != -1) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                        .DELETE_THROTTLE_TIER_PERMISSION_SQL)) {
+                    preparedStatement.setInt(1, tierPermissionId);
+                    preparedStatement.setInt(2, tenantId);
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error in deleting tier permissions: " + e.getMessage(), e);
+        }
+    }
+
     public Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
@@ -2347,6 +2302,7 @@ public class ApiMgtDAO {
     }
 
     public long getAPISubscriptionCountByAPI(Identifier identifier) throws APIManagementException {
+
         String sqlQuery = SQLConstants.GET_API_SUBSCRIPTION_COUNT_BY_API_SQL;
         String artifactType = APIConstants.API_IDENTIFIER_TYPE;
         if (identifier instanceof APIProductIdentifier) {
@@ -2370,18 +2326,6 @@ public class ApiMgtDAO {
         }
 
         return subscriptions;
-    }
-
-    /**
-     * This method is used to update the subscriber
-     *
-     * @param apiTypeWrapper APIIdentifier
-     * @param applicationId  Application id
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
-     */
-    public void updateSubscriptions(ApiTypeWrapper apiTypeWrapper, int applicationId, String subscriber)
-            throws APIManagementException {
-        addSubscription(apiTypeWrapper, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, subscriber);
     }
 
     /**
@@ -2427,7 +2371,6 @@ public class ApiMgtDAO {
                 deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
             }
 
-
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_OF_APPLICATION_SQL;
 
@@ -2464,6 +2407,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to update subscription
      */
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -2500,6 +2444,7 @@ public class ApiMgtDAO {
     }
 
     public void updateSubscriptionStatus(int subscriptionId, String status) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -2532,6 +2477,7 @@ public class ApiMgtDAO {
     }
 
     public void updateSubscriptionStatusAndTier(int subscriptionId, String status) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         SubscribedAPI subscribedAPI = getSubscriptionById(subscriptionId);
@@ -2569,8 +2515,8 @@ public class ApiMgtDAO {
         }
     }
 
-
     public Map<String, String> getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
+
         Map<String, String> keyManagerWiseApprovalState = new HashMap<>();
         Connection conn = null;
         ResultSet resultSet = null;
@@ -2607,6 +2553,7 @@ public class ApiMgtDAO {
      */
     public void updateApplicationKeyTypeMapping(Application application, String keyType,
                                                 String keyManagerId) throws APIManagementException {
+
         OAuthApplicationInfo app = application.getOAuthApp(keyType, keyManagerId);
         String consumerKey = null;
         if (app != null) {
@@ -2654,6 +2601,7 @@ public class ApiMgtDAO {
     public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName, String userName,
                                                                 String clientId, String keyManagerName,
                                                                 String keyMappingId) throws APIManagementException {
+
         String consumerKey = null;
         if (clientId != null) {
             consumerKey = clientId;
@@ -2690,7 +2638,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Updates the state of the Application Registration.
      *
@@ -2701,6 +2648,7 @@ public class ApiMgtDAO {
      */
     public void updateApplicationRegistration(String state, String keyType, int appId, String keyManager)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -2724,7 +2672,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * @param apiIdentifier APIIdentifier
      * @param userId        User Id
@@ -2732,6 +2679,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to check subscribed or not
      */
     public boolean isSubscribed(APIIdentifier apiIdentifier, String userId) throws APIManagementException {
+
         boolean isSubscribed = false;
         String loginUserName = getLoginUserName(userId);
 
@@ -2777,6 +2725,7 @@ public class ApiMgtDAO {
      */
     public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId)
             throws APIManagementException {
+
         boolean isSubscribed = false;
         String loginUserName = getLoginUserName(userId);
 
@@ -2821,6 +2770,7 @@ public class ApiMgtDAO {
      *                                                           UserApplicationAPIUsage for given provider
      */
     public UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerName) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
@@ -2939,6 +2889,7 @@ public class ApiMgtDAO {
      *                                                           UserApplicationAPIUsage for given provider
      */
     public UserApplicationAPIUsage[] getAllAPIProductUsageByProvider(String providerName) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      connection.prepareStatement(SQLConstants.GET_APP_API_USAGE_BY_PROVIDER_SQL)) {
@@ -2992,6 +2943,7 @@ public class ApiMgtDAO {
      */
     public List<SubscribedAPI> getSubscriptionsOfAPI(String apiName, String apiVersion, String provider)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
@@ -3065,6 +3017,7 @@ public class ApiMgtDAO {
 
 
     public void addRating(Identifier id, int rating, String user) throws APIManagementException {
+
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -3094,6 +3047,7 @@ public class ApiMgtDAO {
      */
     public void addOrUpdateRating(Identifier identifier, int rating, String userId, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         PreparedStatement psSelect = null;
         ResultSet rs = null;
@@ -3148,7 +3102,6 @@ public class ApiMgtDAO {
                 ps.setInt(3, subscriber.getId());
             }
 
-
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -3160,6 +3113,7 @@ public class ApiMgtDAO {
     }
 
     public void removeAPIRating(Identifier id, String user) throws APIManagementException {
+
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -3189,6 +3143,7 @@ public class ApiMgtDAO {
      */
     public void removeAPIRating(Identifier identifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         PreparedStatement psSelect = null;
         ResultSet rs = null;
@@ -3241,6 +3196,7 @@ public class ApiMgtDAO {
     }
 
     public int getUserRating(Identifier id, String user) throws APIManagementException {
+
         Connection conn = null;
         int userRating = 0;
         try {
@@ -3272,6 +3228,7 @@ public class ApiMgtDAO {
      */
     public int getUserRating(Identifier identifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         int userRating = 0;
@@ -3320,6 +3277,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get user API Ratings
      */
     public JSONObject getUserRatingInfo(Identifier identifier, String user) throws APIManagementException {
+
         Connection conn = null;
         JSONObject userRating = null;
         try {
@@ -3352,6 +3310,7 @@ public class ApiMgtDAO {
      */
     private JSONObject getUserRatingInfo(Identifier identifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         JSONObject ratingObj = new JSONObject();
@@ -3406,6 +3365,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get API Ratings
      */
     public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
+
         Connection conn = null;
         JSONArray apiRatings = null;
         try {
@@ -3437,6 +3397,7 @@ public class ApiMgtDAO {
      */
     private JSONArray getAPIRatings(Identifier identifier, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         PreparedStatement psSubscriber = null;
         ResultSet rs = null;
@@ -3492,6 +3453,7 @@ public class ApiMgtDAO {
     }
 
     public float getAverageRating(Identifier apiId) throws APIManagementException {
+
         Connection conn = null;
         float avrRating = 0;
         try {
@@ -3515,6 +3477,7 @@ public class ApiMgtDAO {
     }
 
     public float getAverageRating(int apiId) throws APIManagementException {
+
         Connection conn = null;
         float avrRating = 0;
         PreparedStatement ps = null;
@@ -3559,6 +3522,7 @@ public class ApiMgtDAO {
      */
     public float getAverageRating(Identifier identifier, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         float avrRating = 0;
@@ -3602,6 +3566,7 @@ public class ApiMgtDAO {
      */
     public BlockConditionsDTO getSubscriptionBlockCondition(String conditionValue, String tenantDomain)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
@@ -3648,6 +3613,7 @@ public class ApiMgtDAO {
      */
     public int addApplication(Application application, String userId, Connection conn, String organizationId)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         conn.setAutoCommit(false);
         ResultSet rs = null;
@@ -3718,6 +3684,7 @@ public class ApiMgtDAO {
     }
 
     public void updateApplication(Application application) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStatement = null;
@@ -3786,6 +3753,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void updateApplicationStatus(int applicationId, String status) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -3824,6 +3792,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getApplicationStatus(String appName, String userId) throws APIManagementException {
+
         int applicationId = getApplicationId(appName, userId);
         return getApplicationStatusById(applicationId);
     }
@@ -3836,6 +3805,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getApplicationStatusById(int applicationId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -3879,6 +3849,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get applications for given subscriber
      */
     public boolean isApplicationExist(String appName, String username, String groupId) throws APIManagementException {
+
         if (username == null) {
             return false;
         }
@@ -3904,7 +3875,6 @@ public class ApiMgtDAO {
                 "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                 "OR (LOWER(SUB.USER_ID) = LOWER(?))" +
                 "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?)))";
-
 
         String whereClause = " AND SUB.USER_ID = ? ";
         String whereClauseCaseInsensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
@@ -3977,6 +3947,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get applications for given subscriber
      */
     public boolean isApplicationOwnedBySubscriber(String appName, String username) throws APIManagementException {
+
         if (username == null) {
             return false;
         }
@@ -4019,6 +3990,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get Applications for given subscriber.
      */
     public int getApplicationId(String appName, String username) throws APIManagementException {
+
         if (username == null) {
             return 0;
         }
@@ -4037,7 +4009,6 @@ public class ApiMgtDAO {
             prepStmt.setString(2, appName);
             rs = prepStmt.executeQuery();
 
-
             while (rs.next()) {
                 appId = rs.getInt("APPLICATION_ID");
             }
@@ -4051,6 +4022,7 @@ public class ApiMgtDAO {
     }
 
     public String getApplicationUUID(String appName, String username) throws APIManagementException {
+
         if (username == null) {
             return null;
         }
@@ -4210,7 +4182,7 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
 
                 if (multiGroupAppSharingEnabled) {
-                    application.setGroupId(getGroupId(rs.getInt("APPLICATION_ID")));
+                    application.setGroupId(getGroupId(connection, rs.getInt("APPLICATION_ID")));
                 }
                 applicationsList.add(application);
             }
@@ -4387,7 +4359,7 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
 
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(application);
+                    setGroupIdInApplication(connection,application);
                 }
 
                 //setting subscription count
@@ -4513,12 +4485,13 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(application);
+                    setGroupIdInApplication(connection, application);
                 }
                 applicationsList.add(application);
             }
             Collections.sort(applicationsList, new Comparator<Application>() {
                 public int compare(Application o1, Application o2) {
+
                     return o1.getName().compareToIgnoreCase(o2.getName());
                 }
             });
@@ -4548,6 +4521,7 @@ public class ApiMgtDAO {
     public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
                                                        int offset, String sortBy, String sortOrder, String appName)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -4597,6 +4571,7 @@ public class ApiMgtDAO {
 
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
             APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet resultSet = null;
@@ -4715,6 +4690,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteApplication(Application application) throws APIManagementException {
+
         String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
@@ -5048,6 +5024,7 @@ public class ApiMgtDAO {
      */
     private Subscriber getSubscriber(String username, int tenantId, Connection connection)
             throws APIManagementException {
+
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         Subscriber subscriber = null;
@@ -5098,7 +5075,6 @@ public class ApiMgtDAO {
             handleException("Failed to record API state change", e);
         }
     }
-
 
     public void recordAPILifeCycleEvent(int apiId, String oldStatus, String newStatus, String userId,
                                         int tenantId) throws APIManagementException {
@@ -5181,6 +5157,7 @@ public class ApiMgtDAO {
     }
 
     public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5208,11 +5185,7 @@ public class ApiMgtDAO {
                 events.add(event);
             }
 
-            Collections.sort(events, new Comparator<LifeCycleEvent>() {
-                public int compare(LifeCycleEvent o1, LifeCycleEvent o2) {
-                    return o1.getDate().compareTo(o2.getDate());
-                }
-            });
+            Collections.sort(events, (o1, o2) -> o1.getDate().compareTo(o2.getDate()));
         } catch (SQLException e) {
             handleException("Error when executing the SQL : " + sqlQuery, e);
         } finally {
@@ -5221,129 +5194,210 @@ public class ApiMgtDAO {
         return events;
     }
 
-    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, String oldVersion) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        PreparedStatement getAppSt = null;
-        ResultSet rs = null;
+    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions) throws APIManagementException {
 
-        String getSubscriptionDataQuery = SQLConstants.GET_SUBSCRIPTION_DATA_SQL;
-        String getApplicationDataQuery = SQLConstants.GET_APPLICATION_DATA_SQL;
-
+        //if there are no previous versions, there is no need to copy subscriptions
+        if (oldAPIVersions == null || oldAPIVersions.isEmpty()) {
+            return;
+        }
+        String getSubscriptionDataQuery = SQLConstants.GET_SUBSCRIPTION_DATA_SQL.replaceAll("_API_VERSION_LIST_",
+                String.join(",", Collections.nCopies(oldAPIVersions.size(), "?")));
         APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
-        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         try {
             // Retrieve all the existing subscription for the old version
-            connection = APIMgtDBUtil.getConnection();
-
-            prepStmt = connection.prepareStatement(getSubscriptionDataQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-            prepStmt.setString(2, apiIdentifier.getApiName());
-            prepStmt.setString(3, oldVersion);
-            rs = prepStmt.executeQuery();
-
-            List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
-            Set<Integer> subscribedApplications = new HashSet<Integer>();
-            while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS")))) {
-                SubscriptionInfo info = new SubscriptionInfo();
-                info.subscriptionId = rs.getInt("SUBSCRIPTION_ID");
-                info.tierId = rs.getString("TIER_ID");
-                info.applicationId = rs.getInt("APPLICATION_ID");
-                info.subscriptionStatus = rs.getString("SUB_STATUS");
-                subscriptionData.add(info);
-            }
-
-            Map<Integer, Integer> subscriptionIdMap = new HashMap<Integer, Integer>();
-
-            for (SubscriptionInfo info : subscriptionData) {
-                try {
-                    if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
-                        String subscriptionStatus;
-                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
-                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
-                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
-                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.subscriptionStatus)) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
-                        } else {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
-                        }
-                        apiTypeWrapper.setTier(info.tierId);
-                        int subscriptionId = addSubscription(apiTypeWrapper, info.applicationId, subscriptionStatus,
-                                apiIdentifier.getProviderName());
-                        if (subscriptionId == -1) {
-                            String msg = "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
-                                    ":v" + apiIdentifier.getVersion();
-                            log.error(msg);
-                            throw new APIManagementException(msg);
-                        }
-                        subscriptionIdMap.put(info.subscriptionId, subscriptionId);
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                try (PreparedStatement prepStmt = connection.prepareStatement(getSubscriptionDataQuery)) {
+                    prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                    prepStmt.setString(2, apiIdentifier.getApiName());
+                    int index = 3;
+                    for (API oldAPI : oldAPIVersions) {
+                        prepStmt.setString(index++, oldAPI.getId().getVersion());
                     }
-                    int subscriptionId = subscriptionIdMap.get(info.subscriptionId);
-                    connection.setAutoCommit(false);
-
-                    subscribedApplications.add(info.applicationId);
-                    // catching the exception because when copy the api without the option "require re-subscription"
-                    // need to go forward rather throwing the exception
-                } catch (SubscriptionAlreadyExistingException e) {
-                    log.error("Error while adding subscription " + e.getMessage(), e);
-                } catch (SubscriptionBlockedException e) {
-                    log.info("Subscription is blocked: " + e.getMessage());
-                }
-            }
-
-            getAppSt = connection.prepareStatement(getApplicationDataQuery);
-            getAppSt.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-            getAppSt.setString(2, apiIdentifier.getName());
-            getAppSt.setString(3, oldVersion);
-            rs = getAppSt.executeQuery();
-
-            while (rs.next()) {
-                int applicationId = rs.getInt("APPLICATION_ID");
-                if (!subscribedApplications.contains(applicationId)) {
-                    try {
-                        String subscriptionStatus;
-                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
-                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(rs.getString(
-                                "SUB_STATUS"))) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
-                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(rs.getString(
-                                "SUB_STATUS"))) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
-                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(rs.getString("SUB_STATUS"
-                        ))) {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
-                        } else {
-                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                    try (ResultSet rs = prepStmt.executeQuery()) {
+                        List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
+                        while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS"
+                        )))) {
+                            int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
+                            String tierId = rs.getString("TIER_ID");
+                            int applicationId = rs.getInt("APPLICATION_ID");
+                            String apiVersion = rs.getString("VERSION");
+                            String subscriptionStatus = rs.getString("SUB_STATUS");
+                            SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
+                                    apiVersion, subscriptionStatus);
+                            subscriptionData.add(info);
                         }
-                        apiTypeWrapper.setTier(rs.getString("TIER_ID"));
-                        int subscriptionId = addSubscription(apiTypeWrapper, applicationId, subscriptionStatus,
-                                apiIdentifier.getProviderName());
-                        // catching the exception because when copy the api without the option "require re-subscription"
-                        // need to go forward rather throwing the exception
-                    } catch (SubscriptionAlreadyExistingException e) {
-                        //Not handled as an error because same subscription can be there in many previous versions.
-                        //Ex: if previous version was created by another older version and if the subscriptions are
-                        //Forwarded, then the third one will get same subscription from previous two versions.
-                        log.info("Subscription already exists: " + e.getMessage());
-                    } catch (SubscriptionBlockedException e) {
-                        //Not handled as an error because we cannot update subscriptions for an API with blocked
-                        // subscriptions
-                        //If previous version was created by another older version and if the subscriptions are
-                        //Forwarded, by catching the exception we will continue checking the other subscriptions
-                        log.info("Subscription is blocked: " + e.getMessage());
+                        // To keep track of already added subscriptions (apps)
+                        List<Integer> addedApplications = new ArrayList<>();
+                        for (int i = oldAPIVersions.size() - 1; i >= 0; i--) {
+                            API oldAPI = oldAPIVersions.get(i);
+                            for (SubscriptionInfo info : subscriptionData) {
+                                try {
+                                    if (info.getApiVersion().equals(oldAPI.getId().getVersion()) &&
+                                            !addedApplications.contains(info.getApplicationId())) {
+                                        String subscriptionStatus;
+                                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                                        } else {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                                        }
+                                        apiTypeWrapper.setTier(info.getTierId());
+                                        Application application = getLightweightApplicationById(connection,
+                                                info.getApplicationId());
+                                        int subscriptionId = addSubscription(connection, apiTypeWrapper, application,
+                                                subscriptionStatus, apiIdentifier.getProviderName());
+                                        if (subscriptionId == -1) {
+                                            String msg =
+                                                    "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
+                                                            ":v" + apiIdentifier.getVersion();
+                                            log.error(msg);
+                                            throw new APIManagementException(msg);
+                                        }
+                                        addedApplications.add(info.getApplicationId());
+                                    }
+                                    // catching the exception because when copy the api without the option "require
+                                    // re-subscription"
+                                    // need to go forward rather throwing the exception
+                                } catch (SubscriptionAlreadyExistingException e) {
+                                    log.error("Error while adding subscription " + e.getMessage(), e);
+                                } catch (SubscriptionBlockedException e) {
+                                    log.info("Subscription is blocked: " + e.getMessage());
+                                }
+                            }
+                        }
                     }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw e;
                 }
             }
         } catch (SQLException e) {
             handleException("Error when executing the SQL queries", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(getAppSt, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
+    }
+
+    private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
+                                String subscriptionStatus, String subscriber) throws APIManagementException,
+            SQLException {
+
+        final boolean isProduct = apiTypeWrapper.isAPIProduct();
+        int subscriptionId = -1;
+        int id = -1;
+        String apiUUID;
+        Identifier identifier;
+        String tier;
+
+        //Query to check if this subscription already exists
+        String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
+        if (!isProduct) {
+            identifier = apiTypeWrapper.getApi().getId();
+            id = identifier.getId();
+            apiUUID = apiTypeWrapper.getApi().getUuid();
+        } else {
+            identifier = apiTypeWrapper.getApiProduct().getId();
+            id = apiTypeWrapper.getApiProduct().getProductId();
+            apiUUID = apiTypeWrapper.getApiProduct().getUuid();
+        }
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+
+        try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
+            ps.setInt(1, id);
+            ps.setInt(2, application.getId());
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                //If the subscription already exists
+                if (resultSet.next()) {
+                    String subStatus = resultSet.getString("SUB_STATUS");
+                    String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
+
+                    if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
+                            APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
+                            APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
+                            APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
+
+                        //Throw error saying subscription already exists.
+                        log.error(String.format("Subscription already exists for API/API Prouct %s in Application %s"
+                                , apiTypeWrapper.getName(), application.getName()));
+                        throw new SubscriptionAlreadyExistingException(String.format("Subscription already exists for" +
+                                " API/API Prouct %s in Application %s", apiTypeWrapper.getName(), application.getName()));
+
+                    } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
+                            .SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus)) {
+                        deleteSubscriptionByApiIDAndAppID(id, application.getId(), connection);
+                    } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
+                            .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                        log.error(String.format(String.format("Subscription to API/API Prouct %%s through application" +
+                                " %%s was blocked"), apiTypeWrapper.getName(), application.getName()));
+                        throw new SubscriptionBlockedException(String.format("Subscription to API/API Product %s " +
+                                "through application %s was blocked", apiTypeWrapper.getName(), application.getName()));
+                    } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {
+                        throw new SubscriptionBlockedException("Subscription to API " + apiTypeWrapper.getName()
+                                + " through application " + application.getName() + " was rejected");
+                    }
+                }
+
+            }
+        }
+
+        //This query to update the AM_SUBSCRIPTION table
+        String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
+
+        //Adding data to the AM_SUBSCRIPTION table
+        //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
+        String subscriptionIDColumn = "SUBSCRIPTION_ID";
+        String subscriptionUUID = UUID.randomUUID().toString();
+        if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+            subscriptionIDColumn = "subscription_id";
+        }
+            try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
+                    new String[]{subscriptionIDColumn})) {
+                if (!isProduct) {
+                    tier = apiTypeWrapper.getApi().getId().getTier();
+                    preparedStForInsert.setString(1, tier);
+                    preparedStForInsert.setString(10, tier);
+                } else {
+                    tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                    preparedStForInsert.setString(1, tier);
+                    preparedStForInsert.setString(10, tier);
+                }
+                preparedStForInsert.setInt(2, id);
+                preparedStForInsert.setInt(3, application.getId());
+                preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
+                        APIConstants.SubscriptionStatus.UNBLOCKED);
+                preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+                preparedStForInsert.setString(6, subscriber);
+
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                preparedStForInsert.setTimestamp(7, timestamp);
+                preparedStForInsert.setTimestamp(8, timestamp);
+                preparedStForInsert.setString(9, subscriptionUUID);
+
+                preparedStForInsert.executeUpdate();
+                try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
+                    while (rs.next()) {
+                        //subscriptionId = rs.getInt(1);
+                        subscriptionId = Integer.parseInt(rs.getString(1));
+                    }
+                }
+            }
+
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                    tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
+                    application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
+                    APIConstants.SubscriptionStatus.UNBLOCKED));
+        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+
+        return subscriptionId;
     }
 
     /**
@@ -5572,6 +5626,7 @@ public class ApiMgtDAO {
     }
 
     public String getDefaultVersion(APIIdentifier apiId) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             return getDefaultVersion(connection, apiId);
         } catch (SQLException e) {
@@ -5581,6 +5636,7 @@ public class ApiMgtDAO {
     }
 
     private String getDefaultVersion(Connection connection, APIIdentifier apiId) throws SQLException {
+
         String oldDefaultVersion = null;
 
         String query = SQLConstants.GET_DEFAULT_VERSION_SQL;
@@ -5603,6 +5659,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addWorkflowEntry(WorkflowDTO workflow) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -5647,6 +5704,7 @@ public class ApiMgtDAO {
     }
 
     public void updateWorkflowStatus(WorkflowDTO workflowDTO) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -5681,6 +5739,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public WorkflowDTO retrieveWorkflow(String workflowReference) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5721,6 +5780,7 @@ public class ApiMgtDAO {
      */
     public WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference, String workflowType)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5754,6 +5814,7 @@ public class ApiMgtDAO {
 
     private void setPublishedDefVersion(APIIdentifier apiId, Connection connection, String value)
             throws APIManagementException {
+
         String queryDefaultVersionUpdate = SQLConstants.UPDATE_PUBLISHED_DEFAULT_VERSION_SQL;
 
         PreparedStatement prepStmtDefVersionUpdate = null;
@@ -5800,6 +5861,7 @@ public class ApiMgtDAO {
     }
 
     public String getPublishedDefaultVersion(APIIdentifier apiId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5826,6 +5888,7 @@ public class ApiMgtDAO {
     }
 
     public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws APIManagementException {
+
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         boolean deploymentAvailable = isDeploymentAvailableByAPIUUID(connection, api.getUuid());
         removeAPIFromDefaultVersion(api.getId(), connection);
@@ -5960,6 +6023,7 @@ public class ApiMgtDAO {
      */
     public boolean isAppAllowed(int applicationID, String userId, String groupId)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -6131,7 +6195,7 @@ public class ApiMgtDAO {
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
 
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(application);
+                    setGroupIdInApplication(connection, application);
                 }
                 if (application != null) {
                     Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
@@ -6146,10 +6210,11 @@ public class ApiMgtDAO {
         return application;
     }
 
-    private void setGroupIdInApplication(Application application) throws APIManagementException {
+    private void setGroupIdInApplication(Connection connection, Application application) throws SQLException {
+
         String applicationGroupId = application.getGroupId();
         if (StringUtils.isEmpty(applicationGroupId)) { // No migrated App groupId
-            application.setGroupId(getGroupId(application.getId()));
+            application.setGroupId(getGroupId(connection, application.getId()));
         } else {
             // Migrated data exists where Group ID for this App has been stored in AM_APPLICATION table
             // in the format 'tenant/groupId', so extract groupId value and store it in the App object
@@ -6164,6 +6229,7 @@ public class ApiMgtDAO {
     }
 
     public Application getApplicationById(int applicationId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -6204,7 +6270,7 @@ public class ApiMgtDAO {
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
-                        application.setGroupId(getGroupId(applicationId));
+                        application.setGroupId(getGroupId(connection, applicationId));
                     }
                 }
             }
@@ -6220,51 +6286,42 @@ public class ApiMgtDAO {
         return application;
     }
 
-    public Application getLightweightApplicationById(int applicationId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
+    private Application getLightweightApplicationById(Connection conn, int applicationId) throws SQLException {
 
         Application application = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            String query = SQLConstants.GET_APPLICATION_BY_ID_SQL;
-            prepStmt = connection.prepareStatement(query);
+        String query = SQLConstants.GET_APPLICATION_BY_ID_SQL;
+        try (PreparedStatement prepStmt = conn.prepareStatement(query)) {
             prepStmt.setInt(1, applicationId);
 
-            rs = prepStmt.executeQuery();
-            if (rs.next()) {
-                String applicationName = rs.getString("NAME");
-                String subscriberId = rs.getString("SUBSCRIBER_ID");
-                String subscriberName = rs.getString("USER_ID");
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    String applicationName = rs.getString("NAME");
+                    String subscriberId = rs.getString("SUBSCRIBER_ID");
+                    String subscriberName = rs.getString("USER_ID");
 
-                Subscriber subscriber = new Subscriber(subscriberName);
-                subscriber.setId(Integer.parseInt(subscriberId));
-                application = new Application(applicationName, subscriber);
+                    Subscriber subscriber = new Subscriber(subscriberName);
+                    subscriber.setId(Integer.parseInt(subscriberId));
+                    application = new Application(applicationName, subscriber);
 
-                application.setOwner(rs.getString("CREATED_BY"));
-                application.setDescription(rs.getString("DESCRIPTION"));
-                application.setStatus(rs.getString("APPLICATION_STATUS"));
-                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                application.setId(rs.getInt("APPLICATION_ID"));
-                application.setGroupId(rs.getString("GROUP_ID"));
-                application.setUUID(rs.getString("UUID"));
-                application.setTier(rs.getString("APPLICATION_TIER"));
-                application.setTokenType(rs.getString("TOKEN_TYPE"));
-                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    application.setDescription(rs.getString("DESCRIPTION"));
+                    application.setStatus(rs.getString("APPLICATION_STATUS"));
+                    application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                    application.setId(rs.getInt("APPLICATION_ID"));
+                    application.setGroupId(rs.getString("GROUP_ID"));
+                    application.setUUID(rs.getString("UUID"));
+                    application.setTier(rs.getString("APPLICATION_TIER"));
+                    application.setTokenType(rs.getString("TOKEN_TYPE"));
+                    subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
-                if (multiGroupAppSharingEnabled) {
-                    if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
-                        application.setGroupId(getGroupId(applicationId));
+                    if (multiGroupAppSharingEnabled) {
+                        if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
+                            application.setGroupId(getGroupId(conn, applicationId));
+                        }
                     }
                 }
-            }
 
-        } catch (SQLException e) {
-            handleException("Error while obtaining details of the Application : " + applicationId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
         }
         return application;
     }
@@ -6358,7 +6415,7 @@ public class ApiMgtDAO {
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
-                        application.setGroupId(getGroupId(applicationId));
+                        application.setGroupId(getGroupId(connection, applicationId));
                     }
                 }
             }
@@ -6384,6 +6441,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Application getApplicationByUUID(String uuid) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -6421,7 +6479,7 @@ public class ApiMgtDAO {
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
-                        application.setGroupId(getGroupId(application.getId()));
+                        application.setGroupId(getGroupId(connection, application.getId()));
                     }
                 }
 
@@ -6539,10 +6597,12 @@ public class ApiMgtDAO {
 
     public ArrayList<URITemplate> getAPIProductURITemplates(String apiContext, String version)
             throws APIManagementException {
+
         return getAPIProductURITemplatesAdvancedThrottle(apiContext, version);
     }
 
     public ArrayList<URITemplate> getAllURITemplatesOldThrottle(String apiContext, String version) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -6584,6 +6644,7 @@ public class ApiMgtDAO {
     }
 
     public ArrayList<URITemplate> getAllURITemplatesAdvancedThrottle(String apiContext, String version) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -6618,9 +6679,9 @@ public class ApiMgtDAO {
         return uriTemplates;
     }
 
-
     public ArrayList<URITemplate> getAPIProductURITemplatesAdvancedThrottle(String apiContext, String version)
             throws APIManagementException {
+
         int tenantId;
         ArrayList<URITemplate> uriTemplates = new ArrayList<>();
 
@@ -6650,6 +6711,7 @@ public class ApiMgtDAO {
     }
 
     private ArrayList<URITemplate> extractURITemplates(ResultSet rs) throws SQLException, APIManagementException {
+
         Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
         ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
@@ -6744,6 +6806,7 @@ public class ApiMgtDAO {
      */
     public String getAPIProviderByNameAndVersion(String apiName, String apiVersion, String tenant)
             throws APIManagementException {
+
         if (StringUtils.isBlank(apiName) || StringUtils.isBlank(apiVersion) || StringUtils.isBlank(tenant)) {
             String msg = "API name, version, tenant cannot be null when fetching provider";
             log.error(msg);
@@ -6791,6 +6854,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
+
         List<Condition> conditions = getConditions(conditionGroup);
         ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
         for (Condition condition : conditions) {
@@ -6904,6 +6968,7 @@ public class ApiMgtDAO {
     }
 
     public int getAPIID(Identifier apiId) throws APIManagementException {
+
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
@@ -6959,6 +7024,7 @@ public class ApiMgtDAO {
      */
     public void setAPIProductFromDB(APIProduct product)
             throws APIManagementException {
+
         APIProductIdentifier apiProductIdentifier = product.getId();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -6991,6 +7057,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteApplicationMappingByConsumerKey(String consumerKey) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -7102,7 +7169,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Get all applications associated with given tier
      *
@@ -7111,6 +7177,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException on error in getting applications array
      */
     public Application[] getApplicationsByTier(String tier) throws APIManagementException {
+
         if (tier == null) {
             return null;
         }
@@ -7134,6 +7201,7 @@ public class ApiMgtDAO {
             }
             Collections.sort(applicationsList, new Comparator<Application>() {
                 public int compare(Application o1, Application o2) {
+
                     return o1.getName().compareToIgnoreCase(o2.getName());
                 }
             });
@@ -7148,13 +7216,14 @@ public class ApiMgtDAO {
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
+
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
 
-
     public HashMap<String, String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
             throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7204,6 +7273,7 @@ public class ApiMgtDAO {
 
     public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier, String organizationId)
             throws APIManagementException {
+
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
@@ -7333,10 +7403,12 @@ public class ApiMgtDAO {
 
     public Map<Integer, URITemplate> getURITemplatesOfAPIWithProductMapping(APIIdentifier identifier)
             throws APIManagementException {
+
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_WITH_PRODUCT_MAPPINGS_SQL)) {
+             PreparedStatement ps =
+                     conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_WITH_PRODUCT_MAPPINGS_SQL)) {
             ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             ps.setString(2, identifier.getName());
             ps.setString(3, identifier.getVersion());
@@ -7397,6 +7469,7 @@ public class ApiMgtDAO {
 
     private void setAssociatedAPIProducts(APIIdentifier identifier, Map<Integer, URITemplate> uriTemplates)
             throws SQLException {
+
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL)) {
             ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -7422,6 +7495,7 @@ public class ApiMgtDAO {
 
     private void setAssociatedAPIProductsURLMappings(APIIdentifier identifier, Map<Integer, URITemplate> uriTemplates)
             throws SQLException {
+
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL)) {
             ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -7522,6 +7596,7 @@ public class ApiMgtDAO {
      * @return Comment ID
      */
     public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
+
         String commentId = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             int id = -1;
@@ -7560,7 +7635,8 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit,
+                              Integer replyOffset) throws
             APIManagementException {
 
         Identifier identifier;
@@ -7620,7 +7696,9 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit, Integer offset) throws APIManagementException {
+    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit,
+     Integer offset) throws APIManagementException {
+
         CommentList commentList = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             int id = -1;
@@ -7650,7 +7728,8 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    private CommentList getComments(Identifier identifier, String parentCommentID, Integer limit, Integer offset, Connection connection) throws
+    private CommentList getComments(Identifier identifier, String parentCommentID, Integer limit, Integer offset,
+     Connection connection) throws
             APIManagementException {
 
         List<Comment> list = new ArrayList<Comment>();
@@ -7747,6 +7826,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException {
+
         List<Comment> commentList = new ArrayList<Comment>();
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7851,6 +7931,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
@@ -7867,6 +7948,7 @@ public class ApiMgtDAO {
 
     private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws
             APIManagementException {
+
         int id = -1;
         String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
         String getCommentIDsOfReplies = SQLConstants.GET_IDS_OF_REPLIES_SQL;
@@ -7910,6 +7992,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             int id = -1;
             id = getAPIID(identifier, connection);
@@ -7931,6 +8014,7 @@ public class ApiMgtDAO {
     }
 
     public boolean isContextExist(String context) {
+
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
@@ -8204,6 +8288,7 @@ public class ApiMgtDAO {
     }
 
     public List<String> getAllAvailableContexts() {
+
         List<String> contexts = new ArrayList<String>();
         Connection connection = null;
         ResultSet resultSet = null;
@@ -8228,6 +8313,7 @@ public class ApiMgtDAO {
 
     public void populateAppRegistrationWorkflowDTO(ApplicationRegistrationWorkflowDTO workflowDTO)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8316,6 +8402,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getWorkflowReference(String applicationName, String userId) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8350,6 +8437,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getWorkflowReferenceByApplicationId(int applicationId, String userId) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8381,6 +8469,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getExternalWorkflowReferenceByApplicationID(int appID) throws APIManagementException {
+
         String workflowExtRef = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8490,6 +8579,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getExternalWorkflowReferenceForSubscription(int subscriptionId) throws APIManagementException {
+
         String workflowExtRef = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8526,6 +8616,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getExternalWorkflowReferenceForUserSignup(String usernameWithDomain) throws APIManagementException {
+
         String workflowExtRef = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8560,6 +8651,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<Integer> getPendingSubscriptionsByApplicationId(int applicationId) throws APIManagementException {
+
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8593,6 +8685,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<Integer> getPendingSubscriptionsByAPIId(APIIdentifier apiId) throws APIManagementException {
+
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8628,6 +8721,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8664,6 +8758,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getSubscriptionStatus(Identifier identifier, int applicationId) throws APIManagementException {
+
         String status = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8707,6 +8802,7 @@ public class ApiMgtDAO {
      */
     public String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, Connection connection)
             throws APIManagementException {
+
         String status = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8734,6 +8830,7 @@ public class ApiMgtDAO {
 
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
             throws APIManagementException {
+
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE TENANT_DOMAIN = ? ";
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -8805,6 +8902,7 @@ public class ApiMgtDAO {
 
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
             throws APIManagementException {
+
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             return getKeyManagerConfigurationByName(conn, tenantDomain, name);
@@ -8817,6 +8915,7 @@ public class ApiMgtDAO {
     private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection, String tenantDomain,
                                                                         String name)
             throws SQLException, IOException {
+
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, name);
@@ -8846,6 +8945,7 @@ public class ApiMgtDAO {
 
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
             throws APIManagementException {
+
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             return getKeyManagerConfigurationByUUID(conn, uuid);
         } catch (SQLException | IOException e) {
@@ -8856,6 +8956,7 @@ public class ApiMgtDAO {
 
     private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection, String uuid)
             throws SQLException, IOException {
+
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, uuid);
@@ -8921,6 +9022,7 @@ public class ApiMgtDAO {
     }
 
     public boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException {
+
         final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
@@ -8941,6 +9043,7 @@ public class ApiMgtDAO {
 
     public void updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
+
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn
@@ -8968,6 +9071,7 @@ public class ApiMgtDAO {
     }
 
     public void deleteKeyManagerConfigurationById(String id, String tenantDomain) throws APIManagementException {
+
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn
@@ -8987,8 +9091,8 @@ public class ApiMgtDAO {
 
     }
 
-
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
+
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
         final String query = "SELECT * FROM AM_KEY_MANAGER";
         try (Connection conn = APIMgtDBUtil.getConnection();
@@ -9110,6 +9214,7 @@ public class ApiMgtDAO {
     }
 
     public void deleteApplicationKeyMappingByMappingId(String keyMappingId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement ps = null;
         try {
@@ -9133,6 +9238,7 @@ public class ApiMgtDAO {
     public String getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(int applicationId, String tokenType,
                                                                        String keyManagerName)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement =
                      connection.prepareStatement(SQLConstants.GET_KEY_MAPPING_ID_FROM_APPLICATION)) {
@@ -9188,20 +9294,37 @@ public class ApiMgtDAO {
         }
     }
 
-    public SubscribedApiDTO getAPIInfoByUUID(String apiId) throws APIManagementException {
-
+    /**
+     * Retrieve basic information about the given API by the UUID quering only from AM_API
+     *
+     * @param apiId UUID of the API
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    public APIInfo getAPIInfoByUUID(String apiId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            String sql = "SELECT API_PROVIDER,API_NAME,API_VERSION,CONTEXT FROM AM_API WHERE API_UUID = ?";
+            String sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, apiId);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-                        subscribedApiDTO.setName(resultSet.getString("API_NAME"));
-                        subscribedApiDTO.setVersion(resultSet.getString("API_VERSION"));
-                        subscribedApiDTO.setPublisher(resultSet.getString("API_PROVIDER"));
-                        subscribedApiDTO.setContext(resultSet.getString("CONTEXT"));
-                        return subscribedApiDTO;
+                        APIInfo.Builder apiInfoBuilder = new APIInfo.Builder();
+                        return apiInfoBuilder
+                                .id(resultSet.getString("API_UUID"))
+                                .name(resultSet.getString("API_NAME"))
+                                .version(resultSet.getString("API_VERSION"))
+                                .provider(resultSet.getString("API_PROVIDER"))
+                                .context(resultSet.getString("CONTEXT"))
+                                .contextTemplate(resultSet.getString("CONTEXT_TEMPLATE"))
+                                .apiTier(resultSet.getString("API_TIER"))
+                                .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
+                                .apiType(resultSet.getString("API_TYPE"))
+                                .createdBy(resultSet.getString("CREATED_BY"))
+                                .createdTime(resultSet.getString("CREATED_TIME"))
+                                .updatedBy(resultSet.getString("UPDATED_BY"))
+                                .updatedTime(resultSet.getString("UPDATED_TIME"))
+                                .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
+                                .build();
                     }
                 }
             }
@@ -9213,6 +9336,7 @@ public class ApiMgtDAO {
     }
 
     public String getAPIStatusFromAPIUUID(String uuid) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =
                          connection.prepareStatement(SQLConstants.RETRIEVE_API_STATUS_FROM_UUID)) {
@@ -9231,6 +9355,7 @@ public class ApiMgtDAO {
     }
 
     public void setDefaultVersion(API api) throws APIManagementException {
+
         APIIdentifier apiId = api.getId();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =
@@ -9253,6 +9378,7 @@ public class ApiMgtDAO {
     }
 
     public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =
                          connection.prepareStatement(SQLConstants.GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER)) {
@@ -9279,15 +9405,6 @@ public class ApiMgtDAO {
         return null;
     }
 
-    private class SubscriptionInfo {
-        private int subscriptionId;
-        private String tierId;
-        private int applicationId;
-        private String accessToken;
-        private String tokenType;
-        private String subscriptionStatus;
-    }
-
     /**
      * Identify whether the loggedin user used his ordinal username or email
      *
@@ -9295,6 +9412,7 @@ public class ApiMgtDAO {
      * @return
      */
     private boolean isUserLoggedInEmail(String userId) {
+
         return userId.contains("@");
     }
 
@@ -9305,6 +9423,7 @@ public class ApiMgtDAO {
      * @return
      */
     private boolean isSecondaryLogin(String userId) {
+
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
         if (loginConfiguration.get(APIConstants.EMAIL_LOGIN) != null) {
@@ -9340,6 +9459,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private String getPrimaryLoginFromSecondary(String login) throws APIManagementException {
+
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getLoginConfiguration();
         String claimURI, username = null;
@@ -9372,13 +9492,13 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private String getLoginUserName(String userID) throws APIManagementException {
+
         String primaryLogin = userID;
         if (isSecondaryLogin(userID)) {
             primaryLogin = getPrimaryLoginFromSecondary(userID);
         }
         return primaryLogin;
     }
-
 
     /**
      * Store external APIStore details to which APIs successfully published
@@ -9390,6 +9510,7 @@ public class ApiMgtDAO {
      */
     public boolean addExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         boolean state = false;
@@ -9451,6 +9572,7 @@ public class ApiMgtDAO {
      */
     public boolean deleteExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         boolean state = false;
@@ -9500,6 +9622,7 @@ public class ApiMgtDAO {
 
     public void updateExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
+
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -9529,6 +9652,7 @@ public class ApiMgtDAO {
      */
     public void updateExternalAPIStoresDetails(APIIdentifier apiIdentifier, Set<APIStore> apiStoreSet, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
 
         try {
@@ -9574,6 +9698,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiId) throws APIManagementException {
+
         Connection conn = null;
         Set<APIStore> storesSet = new HashSet<APIStore>();
         try {
@@ -9608,6 +9733,7 @@ public class ApiMgtDAO {
      */
     public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiIdentifier, Connection conn)
             throws APIManagementException, SQLException {
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         Set<APIStore> storesSet = new HashSet<APIStore>();
@@ -9866,6 +9992,7 @@ public class ApiMgtDAO {
      * @throws java.sql.SQLException - Letting the caller to handle the roll back
      */
     private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, Connection conn) throws SQLException {
+
         String deleteQuery = SQLConstants.REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL;
         PreparedStatement ps = null;
         try {
@@ -9888,6 +10015,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean isApiNameExist(String apiName, String tenantDomain) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet resultSet = null;
@@ -9934,6 +10062,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException If failed to check different letter case api name availability
      */
     public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet resultSet = null;
@@ -10033,6 +10162,7 @@ public class ApiMgtDAO {
     }
 
     public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -10064,6 +10194,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public List<String> getAPINamesMatchingContext(String contextTemplate) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -10092,6 +10223,7 @@ public class ApiMgtDAO {
      * @return
      */
     public boolean isMappingExistsforConsumerKey(String keyManager, String consumerKey) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -10123,6 +10255,7 @@ public class ApiMgtDAO {
      */
     public Map<String, String> getConsumerkeyByApplicationIdAndKeyType(int applicationId, String keyType)
             throws APIManagementException {
+
         Map<String, String> keyManagerConsumerKeyMap = new HashMap<>();
         Connection conn = null;
         ResultSet resultSet = null;
@@ -10159,6 +10292,7 @@ public class ApiMgtDAO {
      */
     public String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier, String storeName)
             throws APIManagementException {
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         Connection conn = null;
@@ -10184,10 +10318,6 @@ public class ApiMgtDAO {
         return version;
     }
 
-    //    public TokenGenerator getTokenGenerator() {
-//        return tokenGenerator;
-//    }
-
     /**
      * This method will fetch all alerts type that is available in AM_ALERT_TYPES.
      *
@@ -10197,6 +10327,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public HashMap<Integer, String> getAllAlertTypesByStakeHolder(String stakeHolder) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -10226,6 +10357,10 @@ public class ApiMgtDAO {
         return map;
     }
 
+    //    public TokenGenerator getTokenGenerator() {
+//        return tokenGenerator;
+//    }
+
     /**
      * @param userName    user name with tenant domain ex: admin@carbon.super
      * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
@@ -10233,6 +10368,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -10345,7 +10481,6 @@ public class ApiMgtDAO {
 
         }
 
-
     }
 
     /**
@@ -10396,7 +10531,6 @@ public class ApiMgtDAO {
                         APIMgtDBUtil.closeAllConnections(psAlertTypeId, null, null);
                     }
                 }
-
 
             }
 
@@ -10495,6 +10629,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement policyStatement = null;
         boolean hasCustomAttrib = false;
@@ -10560,6 +10695,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement policyStatement = null;
         boolean hasCustomAttrib = false;
@@ -10655,6 +10791,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy addAPIPolicy(APIPolicy policy) throws APIManagementException {
+
         Connection connection = null;
 
         try {
@@ -10714,6 +10851,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     private void addAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
+
         ResultSet resultSet = null;
         PreparedStatement policyStatement = null;
         String addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_SQL;
@@ -10759,6 +10897,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
+
         String updateQuery;
         int policyId = 0;
         String selectQuery;
@@ -10865,6 +11004,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     private void addPipeline(Pipeline pipeline, int policyID, Connection conn) throws SQLException {
+
         PreparedStatement conditionStatement = null;
         ResultSet rs = null;
 
@@ -10936,6 +11076,7 @@ public class ApiMgtDAO {
      */
     private void addHeaderCondition(HeaderCondition headerCondition, int pipelineId, Connection conn)
             throws SQLException {
+
         PreparedStatement psHeaderCondition = null;
 
         try {
@@ -10961,6 +11102,7 @@ public class ApiMgtDAO {
      */
     private void addQueryParameterCondition(QueryParameterCondition queryParameterCondition, int pipelineId,
                                             Connection conn) throws SQLException {
+
         PreparedStatement psQueryParameterCondition = null;
 
         try {
@@ -10977,6 +11119,7 @@ public class ApiMgtDAO {
     }
 
     private void addIPCondition(IPCondition ipCondition, int pipelineId, Connection conn) throws SQLException {
+
         PreparedStatement statementIPCondition = null;
 
         try {
@@ -11008,6 +11151,7 @@ public class ApiMgtDAO {
      */
     private void addJWTClaimsCondition(JWTClaimsCondition jwtClaimsCondition, int pipelineId, Connection conn)
             throws SQLException {
+
         PreparedStatement psJWTClaimsCondition = null;
 
         try {
@@ -11030,6 +11174,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement policyStatement = null;
         try {
@@ -11148,6 +11293,7 @@ public class ApiMgtDAO {
      */
     public void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement deleteStatement = null;
         String query = null;
@@ -11186,6 +11332,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException {
+
         List<APIPolicy> policies = new ArrayList<APIPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -11223,6 +11370,7 @@ public class ApiMgtDAO {
      * @return AppilicationPolicy array list
      */
     public ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException {
+
         List<ApplicationPolicy> policies = new ArrayList<ApplicationPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -11258,6 +11406,7 @@ public class ApiMgtDAO {
      * @return subscriptionPolicy array list
      */
     public SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException {
+
         List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -11312,7 +11461,6 @@ public class ApiMgtDAO {
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
     }
 
-
     /**
      * Get subscription level policies specified by tier names belonging to a specific tenant
      *
@@ -11321,6 +11469,7 @@ public class ApiMgtDAO {
      * @return subscriptionPolicy array list
      */
     public SubscriptionPolicy[] getSubscriptionPolicies(String[] subscriptionTiers, int tenantID) throws APIManagementException {
+
         List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -11390,6 +11539,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException {
+
         List<GlobalPolicy> policies = new ArrayList<GlobalPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -11429,7 +11579,6 @@ public class ApiMgtDAO {
         return policies.toArray(new GlobalPolicy[policies.size()]);
     }
 
-
     /**
      * Get a particular Global level policy.
      *
@@ -11438,6 +11587,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -11482,6 +11632,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -11528,6 +11679,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy getAPIPolicy(String policyName, int tenantId) throws APIManagementException {
+
         APIPolicy policy = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
@@ -11569,6 +11721,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
+
         APIPolicy policy = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
@@ -11609,6 +11762,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public ApplicationPolicy getApplicationPolicy(String policyName, int tenantId) throws APIManagementException {
+
         ApplicationPolicy policy = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
@@ -11647,6 +11801,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException {
+
         ApplicationPolicy policy = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
@@ -11685,6 +11840,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public SubscriptionPolicy getSubscriptionPolicy(String policyName, int tenantId) throws APIManagementException {
+
         SubscriptionPolicy policy = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
@@ -11737,6 +11893,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException {
+
         SubscriptionPolicy policy = null;
         Connection connection = null;
         PreparedStatement selectStatement = null;
@@ -11769,6 +11926,20 @@ public class ApiMgtDAO {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
                     policy.setCustomAttributes(customAttrib);
                 }
+                if (APIConstants.COMMERCIAL_TIER_PLAN.equals(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_BILLING_PLAN))) {
+                    policy.setMonetizationPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                    Map<String, String> monetizationPlanProperties = new HashMap<String, String>();
+                    monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                    monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                    monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                    monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                    policy.setMonetizationPlanProperties(monetizationPlanProperties);
+                }
             }
         } catch (SQLException e) {
             handleException("Failed to get subscription policy: " + uuid, e);
@@ -11788,6 +11959,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private ArrayList<Pipeline> getPipelines(int policyId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement pipelinesStatement = null;
         ResultSet resultSet = null;
@@ -11854,6 +12026,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private ArrayList<Condition> getConditions(int pipelineId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement conditionsStatement = null;
         ResultSet resultSet = null;
@@ -11912,6 +12085,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private void setHeaderConditions(int pipelineId, ArrayList<Condition> conditions) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement conditionsStatement = null;
         ResultSet resultSet = null;
@@ -11947,6 +12121,7 @@ public class ApiMgtDAO {
      */
     private void setQueryParameterConditions(int pipelineId, ArrayList<Condition> conditions)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement conditionsStatement = null;
         ResultSet resultSet = null;
@@ -11982,6 +12157,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private void setJWTClaimConditions(int pipelineId, ArrayList<Condition> conditions) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement conditionsStatement = null;
         ResultSet resultSet = null;
@@ -12015,6 +12191,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement updateStatement = null;
         boolean hasCustomAttrib = false;
@@ -12117,6 +12294,7 @@ public class ApiMgtDAO {
      */
 
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement updateStatement = null;
         boolean hasCustomAttrib = false;
@@ -12256,7 +12434,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Updates global throttle policy in database
      *
@@ -12264,6 +12441,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void updateGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement updateStatement = null;
         InputStream siddhiQueryInputStream;
@@ -12371,6 +12549,7 @@ public class ApiMgtDAO {
      */
     public void setPolicyDeploymentStatus(String policyLevel, String policyName, int tenantId, boolean isDeployed)
             throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement statusStatement = null;
         String query = null;
@@ -12419,6 +12598,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     private void setCommonParametersForPolicy(PreparedStatement policyStatement, Policy policy) throws SQLException {
+
         policyStatement.setString(1, policy.getPolicyName());
         if (!StringUtils.isEmpty(policy.getDisplayName())) {
             policyStatement.setString(2, policy.getDisplayName());
@@ -12464,6 +12644,7 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     private void setCommonPolicyDetails(Policy policy, ResultSet resultSet) throws SQLException {
+
         QuotaPolicy quotaPolicy = new QuotaPolicy();
         String prefix = "";
 
@@ -12507,6 +12688,7 @@ public class ApiMgtDAO {
     }
 
     public boolean isPolicyExist(String policyType, int tenantId, String policyName) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();) {
             return isPolicyExist(connection, policyType, tenantId, policyName);
         } catch (SQLException e) {
@@ -12517,6 +12699,7 @@ public class ApiMgtDAO {
 
     public boolean isPolicyExist(Connection connection, String policyType, int tenantId, String policyName)
             throws APIManagementException {
+
         PreparedStatement isExistStatement = null;
 
         boolean isExist = false;
@@ -12550,6 +12733,7 @@ public class ApiMgtDAO {
     }
 
     public boolean isPolicyDeployed(String policyType, int tenantId, String policyName) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement isExistStatement = null;
 
@@ -12592,6 +12776,7 @@ public class ApiMgtDAO {
      */
     public BlockConditionsDTO addBlockConditions(BlockConditionsDTO blockConditionsDTO) throws
             APIManagementException {
+
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
@@ -12732,6 +12917,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
@@ -12775,6 +12961,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
@@ -12811,6 +12998,7 @@ public class ApiMgtDAO {
     }
 
     public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
@@ -12856,6 +13044,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean updateBlockConditionState(int conditionId, String state) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement updateBlockConditionPreparedStatement = null;
         boolean status = false;
@@ -12893,6 +13082,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean updateBlockConditionStateByUUID(String uuid, String state) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement updateBlockConditionPreparedStatement = null;
         boolean status = false;
@@ -12929,6 +13119,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement deleteBlockConditionPreparedStatement = null;
         boolean status = false;
@@ -12964,6 +13155,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement deleteBlockConditionPreparedStatement = null;
         boolean status = false;
@@ -12992,6 +13184,7 @@ public class ApiMgtDAO {
     }
 
     private boolean isValidContext(String context) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
         ResultSet resultSet = null;
@@ -13023,6 +13216,7 @@ public class ApiMgtDAO {
     }
 
     private boolean isValidApplication(String appOwner, String appName) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
         ResultSet resultSet = null;
@@ -13059,6 +13253,7 @@ public class ApiMgtDAO {
     }
 
     public String getAPILevelTier(int id) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
@@ -13109,6 +13304,7 @@ public class ApiMgtDAO {
 
     private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection
             connection) throws APIManagementException {
+
         PreparedStatement checkIsExistPreparedStatement = null;
         ResultSet checkIsResultSet = null;
         boolean status = false;
@@ -13134,6 +13330,7 @@ public class ApiMgtDAO {
     }
 
     public boolean hasSubscription(String tierId, String tenantDomainWithAt, String policyLevel) throws APIManagementException {
+
         PreparedStatement checkIsExistPreparedStatement = null;
         Connection connection = null;
         ResultSet checkIsResultSet = null;
@@ -13181,8 +13378,8 @@ public class ApiMgtDAO {
 
     }
 
-
     public String[] getAPIDetailsByContext(String context) {
+
         String apiName = "";
         String apiProvider = "";
         String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
@@ -13212,7 +13409,6 @@ public class ApiMgtDAO {
         }
         return new String[]{apiName, apiProvider};
     }
-
 
     /**
      * Returns a Prepared statement after setting all the dynamic parameters. Dynamic parameters will be added in
@@ -13335,6 +13531,16 @@ public class ApiMgtDAO {
         return updateSuccessful;
     }
 
+    public String getGroupId(int applicationId) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return getGroupId(conn, applicationId);
+        } catch (SQLException e) {
+            handleException("Failed to Retrieve GroupId for application " + applicationId, e);
+        }
+        return null;
+    }
+
     /**
      * Fetches all the groups for a given application and creates a single string separated by comma
      *
@@ -13342,39 +13548,19 @@ public class ApiMgtDAO {
      * @return comma separated group Id String
      * @throws APIManagementException
      */
-    public String getGroupId(int applicationId) throws APIManagementException {
+    private String getGroupId(Connection connection, int applicationId) throws SQLException {
 
-        String grpId = "";
         ArrayList<String> grpIdList = new ArrayList<String>();
-        PreparedStatement preparedStatement = null;
-        Connection conn = null;
-        ResultSet resultSet = null;
         String sqlQuery = SQLConstants.GET_GROUP_ID_SQL;
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            preparedStatement = conn.prepareStatement(sqlQuery);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setInt(1, applicationId);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                grpIdList.add(resultSet.getString("GROUP_ID"));
-            }
-
-            for (int i = 0; i < grpIdList.size(); i++) {
-                if (i == grpIdList.size() - 1) {
-                    grpId = grpId + grpIdList.get(i);
-                } else {
-                    grpId = grpId + grpIdList.get(i) + ",";
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    grpIdList.add(resultSet.getString("GROUP_ID"));
                 }
             }
-
-        } catch (SQLException e) {
-            handleException("Failed to Retrieve GroupId for application " + applicationId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, resultSet);
         }
-        return grpId;
+        return String.join(",", grpIdList);
     }
 
     /**
@@ -13386,6 +13572,7 @@ public class ApiMgtDAO {
      */
     public APISubscriptionInfoDTO[] getSubscribedAPIsForAnApp(String userId, int applicationID) throws
             APIManagementException {
+
         List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -13423,8 +13610,8 @@ public class ApiMgtDAO {
         return apiSubscriptionInfoDTOS.toArray(new APISubscriptionInfoDTO[apiSubscriptionInfoDTOS.size()]);
     }
 
-
     public Application getApplicationByClientId(String clientId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -13458,7 +13645,7 @@ public class ApiMgtDAO {
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
-                        application.setGroupId(getGroupId(application.getId()));
+                        application.setGroupId(getGroupId(connection, application.getId()));
                     }
                 }
             }
@@ -13477,6 +13664,7 @@ public class ApiMgtDAO {
      * @return List of Environments.
      */
     public List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException {
+
         List<Environment> envList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_TENANT_SQL)) {
@@ -13513,6 +13701,7 @@ public class ApiMgtDAO {
      * @return Gateway environment with given UUID
      */
     public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+
         Environment env = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt =
@@ -13550,6 +13739,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to add environment
      */
     public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
+
         String uuid = UUID.randomUUID().toString();
         environment.setUuid(uuid);
 
@@ -13592,6 +13782,7 @@ public class ApiMgtDAO {
      */
     private void addGatewayVhosts(Connection connection, int id, List<VHost> vhosts) throws
             APIManagementException {
+
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.INSERT_GATEWAY_VHOSTS_SQL)) {
             for (VHost vhost : vhosts) {
                 prepStmt.setInt(1, id);
@@ -13618,6 +13809,7 @@ public class ApiMgtDAO {
      */
     private void deleteGatewayVhosts(Connection connection, int id) throws
             APIManagementException {
+
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_GATEWAY_VHOSTS_SQL)) {
             prepStmt.setInt(1, id);
             prepStmt.executeUpdate();
@@ -13634,6 +13826,7 @@ public class ApiMgtDAO {
      * @return list of vhosts belongs to the gateway environments.
      */
     private List<VHost> getVhostGatewayEnvironments(Connection connection, Integer envId) throws APIManagementException {
+
         List<VHost> vhosts = new ArrayList<>();
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_VHOSTS_BY_ID_SQL)) {
             prepStmt.setInt(1, envId);
@@ -13669,6 +13862,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to delete environment
      */
     public void deleteEnvironment(String uuid) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_ENVIRONMENT_SQL)) {
@@ -13692,6 +13886,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to updated Environment
      */
     public Environment updateEnvironment(Environment environment) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
@@ -13833,6 +14028,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void convertNullThrottlingTiers() throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -13862,6 +14058,7 @@ public class ApiMgtDAO {
      */
     public Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws
             APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -13891,7 +14088,7 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 if (multiGroupAppSharingEnabled) {
                     if (StringUtils.isEmpty(application.getGroupId())) {
-                        application.setGroupId(getGroupId(application.getId()));
+                        application.setGroupId(getGroupId(connection,application.getId()));
                     }
                 }
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
@@ -13925,6 +14122,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException exception
      */
     public Map<String, URITemplate> getURITemplatesForAPI(API api) throws APIManagementException {
+
         Map<String, URITemplate> templatesMap = new HashMap<String, URITemplate>();
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -13962,6 +14160,7 @@ public class ApiMgtDAO {
     }
 
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
+
         List<ResourcePath> resourcePathList = new ArrayList<ResourcePath>();
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -13988,6 +14187,7 @@ public class ApiMgtDAO {
     }
 
     public void addAPIProduct(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmtAddAPIProduct = null;
         PreparedStatement prepStmtAddScopeEntry = null;
@@ -14231,6 +14431,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteAPIProduct(APIProductIdentifier productIdentifier) throws APIManagementException {
+
         String deleteQuery = SQLConstants.DELETE_API_PRODUCT_SQL;
         String deleteRatingsQuery = SQLConstants.REMOVE_FROM_API_RATING_SQL;
         PreparedStatement ps = null;
@@ -14261,6 +14462,7 @@ public class ApiMgtDAO {
     }
 
     public List<APIProductResource> getProductMappingsForAPI(API api) throws APIManagementException {
+
         List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
 
@@ -14282,6 +14484,7 @@ public class ApiMgtDAO {
     }
 
     public int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
+
         Connection conn = null;
         String queryGetProductId = SQLConstants.GET_PRODUCT_ID;
         PreparedStatement preparedStatement = null;
@@ -14316,6 +14519,7 @@ public class ApiMgtDAO {
     }
 
     public void updateAPIProduct(APIProduct product, String username) throws APIManagementException {
+
         Connection conn = null;
         PreparedStatement ps = null;
         if (log.isDebugEnabled()) {
@@ -14364,6 +14568,7 @@ public class ApiMgtDAO {
      */
     public List<APIProductResource> getAPIProductResourceMappings(APIProductIdentifier productIdentifier)
             throws APIManagementException {
+
         int productId = getAPIProductId(productIdentifier);
         List<APIProductResource> productResourceList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -14486,6 +14691,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getAuditApiId(APIIdentifier apiIdentifier) throws APIManagementException {
+
         String query = SQLConstants.GET_AUDIT_UUID_SQL;
         String auditUuid = null;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -14513,6 +14719,7 @@ public class ApiMgtDAO {
      */
     public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
+
         String addCustomComplexityDetails = SQLConstants.ADD_CUSTOM_COMPLEXITY_DETAILS_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(addCustomComplexityDetails)) {
@@ -14543,6 +14750,7 @@ public class ApiMgtDAO {
      */
     public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
+
         String updateCustomComplexityDetails = SQLConstants.UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(updateCustomComplexityDetails)) {
@@ -14571,6 +14779,7 @@ public class ApiMgtDAO {
      */
     public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException {
+
         String getCustomComplexityDetailsQuery = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement getCustomComplexityDetails = conn.prepareStatement(getCustomComplexityDetailsQuery)) {
@@ -14596,6 +14805,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
         String getCustomComplexityDetailsQuery = SQLConstants.GET_CUSTOM_COMPLEXITY_DETAILS_SQL;
         List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
@@ -14808,6 +15018,7 @@ public class ApiMgtDAO {
      * @return Category
      */
     public APICategory addCategory(int tenantID, APICategory category) throws APIManagementException {
+
         String uuid = UUID.randomUUID().toString();
         category.setId(uuid);
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -14830,6 +15041,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void updateCategory(APICategory apiCategory) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_CATEGORY)) {
             statement.setString(1, apiCategory.getDescription());
@@ -14849,6 +15061,7 @@ public class ApiMgtDAO {
      * @return API Categories List
      */
     public List<APICategory> getAllCategories(int tenantID) throws APIManagementException {
+
         List<APICategory> categoriesList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_CATEGORIES_BY_TENANT_ID_SQL)) {
@@ -14884,6 +15097,7 @@ public class ApiMgtDAO {
      * @return
      */
     public boolean isAPICategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
+
         String sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS;
         if (uuid != null) {
             sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS_FOR_ANOTHER_UUID;
@@ -14909,8 +15123,8 @@ public class ApiMgtDAO {
         return false;
     }
 
-
     public APICategory getAPICategoryByID(String apiCategoryID) throws APIManagementException {
+
         APICategory apiCategory = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_CATEGORY_BY_ID)) {
@@ -14931,6 +15145,7 @@ public class ApiMgtDAO {
     }
 
     public APICategory getAPICategoryByName(String apiCategoryName, String tenantDomain) throws APIManagementException {
+
         APICategory apiCategory = null;
         int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -14953,6 +15168,7 @@ public class ApiMgtDAO {
     }
 
     public void deleteCategory(String categoryID) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_CATEGORY)) {
             statement.setString(1, categoryID);
@@ -14963,6 +15179,7 @@ public class ApiMgtDAO {
     }
 
     public String addUserID(String userID, String userName) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_USER_ID)) {
             statement.setString(1, userID);
@@ -14975,6 +15192,7 @@ public class ApiMgtDAO {
     }
 
     public String getUserID(String userName) throws APIManagementException {
+
         String userID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_USER_ID)) {
@@ -15001,6 +15219,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public List<String> getNamesOfTierWithBandwidthQuotaType(int tenantId) throws APIManagementException {
+
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -15196,6 +15415,7 @@ public class ApiMgtDAO {
      */
     public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
                                                                       String tenantDomain) throws APIManagementException {
+
         ResultSet rs = null;
         Workflow workflow = new Workflow();
         String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE;
@@ -15345,6 +15565,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException If an error occurs while getting the usage details
      */
     public SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException {
+
         SharedScopeUsage sharedScopeUsage;
         List<API> usedApiList = new ArrayList<>();
         String sharedScopeName = getSharedScopeKeyByUUID(uuid);
@@ -15609,6 +15830,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+
         Set<String> versions = new HashSet<String>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -15635,6 +15857,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<String> getUUIDsOfAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+
         Set<String> versions = new HashSet<String>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -15659,6 +15882,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision count
      */
     public int getRevisionCountByAPI(String apiUUID) throws APIManagementException {
+
         int count = 0;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -15682,6 +15906,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision id
      */
     public int getMostRecentRevisionId(String apiUUID) throws APIManagementException {
+
         int revisionId = 0;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -15706,6 +15931,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getLatestRevisionUUID(String apiUUID) throws APIManagementException {
+
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -15954,6 +16180,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public APIRevision getRevisionByRevisionUUID(String revisionUUID) throws APIManagementException {
+
         APIRevision apiRevision = new APIRevision();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -15987,6 +16214,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
+
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -16004,7 +16232,6 @@ public class ApiMgtDAO {
         return revisionUUID;
     }
 
-
     /**
      * Get the earliest revision UUID from the revision list for a given API
      *
@@ -16013,6 +16240,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getEarliestRevision(String apiUUID) throws APIManagementException {
+
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -16090,6 +16318,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while checking revision table
      */
     public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
@@ -16118,6 +16347,7 @@ public class ApiMgtDAO {
      */
     public void addAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -16154,6 +16384,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public APIRevisionDeployment getAPIRevisionDeploymentByNameAndRevsionID(String name, String revisionId) throws APIManagementException {
+
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -16185,6 +16416,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentByRevisionUUID(String revisionUUID) throws APIManagementException {
+
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -16218,6 +16450,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
+
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -16251,6 +16484,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
     private boolean isDeploymentAvailableByAPIUUID(Connection connection, String apiUUID) throws APIManagementException {
+
         try (PreparedStatement statement =
                      connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID)) {
             statement.setString(1, apiUUID);
@@ -16266,7 +16500,6 @@ public class ApiMgtDAO {
         return false;
     }
 
-
     /**
      * Get APIRevisionDeployment details by providing ApiUUID
      *
@@ -16274,6 +16507,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentsByApiUUID(String apiUUID) throws APIManagementException {
+
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
@@ -16309,6 +16543,7 @@ public class ApiMgtDAO {
      */
     public void removeAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -16475,7 +16710,6 @@ public class ApiMgtDAO {
                         uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
                     }
                 }
-
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
@@ -17069,6 +17303,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void setServiceStatusInfoToAPI(API api, int apiId) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
                      .GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL)) {
@@ -17099,6 +17334,7 @@ public class ApiMgtDAO {
 
     private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
                                       Connection connection) throws SQLException {
+
         String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
             preparedStatement.setInt(1, apiId);
@@ -17118,6 +17354,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
+
         String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
         String serviceKey = StringUtils.EMPTY;
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -17145,6 +17382,7 @@ public class ApiMgtDAO {
      */
     public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
             throws SQLException {
+
         try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
             statement.setString(1, serviceKey);
             statement.setString(2, md5);
@@ -17192,6 +17430,68 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, revisionUUID);
             preparedStatement.setString(3, apiUUID);
             preparedStatement.executeUpdate();
+        }
+    }
+
+    private class SubscriptionInfo {
+
+        private int subscriptionId;
+        private String tierId;
+        private int applicationId;
+        private String subscriptionStatus;
+        private String apiVersion;
+
+        public SubscriptionInfo(int subscriptionId, String tierId, int applicationId,
+                                String apiVersion, String subscriptionStatus) {
+            this.subscriptionId = subscriptionId;
+            this.tierId = tierId;
+            this.applicationId = applicationId;
+            this.subscriptionStatus = subscriptionStatus;
+            this.apiVersion = apiVersion;
+        }
+
+        public String getApiVersion() {
+            return apiVersion;
+        }
+
+        public int getSubscriptionId() {
+
+            return subscriptionId;
+        }
+
+        public void setSubscriptionId(int subscriptionId) {
+
+            this.subscriptionId = subscriptionId;
+        }
+
+        public String getTierId() {
+
+            return tierId;
+        }
+
+        public void setTierId(String tierId) {
+
+            this.tierId = tierId;
+        }
+
+        public int getApplicationId() {
+
+            return applicationId;
+        }
+
+        public void setApplicationId(int applicationId) {
+
+            this.applicationId = applicationId;
+        }
+
+        public String getSubscriptionStatus() {
+
+            return subscriptionStatus;
+        }
+
+        public void setSubscriptionStatus(String subscriptionStatus) {
+
+            this.subscriptionStatus = subscriptionStatus;
         }
     }
 }

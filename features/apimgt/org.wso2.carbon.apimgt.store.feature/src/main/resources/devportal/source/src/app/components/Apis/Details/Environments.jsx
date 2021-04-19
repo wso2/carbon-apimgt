@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         alignItems: 'center',
         width: '100%',
+        border: `solid 1px ${theme.palette.grey[300]}`,
         '& .MuiInputBase-root:before,  .MuiInputBase-root:hover': {
             borderBottom: 'none !important',
             color: theme.palette.primary.main,
@@ -133,6 +134,7 @@ function Environments(props) {
                                     id: 'Apis.Details.Environments.copy.to.clipboard',
                                 })
                         }
+                        interactive
                         placement='right'
                         className={classes.iconStyle}
                     >
@@ -144,7 +146,7 @@ function Environments(props) {
                             // text={endpoint.URLs.http}
                             onCopy={() => onCopy('urlCopied')}
                         >
-                            <IconButton aria-label='Copy to clipboard'>
+                            <IconButton aria-label='Copy the Default Version URL to clipboard'>
                                 <Icon color='secondary'>file_copy</Icon>
                             </IconButton>
                         </CopyToClipboard>
@@ -163,21 +165,29 @@ function Environments(props) {
     // }
     return (
         <Box display='flex' flexDirection='column' width='100%'>
-            <Box mr={5} display='flex' alignItems='center' width='100%' flexDirection='row'>
-                <Typography variant='subtitle2' gutterBottom align='left' className={classes.sectionTitle}>
-                    <FormattedMessage
-                        id='Apis.Details.Environments.label.url'
-                        defaultMessage='URL'
-                    />
-                </Typography>
+            <Box mr={5} display='flex' area-label='API URL details' alignItems='center' width='100%' flexDirection='row'>
                 {selectedEndpoint && (
                     <>
-                        <Paper component='form' className={classes.root}>
+                        <Typography
+                            variant='subtitle2'
+                            component='label'
+                            for='gateway-envirounment'
+                            gutterBottom
+                            align='left'
+                            className={classes.sectionTitle}
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.Environments.label.url'
+                                defaultMessage='URL'
+                            />
+                        </Typography>
+                        <Paper id='gateway-envirounment' component='form' className={classes.root}>
                             {api.endpointURLs.length > 1 && (
                                 <>
                                     <Select
                                         value={selectedEndpoint.environmentName}
                                         onChange={updateSelectedEndpoint}
+                                        aria-label='Select the Gateway Environment'
                                     >
                                         {api.endpointURLs.map((endpoint) => (
                                             <MenuItem value={endpoint.environmentName}>
@@ -210,6 +220,7 @@ function Environments(props) {
                                                 id: 'Apis.Details.Environments.copy.to.clipboard',
                                             })
                                     }
+                                    interactive
                                     placement='right'
                                     className={classes.iconStyle}
                                 >
@@ -221,7 +232,7 @@ function Environments(props) {
                                         // text={endpoint.URLs.http}
                                         onCopy={() => onCopy('urlCopied')}
                                     >
-                                        <IconButton aria-label='Copy to clipboard'>
+                                        <IconButton aria-label='Copy the API URL to clipboard'>
                                             <Icon color='secondary'>file_copy</Icon>
                                         </IconButton>
                                     </CopyToClipboard>
@@ -230,10 +241,18 @@ function Environments(props) {
                         </Paper>
                     </>
                 )}
+                {!selectedEndpoint && (api.lifeCycleStatus !== 'PROTOTYPED') && (
+                    <Typography variant='subtitle2' component='p' gutterBottom align='left' className={classes.sectionTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.Environments.label.noendpoint'
+                            defaultMessage='No endpoints yet.'
+                        />
+                    </Typography>
+                )}
                 <GoToTryOut />
             </Box>
             <Box ml={8} alignItems='center' mt={1}>
-                {getDefaultVersionUrl() && (
+                {selectedEndpoint && (
                     <Typography variant='caption'>
                         {getDefaultVersionUrl()}
                     </Typography>

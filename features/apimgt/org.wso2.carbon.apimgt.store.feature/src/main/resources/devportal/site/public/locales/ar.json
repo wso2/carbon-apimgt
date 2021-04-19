@@ -253,7 +253,6 @@
  "Base.Header.headersearch.SearchUtils.lcState.all": "الكل",
  "Base.Header.headersearch.HeaderSearch.tooltip.option7": "حسب السياق الفرعي [النحو - السياق الفرعي: xxxx]",
  "Base.Header.headersearch.HeaderSearch.tooltip.option10": "حسب خصائص واجهة برمجة التطبيقات [البنية - property_name: property_value]",
- "Base.Header.headersearch.HeaderSearch.tooltip.option8": "حسب محتوى التوثيق [النحو - doc: xxxx]",
  "Base.Header.GlobalNavbar.menu.applications": "التطبيقات",
  "Base.Header.headersearch.HeaderSearch.tooltip.option6": "حسب العلامات [التركيب - العلامات: xxxx]",
  "Base.index.logo.alt": "بوابة التطوير",

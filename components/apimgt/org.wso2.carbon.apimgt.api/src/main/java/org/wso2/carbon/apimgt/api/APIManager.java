@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -80,6 +81,17 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
+
+
+    /**
+     * Returns the minimalistic information about the API given the UUID. This will only query from AM database AM_API
+     * table.
+     *
+     * @param id UUID of the API
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    APIInfo getAPIInfoByUUID(String id) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id

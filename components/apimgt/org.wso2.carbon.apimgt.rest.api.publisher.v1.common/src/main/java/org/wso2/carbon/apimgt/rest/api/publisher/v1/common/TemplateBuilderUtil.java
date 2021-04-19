@@ -217,6 +217,8 @@ public class TemplateBuilderUtil {
                     APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler",
                     authProperties);
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook." +
+                    "WebhooksExtensionHandler", Collections.emptyMap());
         } else if (APIConstants.APITransportType.SSE.toString().equals(api.getType())) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
                     authProperties);
@@ -939,7 +941,29 @@ public class TemplateBuilderUtil {
                             APIConstants.ENDPOINT_SECURITY_SANDBOX);
 
                 }
+            } else if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
+                    .equals(endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                addAWSCredentialsToList(prefix, api, gatewayAPIDTO, endpointConfig);
             }
+        }
+    }
+
+    private static void addAWSCredentialsToList(String prefix, API api, GatewayAPIDTO gatewayAPIDTO,
+                                                org.json.JSONObject endpointConfig) {
+
+        if (StringUtils.isNotEmpty((String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY))) {
+            CredentialDto awsSecretDto = new CredentialDto();
+            if (StringUtils.isNotEmpty(prefix)) {
+                awsSecretDto.setAlias(prefix.concat("--")
+                        .concat(GatewayUtils.retrieveAWSCredAlias(api.getId().getApiName(),
+                                api.getId().getVersion(), APIConstants.ENDPOINT_TYPE_AWSLAMBDA)));
+            } else {
+                awsSecretDto.setAlias(GatewayUtils.retrieveAWSCredAlias(api.getId().getApiName(),
+                        api.getId().getVersion(), APIConstants.ENDPOINT_TYPE_AWSLAMBDA));
+            }
+            awsSecretDto.setPassword((String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY));
+            gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(awsSecretDto,
+                    gatewayAPIDTO.getCredentialsToBeAdd()));
         }
     }
 

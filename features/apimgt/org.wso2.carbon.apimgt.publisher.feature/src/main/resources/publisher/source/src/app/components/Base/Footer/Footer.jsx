@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
@@ -27,11 +27,12 @@ import FeedbackForm from './FeedbackForm';
 
 const useStyles = makeStyles((theme) => ({
     footer: {
-        backgroundColor: theme.palette.grey.A100,
+        background: theme.custom.footer.background,
         paddingLeft: theme.spacing(3),
-        height: 50,
+        height: theme.custom.footer.height,
         alignItems: 'center',
         display: 'flex',
+        color: theme.custom.footer.color,
     },
 }));
 
@@ -43,23 +44,27 @@ const useStyles = makeStyles((theme) => ({
  */
 function Footer() {
     const classes = useStyles();
+    const theme = useTheme();
 
     return (
         <footer className={classes.footer}>
             <Grid container direction='row' justify='space-between' alignItems='center'>
                 <Grid item>
-                    <Typography noWrap>
-                        <FormattedMessage
-                            id='Base.Footer.Footer.product_details'
-                            defaultMessage='WSO2 API-M v4.0.0 | © 2021 WSO2 Inc'
-                        />
-                    </Typography>
+                    {theme.custom.footer.text ? theme.custom.footer.text : (
+                        <Typography noWrap>
+                            <FormattedMessage
+                                id='Base.Footer.Footer.product_details'
+                                defaultMessage='WSO2 API-M v4.0.0 | © 2021 WSO2 Inc'
+                            />
+                        </Typography>
+                    )}
                 </Grid>
                 {Configurations.app.feedback.enable && (
                     <Grid item>
                         <FeedbackForm />
                     </Grid>
                 )}
+                <Grid item />
             </Grid>
         </footer>
     );

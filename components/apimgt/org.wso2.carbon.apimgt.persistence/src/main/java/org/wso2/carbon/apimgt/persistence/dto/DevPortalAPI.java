@@ -39,6 +39,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String redirectURL;  // (originalStoreUrl)
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
@@ -169,6 +171,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setAdvertiseOnly(boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public String getSubscriptionAvailability() {

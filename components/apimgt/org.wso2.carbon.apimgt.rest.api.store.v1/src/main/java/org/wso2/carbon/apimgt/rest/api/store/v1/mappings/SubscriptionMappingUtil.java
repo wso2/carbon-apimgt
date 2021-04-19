@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,22 +56,48 @@ public class SubscriptionMappingUtil {
      */
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String organizationId)
             throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
         APIProductIdentifier apiProdId = subscription.getProductId();
+        APIInfoDTO apiInfo = null;
+
         if (apiId != null) {
-            API api = apiConsumer.getLightweightAPI(apiId, organizationId);
-            subscriptionDTO.setApiId(api.getUUID());
-            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
-            subscriptionDTO.setApiInfo(apiInfo);
+            API api = null;
+            try {
+                api = apiConsumer.getLightweightAPI(apiId, organizationId);
+                subscriptionDTO.setApiId(api.getUUID());
+                apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
+                subscriptionDTO.setApiInfo(apiInfo);
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User :" + username + " does not have access to the API " + apiId);
+                }
+                apiInfo = new APIInfoDTO();
+                apiInfo.setName(apiId.getName());
+                apiInfo.setVersion(apiId.getVersion());
+                subscriptionDTO.setApiInfo(apiInfo);
+            }
         }
         if (apiProdId != null) {
-            APIProduct apiProduct = apiConsumer.getAPIProduct(apiProdId);
-            subscriptionDTO.setApiId(apiProduct.getUuid());
-            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
-            subscriptionDTO.setApiInfo(apiInfo);
+            APIProduct apiProduct = null;
+
+            try {
+                apiProduct = apiConsumer.getAPIProduct(apiProdId);
+                subscriptionDTO.setApiId(apiProduct.getUuid());
+                apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
+                subscriptionDTO.setApiInfo(apiInfo);
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User :" + username + " does not have access to the API Product " + apiId);
+                }
+                apiInfo = new APIInfoDTO();
+                apiInfo.setName(apiProdId.getName());
+                apiInfo.setVersion(apiProdId.getVersion());
+                subscriptionDTO.setApiInfo(apiInfo);
+            }
         }
         Application application = subscription.getApplication();
         application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());

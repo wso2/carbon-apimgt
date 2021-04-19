@@ -211,7 +211,7 @@ class Monetization extends Component {
             <form method='post' onSubmit={this.handleSubmit}>
                 <Grid container xs={6} spacing={2}>
                     <Grid item xs={12}>
-                        <Typography variant='h4'>
+                        <Typography id='itest-api-details-api-monetization-head' variant='h4'>
                             <FormattedMessage
                                 id='Apis.Details.Monetization.Index.monetization'
                                 defaultMessage='Monetization'
@@ -247,7 +247,7 @@ class Monetization extends Component {
                                     (monetizationAttributes.length > 0) ? (
                                         (monetizationAttributes.map((monetizationAttribute, i) => (
                                             <TextField
-                                                disabled={isRestricted(['apim:api_publish'], api)}
+                                                disabled={!monStatus || isRestricted(['apim:api_publish'], api)}
                                                 fullWidth
                                                 id={'attribute' + i}
                                                 label={monetizationAttribute.displayName}

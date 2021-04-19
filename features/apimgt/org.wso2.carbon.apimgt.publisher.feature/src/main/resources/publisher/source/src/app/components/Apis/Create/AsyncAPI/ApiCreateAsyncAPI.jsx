@@ -31,7 +31,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
-import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -50,7 +49,6 @@ import ProvideAsyncAPI from './Steps/ProvideAsyncAPI';
 export default function ApiCreateAsyncAPI(props) {
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
-    const { settings } = useAppContext();
     // eslint-disable-next-line no-use-before-define
     const classes = useStyles();
     const [hideEndpoint, setHideEndpoint] = useState(true);
@@ -188,8 +186,6 @@ export default function ApiCreateAsyncAPI(props) {
                 },
             };
         }
-        additionalProperties.gatewayEnvironments = Array.isArray(settings.environment)
-        && settings.environment.length > 0 ? [settings.environment[0].name] : [];
         const newAPI = new API(additionalProperties);
         const promisedResponse = inputType === 'file'
             ? newAPI.importAsyncAPIByFile(inputValue) : newAPI.importAsyncAPIByUrl(inputValue);

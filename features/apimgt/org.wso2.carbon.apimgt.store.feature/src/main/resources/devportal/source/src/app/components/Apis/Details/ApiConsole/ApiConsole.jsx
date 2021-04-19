@@ -423,9 +423,6 @@ class ApiConsole extends React.Component {
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
         return (
             <>
-                <Typography variant='h4' component='h1' className={classes.titleSub}>
-                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
-                </Typography>
                 <Paper className={classes.paper}>
                     <Grid container className={classes.grid}>
                         {!isPrototypedAPI && !user && (
@@ -478,30 +475,32 @@ class ApiConsole extends React.Component {
                         api={this.state.api}
                     />
 
-                    <Grid container>
-                        <Grid xs={10} item />
-                        <Grid xs={1} item>
-                            <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
-                                <Icons icon={postmanIcon} width={30} height={30} />
-                                <FormattedMessage
-                                    id='Apis.Details.APIConsole.APIConsole.download.postman'
-                                    defaultMessage='Postman collection'
-                                />
-                            </Button>
-
-                        </Grid>
-                        <Grid xs={1} item>
-                            <a href={downloadLink} download={fileName}>
-                                <Button size='small'>
-                                    <Icons icon={openapiinitiativeIcon} width={30} height={30} className={classes.buttonIcon} />
+                    {api.type !== 'SOAP' && (
+                        <Grid container>
+                            <Grid xs={8} item />
+                            <Grid xs={2} item>
+                                <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
+                                    <Icons icon={postmanIcon} width={30} height={30} className={classes.buttonIcon} />
                                     <FormattedMessage
-                                        id='Apis.Details.APIConsole.APIConsole.download.swagger'
-                                        defaultMessage='OpenAPI'
+                                        id='Apis.Details.APIConsole.APIConsole.download.postman'
+                                        defaultMessage='Postman collection'
                                     />
                                 </Button>
-                            </a>
+
+                            </Grid>
+                            <Grid xs={2} item>
+                                <a href={downloadLink} download={fileName}>
+                                    <Button size='small'>
+                                        <Icons icon={openapiinitiativeIcon} width={30} height={30} className={classes.buttonIcon} />
+                                        <FormattedMessage
+                                            id='Apis.Details.APIConsole.APIConsole.download.swagger'
+                                            defaultMessage='OpenAPI'
+                                        />
+                                    </Button>
+                                </a>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    )}
                 </Paper>
                 <Paper className={classes.swaggerUIPaper}>
                     <SwaggerUI
