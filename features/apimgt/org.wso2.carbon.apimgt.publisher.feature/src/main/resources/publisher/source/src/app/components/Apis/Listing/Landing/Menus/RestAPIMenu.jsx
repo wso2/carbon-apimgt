@@ -24,12 +24,14 @@ import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMe
 import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
 import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Configurations from 'Config';
 import API from 'AppData/api';
+import Grid from '@material-ui/core/Grid';
 
 const RestAPIMenu = (props) => {
-    const { icon, isCreateMenu } = props;
+    const { icon, isCreateMenu, isDisabled } = props;
     const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
     const dense = isCreateMenu;
     const { alwaysShowDeploySampleButton } = Configurations.apis;
@@ -61,46 +63,62 @@ const RestAPIMenu = (props) => {
             )}
             icon={icon}
         >
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-landing-rest-create-default'
-                linkTo='/apis/create/rest'
-                helperText={(
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.content'
-                        defaultMessage='Design and prototype a new REST API'
-                    />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.title'
-                    defaultMessage='Start From Scratch'
-                />
-            </LandingMenuItem>
-
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-landing-upload-oas'
-                linkTo='/apis/create/openapi'
-                helperText={(
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content'
-                        defaultMessage='Import OAS 3 or Swagger 2.0 definition'
-                    />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title'
-                    defaultMessage='Import Open API'
-                />
-            </LandingMenuItem>
-            {(!isCreateMenu || (isCreateMenu && alwaysShowDeploySampleButton)) && showSampleDeploy && (
+            {!isDisabled ? (
                 <>
-                    <Box width={1}>
-                        <Divider light variant='middle' />
-                    </Box>
-                    <SampleAPI dense={dense} />
+                    <LandingMenuItem
+                        dense={dense}
+                        id='itest-id-landing-rest-create-default'
+                        linkTo='/apis/create/rest'
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.content'
+                                defaultMessage='Design and prototype a new REST API'
+                            />
+                        )}
+                    >
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.title'
+                            defaultMessage='Start From Scratch'
+                        />
+                    </LandingMenuItem>
+
+                    <LandingMenuItem
+                        dense={dense}
+                        id='itest-id-landing-upload-oas'
+                        linkTo='/apis/create/openapi'
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content'
+                                defaultMessage='Import OAS 3 or Swagger 2.0 definition'
+                            />
+                        )}
+                    >
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title'
+                            defaultMessage='Import Open API'
+                        />
+                    </LandingMenuItem>
+                    {(!isCreateMenu || (isCreateMenu && alwaysShowDeploySampleButton)) && showSampleDeploy && (
+                        <>
+                            <Box width={1}>
+                                <Divider light variant='middle' />
+                            </Box>
+                            <SampleAPI dense={dense} />
+                        </>
+                    )}
                 </>
+            ) : (
+                <Grid
+                    item
+                    xs={12}
+                >
+                    <Typography align='center' variant='body1'>
+                        <FormattedMessage
+                            id='Apis.Listing.Landing.Menus.RestAPIMenu.no.permission'
+                            defaultMessage='You do not have enough permission to create an API'
+                        />
+                    </Typography>
+                </Grid>
             )}
         </Component>
     );

@@ -29,6 +29,7 @@ import RestAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/RestAPIMenu';
 import SoapAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/SoapAPIMenu';
 import GraphqlAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/GraphqlAPIMenu';
 import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/StreamingAPIMenu';
+import { isRestricted } from 'AppData/AuthManager';
 
 const useStyles = makeStyles({
     root: {
@@ -83,10 +84,10 @@ const APILanding = () => {
                             alignItems='flex-start'
                             spacing={3}
                         >
-                            <RestAPIMenu icon={restApiIcon} />
-                            <SoapAPIMenu icon={soapApiIcon} />
-                            <GraphqlAPIMenu icon={graphqlIcon} />
-                            <StreamingAPIMenu icon={streamingApiIcon} />
+                            <RestAPIMenu icon={restApiIcon} isDisabled={isRestricted(['apim:api_create'])} />
+                            <SoapAPIMenu icon={soapApiIcon} isDisabled={isRestricted(['apim:api_create'])} />
+                            <GraphqlAPIMenu icon={graphqlIcon} isDisabled={isRestricted(['apim:api_create'])} />
+                            <StreamingAPIMenu icon={streamingApiIcon} isDisabled={isRestricted(['apim:api_create'])} />
                         </Grid>
                     </Box>
                 </Grid>

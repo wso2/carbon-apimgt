@@ -21,9 +21,11 @@ import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 
 const SoapAPIMenu = (props) => {
-    const { icon, isCreateMenu } = props;
+    const { icon, isCreateMenu, isDisabled } = props;
 
     const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
     const dense = isCreateMenu;
@@ -38,22 +40,36 @@ const SoapAPIMenu = (props) => {
             )}
             icon={icon}
         >
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-create-soap-api'
-                linkTo='/apis/create/wsdl'
-                helperText={(
+            {!isDisabled ? (
+                <LandingMenuItem
+                    dense={dense}
+                    id='itest-id-create-soap-api'
+                    linkTo='/apis/create/wsdl'
+                    helperText={(
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content'
+                            defaultMessage='Generate REST or create a pass-through API'
+                        />
+                    )}
+                >
                     <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content'
-                        defaultMessage='Generate REST or create a pass-through API'
+                        id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title'
+                        defaultMessage='Import WSDL'
                     />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title'
-                    defaultMessage='Import WSDL'
-                />
-            </LandingMenuItem>
+                </LandingMenuItem>
+            ) : (
+                <Grid
+                    item
+                    xs={12}
+                >
+                    <Typography align='center' variant='body1'>
+                        <FormattedMessage
+                            id='Apis.Listing.Landing.Menus.SoapAPIMenu.no.permission'
+                            defaultMessage='You do not have enough permission to create an API'
+                        />
+                    </Typography>
+                </Grid>
+            )}
         </Component>
     );
 };

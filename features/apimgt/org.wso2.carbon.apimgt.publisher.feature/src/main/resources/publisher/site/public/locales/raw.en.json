@@ -3180,6 +3180,12 @@
   "Apis.Listing.ApiThumb.version": {
     "defaultMessage": "Version"
   },
+  "Apis.Listing.Landing.Menus.RestAPIMenu.no.permission": {
+    "defaultMessage": "You do not have enough permission to create an API"
+  },
+  "Apis.Listing.Landing.Menus.SoapAPIMenu.no.permission": {
+    "defaultMessage": "You do not have enough permission to create an API"
+  },
   "Apis.Listing.SampleAPI.SampleAPI.create.new": {
     "defaultMessage": "Let’s get started !"
   },
@@ -3194,6 +3200,9 @@
   },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title": {
     "defaultMessage": "Import GraphQL SDL"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.graphql.no permission": {
+    "defaultMessage": "You do not have enough permission to create an API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
     "defaultMessage": "REST API"

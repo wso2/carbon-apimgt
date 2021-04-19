@@ -6701,6 +6701,18 @@
       "value": "Version"
     }
   ],
+  "Apis.Listing.Landing.Menus.RestAPIMenu.no.permission": [
+    {
+      "type": 0,
+      "value": "You do not have enough permission to create an API"
+    }
+  ],
+  "Apis.Listing.Landing.Menus.SoapAPIMenu.no.permission": [
+    {
+      "type": 0,
+      "value": "You do not have enough permission to create an API"
+    }
+  ],
   "Apis.Listing.SampleAPI.SampleAPI.create.new": [
     {
       "type": 0,
@@ -6729,6 +6741,12 @@
     {
       "type": 0,
       "value": "Import GraphQL SDL"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.graphql.no permission": [
+    {
+      "type": 0,
+      "value": "You do not have enough permission to create an API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": [

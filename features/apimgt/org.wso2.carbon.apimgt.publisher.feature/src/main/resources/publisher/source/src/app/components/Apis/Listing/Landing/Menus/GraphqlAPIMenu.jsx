@@ -21,9 +21,11 @@ import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 
 const GraphqlAPIMenu = (props) => {
-    const { icon, isCreateMenu } = props;
+    const { icon, isCreateMenu, isDisabled } = props;
     const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
     const dense = isCreateMenu;
 
@@ -38,22 +40,36 @@ const GraphqlAPIMenu = (props) => {
             )}
             icon={icon}
         >
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-create-graphql-api'
-                linkTo='/apis/create/graphQL'
-                helperText={(
+            {!isDisabled ? (
+                <LandingMenuItem
+                    dense={dense}
+                    id='itest-id-create-graphql-api'
+                    linkTo='/apis/create/graphQL'
+                    helperText={(
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.content'
+                            defaultMessage='Use an existing definition'
+                        />
+                    )}
+                >
                     <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.content'
-                        defaultMessage='Use an existing definition'
+                        id='Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title'
+                        defaultMessage='Import GraphQL SDL'
                     />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title'
-                    defaultMessage='Import GraphQL SDL'
-                />
-            </LandingMenuItem>
+                </LandingMenuItem>
+            ) : (
+                <Grid
+                    item
+                    xs={12}
+                >
+                    <Typography align='center' variant='body1'>
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.graphql.no permission'
+                            defaultMessage='You do not have enough permission to create an API'
+                        />
+                    </Typography>
+                </Grid>
+            )}
         </Component>
     );
 };

@@ -21,9 +21,11 @@ import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 
 const StreamingAPIMenu = (props) => {
-    const { icon, isCreateMenu } = props;
+    const { icon, isCreateMenu, isDisabled } = props;
     const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
     const dense = isCreateMenu;
     return (
@@ -37,70 +39,86 @@ const StreamingAPIMenu = (props) => {
             )}
             icon={icon}
         >
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-create-streaming-api-ws'
-                linkTo='/apis/create/streamingapi/ws'
-                helperText={(
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content'
-                        defaultMessage='Create a Web Socket API'
-                    />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title'
-                    defaultMessage='Web Socket API'
-                />
-            </LandingMenuItem>
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-create-streaming-api-web-hook'
-                linkTo='/apis/create/streamingapi/websub'
-                helperText={(
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content'
-                        defaultMessage='Create a Webhook/WebSub API'
-                    />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title'
-                    defaultMessage='Webhook API'
-                />
-            </LandingMenuItem>
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-create-streaming-api-sse'
-                linkTo='/apis/create/streamingapi/sse'
-                helperText={(
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content'
-                        defaultMessage='Create a Server-Sent Events API'
-                    />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title'
-                    defaultMessage='SSE API'
-                />
-            </LandingMenuItem>
-            <LandingMenuItem
-                dense={dense}
-                id='itest-id-create-streaming-api-import'
-                linkTo='/apis/create/asyncapi'
-                helperText={(
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.content'
-                        defaultMessage='Upload a file or provide an Async API URL'
-                    />
-                )}
-            >
-                <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.title'
-                    defaultMessage='Import an AsyncAPI'
-                />
-            </LandingMenuItem>
+            {!isDisabled ? (
+                <>
+                    <LandingMenuItem
+                        dense={dense}
+                        id='itest-id-create-streaming-api-ws'
+                        linkTo='/apis/create/streamingapi/ws'
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content'
+                                defaultMessage='Create a Web Socket API'
+                            />
+                        )}
+                    >
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title'
+                            defaultMessage='Web Socket API'
+                        />
+                    </LandingMenuItem>
+                    <LandingMenuItem
+                        dense={dense}
+                        id='itest-id-create-streaming-api-web-hook'
+                        linkTo='/apis/create/streamingapi/websub'
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content'
+                                defaultMessage='Create a Webhook/WebSub API'
+                            />
+                        )}
+                    >
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title'
+                            defaultMessage='Webhook API'
+                        />
+                    </LandingMenuItem>
+                    <LandingMenuItem
+                        dense={dense}
+                        id='itest-id-create-streaming-api-sse'
+                        linkTo='/apis/create/streamingapi/sse'
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content'
+                                defaultMessage='Create a Server-Sent Events API'
+                            />
+                        )}
+                    >
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title'
+                            defaultMessage='SSE API'
+                        />
+                    </LandingMenuItem>
+                    <LandingMenuItem
+                        dense={dense}
+                        id='itest-id-create-streaming-api-import'
+                        linkTo='/apis/create/asyncapi'
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.content'
+                                defaultMessage='Upload a file or provide an Async API URL'
+                            />
+                        )}
+                    >
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.title'
+                            defaultMessage='Import an AsyncAPI'
+                        />
+                    </LandingMenuItem>
+                </>
+            ) : (
+                <Grid
+                    item
+                    xs={12}
+                >
+                    <Typography align='center' variant='body1'>
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.graphql.no permission'
+                            defaultMessage='You do not have enough permission to create an API'
+                        />
+                    </Typography>
+                </Grid>
+            )}
         </Component>
     );
 };
