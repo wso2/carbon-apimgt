@@ -58,8 +58,7 @@ public class APITokenMgtServiceComponent {
                     ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(), listener, null);
             log.debug("Key Manager User Operation Listener is enabled.");
 
-            APIManagerConfigurationService configurationService =
-                    org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+            APIManagerConfigurationService configurationService = ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService();
             boolean accessTokenBindingEnable;
 
