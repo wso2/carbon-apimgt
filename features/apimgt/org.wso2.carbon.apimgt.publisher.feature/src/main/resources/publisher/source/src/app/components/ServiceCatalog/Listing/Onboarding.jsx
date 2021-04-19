@@ -126,7 +126,8 @@ function Onboarding() {
                         size='small'
                         variant='outlined'
                         color='primary'
-                        href='https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/'
+                        href={'https://apim.docs.wso2.com/en/4.0.0/use-cases/streaming-usecase/'
+                        + 'exposing-stream-as-managed-api-in-service-catalog/'}
                         target='_blank'
                         rel='noopener noreferrer'
                         endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
