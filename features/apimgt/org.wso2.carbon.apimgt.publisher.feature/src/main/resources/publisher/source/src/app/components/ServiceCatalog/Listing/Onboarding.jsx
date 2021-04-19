@@ -108,6 +108,7 @@ function Onboarding() {
                 >
                     {' '}
                     <Button
+                        style={{ marginLeft: '10px' }}
                         className={classes.actionStyle}
                         size='small'
                         variant='outlined'
@@ -122,6 +123,7 @@ function Onboarding() {
                     </Button>
                     {' '}
                     <Button
+                        style={{ marginLeft: '10px', marginRight: '10px' }}
                         className={classes.actionStyle}
                         size='small'
                         variant='outlined'
