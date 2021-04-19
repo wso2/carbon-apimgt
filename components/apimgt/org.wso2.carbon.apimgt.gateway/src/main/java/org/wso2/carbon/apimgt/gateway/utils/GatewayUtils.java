@@ -367,7 +367,7 @@ public class GatewayUtils {
 
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, Integer.parseInt(errorCode));
         if (messageContext.isResponse()) {
             messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_RESPONSE);
             messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, APIMgtGatewayConstants.BAD_RESPONSE);
