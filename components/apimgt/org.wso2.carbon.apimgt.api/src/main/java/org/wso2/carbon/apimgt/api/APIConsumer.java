@@ -497,7 +497,7 @@ public interface APIConsumer extends APIManager {
      * @param username
      * @throws APIManagementException
      */
-    void removeApplication(Application application, String username) throws APIManagementException;
+    void removeApplication(Application application, String username, String tenantDomain) throws APIManagementException;
 
     /** get the status of the Application creation process given the application Id
      *
