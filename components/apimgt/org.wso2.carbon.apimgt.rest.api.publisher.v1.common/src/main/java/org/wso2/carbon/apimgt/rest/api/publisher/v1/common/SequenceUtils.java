@@ -37,15 +37,15 @@ public class SequenceUtils {
     /**
      * Gets the velocity template config context with sequence data populated
      *
-     * @param soapToRestMediationDtoList  registry resource path
-     * @param seqType       sequence type whether in or out sequence
-     * @param configContext velocity template config context
+     * @param soapToRestMediationDtoList registry resource path
+     * @param seqType                    sequence type whether in or out sequence
+     * @param configContext              velocity template config context
      * @return {@link ConfigContext} sequences populated velocity template config context
      */
     public static ConfigContext getSequenceTemplateConfigContext(
             List<SoapToRestMediationDto> soapToRestMediationDtoList, String seqType, ConfigContext configContext) {
 
-        if (soapToRestMediationDtoList.size()>0) {
+        if (soapToRestMediationDtoList.size() > 0) {
             JSONObject pathObj = new JSONObject();
             for (SoapToRestMediationDto soapToRestMediationDto : soapToRestMediationDtoList) {
                 String method = soapToRestMediationDto.getMethod();

@@ -26,6 +26,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -206,15 +207,14 @@ public class ThrottleConditionEvaluator {
 
     private boolean isJWTClaimPresent(AuthenticationContext authenticationContext, ConditionDTO condition) {
 
-        Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
+        Map<String, String> assertions = JWTUtil.getJWTClaims(authenticationContext.getCallerToken());
         if (assertions != null) {
-            Object value = assertions.get(condition.getConditionName());
+            String value = assertions.get(condition.getConditionName());
             if (value == null) {
                 return false;
-            } else if (value instanceof String) {
-                String valueString = (String) value;
+            } else {
                 Pattern pattern = Pattern.compile(condition.getConditionValue());
-                Matcher matcher = pattern.matcher(valueString);
+                Matcher matcher = pattern.matcher(value);
                 return matcher.find();
             }
         }
@@ -224,21 +224,18 @@ public class ThrottleConditionEvaluator {
     private boolean isJWTClaimPresent(AuthenticationContext authenticationContext, ConditionDto.JWTClaimConditions
             condition) {
 
-        Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
+        Map<String, String> assertions = JWTUtil.getJWTClaims(authenticationContext.getCallerToken());
         boolean status = true;
 
         for (Map.Entry<String, String> jwtClaim : condition.getValues().entrySet()) {
-            Object value = assertions.get(jwtClaim.getKey());
+            String value = assertions.get(jwtClaim.getKey());
             if (value == null) {
                 status = false;
                 break;
-            } else if (value instanceof String) {
-                String valueString = (String) value;
-                Pattern pattern = Pattern.compile(jwtClaim.getValue());
-                Matcher matcher = pattern.matcher(valueString);
-                status = status && matcher.find();
             } else {
-                status = false;
+                Pattern pattern = Pattern.compile(jwtClaim.getValue());
+                Matcher matcher = pattern.matcher(value);
+                status = status && matcher.find();
             }
         }
         if (condition.isInvert()) {

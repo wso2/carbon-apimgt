@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -23,13 +23,19 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
+import { useHistory } from 'react-router-dom';
 import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
+import Banner from 'AppComponents/Shared/Banner';
 import { FormattedMessage, useIntl } from 'react-intl';
-import ServiceCatalog from 'AppData/ServiceCatalog';
+import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
     buttonStyle: {
@@ -44,6 +50,10 @@ const useStyles = makeStyles((theme) => ({
     actionButtonStyle: {
         marginBottom: theme.spacing(2),
         marginRight: theme.spacing(2),
+    },
+    mandatoryLabelStyle: {
+        marginLeft: theme.spacing(2),
+        marginBottom: theme.spacing(2),
     },
     textStyle: {
         fontSize: 11,
@@ -109,6 +119,21 @@ function reducer(state, { field, value }) {
     }
 }
 
+const protocols = [
+    {
+        displayName: 'WebSocket',
+        value: 'WS',
+    },
+    {
+        displayName: 'WebSub',
+        value: 'WEBSUB',
+    },
+    {
+        displayName: 'SSE',
+        value: 'SSE',
+    },
+];
+
 /**
  * Create API Component for the Service Catalog
  * @param {any} props prop values
@@ -116,54 +141,77 @@ function reducer(state, { field, value }) {
  */
 function CreateApi(props) {
     const {
-        serviceId,
-        history,
+        isIconButton,
         isOverview,
         serviceDisplayName,
+        serviceKey,
         definitionType,
+        serviceVersion,
+        serviceUrl,
+        usage,
     } = props;
     const classes = useStyles();
     const intl = useIntl();
-    // const [serviceDefinition, setServiceDefinition] = useState(null);
-
+    const history = useHistory();
     const [open, setOpen] = useState(false);
-
+    const [pageError, setPageError] = useState(null);
+    const [type, setType] = useState('');
     const [isFormValid, setIsFormValid] = useState(false);
 
-    const initialState = {
-        name: '',
-        context: '',
-        version: '',
-    };
+    const [policies, setPolicies] = useState([]);
 
-    const [state, dispatch] = useReducer(reducer, initialState);
-
-    const getServiceDefinition = () => {
-        const promisedServiceDefinition = ServiceCatalog.getServiceDefinition(serviceId);
-        promisedServiceDefinition.then((data) => {
-            if (data && (definitionType === 'OAS3' || definitionType === 'OAS2')) {
-                const apiDetails = JSON.parse(data);
-                dispatch({ field: 'name', value: apiDetails.info.title.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') });
-                dispatch({ field: 'version', value: apiDetails.info.version });
-            }
-        }).catch((error) => {
-            if (error.response) {
-                Alert.error(error.response.body.description);
-            } else {
-                Alert.error(intl.formatMessage({
-                    id: 'ServiceCatalog.Listing.CreateApi.get.service.def.error',
-                    defaultMessage: 'Something went wrong while retrieving the Service Definition.',
+    useEffect(() => {
+        API.policies('subscription').then((response) => {
+            const allPolicies = response.body.list;
+            if (allPolicies.length === 0) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Create.Default.APICreateDefault.error.policies.not.available',
+                    defaultMessage: 'Throttling policies not available. Contact your administrator',
                 }));
+            } else if (allPolicies.filter((p) => p.name === 'Unlimited').length > 0) {
+                setPolicies(['Unlimited']);
+            } else {
+                setPolicies([allPolicies[0].name]);
             }
         });
-    };
+    }, []);
+    /**
+     * This method gets the context for the API from the service url
+     *
+     * @param {string} url service url
+     * @returns {string} The url or the pathname of the url
+     */
+    function getContextFromServiceUrl(url) {
+        if (url && url !== '') {
+            const urlObject = url.split('://').length > 1 ? new URL(url) : null;
+            if (urlObject) {
+                let path = urlObject.pathname;
+                if (path.endsWith('/')) {
+                    path = path.slice(0, -1); // Remove leading `/` because of context validation failure
+                }
+                return path;
+            } else {
+                return url.replace(/[^a-zA-Z ]/g, ''); // we need to remove the special chars from context.
+            }
+        }
+        return url;
+    }
 
-    const toggleOpen = () => {
-        getServiceDefinition();
-        setOpen(!open);
+    const initialState = {
+        name: serviceDisplayName
+            ? serviceDisplayName.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') + (usage === 0 ? '' : usage + 1)
+            : serviceDisplayName + (usage === 0 ? '' : usage + 1),
+        context: getContextFromServiceUrl(serviceUrl) + (usage === 0 ? '' : usage + 1),
+        version: serviceVersion,
     };
+    const [state, dispatch] = useReducer(reducer, initialState);
+
     const handleClose = () => {
         setOpen(false);
+    };
+
+    const handleChangeType = (event) => {
+        setType(event.target.value);
     };
 
     const {
@@ -264,8 +312,15 @@ function CreateApi(props) {
         }
     }
 
+    const toggleOpen = (event) => {
+        validate('context', context);
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen(!open);
+    };
+
     const runAction = () => {
-        const promisedCreateApi = ServiceCatalog.createApiFromService(serviceId, state);
+        const promisedCreateApi = API.createApiFromService(serviceKey, { ...state, policies }, type);
         promisedCreateApi.then((data) => {
             const apiInfo = data;
             Alert.info(intl.formatMessage({
@@ -274,30 +329,61 @@ function CreateApi(props) {
             }));
             setOpen(!open);
             history.push(`/apis/${apiInfo.id}/overview`);
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while creating API from service',
-                id: 'ServiceCatalog.CreateApi.error.create.api',
-            }));
+        }).catch((error) => {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+                setPageError(error.response.body);
+            } else {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error while creating API from service',
+                    id: 'ServiceCatalog.CreateApi.error.create.api',
+                }));
+                setPageError('Error while creating API from service');
+            }
+            console.error(error);
         });
     };
 
     return (
         <>
-            <Button
-                color='primary'
-                variant={isOverview ? 'contained' : 'outlined'}
-                className={isOverview ? classes.topMarginSpacing : classes.buttonStyle}
-                onClick={toggleOpen}
-            >
-                <Typography className={!isOverview && classes.textStyle}>
-                    <FormattedMessage
-                        id='ServiceCatalog.CreateApi.create.api'
-                        defaultMessage='Create API'
-                    />
-                </Typography>
-            </Button>
+            {isIconButton && (
+                <Tooltip
+                    interactive
+                    title={(
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.components.ServiceCard.create.api'
+                            defaultMessage='Create API'
+                        />
+                    )}
+                >
+                    <IconButton
+                        disableRipple
+                        disableFocusRipple
+                        color='primary'
+                        onClick={toggleOpen}
+                        aria-label={`Create api from ${serviceDisplayName} service`}
+                    >
+                        <AddCircleIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+            {!isIconButton && (
+                <Button
+                    color='primary'
+                    variant={isOverview ? 'contained' : 'outlined'}
+                    className={isOverview ? classes.topMarginSpacing : classes.buttonStyle}
+                    onClick={toggleOpen}
+                >
+                    <Typography className={!isOverview && classes.textStyle}>
+                        <FormattedMessage
+                            id='ServiceCatalog.CreateApi.create.api'
+                            defaultMessage='Create API'
+                        />
+                    </Typography>
+                </Button>
+            )}
             <Dialog
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                 open={open}
                 onClose={handleClose}
                 maxWidth='sm'
@@ -321,6 +407,23 @@ function CreateApi(props) {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2}>
+                        {/* Page error banner */}
+                        {pageError && (
+                            <>
+                                <Grid item xs={12}>
+                                    <Banner
+                                        onClose={() => setPageError(null)}
+                                        disableActions
+                                        dense
+                                        paperProps={{ elevation: 1 }}
+                                        type='error'
+                                        message={pageError}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} />
+                            </>
+                        )}
+                        {/* end of Page error banner */}
                         <Grid item xs={12}>
                             <TextField
                                 autoFocus
@@ -420,28 +523,91 @@ function CreateApi(props) {
                                         onChange={handleChange}
                                     />
                                 </Grid>
+                                {definitionType === 'ASYNC_API' && (
+                                    <Grid item md={8} xs={6}>
+                                        <TextField
+                                            id='version-selector'
+                                            select
+                                            label={(
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.CreateApi.select.protocol'
+                                                    defaultMessage='Select Protocol'
+                                                />
+                                            )}
+                                            name='selectType'
+                                            value={type}
+                                            onChange={handleChangeType}
+                                            margin='dense'
+                                            variant='outlined'
+                                            fullWidth
+                                            SelectProps={{
+                                                MenuProps: {
+                                                    anchorOrigin: {
+                                                        vertical: 'bottom',
+                                                        horizontal: 'left',
+                                                    },
+                                                    getContentAnchorEl: null,
+                                                },
+                                            }}
+                                        >
+                                            {protocols.map((protocol) => (
+                                                <MenuItem value={protocol.value} native>
+                                                    {protocol.value}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
+                                )}
                             </Grid>
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions className={classes.actionButtonStyle}>
-                    <Button onClick={toggleOpen} color='primary'>
-                        <FormattedMessage
-                            id='ServiceCatalog.CreateApi.cancel.btn'
-                            defaultMessage='Cancel'
-                        />
-                    </Button>
-                    <Button
-                        onClick={runAction}
-                        color='primary'
-                        variant='contained'
-                        disabled={!isFormValid}
+                <DialogActions>
+                    <Grid
+                        container
+                        direction='row'
+                        justify='flex-start'
+                        alignItems='center'
+                        className={classes.mandatoryLabelStyle}
                     >
-                        <FormattedMessage
-                            id='ServiceCatalog.CreateApi.update.btn'
-                            defaultMessage='Create API'
-                        />
-                    </Button>
+                        <Grid item>
+                            <Typography variant='caption' display='block'>
+                                <sup style={{ color: 'red' }}>*</sup>
+                                {' '}
+                                <FormattedMessage
+                                    id='ServiceCatalog.CreateApi.mandatory.field.label'
+                                    defaultMessage='Mandatory fields'
+                                />
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                    <Grid
+                        container
+                        direction='row'
+                        justify='flex-end'
+                        alignItems='center'
+                        className={classes.actionButtonStyle}
+                    >
+                        <Grid item>
+                            <Button onClick={toggleOpen} color='primary'>
+                                <FormattedMessage
+                                    id='ServiceCatalog.CreateApi.cancel.btn'
+                                    defaultMessage='Cancel'
+                                />
+                            </Button>
+                            <Button
+                                onClick={runAction}
+                                color='primary'
+                                variant='contained'
+                                disabled={!isFormValid}
+                            >
+                                <FormattedMessage
+                                    id='ServiceCatalog.CreateApi.update.btn'
+                                    defaultMessage='Create API'
+                                />
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </DialogActions>
             </Dialog>
         </>
@@ -453,9 +619,11 @@ CreateApi.defaultProps = {
 };
 
 CreateApi.propTypes = {
-    serviceId: PropTypes.string.isRequired,
+    serviceKey: PropTypes.string.isRequired,
     serviceDisplayName: PropTypes.string.isRequired,
     definitionType: PropTypes.string.isRequired,
+    serviceVersion: PropTypes.string.isRequired,
+    serviceUrl: PropTypes.string.isRequired,
     isOverview: PropTypes.bool,
 };
 

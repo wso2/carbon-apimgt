@@ -46,7 +46,6 @@ export default function GraphQLUI(props) {
         URLs,
         securitySchemeType,
         accessTokenProvider,
-        handleSchema,
 
     } = props;
     const { api } = useContext(ApiContext);
@@ -64,7 +63,6 @@ export default function GraphQLUI(props) {
             .then((res) => {
                 const graphqlSchemaObj = buildSchema(res.data);
                 setSchema(graphqlSchemaObj);
-                handleSchema(res.data);
             });
     }, []);
 
@@ -94,7 +92,7 @@ export default function GraphQLUI(props) {
         } else {
             token = 'Bearer ' + accessTokenProvider();
         }
-        return fetch((URLs.https), {
+        return fetch((URLs && URLs.https), {
             method: 'post',
             headers: {
                 Accept: 'application/json',
@@ -111,19 +109,18 @@ export default function GraphQLUI(props) {
             <>
                 <Box width='30%' m={1}>
                     <TextField
-
                         label={(
                             <FormattedMessage
                                 defaultMessage='Gateway URLs'
                                 id='Apis.Details.GraphQLConsole.GraphQLUI.URLs'
                             />
                         )}
-                        value={URLs.https}
+                        value={URLs && URLs.https}
                         name='selectedURL'
                         fullWidth
                         margin='normal'
                         variant='outlined'
-                        InputProps={URLs.https}
+                        InputProps={URLs && URLs.https}
                         disabled
                     />
                 </Box>

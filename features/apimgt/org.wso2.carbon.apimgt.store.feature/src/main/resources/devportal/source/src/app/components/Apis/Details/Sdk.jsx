@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -29,14 +28,15 @@ import JSFileDownload from 'js-file-download';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-import { withStyles, withTheme } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
 import { app } from 'Settings';
 import Api from '../../../data/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     genericMessageWrapper: {
         margin: theme.spacing(2),
     },
@@ -52,7 +52,7 @@ const styles = theme => ({
     titleWrappper: {
         display: 'flex',
         alignItems: 'center',
-        '& h4' : {
+        '& h4': {
             marginRight: theme.spacing(1),
         },
     },
@@ -61,16 +61,18 @@ const styles = theme => ({
     },
     cardRoot: {
         background: theme.custom.apiDetailPages.sdkBackground,
-    }
+    },
 });
 
 /**
- *
- *
  * @class Sdk
  * @extends {React.Component}
  */
 class Sdk extends React.Component {
+    /**
+     * Create instance of Sdk
+     * @param {JSON} props props passed from parent
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -87,17 +89,15 @@ class Sdk extends React.Component {
     }
 
     /**
-     *
-     *
      * @memberof Sdk
      */
     componentDidMount() {
         const api = new Api();
         const user = AuthManager.getUser();
         if (user != null) {
-            const promised_languages = api.getSdkLanguages();
+            const promisedLanguages = api.getSdkLanguages();
 
-            promised_languages
+            promisedLanguages
                 .then((response) => {
                     if (response.obj.length === 0) {
                         this.setState({ sdkLanguages: false });
@@ -107,13 +107,8 @@ class Sdk extends React.Component {
                     this.setState({ items: response.obj });
                 })
                 .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const status = error.status;
-                    if (status === 404) {
-                        this.setState({ notFound: true });
-                    }
+                    console.log(error);
+                    Alert.error(error);
                 });
         }
     }
@@ -121,15 +116,15 @@ class Sdk extends React.Component {
     /**
      * Call the REST API to generate the SDK
      *
-     * @param {*} apiId
-     * @param {*} language
+     * @param {string} apiId api id
+     * @param {string} language language selected
      * @memberof Sdk
      */
     getSdkForApi(apiId, language) {
         const api = new Api();
-        const promised_sdk = api.getSdk(apiId, language);
+        const promisedSdk = api.getSdk(apiId, language);
 
-        promised_sdk
+        promisedSdk
             .then((response) => {
                 const sdkZipName = response.headers['content-disposition'].match(/filename="(.+)"/)[1];
                 const sdkZip = response.data;
@@ -137,26 +132,18 @@ class Sdk extends React.Component {
                 JSFileDownload(sdkZip, sdkZipName);
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 400) {
-                    this.setState({ badRequest: true });
-                } else if (status === 500) {
-                    this.setState({ serverError: true });
-                }
+                console.log(error);
+                Alert.error(error);
             });
     }
 
     /**
      * Handle the click event of the download button
-     *
+     * @param {event} _event click event
+     * @param {string} item selected language
      * @memberof Sdk
      */
-    handleClick = (event, item) => {
+    handleClick = (_event, item) => {
         const apiId = this.api_uuid;
         const language = item;
         this.getSdkForApi(apiId, language);
@@ -164,11 +151,12 @@ class Sdk extends React.Component {
 
     /**
      * Handle the change event of the Search input field
-     *
+     * @param {event} event click event
      * @memberof Sdk
      */
     handleChange = (event) => {
-        let updatedList = this.state.sdkLanguages;
+        const { sdkLanguages } = this.state;
+        let updatedList = sdkLanguages;
         updatedList = updatedList.filter((item) => {
             return item.toLowerCase().search(event.target.value.toLowerCase()) !== -1;
         });
@@ -177,15 +165,16 @@ class Sdk extends React.Component {
 
     /**
      * Handle sdk image not found issue. Point to a default image
+     * @param {event} ev click event
+     * @memberof Sdk
      */
     addDefaultSrc = (ev) => {
-        ev.target.src = app.context + '/site/public/images/sdks/default.svg';
+        const evLocal = ev;
+        evLocal.target.src = app.context + '/site/public/images/sdks/default.svg';
     };
 
     /**
-     *
-     *
-     * @returns
+     * @returns  {JSX} rendered sdk ui
      * @memberof Sdk
      */
     render() {
@@ -198,51 +187,50 @@ class Sdk extends React.Component {
                 apiDetailPages: { onlyShowSdks },
             },
         } = theme;
-        const filteredLanguageList =
-        languageList && languageList.length > 0 && onlyShowSdks && onlyShowSdks.length > 0
-                ? languageList.filter(lang => onlyShowSdks.includes(lang.toLowerCase()))
-                : languageList;
+        const filteredLanguageList = languageList && languageList.length > 0 && onlyShowSdks && onlyShowSdks.length > 0
+            ? languageList.filter((lang) => onlyShowSdks.includes(lang.toLowerCase()))
+            : languageList;
         if (onlyIcons) {
             return (
                 filteredLanguageList && (
-                    <React.Fragment>
-                        {filteredLanguageList.map((language, index) =>
-                            index < 3 && (
-                                <Grid item xs={4} key={index}>
-                                    <a
-                                        onClick={event => this.handleClick(event, language)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <img
-                                            alt={language}
-                                            src={
-                                                app.context +
-                                                    '/site/public/images/sdks/' +
-                                                    new String(language) +
-                                                    '.svg'
-                                            }
-                                            style={{
-                                                width: 80,
-                                                height: 80,
-                                                margin: 10,
-                                            }}
-                                        />
-                                    </a>
-                                </Grid>
-                            ))}
-                    </React.Fragment>
+                    <>
+                        {filteredLanguageList.map((language, index) => index < 3 && (
+                            <Grid item xs={4} key={language}>
+                                <a
+                                    onClick={(event) => this.handleClick(event, language)}
+                                    onKeyDown={(event) => this.handleClick(event, language)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <img
+                                        alt={language}
+                                        src={
+                                            app.context
+                                                    + '/site/public/images/sdks/'
+                                                    + String(language)
+                                                    + '.svg'
+                                        }
+                                        style={{
+                                            width: 80,
+                                            height: 80,
+                                            margin: 10,
+                                        }}
+                                    />
+                                </a>
+                            </Grid>
+                        ))}
+                    </>
                 )
             );
         }
         return (
-            <React.Fragment>
+            <>
                 <div className={classes.titleWrappper}>
-                    <Typography variant='h4' className={classes.titleSub}>
+                    <Typography variant='h4' component='h2' className={classes.titleSub}>
                         <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
                     </Typography>
                     {filteredLanguageList && this.state.sdkLanguages.length >= this.filter_threshold && (
                         <TextField
-                            variant="outlined"
+                            variant='outlined'
                             id='search'
                             label={intl.formatMessage({
                                 defaultMessage: 'Search SDK',
@@ -256,11 +244,11 @@ class Sdk extends React.Component {
                     )}
                 </div>
                 {filteredLanguageList ? (
-                    <Grid container className='tab-grid' spacing={0} className={classes.gridRoot}>
+                    <Grid container spacing={0} className={classes.gridRoot}>
                         <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
                             <Grid container justify='flex-start' spacing={4}>
-                                {filteredLanguageList.map((language, index) => (
-                                    <Grid key={index} item key={index}>
+                                {filteredLanguageList.map((language) => (
+                                    <Grid key={language} item>
                                         <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
                                             <Card className={classes.cardRoot}>
                                                 <div>{language.toString().toUpperCase()}</div>
@@ -268,11 +256,11 @@ class Sdk extends React.Component {
                                                 <CardMedia
                                                     title={language.toString().toUpperCase()}
                                                     src={
-                                                        app.context + '/site/public/images/sdks/' +
-                                                        new String(language) +
-                                                        '.svg'
+                                                        app.context + '/site/public/images/sdks/'
+                                                        + String(language)
+                                                        + '.svg'
                                                     }
-                                                    classes={{root: classes.cardTitle}}
+                                                    classes={{ root: classes.cardTitle }}
                                                 >
                                                     <img
                                                         alt={language}
@@ -285,10 +273,11 @@ class Sdk extends React.Component {
                                                     <Grid container justify='center'>
                                                         <Button
                                                             color='secondary'
-                                                            onClick={event => this.handleClick(event, language)}
+                                                            onClick={(event) => this.handleClick(event, language)}
+                                                            aria-label={'Download ' + language + ' SDK'}
                                                         >
                                                             <Icon>arrow_downward</Icon>
-                                                            {'Download'}
+                                                            Download
                                                         </Button>
                                                     </Grid>
                                                 </CardActions>
@@ -314,7 +303,7 @@ class Sdk extends React.Component {
                         </InlineMessage>
                     </div>
                 )}
-            </React.Fragment>
+            </>
         );
     }
 }

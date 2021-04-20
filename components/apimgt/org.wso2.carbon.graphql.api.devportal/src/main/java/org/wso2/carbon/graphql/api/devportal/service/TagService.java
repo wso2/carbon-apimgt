@@ -15,8 +15,6 @@ import java.util.Set;
 
 public class TagService {
 
-
-
     public List<TagDTO> getAllTags() throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(null);
         String loggedInUserName= AuthenticationContext.getLoggedInUserName();

@@ -17,23 +17,4 @@ import java.util.Set;
 
 
 public class LabelService {
-
-
-    public List<LabelDTO> getLabelDetails(String name) throws APIManagementException {
-
-
-        String loggedInUserName= AuthenticationContext.getLoggedInUserName();
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
-        List<Label> labels = apiConsumer.getLabelDataFromDAO();
-        LabelMapping labelMapping = new LabelMapping();
-        List<LabelDTO> labelData = labelMapping.fromLabeltoLabelDTO(labels,name);
-        return labelData;
-    }
-
-    public List<LabelNameDTO> getLabelNames(DevPortalAPI devPortalAPI) throws APIPersistenceException {
-        LabelMapping labelMapping = new LabelMapping();
-        List<LabelNameDTO> labelNameDTOList = labelMapping.fromLabelNametoLabelNameDTO(devPortalAPI);
-        return labelNameDTOList;
-    }
-
 }

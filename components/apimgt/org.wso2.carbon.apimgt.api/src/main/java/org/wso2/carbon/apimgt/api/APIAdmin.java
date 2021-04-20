@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -35,55 +36,69 @@ import java.util.Map;
  */
 public interface APIAdmin  {
     /**
-     * Returns labels of a given tenant
+     * Returns environments of a given tenant
      *
-     * @param tenantDomain    tenant domain
-     * @return A List of labels related to the given tenant
+     * @param tenantDomain tenant domain
+     * @return List of environments related to the given tenant
      */
-    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
+    List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException;
 
     /**
-     * Creates a new label for the tenant
+     * Returns environment of a given uuid
      *
-     * @param tenantDomain    tenant domain
-     * @param label           content to add
-     * @throws APIManagementException if failed add Label
+     * @param tenantDomain tenant domain
+     * @return List of environments related to the given tenant
      */
-    Label addLabel(String tenantDomain, Label label) throws APIManagementException;
+    Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException;
 
     /**
-     * Delete existing label
+     * Creates a new environment in the tenant
      *
-     * @param labelID  Label identifier
-     * @throws APIManagementException If failed to delete label
+     * @param tenantDomain tenant domain
+     * @param environment  content to add
+     * @return Added environment
+     * @throws APIManagementException if failed add environment
      */
-    void deleteLabel(String user, String labelID) throws APIManagementException;
+    Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException;
 
     /**
-     * Updates the details of the given Label.
-     * @param tenantDomain    tenant domain
-     * @param label             content to update
-     * @throws APIManagementException if failed to update label
+     * Delete an existing environment
+     *
+     * @param tenantDomain tenant domain
+     * @param uuid         Environment identifier
+     * @throws APIManagementException If failed to delete environment
      */
-    Label updateLabel(String tenantDomain, Label label) throws APIManagementException;
+    void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+
+    /**
+     * Updates the details of the given Environment.
+     *
+     * @param tenantDomain tenant domain
+     * @param environment  content to update
+     * @return updated environment
+     * @throws APIManagementException if failed to update environment
+     */
+    Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException;
+
+
 
     Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 
     /**
-     * Get the applications of the given tenantId with pagination.
-     *
-     * @param tenantId             tenant Id
-     * @param start                content to start
-     * @param offset               content to limit number of pages
-     * @param searchOwner          content to search applications based on owners
-     * @param searchApplication    content to search applications based on application
-     * @param sortColumn           content to sort column
-     * @param sortOrder            content to sort in a order
-     * @throws APIManagementException if failed to get applications
+     * Returns List of Applications
+     * @param user              Logged-in user
+     * @param owner             Owner of the application
+     * @param tenantId          Logged-in user tenant-id
+     * @param limit             The limit
+     * @param offset            The offset
+     * @param applicationName   The application name
+     * @param sortBy            The sortBy column
+     * @param sortOrder         The sort order
+     * @return          List of applications match to the search conditions
+     * @throws APIManagementException
      */
-    List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start , int offset, String searchOwner,
-                                                              String searchApplication, String sortColumn,
-                                                              String sortOrder)
+    Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit , int offset,
+                                                String applicationName, String sortBy, String sortOrder)
             throws APIManagementException;
 
     /**

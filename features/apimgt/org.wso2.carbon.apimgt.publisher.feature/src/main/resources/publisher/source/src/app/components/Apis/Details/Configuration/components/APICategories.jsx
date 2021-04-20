@@ -37,6 +37,11 @@ const useStyles = makeStyles((theme) => ({
         right: theme.spacing(-4),
         top: theme.spacing(1),
     },
+    listItemText: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
 }));
 /**
  * Render the categories drop down.
@@ -112,6 +117,20 @@ function APICategories(props) {
                     SelectProps={{
                         multiple: true,
                         renderValue: (selected) => (Array.isArray(selected) ? selected.join(', ') : selected),
+                        MenuProps: {
+                            anchorOrigin: {
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            },
+                            getContentAnchorEl: null,
+                            keepMounted: true,
+                            PaperProps: {
+                                style: {
+                                    maxHeight: 300,
+                                    maxWidth: 300,
+                                },
+                            },
+                        },
                     }}
                     onChange={(e) => configDispatcher({ action: 'categories', value: e.target.value })}
                     InputProps={{
@@ -128,7 +147,11 @@ function APICategories(props) {
                             value={category.name}
                         >
                             <Checkbox color='primary' checked={api.categories.includes(category.name)} />
-                            <ListItemText primary={category.name} secondary={category.description} />
+                            <ListItemText
+                                primary={category.name}
+                                secondary={category.description}
+                                classes={{ primary: classes.listItemText }}
+                            />
                         </MenuItem>
                     ))}
                 </TextField>

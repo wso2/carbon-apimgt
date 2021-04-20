@@ -18,10 +18,29 @@
 
 package org.wso2.carbon.apimgt.impl.jwt;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.clients.Util;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 
 /**
  * JWT internal Representation
@@ -32,6 +51,10 @@ public class SignedJWTInfo implements Serializable {
     private SignedJWT signedJWT;
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
+    private String certificateThumbprint; //holder of key certificate bound access token
+    private X509Certificate x509ClientCertificate; //holder of key certificate cnf
+    private String x509ClientCertificateHash; //holder of key certificate cnf
+    private static final Log log = LogFactory.getLog(JWTValidator.class);
 
     public enum ValidationStatus {
         NOT_VALIDATED, INVALID, VALID
@@ -84,5 +107,35 @@ public class SignedJWTInfo implements Serializable {
 
     public void setValidationStatus(ValidationStatus validationStatus) {
         this.validationStatus = validationStatus;
+    }
+
+    public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
+
+        this.x509ClientCertificate = x509ClientCertificate;
+        if (x509ClientCertificate != null) {
+            CertificateMgtUtils.convert(x509ClientCertificate).ifPresent(x509Certificate ->
+                    x509ClientCertificateHash = X509CertUtils.computeSHA256Thumbprint(x509Certificate).toString());
+        }
+    }
+
+
+    public String getCertificateThumbprint() {
+
+        if (null != jwtClaimsSet) {
+            Object thumbprint = jwtClaimsSet.getClaim(APIConstants.CNF);
+            net.minidev.json.JSONObject thumbprintJson = (net.minidev.json.JSONObject) thumbprint;
+            return thumbprintJson.getAsString(APIConstants.DIGEST);
+        }
+        return null;
+    }
+
+    public String getX509ClientCertificateHash() {
+
+        return x509ClientCertificateHash;
+    }
+
+    public X509Certificate getX509ClientCertificate() {
+
+        return x509ClientCertificate;
     }
 }

@@ -19,15 +19,15 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.am.analytics.publisher.exception.MetricCreationException;
+//import org.wso2.am.analytics.publisher.exception.MetricCreationException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
-import org.wso2.am.analytics.publisher.reporter.MetricReporter;
-import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
-import org.wso2.am.analytics.publisher.reporter.MetricSchema;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
-import org.wso2.carbon.apimgt.common.gateway.analytics.Constants;
-
-import java.util.Map;
+//import org.wso2.am.analytics.publisher.reporter.MetricReporter;
+//import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
+//import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+//import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
+//import org.wso2.carbon.apimgt.common.gateway.analytics.Constants;
+//
+//import java.util.Map;
 
 /**
  * Analytics event publisher for APIM
@@ -45,36 +45,36 @@ public class AnalyticsDataPublisher {
     }
 
     public static AnalyticsDataPublisher getInstance() {
-        if (instance == null) {
-            synchronized (AnalyticsDataPublisher.class) {
-                if (instance == null) {
-                    instance = new AnalyticsDataPublisher();
-                    instance.init();
-                }
-            }
-        }
+//        if (instance == null) {
+//            synchronized (AnalyticsDataPublisher.class) {
+//                if (instance == null) {
+//                    instance = new AnalyticsDataPublisher();
+//                    instance.init();
+//                }
+//            }
+//        }
         return instance;
     }
 
-    private void init() {
-        Map<String, String> configs = AnalyticsConfigurationHolder.getInstance().getConfigurations();
-        String reporterClass = configs.get("publisher.reporter.class");
-        try {
-            MetricReporter metricReporter;
-            if (reporterClass != null) {
-                metricReporter = MetricReporterFactory.getInstance()
-                        .createMetricReporter(reporterClass, configs);
-            } else {
-                metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
-            }
-            this.successMetricReporter = metricReporter
-                    .createCounterMetric(Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);
-            this.faultyMetricReporter = metricReporter
-                    .createCounterMetric(Constants.FAULTY_METRIC_NAME, MetricSchema.ERROR);
-        } catch (MetricCreationException e) {
-            log.error("Error initializing event publisher.", e);
-        }
-    }
+//    private void init() {
+//        Map<String, String> configs = AnalyticsConfigurationHolder.getInstance().getConfigurations();
+//        String reporterClass = configs.get("publisher.reporter.class");
+//        try {
+//            MetricReporter metricReporter;
+//            if (reporterClass != null) {
+//                metricReporter = MetricReporterFactory.getInstance()
+//                        .createMetricReporter(reporterClass, configs);
+//            } else {
+//                metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
+//            }
+//            this.successMetricReporter = metricReporter
+//                    .createCounterMetric(Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);
+//            this.faultyMetricReporter = metricReporter
+//                    .createCounterMetric(Constants.FAULTY_METRIC_NAME, MetricSchema.ERROR);
+//        } catch (MetricCreationException e) {
+//            log.error("Error initializing event publisher.", e);
+//        }
+//    }
 
     public CounterMetric getSuccessMetricReporter() {
         return successMetricReporter;

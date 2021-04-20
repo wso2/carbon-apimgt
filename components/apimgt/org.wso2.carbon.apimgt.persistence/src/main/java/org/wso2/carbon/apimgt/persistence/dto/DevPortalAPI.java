@@ -41,12 +41,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String redirectURL;  // (originalStoreUrl)
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
     private List<String> securityScheme = new ArrayList<>();
     private Set<String> environments;
-    private Set<String> gatewayLabels;
+//    private Set<String> gatewayLabels;
 
     private Set<String> apiCategories;
     private boolean isMonetizationEnabled; //(monetizationStatus)
@@ -63,25 +65,19 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String visibility;
     private String visibleRoles;
 
+    private Set<String> gatewayLabels;
 
-    //new for apiSecurity
-//    private String apiSecurity;
-//    public void setApiSecurity(String apiSecurity){
-//        this.apiSecurity = apiSecurity;
-//    }
-//    public String getApiSecurity(){
-//        return apiSecurity;
-//    }
-    //
-//    private List<Label> gatewayLabelListForAPI;
-//
-//    public List<Label> getGatewayLabelListForAPI() {
-//        return gatewayLabelListForAPI;
-//    }
-//
-//    public void setGatewayLabelListForAPI(List<Label> gatewayLabelListForAPI) {
-//        this.gatewayLabelListForAPI = gatewayLabelListForAPI;
-//    }
+
+
+
+    public Set<String> getGatewayLabels() {
+        return gatewayLabels;
+    }
+
+    public void setGatewayLabels(Set<String> gatewayLabels) {
+        this.gatewayLabels = gatewayLabels;
+    }
+
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -195,6 +191,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
+    }
+
     public String getSubscriptionAvailability() {
         return subscriptionAvailability;
     }
@@ -233,14 +237,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setEnvironments(Set<String> environments) {
         this.environments = environments;
-    }
-
-    public Set<String> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(Set<String> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
     }
 
     public Set<String> getApiCategories() {
@@ -335,7 +331,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + ", environments=" + environments + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="

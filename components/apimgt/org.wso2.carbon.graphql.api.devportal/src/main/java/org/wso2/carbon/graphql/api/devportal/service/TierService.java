@@ -25,7 +25,6 @@ public class TierService {
 
     public List<TierDTO> getTierDetailsFromDAO(String uuid, String name) throws APIManagementException, RegistryException, UserStoreException, APIPersistenceException {
 
-
         String loggedInUserTenantDomain = AuthenticationContext.getLoggedInTenanDomain();
 
         TierMapping tierMapping = new TierMapping();

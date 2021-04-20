@@ -18,11 +18,21 @@
 
 package org.wso2.carbon.apimgt.common.gateway.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,11 +41,18 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Helper class for util related to jwt generation.
  */
 public final class JWTUtil {
+
+    private static final Log log = LogFactory.getLog(JWTUtil.class);
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
 
@@ -90,13 +107,7 @@ public final class JWTUtil {
 
             jwtHeader.append("\"x5t\":\"");
             jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"kid\":\"");
-            jwtHeader.append(getKID(base64UrlEncodedThumbPrint, getJWSCompliantAlgorithmCode(signatureAlgorithm)));
-            jwtHeader.append("\"");
-
-            jwtHeader.append("}");
+            jwtHeader.append("\"}");
             return jwtHeader.toString();
 
         } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
@@ -124,19 +135,7 @@ public final class JWTUtil {
     }
 
     /**
-     * Helper method to add kid claim into to JWT_HEADER.
-     *
-     * @param certThumbprint     thumbPrint generated for certificate
-     * @param signatureAlgorithm relevant signature algorithm
-     * @return KID
-     */
-    private static String getKID(String certThumbprint, String signatureAlgorithm) {
-
-        return certThumbprint + "_" + signatureAlgorithm;
-    }
-
-    /**
-     * Utility method to sign a JWT assertion with a particular signature algorithm
+     * Utility method to sign a JWT assertion with a particular signature algorithm.
      *
      * @param assertion          valid JWT assertion
      * @param privateKey         private key which use to sign the JWT assertion
@@ -167,6 +166,75 @@ public final class JWTUtil {
         } catch (SignatureException e) {
             //do not log
             throw new JWTGeneratorException("Error while signing JWT", e);
+        }
+    }
+
+    /**
+     * Parse a jwt assertion provided in string format and returns set of claims
+     * defined in the assertion.
+     *
+     * @param jwt jwt assertion
+     * @return claims as a {@link Map}. if jwt is not parse-able null will be returned.
+     */
+    public static Map<String, String> getJWTClaims(String jwt) {
+
+        if (StringUtils.isNotEmpty(jwt)) {
+            Map<String, String> jwtClaims = new HashMap<>();
+            String[] jwtTokenArray = jwt.split(Pattern.quote("."));
+            // decoding JWT
+            try {
+                byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
+                String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
+                JsonElement parsedJson = new JsonParser().parse(jwtAssertion);
+                if (parsedJson.isJsonObject()) {
+                    JsonObject rootObject = parsedJson.getAsJsonObject();
+                    for (Map.Entry<String, JsonElement> rootElement : rootObject.entrySet()) {
+                        if (rootElement.getValue().isJsonPrimitive()) {
+                            jwtClaims.put(rootElement.getKey(), rootElement.getValue().getAsString());
+                        } else if (rootElement.getValue().isJsonArray()) {
+                            JsonArray arrayElement = rootElement.getValue().getAsJsonArray();
+                            List<String> element = new ArrayList<>();
+                            for (JsonElement jsonElement : arrayElement) {
+                                element.add(jsonElement.getAsString());
+                            }
+                            jwtClaims.put(rootElement.getKey(), String.join("|", element));
+                        } else if (rootElement.getValue().isJsonObject()) {
+                            getJWTClaimsArray(jwtClaims, (JsonObject) rootElement.getValue(), rootElement.getKey());
+                        }
+                    }
+                }
+            } catch (JsonParseException e) {
+                // gson throws runtime exceptions for parsing errors. We don't want to throw
+                // errors and break the flow from this util method. Therefore logging and
+                // returning null for error case
+                log.error("Error occurred while parsing jwt claims");
+            }
+            return jwtClaims;
+        } else {
+            return null;
+        }
+
+    }
+
+    private static void getJWTClaimsArray(Map<String, String> jwtClaims, JsonObject jsonObject, String parent) {
+
+        if (jsonObject.isJsonObject()) {
+            JsonObject rootObject = jsonObject.getAsJsonObject();
+            for (Map.Entry<String, JsonElement> rootElement : rootObject.entrySet()) {
+                String claimKey = parent.concat(".").concat(rootElement.getKey());
+                if (rootElement.getValue().isJsonPrimitive()) {
+                    jwtClaims.put(claimKey, rootElement.getValue().getAsString());
+                } else if (rootElement.getValue().isJsonArray()) {
+                    JsonArray arrayElement = rootElement.getValue().getAsJsonArray();
+                    List<String> element = new ArrayList<>();
+                    for (JsonElement jsonElement : arrayElement) {
+                        element.add(jsonElement.getAsString());
+                    }
+                    jwtClaims.put(claimKey, String.join("|", element));
+                } else if (rootElement.getValue().isJsonObject()) {
+                    getJWTClaimsArray(jwtClaims, (JsonObject) rootElement.getValue(), claimKey);
+                }
+            }
         }
     }
 }

@@ -205,6 +205,23 @@ class ThumbnailView extends Component {
     }
 
     /**
+     * Event listener for file drop on the dropzone
+     *
+     * @param {File} acceptedFile dropped file
+     */
+    onDrop(acceptedFile) {
+        this.setState({ file: acceptedFile });
+    }
+
+    selectIcon = (selectedIconUpdate) => {
+        this.setState({ selectedIconUpdate });
+    };
+
+    selectBackground = (backgroundIndexUpdate) => {
+        this.setState({ backgroundIndexUpdate });
+    };
+
+    /**
      * @param {SyntheticEvent} e React event object
      */
     handleClick = (action, intl) => () => {
@@ -226,6 +243,8 @@ class ThumbnailView extends Component {
                 }
                 /* eslint prefer-destructuring: ["error", {VariableDeclarator: {object: true}}] */
                 fileObj = file[0];
+            } else if (selectedTab === 'remove') {
+                fileObj = new File([], 'FileName.json', { type: 'application/json' });
             } else {
                 if (!selectedIconUpdate && !colorUpdate && !backgroundIndexUpdate) {
                     Alert.error(intl.formatMessage({
@@ -276,23 +295,6 @@ class ThumbnailView extends Component {
             selectedIconUpdate: cState.selectedIcon,
         }));
     }
-
-    /**
-     * Event listener for file drop on the dropzone
-     *
-     * @param {File} acceptedFile dropped file
-     */
-    onDrop(acceptedFile) {
-        this.setState({ file: acceptedFile });
-    }
-
-    selectIcon = (selectedIconUpdate) => {
-        this.setState({ selectedIconUpdate });
-    };
-
-    selectBackground = (backgroundIndexUpdate) => {
-        this.setState({ backgroundIndexUpdate });
-    };
 
     /**
      * Add new thumbnail image to an API
@@ -349,6 +351,8 @@ class ThumbnailView extends Component {
         } = this.state;
         if (selectedTab === 'upload') {
             return !(file && file[0]) || uploading; // If no files is uploaded retrun true
+        } else if (selectedTab === 'remove') {
+            return false;
         } else {
             // If one of them is selected we return false
             return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate) || uploading;
@@ -363,6 +367,7 @@ class ThumbnailView extends Component {
             api, classes, width, height, isEditable, theme, intl, imageUpdate,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
+        const maxSize = 1000000;
         const {
             file,
             thumbnail,
@@ -435,6 +440,16 @@ class ThumbnailView extends Component {
                                     />
                                 )}
                             />
+                            <FormControlLabel
+                                value='remove'
+                                control={<Radio color='primary' />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.remove'
+                                        defaultMessage='Remove'
+                                    />
+                                )}
+                            />
                         </RadioGroup>
                     </Paper>
 
@@ -459,6 +474,7 @@ class ThumbnailView extends Component {
                                     <Dropzone
                                         multiple={false}
                                         accept='image/*'
+                                        maxSize={maxSize}
                                         className={classes.dropzone}
                                         activeClassName={classes.acceptDrop}
                                         rejectClassName={classes.rejectDrop}
@@ -466,21 +482,40 @@ class ThumbnailView extends Component {
                                             this.onDrop(dropFile);
                                         }}
                                     >
-                                        {({ getRootProps, getInputProps }) => (
-                                            <div {...getRootProps({ style: dropzoneStyles })}>
-                                                <input {...getInputProps()} />
-                                                <div className={classes.dropZoneWrapper}>
-                                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                                    <Typography>
-                                                        <FormattedMessage
-                                                            id='upload.image'
-                                                            defaultMessage='Click or drag the image to upload.'
-                                                        />
-                                                    </Typography>
+                                        {({ getRootProps, getInputProps, rejectedFiles }) => {
+                                            const isFileTooLarge = rejectedFiles.length > 0
+                                                && rejectedFiles[0].size > maxSize;
+                                            return (
+                                                <div {...getRootProps({ style: dropzoneStyles })}>
+                                                    <input {...getInputProps()} />
+                                                    {isFileTooLarge && (
+                                                        <Typography color='error'>
+                                                            <FormattedMessage
+                                                                id='upload.image.size.error'
+                                                                defaultMessage='Uploaded File is too large.
+                                                                Maximum file size limit to 1MB'
+                                                            />
+                                                        </Typography>
+                                                    )}
+                                                    <div className={classes.dropZoneWrapper}>
+                                                        <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                                        <Typography>
+                                                            <FormattedMessage
+                                                                id='upload.image'
+                                                                defaultMessage='Click or drag the image to upload.'
+                                                            />
+                                                        </Typography>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            );
+                                        }}
                                     </Dropzone>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='upload.image.size.info'
+                                            defaultMessage='Maximum file size limit to 1MB'
+                                        />
+                                    </Typography>
                                 </Grid>
                             </Grid>
                         )}
@@ -549,26 +584,34 @@ class ThumbnailView extends Component {
                                         color={this.state.color || '#ffffff'}
                                         onChangeComplete={this.handleChangeComplete}
                                     />
-                                    <div className={classes.subtitleWrapper}>
-                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage
-                                                id={
-                                                    'Apis.Listing.components.ImageGenerator.'
-                                                    + 'ThumbnailView.select.background'
-                                                }
-                                                defaultMessage='Select a Background'
-                                            />
-                                        </Typography>
-                                    </div>
-                                    {colorPairs.map((colorPair, index) => (
-                                        <div
-                                            className={classes.backgroundSelection}
-                                            onClick={() => this.selectBackground(index)}
-                                            onKeyDown={() => { }}
-                                        >
-                                            <Background width={100} height={100} colorPair={colorPair} />
-                                        </div>
-                                    ))}
+                                    {(!theme.custom.thumbnailTemplates || !theme.custom.thumbnailTemplates.active) && (
+                                        <>
+                                            <div className={classes.subtitleWrapper}>
+                                                <Typography
+                                                    component='p'
+                                                    variant='subtitle2'
+                                                    className={classes.subtitle}
+                                                >
+                                                    <FormattedMessage
+                                                        id={
+                                                            'Apis.Listing.components.ImageGenerator.'
+                                                        + 'ThumbnailView.select.background'
+                                                        }
+                                                        defaultMessage='Select a Background'
+                                                    />
+                                                </Typography>
+                                            </div>
+                                            {colorPairs.map((colorPair, index) => (
+                                                <div
+                                                    className={classes.backgroundSelection}
+                                                    onClick={() => this.selectBackground(index)}
+                                                    onKeyDown={() => { }}
+                                                >
+                                                    <Background width={100} height={100} colorPair={colorPair} />
+                                                </div>
+                                            ))}
+                                        </>
+                                    )}
                                 </Grid>
                             </Grid>
                         )}
@@ -606,10 +649,16 @@ class ThumbnailView extends Component {
                                     <CircularProgress size={16} />
                                 </>
                             )}
-                            {selectedTab !== 'design' && !uploading && (
+                            {selectedTab === 'upload' && !uploading && (
                                 <FormattedMessage
                                     id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn'
                                     defaultMessage='Upload'
+                                />
+                            )}
+                            {selectedTab === 'remove' && !uploading && (
+                                <FormattedMessage
+                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn'
+                                    defaultMessage='Remove'
                                 />
                             )}
                         </Button>

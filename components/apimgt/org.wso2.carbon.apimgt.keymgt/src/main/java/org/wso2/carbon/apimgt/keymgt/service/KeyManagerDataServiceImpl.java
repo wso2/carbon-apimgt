@@ -334,6 +334,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
         ApplicationKeyMapping mapping = new ApplicationKeyMapping();
         mapping.setApplicationId(event.getApplicationId());
+        mapping.setApplicationUUID(event.getApplicationUUID());
         mapping.setConsumerKey(event.getConsumerKey());
         mapping.setKeyType(event.getKeyType());
         mapping.setKeyManager(event.getKeyManager());
@@ -369,6 +370,9 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         sub.setPolicyId(event.getPolicyId());
         sub.setSubscriptionId(String.valueOf(event.getSubscriptionId()));
         sub.setSubscriptionState(event.getSubscriptionState());
+        sub.setApiUUId(event.getApiUUID());
+        sub.setAppUUID(event.getApplicationUUID());
+        sub.setSubscriptionUUId(event.getSubscriptionUUID());
         sub.setTimeStamp(event.getTimeStamp());
         if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());

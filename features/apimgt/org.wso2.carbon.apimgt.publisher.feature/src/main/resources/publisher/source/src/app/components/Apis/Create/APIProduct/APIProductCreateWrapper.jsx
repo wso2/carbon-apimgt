@@ -192,7 +192,6 @@ export default function ApiProductCreateWrapper(props) {
             policies,
             apis: apiResources,
         };
-        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
         apiData.transport = ['http', 'https'];
         const newAPIProduct = new APIProduct(apiData);
         newAPIProduct
@@ -208,16 +207,24 @@ export default function ApiProductCreateWrapper(props) {
                         Alert.info('API Revision created successfully');
                         const envList = settings.environment.map((env) => env.name);
                         const body1 = [];
+                        const getFirstVhost = (envName) => {
+                            const env = settings.environment.find(
+                                (e) => e.name === envName && e.vhosts.length > 0,
+                            );
+                            return env && env.vhosts[0].host;
+                        };
                         if (envList && envList.length > 0) {
-                            if (envList.includes('Default')) {
+                            if (envList.includes('Default') && getFirstVhost('Default')) {
                                 body1.push({
                                     name: 'Default',
                                     displayOnDevportal: true,
+                                    vhost: getFirstVhost('Default'),
                                 });
-                            } else {
+                            } else if (getFirstVhost(envList[0])) {
                                 body1.push({
                                     name: envList[0],
                                     displayOnDevportal: true,
+                                    vhost: getFirstVhost(envList[0]),
                                 });
                             }
                         }
@@ -229,10 +236,9 @@ export default function ApiProductCreateWrapper(props) {
                                 if (error.response) {
                                     Alert.error(error.response.body.description);
                                 } else {
-                                    const message = 'Something went wrong while deploying the API Revision';
                                     Alert.error(intl.formatMessage({
                                         id: 'Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision',
-                                        defaultMessage: message,
+                                        defaultMessage: 'Something went wrong while deploying the API Revision',
                                     }));
                                 }
                                 console.error(error);
@@ -242,10 +248,9 @@ export default function ApiProductCreateWrapper(props) {
                         if (error.response) {
                             Alert.error(error.response.body.description);
                         } else {
-                            const message = 'Something went wrong while creating the API Revision';
                             Alert.error(intl.formatMessage({
                                 id: 'Apis.APIProductCreateWrapper.error.errorMessage.create.revision',
-                                defaultMessage: message,
+                                defaultMessage: 'Something went wrong while creating the API Revision',
                             }));
                         }
                         console.error(error);
@@ -332,7 +337,7 @@ export default function ApiProductCreateWrapper(props) {
                                         </Button>
                                     )}
                                 {wizardStep === 0 && (
-                                    <Link to='/apis/'>
+                                    <Link to='/api-products/'>
                                         <Button>
                                             <FormattedMessage
                                                 id='Apis.Create.APIProduct.APIProductCreateWrapper.cancel'

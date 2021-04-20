@@ -25,8 +25,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,6 +54,7 @@ public class API implements Serializable {
     private String wadlUrl;
     private String swaggerDefinition;
     private String graphQLSchema;
+    private String asyncApiDefinition;
     private String type;
     private String context;
     private String contextTemplate;
@@ -86,8 +89,6 @@ public class API implements Serializable {
     private String visibleRoles;
     private String visibleTenants;
 
-    private List<Label> gatewayLabels;
-
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
     private String endpointUTUsername;
@@ -97,7 +98,7 @@ public class API implements Serializable {
     private String inSequence;
     private String outSequence;
     private String faultSequence;
-    
+
     private Mediation inSequenceMediation;
     private Mediation outSequenceMediation;
     private Mediation faultSequenceMediation;
@@ -109,11 +110,16 @@ public class API implements Serializable {
     private boolean advertiseOnly;
     private String apiOwner;
     private String redirectURL;
+    private String vendor;
 
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
+
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -121,7 +127,7 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
-    
+
     private List<SOAPToRestSequence> soapToRestSequences;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
@@ -139,6 +145,7 @@ public class API implements Serializable {
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
+    private JSONObject serviceInfo = new JSONObject();
     /**
      * Used to set the workflow status in lifecycle state change workflow
      */
@@ -161,11 +168,6 @@ public class API implements Serializable {
      * Property to indicate the monetization status of the particular API.
      */
     private boolean isMonetizationEnabled = false;
-
-    /**
-     * Property to hold selected deployment environments of the  particular API.
-     */
-    private Set<DeploymentEnvironments> deploymentEnvironments;
 
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
@@ -232,6 +234,19 @@ public class API implements Serializable {
         this.additionalProperties = properties;
     }
 
+    public JSONObject getServiceInfoObject() { return serviceInfo; }
+
+    public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
+
+    public void setServiceInfo(JSONObject serviceInfo) { this.serviceInfo = serviceInfo; }
+
+    public String getServiceInfo(String key) {
+        if (serviceInfo != null && serviceInfo.get(key) != null) {
+            return serviceInfo.get(key).toString();
+        } else {
+            return null;
+        }
+    }
     /**
      * This method is used to get the properties related to monetization
      *
@@ -342,6 +357,14 @@ public class API implements Serializable {
         return graphQLSchema;
     }
 
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
+    }
+
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -432,6 +455,14 @@ public class API implements Serializable {
 
     public void setRedirectURL(String redirectURL) {
         this.redirectURL = redirectURL;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public API(APIIdentifier id) {
@@ -703,14 +734,6 @@ public class API implements Serializable {
         this.visibleTenants = visibleTenants;
     }
 
-    public List<Label> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(List<Label> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
-    }
-
     public boolean isApiHeaderChanged() {
         return apiHeaderChanged;
     }
@@ -935,6 +958,30 @@ public class API implements Serializable {
         this.monetizationCategory = monetizationCategory;
     }
 
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
+    }
+
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
+    }
+
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
@@ -1133,14 +1180,54 @@ public class API implements Serializable {
         this.keyManagers = keyManagers;
     }
 
-    public Set<DeploymentEnvironments> getDeploymentEnvironments() {
-        return deploymentEnvironments;
-    }
+//    public Mediation getInSequenceMediation() {
+//        return inSequenceMediation;
+//    }
+//
+//    public void setInSequenceMediation(Mediation inSequenceMediation) {
+//        this.inSequenceMediation = inSequenceMediation;
+//    }
+//
+//    public Mediation getOutSequenceMediation() {
+//        return outSequenceMediation;
+//    }
+//
+//    public void setOutSequenceMediation(Mediation outSequenceMediation) {
+//        this.outSequenceMediation = outSequenceMediation;
+//    }
 
-    public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
-        this.deploymentEnvironments = deploymentEnvironments;
-    }
-    
+//    public Mediation getFaultSequenceMediation() {
+//        return faultSequenceMediation;
+//    }
+//
+//    public void setFaultSequenceMediation(Mediation faultSequenceMediation) {
+//        this.faultSequenceMediation = faultSequenceMediation;
+//    }
+
+//    public boolean isRevision() {
+//        return isRevision;
+//    }
+//
+//    public void setRevision(boolean revision) {
+//        isRevision = revision;
+//    }
+//
+//    public String getRevisionedApiId() {
+//        return revisionedApiId;
+//    }
+
+//    public void setRevisionedApiId(String revisionedApiId) {
+//        this.revisionedApiId = revisionedApiId;
+//    }
+//
+//    public int getRevisionId() {
+//        return revisionId;
+//    }
+//
+//    public void setRevisionId(int revisionId) {
+//        this.revisionId = revisionId;
+//    }
+
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;
     }
@@ -1206,9 +1293,6 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
-            return true;
-        }
-        return false;
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
 }

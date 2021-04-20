@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.dao.test.TestTenantManager;
 import org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -53,21 +54,19 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
 
     }
 
+    public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO, APIPersistence apiPersistenceInstance)
+            throws APIManagementException {
+        this.apiMgtDAO = apiMgtDAO;
+        this.apiPersistenceInstance = apiPersistenceInstance;
+    }
     /**
      * Returns API manager configurations.
      *
      * @return APIManagerConfiguration object
      */
     protected APIManagerConfiguration getAPIManagerConfiguration() {
-        APIManagerConfiguration apiManagerConfiguration = new APIManagerConfiguration();
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("amConfig.xml").getFile());
-        try {
-            apiManagerConfiguration.load(file.getPath().toString());
-        } catch (APIManagementException e) {
-            log.error("Error while reading configs from file api-manager.xml", e);
-        }
-        return apiManagerConfiguration;
+
+        return new APIManagerConfiguration();
     }
 
     protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {

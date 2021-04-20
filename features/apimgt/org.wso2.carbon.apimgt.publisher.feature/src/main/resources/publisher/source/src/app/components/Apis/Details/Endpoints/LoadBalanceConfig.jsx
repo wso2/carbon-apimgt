@@ -22,6 +22,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const algorithms = [
     {
@@ -42,6 +44,7 @@ const defaultTemplateObj = {
     algoCombo: algorithms[0].key,
     sessionManagement: sessionManagementOps[0].key,
     sessionTimeOut: 300,
+    failOver: false,
 };
 
 const styles = (theme) => ({
@@ -63,6 +66,7 @@ function LoadBalanceConfig(props) {
         algoCombo,
         sessionManagement,
         sessionTimeOut,
+        failOver,
         handleLBConfigChange,
         closeLBConfigDialog,
         classes,
@@ -85,6 +89,9 @@ function LoadBalanceConfig(props) {
             }
             if (sessionTimeOut) {
                 tmpLBConfig.sessionTimeOut = sessionTimeOut;
+            }
+            if (failOver) {
+                tmpLBConfig.failOver = failOver;
             }
             return tmpLBConfig;
         });
@@ -112,6 +119,16 @@ function LoadBalanceConfig(props) {
      * */
     const handleFieldChange = (event, field) => {
         setLbConfigObject({ ...lbConfig, [field]: event.target.value });
+    };
+
+    /**
+     * Method to capture the onChange event of the elements.
+     *
+     * @param {any} event The event triggered by the element.
+     * @param {string} field The respective field which is being changed.
+     * */
+    const handleFailoverFieldChange = (event, field) => {
+        setLbConfigObject({ ...lbConfig, [field]: event.target.checked });
     };
 
     /**
@@ -201,6 +218,23 @@ function LoadBalanceConfig(props) {
                     margin='normal'
                     disabled={isRestricted(['apim:api_create'], api)}
                 />
+                <FormControlLabel
+                    control={(
+                        <Checkbox
+                            id='failOver'
+                            checked={lbConfig.failOver}
+                            onChange={(event) => handleFailoverFieldChange(event, 'failOver')}
+                            margin='normal'
+                            disabled={isRestricted(['apim:api_create'], api)}
+                        />
+                    )}
+                    label={(
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.LoadBalanceConfig.failover'
+                            defaultMessage='Enable Failover'
+                        />
+                    )}
+                />
             </Grid>
             <Grid className={classes.configButtonContainer}>
                 <Button
@@ -236,6 +270,7 @@ LoadBalanceConfig.propTypes = {
     algoCombo: PropTypes.string.isRequired,
     sessionManagement: PropTypes.string.isRequired,
     sessionTimeOut: PropTypes.string.isRequired,
+    failOver: PropTypes.bool.isRequired,
     handleLBConfigChange: PropTypes.func.isRequired,
     closeLBConfigDialog: PropTypes.func.isRequired,
 };

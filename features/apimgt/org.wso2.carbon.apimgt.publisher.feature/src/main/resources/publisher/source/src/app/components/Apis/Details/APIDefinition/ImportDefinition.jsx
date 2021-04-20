@@ -32,6 +32,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ProvideWSDL from 'AppComponents/Apis/Create/WSDL/Steps/ProvideWSDL';
+import ProvideAsyncAPI from 'AppComponents/Apis/Create/AsyncAPI/Steps/ProvideAsyncAPI';
 import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
 import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
 
@@ -60,13 +61,21 @@ export default function ImportDefinition(props) {
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
     const isSOAP = api.isSOAP();
+    // const isWebSocket = api.isWebSocket();
+    // const isWebSub = api.isWebSub();
+    const isAsyncAPI = api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
+    const [asyncAPIDefinitionImport, setAsyncAPIDefinitionImport] = useState(false);
 
     const handleAPIDefinitionImportOpen = () => {
-        setOpenAPIDefinitionImport(true);
+        // eslint-disable-next-line no-unused-expressions
+        isAsyncAPI ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
+        // isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
     };
 
     const handleAPIDefinitionImportCancel = () => {
-        setOpenAPIDefinitionImport(false);
+        // eslint-disable-next-line no-unused-expressions
+        isAsyncAPI ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
+        // isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
     };
 
     function apiInputsReducer(currentState, inputAction) {
@@ -106,7 +115,7 @@ export default function ImportDefinition(props) {
         const isFileInput = inputType === 'file';
         if (isFileInput) {
             const reader = new FileReader();
-            const contentType = inputValue.type.includes('yaml') ? 'yaml ' : 'json';
+            const contentType = inputValue.type.includes('yaml') ? 'yaml' : 'json';
             reader.onloadend = (event) => {
                 setSchemaDefinition(event.currentTarget.result, contentType);
             };
@@ -118,7 +127,7 @@ export default function ImportDefinition(props) {
         promisedResponse
             .then(() => {
                 Alert.success(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.oas.updated.successfully',
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
@@ -132,7 +141,52 @@ export default function ImportDefinition(props) {
             .catch((error) => {
                 console.error(error);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.import.api.definition',
+                    defaultMessage: 'Error while updating the API Definition',
+                }));
+            }).finally(() => setIsImporting(false));
+    }
+
+    /**
+     * Updates AsyncAPI definition
+     */
+    function updateAsyncAPIDefinition() {
+        setIsImporting(true);
+        const {
+            inputValue, inputType, content,
+        } = apiInputs;
+        const isFileInput = inputType === 'file';
+        if (isFileInput) {
+            const reader = new FileReader();
+            // eslint-disable-next-line no-nested-ternary
+            const contentType = inputValue.type.includes('yaml') ? 'yaml'
+                : inputValue.type.includes('yml') ? 'yml' : 'json';
+            reader.onloadend = (event) => {
+                setSchemaDefinition(event.currentTarget.result, contentType);
+            };
+            reader.readAsText(inputValue);
+        }
+        const newAPI = new API();
+        const promisedResponse = isFileInput ? newAPI.updateAsyncAPIDefinitionByFile(api.id, inputValue)
+            : newAPI.updateAsyncAPIDefinitionByUrl(api.id, inputValue);
+        promisedResponse
+            .then(() => {
+                Alert.success(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.async.api.import.definition.updated.successfully',
+                    defaultMessage: 'API Definition Updated Successfully',
+                }));
+                setAsyncAPIDefinitionImport(false);
+                if (!isFileInput) {
+                    // Test to starting the content with'{' character ignoring white spaces
+                    const isJSONRegex = RegExp(/^\s*{/); // TODO: not a solid test need to support from REST API ~tmkb
+                    const contentType = isJSONRegex.test(content) ? 'json' : 'yaml';
+                    setSchemaDefinition(content, contentType);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.import.async.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
             }).finally(() => setIsImporting(false));
@@ -229,6 +283,9 @@ export default function ImportDefinition(props) {
             updateGraphQLSchema();
         } else if (isSOAP) {
             updateWSDL();
+        // } else if (isWebSocket || isWebSub) {
+        } else if (isAsyncAPI) {
+            updateAsyncAPIDefinition();
         } else {
             updateOASDefinition();
         }
@@ -301,19 +358,46 @@ export default function ImportDefinition(props) {
             />
         );
     }
+    // if (isWebSocket || isWebSub) {
+    if (isAsyncAPI) {
+        dialogTitle = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.definition.asyncApi'
+                defaultMessage='Import AsyncAPI Definition'
+            />
+        );
+        dialogContent = (
+            <ProvideAsyncAPI
+                onValidate={handleOnValidate}
+                apiInputs={apiInputs}
+                inputsDispatcher={inputsDispatcher}
+            />
+        );
+        btnText = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.import.asyncAPI'
+                defaultMessage='Import AsyncAPI'
+            />
+        );
+    }
 
     return (
         <>
-            <Button
-                size='small'
-                className={classes.button}
-                onClick={handleAPIDefinitionImportOpen}
-                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
+            {!isAsyncAPI && (
+                <Button
+                    size='small'
+                    className={classes.button}
+                    onClick={handleAPIDefinitionImportOpen}
+                    disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
+                >
+                    <CloudUploadRounded className={classes.buttonIcon} />
+                    {btnText}
+                </Button>
+            )}
+            <Dialog
+                onBackdropClick={isAsyncAPI ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
+                open={isAsyncAPI ? asyncAPIDefinitionImport : openAPIDefinitionImport}
             >
-                <CloudUploadRounded className={classes.buttonIcon} />
-                {btnText}
-            </Button>
-            <Dialog onBackdropClick={setOpenAPIDefinitionImport} open={openAPIDefinitionImport}>
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
                         {dialogTitle}

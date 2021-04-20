@@ -121,11 +121,11 @@ const documentSchema = Joi.extend((joi) => ({
 }));
 
 const definition = {
-    apiName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    apiName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Name ' + getMessage(error.type, 50) }));
         }),
-    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
+    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$[\]\s]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };
@@ -134,13 +134,17 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#:%^&*+=|\\<>"',&\s]*$/).required()
+    apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#:%^&*+=|\\<>"',&\s[\]]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Context ' + getMessage(error.type, 60) }));
         }),
-    documentName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    documentName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Document name ' + getMessage(error.type, 50) }));
+        }),
+    authorizationHeader: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+        .error((errors) => {
+            return errors.map((error) => ({ ...error, message: 'Authorization Header ' + getMessage(error.type) }));
         }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
@@ -153,7 +157,18 @@ const definition = {
         });
         return tmpErrors;
     }),
-    alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    wsUrl: Joi.string().uri({ scheme: ['ws', 'wss'] }).error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            const errType = err.type;
+            tmpError.message = errType === 'string.uriCustomScheme' ? 'Invalid WebSocket URL'
+                : 'WebSocket URL ' + getMessage(errType);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
+    alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Alias ' + getMessage(error.type, 30) }));
         }),
@@ -162,6 +177,7 @@ const definition = {
     apiDocument: documentSchema.document().isDocumentPresent(),
     operationVerbs: Joi.array().items(Joi.string()).min(1).unique(),
     operationTarget: Joi.string().required(),
+    websubOperationTarget: Joi.string().regex(/^[^{}]*$/).required(),
     name: Joi.string().min(1).max(255),
     email: Joi.string().email({ tlds: true }).required(),
 };

@@ -398,9 +398,11 @@ public class OASParserUtil {
                 if (REQUEST_BODIES.equalsIgnoreCase(category)) {
                     Map<String, RequestBody> sourceRequestBodies = sourceComponents.getRequestBodies();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        RequestBody requestBody = sourceRequestBodies.get(refKey);
-                        setRefOfRequestBody(requestBody, context);
+                    if (sourceRequestBodies != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            RequestBody requestBody = sourceRequestBodies.get(refKey);
+                            setRefOfRequestBody(requestBody, context);
+                        }
                     }
                 }
 
@@ -582,8 +584,12 @@ public class OASParserUtil {
     private static void setRefOfRequestBody(RequestBody requestBody, SwaggerUpdateContext context) {
         if (requestBody != null) {
             Content content = requestBody.getContent();
-
-            extractReferenceFromContent(content, context);
+            if (content != null) {
+                extractReferenceFromContent(content, context);
+            } else {
+                String ref = requestBody.get$ref();
+                addToReferenceObjectMap(ref, context);
+            }
         }
     }
 
@@ -1127,9 +1133,11 @@ public class OASParserUtil {
         if (api.isEndpointSecured()) {
             ObjectNode securityConfigObj = objectMapper.createObjectNode();
             if (api.isEndpointAuthDigest()) {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             } else {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             }
             if (!StringUtils.isEmpty(api.getEndpointUTUsername())) {
                 securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
@@ -1557,6 +1565,46 @@ public class OASParserUtil {
             appSecurityState = Boolean.parseBoolean(String.valueOf(appSecurityTypesNode.get("optional")));
         }
         return appSecurityState;
+    }
+
+    public static void copyOperationVendorExtensions(Map<String, Object> existingExtensions,
+                                                     Map<String, Object> updatedVendorExtensions) {
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AUTH_TYPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_WSO2_SECURITY, existingExtensions
+                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_SCOPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_SCOPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_SCOPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
+        }
+        if (existingExtensions.get(APIConstants.X_WSO2_APP_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.X_WSO2_APP_SECURITY, existingExtensions
+                    .get(APIConstants.X_WSO2_APP_SECURITY));
+        }
     }
 
 }

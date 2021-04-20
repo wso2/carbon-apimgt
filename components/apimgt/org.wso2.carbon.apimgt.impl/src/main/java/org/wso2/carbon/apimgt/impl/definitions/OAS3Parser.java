@@ -113,7 +113,7 @@ public class OAS3Parser extends APIDefinition {
      * @return swagger Json
      */
     @Override
-    public Map<String, Object> generateExample(String apiDefinition) {
+    public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -128,15 +128,16 @@ public class OAS3Parser extends APIDefinition {
             int minResponseCode = 0;
             int responseCode = 0;
             String path = entry.getKey();
-            //initializing apiResourceMediationPolicyObject
-            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
-            //setting path for apiResourceMediationPolicyObject
-            apiResourceMediationPolicyObject.setPath(path);
             Map<String, Schema> definitions = swagger.getComponents().getSchemas();
             //operation map to get verb
             Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
-            for (Operation op : operations) {
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                //initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                //setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
                 StringBuilder genCode = new StringBuilder();
@@ -144,9 +145,14 @@ public class OAS3Parser extends APIDefinition {
                 boolean hasXmlPayload = false;
                 //for setting only one initializing if condition per response code
                 boolean respCodeInitialized = false;
-                for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
-                    //add verb to apiResourceMediationPolicyObject
-                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<PathItem.HttpMethod, Operation> operationEntry =
+                            (Map.Entry<PathItem.HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
@@ -447,7 +453,7 @@ public class OAS3Parser extends APIDefinition {
                                     extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
                         }
                         if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
-                            template.setAmznResourceTimeout(((Long)
+                            template.setAmznResourceTimeout(((Number)
                                     extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                         }
                     }
@@ -639,7 +645,9 @@ public class OAS3Parser extends APIDefinition {
         if (StringUtils.isEmpty(openAPI.getInfo().getVersion())) {
             openAPI.getInfo().setVersion(swaggerData.getVersion());
         }
-        preserveResourcePathOrderFromAPI(swaggerData, openAPI);
+        if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+            preserveResourcePathOrderFromAPI(swaggerData, openAPI);
+        }
         return Json.pretty(openAPI);
     }
 
@@ -1488,6 +1496,64 @@ public class OAS3Parser extends APIDefinition {
             }
         }
         return Json.pretty(openAPI);
+    }
+
+    @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent) {
+
+        OpenAPI existingOpenAPI = getOpenAPI(existingOASContent);
+        OpenAPI updatedOpenAPI = getOpenAPI(updatedOASContent);
+        Paths updatedPaths = updatedOpenAPI.getPaths();
+        Paths existingPaths = existingOpenAPI.getPaths();
+
+        // Merge Security Schemes
+        if (existingOpenAPI.getComponents().getSecuritySchemes() != null) {
+            if (updatedOpenAPI.getComponents() != null) {
+                updatedOpenAPI.getComponents().setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+            } else {
+                Components components = new Components();
+                components.setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+                updatedOpenAPI.setComponents(components);
+            }
+        }
+
+        // Merge Operation specific vendor extensions
+        for (String pathKey : updatedPaths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = updatedPaths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> updatedEntry : operationsMap.entrySet()) {
+                if (existingPaths.keySet().contains(pathKey)) {
+                    for (Map.Entry<PathItem.HttpMethod, Operation> existingEntry : existingPaths.get(pathKey)
+                            .readOperationsMap().entrySet()) {
+                        if (updatedEntry.getKey().equals(existingEntry.getKey())) {
+                            Map<String, Object> vendorExtensions = updatedEntry.getValue().getExtensions();
+                            Map<String, Object> existingExtensions = existingEntry.getValue().getExtensions();
+                            boolean extensionsAreEmpty = false;
+                            if (vendorExtensions == null) {
+                                vendorExtensions = new HashMap<>();
+                                extensionsAreEmpty = true;
+                            }
+                            OASParserUtil.copyOperationVendorExtensions(existingExtensions, vendorExtensions);
+                            if (extensionsAreEmpty) {
+                                updatedEntry.getValue().setExtensions(existingExtensions);
+                            }
+                            List<SecurityRequirement> securityRequirements = existingEntry.getValue().getSecurity();
+                            List<SecurityRequirement> updatedRequirements = new ArrayList<>();
+                            if (securityRequirements != null) {
+                                for (SecurityRequirement requirement : securityRequirements) {
+                                    List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+                                    if (scopes != null) {
+                                        updatedRequirements.add(requirement);
+                                    }
+                                }
+                                updatedEntry.getValue().setSecurity(updatedRequirements);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return Json.pretty(updatedOpenAPI);
     }
 
     /**

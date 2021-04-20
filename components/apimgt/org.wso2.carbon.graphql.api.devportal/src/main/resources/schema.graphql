@@ -15,7 +15,6 @@ type Api{
     status:String!
     isSubscriptionAvailable:Boolean
     monetizationLabel:String
-    label:[Label]
     scope:[Scope]
     apiEndPointInformation:[APIEndpointURLsDTO]
     tierInformation:[Tier]
@@ -25,7 +24,6 @@ type Api{
     tags:String
     operationInformation:[Operation]
     isMonetizationEnabled:Boolean
-    ingressUrl:[IngressUrl]
     rating:Float
     throttlingPolicies:String
     thumbnailUrl:String
@@ -44,27 +42,10 @@ type Tag{
     value:String
     count:Int
 }
-type Label{
-    name:String
-    labelDetails:[LabelDetails]
-}
 
 type LabelDetails{
     description:String
     accessUrls:String
-}
-
-type IngressUrl{
-    deploymentEnvironmentName:String
-    clusterDetails:[DeploymentClusterInformation]
-
-}
-
-
-type DeploymentClusterInformation{
-    clusterName:String
-    clusterDisplayName:String
-    ingressURL:String
 }
 
 type Tier{
@@ -94,6 +75,7 @@ type Advertise{
     advertised:Boolean
     originalStoreUrl:String
     apiOwner:String
+    vendor:String
 }
 
 
@@ -143,9 +125,7 @@ type ApiListing{
 }
 
 type Query{
-    #getExtraDetails(start:Int,offset:Int):ExtraDetails
     apis(offset:Int!,limit:Int!):ApiListing
     api(id:String!):Api
-    #getApis(start:Int,offset:Int):[Api]
     getTags:[Tag]
 }

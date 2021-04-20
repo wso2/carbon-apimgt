@@ -610,11 +610,6 @@ public class APIKeyValidatorTestCase {
         List<VerbInfoDTO> verbInfoDTOList = new ArrayList<>();
         verbInfoDTOList.add(verbInfoDTO);
         return new APIKeyValidator() {
-            @Override
-            protected String getKeyValidatorClientType() {
-
-                return "WSClient";
-            }
 
             @Override
             protected APIManagerConfiguration getApiManagerConfiguration() {
@@ -713,12 +708,6 @@ public class APIKeyValidatorTestCase {
             }
 
             @Override
-            protected String getKeyValidatorClientType() {
-
-                return "WSClient";
-            }
-
-            @Override
             protected APIManagerConfiguration getApiManagerConfiguration() {
 
                 APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
@@ -773,15 +762,6 @@ public class APIKeyValidatorTestCase {
 
     }
 
-    @Test
-    public void testGetKeyValidatorClientType() {
-
-        AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
-        APIKeyValidator apiKeyValidator = new APIKeyValidator() {
-        };
-        apiKeyValidator.getKeyValidatorClientType();
-
-    }
 
     @Test
     public void testDatasourceConfigurationAndCleanup() throws Exception {
@@ -791,11 +771,6 @@ public class APIKeyValidatorTestCase {
         PowerMockito.whenNew(WSAPIKeyDataStore.class).withNoArguments().thenReturn(wsDataStore);
 
         APIKeyValidator wsKeyValidator = new APIKeyValidator() {
-            @Override
-            protected String getKeyValidatorClientType() {
-
-                return "WSClient";
-            }
         };
 
         // test cleanup for WSClient
@@ -1161,11 +1136,7 @@ public class APIKeyValidatorTestCase {
                                                final String tenantDomain) {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator() {
-            @Override
-            protected String getKeyValidatorClientType() {
 
-                return super.getKeyValidatorClientType();
-            }
 
             @Override
             protected Cache getGatewayKeyCache() {

@@ -1,0 +1,76 @@
+{
+  "name": "org.wso2.apimgt.webhooks.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "apiUUID",
+      "type": "STRING"
+    },
+    {
+      "name": "apiName",
+      "type": "STRING"
+    },
+    {
+      "name": "apiContext",
+      "type": "STRING"
+    },
+    {
+      "name": "apiVersion",
+      "type": "STRING"
+    },
+    {
+      "name": "appID",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantDomain",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantId",
+      "type": "int"
+    },
+    {
+      "name": "callback",
+      "type": "STRING"
+    },
+    {
+      "name": "topic",
+      "type": "STRING"
+    },
+    {
+      "name": "mode",
+      "type": "STRING"
+    },
+    {
+      "name": "secret",
+      "type": "STRING"
+    },
+    {
+      "name": "expireAt",
+      "type": "long"
+    },
+    {
+      "name": "subscriberName",
+      "type": "STRING"
+    },
+    {
+      "name": "applicationTier",
+      "type": "STRING"
+    },
+    {
+      "name": "tier",
+      "type": "STRING"
+    },
+    {
+      "name": "apiTier",
+      "type": "STRING"
+    },
+    {
+      "name": "isThrottled",
+      "type": "boolean"
+    }
+  ]
+}

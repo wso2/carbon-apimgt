@@ -38,7 +38,7 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Validation from 'AppData/Validation';
 import AppConfiguration from './AppConfiguration';
 
-const styles = theme => ({
+const styles = (theme) => ({
     FormControl: {
         paddingTop: 0,
         paddingBottom: theme.spacing(2),
@@ -92,7 +92,7 @@ const styles = theme => ({
         '& td': {
             paddingBottom: 5,
             borderBottom: 'solid 1px #cccc',
-        }
+        },
     },
     leftCol: {
         width: 180,
@@ -106,14 +106,15 @@ const styles = theme => ({
  */
 const KeyConfiguration = (props) => {
     const [urlCopied, setUrlCopied] = useState(false);
+    const [callbackHelper, setCallbackHelper] = useState(false);
     const intl = useIntl();
-    let {
-        classes, notFound, isUserOwner, keyManagerConfig, validating, updateKeyRequest, keyRequest,
+    const {
+        classes, notFound, isUserOwner, keyManagerConfig, updateKeyRequest, keyRequest, updateHasError, callbackError,
     } = props;
     const {
         selectedGrantTypes, callbackUrl,
     } = keyRequest;
-    let {
+    const {
         applicationConfiguration, availableGrantTypes, description, additionalProperties,
         enableMapOAuthConsumerApps, enableOAuthAppCreation, enableTokenEncryption, enableTokenGeneration,
         id, name, revokeEndpoint, tokenEndpoint, type, userInfoEndpoint,
@@ -135,23 +136,23 @@ const KeyConfiguration = (props) => {
         return modifiedGrantTypes;
     };
     const callBackHasErrors = () => {
-        if (!(selectedGrantTypes.includes('implicit') || selectedGrantTypes.includes('authorization_code'))) {
-            return false;
-        }
-        if (callbackUrl === '' && validating) {
-            return intl.formatMessage({
+        if (callbackUrl === '') {
+            updateHasError(true);
+            setCallbackHelper(intl.formatMessage({
                 defaultMessage: 'Call back URL can not be empty when Implicit or Authorization Code grants are selected.',
-                id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.empty.error.text'
-            });
-        } else if (Validation.url.validate(callbackUrl).error && validating) {
-            return intl.formatMessage({
+                id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.empty.error.text',
+            }));
+        } else if (Validation.url.validate(callbackUrl).error) {
+            updateHasError(true);
+            setCallbackHelper(intl.formatMessage({
                 defaultMessage: 'Invalid URL. Please enter a valid URL.',
-                id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.url.error.text'
-            });
+                id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.url.error.text',
+            }));
         } else {
-            return false;
+            setCallbackHelper(false);
+            updateHasError(false);
         }
-    }
+    };
     /**
      * This method is used to handle the updating of key generation
      * request object.
@@ -161,25 +162,31 @@ const KeyConfiguration = (props) => {
     const handleChange = (field, event) => {
         const newRequest = cloneDeep(keyRequest);
         const { target: currentTarget } = event;
-        //newRequest.serverSupportedGrantTypes = availableGrantTypes;
-        //newRequest.selectedGrantTypes = availableGrantTypes;
         let newGrantTypes = [...newRequest.selectedGrantTypes];
         newRequest.keyManager = name;
 
         switch (field) {
             case 'callbackUrl':
+                if (newGrantTypes.includes('implicit') || newGrantTypes.includes('authorization_code')) {
+                    callBackHasErrors();
+                }
                 newRequest.callbackUrl = currentTarget.value;
                 break;
             case 'grantType':
                 if (currentTarget.checked) {
                     newGrantTypes = [...newGrantTypes, currentTarget.id];
                 } else {
-                    newGrantTypes = newRequest.selectedGrantTypes.filter(item => item !== currentTarget.id);
+                    newGrantTypes = newRequest.selectedGrantTypes.filter((item) => item !== currentTarget.id);
+                    if (currentTarget.id === 'implicit' || currentTarget.id === 'authorization_code') {
+                        newRequest.callbackUrl = '';
+                        setCallbackHelper(false);
+                        updateHasError(false);
+                    }
                 }
                 newRequest.selectedGrantTypes = newGrantTypes;
                 break;
             case 'additionalProperties':
-                let clonedAdditionalProperties = newRequest.additionalProperties;
+                const clonedAdditionalProperties = newRequest.additionalProperties;
                 clonedAdditionalProperties[currentTarget.name] = currentTarget.value;
                 newRequest.additionalProperties = clonedAdditionalProperties;
                 break;
@@ -196,17 +203,23 @@ const KeyConfiguration = (props) => {
             setUrlCopied(false);
         };
         setTimeout(caller, 2000);
-    }
+    };
 
     const getPreviousValue = (config) => {
         const { additionalProperties } = keyRequest;
-        const isPreviousValueSet =  !!(additionalProperties && additionalProperties[config.name]);
+        let isPreviousValueSet;
+        if (config.type == 'input' && !config.multiple) {
+            isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]
+                || additionalProperties[config.name] === ''));
+        } else {
+            isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]));
+        }
         let defaultValue = config.default;
-        if (config.multiple && typeof defaultValue === 'string' && defaultValue === '' ) {
+        if (config.multiple && typeof defaultValue === 'string' && defaultValue === '') {
             defaultValue = [];
         }
-        return  isPreviousValueSet ? additionalProperties[config.name] : defaultValue;
-    }
+        return isPreviousValueSet ? additionalProperties[config.name] : defaultValue;
+    };
     /**
      *
      *
@@ -228,144 +241,157 @@ const KeyConfiguration = (props) => {
             <Box display='flex' alignItems='center'>
                 <Table className={classes.table}>
                     <TableBody>
-                        {(tokenEndpoint && tokenEndpoint !== '') && (<TableRow>
-                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                <FormattedMessage
-                                    defaultMessage='Token Endpoint'
-                                    id='Shared.AppsAndKeys.KeyConfiguration.token.endpoint.label'
-                                />
-                            </TableCell>
-                            <TableCell>
-                                {tokenEndpoint}
-                                <Tooltip
-                                    title={
-                                        urlCopied
-                                            ? intl.formatMessage({
-                                                defaultMessage: 'Copied',
-                                                id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
-                                            })
-                                            : intl.formatMessage({
-                                                defaultMessage: 'Copy to clipboard',
-                                                id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
-                                            })
-                                    }
-                                    placement='right'
-                                    className={classes.iconStyle}
-                                >
-                                    <CopyToClipboard
-                                        text={tokenEndpoint}
-                                        onCopy={onCopy}
+                        {(tokenEndpoint && tokenEndpoint !== '') && (
+                            <TableRow>
+                                <TableCell component='th' scope='row' className={classes.leftCol}>
+                                    <FormattedMessage
+                                        defaultMessage='Token Endpoint'
+                                        id='Shared.AppsAndKeys.KeyConfiguration.token.endpoint.label'
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    {tokenEndpoint}
+                                    <Tooltip
+                                        title={
+                                            urlCopied
+                                                ? intl.formatMessage({
+                                                    defaultMessage: 'Copied',
+                                                    id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
+                                                })
+                                                : intl.formatMessage({
+                                                    defaultMessage: 'Copy to clipboard',
+                                                    id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
+                                                })
+                                        }
+                                        placement='right'
+                                        className={classes.iconStyle}
                                     >
-                                        <IconButton aria-label='Copy to clipboard'
-                                            classes={{ root: classes.iconButton }}>
-                                            <Icon color='secondary'>file_copy</Icon>
-                                        </IconButton>
-                                    </CopyToClipboard>
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>)}
-                        {(revokeEndpoint && revokeEndpoint !== '') && (<TableRow>
-                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                <FormattedMessage
-                                    defaultMessage='Revoke Endpoint'
-                                    id='Shared.AppsAndKeys.KeyConfiguration.revoke.endpoint.label'
-                                />
-                            </TableCell>
-                            <TableCell>
-                                {revokeEndpoint}
-                                <Tooltip
-                                    title={
-                                        urlCopied
-                                            ? intl.formatMessage({
-                                                defaultMessage: 'Copied',
-                                                id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
-                                            })
-                                            : intl.formatMessage({
-                                                defaultMessage: 'Copy to clipboard',
-                                                id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
-                                            })
-                                    }
-                                    placement='right'
-                                    className={classes.iconStyle}
-                                >
-                                    <CopyToClipboard
-                                        text={revokeEndpoint}
-                                        onCopy={onCopy}
+                                        <CopyToClipboard
+                                            text={tokenEndpoint}
+                                            onCopy={onCopy}
+                                        >
+                                            <IconButton
+                                                aria-label='Copy to clipboard'
+                                                classes={{ root: classes.iconButton }}
+                                            >
+                                                <Icon color='secondary'>file_copy</Icon>
+                                            </IconButton>
+                                        </CopyToClipboard>
+                                    </Tooltip>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {(revokeEndpoint && revokeEndpoint !== '') && (
+                            <TableRow>
+                                <TableCell component='th' scope='row' className={classes.leftCol}>
+                                    <FormattedMessage
+                                        defaultMessage='Revoke Endpoint'
+                                        id='Shared.AppsAndKeys.KeyConfiguration.revoke.endpoint.label'
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    {revokeEndpoint}
+                                    <Tooltip
+                                        title={
+                                            urlCopied
+                                                ? intl.formatMessage({
+                                                    defaultMessage: 'Copied',
+                                                    id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
+                                                })
+                                                : intl.formatMessage({
+                                                    defaultMessage: 'Copy to clipboard',
+                                                    id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
+                                                })
+                                        }
+                                        placement='right'
+                                        className={classes.iconStyle}
                                     >
-                                        <IconButton aria-label='Copy to clipboard'
-                                            classes={{ root: classes.iconButton }}>
-                                            <Icon color='secondary'>file_copy</Icon>
-                                        </IconButton>
-                                    </CopyToClipboard>
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>)}
-                        {(userInfoEndpoint && userInfoEndpoint !== '') && (<TableRow>
-                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                <FormattedMessage
-                                    defaultMessage='User Info Endpoint'
-                                    id='Shared.AppsAndKeys.KeyConfiguration.userinfo.endpoint.label'
-                                />
-                            </TableCell>
-                            <TableCell>
-                                {userInfoEndpoint}
-                                <Tooltip
-                                    title={
-                                        urlCopied
-                                            ? intl.formatMessage({
-                                                defaultMessage: 'Copied',
-                                                id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
-                                            })
-                                            : intl.formatMessage({
-                                                defaultMessage: 'Copy to clipboard',
-                                                id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
-                                            })
-                                    }
-                                    placement='right'
-                                    className={classes.iconStyle}
-                                >
-                                    <CopyToClipboard
-                                        text={userInfoEndpoint}
-                                        onCopy={onCopy}
+                                        <CopyToClipboard
+                                            text={revokeEndpoint}
+                                            onCopy={onCopy}
+                                        >
+                                            <IconButton
+                                                aria-label='Copy to clipboard'
+                                                classes={{ root: classes.iconButton }}
+                                            >
+                                                <Icon color='secondary'>file_copy</Icon>
+                                            </IconButton>
+                                        </CopyToClipboard>
+                                    </Tooltip>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {(userInfoEndpoint && userInfoEndpoint !== '') && (
+                            <TableRow>
+                                <TableCell component='th' scope='row' className={classes.leftCol}>
+                                    <FormattedMessage
+                                        defaultMessage='User Info Endpoint'
+                                        id='Shared.AppsAndKeys.KeyConfiguration.userinfo.endpoint.label'
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    {userInfoEndpoint}
+                                    <Tooltip
+                                        title={
+                                            urlCopied
+                                                ? intl.formatMessage({
+                                                    defaultMessage: 'Copied',
+                                                    id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
+                                                })
+                                                : intl.formatMessage({
+                                                    defaultMessage: 'Copy to clipboard',
+                                                    id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
+                                                })
+                                        }
+                                        placement='right'
+                                        className={classes.iconStyle}
                                     >
-                                        <IconButton aria-label='Copy to clipboard'
-                                            classes={{ root: classes.iconButton }}>
-                                            <Icon color='secondary'>file_copy</Icon>
-                                        </IconButton>
-                                    </CopyToClipboard>
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>)}
+                                        <CopyToClipboard
+                                            text={userInfoEndpoint}
+                                            onCopy={onCopy}
+                                        >
+                                            <IconButton
+                                                aria-label='Copy to clipboard'
+                                                classes={{ root: classes.iconButton }}
+                                            >
+                                                <Icon color='secondary'>file_copy</Icon>
+                                            </IconButton>
+                                        </CopyToClipboard>
+                                    </Tooltip>
+                                </TableCell>
+                            </TableRow>
+                        )}
                         <TableRow>
                             <TableCell component='th' scope='row' className={classes.leftCol}>
                                 <FormattedMessage
                                     id='Shared.AppsAndKeys.KeyConfiguration.grant.types'
-                                    defaultMessage='Grant Types' />
+                                    defaultMessage='Grant Types'
+                                />
 
                             </TableCell>
                             <TableCell>
-                                    <div className={classes.checkboxWrapperColumn}>
-                                        {Object.keys(grantTypeDisplayListMap).map((key) => {
-                                            const value = grantTypeDisplayListMap[key];
-                                            return (
-                                                <FormControlLabel
-                                                    control={(
-                                                        <Checkbox
-                                                            id={key}
-                                                            checked={!!(selectedGrantTypes
+                                <div className={classes.checkboxWrapperColumn}>
+                                    {Object.keys(grantTypeDisplayListMap).map((key) => {
+                                        const value = grantTypeDisplayListMap[key];
+                                        return (
+                                            <FormControlLabel
+                                                control={(
+                                                    <Checkbox
+                                                        id={key}
+                                                        checked={!!(selectedGrantTypes
                                                                 && selectedGrantTypes.includes(key))}
-                                                            onChange={e => handleChange('grantType', e)}
-                                                            value={value}
-                                                            disabled={!isUserOwner}
-                                                            color='primary'
-                                                        />
-                                                    )}
-                                                    label={value}
-                                                    key={key}
-                                                />
-                                            );
-                                        })}
-                                    </div>
+                                                        onChange={(e) => handleChange('grantType', e)}
+                                                        value={value}
+                                                        disabled={!isUserOwner}
+                                                        color='primary'
+                                                    />
+                                                )}
+                                                label={value}
+                                                key={key}
+                                            />
+                                        );
+                                    })}
+                                </div>
                                 <FormHelperText>
                                     <FormattedMessage
                                         defaultMessage={`The application can use the following grant types to generate 
@@ -374,7 +400,7 @@ const KeyConfiguration = (props) => {
                                         id='Shared.AppsAndKeys.KeyConfiguration.the.application.can'
                                     />
                                 </FormHelperText>
-                                        
+
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -390,34 +416,38 @@ const KeyConfiguration = (props) => {
                                     <TextField
                                         margin='dense'
                                         id='callbackURL'
-                                        label={<FormattedMessage
-                                            defaultMessage='Callback URL'
-                                            id='Shared.AppsAndKeys.KeyConfiguration.callback.url.label'
-                                        />}
+                                        label={(
+                                            <FormattedMessage
+                                                defaultMessage='Callback URL'
+                                                id='Shared.AppsAndKeys.KeyConfiguration.callback.url.label'
+                                            />
+                                        )}
                                         value={callbackUrl}
                                         name='callbackURL'
-                                        onChange={e => handleChange('callbackUrl', e)}
-                                        helperText={callBackHasErrors() || <FormattedMessage
-                                            defaultMessage={`Callback URL is a redirection URI in the client
+                                        onChange={(e) => handleChange('callbackUrl', e)}
+                                        helperText={callbackHelper || (
+                                            <FormattedMessage
+                                                defaultMessage={`Callback URL is a redirection URI in the client
                             application which is used by the authorization server to send the
                             client's user-agent (usually web browser) back after granting access.`}
-                                            id='Shared.AppsAndKeys.KeyConfCiguration.callback.url.helper.text'
-                                        />}
+                                                id='Shared.AppsAndKeys.KeyConfCiguration.callback.url.helper.text'
+                                            />
+                                        )}
                                         variant='outlined'
-                                        disabled={!isUserOwner ||
-                                            (selectedGrantTypes && !selectedGrantTypes.includes('authorization_code')
-                                                && !selectedGrantTypes.includes('implicit'))
-                                        }
-                                        error={callBackHasErrors()}
+                                        disabled={!isUserOwner
+                                            || (selectedGrantTypes && !selectedGrantTypes.includes('authorization_code')
+                                                && !selectedGrantTypes.includes('implicit'))}
+                                        error={callbackError}
                                         placeholder={intl.formatMessage({
                                             defaultMessage: 'http://url-to-webapp',
                                             id: 'Shared.AppsAndKeys.KeyConfiguration.url.to.webapp',
                                         })}
+                                        fullWidth
                                     />
                                 </Box>
                             </TableCell>
                         </TableRow>
-                        {applicationConfiguration.length > 0 && applicationConfiguration.map(config => (
+                        {applicationConfiguration.length > 0 && applicationConfiguration.map((config) => (
                             <AppConfiguration
                                 config={config}
                                 previousValue={getPreviousValue(config)}

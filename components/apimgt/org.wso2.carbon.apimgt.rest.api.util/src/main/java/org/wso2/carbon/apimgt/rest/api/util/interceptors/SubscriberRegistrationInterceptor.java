@@ -27,12 +27,16 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.util.Arrays;
 import javax.cache.Cache;
 import javax.cache.Caching;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.APIM_SUBSCRIBE_SCOPE;
 
 public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor {
 
@@ -78,14 +82,14 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                 synchronized ((username + LOCK_POSTFIX).intern()) {
                     subscriber = apiConsumer.getSubscriber(username);
                     if (subscriber == null) {
-                        try {
-                            APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-                        } catch (APIManagementException e) {
-                            // When user does not have subscribe permission we will log it and continue flow.
+                        message.getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+                        if (!hasSubscribeScope(message)) {
+                            // When user does not have subscribe scope we will log it and continue flow.
                             // This happens when user tries to access anonymous apis although he does not have subscribe
                             // permission. It should be allowed.
                             if (logger.isDebugEnabled()) {
-                                logger.debug("User " + username + " does not have subscribe permission", e);
+                                logger.debug("User " + username + " does not have subscribe scope " +
+                                        "(" + APIM_SUBSCRIBE_SCOPE + ")");
                             }
                             return;
                         }
@@ -124,5 +128,13 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         } catch (RegistryException e) {
             throw new APIManagementException("Error occured while loading registry for tenant '" + tenantDomain + "'");
         }
+    }
+
+    private boolean hasSubscribeScope(Message message) {
+        String[] scopes = (String[])message.getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+        if (scopes != null && scopes.length > 0) {
+            return Arrays.asList(scopes).contains(APIM_SUBSCRIBE_SCOPE);
+        }
+        return false;
     }
 }

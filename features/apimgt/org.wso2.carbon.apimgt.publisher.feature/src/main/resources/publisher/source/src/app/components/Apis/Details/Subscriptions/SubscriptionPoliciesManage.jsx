@@ -58,7 +58,10 @@ class SubscriptionPoliciesManage extends Component {
     }
 
     componentDidMount() {
-        API.policies('subscription')
+        const { api } = this.props;
+        const isAsyncAPI = (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
+        const policyPromise = isAsyncAPI ? API.asyncAPIPolicies() : API.policies('subscription');
+        policyPromise
             .then((res) => {
                 this.setState({ subscriptionPolicies: res.body.list });
             })
@@ -92,7 +95,7 @@ class SubscriptionPoliciesManage extends Component {
 
         return (
             <>
-                <Typography variant='h4'>
+                <Typography id='itest-api-details-bushiness-plans-head' variant='h4'>
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
                         defaultMessage='Business Plans'
@@ -120,17 +123,17 @@ class SubscriptionPoliciesManage extends Component {
                         <FormGroup>
                             { subscriptionPolicies && Object.entries(subscriptionPolicies).map((value) => (
                                 <FormControlLabel
-                                    key={value[1].name}
+                                    key={value[1].displayName}
                                     control={(
                                         <Checkbox
                                             disabled={isRestricted(['apim:api_publish', 'apim:api_create'], api)}
                                             color='primary'
-                                            checked={policies.includes(value[1].name)}
+                                            checked={policies.includes(value[1].displayName)}
                                             onChange={(e) => this.handleChange(e)}
-                                            name={value[1].name}
+                                            name={value[1].displayName}
                                         />
                                     )}
-                                    label={value[1].name + ' : ' + value[1].description}
+                                    label={value[1].displayName + ' : ' + value[1].description}
                                 />
                             ))}
                         </FormGroup>

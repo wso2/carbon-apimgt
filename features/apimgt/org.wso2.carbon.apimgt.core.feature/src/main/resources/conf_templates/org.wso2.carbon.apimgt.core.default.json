@@ -27,7 +27,8 @@
   "apim.jwt.convert_dialect": false,
   "apim.jwt.signing_algorithm": "SHA256withRSA",
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
-  "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl",
+  "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
+  "apim.jwt.enable_tenant_based_signing": false,
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
   "apim.cache.km_token.enable": false,
@@ -57,6 +58,7 @@
   "apim.oauth_config.revoke_endpoint": "https://localhost:${mgt.transport.https.port}/oauth2/revoke",
   "apim.oauth_config.enable_token_encryption": false,
   "apim.oauth_config.enable_token_hashing": false,
+  "apim.oauth_config.enable_certificate_bound_access_token": false,
   "apim.oauth_config.allowed_scopes": [
     "^device_.*",
     "openid"
@@ -76,6 +78,7 @@
   "apim.devportal.api_key_alias": "gateway_certificate_alias",
   "apim.devportal.application_sharing_claim": "http://wso2.org/claims/organization",
   "apim.devportal.enable_anonymous_mode": true,
+  "apim.publisher.key_alias": "gateway_certificate_alias",
   "apim.publisher.enable_api_doc_visibility": false,
   "apim.publisher.display_url": false,
   "apim.cors.enable": "true",
@@ -110,6 +113,7 @@
   "apim.throttling.enable_jwt_claim_based_throttling": "false",
   "apim.throttling.enable_query_param_based_throttling": "false",
   "apim.throttling.jms.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
+  "apim.throttling.enable_policy_deployment": true,
   "server.mode": "single",
   "apim.workflow.enable": "false",
   "apim.workflow.service_url": "https://localhost:9445/bpmn",
@@ -157,6 +161,7 @@
   "apim.event_hub.password": "$ref{apim.throttling.password}",
   "apim.key_manager.type": "default",
   "apim.devportal.enable_cross_tenant_subscriptions": false,
+  "apim.devportal.default_reserved_username": "apim_reserved_user",
   "apim.cache_invalidation.enabled":false,
   "apim.cache_invalidation.domain": "default",
   "apim.cache.invalidation.stream":"cache.invalidation.stream:1.0.0",
@@ -165,9 +170,10 @@
   "apim.cache_invalidation.topic_name":"globalCacheInvalidation",
   "apim.auth_manager.check_permissions_remotely": false,
   "apim.auth_manager.iskm_reverseproxy_enabled": false,
-  "apim.sync_runtime_artifacts.gateway.gateway_labels": ["Production and Sandbox"],
+  "apim.sync_runtime_artifacts.gateway.gateway_labels": ["Default"],
   "apim.sync_runtime_artifacts.gateway.artifact_retriever": "DBRetriever",
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
   "apim.sync_runtime_artifacts.gateway.data_retrieval_mode": "async",
-  "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000"
+  "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000",
+  "apim.sync_runtime_artifacts.gateway.enable": true
 }

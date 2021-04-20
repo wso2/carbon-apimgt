@@ -16,156 +16,225 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
-import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
-import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import EditApplication from 'AppComponents/ApplicationSettings/EditApplication';
-import DescriptionIcon from '@material-ui/icons/Description';
-import Link from '@material-ui/core/Link';
-import Configurations from 'Config';
+import AppsTableContent from 'AppComponents/ApplicationSettings/AppsTableContent';
+import ApplicationTableHead from 'AppComponents/ApplicationSettings/ApplicationTableHead';
 import EditIcon from '@material-ui/icons/Edit';
+import Table from '@material-ui/core/Table';
+import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
+import TableFooter from '@material-ui/core/TableFooter';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
+import Tooltip from '@material-ui/core/Tooltip';
+import TextField from '@material-ui/core/TextField';
+import SearchIcon from '@material-ui/icons/Search';
 
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
+
+const useStyles = makeStyles((theme) => ({
+    searchBar: {
+        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    },
+    block: {
+        display: 'block',
+    },
+    clearSearch: {
+        position: 'absolute',
+        right: 111,
+        top: 13,
+    },
+    addUser: {
+        marginRight: theme.spacing(1),
+    },
+}));
+
 export default function ListApplications() {
     const intl = useIntl();
+    const classes = useStyles();
     const [applicationList, setApplicationList] = useState([]);
+    const [totalApps, setTotalApps] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [page, setPage] = useState(0);
+    const [owner, setOwner] = useState('');
+
     /**
     * API call to get application list
     * @returns {Promise}.
     */
-    function apiCall() {
+    function apiCall(pageNo) {
         const restApi = new API();
         return restApi
-            .getApplicationList()
+            .getApplicationList({ limit: rowsPerPage, offset: pageNo * rowsPerPage, user: owner })
             .then((result) => {
                 setApplicationList(result.body.list);
+                const { pagination: { total } } = result.body;
+                setTotalApps(total);
                 return result.body.list;
             })
             .catch((error) => {
                 throw error;
             });
     }
-    const columProps = [
-        { name: 'applicationId', options: { display: false } },
-        {
-            name: 'name',
-            label: intl.formatMessage({
-                id: 'AdminPages.ApplicationSettings.table.header.application.name',
-                defaultMessage: 'Application Name',
-            }),
-            options: {
-                filter: true,
-                sort: true,
-            },
-        },
-        {
-            name: 'owner',
-            label: intl.formatMessage({
-                id: 'AdminPages.ApplicationSettings.table.header.application.owner',
-                defaultMessage: 'Owner',
-            }),
-            options: {
-                filter: true,
-                sort: false,
-            },
-        },
-    ];
-    const searchProps = {
-        searchPlaceholder: intl.formatMessage({
-            id: 'AdminPages.ApplicationSettings.List.search.default',
-            defaultMessage: 'Search by Application Name or Owner',
-        }),
-        active: true,
-    };
-    const pageProps = {
-        help: (
-            <HelpBase>
-                <List component='nav' aria-label='main mailbox folders'>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={
-                                Configurations.app.docUrl
-                                + 'learn/consume-api/manage-application/advanced-topics/'
-                                + 'changing-the-owner-of-an-application/'
-                            }
-                        >
-                            <ListItemText
-                                primary={(
-                                    <FormattedMessage
-                                        id='AdminPages.ApplicationSettings.List.help.link.one'
-                                        defaultMessage='Changing the Owner of an Application'
-                                    />
-                                )}
-                            />
-                        </Link>
-                    </ListItem>
-                </List>
-            </HelpBase>
-        ),
-        pageStyle: 'half',
-        title: intl.formatMessage({
-            id: 'AdminPages.ApplicationSettings.List.title.application.settings',
-            defaultMessage: 'Application Settings',
-        }),
-    };
 
-    const emptyBoxProps = {
-        content: (
-            <Typography variant='body2' color='textSecondary' component='p'>
-                <FormattedMessage
-                    id='AdminPages.ApplicationSettings.List.empty.content.application.settings'
-                    values={{
-                        breakingLine: <br />,
-                    }}
-                    defaultMessage={
-                        'If required, you can transfer the ownership of your application to another user '
-                        + 'in your organization. When transferring ownership, the new owner '
-                        + 'will have the required permission to delete or edit the respective application.'
-                        + '{breakingLine}{breakingLine}'
-                        + 'Create an application with the Devportal to change ownership.'
-                    }
-                />
-            </Typography>
-        ),
-        title: (
-            <Typography gutterBottom variant='h5' component='h2'>
-                <FormattedMessage
-                    id='AdminPages.ApplicationSettings.List.empty.title.change.application.ownership'
-                    defaultMessage='Application Ownership Change'
-                />
-            </Typography>
-        ),
-    };
+    useEffect(() => {
+        apiCall(page).then((result) => {
+            setApplicationList(result);
+        });
+    }, [page]);
+
+    useEffect(() => {
+        apiCall(page).then((result) => {
+            setApplicationList(result);
+        });
+    }, [rowsPerPage]);
+
+    function handleChangePage(event, pageNo) {
+        setPage(pageNo);
+        apiCall(pageNo).then((result) => {
+            setApplicationList(result);
+        });
+    }
+
+    function handleChangeRowsPerPage(event) {
+        const nextRowsPerPage = event.target.value;
+        const rowsPerPageRatio = rowsPerPage / nextRowsPerPage;
+        const nextPage = Math.floor(page * rowsPerPageRatio);
+        setPage(nextPage);
+        setRowsPerPage(nextRowsPerPage);
+        apiCall(page).then((result) => {
+            setApplicationList(result);
+        });
+    }
+
+    function clearSearch() {
+        setPage(0);
+        setOwner('');
+        apiCall(page).then((result) => {
+            setApplicationList(result);
+        });
+    }
+
+    function setQuery(event) {
+        const newQuery = event.target.value;
+        if (newQuery === '') {
+            clearSearch();
+        } else {
+            setOwner(newQuery);
+        }
+    }
+
+    function filterApps() {
+        setPage(0);
+        apiCall(page).then((result) => {
+            setApplicationList(result);
+        });
+    }
 
     return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={() => <span />}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            EditComponent={EditApplication}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Change Application Owner',
-                applicationList,
-            }}
-            DeleteComponent={() => <span />}
-        />
+        <ContentBase>
+            <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
+                <Toolbar>
+                    <Grid container spacing={2} alignItems='center'>
+                        <Grid item>
+                            <SearchIcon className={classes.block} color='inherit' />
+                        </Grid>
+                        <Grid item xs>
+                            <TextField
+                                fullWidth
+                                id='search-label'
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Search',
+                                    id: 'Applications.Listing.Listing.applications.search.label',
+                                })}
+                                placeholder='Search application by owner'
+                                InputProps={{
+                                    disableUnderline: true,
+                                    className: classes.searchInput,
+                                }}
+                                value={owner}
+                                onChange={setQuery}
+                                // onKeyPress={this.handleSearchKeyPress}
+                            />
+                            { owner.length > 0
+                                && (
+                                    <Tooltip
+                                        title={
+                                            intl.formatMessage({
+                                                defaultMessage: 'Clear Search',
+                                                id: 'Applications.Listing.Listing.clear.search',
+                                            })
+                                        }
+                                    >
+                                        <IconButton
+                                            aria-label='delete'
+                                            className={classes.clearSearch}
+                                            onClick={clearSearch}
+                                        >
+                                            <HighlightOffRoundedIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                        </Grid>
+                        <Grid item>
+                            <Button variant='contained' className={classes.addUser} onClick={filterApps}>
+                                <FormattedMessage
+                                    id='Applications.Listing.Listing.applications.search'
+                                    defaultMessage='Search'
+                                />
+                            </Button>
+
+                        </Grid>
+                    </Grid>
+                </Toolbar>
+            </AppBar>
+            <Table id='itest-application-list-table'>
+                <ApplicationTableHead />
+                <AppsTableContent
+                    apps={applicationList}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    editComponentProps={{
+                        icon: <EditIcon />,
+                        title: 'Change Application Owner',
+                        applicationList,
+                    }}
+                    EditComponent={EditApplication}
+                    apiCall={apiCall}
+                />
+                <TableFooter>
+                    <TableRow>
+                        <TablePagination
+                            component='td'
+                            count={totalApps}
+                            rowsPerPage={rowsPerPage}
+                            rowsPerPageOptions={[5, 10, 15]}
+                            labelRowsPerPage='Show'
+                            page={page}
+                            backIconButtonProps={{
+                                'aria-label': 'Previous Page',
+                            }}
+                            nextIconButtonProps={{
+                                'aria-label': 'Next Page',
+                            }}
+                            onChangePage={handleChangePage}
+                            onChangeRowsPerPage={handleChangeRowsPerPage}
+                        />
+                    </TableRow>
+                </TableFooter>
+            </Table>
+        </ContentBase>
     );
 }

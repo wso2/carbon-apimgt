@@ -90,12 +90,6 @@ public class ApiDataFetcherImpl {
 
         };
     }
-    public DataFetcher getLabelsDetails(){
-        return env->{
-            LabelNameDTO labelNameDTO = env.getSource();
-            return labelService.getLabelDetails(labelNameDTO.getName());
-        };
-    }
     public DataFetcher getScopeInformation(){
         return env->{
             ApiDTO api = env.getSource();

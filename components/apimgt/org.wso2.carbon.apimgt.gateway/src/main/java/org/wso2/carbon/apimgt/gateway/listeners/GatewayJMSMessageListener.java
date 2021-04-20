@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
@@ -49,10 +50,12 @@ import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.Iterator;
-
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -95,6 +98,14 @@ public class GatewayJMSMessageListener implements MessageListener {
                                     payloadData.get(APIConstants.EVENT_TIMESTAMP).asLong(),
                                     payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
                         }
+                    } else if (APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA.equalsIgnoreCase
+                            (jmsDestination.getTopicName())) {
+                        String mode = payloadData.get(APIConstants.Webhooks.MODE).asText();
+                        if (APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode)) {
+                            handleAsyncWebhooksSubscriptionMessage(payloadData);
+                        } else if (APIConstants.Webhooks.UNSUBSCRIBE_MODE.equalsIgnoreCase(mode)) {
+                            handleAsyncWebhooksUnSubscriptionMessage(payloadData);
+                        }
                     }
 
                 } else {
@@ -115,27 +126,38 @@ public class GatewayJMSMessageListener implements MessageListener {
 
         if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
+            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
+                    DeployAPIInGatewayEvent.class);
             String tenantDomain = gatewayEvent.getTenantDomain();
             boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
+            if (!tenantLoaded) {
+                String syncKey = tenantDomain.concat("__").concat(this.getClass().getName());
+                synchronized (syncKey.intern()) {
+                    tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
+                    if (!tenantLoaded) {
+                        APIUtil.loadTenantConfigBlockingMode(tenantDomain);
+                    }
+                }
+            }
             if (tenantLoaded) {
-                gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
-                if (!gatewayEvent.getGatewayLabels().isEmpty()) {
+                Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayEvent.getGatewayLabels());
+                systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+                if (!systemConfiguredGatewayLabels.isEmpty()) {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
-                        if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                            boolean tenantFlowStarted = false;
-                            try {
-                                startTenantFlow(tenantDomain);
-                                tenantFlowStarted = true;
-                                inMemoryApiDeployer.deployAPI(gatewayEvent);
-                            } catch (ArtifactSynchronizerException e) {
-                                log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
-                                        "in the Gateway");
-                            } finally {
-                                if (tenantFlowStarted) {
-                                    endTenantFlow();
-                                }
+                    if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                        boolean tenantFlowStarted = false;
+                        try {
+                            startTenantFlow(tenantDomain);
+                            tenantFlowStarted = true;
+                            inMemoryApiDeployer.deployAPI(gatewayEvent);
+                        } catch (ArtifactSynchronizerException e) {
+                            log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
+                                    "in the Gateway");
+                        } finally {
+                            if (tenantFlowStarted) {
+                                endTenantFlow();
                             }
+                        }
                     }
                     if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
                         boolean tenantFlowStarted = false;
@@ -283,5 +305,55 @@ public class GatewayJMSMessageListener implements MessageListener {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 setTenantDomain(tenantDomain, true);
+    }
+
+    private synchronized void handleAsyncWebhooksSubscriptionMessage(JsonNode payloadData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received event for -  Async Webhooks API subscription for : " + payloadData.
+                    get(APIConstants.Webhooks.API_UUID).asText());
+        }
+        String apiUUID = payloadData.get(APIConstants.Webhooks.API_UUID).textValue();
+        String appID = payloadData.get(APIConstants.Webhooks.APP_ID).textValue();
+        String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).textValue();
+        boolean isThrottled = payloadData.get(APIConstants.Webhooks.IS_THROTTLED).asBoolean();
+        ServiceReferenceHolder.getInstance().getSubscriptionsDataService().updateThrottleStatus(appID, apiUUID,
+                tenantDomain, isThrottled);
+        if (!isThrottled) {
+            String topicName = payloadData.get(APIConstants.Webhooks.TOPIC).textValue();
+            WebhooksDTO subscriber = new WebhooksDTO();
+            subscriber.setApiUUID(apiUUID);
+            subscriber.setApiContext(payloadData.get(APIConstants.Webhooks.API_CONTEXT).textValue());
+            subscriber.setApiName(payloadData.get(APIConstants.Webhooks.API_NAME).textValue());
+            subscriber.setApiVersion(payloadData.get(APIConstants.Webhooks.API_VERSION).textValue());
+            subscriber.setAppID(appID);
+            subscriber.setCallbackURL(payloadData.get(APIConstants.Webhooks.CALLBACK).textValue());
+            subscriber.setTenantDomain(tenantDomain);
+            subscriber.setTenantId(payloadData.get(APIConstants.Webhooks.TENANT_ID).intValue());
+            subscriber.setSecret(payloadData.get(APIConstants.Webhooks.SECRET).textValue());
+            subscriber.setExpiryTime(payloadData.get(APIConstants.Webhooks.EXPIRY_AT).asLong());
+            subscriber.setTopicName(topicName);
+            subscriber.setApiTier(payloadData.get(APIConstants.Webhooks.API_TIER).textValue());
+            subscriber.setApplicationTier(payloadData.get(APIConstants.Webhooks.APPLICATION_TIER).textValue());
+            subscriber.setTier(payloadData.get(APIConstants.Webhooks.TIER).textValue());
+            subscriber.setSubscriberName(payloadData.get(APIConstants.Webhooks.SUBSCRIBER_NAME).textValue());
+            ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
+                    .addSubscription(apiUUID, topicName, tenantDomain, subscriber);
+        }
+    }
+
+    private synchronized void handleAsyncWebhooksUnSubscriptionMessage(JsonNode payloadData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received event for -  Async Webhooks API unsubscription for : " + payloadData.
+                    get(APIConstants.Webhooks.API_UUID).asText());
+        }
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_UUID).textValue();
+        String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).textValue();
+        String topicName = payloadData.get(APIConstants.Webhooks.TOPIC).textValue();
+        WebhooksDTO subscriber = new WebhooksDTO();
+        subscriber.setCallbackURL(payloadData.get(APIConstants.Webhooks.CALLBACK).textValue());
+        subscriber.setAppID(payloadData.get(APIConstants.Webhooks.APP_ID).textValue());
+        subscriber.setSecret(payloadData.get(APIConstants.Webhooks.SECRET).textValue());
+        ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
+                .removeSubscription(apiKey, topicName, tenantDomain, subscriber);
     }
 }

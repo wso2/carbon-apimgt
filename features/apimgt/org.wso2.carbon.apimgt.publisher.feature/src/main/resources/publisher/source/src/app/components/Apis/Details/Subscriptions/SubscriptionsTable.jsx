@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
@@ -39,6 +40,7 @@ import PropTypes from 'prop-types';
 import MUIDataTable from 'mui-datatables';
 import InfoIcon from '@material-ui/icons/Info';
 import UserIcon from '@material-ui/icons/Person';
+
 
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
@@ -277,24 +279,7 @@ class SubscriptionsTable extends Component {
         this.fetchSubscriptionData();
     }
 
-    /**
-     * handleChangePage handle change in selected page
-     *
-     * @param page selected page
-     * */
-    handleChangePage(page) {
-        this.setState({ page }, this.fetchSubscriptionData);
-    }
-
-    /**
-     * handleChangeRowsPerPage handle change in rows per page
-     *
-     * @param event rows per page change event
-     * */
-    handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
-    }
-
+    // TODO: This is a React anti-pattern, have to move this to a component ~tmkb
     /**
      * Returns the set of action buttons based on the current subscription state
      *
@@ -441,6 +426,24 @@ class SubscriptionsTable extends Component {
     }
 
     /**
+     * handleChangePage handle change in selected page
+     *
+     * @param page selected page
+     * */
+    handleChangePage(page) {
+        this.setState({ page }, this.fetchSubscriptionData);
+    }
+
+    /**
+     * handleChangeRowsPerPage handle change in rows per page
+     *
+     * @param event rows per page change event
+     * */
+    handleChangeRowsPerPage(event) {
+        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
+    }
+
+    /**
      * Returns subscription state string based on te current subscription state
      *
      * @param {*} state The current state of subscription
@@ -577,12 +580,9 @@ class SubscriptionsTable extends Component {
         const promisedSubscriptions = api.subscriptions(this.api.id, page * rowsPerPage, rowsPerPage, searchQuery);
         promisedSubscriptions
             .then((response) => {
-                this.setState({
-                    subscriptions: response.body.list,
-                    totalSubscription: response.body.pagination.total,
-                });
                 for (let i = 0; i < response.body.list.length; i++) {
                     const { subscriptionId } = response.body.list[i];
+                    response.body.list[i].name = response.body.list[i].applicationInfo.name;
                     const promisedInfo = api.getSubscriberInfo(subscriptionId);
                     promisedInfo
                         .then((resp) => {
@@ -601,6 +601,10 @@ class SubscriptionsTable extends Component {
                             }));
                         });
                 }
+                this.setState({
+                    subscriptions: response.body.list,
+                    totalSubscription: response.body.pagination.total,
+                });
             })
             .catch((errorMessage) => {
                 console.error(errorMessage);
@@ -651,6 +655,7 @@ class SubscriptionsTable extends Component {
         if (claimsObject) {
             return (
                 <div className={classes.root}>
+                    {claimsObject.name}
                     <Grid container spacing={1}>
                         <Grid item>
                             <UserIcon color='primary' />
@@ -737,8 +742,15 @@ class SubscriptionsTable extends Component {
                     sort: false,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
+                            let claimsObject;
+                            if (subscriberClaims) {
+                                claimsObject = subscriberClaims[tableMeta.rowData[0]];
+                            }
                             return (
-                                <div>
+                                <Box display='flex'>
+                                    <Box pr={1}>
+                                        {subscriberClaims && claimsObject && claimsObject.name}
+                                    </Box>
                                     <Tooltip
                                         interactive
                                         placement='top'
@@ -749,7 +761,7 @@ class SubscriptionsTable extends Component {
                                             <>
                                                 {subscriberClaims && (
                                                     <div>
-                                                        {this.renderClaims(subscriberClaims[tableMeta.rowData[0]])}
+                                                        {this.renderClaims(claimsObject)}
                                                     </div>
                                                 )}
                                             </>
@@ -766,7 +778,7 @@ class SubscriptionsTable extends Component {
                                             </Grid>
                                         </Grid>
                                     </Tooltip>
-                                </div>
+                                </Box>
                             );
                         }
                         return null;
@@ -774,7 +786,7 @@ class SubscriptionsTable extends Component {
                 },
             },
             {
-                name: 'applicationInfo.name',
+                name: 'name',
                 label: (
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.Listing.column.header.application'

@@ -220,7 +220,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
-            "select distinct x.* from (" +
+            "(" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
@@ -241,11 +241,54 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "    SUB.TENANT_ID = ?"+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " OR APP.NAME like ?"+
+                    " AND APP.NAME like ?"+
                     " )) a " +
-                    " )x" +
+                    " )" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
+    public static final String GET_REPLIES_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID, " +
+                "AM_API_COMMENTS.COMMENT_TEXT, " +
+                "AM_API_COMMENTS.CREATED_BY, " +
+                "AM_API_COMMENTS.CREATED_TIME, " +
+                "AM_API_COMMENTS.UPDATED_TIME, " +
+                "AM_API_COMMENTS.API_ID, " +
+                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
+                "AM_API_COMMENTS.ENTRY_POINT, " +
+                "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ? " +
+                "ORDER BY AM_API_COMMENTS.CREATED_TIME ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String GET_ROOT_COMMENTS_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID, " +
+                "AM_API_COMMENTS.COMMENT_TEXT, " +
+                "AM_API_COMMENTS.CREATED_BY, " +
+                "AM_API_COMMENTS.CREATED_TIME, " +
+                "AM_API_COMMENTS.UPDATED_TIME, " +
+                "AM_API_COMMENTS.API_ID, " +
+                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
+                "AM_API_COMMENTS.ENTRY_POINT, " +
+                "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID IS NULL " +
+                "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 }
 
 

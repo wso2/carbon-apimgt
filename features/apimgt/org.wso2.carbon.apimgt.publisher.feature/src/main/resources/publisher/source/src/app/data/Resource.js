@@ -71,4 +71,12 @@ export default class Resource {
     isSOAP() {
         return this.type === 'SOAP';
     }
+
+    isWebSub() {
+        return this.type === 'WEBSUB';
+    }
+
+    isAsyncAPI() {
+        return (this.type === 'WS' || this.type === 'WEBSUB' || this.type === 'SSE');
+    }
 }

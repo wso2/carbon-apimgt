@@ -4,6 +4,7 @@ import {
     Menu,
     MenuItem,
     Icon,
+    Box,
 } from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { withStyles } from '@material-ui/core/styles';
@@ -11,6 +12,7 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Configurations from 'Config';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 const styles = (theme) => ({
     profileMenu: {
@@ -48,6 +50,15 @@ class Avatar extends Component {
     }
 
     /**
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = `${Configurations.app.context}/services/logout`;
+    };
+
+    /**
      *
      * Close Avatar dropdown menu
      * @memberof Avatar
@@ -65,15 +76,6 @@ class Avatar extends Component {
     handleClick(event) {
         this.setState({ anchorEl: event.currentTarget });
     }
-
-    /**
-     * Do OIDC logout redirection
-     * @param {React.SyntheticEvent} e Click event of the submit button
-     */
-    doOIDCLogout = (e) => {
-        e.preventDefault();
-        window.location = `${Configurations.app.context}/services/logout`;
-    };
 
     /**
      *
@@ -98,6 +100,8 @@ class Avatar extends Component {
                     color='inherit'
                     onClick={this.handleClick}
                     className={classes.userLink}
+                    disableFocusRipple
+                    disableRipple
                 >
                     <AccountCircle className={classes.accountIcon} />
                     {' '}
@@ -107,7 +111,7 @@ class Avatar extends Component {
                     </Icon>
                 </IconButton>
                 <Menu
-                    id='logout-menu'
+                    id='itest-logout-menu'
                     anchorEl={anchorEl}
                     keepMounted
                     open={Boolean(anchorEl)}
@@ -124,11 +128,17 @@ class Avatar extends Component {
                     className={classes.profileMenu}
                 >
                     <Link to={{ pathname: '/services/logout' }}>
-                        <MenuItem onClick={this.doOIDCLogout} id='logout'>
-                            <FormattedMessage
-                                id='Base.Header.avatar.Avatar.logout'
-                                defaultMessage='Logout'
-                            />
+                        <MenuItem onClick={this.doOIDCLogout} id='itest-logout'>
+                            <Box mx={1} display='flex' alignItems='center' color='text.secondary'>
+                                <ExitToAppIcon fontSize='small' />
+                                <Box ml={1}>
+                                    <FormattedMessage
+                                        id='Base.Header.avatar.Avatar.logout'
+                                        defaultMessage='Logout'
+                                    />
+                                </Box>
+                            </Box>
+
                         </MenuItem>
                     </Link>
                 </Menu>

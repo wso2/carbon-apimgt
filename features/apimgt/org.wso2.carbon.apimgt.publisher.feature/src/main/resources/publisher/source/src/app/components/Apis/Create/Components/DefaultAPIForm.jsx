@@ -113,7 +113,7 @@ function checkContext(value, result) {
  */
 export default function DefaultAPIForm(props) {
     const {
-        onChange, onValidate, api, isAPIProduct, isWebSocket,
+        onChange, onValidate, api, isAPIProduct, isWebSocket, children, appendChildrenBeforeEndpoint, hideEndpoint,
     } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
@@ -214,6 +214,13 @@ export default function DefaultAPIForm(props) {
                     });
                 } else {
                     updateValidity({ ...validity, version: versionValidity });
+                }
+                break;
+            }
+            case 'endpoint': {
+                if (isWebSocket && value && value.length > 0) {
+                    const wsUrlValidity = APIValidation.wsUrl.validate(value).error;
+                    updateValidity({ ...validity, endpointURL: wsUrlValidity });
                 }
                 break;
             }
@@ -390,7 +397,8 @@ export default function DefaultAPIForm(props) {
                         </>
                     )}
                 </Grid>
-                {!isAPIProduct && (
+                {appendChildrenBeforeEndpoint && !!children && children}
+                {!isAPIProduct && !hideEndpoint && (
                     <TextField
                         fullWidth
                         id='itest-id-apiendpoint-input'
@@ -399,25 +407,22 @@ export default function DefaultAPIForm(props) {
                         value={api.endpoint}
                         onChange={onChange}
                         helperText={
-                            validity.endpointURL && (
-                                <span>
-                                    Enter a valid
-                                    <a
-                                        rel='noopener noreferrer'
-                                        target='_blank'
-                                        href='http://tools.ietf.org/html/rfc3986'
-                                    >
-                                        RFC 3986
-                                    </a>
-                                    {' '}
-                                    URI
-                                </span>
-                            )
+                            (validity.endpointURL
+                                && validity.endpointURL.details.map((detail, index) => {
+                                    return (
+                                        <div style={{ marginTop: index !== 0 && '10px' }}>
+                                            {detail.message}
+                                        </div>
+                                    );
+                                }))
                         }
                         error={validity.endpointURL}
                         margin='normal'
                         variant='outlined'
                         InputProps={{
+                            onBlur: ({ target: { value } }) => {
+                                validate('endpoint', value);
+                            },
                             endAdornment: (
                                 <InputAdornment position='end'>
                                     {statusCode && (
@@ -451,6 +456,8 @@ export default function DefaultAPIForm(props) {
                         }}
                     />
                 )}
+
+                {!appendChildrenBeforeEndpoint && !!children && children}
             </form>
             <Grid container direction='row' justify='flex-end' alignItems='center'>
                 <Grid item>

@@ -48,7 +48,7 @@ public abstract class APIDefinition {
      * @param apiDefinition
      * @return
      */
-    public abstract Map<String, Object> generateExample(String apiDefinition);
+    public abstract Map<String, Object> generateExample(String apiDefinition) throws APIManagementException;
 
     /**
      * This method extracts the URI templates from the API definition
@@ -217,6 +217,16 @@ public abstract class APIDefinition {
     public abstract API setExtensionsToAPI(String swaggerContent, API api)
             throws APIManagementException;
 
+    /**
+     * This method copy the vendor extensions from Existing OAS to the updated OAS
+     *
+     * @param existingOASContent Current OAS Content
+     * @param updatedOASContent Updated OAS Content
+     * @return OAS content
+     * @throws APIManagementException
+     */
+    public abstract String copyVendorExtensions(String existingOASContent, String updatedOASContent)
+            throws APIManagementException;
     /**
      * This method will extractX-WSO2-disable-security extension provided in API level
      * by mgw and inject that extension to all resources in OAS file

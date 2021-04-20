@@ -34,12 +34,10 @@ public class ApiDTO {
 
     private List<TierNameDTO> tierInformation;
 
-    private List<LabelNameDTO> label;
-
-    private List<IngressUrlDTO> ingressUrl;
 
 
-    public ApiDTO(String uuid, String name, String description, String context, String version, String provider, String type, String transport, boolean hasthumbnail, String environments, String wsdUrl, String status, boolean isSubscriptionAvailable, boolean isDefault, String authorizationHeader, String apiSecurity, boolean isMonetizationEnabled , String throttlingPolicies, String thumbnailUrl, String categories, String keyManagers, BusinessInformationDTO businessInformation, AdvertiseDTO advertiseInfo, List<APIEndpointURLsDTO> apiEndPointInformation, List<TierNameDTO> tierInformation, List<LabelNameDTO> label, List<IngressUrlDTO> ingressUrl) {
+
+    public ApiDTO(String uuid, String name, String description, String context, String version, String provider, String type, String transport, boolean hasthumbnail, String environments, String wsdUrl, String status, boolean isSubscriptionAvailable, boolean isDefault, String authorizationHeader, String apiSecurity, boolean isMonetizationEnabled , String throttlingPolicies, String thumbnailUrl, String categories, String keyManagers, BusinessInformationDTO businessInformation, AdvertiseDTO advertiseInfo, List<APIEndpointURLsDTO> apiEndPointInformation, List<TierNameDTO> tierInformation) {
         this.uuid = uuid;
         this.name = name;
         this.description = description;
@@ -70,9 +68,6 @@ public class ApiDTO {
 
         this.tierInformation = tierInformation;
 
-        this.label = label;
-
-        this.ingressUrl = ingressUrl;
 
     }
 

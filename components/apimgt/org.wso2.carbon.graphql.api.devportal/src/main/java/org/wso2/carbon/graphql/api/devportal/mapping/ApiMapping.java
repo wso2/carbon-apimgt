@@ -5,10 +5,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+//import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
+//import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -96,19 +97,17 @@ public class ApiMapping {
         boolean advertised = devPortalAPI.isAdvertiseOnly();
         String originalStoreUrl = devPortalAPI.getRedirectURL();
         String apiOwner = devPortalAPI.getApiOwner();
-        AdvertiseDTO advertiseInfo = new AdvertiseDTO(advertised,originalStoreUrl,apiOwner);
+        String vendor = devPortalAPI.getAdvertiseOnlyAPIVendor();
+        AdvertiseDTO advertiseInfo = new AdvertiseDTO(advertised,originalStoreUrl,apiOwner,vendor);
 
         List<APIEndpointURLsDTO> apiEndPointInformation = apiEndpointURLsDTO(devPortalAPI);
 
         TierService tierData = new TierService();
         List<TierNameDTO>  tierInformation = tierData.getTierName(devPortalAPI);
 
-        LabelService labelData = new LabelService();
-        List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(devPortalAPI);
 
-        List<IngressUrlDTO> ingressUrlDTOS = getIngressUrlData(devPortalAPI);
 
-        return new ApiDTO(uuid,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
+        return new ApiDTO(uuid,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation);
     }
 
     public String getThrottlingPoliciesData(Set<String> tierNames)  {
@@ -284,60 +283,6 @@ public class ApiMapping {
         return  apiEndpointURLsDTOS;
     }
 
-    public List<IngressUrlDTO>  getIngressUrlData(DevPortalAPI devPortalAPI) throws APIManagementException, APIPersistenceException {
 
-        List<IngressUrlDTO> apiDeployedIngressURLs = new ArrayList<>();
-
-        Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> deploymentEnvironments = devPortalAPI.getDeploymentEnvironments();//extractDeploymentsForAPI(deployments);
-
-        if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-            Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> selectedDeploymentEnvironments = deploymentEnvironments;
-            if (selectedDeploymentEnvironments != null && !selectedDeploymentEnvironments.isEmpty()) {
-                for (org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments deploymentEnvironment : selectedDeploymentEnvironments) {
-                    IngressUrlDTO ingressUrlDTO = new IngressUrlDTO();
-                    JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
-                    for (Object clusterConfig : clusterConfigs) {
-                        JSONObject clusterConf = (JSONObject) clusterConfig;
-                        List<DeploymentClusterInfoDTO> clusterInfoArray = new ArrayList<>();
-                        if (clusterConf.get(ContainerBasedConstants.TYPE).toString().equalsIgnoreCase(deploymentEnvironment.getType())) {
-                            JSONArray containerMgtInfoArray = (JSONArray) (clusterConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-                            for (Object containerMgtInfoObj : containerMgtInfoArray) {
-                                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
-                                DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
-                                if (deploymentEnvironment.getClusterNames().contains(containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
-
-                                    String ClusterName =  containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME).toString();
-                                    deploymentClusterInfoDTO.setClusterName(ClusterName);
-                                    String ClusterDisplayName = containerMgtInfo.get(ContainerBasedConstants.DISPLAY_NAME).toString();
-                                    deploymentClusterInfoDTO.setClusterDisplayName(ClusterDisplayName);
-                                    String IngressURL=null;
-                                    if(((JSONObject) containerMgtInfo.get(ContainerBasedConstants.PROPERTIES)).get(ContainerBasedConstants.ACCESS_URL) != null){
-                                        IngressURL = ((JSONObject) containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
-                                                .get(ContainerBasedConstants.ACCESS_URL).toString();
-                                        deploymentClusterInfoDTO.setIngressURL(IngressURL);
-                                    }
-                                    clusterInfoArray.add(deploymentClusterInfoDTO);
-                                }
-                            }
-                            if (!clusterInfoArray.isEmpty()) {
-                                ingressUrlDTO.setClusterDetails(clusterInfoArray);
-                                ingressUrlDTO.setDeploymentEnvironmentName(deploymentEnvironment.getType());
-                            }
-                        }
-
-                    }
-                    if (ingressUrlDTO.getDeploymentEnvironmentName() != null && !ingressUrlDTO.getClusterDetails()
-                            .isEmpty()) {
-                        apiDeployedIngressURLs.add(ingressUrlDTO);
-                    }
-
-                }
-            }
-
-
-
-        }
-        return apiDeployedIngressURLs;
-    }
 
 }

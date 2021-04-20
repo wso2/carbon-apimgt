@@ -102,7 +102,7 @@ export default function SelectPermissionsStep(props) {
                 <FormControlLabel
                     value={SELECT_PERMISSIONS}
                     control={<Radio color='primary' />}
-                    label='Custom permissions'
+                    label='Custom scope assignments'
                 />
                 <Box pl={7} pt={2}>
                     <PermissionTree

@@ -29,6 +29,7 @@ public class APIMgtGatewayConstants {
     public static final String VERSION = "api.ut.version";
     public static final String API_TYPE = "api.ut.api_type";
     public static final String RESOURCE = "api.ut.resource";
+    public static final String API_STATUS = "api.ut.status";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
@@ -49,7 +50,7 @@ public class APIMgtGatewayConstants {
     public static final String REQUEST_EXECUTION_START_TIME = "request.execution.start.time";
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
-
+    public static final String CUSTOM_PROPERTY = "customProperty";
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
@@ -204,7 +205,7 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
     public static final String SPAN_ENDPOINT = "span.endpoint";
 
-    public static final String TEST_KEY = "testkey";
+    public static final String INTERNAL_KEY = "Internal-Key";
 
     /**
      * Synapse Properties related Constants
@@ -218,5 +219,8 @@ public class APIMgtGatewayConstants {
     public static final String AUTHENTICATION_ENDPOINT_CONTEXT = "/authenticationendpoint";
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
+    public static final String API_OBJECT = "API";
+    public static final String OAUTH_ENDPOINT_INSTANCE = "oauth.instance";
+    public static final String VALIDATED_X509_CERT = "ValidatedX509Cert";
 }
 

@@ -164,7 +164,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return applicationKeyMapping;
                 }
                 try {
-                    applicationKeyMapping = new SubscriptionDataLoaderImpl().getKeyMapping(key, keyManager);
+                    applicationKeyMapping = new SubscriptionDataLoaderImpl()
+                            .getKeyMapping(key, keyManager, tenantDomain);
                 } catch (DataLoadingException e) {
                     log.error("Error while Loading KeyMapping Information from Internal API.", e);
                 }
@@ -710,6 +711,19 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    public Map<String, API> getAllAPIsByContextList() {
+        Map<String, API> apiContextAPIMap = new HashMap<>();
+        for (API api : apiMap.values()) {
+            apiContextAPIMap.put(api.getContext(), api);
+            if (api.isDefaultVersion()) {
+                String context = api.getContext().replace("/" + api.getApiVersion(), "");
+                apiContextAPIMap.put(context, api);
+            }
+        }
+        return apiContextAPIMap;
+    }
+
+    @Override
     public void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event) {
 
         try {
@@ -718,10 +732,14 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 clearResourceCache(api, event.getTenantDomain());
             }
             if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
-                removeAPI(api);
+                if (api != null){
+                    removeAPI(api);
+                }
             } else {
                 API newAPI = new SubscriptionDataLoaderImpl().getApi(event.getContext(), event.getVersion());
-                addOrUpdateAPI(newAPI);
+                if (newAPI != null) {
+                    addOrUpdateAPI(newAPI);
+                }
             }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);

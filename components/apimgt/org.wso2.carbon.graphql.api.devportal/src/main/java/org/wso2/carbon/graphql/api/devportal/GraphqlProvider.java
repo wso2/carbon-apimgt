@@ -69,7 +69,6 @@ public class GraphqlProvider {
                 .type(OperationInformationDataFetcher())
                 .type(TierDetailsDataFetcher())
                 .type(MonetizationLabelDataFetcher())
-                .type(LabelDetailsDataFetcher())
                 .type(ScopeInformationDataFetcher())
                 .type(QueryApiListing())
                 .type(APICreatedTimeDataFetcher())
@@ -114,10 +113,7 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("operationInformation",apiDataFetcher.getOperationInformation());
     }
-    private TypeRuntimeWiring.Builder LabelDetailsDataFetcher(){
-        return TypeRuntimeWiring.newTypeWiring("Label")
-                .dataFetcher("labelDetails",apiDataFetcher.getLabelsDetails());
-    }
+
     private TypeRuntimeWiring.Builder ScopeInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("scope",apiDataFetcher.getScopeInformation());

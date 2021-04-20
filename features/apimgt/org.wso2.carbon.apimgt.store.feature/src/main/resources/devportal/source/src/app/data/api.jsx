@@ -196,42 +196,6 @@ export default class API extends Resource {
     }
 
     /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param labelName {String} Micro gateway label
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
-    }
-
-    /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param clusterName {String} Container managed cluster name
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwaggerByAPIIdAndClusterName(apiId, clusterName, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId, clusterName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
-    }
-
-    /**
      * Get application by id
      * @param id {String} UUID of the application
      * @param callback {function} Function which needs to be called upon success
@@ -259,7 +223,7 @@ export default class API extends Resource {
      */
     getAllApplications(callback = null, limit = 25) {
         const promiseGet = this.client.then((client) => {
-            return client.apis.Applications.get_applications({limit}, this._requestMetaData());
+            return client.apis.Applications.get_applications({ limit }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -338,9 +302,9 @@ export default class API extends Resource {
      * @param apiId apiId of the api to which the comment is added
      * @param comment comment text
      */
-    addComment(apiId, comment) {
+    addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
-            const payload = { apiId };
+            const payload = { apiId, replyTo };
             return client.apis.Comments.addCommentToAPI(
                 payload,
                 { requestBody: comment },
@@ -353,9 +317,9 @@ export default class API extends Resource {
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId) {
+    getAllComments(apiId, limit, offset) {
         return this.client.then((client) => {
-            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId, limit: limit, offset: offset }, this._requestMetaData());
         });
     }
 
@@ -390,6 +354,38 @@ export default class API extends Resource {
         } else {
             return promise;
         }
+    }
+    
+    /**
+     * Get all replies for a particular comment
+     * @param {string} apiId api id of the api for which the comment is added
+     * @param {string} commentId id of the comment
+     * @param {string} limit number of replies to retrieve
+     * @param {string} offset the starting point of replies
+     * @returns {promise} promise
+     */
+    getAllCommentReplies(apiId, commentId, limit, offset) {
+        return this.client.then((client) => {
+            return client.apis.Comments.getRepliesOfComment({
+                commentId, apiId, limit, offset,
+            }, this._requestMetaData());
+        });
+    }
+
+    /**
+     * Get all replies for a particular comment
+     * @param {string} apiId api id of the api for which the comment is added
+     * @param {string} commentId id of the comment
+     * @param {string} limit number of replies to retrieve
+     * @param {string} offset the starting point of replies
+     * @returns {promise} promise
+     */
+    getAllCommentReplies(apiId, commentId, limit, offset) {
+        return this.client.then((client) => {
+            return client.apis.Comments.getRepliesOfComment({
+                commentId, apiId, limit, offset,
+            }, this._requestMetaData());
+        });
     }
 
     /**
@@ -529,14 +525,16 @@ export default class API extends Resource {
     /**
      * Get keys of an application
      * @param applicationId id of the application that needs to get the keys
+     * @param limit subscription count to return
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSubscriptions(apiId, applicationId, callback = null) {
+    getSubscriptions(apiId, applicationId, limit = 25, callback = null) {
         const payload = { apiId };
         if (applicationId) {
             payload[applicationId] = applicationId;
         }
+        payload['limit'] = limit;
         const promisedGet = this.client.then((client) => {
             return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
         });
@@ -545,6 +543,34 @@ export default class API extends Resource {
         } else {
             return promisedGet;
         }
+    }
+
+    /**
+     * Get webhook subscriptions for a web hook Api.
+     * @param apiId of the web hook api which holds the topics
+     * @param applicationId of the application making the subscription
+     * @returns promise
+     */
+    getWebhookubScriptions(apiId, applicationId) {
+        var promisedTopicSubscriptionGet = this.client.then((client) => {
+            return client.apis["Webhooks"].get_webhooks_subscriptions(
+                { apiId: apiId, applicationId: applicationId });
+        }
+        );
+        return promisedTopicSubscriptionGet;
+    }
+
+    /**
+     * Get all topics available for a specified webhook API.
+     * @param apiId of the web hook api
+     * @returns promise
+     */
+    getAllTopics(apiId) {
+        const payload = { apiId };
+        const promisedTopicGet = this.client.then((client) => {
+            return client.apis.Topics.get_apis__apiId__topics(payload);
+        });
+        return promisedTopicGet;
     }
 
     /**
@@ -571,20 +597,6 @@ export default class API extends Resource {
         } else {
             return promiseCreateSubscription;
         }
-    }
-
-    /**
-     * Get the available labels.
-     * @returns {Promise.<TResult>}
-     */
-    labels() {
-        const promiseLabels = this.client.then((client) => {
-            return client.apis['Label (Collection)'].get_labels(
-                {},
-                this._requestMetaData(),
-            );
-        });
-        return promiseLabels;
     }
 
     /**
@@ -717,113 +729,6 @@ export default class API extends Resource {
     getKeyManagers() {
         return this.client.then((client) => {
             return client.apis['Key Managers (Collection)'].get_key_managers(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the supported alert types by the publisher.
-     * @return {Promise}
-     * */
-    getSupportedAlertTypes() {
-        return this.client.then((client) => {
-            return client.apis.Alerts.getDevportalAlertTypes(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the subscribed alert types by the current user.
-     * @returns {Promise}
-     * */
-    getSubscribedAlertTypesByUser() {
-        return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].getSubscribedAlertTypes(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Subscribe to the provided set of alerts.
-     * @return {Promise}
-     * */
-    subscribeAlerts(alerts) {
-        return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts(
-                {},
-                { requestBody: alerts },
-                this._requestMetaData()
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Unsubscribe from all the alerts.
-     * @return {Promise}
-     * */
-    unsubscribeAlerts() {
-        return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].unsubscribeAllAlerts(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the configuration for the given alert type.
-     * @param {string} alertType The alert type name.
-     * @return {Promise}
-     * */
-    getAlertConfigurations(alertType) {
-        return this.client.then((client) => {
-            return client.apis['Alert Configuration'].getAllAlertConfigs(
-                {
-                    alertType,
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Add configuration for the given alert type.
-     * @param {string} alertType The alert type name.
-     * @param {object} alertConfig Alert configurations.
-     * @param {string} configId The alert configuration id.
-     * @return {Promise}
-     * */
-    putAlertConfiguration(alertType, alertConfig, configId) {
-        return this.client.then((client) => {
-            return client.apis['Alert Configuration'].addAlertConfig(
-                {
-                    alertType,
-                    configurationId: configId,
-                },
-                {
-                    requestBody: alertConfig
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Delete configuration.
-     * @param {string} alertType The alert type name.
-     * @param {string} configId The alert configuration id.
-     * @return {Promise}
-     * */
-    deleteAlertConfiguration(alertType, configId) {
-        return this.client.then((client) => {
-            return client.apis['Alert Configuration'].deleteAlertConfig(
-                {
-                    alertType,
-                    configurationId: configId,
-                },
-                this._requestMetaData(),
-            );
         });
     }
 

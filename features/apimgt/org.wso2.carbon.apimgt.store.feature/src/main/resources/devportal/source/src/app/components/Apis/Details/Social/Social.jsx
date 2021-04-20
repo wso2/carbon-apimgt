@@ -21,7 +21,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
 import { app } from 'Settings';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
-import EmbadCode from 'AppComponents/Apis/Details/Social/EmbadCode';
+import EmbedCode from 'AppComponents/Apis/Details/Social/EmbedCode';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 
 const useStyles = makeStyles((theme) => ({
@@ -29,13 +29,14 @@ const useStyles = makeStyles((theme) => ({
         display: 'inline-block',
         '& img': {
             width: 32,
-            marginLeft: theme.spacing(1),
+            marginRight: theme.spacing(1),
         },
     },
     oneFlex: {
         flex: 1,
     },
     socialLinkWrapper: {
+        marginTop: 16,
         display: 'flex',
         alignItems: 'center',
         paddingRight: theme.spacing(2),
@@ -73,14 +74,11 @@ function Social() {
         custom: {
             social: {
                 showSharing: {
-                    active, showFacebook, showReddit, showTwitter, showEmbad, showEmail,
+                    active, showFacebook, showReddit, showTwitter, showEmbed, showEmail,
                 },
             },
         },
     } = theme;
-    if (!active) {
-        return <span />;
-    }
     return (
         <>
             <div className={classes.oneFlex} />
@@ -119,10 +117,10 @@ function Social() {
                         </a>
                     </>
                 )}
-                {(slack || github) && (
+                {active && (slack || github) && (
                     <div className={classes.divider} />
                 )}
-                {showFacebook && (
+                {active && showFacebook && (
                     <a
                         className={classes.socialLink}
                         id='facebook'
@@ -138,7 +136,7 @@ function Social() {
                     </a>
                 )}
                 {/* Twitter */}
-                {showTwitter && (
+                {active && showTwitter && (
                     <a
                         className={classes.socialLink}
                         id='Twitter'
@@ -154,7 +152,7 @@ function Social() {
                     </a>
                 )}
                 {/* Reddit */}
-                {showReddit && (
+                {active && showReddit && (
                     <a
                         className={classes.socialLink}
                         id='Reddit'
@@ -169,14 +167,14 @@ function Social() {
                         />
                     </a>
                 )}
-                {showEmbad && (
+                {active && showEmbed && (
                     <>
                         <div className={classes.divider} />
                         {/* TODO: Fix spelling mistake ~tmkb */}
-                        <EmbadCode />
+                        <EmbedCode />
                     </>
                 )}
-                {showEmail && (
+                {active && showEmail && (
                     <>
                         <div className={classes.divider} />
                         <a href={`mailto:?Subject=${apiName}&body=Link+:+${apiUrl}"`} className={classes.codeIcon}>

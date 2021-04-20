@@ -101,7 +101,7 @@ post:
           "context":"/pizza-api",
           "isDefaultVersion":false,
           "gatewayEnvironments":[
-            "Production and Sandbox"
+            "Default"
           ],
           "transport":[
             "http",
@@ -206,7 +206,7 @@ post:
           ],
           "endpointSecurity":null,
           "gatewayEnvironments":[
-            "Production and Sandbox"
+            "Default"
           ],
           "labels":[
 

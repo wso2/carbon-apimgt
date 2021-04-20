@@ -19,24 +19,25 @@
 import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { StylesProvider, jssPreset } from '@material-ui/core/styles';
+import {
+    StylesProvider, jssPreset, MuiThemeProvider, createMuiTheme,
+} from '@material-ui/core/styles';
 import { IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import merge from 'lodash.merge';
 import cloneDeep from 'lodash.clonedeep';
 import { create } from 'jss';
 import rtl from 'jss-rtl';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
 import Utils from 'AppData/Utils';
 import Settings from 'Settings';
+import DefaultConfigurations from 'AppData/defaultTheme';
 import Logout from './app/components/Logout';
 import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
-import DefaultConfigurations from './defaultTheme';
 import AuthManager from './app/data/AuthManager';
-import Loading from './app/components/Base/Loading/Loading';
 import CONSTS from './app/data/Constants';
 
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
@@ -63,7 +64,6 @@ class DevPortal extends React.Component {
             tenantDomain: null,
             theme: null,
             isNonAnonymous: false,
-            lanuage: null,
             redirecting: false,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
@@ -81,7 +81,7 @@ class DevPortal extends React.Component {
         if (customUrlEnabledDomain !== 'null') {
             tenant = customUrlEnabledDomain;
         } else {
-            tenant = urlParams.get('tenant')
+            tenant = urlParams.get('tenant');
         }
         const api = new API();
         const promisedSettings = api.getSettings();
@@ -104,11 +104,11 @@ class DevPortal extends React.Component {
             });
         if (tenant === null || tenant === 'carbon.super') {
             const { custom: { publicTenantStore } } = this.systemTheme;
-            if(publicTenantStore) {
+            if (publicTenantStore) {
                 const { active: publicTenantStoreActive, redirectToIfInactive } = publicTenantStore;
-                if( !publicTenantStoreActive ) {
+                if (!publicTenantStoreActive) {
                     window.location.href = redirectToIfInactive;
-                    this.setState( { redirecting: true})
+                    this.setState({ redirecting: true });
                 } else {
                     this.updateLocale();
                     this.setState({ theme: this.systemTheme, redirecting: false });
@@ -121,61 +121,8 @@ class DevPortal extends React.Component {
             this.setTenantTheme(tenant);
         }
     }
-    /**
-    * Load locale file.
-    *
-    * @param {string} locale Locale name
-    */
-    loadLocale(locale = 'en') {
-        fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
-            .then((resp) => {
-                if (resp.status === 200) {
-                    return (resp.json());
-                } else {
-                    return {};
-                }
-            })
-            .then((messages) => {
-                // eslint-disable-next-line global-require, import/no-dynamic-require
-                this.setState({ messages, language: locale });
-            });
-    }
-    /**
-     * Set the local settings
-     *
-     * @memberof DevPortal
-     */
-    updateLocale(localTheme = this.systemTheme) {
-        //The above can be overriden by the language switcher
-        let browserLocal = Utils.getBrowserLocal();
-        const { direction: defaultDirection, custom: { languageSwitch: { active: languageSwitchActive, languages } } } = localTheme;
-        let lanauageToLoad = null;
-        if (languageSwitchActive) {
-            const savedLanguage = localStorage.getItem('language');
-            let direction = defaultDirection;
-            let selectedLanuageObject = null;
-            for (var i = 0; i < languages.length; i++) {
-                if (savedLanguage && savedLanguage === languages[i].key) {
-                    selectedLanuageObject = languages[i];
-                } else if (!savedLanguage && browserLocal === languages[i].key) {
-                    selectedLanuageObject = languages[i];
-                }
-            }
-            if (selectedLanuageObject) {
-                direction = selectedLanuageObject.direction || defaultDirection;
-            }
-            document.body.setAttribute('dir', direction);
-            this.systemTheme.direction = direction;
-            lanauageToLoad = savedLanguage || selectedLanuageObject.key || browserLocal;
-        } else {
-            // If the lanauage switch was disabled after setting a cookie we need to remove the cookie and 
-            // force the selected lanuage to the browserLocal.
-            lanauageToLoad = browserLocal;
-            document.body.setAttribute('dir', localTheme.direction);
-            this.systemTheme.direction = localTheme.direction;
-        }
-        this.loadLocale(lanauageToLoad);
-    }
+
+
     /**
      * Set the tenant domain to state
      * @param {String} tenantDomain tenant domain
@@ -190,6 +137,21 @@ class DevPortal extends React.Component {
         }
     }
 
+    /**
+     * Add two numbers.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
+     */
+    getTitle(theme) {
+        const {
+            custom: {
+                title: {
+                    prefix, sufix,
+                },
+            },
+        } = theme;
+        return (prefix + sufix);
+    }
 
     /**
      *
@@ -211,9 +173,9 @@ class DevPortal extends React.Component {
     setTenantTheme(tenant) {
         if (tenant && tenant !== 'INVALID') {
             fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
-                .then(response => {
+                .then((response) => {
                     if (!response.ok) {
-                        throw new Error("HTTP error " + response.status);
+                        throw new Error('HTTP error ' + response.status);
                     }
                     return response.json();
                 })
@@ -235,6 +197,68 @@ class DevPortal extends React.Component {
     }
 
     /**
+    * Load locale file.
+    *
+    * @param {string} locale Locale name
+    */
+    loadLocale(locale = 'en') {
+        fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
+            .then((resp) => {
+                if (resp.status === 200) {
+                    return (resp.json());
+                } else {
+                    return {};
+                }
+            })
+            .then((messages) => {
+                // eslint-disable-next-line global-require, import/no-dynamic-require
+                this.setState({ messages, language: locale });
+            });
+    }
+
+    /**
+     * Set the local settings
+     *
+     * @memberof DevPortal
+     */
+    /**
+     * Load the local according to the theme.
+     * @param {JSON} localTheme selected theme
+     * @returns {void} load the local according to the theme.
+     */
+    updateLocale(localTheme = this.systemTheme) {
+        // The above can be overriden by the language switcher
+        const browserLocal = Utils.getBrowserLocal();
+        const { direction: defaultDirection, custom: { languageSwitch: { active: languageSwitchActive, languages } } } = localTheme;
+        let lanauageToLoad = null;
+        if (languageSwitchActive) {
+            const savedLanguage = localStorage.getItem('language');
+            let direction = defaultDirection;
+            let selectedLanuageObject = null;
+            for (let i = 0; i < languages.length; i++) {
+                if (savedLanguage && savedLanguage === languages[i].key) {
+                    selectedLanuageObject = languages[i];
+                } else if (!savedLanguage && browserLocal === languages[i].key) {
+                    selectedLanuageObject = languages[i];
+                }
+            }
+            if (selectedLanuageObject) {
+                direction = selectedLanuageObject.direction || defaultDirection;
+            }
+            document.body.setAttribute('dir', direction);
+            this.systemTheme.direction = direction;
+            lanauageToLoad = savedLanguage || selectedLanuageObject.key || browserLocal;
+        } else {
+            // If the lanauage switch was disabled after setting a cookie we need to remove the cookie and
+            // force the selected lanuage to the browserLocal.
+            lanauageToLoad = browserLocal;
+            document.body.setAttribute('dir', localTheme.direction);
+            this.systemTheme.direction = localTheme.direction;
+        }
+        this.loadLocale(lanauageToLoad);
+    }
+
+    /**
      * Add two numbers.
      * @param {object} theme object.
      * @returns {JSX} link dom tag.
@@ -248,9 +272,9 @@ class DevPortal extends React.Component {
         }
         if (cssUrlWithTenant) {
             let url = cssUrlWithTenant;
-            
-            if(Settings.app.context === ''){
-                if(/^\//.test(cssUrlWithTenant)){
+
+            if (Settings.app.context === '') {
+                if (/^\//.test(cssUrlWithTenant)) {
                     url = cssUrlWithTenant.substr(1);
                 } else {
                     url = cssUrlWithTenant;
@@ -270,21 +294,6 @@ class DevPortal extends React.Component {
         }
     }
 
-    /**
-     * Add two numbers.
-     * @param {object} theme object.
-     * @returns {JSX} link dom tag.
-     */
-    getTitle(theme) {
-        const {
-            custom: {
-                title: {
-                    prefix, sufix,
-                },
-            },
-        } = theme;
-        return (prefix + sufix);
-    }
 
     /**
      * If the passive mode is enabled then this method will check whether
@@ -305,12 +314,14 @@ class DevPortal extends React.Component {
      * @memberof DevPortal
      */
     render() {
-        const { settings, tenantDomain, theme, messages, language, redirecting } = this.state;
+        const {
+            settings, tenantDomain, theme, messages, language, redirecting,
+        } = this.state;
         const { app: { context } } = Settings;
-        if(redirecting) {
+        if (redirecting) {
             return (
                 <Progress />
-            )
+            );
         }
         if (settings && theme && messages && language) {
             return (
@@ -344,9 +355,8 @@ class DevPortal extends React.Component {
         } else {
             return (
                 <Progress />
-            )
+            );
         }
-
     }
 }
 

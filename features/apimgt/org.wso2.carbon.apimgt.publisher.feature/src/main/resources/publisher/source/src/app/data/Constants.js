@@ -25,6 +25,20 @@ const CONSTS = {
         NO_TOKEN_FOUND: '901401: No partial token found!',
     },
     TENANT_STATE_ACTIVE: 'ACTIVE',
+    DESCRIPTION_TYPES: {
+        DESCRIPTION: 'description',
+        OVERVIEW: '_overview',
+    },
+    DEFAULT_VHOST: {
+        host: '',
+        httpContext: '',
+        httpPort: 80,
+        httpsPort: 443,
+        wsPort: 9099,
+        wssPort: 8099,
+        websubHttpPort: 9021,
+        websubHttpsPort: 8021,
+    },
 };
 
 export default CONSTS;

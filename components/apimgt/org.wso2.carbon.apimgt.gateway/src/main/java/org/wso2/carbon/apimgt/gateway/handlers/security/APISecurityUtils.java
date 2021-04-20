@@ -18,9 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 import java.util.Map;
 
@@ -56,6 +54,22 @@ public class APISecurityUtils {
     }
 
     /**
+     * Add AuthenticationContext information into a validated request. This method does not
+     * allow overriding existing AuthenticationContext information on the request. Therefore
+     * this should only be used with newly validated requests. It shouldn't be used to modify
+     * already validated requests.
+     *
+     * @param synCtx        A newly authenticated request
+     * @param authContext   AuthenticationContext information to be added
+     */
+    public static void setAuthenticationContext(MessageContext synCtx,
+                                                AuthenticationContext authContext) {
+        synCtx.setProperty(API_AUTH_CONTEXT, authContext);
+        synCtx.setProperty(APIConstants.API_KEY_TYPE, authContext.getKeyType());
+    }
+
+
+    /**
      * Retrieve the AuthenticationContext information from the request. If the request hasn't
      * been validated yet, this method will return null.
      *
@@ -66,25 +80,4 @@ public class APISecurityUtils {
         return (AuthenticationContext) synCtx.getProperty(API_AUTH_CONTEXT);
     }
 
-    public static String getKeyValidatorClientType() {
-        if (keyValidatorClientType == null) {
-            synchronized (APISecurityUtils.class) {
-                if (keyValidatorClientType == null) {
-                    getAPIKeyValidatorClientType();
-                    if (keyValidatorClientType == null) {
-                        //default to WSClient
-                        keyValidatorClientType = APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
-                    }
-                    return keyValidatorClientType;
-                }
-            }
-        }
-        return keyValidatorClientType;
-    }
-
-    protected static void getAPIKeyValidatorClientType() {
-        APIManagerConfiguration apiMgtConfig =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        keyValidatorClientType = apiMgtConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CLIENT_TYPE);
-    }
 }

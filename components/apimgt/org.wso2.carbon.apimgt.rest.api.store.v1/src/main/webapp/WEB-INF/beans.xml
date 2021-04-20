@@ -16,9 +16,6 @@
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertTypesApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApi"/>
@@ -31,6 +28,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.MeApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -38,6 +36,13 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
             <ref bean="cors-filter" />
         </jaxrs:providers>
+        <jaxrs:properties>
+            <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
+            <entry key="map.cxf.interceptor.fault" value="true" />
+            <!-- This is added to restrict the size of attachments sent through the requests. -->
+            <entry key="attachment-max-size" value="#{systemProperties['rest.api.devportal.attachment.max.size'] != null ?
+              systemProperties['rest.api.devportal.attachment.max.size'] :  T(java.lang.Integer).toString(10485760) }"/>
+        </jaxrs:properties>
     </jaxrs:server>
 
     <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor" />
@@ -62,6 +67,9 @@
             </list>
         </property>
         <property name="allowCredentials" value="true"/>
+        <property name="allowOrigins"
+                  value="#{systemProperties['rest.api.devportal.allowed.origins'] != null ?
+                      systemProperties['rest.api.devportal.allowed.origins'].split(',') : {}}"/>
     </bean>
 
     <!-- Out interceptors -->

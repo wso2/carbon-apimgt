@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.217-SNAPSHOT</version>
+        <version>9.0.168-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -31,10 +31,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -71,10 +67,18 @@
                             javax.cache.*,
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.multitenancy.*;version="${carbon.kernel.package.import.version.range}
                         </Import-Package>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

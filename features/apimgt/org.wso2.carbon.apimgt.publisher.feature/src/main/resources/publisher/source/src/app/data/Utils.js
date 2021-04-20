@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import CONSTS from 'AppData/Constants';
+
 /**
  * Utility class for Publisher application
  */
@@ -192,7 +194,7 @@ class Utils {
             // Disable the no bitwise rule as this is a `very rare` usage of bitwise logic operators
             // eslint-disable-next-line no-bitwise
             const r = Math.random() * 16 | 0; const
-            // eslint-disable-next-line no-bitwise
+                // eslint-disable-next-line no-bitwise
                 v = c === 'x' ? r : (r & (0x3 | 0x8));
             return v.toString(16);
         });
@@ -206,8 +208,8 @@ class Utils {
      * @memberof Utils
      */
     static getServiceCatalogSwaggerURL() {
-        // return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
-        return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        // return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
     }
 
     /**
@@ -310,6 +312,42 @@ class Utils {
     }
 
     /**
+     * return R,G & B color components
+     * @param {Strinng} hex HEX color code string i:e `#AF2386`
+     * @returns {Object} colors
+     */
+    static hexToRGBHash(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        const commonHex = hex.replace(shorthandRegex, (m, r, g, b) => {
+            return r + r + g + g + b + b;
+        });
+
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(commonHex);
+        return result
+            ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+            }
+            : null;
+    }
+
+    /**
+     * Return HEX hashed color code given the R,G & B color components
+     * @param {Integer} r Red
+     * @param {Integer} g Green
+     * @param {Integer} b Blue
+     * @returns {String} Hex code
+     */
+    static rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map((x) => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+
+    /**
      * Force file download in browser
      *
      * @static
@@ -354,6 +392,97 @@ class Utils {
             }, 100);
         }
     }
+
+    /**
+     * Force service definition download in browser
+     *
+     * @static
+     * @param {*} response
+     * @memberof Utils
+     */
+    static downloadServiceDefinition(response) {
+        const fileName = 'service-definition';
+        const contentType = 'application/yaml';
+        const blob = new Blob([JSON.stringify(response)], {
+            type: contentType,
+        });
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+            window.navigator.msSaveBlob(blob, fileName);
+        } else {
+            const URL = window.URL || window.webkitURL;
+            const downloadUrl = URL.createObjectURL(blob);
+
+            if (fileName) {
+                const aTag = document.createElement('a');
+                if (typeof aTag.download === 'undefined') {
+                    window.location = downloadUrl;
+                } else {
+                    aTag.href = downloadUrl;
+                    aTag.download = fileName;
+                    document.body.appendChild(aTag);
+                    aTag.click();
+                }
+            } else {
+                window.location = downloadUrl;
+            }
+
+            setTimeout(() => {
+                URL.revokeObjectURL(downloadUrl);
+            }, 100);
+        }
+    }
+
+    /**
+     * Simply split the token by dots `.` and parse it as a JSON object
+     * @param {String} token raw token string
+     * @returns {JSON} decoded JWT token in JSON format
+     */
+    static decodeJWT(token) {
+        const [header, payload, signature] = token.split('.');
+        try {
+            return {
+                header: JSON.parse(atob(header)),
+                payload: JSON.parse(atob(payload)),
+                signature,
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get the super tenent user without domain
+     * @param {String} userName - Name of the user
+     * @returns {String} - user name without domain
+     */
+    static getUserNameWithoutDomain(userName) {
+        let username = userName;
+        const count = (username.match(/@/g) || []).length;
+        if (username.endsWith('@carbon.super') && count <= 1) {
+            username = username.replace('@carbon.super', '');
+        }
+
+        return username;
+    }
+
+    static getAllEnvironmentDeployments(environments, allEnvRevision) {
+        // allEnvDeployments represents all deployments of the API with mapping
+        // environment -> {revision deployed to env, vhost deployed to env with revision}
+        const allEnvDeployments = [];
+        environments.forEach((env) => {
+            const revision = allEnvRevision && allEnvRevision.find(
+                (r) => r.deploymentInfo.some((e) => e.name === env.name),
+            );
+            const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
+            const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
+            let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+            if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
+                vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
+            }
+            allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
+        });
+        return allEnvDeployments;
+    }
 }
 
 Utils.CONST = {
@@ -363,13 +492,11 @@ Utils.CONST = {
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
-    // SERVICE_CATALOG_SWAGGER_YAML: '/api/service-catalog/v1/swagger.yaml',
-    SERVICE_CATALOG_SWAGGER_YAML: '../../../../../publisher/site/public/serviceCatalog.yaml',
+    SERVICE_CATALOG_SWAGGER_YAML: '/api/am/service-catalog/v0/oas.yaml',
     SWAGGER_YAML: '/api/am/publisher/v2/swagger.yaml',
     PROTOCOL: 'https://',
     API_CLIENT: 'apiClient',
     SERVICE_CATALOG_CLIENT: 'serviceCatalogClient',
-    ENABLE_SERVICE_CATALOG: true,
 };
 
 /**

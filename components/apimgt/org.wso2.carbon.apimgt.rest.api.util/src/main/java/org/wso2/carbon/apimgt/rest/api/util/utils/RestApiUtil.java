@@ -1371,4 +1371,25 @@ public class RestApiUtil {
         }
         return portalScopeList;
     }
+
+    /**
+     * To check whether the DevPortal Anonymous Mode is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether devportal anonymous mode is enabled or not
+     */
+    public static boolean isDevPortalAnonymousEnabled(String tenantDomain) {
+        try {
+            org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+            Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
+            } else {
+                return APIUtil.isDevPortalAnonymous();
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while retrieving Anonymous config from registry", e);
+        }
+        return true;
+    }
 }

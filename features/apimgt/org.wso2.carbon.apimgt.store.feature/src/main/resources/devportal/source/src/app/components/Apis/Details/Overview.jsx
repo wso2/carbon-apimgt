@@ -15,538 +15,684 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect, useContext } from 'react';
-import PropTypes from 'prop-types';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
-import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import React, { useContext, useState, useEffect } from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import Divider from '@material-ui/core/Divider';
+import { Link as MUILink } from '@material-ui/core';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
-import Alert from 'AppComponents/Shared/Alert';
-import { FormattedMessage } from 'react-intl';
-import API from 'AppData/api';
-import AuthManager from 'AppData/AuthManager';
-import View from 'AppComponents/Apis/Details/Documents/View';
+import Grid from '@material-ui/core/Grid';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import Box from '@material-ui/core/Box';
-import { app } from 'Settings';
-import { ApiContext } from './ApiContext';
-import Resources from './Resources';
-import Operations from './Operations';
-import Comments from './Comments/Comments';
-import Sdk from './Sdk';
-import OverviewDocuments from './OverviewDocuments';
+import Chip from '@material-ui/core/Chip';
+import Typography from '@material-ui/core/Typography';
+import LaunchIcon from '@material-ui/icons/Launch';
+import Card from '@material-ui/core/Card';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import CardContent from '@material-ui/core/CardContent';
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
+import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
+import ApiThumb from 'AppComponents/Apis/Listing/ApiThumb';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
+import Social from 'AppComponents/Apis/Details/Social/Social';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import AuthManager from 'AppData/AuthManager';
+import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
+import API from 'AppData/api';
+import View from 'AppComponents/Apis/Details/Documents/View';
 import Environments from './Environments';
+import Comments from './Comments/Comments';
+import OverviewDocuments from './OverviewDocuments';
+import SourceDownload from './SourceDownload';
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
     root: {
-        padding: theme.spacing(3),
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-        margin: -1 * theme.spacing(0, 2),
-    },
-    iconClass: {
-        marginRight: 10,
-    },
-    boxBadge: {
-        background: theme.palette.grey.A400,
-        fontSize: theme.typography.h5.fontSize,
-        padding: theme.spacing(1),
-        width: 30,
-        height: 30,
-        marginRight: 20,
-        textAlign: 'center',
-    },
-    subscriptionBox: {
+        width: '100%',
+        height: '100vh',
         paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
     },
-    linkStyle: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-        fontSize: theme.typography.fontSize,
+    linkTitle: {
+        color: theme.palette.grey[800],
     },
-    subscriptionTop: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
+    description: {
+        color: theme.palette.grey[700],
     },
-    resourceWrapper: {
-        height: 192,
-        overflow: 'auto',
+    textLabel: {
+        fontWeight: 400,
+        color: theme.palette.grey[800],
     },
-    actionPanel: {
-        justifyContent: 'flex-start',
+    textValue: {
+        textIndent: theme.spacing(1),
     },
-    linkToTest: {
-        textDecoration: 'none',
+    apiThumb: {
+        padding: theme.spacing(),
+        border: 'solid 1px',
+        borderColor: theme.palette.grey[800],
     },
-    button: {
-        textDecoration: 'none',
-        '& button': {
-            textTransform: 'capitalize !important',
-        }
+    chipRoot: {
+        cursor: 'pointer',
+        marginRight: theme.spacing(),
     },
-    verticalSpace: {
-        marginLeft: theme.spacing(60),
+    subtitle: {
+        color: theme.palette.grey[800],
     },
-    subheading: {
-        marginLeft: theme.spacing(2),
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    marginTop: {
-        marginTop: theme.spacing(8),
-    },
-    subsToApp: {
-        marginTop: theme.spacing(2),
-    },
-    expansionRoot: {
-        minHeight: 238,
-    },
-    noCommentRoot: {
-        backgroundImage: `url(${app.context + theme.custom.overviewPage.commentsBackground})`,
-        height: '100%',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-        minHeight: 192,
-    },
-    commentRoot: {
-        height: '100%',
-        minHeight: 192,
-    },
-    noDocumentRoot: {
-        backgroundImage: `url(${app.context + theme.custom.overviewPage.documentsBackground})`,
-        height: '100%',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-        minHeight: 192,
-    },
-    noCredentialsRoot: {
-        backgroundImage: `url(${app.context + theme.custom.overviewPage.credentialsBackground})`,
-        height: '100%',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-        minHeight: 236,
-    },
-    emptyBox: {
-        background: theme.custom.overview.noContentBackground,
-        color: theme.palette.getContrastText(theme.custom.overview.noContentBackground),
-        border: 'solid 1px #fff',
-        padding: theme.spacing(2),
-        '& span': {
-            color: theme.palette.getContrastText(theme.custom.overview.noContentBackground),
-        }
-    },
-    paper: {
-        margin: theme.spacing(2),
-        padding: theme.spacing(2),
-    },
-    paperWithDoc: {
-        margin: theme.spacing(2),
-        padding: theme.spacing(2),
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    heading: {
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    mutualsslMessage: {
+    cardRoot: {
+        width: 150,
+        height: 150,
+        marginRight: theme.spacing(),
         marginTop: theme.spacing(2),
     },
     sectionTitle: {
-        padding: 5,
-        paddingLeft: 16,
+        color: theme.palette.grey[800],
+        fontSize: '0.95rem',
+        fontWeight: 400,
     },
-    overviewPaper: {
-        border: 'solid 1px #ccc',
-        borderRadius: 5,
+    moreLink: {
+        fontSize: '14px',
     },
-    overviewContainerBox: {
-        minHeight: 200,
-        overflowY: 'auto',
-    },
-    overviewContainerBoxAction: {
-        minHeight: 172,
-    }
-});
-const ExpansionPanelSummary = withStyles({
-    root: {
-        borderBottom: '1px solid rgba(0,0,0,.125)',
-        marginBottom: -1,
-        minHeight: 56,
-        '&$expanded': {
-            minHeight: 56,
+    table: {
+        '& th': {
+            fontWeight: 400,
         },
     },
-    content: {
-        '&$expanded': {
-            margin: '12px 0',
-        },
-        alignItems: 'center',
+    requestCount: {
+        fontSize: 22,
     },
-    expanded: {},
-})((props) => <MuiExpansionPanelSummary {...props} />);
-
-ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
-
+    requestUnit: {
+        fontSize: 13,
+    },
+}));
 /**
- * Handles the Overview page for APIs and API Products.
- * @param {*} props properties passed by parent element
- * @memberof Overview
+ * @returns {JSX} overview section
  */
-function Overview(props) {
-    const { classes, theme } = props;
+function Overview() {
+    const theme = useTheme();
+
     const {
         custom: {
             apiDetailPages: {
-                showCredentials, showComments, showTryout, showDocuments, showSdks,
+                showCredentials,
+                showComments,
+                showDocuments,
             },
+            infoBar: { showThumbnail },
+            social: { showRating },
+            showSwaggerDescriptionOnOverview,
         },
     } = theme;
+    const intl = useIntl();
     const { api, subscribedApplications } = useContext(ApiContext);
-    const [totalComments, setCount] = useState(0);
-    const [totalDocuments, setDocsCount] = useState(0);
+    const [descriptionHidden, setDescriptionHidden] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [notFound, setNotFound] = useState(false);
+    const [allDocuments, setAllDocuments] = useState(null);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
-    const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
-        !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
-    const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2') &&
-        !api.securityScheme.includes('api_key');
-    useEffect(() => {
+    const [swaggerDescription, setSwaggerDescription] = useState(null);
+    const [allPolicies, setAllPolicies] = useState(null);
+    const [rating, setRating] = useState({
+        avgRating: 0,
+        total: 0,
+        count: 0,
+    });
+    const [selectedEndpoint, setSelectedEndpoint] = useState((api.endpointURLs && api.endpointURLs.length > 0)
+        ? api.endpointURLs[0]
+        : null);
+    const classes = useStyles();
+    // Truncating the description
+    let descriptionIsBig = false;
+    let smallDescription = '';
+    if (api.description) {
+        const limit = 40;
+        if (api.description.split(' ').length > limit) {
+            const newContent = api.description.split(' ').slice(0, limit);
+            smallDescription = newContent.join(' ') + '...';
+            descriptionIsBig = true;
+        }
+    }
+
+    const isApiPolicy = (policyName) => {
+        const filteredApiPolicies = api.tiers.filter((t) => t.tierName === policyName);
+        return filteredApiPolicies && filteredApiPolicies.length > 0;
+    };
+
+    const updateSelectedEndpoint = (e) => {
+        const selectedEnvName = e.target.value;
+        const filteredEndpoints = api.endpointURLs.filter((ep) => ep.environmentName === selectedEnvName);
+        if (filteredEndpoints && filteredEndpoints.length > 0) {
+            setSelectedEndpoint(filteredEndpoints[0]);
+        } else {
+            Alert.error(intl.formatMessage({
+                id: 'Apis.Details.Overview.select.env.error',
+                defaultMessage: 'Error Selecting Environment',
+            }));
+        }
+    };
+
+    const getSubscriptionPolicies = () => {
         const restApi = new API();
-        const promisedApi = restApi.getDocumentsByAPIId(api.id);
-        promisedApi
+        return restApi.getAllTiers('subscription')
+            .then((response) => {
+                try {
+                    // Filter policies base on async or not.
+                    const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
+                    setAllPolicies(filteredList);
+                } catch (e) {
+                    console.log(e);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Overview.error.occurred',
+                        defaultMessage: 'Error occurred',
+                    }));
+                }
+            }).catch((error) => {
+                console.log(error);
+                const { status } = error;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Overview.error.occurred.subs',
+                    defaultMessage: 'Error occurred when fetching subscription policies',
+                }));
+                if (status === 404) {
+                    setNotFound(true);
+                }
+                setAllDocuments([]);
+                setIsLoading(false);
+            });
+    };
+
+    const getDocuments = () => {
+        const restApi = new API();
+        return restApi.getDocumentsByAPIId(api.id)
             .then((response) => {
                 const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
                 if (overviewDoc.length > 0) {
                     // We can override the UI with this content
                     setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
                 }
+                setAllDocuments(response.body.list);
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
                 const { status } = error;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Overview.error.occurred.docs',
+                    defaultMessage: 'Error occurred when fetching documents',
+                }));
                 if (status === 404) {
-                    Alert.error('Error occurred');
+                    setNotFound(true);
                 }
+                setAllDocuments([]);
+                setIsLoading(false);
             });
+    };
+    useEffect(() => {
+        setIsLoading(true);
+        const { endpointURLs } = api;
+        if (endpointURLs && endpointURLs.length > 0) {
+            setSelectedEndpoint(endpointURLs[0]);
+        }
+        Promise.all([getDocuments(), getSubscriptionPolicies()])
+            .then(() => {
+                setIsLoading(false);
+            });
+    }, [api]);
+    useEffect(() => {
+        const restApi = new API();
+        if (showSwaggerDescriptionOnOverview) {
+            restApi.getSwaggerByAPIIdAndEnvironment(api.id, selectedEndpoint.environmentName)
+                .then((swaggerResponse) => {
+                    const swagger = swaggerResponse.obj;
+                    if (swagger && swagger.info) {
+                        setSwaggerDescription(swagger.info.description);
+                    } else {
+                        setSwaggerDescription('');
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                    setSwaggerDescription('');
+                });
+        } else {
+            setIsLoading(true);
+            Promise.all([getDocuments(), getSubscriptionPolicies()])
+                .then(() => {
+                    setIsLoading(false);
+                });
+        }
     }, []);
-    const getResourcesForAPIs = (apiType, apiObject) => {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <Operations api={apiObject} />;
-            case 'WS':
-                return '';
-            default:
-                return <Resources api={apiObject} />;
+
+
+    /**
+     * @param {event} e click event
+     */
+    const collapseAllDescription = (e) => {
+        e.preventDefault();
+        setDescriptionHidden(!descriptionHidden);
+    };
+
+    /**
+     * @returns {string} provider
+     */
+    const getProvider = () => {
+        let { provider } = api;
+        if (
+            api.businessInformation
+            && api.businessInformation.businessOwner
+            && api.businessInformation.businessOwner.trim() !== ''
+        ) {
+            provider = api.businessInformation.businessOwner;
+        }
+        return provider;
+    };
+
+    /**
+     * @param {number} ratings rating value
+     */
+    const setRatingUpdate = (ratingLocal) => {
+        if (ratingLocal) {
+            const { avgRating, total, count } = ratingLocal;
+            setRating({ avgRating, total, count });
         }
     };
 
-    const getTitleForAPIOperationType = (apiType) => {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations' />;
-            default:
-                return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources' />;
+    /**
+     * @param {JSON} api api object
+     * @returns {JSON} key managers
+     */
+    const getKeyManagers = () => {
+        if (api.keyManagers) {
+            if (api.keyManagers[0] === 'all') {
+                return null;
+            } else {
+                return (
+                    api.keyManagers.map((km) => (<Typography variant='body2'>{km}</Typography>))
+                );
+            }
+        } else {
+            return null;
         }
     };
+
+    const user = AuthManager.getUser();
+    if (isLoading) {
+        return (<Progress />);
+    }
+    if (showSwaggerDescriptionOnOverview) {
+        if (!swaggerDescription) {
+            return (<Progress />);
+        } else {
+            return (
+                <Box p={3}>
+                    <ReactMarkdown plugins={[gfm]} escapeHtml>
+                        {swaggerDescription}
+                    </ReactMarkdown>
+                </Box>
+            );
+        }
+    }
+    if (!allDocuments) {
+        return (<Progress />);
+    }
+    if (notFound) {
+        return (
+            <ResourceNotFound message={intl.formattedMessage({
+                id: 'Apis.Details.Overview.not.found.message',
+                defaultMessage: 'Resource Not Found',
+            })}
+            />
+        );
+    }
     if (overviewDocOverride) {
         return (
             <>
                 <Paper className={classes.paperWithDoc}>
-                    <View doc={overviewDocOverride} apiId={api.id} fullScreen />
+                    <View doc={overviewDocOverride} apiId={api.id} fullScreen dontShowName />
                 </Paper>
             </>
         );
     }
-    const user = AuthManager.getUser();
     return (
-        <Box m={2}>
-            <Grid container spacing={3}>
-                <Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.endpoints.title'
-                                defaultMessage='Endpoints'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBox}>
-                            <Environments />
-                        </Box>
-                    </Paper>
-                </Grid>
-                {/* Resources */}
-                {api.type !== 'WS' && showTryout && (
-                    <Grid item lg={4} md={6} xs={12}>
-                        <Paper elevation={0} className={classes.overviewPaper}>
-                            <Typography variant='subtitle2' className={classes.sectionTitle}>
-                                {getTitleForAPIOperationType(api.type)}
-
-                            </Typography>
-                            <Divider />
-                            <Box p={2} className={classes.overviewContainerBoxAction}>
-                                {getResourcesForAPIs(api.type, api)}
-                            </Box>
-                            <Box>
-                                {!api.advertiseInfo.advertised && (
-                                    <>
-                                        <Divider />
-                                        <Link to={'/apis/' + api.id + '/test'} className={classes.button}>
-                                            <Button
-                                                id='test'
-                                                size='small'
-                                                color='primary'
-                                                aria-labelledby='test APIOperationTitle'
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.resources.show.more'
-                                                    defaultMessage='Try Out'
-                                                />
-                                            </Button>
-                                        </Link>
-                                    </>
-                                )}
-                            </Box>
-                        </Paper>
-                    </Grid>)}
-                {(!api.advertiseInfo.advertised && showComments) && (<Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.comments.title'
-                                defaultMessage='Comments'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBox}>
-                            {api && (
-                                <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+        <Paper className={classes.root} elevation={0}>
+            <Grid container>
+                <Grid item sm={8} xl={9}>
+                    <Box display='flex' flexDirection='column'>
+                        <Box display='flex' flexDirection='row'>
+                            {showThumbnail && (
+                                <Box id='overview-thumbnail' width={86} display='flex' alignItems='center'>
+                                    <Box className={classes.apiThumb}>
+                                        <ApiThumb
+                                            api={api}
+                                            customWidth={70}
+                                            customHeight={50}
+                                            showInfo={false}
+                                        />
+                                    </Box>
+                                </Box>
                             )}
-                            {totalComments === 0 && (
-                                <div className={classes.emptyBox}>
-                                    <Typography variant='body2'>
+                            <Box ml={3} mr={2}>
+                                <Typography variant='h4' component='h2'>{api.name}</Typography>
+                                {api.description && (
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.description}>
+                                        {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
+                                        {descriptionIsBig && (
+                                            <a aria-label='Show more/less description' onClick={collapseAllDescription} href='#'>
+                                                {descriptionHidden ? ' more' : ' less'}
+                                            </a>
+                                        )}
+                                    </Typography>
+                                )}
+                                <Box display='flex' area-lable='API version and owner details' flexDirection='row'>
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.textLabel}>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.comments.no.content'
-                                            defaultMessage='No Comments Yet'
+                                            id='Apis.Details.Overview.list.version'
+                                            defaultMessage='Version '
                                         />
                                     </Typography>
-                                </div>
-                            )}
+                                    {' '}
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.textValue}>
+                                        {api.version}
+                                    </Typography>
+                                    <VerticalDivider height={20} />
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.textLabel}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.list.provider'
+                                            defaultMessage='By '
+                                        />
+                                    </Typography>
+                                    {' '}
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.textValue}>
+                                        {getProvider()}
+                                    </Typography>
+                                </Box>
+                            </Box>
                         </Box>
-                    </Paper>
-                </Grid>)}
-
-                {showDocuments && (<Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.documents.title'
-                                defaultMessage='Documents'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBoxAction}>
-                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
+                        <Box display='flex' flexDirection='row' alignItems='center' mt={2} pr={6}>
+                            <Environments updateSelectedEndpoint={updateSelectedEndpoint} selectedEndpoint={selectedEndpoint} />
                         </Box>
-                        <Box>
-                            <Divider />
-                            <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
-                                <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.comments.show.more'
-                                        defaultMessage='Show All Documents'
-                                    />
-                                </Button>
-                            </Link>
-                        </Box>
-                    </Paper>
-                </Grid>)}
-                {api.type !== 'WS' && showSdks && (<Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.sdk.generation.title'
-                                defaultMessage='Software Development Kits'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBoxAction} display='flex'>
-                            {api && <Sdk apiId={api.id} onlyIcons />}
-                        </Box>
-                        <Box>
-                            <Divider />
-                            <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
-                                <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.sdk.generation.show.more'
-                                        defaultMessage='Show All SDKs'
-                                    />
-                                </Button>
-                            </Link>
-                        </Box>
-                    </Paper>
-                </Grid>)}
-                {!api.advertiseInfo.advertised && showCredentials && (
-                    <Grid item lg={4} md={6} xs={12}>
-                        <Paper elevation={0} className={classes.overviewPaper}>
-                            <Typography variant='subtitle2' className={classes.sectionTitle}>
+                        <Box mt={6}>
+                            <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                 <FormattedMessage
-                                    id='Apis.Details.Overview.api.subscriptions'
-                                    defaultMessage='Subscriptions'
+                                    id='Apis.Details.Overview.business.plans.title'
+                                    defaultMessage='Business Plans'
                                 />
                             </Typography>
-                            <Divider />
-                            <Box p={2} className={classes.overviewContainerBoxAction} display='flex'>
-
-                                {api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped' ? (
-
-                                    <Typography variant='body2'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.no.subscription.message'
-                                            defaultMessage='Subscriptions Are Not Allowed'
-                                        />
-                                    </Typography>
-
-                                ) : (
-                                        <Box display='flex' flexDirection='column'>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.subscribe.info'
-                                                    defaultMessage={
-                                                        'Subscription enables you to receive access'
-                                                        + ' tokens and be authenticated to invoke this API.'
-                                                    }
-                                                />
+                        </Box>
+                        <Box flexWrap='wrap' display='flex' flexDirection='row' alignItems='center' mt={2} ml={1} textAlign='center'>
+                            {allPolicies && allPolicies.map((tier) => (
+                                <Card className={classes.cardRoot} key={tier.name}>
+                                    <CardContent>
+                                        <Typography className={classes.cardMainTitle} color='textSecondary' gutterBottom>
+                                            {tier.name}
+                                        </Typography>
+                                        <Box mt={2}>
+                                            <Typography className={classes.requestCount} color='textSecondary'>
+                                                {tier.requestCount === 2147483647 ? 'Unlimited' : tier.requestCount}
                                             </Typography>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id={'Apis.Details.Overview' +
-                                                        '.subscribe.available'}
-                                                    defaultMessage='Business plans available '
-                                                />
-                                                {api.tiers.map((tier, index) => (<>
-                                                    {tier.tierName}{index !== (api.tiers.length - 1)
-                                                        ? (', ') : ' '
-                                                    }
-                                                </>))}
-                                            </Typography>
-                                            <Box display='block' mt={2}>
-                                                <Grid item xs={12}>
-                                                    {user ? (
-                                                        <Box display='flex' flexDirection='column' mr={2}>
-                                                            <Link
-                                                                to={'/apis/' + api.id + '/credentials'}
-                                                                style={
-                                                                    !api.isSubscriptionAvailable ?
-                                                                        { pointerEvents: 'none' } : null
-                                                                }
-                                                            >
-                                                                <Button
-                                                                    variant='contained'
-                                                                    color='primary'
-                                                                    size='large'
-                                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL ||
-                                                                        isOnlyBasicAuth}
-                                                                >
-                                                                    <FormattedMessage
-                                                                        id={'Apis.Details.Overview.subscribe' +
-                                                                            'btn.link'}
-                                                                        defaultMessage='Subscribe'
-                                                                    />
-                                                                </Button>
-                                                            </Link>
-                                                            {subscribedApplications && (<Typography variant='caption' component='div'>
-                                                                {subscribedApplications.length === 0 ? (<FormattedMessage
-                                                                    id='Apis.Details.Overview.subscribe.count.zero'
-                                                                    defaultMessage={
-                                                                        'No application subscriptions.'
-                                                                    }
-                                                                />) : (
-                                                                        subscribedApplications.length
-                                                                    )}
-                                                                {(isOnlyMutualSSL || isOnlyBasicAuth) && (
-                                                                    <Grid className={classes.mutualsslMessage}>
-                                                                        <Typography variant='body2'>
-                                                                            <FormattedMessage
-                                                                                id='Apis.Details.Overview.mutualssl.basicauth'
-                                                                                defaultMessage={'Subscription is not required for Mutual SSL APIs' +
-                                                                                    ' or APIs with only Basic Authentication.'}
-                                                                            />
-                                                                        </Typography>
-                                                                    </Grid>
-                                                                )}
-                                                                {' '}
-                                                                {subscribedApplications.length === 1 && (<>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.Overview.subscribe.count.singular'
-                                                                        defaultMessage={
-                                                                            'Application subscribed.'
-                                                                        }
-                                                                    /></>)}
-                                                                {subscribedApplications.length > 1 && (<>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.Overview.subscribe.count.plural'
-                                                                        defaultMessage={
-                                                                            'Applications subscribed.'
-                                                                        }
-                                                                    /></>)}
-                                                            </Typography>)}
-                                                        </Box>
-                                                    ) : (
-                                                            <Box display='inline' mr={2}>
-                                                                <a href={app.context + '/services/configs'}>
-                                                                    <Button
-                                                                        variant='contained'
-                                                                        color='primary'
-                                                                        size='large'
-                                                                        disabled={!api.isSubscriptionAvailable}
-                                                                    >
-                                                                        <FormattedMessage
-                                                                            id={'Apis.Details.Overview.signin' +
-                                                                                '.subscribe.btn.link'}
-                                                                            defaultMessage='Sign in to Subscribe'
-                                                                        />
-                                                                    </Button>
-                                                                </a>
-                                                            </Box>
-                                                        )}
-                                                </Grid>
-                                            </Box>
                                         </Box>
-                                    )}
-                            </Box>
-                            <Box>
-                                <Divider />
-                                <Link to={'/apis/' + api.id + '/credentials'} className={classes.button}>
-                                    <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
+                                        <Box>
+                                            <Typography className={classes.requestUnit} color='textSecondary'>
+                                                Requests/
+                                                {tier.timeUnit}
+                                            </Typography>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            ))}
+
+                        </Box>
+                        {(showCredentials && subscribedApplications.length > 0) && (
+                            <>
+                                <Box mt={6}>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                         <FormattedMessage
-                                            id='Apis.Details.Overview.sdk.generation.show.subscriptions'
+                                            id='Apis.Details.Overview.subscriptions.title'
                                             defaultMessage='Subscriptions'
                                         />
-                                    </Button>
-                                </Link>
+                                    </Typography>
+                                </Box>
+                                <Box mt={2} ml={1} pr={6}>
+                                    <TableContainer component={Paper}>
+                                        <Table className={classes.table} aria-label='simple table'>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id={'Apis.Details.Overview.'
+                                                                + 'api.credentials.subscribed.apps.name'}
+                                                            defaultMessage='Application Name'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id={'Apis.Details.Overview.api.'
+                                                                + 'credentials.subscribed.apps.tier'}
+                                                            defaultMessage='Throttling Tier'
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormattedMessage
+                                                            id={'Apis.Details.Overview.'
+                                                                + 'api.credentials.subscribed.apps.status'}
+                                                            defaultMessage='Application Status'
+                                                        />
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {subscribedApplications.map((app) => (
+                                                    <TableRow key={app.label}>
+                                                        <TableCell component='th' scope='row'>
+                                                            <MUILink component={Link} to={`/applications/${app.value}/overview`}>
+                                                                {app.label}
+                                                            </MUILink>
+                                                        </TableCell>
+                                                        <TableCell>{app.policy}</TableCell>
+                                                        <TableCell>{app.status}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Box>
+                            </>
+                        )}
+                        <Box mt={6}>
+                            {(!api.advertiseInfo.advertised && showComments) && (
+                                <>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.title'
+                                            defaultMessage='Comments'
+                                        />
+                                    </Typography>
+                                    <Box pr={6}>
+                                        {api && (
+                                            <Comments apiId={api.id} isOverview />
+                                        )}
+                                    </Box>
+                                </>
+                            )}
+                        </Box>
+                    </Box>
+                </Grid>
+                <Grid item xs={4} xl={3}>
+                    {!api.advertiseInfo.advertised && user && showRating && (
+                        <Box display='flex' flexDirection='row' alignItems='center'>
+                            <StarRatingSummary avgRating={rating.avgRating} reviewCount={rating.total} returnCount={rating.count} />
+                            <VerticalDivider height={30} />
+                            <StarRatingBar
+                                apiId={api.id}
+                                isEditable
+                                showSummary={false}
+                                setRatingUpdate={setRatingUpdate}
+                            />
+                        </Box>
+                    )}
+                    <Box mt={6}>
+                        <Social />
+                    </Box>
+                    {api.advertiseInfo.advertised && (
+                        <>
+                            <a
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                href={api.advertiseInfo.originalStoreUrl}
+                                className={classes.viewInPubStoreLauncher}
+                            >
+                                <div>
+                                    <LaunchIcon />
+                                </div>
+                                <div className={classes.linkText}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.visit.publisher.portal'
+                                        defaultMessage='Visit Publisher Portal'
+                                    />
+                                </div>
+                            </a>
+                            <VerticalDivider height={70} />
+                        </>
+                    )}
+                    <Box mt={6} mb={1}>
+                        <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.tags.title'
+                                defaultMessage='Tags'
+                            />
+                        </Typography>
+                    </Box>
+
+                    <Typography variant='body2' className={classes.endpointLabel}>
+                        {api.tags.map((tag) => (
+                            <Chip
+                                label={tag}
+                                key={tag}
+                                component={Link}
+                                clickable
+                                to={`/apis?offset=0&query=tag:${tag}`}
+                                classes={{ root: classes.chipRoot }}
+                                variant='outlined'
+                                size='small'
+                            />
+                        ))}
+                        {api.tags.length === 0 && (
+                            <FormattedMessage
+                                id='Apis.Details.Overview.list.tags.not'
+                                defaultMessage='Not Tagged'
+                            />
+                        )}
+                    </Typography>
+
+                    {/* Documentation */}
+                    {(showDocuments && allDocuments && allDocuments.length > 0) && (
+                        <>
+                            <Box mt={6}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.documents.title'
+                                        defaultMessage='Documents'
+                                    />
+                                </Typography>
                             </Box>
-                        </Paper>
-                    </Grid>)}
+                            <Box pr={2} pl={1}>
+                                <OverviewDocuments apiId={api.id} />
+                                {allDocuments.length > 2 && (
+                                    <MUILink component={Link} to={'/apis/' + api.id + '/documents'} className={classes.moreLink}>
+                                        {allDocuments.length - 2}
+                                        {' '}
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.show.more.more'
+                                            defaultMessage='more'
+                                        />
+                                    </MUILink>
+                                )}
+                            </Box>
+                        </>
 
-
+                    )}
+                    {api.businessInformation.businessOwnerEmail && (
+                        <>
+                            <Box mt={6}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.business.info'
+                                        defaultMessage='Business Info'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box mt={1}>
+                                <Typography variant='body2'>
+                                    {api.businessInformation.businessOwnerEmail}
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+                    <Box mt={6}>
+                        <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.source'
+                                defaultMessage='Source'
+                            />
+                        </Typography>
+                    </Box>
+                    {(api.type === 'HTTP' || api.type === 'SOAPTOREST' || api.type === 'SOAP') && (
+                        <Box mt={2}>
+                            <SourceDownload selectedEndpoint={selectedEndpoint} />
+                        </Box>
+                    )}
+                    {/* Key Managers */}
+                    {getKeyManagers() && (
+                        <>
+                            <Box mt={6}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.key.manager'
+                                        defaultMessage='Key Managers'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box mt={1}>
+                                {getKeyManagers()}
+                            </Box>
+                        </>
+                    )}
+                    {api.additionalProperties && Object.keys(api.additionalProperties).length > 0 && (
+                        <>
+                            <Box mt={6}>
+                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.additional.properties'
+                                        defaultMessage='Additonal properties'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box mt={1} ml={1}>
+                                {api.additionalProperties
+                                    .filter(({ display }) => display)
+                                    .map(({ name, value }) => {
+                                        return (
+                                            <Typography variant='body2'>
+                                                {name}
+                                                {' '}
+                                                :
+                                                {' '}
+                                                {value}
+                                            </Typography>
+                                        );
+                                    })}
+                            </Box>
+                        </>
+                    )}
+                </Grid>
             </Grid>
-        </Box>
-    )
+        </Paper>
+    );
 }
 
-Overview.propTypes = {
-    classes: PropTypes.instanceOf(Object).isRequired,
-    theme: PropTypes.instanceOf(Object).isRequired,
-};
-
-export default withStyles(styles, { withTheme: true })(Overview);
+export default Overview;

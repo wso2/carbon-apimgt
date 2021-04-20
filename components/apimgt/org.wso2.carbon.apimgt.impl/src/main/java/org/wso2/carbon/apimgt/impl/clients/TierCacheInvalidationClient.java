@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.clients;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.util.Map;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
@@ -35,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.tier.cache.stub.TierCacheServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;

@@ -36,10 +36,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 
 /**
  * This @AWSLambdaMediator mediator invokes AWS Lambda functions when
@@ -59,12 +57,16 @@ public class AWSLambdaMediator extends AbstractMediator {
 
     /**
      * mediate to AWS Lambda
+     *
      * @param messageContext - contains the payload
      * @return true
      */
     public boolean mediate(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
+
+        // Set lambda backend invocation start time for analytics
+        messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
 
         String payload;
         if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
@@ -97,6 +99,7 @@ public class AWSLambdaMediator extends AbstractMediator {
 
     /**
      * invoke AWS Lambda function
+     *
      * @param payload - input parameters to pass to AWS Lambda function as a JSONString
      * @return InvokeResult
      */
@@ -114,11 +117,6 @@ public class AWSLambdaMediator extends AbstractMediator {
             } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");
-                }
-                if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
-                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                    setSecretKey(new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
-                            APIConstants.DigestAuthConstants.CHARSET));
                 }
                 BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
                 credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
@@ -143,8 +141,6 @@ public class AWSLambdaMediator extends AbstractMediator {
             return awsLambda.invoke(invokeRequest);
         } catch (SdkClientException e) {
             log.error("Error while invoking the lambda function", e);
-        } catch (CryptoException | UnsupportedEncodingException e) {
-            log.error("Error while decrypting the secret key", e);
         }
         return null;
     }

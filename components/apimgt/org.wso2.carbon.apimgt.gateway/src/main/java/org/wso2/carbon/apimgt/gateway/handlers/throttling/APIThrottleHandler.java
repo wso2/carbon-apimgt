@@ -160,6 +160,10 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+            return true;
+        }
         Timer timer = getTimer();
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();
@@ -295,14 +299,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
-        Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
-
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
-        }
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         // This property need to be set to avoid sending the content in pass-through pipe (request message)
@@ -311,36 +308,19 @@ public class APIThrottleHandler extends AbstractHandler {
         try {
             RelayUtils.consumeAndDiscardMessage(axis2MC);
         } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            //In case of an error it is logged and the process is continued because we're setting a fault message in
+            // the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
+        Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
 
-        if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
-        } else {
-            setSOAPFault(messageContext, errorMessage, errorDescription);
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
         }
-
         sendFault(messageContext, httpErrorCode);
-    }
-
-    private OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
-                                               APIThrottleConstants.API_THROTTLE_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(String.valueOf(throttleErrorCode));
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
     }
 
     private boolean doThrottleByConcurrency(boolean isResponse) {
@@ -1121,10 +1101,6 @@ public class APIThrottleHandler extends AbstractHandler {
 
     protected void sendFault(MessageContext messageContext, int httpErrorCode) {
         Utils.sendFault(messageContext, httpErrorCode);
-    }
-
-    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String errorDescription) {
-        Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
     }
 
     protected int resolveTenantId() {

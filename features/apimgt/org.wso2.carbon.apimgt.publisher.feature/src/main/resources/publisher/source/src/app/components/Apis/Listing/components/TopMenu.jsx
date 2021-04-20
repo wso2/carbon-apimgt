@@ -20,30 +20,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
 import GridOn from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import APICreateMenu from './APICreateMenu';
 
 const styles = (theme) => ({
-    rightIcon: {
-        marginLeft: theme.spacing(1),
-    },
     button: {
         margin: theme.spacing(1),
         marginBottom: 0,
-    },
-    buttonRight: {
-        display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
     },
     root: {
         height: 70,
@@ -51,12 +42,8 @@ const styles = (theme) => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
     },
-    mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
-    },
     mainTitleWrapper: {
+        paddingLeft: 35,
         display: 'flex',
         justifyContent: 'center',
         flexDirection: 'column',
@@ -66,13 +53,6 @@ const styles = (theme) => ({
         display: 'flex',
         alignItems: 'center',
     },
-    content: {
-        flexGrow: 1,
-    },
-    createButton: {
-        color: '#000000',
-        background: '#15b8cf',
-    },
 });
 
 /**
@@ -80,24 +60,37 @@ const styles = (theme) => ({
  * @param props
  * @returns {*}
  */
-function getTitleForArtifactType(props) {
+function getTitleForArtifactType(props, count) {
     const {
         isAPIProduct, query,
     } = props;
+    const isSingular = count === 1;
     if (query) {
-        return (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Result(s)' />
+        return isSingular ? (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.search.results.singular'
+                defaultMessage='Search result'
+            />
+        ) : (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search results' />
         );
     } else if (isAPIProduct) {
-        return (
+        return isSingular ? (
             <FormattedMessage
-                id='Apis.Listing.components.TopMenu.apiproduct(s)'
-                defaultMessage='API Product(s)'
+                id='Apis.Listing.components.TopMenu.apiproduct.singular'
+                defaultMessage='API product'
+            />
+        ) : (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.apiproducts.results'
+                defaultMessage='API products'
             />
         );
     } else {
-        return (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
+        return isSingular ? (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.api.singular' defaultMessage='API' />
+        ) : (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
         );
     }
 }
@@ -110,62 +103,67 @@ function getTitleForArtifactType(props) {
  */
 function TopMenu(props) {
     const {
-        classes, data, setListType, theme, count, isAPIProduct, listType, showToggle,
+        classes, data, setListType, count, isAPIProduct, listType, showToggle, query,
     } = props;
-    const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-
     if (count > 0) {
         return (
             <div className={classes.root}>
-                <div className={classes.mainIconWrapper}>
-                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-                </div>
                 <div className={classes.mainTitleWrapper}>
                     {data && (
                         <>
                             <Typography variant='h5' className={classes.mainTitle} component='div'>
-                                {isAPIProduct ? (
+                                {isAPIProduct && (
                                     <FormattedMessage
                                         id='Apis.Listing.components.TopMenu.apiproducts'
                                         defaultMessage='API Products'
                                     />
-                                ) : (
+                                )}
+                                { query && (
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.unified.search'
+                                        defaultMessage='Unified search'
+                                    />
+                                )}
+                                { !query && !isAPIProduct && (
                                     <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
                                 )}
                             </Typography>
-                            <Typography variant='caption' gutterBottom align='left' component='div'>
+                            <Box
+                                fontFamily='fontFamily'
+                                fontSize='body1.fontSize'
+                                display='flex'
+                            >
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.displaying'
-                                    defaultMessage='Displaying'
+                                    defaultMessage='Total:'
                                 />
-                                {' '}
-                                {' '}
-                                {count}
-                                {' '}
-                                {' '}
-                                {getTitleForArtifactType(props)}
-                            </Typography>
+                                <Box
+                                    id='itest-apis-listing-total'
+                                    fontWeight='fontWeightBold'
+                                    px={0.5}
+                                    mb={0.5}
+                                >
+                                    {count}
+                                </Box>
+                                {getTitleForArtifactType(props, count)}
+                            </Box>
                         </>
                     )}
                 </div>
                 <VerticalDivider height={70} />
                 <div className={classes.APICreateMenu}>
-                    {isAPIProduct ? (
+                    {isAPIProduct && (
                         <Link to='/api-products/create'>
-                            <Button variant='contained' className={classes.createButton}>
+                            <Button variant='contained' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.create.an.api.product'
                                     defaultMessage='Create an API Product'
                                 />
                             </Button>
                         </Link>
-                    ) : (
-                        <APICreateMenu buttonProps={{
-                            variant: 'contained',
-                            color: 'primary',
-                            className: classes.button,
-                        }}
-                        >
+                    )}
+                    {!query && !isAPIProduct && (
+                        <APICreateMenu>
                             <FormattedMessage
                                 id='Apis.Listing.components.TopMenu.create.api'
                                 defaultMessage='Create API'
@@ -174,22 +172,16 @@ function TopMenu(props) {
                     )}
                 </div>
                 {showToggle && (
-                    <div className={classes.buttonRight}>
-                        <IconButton
-                            className={classes.button}
-                            disabled={data.length === 0}
-                            onClick={() => setListType('list')}
-                        >
-                            <List color={listType === 'list' ? 'primary' : 'default'} />
-                        </IconButton>
-                        <IconButton
-                            className={classes.button}
-                            disabled={data.length === 0}
-                            onClick={() => setListType('grid')}
-                        >
-                            <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
-                        </IconButton>
-                    </div>
+                    <Box height={32} m='auto'>
+                        <ButtonGroup color='primary' aria-label='outlined primary button group'>
+                            <IconButton onClick={() => setListType('list')} aria-label='list'>
+                                <GridOn color={listType === 'list' ? 'primary' : 'disabled'} />
+                            </IconButton>
+                            <IconButton onClick={() => setListType('grid')} aria-label='grid'>
+                                <List color={listType === 'grid' ? 'primary' : 'disabled'} />
+                            </IconButton>
+                        </ButtonGroup>
+                    </Box>
                 )}
             </div>
         );
@@ -202,13 +194,13 @@ TopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     setListType: PropTypes.func.isRequired,
     listType: PropTypes.string.isRequired,
-    data: PropTypes.shape({ length: PropTypes.number }).isRequired,
+    data: PropTypes.arrayOf(PropTypes.object).isRequired,
     count: PropTypes.number.isRequired,
     theme: PropTypes.shape({
-        custom: PropTypes.string,
+        custom: PropTypes.shape({}),
     }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     showToggle: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(TopMenu);
+export default withStyles(styles)(TopMenu);

@@ -16,8 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
-import org.apache.axiom.om.OMElement;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 
 public interface APITemplateBuilder {
 
@@ -25,10 +24,8 @@ public interface APITemplateBuilder {
 
     String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
-    OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException;
-
-    String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException;
-
     String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException;
+
+    String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
 
 }

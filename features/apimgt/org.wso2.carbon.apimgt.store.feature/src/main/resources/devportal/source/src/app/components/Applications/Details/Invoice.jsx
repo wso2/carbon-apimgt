@@ -32,9 +32,12 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = (theme) => ({
     dialogWrapper: {
-        '& span,& p , & h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
+        '& span,& p , & h5, & label, & td, & li': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
-        }
+        },
+        '& div, & input, & p.MuiFormHelperText-root': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
 });
 
@@ -52,8 +55,15 @@ const options = {
     download: false,
 };
 
+/**
+ *
+ * @param {JSON} props props passed from parent
+ * @returns {JSX} jsx output
+ */
 function Invoice(props) {
-    const { subscriptionId, isMonetizedAPI, isDynamicUsagePolicy, classes } = props;
+    const {
+        subscriptionId, classes, tiers,
+    } = props;
     const [showPopup, setShowPopup] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [invoice, setInvoice] = useState(null);
@@ -70,7 +80,7 @@ function Invoice(props) {
             if (response && response.obj) {
                 const invoiceData = [];
                 const { obj: { properties } } = response;
-                Object.keys(properties).map((invoiveItem) => {
+                Object.keys(properties).forEach((invoiveItem) => {
                     const insideArray = [];
                     insideArray.push(invoiveItem);
                     insideArray.push(properties[invoiveItem]);
@@ -96,11 +106,12 @@ function Invoice(props) {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Button
-                color="default"
+                color='default'
                 onClick={handlePopup}
                 startIcon={<Icon>receipt</Icon>}
+                disabled={tiers.length === 0}
             >
                 <FormattedMessage
                     id='Applications.Details.Invoice.view.btn'
@@ -108,46 +119,63 @@ function Invoice(props) {
                 />
             </Button>
             {invoice ? (
-                <Dialog open={showPopup} onClose={handleClose} fullWidth='true' className={classes.dialogWrapper}>
-                    {invoice && (<MUIDataTable
-                        title='Upcoming Invoice'
-                        data={invoice}
-                        columns={columns}
-                        options={options}
-                    />)}
+                <Dialog
+                    open={showPopup}
+                    onClose={handleClose}
+                    fullWidth='true'
+                    className={classes.dialogWrapper}
+                >
+                    {invoice && (
+                        <MUIDataTable
+                            title='Upcoming Invoice'
+                            data={invoice}
+                            columns={columns}
+                            options={options}
+                        />
+                    )}
                 </Dialog>
             ) : (
-                    <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true' className={classes.dialogWrapper}>
-                        <DialogTitle>
+                <Dialog
+                    open={showErrorPopup}
+                    onClose={handleAlertClose}
+                    fullWidth='true'
+                    className={classes.dialogWrapper}
+                >
+                    <DialogTitle>
+                        <FormattedMessage
+                            id='Applications.Details.Invoice.no.data.available'
+                            defaultMessage='No Data Available'
+                        />
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id='invoice-dialog-description'>
                             <FormattedMessage
-                                id='Applications.Details.Invoice.no.data.available'
-                                defaultMessage='No Data Available'
-                            /></DialogTitle>
-                        <DialogContent>
-                            <DialogContentText id='invoice-dialog-description'>
-                                <FormattedMessage
-                                    id='Applications.Details.Invoice.pending.invoice.data'
-                                    defaultMessage='Pending invoice data not found for this subscription.'
-                                />
+                                id='Applications.Details.Invoice.pending.invoice.data'
+                                defaultMessage='Pending invoice data not found for this subscription.'
+                            />
 
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={handleAlertClose} color='primary'>
-                                <FormattedMessage
-                                    id='Applications.Details.Invoice.close'
-                                    defaultMessage='Close'
-                                />
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleAlertClose} color='primary'>
+                            <FormattedMessage
+                                id='Applications.Details.Invoice.close'
+                                defaultMessage='Close'
+                            />
 
-                            </Button>
-                        </DialogActions>
-                    </Dialog>)}
-        </React.Fragment>
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
+        </>
     );
 }
-
+Invoice.defaultProps = {
+    tiers: [],
+};
 Invoice.propTypes = {
     subscriptionId: PropTypes.string.isRequired,
+    tiers: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default withStyles(styles)(Invoice);

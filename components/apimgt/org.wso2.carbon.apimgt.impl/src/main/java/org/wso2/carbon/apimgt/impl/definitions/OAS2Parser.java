@@ -112,7 +112,7 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger Json
      */
     @Override
-    public Map<String, Object> generateExample(String swaggerDef) {
+    public Map<String, Object> generateExample(String swaggerDef) throws APIManagementException {
         // create APIResourceMediationPolicy List = policyList
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
@@ -125,20 +125,25 @@ public class OAS2Parser extends APIDefinition {
             int responseCode = 0;
             int minResponseCode = 0;
             String path = entry.getKey();
-            //initializing apiResourceMediationPolicyObject
-            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
-            //setting path for apiResourceMediationPolicyObject
-            apiResourceMediationPolicyObject.setPath(path);
             Map<String, Model> definitions = swagger.getDefinitions();
             //operation map to get verb
             Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
             List<Operation> operations = swagger.getPaths().get(path).getOperations();
-            for (Operation op : operations) {
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                //initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                //setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
-                //for each HTTP method get the verb
-                for (Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
-                    //add verb to apiResourceMediationPolicyObject
-                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<HttpMethod, Operation> operationEntry =
+                            (Map.Entry<HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
                 StringBuilder genCode = new StringBuilder();
                 boolean hasJsonPayload = false;
@@ -1362,6 +1367,68 @@ public class OAS2Parser extends APIDefinition {
             }
         }
         return getSwaggerJsonString(swagger);
+    }
+
+    @Override
+    public String copyVendorExtensions(String existingSwaggerContent, String updatedSwaggerContent)
+            throws APIManagementException {
+
+        Swagger existingSwagger = getSwagger(existingSwaggerContent);
+        Swagger updatedSwagger = getSwagger(updatedSwaggerContent);
+        Map<String, Path> existingPaths = existingSwagger.getPaths();
+        Map<String, Path> updatedPaths = updatedSwagger.getPaths();
+
+        // Merge Security Definitions
+        if (existingSwagger.getSecurityDefinitions() != null) {
+            updatedSwagger.setSecurityDefinitions(existingSwagger.getSecurityDefinitions());
+        }
+
+        // Merge Operation specific vendor extensions
+        for (String pathKey : updatedPaths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = updatedPaths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> updatedEntry : operationsMap.entrySet()) {
+                if (existingPaths.keySet().contains(pathKey)) {
+                    for (Map.Entry<HttpMethod, Operation> existingEntry : existingPaths.get(pathKey)
+                            .getOperationMap().entrySet()) {
+                        if (updatedEntry.getKey().equals(existingEntry.getKey())) {
+                            boolean extensionsAreEmpty = false;
+                            Map<String, Object> vendorExtensions = updatedEntry.getValue().getVendorExtensions();
+                            Map<String, Object> existingExtensions = existingEntry.getValue().getVendorExtensions();
+                            if (vendorExtensions == null) {
+                                vendorExtensions = new HashMap<>();
+                                extensionsAreEmpty = true;
+                            }
+                            OASParserUtil.copyOperationVendorExtensions(existingExtensions, vendorExtensions);
+                            if (extensionsAreEmpty) {
+                                updatedEntry.getValue().setVendorExtensions(vendorExtensions);
+                            }
+                            List<Map<String, List<String>>> securityRequirements = existingEntry.getValue()
+                                    .getSecurity();
+                            List<Map<String, List<String>>> updatedRequirements = updatedEntry.getValue()
+                                    .getSecurity();
+                            boolean securityRequirementsAreEmpty = false;
+                            if (updatedRequirements == null) {
+                                updatedRequirements = new ArrayList<>();
+                                securityRequirementsAreEmpty = true;
+                            }
+                            if (securityRequirements != null) {
+                                for (Map<String, List<String>> requirement : securityRequirements) {
+                                    List<String> scopes = requirement.get(SWAGGER_SECURITY_SCHEMA_KEY);
+                                    if (scopes != null) {
+                                        updatedRequirements.add(requirement);
+                                    }
+                                }
+                            }
+                            if (securityRequirementsAreEmpty) {
+                                updatedEntry.getValue().setSecurity(updatedRequirements);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return getSwaggerJsonString(updatedSwagger);
     }
 
     /**

@@ -37,7 +37,7 @@ import AuthManager from 'AppData/AuthManager';
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     fullHeight: {
         height: '100%',
     },
@@ -45,7 +45,7 @@ const styles = theme => ({
         height: theme.spacing(5),
         '& td': {
             padding: theme.spacing(0.5),
-        }
+        },
     },
     appOwner: {
         pointerEvents: 'none',
@@ -53,10 +53,10 @@ const styles = theme => ({
     appName: {
         '& a': {
             color: '#1b9ec7 !important',
-        }
-    }
+        },
+    },
 });
-const StyledTableCell = withStyles(theme => ({
+const StyledTableCell = withStyles((theme) => ({
     head: {
         backgroundColor: theme.palette.common.black,
         color: theme.palette.common.white,
@@ -69,7 +69,7 @@ const StyledTableCell = withStyles(theme => ({
     },
 }))(TableCell);
 
-const StyledTableRow = withStyles(theme => ({
+const StyledTableRow = withStyles((theme) => ({
     root: {
         '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.background.default,
@@ -104,15 +104,16 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, toggleDeleteConfirmation, classes, rowsPerPage,
+            apps, toggleDeleteConfirmation, classes,
         } = this.props;
         const { notFound } = this.state;
         let appsTableData = [];
 
         if (apps) {
             appsTableData = [...apps.values()].map((app) => {
-                app.deleting = false;
-                return app;
+                const appInner = app;
+                appInner.deleting = false;
+                return appInner;
             });
         }
         if (notFound) {
@@ -136,7 +137,7 @@ class AppsTableContent extends Component {
                                 <StyledTableCell align='left'>{app.throttlingPolicy}</StyledTableCell>
                                 <StyledTableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED && (
-                                        <Typography variant='subtitle1' gutterBottom>
+                                        <Typography variant='subtitle1' component='label' gutterBottom>
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.active'
                                                 defaultMessage='ACTIVE'
@@ -145,7 +146,7 @@ class AppsTableContent extends Component {
                                     )}
                                     {app.status === this.APPLICATION_STATES.CREATED && (
                                         <>
-                                            <Typography variant='subtitle1' gutterBottom>
+                                            <Typography variant='subtitle1' component='label' gutterBottom>
                                                 <FormattedMessage
                                                     id='Applications.Listing.AppsTableContent.inactive'
                                                     defaultMessage='INACTIVE'
@@ -161,7 +162,7 @@ class AppsTableContent extends Component {
                                         </>
                                     )}
                                     {app.status === this.APPLICATION_STATES.REJECTED && (
-                                        <Typography variant='subtitle1' gutterBottom>
+                                        <Typography variant='subtitle1' component='label' gutterBottom>
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.rejected'
                                                 defaultMessage='REJECTED'
@@ -176,8 +177,8 @@ class AppsTableContent extends Component {
                                         resourceMethod={resourceMethods.PUT}
                                     >
                                         {app.status === this.APPLICATION_STATES.APPROVED && (
-                                             <Tooltip title={isAppOwner ? 
-                                                (
+                                            <Tooltip title={isAppOwner
+                                                ? (
                                                     <FormattedMessage
                                                         id='Applications.Listing.AppsTableContent.edit.tooltip'
                                                         defaultMessage='Edit'
@@ -187,16 +188,19 @@ class AppsTableContent extends Component {
                                                         id='Applications.Listing.AppsTableContent.edit.tooltip.disabled.button'
                                                         defaultMessage='Not allowed to modify shared applications'
                                                     />
-                                                )
-                                                }>
+                                                )}
+                                            >
                                                 <span>
-                                                <Link to={`/applications/${app.applicationId}/edit/`} className={!isAppOwner && classes.appOwner}>
-                                                    <IconButton disabled={!isAppOwner} aria-label='Edit'>
-                                                        <Icon>
-                                                            edit
-                                                        </Icon>
-                                                    </IconButton>
-                                                </Link>
+                                                    <Link
+                                                        to={`/applications/${app.applicationId}/edit/`}
+                                                        className={!isAppOwner && classes.appOwner}
+                                                    >
+                                                        <IconButton disabled={!isAppOwner} aria-label={'Edit' + app.name}>
+                                                            <Icon>
+                                                                edit
+                                                            </Icon>
+                                                        </IconButton>
+                                                    </Link>
                                                 </span>
                                             </Tooltip>
                                         )}
@@ -205,12 +209,12 @@ class AppsTableContent extends Component {
                                         resourcePath={resourcePaths.SINGLE_APPLICATION}
                                         resourceMethod={resourceMethods.DELETE}
                                     >
-                                        <Tooltip title={ isAppOwner ? (
+                                        <Tooltip title={isAppOwner ? (
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.delete.tooltip'
                                                 defaultMessage='Delete'
                                             />
-                                            ) : (
+                                        ) : (
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.delete.tooltip.disabled.button'
                                                 defaultMessage='Not allowed to delete shared applications'
@@ -218,15 +222,16 @@ class AppsTableContent extends Component {
                                         )}
                                         >
                                             <span>
-                                            <IconButton
-                                                disabled={app.deleting || !isAppOwner}
-                                                data-appid={app.applicationId}
-                                                onClick={toggleDeleteConfirmation}
-                                                color='default'
-                                                aria-label='Delete'
-                                            >
-                                                <Icon>delete</Icon>
-                                            </IconButton>
+                                                <IconButton
+                                                    className='itest-application-delete-button'
+                                                    disabled={app.deleting || !isAppOwner}
+                                                    data-appid={app.applicationId}
+                                                    onClick={toggleDeleteConfirmation}
+                                                    color='default'
+                                                    aria-label={'Delete' + app.name}
+                                                >
+                                                    <Icon>delete</Icon>
+                                                </IconButton>
                                             </span>
                                         </Tooltip>
                                     </ScopeValidation>
@@ -244,4 +249,3 @@ AppsTableContent.propTypes = {
     apps: PropTypes.instanceOf(Map).isRequired,
 };
 export default withStyles(styles)(AppsTableContent);
-
