@@ -1214,14 +1214,8 @@ public class SQLConstants {
             "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
 
     public static final String GET_CONSUMER_KEY_OF_APPLICATION_SQL =
-            " SELECT" +
-            "   CONSUMER_KEY," +
-            "   CREATE_MODE," +
-            "   KEY_MANAGER" +
-                    " FROM" +
-            "   AM_APPLICATION_KEY_MAPPING " +
-            " WHERE" +
-            "   APPLICATION_ID = ?";
+            "SELECT MAP.CONSUMER_KEY, MAP.CREATE_MODE, KM.NAME FROM AM_APPLICATION_KEY_MAPPING MAP, AM_KEY_MANAGER KM "
+                    + "WHERE MAP.APPLICATION_ID = ? AND MAP.KEY_MANAGER = KM.UUID";
 
     public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTIONS_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";

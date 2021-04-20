@@ -4726,7 +4726,7 @@ public class ApiMgtDAO {
             deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
             while (rs.next()) {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
-                String keyManagerName = rs.getString("KEY_MANAGER");
+                String keyManagerName = rs.getString("NAME");
                 // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
@@ -4840,7 +4840,7 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String consumerKey = resultSet.getString("CONSUMER_KEY");
-                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    String keyManager = resultSet.getString("NAME");
                     consumerKeysOfApplication.put(consumerKey, keyManager);
                 }
             }
