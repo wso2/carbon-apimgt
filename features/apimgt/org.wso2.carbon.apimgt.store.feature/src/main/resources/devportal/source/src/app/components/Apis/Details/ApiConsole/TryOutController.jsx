@@ -19,7 +19,7 @@
 import React, {
     useEffect, useState,
 } from 'react';
-import { FormattedMessage, IntlProvider } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -472,7 +472,7 @@ function TryOutController(props) {
     const authHeader = `${authorizationHeader}: ${prefix}`;
 
     return (
-        <IntlProvider locale='en'>
+        <>
             <Grid x={12} md={6} className={classes.centerItems}>
                 <Box>
                     {securitySchemeType !== 'TEST' && (
@@ -929,7 +929,7 @@ function TryOutController(props) {
                             </Grid>
                         </Box>
                     )}
-        </IntlProvider>
+        </>
     );
 }
 
