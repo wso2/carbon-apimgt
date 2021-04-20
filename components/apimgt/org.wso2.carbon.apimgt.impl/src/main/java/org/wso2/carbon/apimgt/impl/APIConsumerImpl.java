@@ -3877,7 +3877,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public void removeApplication(Application application, String username) throws APIManagementException {
+    public void removeApplication(Application application, String username, String tenantDomain) throws APIManagementException {
         String uuid = application.getUUID();
         HashMap<String, String> consumerKeysOfApplication = null;
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
