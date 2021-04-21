@@ -211,13 +211,14 @@ class DeleteApiButton extends React.Component {
                             <Box
                                 fontFamily='fontFamily'
                                 fontSize='caption.fontSize'
+                                onClick={this.handleRequestOpen}
+                                onKeyDown={this.handleRequestOpen}
                             >
 
                                 <FormattedMessage
                                     id='Apis.Details.components.DeleteApiButton.delete'
                                     defaultMessage='Delete'
                                 />
-
                             </Box>
                         </Box>
                     </Box>

@@ -21,7 +21,6 @@
 /* eslint no-unused-expressions: 0 */
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import deburr from 'lodash/deburr';
 import Downshift from 'downshift';
@@ -30,10 +29,14 @@ import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import { FormattedMessage } from 'react-intl';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import { FormattedMessage, useIntl } from 'react-intl';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Backdrop from '@material-ui/core/Backdrop';
+import SearchIcon from '@material-ui/icons/Search';
+import { Link as RouterLink } from 'react-router-dom';
+import Link from '@material-ui/core/Link';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import suggestions from './RouteMappings';
 
 const useStyles = makeStyles((theme) => ({
@@ -48,7 +51,8 @@ const useStyles = makeStyles((theme) => ({
     paper: {
         position: 'absolute',
         zIndex: theme.zIndex.goToSearch,
-        marginTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(1),
         left: 0,
         right: 0,
     },
@@ -61,6 +65,7 @@ const useStyles = makeStyles((theme) => ({
     inputInput: {
         width: 'auto',
         flexGrow: 1,
+        fontSize: '20px',
     },
     divider: {
         height: theme.spacing(2),
@@ -77,14 +82,17 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
     },
     downshiftWrapper: {
-        position: 'absolute',
         padding: theme.spacing(1),
-        right: 60,
-        top: 0,
-        width: 300,
         background: theme.palette.background.paper,
-        border: 'solid 1px #ccc',
-        borderRadius: 5,
+        borderRadius: 10,
+        width: '70vw',
+        marginBottom: '20%',
+        boxShadow: '0px 0px 20px 3px rgb(0 0 0 / 56%)',
+    },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+        backdropFilter: 'blur(1px)',
     },
 }));
 
@@ -100,13 +108,20 @@ function renderInput(inputProps) {
 
     return (
         <TextField
+            variant='outlined'
             autoFocus
             InputProps={{
                 inputRef: ref,
+                autoFocus: true,
                 classes: {
                     root: classes.inputRoot,
                     input: classes.inputInput,
                 },
+                startAdornment: (
+                    <InputAdornment position='start'>
+                        <SearchIcon color='disabled' fontSize='large' />
+                    </InputAdornment>
+                ),
                 ...InputProps,
             }}
             {...other}
@@ -138,7 +153,9 @@ function renderSuggestion(suggestionProps) {
         : (`/apis/${api.id}/${suggestion.route}`));
     return (
         <Link
+            component={RouterLink}
             to={route}
+            underline='none'
             onClick={handleClickAway}
         >
             <ListItem
@@ -209,6 +226,8 @@ function GoTo(props) {
     const { isAPIProduct, api } = props;
     const classes = useStyles();
     const [showSearch, setShowSearch] = useState(false);
+    const intl = useIntl();
+
     let isGraphQL = false;
 
     if (api.type === 'GRAPHQL') {
@@ -222,16 +241,16 @@ function GoTo(props) {
     };
 
     return (
-        <ClickAwayListener onClickAway={handleClickAway}>
-            <div className={classes.goToWrapper}>
-                <a className={classes.linkButton} onClick={toggleSearch}>
-                    <Icon>find_in_page</Icon>
-                    <Typography variant='caption'>
-                        <FormattedMessage id='Apis.Details.GoTo.GoTo.btn' defaultMessage='Go To' />
-                    </Typography>
-                </a>
-                {showSearch && (
-                    <div className={classes.downshiftWrapper}>
+        <div className={classes.goToWrapper}>
+            <a className={classes.linkButton} onClick={toggleSearch}>
+                <Icon>find_in_page</Icon>
+                <Typography variant='caption'>
+                    <FormattedMessage id='Apis.Details.GoTo.GoTo.btn' defaultMessage='Go To' />
+                </Typography>
+            </a>
+            <Backdrop className={classes.backdrop} open={showSearch} onClick={handleClickAway}>
+                <div onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} className={classes.downshiftWrapper}>
+                    {showSearch && (
                         <Downshift id='downshift-simple'>
                             {({
                                 getInputProps,
@@ -244,7 +263,10 @@ function GoTo(props) {
                                 selectedItem,
                             }) => {
                                 const { onBlur, onFocus, ...inputProps } = getInputProps({
-                                    placeholder: 'Type what you want to do..',
+                                    placeholder: intl.formatMessage({
+                                        id: 'Apis.Details.GoTo.button.placeholder',
+                                        defaultMessage: 'Page Search',
+                                    }),
                                 });
 
                                 return (
@@ -252,7 +274,6 @@ function GoTo(props) {
                                         {renderInput({
                                             fullWidth: true,
                                             classes,
-                                            label: 'Go to menu item',
                                             InputLabelProps: getLabelProps({ shrink: true }),
                                             InputProps: { onBlur, onFocus },
                                             inputProps,
@@ -278,10 +299,10 @@ function GoTo(props) {
                                 );
                             }}
                         </Downshift>
-                    </div>
-                )}
-            </div>
-        </ClickAwayListener>
+                    )}
+                </div>
+            </Backdrop>
+        </div>
     );
 }
 
