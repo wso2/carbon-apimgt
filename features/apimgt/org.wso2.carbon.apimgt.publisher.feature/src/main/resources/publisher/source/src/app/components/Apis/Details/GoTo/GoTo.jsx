@@ -22,22 +22,16 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import deburr from 'lodash/deburr';
 import Downshift from 'downshift';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, useIntl } from 'react-intl';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Backdrop from '@material-ui/core/Backdrop';
 import SearchIcon from '@material-ui/icons/Search';
-import { Link as RouterLink } from 'react-router-dom';
-import Link from '@material-ui/core/Link';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import suggestions from './RouteMappings';
+import GoToSuggestions from 'AppComponents/Apis/Details/GoTo/Components/GoToSuggestions';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -138,86 +132,6 @@ renderInput.propTypes = {
 };
 
 /**
- * Method to render the suggestions
- * @param {*} suggestionProps suggestionProps
- * @returns {*} ListItem list of suggestions
- */
-function renderSuggestion(suggestionProps) {
-    const {
-        suggestion, index, itemProps, highlightedIndex, api, isAPIProduct, handleClickAway,
-    } = suggestionProps;
-    const isHighlighted = highlightedIndex === index;
-
-    const route = (isAPIProduct
-        ? (`/api-products/${api.id}/${suggestion.route}`)
-        : (`/apis/${api.id}/${suggestion.route}`));
-    return (
-        <Link
-            component={RouterLink}
-            to={route}
-            underline='none'
-            onClick={handleClickAway}
-        >
-            <ListItem
-                key={suggestion.label}
-                {...itemProps}
-                selected={isHighlighted}
-                button
-                aria-haspopup='true'
-                aria-controls='lock-menu'
-                aria-label='when device is locked'
-            >
-                <ListItemText primary={suggestion.label} secondary={suggestion.route} />
-            </ListItem>
-        </Link>
-    );
-}
-
-renderSuggestion.propTypes = {
-    highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
-    index: PropTypes.number.isRequired,
-    itemProps: PropTypes.shape({}).isRequired,
-    selectedItem: PropTypes.string.isRequired,
-    suggestion: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-    }).isRequired,
-};
-
-/**
- * Method to retrieve suggestions
- * @param {*} value Value of suggestion
- * @param {*} isAPIProduct Boolean to check if it is an APIProduct
- * @param {*} param2 showEmpty
- * @returns {*} filter
- */
-function getSuggestions(value, isAPIProduct, isGraphQL, { showEmpty = false } = {}) {
-    const inputValue = deburr(value.trim()).toLowerCase();
-    const inputLength = inputValue.length;
-    let count = 0;
-    const newSuggestions = [...suggestions.common];
-
-    if (isAPIProduct) {
-        newSuggestions.push(...suggestions.productOnly);
-    } else if (isGraphQL) {
-        newSuggestions.push(...suggestions.graphqlOnly);
-    } else {
-        newSuggestions.push(...suggestions.apiOnly);
-    }
-
-    return inputLength === 0 && !showEmpty
-        ? []
-        : newSuggestions.filter((suggestion) => {
-            const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
-
-            if (keep) {
-                count += 1;
-            }
-
-            return keep;
-        });
-}
-
-/**
  * Method to render the GoTo search feature
  * @param {*} props props param
  * @returns {*} Downshift element
@@ -281,18 +195,16 @@ function GoTo(props) {
 
                                         <div {...getMenuProps()}>
                                             {isOpen ? (
-                                                <Paper className={classes.paper} square>
-                                                    {getSuggestions(inputValue, isAPIProduct, isGraphQL)
-                                                        .map((suggestion, index) => renderSuggestion({
-                                                            suggestion,
-                                                            index,
-                                                            itemProps: getItemProps({ item: suggestion.label }),
-                                                            highlightedIndex,
-                                                            selectedItem,
-                                                            handleClickAway: handleClickAway,
-                                                            ...props,
-                                                        }))}
-                                                </Paper>
+                                                <GoToSuggestions
+                                                    inputValue={inputValue}
+                                                    isAPIProduct={isAPIProduct}
+                                                    isGraphQL={isGraphQL}
+                                                    getItemProps={getItemProps}
+                                                    highlightedIndex={highlightedIndex}
+                                                    selectedItem={selectedItem}
+                                                    handleClickAway={handleClickAway}
+                                                    apiId={api.id}
+                                                />
                                             ) : null}
                                         </div>
                                     </div>
