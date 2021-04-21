@@ -1106,14 +1106,13 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                        if (APIConstants.API_PRODUCT.equals(apiType)) {
-                            attachURlMappingDetailsOfApiProduct(connection, api);
-                            return api;
-                        } else {
-                            if (deployment.equals(deploymentName)) {
-                                attachURLMappingDetails(connection, revision, api);
+                        if (deployment.equals(deploymentName)) {
+                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                                attachURlMappingDetailsOfApiProduct(connection, api);
                                 return api;
                             }
+                            attachURLMappingDetails(connection, revision, api);
+                            return api;
                         }
                     }
                 }

@@ -1436,23 +1436,28 @@ public class AsyncApiParser extends APIDefinition {
                 Aai20ChannelItem channel = (Aai20ChannelItem) entry.getValue();
                 if (includePublish && channel.publish != null) {
                     uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_PUBLISH,
-                            (Aai20Operation) channel.publish, scopes));
+                            (Aai20Operation) channel.publish, scopes, channel));
                 }
                 if (channel.subscribe != null) {
                     uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_SUBSCRIBE,
-                            (Aai20Operation) channel.subscribe, scopes));
+                            (Aai20Operation) channel.subscribe, scopes, channel));
                 }
             }
         }
         return uriTemplates;
     }
 
-    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes)
-            throws APIManagementException {
+    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes,
+                                         Aai20ChannelItem channel) throws APIManagementException {
         URITemplate template = new URITemplate();
         template.setHTTPVerb(verb);
         template.setHttpVerbs(verb);
         template.setUriTemplate(target);
+
+        Extension authTypeExtension = channel.getExtension(APIConstants.SWAGGER_X_AUTH_TYPE);
+        if (authTypeExtension != null && authTypeExtension.value instanceof String) {
+            template.setAuthType(authTypeExtension.value.toString());
+        }
 
         List<String> opScopes = getScopeOfOperations(operation);
         if (!opScopes.isEmpty()) {

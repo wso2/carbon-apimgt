@@ -9112,21 +9112,25 @@ public class ApiMgtDAO {
      * @throws APIManagementException error while getting the API information from AM_API
      */
     public APIInfo getAPIInfoByUUID(String apiId) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+            APIRevision apiRevision = getRevisionByRevisionUUID(connection, apiId);
             String sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, apiId);
+                if (apiRevision != null) {
+                    preparedStatement.setString(1, apiRevision.getApiUUID());
+                } else {
+                    preparedStatement.setString(1, apiId);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         APIInfo.Builder apiInfoBuilder = new APIInfo.Builder();
-                        return apiInfoBuilder
-                                .id(resultSet.getString("API_UUID"))
+                        apiInfoBuilder = apiInfoBuilder.id(resultSet.getString("API_UUID"))
                                 .name(resultSet.getString("API_NAME"))
                                 .version(resultSet.getString("API_VERSION"))
                                 .provider(resultSet.getString("API_PROVIDER"))
                                 .context(resultSet.getString("CONTEXT"))
                                 .contextTemplate(resultSet.getString("CONTEXT_TEMPLATE"))
-                                .apiTier(resultSet.getString("API_TIER"))
                                 .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
                                 .apiType(resultSet.getString("API_TYPE"))
                                 .createdBy(resultSet.getString("CREATED_BY"))
@@ -9134,13 +9138,41 @@ public class ApiMgtDAO {
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
-                                .build();
+                                .isRevision(apiRevision != null);
+                        if (apiRevision != null) {
+                            apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
+                                    apiRevision.getApiUUID(), apiId));
+                        } else {
+                            apiInfoBuilder = apiInfoBuilder.apiTier(resultSet.getString("API_TIER"));
+                        }
+                        return apiInfoBuilder.build();
                     }
                 }
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while retrieving apimgt connection", e,
                     ExceptionCodes.INTERNAL_ERROR);
+        }
+        return null;
+    }
+
+    private APIRevision getRevisionByRevisionUUID(Connection connection, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement statement = connection
+                .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_BY_REVISION_UUID)) {
+            statement.setString(1, revisionUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevision apiRevision = new APIRevision();
+                    apiRevision.setId(rs.getInt("ID"));
+                    apiRevision.setApiUUID(rs.getString("API_UUID"));
+                    apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevision.setDescription(rs.getString("DESCRIPTION"));
+                    apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
+                    apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
+                    return apiRevision;
+                }
+            }
         }
         return null;
     }
@@ -13091,19 +13123,25 @@ public class ApiMgtDAO {
         return apiLevelTier;
     }
 
+    private String getAPILevelTier(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.GET_REVISIONED_API_TIER_SQL)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("API_TIER");
+                }
+            }
+        }
+        return null;
+    }
+
     public String getAPILevelTier(String apiUUID, String revisionUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement =
-                         connection.prepareStatement(SQLConstants.GET_REVISIONED_API_TIER_SQL)) {
-                preparedStatement.setString(1, apiUUID);
-                preparedStatement.setString(2, revisionUUID);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        return resultSet.getString("API_TIER");
-                    }
-                }
-            }
+            return getAPILevelTier(connection, apiUUID, revisionUUID);
         } catch (SQLException e) {
             handleException("Failed to retrieve Connection", e);
         }
@@ -15989,26 +16027,10 @@ public class ApiMgtDAO {
      */
     public APIRevision getRevisionByRevisionUUID(String revisionUUID) throws APIManagementException {
 
-        APIRevision apiRevision = new APIRevision();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_BY_REVISION_UUID)) {
-            statement.setString(1, revisionUUID);
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    apiRevision.setId(rs.getInt(1));
-                    apiRevision.setApiUUID(rs.getString(2));
-                    apiRevision.setRevisionUUID(rs.getString(3));
-                    apiRevision.setDescription(rs.getString(4));
-                    apiRevision.setCreatedTime(rs.getString(5));
-                    apiRevision.setCreatedBy(rs.getString(6));
-                }
-            }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getRevisionByRevisionUUID(connection, revisionUUID);
         } catch (SQLException e) {
             handleException("Failed to get revision details for revision UUID: " + revisionUUID, e);
-        }
-        if (apiRevision.getRevisionUUID() != null) {
-            return apiRevision;
         }
         return null;
     }
@@ -16907,6 +16929,7 @@ public class ApiMgtDAO {
                 }
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
+                addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
