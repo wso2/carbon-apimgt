@@ -835,7 +835,7 @@ public class GatewayUtils {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            publicCert = APIUtil.getCertificateFromTrustStore(alias);
+            publicCert = APIUtil.getCertificateFromParentTrustStore(alias);
         } catch (APIManagementException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);

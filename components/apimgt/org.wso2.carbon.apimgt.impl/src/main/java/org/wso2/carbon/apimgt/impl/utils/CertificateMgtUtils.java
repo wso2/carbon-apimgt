@@ -72,9 +72,9 @@ import javax.xml.stream.XMLStreamException;
 public class CertificateMgtUtils {
 
     private static Log log = LogFactory.getLog(CertificateMgtUtils.class);
-    private static char[] TRUST_STORE_PASSWORD = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
-    private static String TRUST_STORE = System.getProperty("javax.net.ssl.trustStore");
-    private static String CERTIFICATE_TYPE = "X.509";
+    private static char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
+    private static String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
+    private static String certificateType = "X.509";
     private static final String KEY_STORE_TYPE = "JKS";
     private static final CertificateMgtUtils instance = new CertificateMgtUtils();
     private static final String COMMON_CERT_NAME = "client-truststore-temp.jks";
@@ -170,7 +170,7 @@ public class CertificateMgtUtils {
                 try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
                     KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
                     trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
-                    CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+                    CertificateFactory cf = CertificateFactory.getInstance(certificateType);
                     while (serverCert.available() > 0) {
                         Certificate certificate = cf.generateCertificate(serverCert);
                         //Check whether the Alias exists in the trust store.
@@ -232,14 +232,14 @@ public class CertificateMgtUtils {
      */
     public ResponseCode validateCertificate(String alias, int tenantId, String certificate) {
 
-        File trustStoreFile = new File(TRUST_STORE);
+        File trustStoreFile = new File(trustStoreLocation);
         ResponseCode responseCode = ResponseCode.SUCCESS;
         ByteArrayInputStream serverCert = null;
 
         try {
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+                trustStore.load(localTrustStoreStream, trustStorePassword);
             }
             if (StringUtils.isNotEmpty(alias) && trustStore.containsAlias(alias + "_" + tenantId)) {
                 responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
@@ -251,7 +251,7 @@ public class CertificateMgtUtils {
                 if (serverCert.available() == 0) {
                     responseCode = ResponseCode.CERTIFICATE_NOT_FOUND;
                 } else {
-                    CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+                    CertificateFactory cf = CertificateFactory.getInstance(certificateType);
                     while (serverCert.available() > 0) {
                         Certificate generatedCertificate = cf.generateCertificate(serverCert);
                         X509Certificate x509Certificate = (X509Certificate) generatedCertificate;
@@ -371,11 +371,11 @@ public class CertificateMgtUtils {
     public ResponseCode updateCertificate(String certificate, String alias) throws CertificateManagementException {
 
         try {
-            File trustStoreFile = new File(TRUST_STORE);
+            File trustStoreFile = new File(trustStoreLocation);
 
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+                trustStore.load(localTrustStoreStream, trustStorePassword);
             }
 
             if (trustStore.getCertificate(alias) == null) {
@@ -394,7 +394,7 @@ public class CertificateMgtUtils {
                     return ResponseCode.INTERNAL_SERVER_ERROR;
                 }
 
-                CertificateFactory certificateFactory = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+                CertificateFactory certificateFactory = CertificateFactory.getInstance(certificateType);
                 newCertificate = certificateFactory.generateCertificate(certificateStream);
             }
             X509Certificate x509Certificate = (X509Certificate) newCertificate;
@@ -408,7 +408,7 @@ public class CertificateMgtUtils {
             //Store the certificate in the trust store.
             trustStore.setCertificateEntry(alias, newCertificate);
             try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
-                trustStore.store(fileOutputStream, TRUST_STORE_PASSWORD);
+                trustStore.store(fileOutputStream, trustStorePassword);
             }
         } catch (IOException e) {
             throw new CertificateManagementException("Error updating certificate.", e);
@@ -431,11 +431,11 @@ public class CertificateMgtUtils {
     public CertificateInformationDTO getCertificateInformation(String alias) throws CertificateManagementException {
 
         CertificateInformationDTO certificateInformation = new CertificateInformationDTO();
-        File trustStoreFile = new File(TRUST_STORE);
+        File trustStoreFile = new File(trustStoreLocation);
         try {
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+                trustStore.load(localTrustStoreStream, trustStorePassword);
             }
 
             if (trustStore.containsAlias(alias)) {
@@ -488,7 +488,7 @@ public class CertificateMgtUtils {
                 log.error("Provided certificate is empty for getting certificate information. Hence please provide a "
                         + "non-empty certificate to overcome this issue.");
             }
-            CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
+            CertificateFactory cf = CertificateFactory.getInstance(certificateType);
             while (serverCert.available() > 0) {
                 Certificate certificate = cf.generateCertificate(serverCert);
                 certificateInformationDTO = getCertificateMetaData((X509Certificate) certificate);
@@ -508,12 +508,12 @@ public class CertificateMgtUtils {
      */
     public ByteArrayInputStream getCertificateContent(String alias) throws CertificateManagementException {
 
-        File trustStoreFile = new File(TRUST_STORE);
+        File trustStoreFile = new File(trustStoreLocation);
         Certificate certificate;
         try {
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD);
+                trustStore.load(localTrustStoreStream, trustStorePassword);
             }
 
             if (trustStore.containsAlias(alias)) {
@@ -761,7 +761,7 @@ public class CertificateMgtUtils {
 
     private static TrustStoreDTO getParentTrustStore() {
 
-        return new TrustStoreDTO(TRUST_STORE, KEY_STORE_TYPE, TRUST_STORE_PASSWORD);
+        return new TrustStoreDTO(trustStoreLocation, KEY_STORE_TYPE, trustStorePassword);
     }
 
     private static void updateSenderProfileTrustStoreLocation(String jksLocation)
@@ -853,7 +853,7 @@ public class CertificateMgtUtils {
                 CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
                 CertificateReLoaderUtil.setCertificate(listenerProfileTrustStore);
                 CertificateReLoaderUtil.startCertificateReLoader();
-                ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+                ServiceReferenceHolder.getInstance().setListenerTrustStore(trustStore);
             }
         } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException | XMLStreamException e) {
             log.error("Error in loading trust store.", e);

@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -440,9 +439,9 @@ public class Utils {
             if (headers.containsKey(Utils.getClientCertificateHeader())) {
                 try {
                     if (!isClientCertificateValidationEnabled() || APIUtil
-                            .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
+                            .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                         X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                        if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
+                        if (APIUtil.isCertificateExistsInListenerTrustStore(x509Certificate)) {
                             // If valid client certificate is sent via header give it priority over the transport level cert
                             axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
                             return x509Certificate;

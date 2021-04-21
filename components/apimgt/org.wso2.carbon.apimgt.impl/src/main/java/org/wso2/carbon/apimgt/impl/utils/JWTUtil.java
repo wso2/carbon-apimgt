@@ -106,7 +106,7 @@ public class JWTUtil {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            publicCert = APIUtil.getCertificateFromTrustStore(alias);
+            publicCert = APIUtil.getCertificateFromParentTrustStore(alias);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error retrieving certificate from truststore ",e);
         }
