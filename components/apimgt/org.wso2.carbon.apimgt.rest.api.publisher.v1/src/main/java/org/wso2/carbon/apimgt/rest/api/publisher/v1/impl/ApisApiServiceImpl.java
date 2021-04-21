@@ -3733,7 +3733,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
                 service = serviceCatalog.getServiceByNameAndVersion(serviceName, serviceVersion, tenantId);
             }
-            if (StringUtils.isNotEmpty(serviceVersion) && !serviceVersion.equals(existingAPI.getServiceInfo("version"))) {
+            if (StringUtils.isNotEmpty(serviceVersion) && !serviceVersion
+                    .equals(existingAPI.getServiceInfo("version"))) {
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
