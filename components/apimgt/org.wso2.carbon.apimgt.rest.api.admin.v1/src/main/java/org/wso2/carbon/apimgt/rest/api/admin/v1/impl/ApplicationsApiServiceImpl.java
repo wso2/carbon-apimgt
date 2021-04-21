@@ -68,11 +68,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException {
         String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                apiConsumer.removeApplication(application, application.getOwner());
+                apiConsumer.removeApplication(application, application.getOwner(), tenantDomain);
                 return Response.ok().build();
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
