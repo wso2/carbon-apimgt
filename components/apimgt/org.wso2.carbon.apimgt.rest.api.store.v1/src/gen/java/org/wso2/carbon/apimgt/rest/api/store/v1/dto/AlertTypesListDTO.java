@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertTypeDTO;
 import javax.validation.constraints.*;
 
 
@@ -18,46 +21,45 @@ import javax.validation.Valid;
 
 
 
-public class PostRequestBodyDTO   {
+public class AlertTypesListDTO   {
   
-    private String content = null;
-    private String category = null;
+    private Integer count = null;
+    private List<AlertTypeDTO> alerts = new ArrayList<AlertTypeDTO>();
 
   /**
-   * Content of the comment 
+   * The number of alerts
    **/
-  public PostRequestBodyDTO content(String content) {
-    this.content = content;
+  public AlertTypesListDTO count(Integer count) {
+    this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "This is a comment", required = true, value = "Content of the comment ")
-  @JsonProperty("content")
-  @NotNull
-  public String getContent() {
-    return content;
+  @ApiModelProperty(example = "3", value = "The number of alerts")
+  @JsonProperty("count")
+  public Integer getCount() {
+    return count;
   }
-  public void setContent(String content) {
-    this.content = content;
+  public void setCount(Integer count) {
+    this.count = count;
   }
 
   /**
-   * Category of the comment 
    **/
-  public PostRequestBodyDTO category(String category) {
-    this.category = category;
+  public AlertTypesListDTO alerts(List<AlertTypeDTO> alerts) {
+    this.alerts = alerts;
     return this;
   }
 
   
-  @ApiModelProperty(example = "general", value = "Category of the comment ")
-  @JsonProperty("category")
-  public String getCategory() {
-    return category;
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("alerts")
+  public List<AlertTypeDTO> getAlerts() {
+    return alerts;
   }
-  public void setCategory(String category) {
-    this.category = category;
+  public void setAlerts(List<AlertTypeDTO> alerts) {
+    this.alerts = alerts;
   }
 
 
@@ -69,23 +71,23 @@ public class PostRequestBodyDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PostRequestBodyDTO postRequestBody = (PostRequestBodyDTO) o;
-    return Objects.equals(content, postRequestBody.content) &&
-        Objects.equals(category, postRequestBody.category);
+    AlertTypesListDTO alertTypesList = (AlertTypesListDTO) o;
+    return Objects.equals(count, alertTypesList.count) &&
+        Objects.equals(alerts, alertTypesList.alerts);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(content, category);
+    return Objects.hash(count, alerts);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PostRequestBodyDTO {\n");
+    sb.append("class AlertTypesListDTO {\n");
     
-    sb.append("    content: ").append(toIndentedString(content)).append("\n");
-    sb.append("    category: ").append(toIndentedString(category)).append("\n");
+    sb.append("    count: ").append(toIndentedString(count)).append("\n");
+    sb.append("    alerts: ").append(toIndentedString(alerts)).append("\n");
     sb.append("}");
     return sb.toString();
   }

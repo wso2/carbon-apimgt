@@ -18,46 +18,43 @@ import javax.validation.Valid;
 
 
 
-public class PostRequestBodyDTO   {
+public class CertificateValidityDTO   {
   
-    private String content = null;
-    private String category = null;
+    private String from = null;
+    private String to = null;
 
   /**
-   * Content of the comment 
    **/
-  public PostRequestBodyDTO content(String content) {
-    this.content = content;
+  public CertificateValidityDTO from(String from) {
+    this.from = from;
     return this;
   }
 
   
-  @ApiModelProperty(example = "This is a comment", required = true, value = "Content of the comment ")
-  @JsonProperty("content")
-  @NotNull
-  public String getContent() {
-    return content;
+  @ApiModelProperty(example = "12-12-2017", value = "")
+  @JsonProperty("from")
+  public String getFrom() {
+    return from;
   }
-  public void setContent(String content) {
-    this.content = content;
+  public void setFrom(String from) {
+    this.from = from;
   }
 
   /**
-   * Category of the comment 
    **/
-  public PostRequestBodyDTO category(String category) {
-    this.category = category;
+  public CertificateValidityDTO to(String to) {
+    this.to = to;
     return this;
   }
 
   
-  @ApiModelProperty(example = "general", value = "Category of the comment ")
-  @JsonProperty("category")
-  public String getCategory() {
-    return category;
+  @ApiModelProperty(example = "01-01-2019", value = "")
+  @JsonProperty("to")
+  public String getTo() {
+    return to;
   }
-  public void setCategory(String category) {
-    this.category = category;
+  public void setTo(String to) {
+    this.to = to;
   }
 
 
@@ -69,23 +66,23 @@ public class PostRequestBodyDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PostRequestBodyDTO postRequestBody = (PostRequestBodyDTO) o;
-    return Objects.equals(content, postRequestBody.content) &&
-        Objects.equals(category, postRequestBody.category);
+    CertificateValidityDTO certificateValidity = (CertificateValidityDTO) o;
+    return Objects.equals(from, certificateValidity.from) &&
+        Objects.equals(to, certificateValidity.to);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(content, category);
+    return Objects.hash(from, to);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PostRequestBodyDTO {\n");
+    sb.append("class CertificateValidityDTO {\n");
     
-    sb.append("    content: ").append(toIndentedString(content)).append("\n");
-    sb.append("    category: ").append(toIndentedString(category)).append("\n");
+    sb.append("    from: ").append(toIndentedString(from)).append("\n");
+    sb.append("    to: ").append(toIndentedString(to)).append("\n");
     sb.append("}");
     return sb.toString();
   }

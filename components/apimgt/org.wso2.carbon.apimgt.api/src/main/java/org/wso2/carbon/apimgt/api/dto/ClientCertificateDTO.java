@@ -29,6 +29,9 @@ public class ClientCertificateDTO {
     private String uniqueId;
     private String tierName;
     private APIIdentifier apiIdentifier;
+    private int applicationId;
+    private String gatewayType;
+    private String UUID;
 
     /**
      * To get the identifier of the API related with client certificate.
@@ -99,5 +102,57 @@ public class ClientCertificateDTO {
      */
     public void setCertificate(String certificate) {
         this.certificate = certificate;
+    }
+
+    /**
+     * To get the applicationId.
+     *
+     * @return applicationId.
+     */
+    public int getApplicationId() {
+        return applicationId;
+    }
+
+    /**
+     * To set the applicationId.
+     *
+     * @param applicationId applicationId.
+     */
+    public void setApplicationId(int applicationId) {
+        this.applicationId = applicationId;
+    }
+    /**
+     * To get the Gateway Type
+     *
+     * @return applicationId.
+     */
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    /**
+     * To set the Gateway Type
+     *
+     * @param gatewayType applicationId.
+     */
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
+    }
+    /**
+     * To get the UUID
+     *
+     * @return applicationId.
+     */
+    public String getUUID() {
+        return UUID;
+    }
+
+    /**
+     * To set the UUID
+     *
+     * @param UUID applicationId.
+     */
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 }

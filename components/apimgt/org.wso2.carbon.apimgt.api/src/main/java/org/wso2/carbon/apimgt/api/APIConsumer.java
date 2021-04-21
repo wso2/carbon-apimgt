@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -969,4 +970,57 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
+    /**
+     * Method to search the client certificates for the provided tenant id, alias and api identifier.
+     *
+     * @param UUID      : UUID of the Certificate.
+     * @param serialNumber  : Serial Number of the certificate.
+     * @param applicationId : Identifier of the Application.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(String UUID, String serialNumber, int applicationId)
+            throws APIManagementException;
+
+    /**
+     * Method to add client certificate to gateway nodes to support mutual SSL based authentication.
+     *
+     * @param userName      : User name of the logged in user.
+     * @param applicationId :applicationId
+     * @param certificate   : Relevant public certificate.
+     * @param name         : Alias of the certificate.
+     * @return SUCCESS : If operation succeeded,
+     * INTERNAL_SERVER_ERROR : If any internal error occurred,
+     * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
+     * @throws APIManagementException API Management Exception.
+     */
+    int addClientCertificate(String userName, String UUID, int applicationId, String certificate, String name, String serialNumber, String type) throws APIManagementException;
+
+
+    /**
+     * Method to check whether a client certificate for the given alias is present in trust store and whether it can
+     * be modified by current user.
+     * @param UUID    : Unique identifier of the relevant certificate.
+     * @param serialNumber: Serial Number of the certificate.
+     * @param applicationId: The identifier of the api.
+     * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
+     * modifiable by current user.
+     * @throws APIManagementException API Management Exception.
+     */
+    ClientCertificateDTO getClientCertificate(String UUID, String serialNumber, int applicationId)
+            throws APIManagementException;
+    /**
+     * Method to remove the client certificates which is mapped to given uuid and application from database.
+     *
+     * @param userName      : Name of the logged in user.
+     * @param applicationId : Identifier of Application for which the certificate need to be deleted.
+     * @param UUID         : Alias of the certificate which needs to be deleted.
+     * @return 1: If delete succeeded,
+     * 2: If delete failed, due to an un-expected error.
+     * 4 : If certificate is not found in the trust store.
+     * @throws APIManagementException API Management Exception.
+     */
+    int deleteClientCertificate(String userName, int applicationId, String UUID);
+
 }

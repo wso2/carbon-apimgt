@@ -713,20 +713,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         RestApiUtil.handleResourceNotFoundError(message, log);
         return null;
     }
-
-    /**
-     * Retrieves the swagger document of an API
-     *
-     * @param apiId API identifier
-     * @param environmentName name of the gateway environment
-     * @param ifNoneMatch If-None-Match header value
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param messageContext CXF message context
-     * @return Swagger document of the API for the given cluster or gateway environment
-     */
+//
+//    /**
+//     * Retrieves the swagger document of an API
+//     *
+//     * @param apiId API identifier
+//     * @param environmentName name of the gateway environment
+//     * @param ifNoneMatch If-None-Match header value
+//     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+//     * @param messageContext CXF message context
+//     * @return Swagger document of the API for the given cluster or gateway environment
+//     */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String environmentName,
-            String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+    public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String clusterName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -1036,8 +1035,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
-                                 String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+    public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);

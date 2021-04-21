@@ -70,6 +70,7 @@ return null;
     private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<ScopeInfoDTO>();
     private String owner = null;
     private Boolean hashEnabled = null;
+    private Boolean mtlsEnabled = null;
 
   /**
    **/
@@ -298,6 +299,23 @@ return null;
     this.hashEnabled = hashEnabled;
   }
 
+  /**
+   **/
+  public ApplicationDTO mtlsEnabled(Boolean mtlsEnabled) {
+    this.mtlsEnabled = mtlsEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("mtlsEnabled")
+  public Boolean isMtlsEnabled() {
+    return mtlsEnabled;
+  }
+  public void setMtlsEnabled(Boolean mtlsEnabled) {
+    this.mtlsEnabled = mtlsEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -320,12 +338,13 @@ return null;
         Objects.equals(attributes, application.attributes) &&
         Objects.equals(subscriptionScopes, application.subscriptionScopes) &&
         Objects.equals(owner, application.owner) &&
-        Objects.equals(hashEnabled, application.hashEnabled);
+        Objects.equals(hashEnabled, application.hashEnabled) &&
+        Objects.equals(mtlsEnabled, application.mtlsEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, mtlsEnabled);
   }
 
   @Override
@@ -346,6 +365,7 @@ return null;
     sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    hashEnabled: ").append(toIndentedString(hashEnabled)).append("\n");
+    sb.append("    mtlsEnabled: ").append(toIndentedString(mtlsEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

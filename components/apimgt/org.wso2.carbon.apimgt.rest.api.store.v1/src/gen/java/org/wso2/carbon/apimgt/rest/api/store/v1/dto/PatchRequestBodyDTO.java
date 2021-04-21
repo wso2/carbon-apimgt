@@ -34,7 +34,7 @@ public class PatchRequestBodyDTO   {
   
   @ApiModelProperty(example = "This is a comment", value = "Content of the comment ")
   @JsonProperty("content")
- @Size(max=512)  public String getContent() {
+  public String getContent() {
     return content;
   }
   public void setContent(String content) {

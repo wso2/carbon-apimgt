@@ -3062,6 +3062,41 @@ public class SQLConstants {
                 "WHERE TENANT_ID=? AND REMOVED=? AND REVISION_UUID ='Current API'";
     }
 
+
+    /**
+     * Class to hold queries related to application certificates
+     */
+    public static class ApplicationClientCertificateConstants{
+        public static final String INSERT_CERTIFICATE = "INSERT INTO AM_APPLICATION_CLIENT_CERTIFICATE "
+                + "(APPLICATION_ID, UUID, NAME, TYPE,SERIAL_NUMBER, CERTIFICATE) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
+
+        public static final String SELECT_CERTIFICATE_FOR_UUID = "SELECT CERTIFICATE, NAME, TYPE FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                + "WHERE UUID=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_UUID_SERIAL_NUMBER_APPLICATION_ID =
+                "SELECT CERTIFICATE, NAME, TYPE, UUID "
+                        + "FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                        + "WHERE UUID=? AND APPLICATION_ID=? AND SERIAL_NUMBER=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_SERIAL_NUMBER_APPLICATION_ID = "SELECT CERTIFICATE, NAME, TYPE, UUID FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                + "WHERE APPLICATION_ID=? AND SERIAL_NUMBER=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_UUID_APPLICATION_ID = "SELECT CERTIFICATE, NAME, TYPE, UUID "
+                + "FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                + "WHERE UUID=? AND APPLICATION_ID=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_APPLICATION_ID =
+                "SELECT CERTIFICATE, NAME, TYPE, UUID FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                        + "WHERE APPLICATION_ID = ?";
+
+        public static final String DELETE_CERTIFICATES = "DELETE FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                + "WHERE UUID=? AND APPLICATION_ID=?";
+
+        public static final String DELETE_CERTIFICATES_WITHOUT_APPLICATION_ID = "DELETE FROM AM_APPLICATION_CLIENT_CERTIFICATE "
+                + "WHERE UUID=?";
+    }
+
     /**
      * Static class to hold database queries related to AM_SYSTEM_APPS table
      */

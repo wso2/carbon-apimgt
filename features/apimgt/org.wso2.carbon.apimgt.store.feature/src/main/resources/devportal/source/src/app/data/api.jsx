@@ -296,6 +296,92 @@ export default class API extends Resource {
             return promiseGet;
         }
     }
+     /**
+     * Upload Client certificate.
+     *
+     * @param {string} applicationId Application UUID
+     * @param {any} certificateFile The certificate file to be uploaded.
+     * @param {string} name The certificate display name.
+     * */
+    addClientCertificate(applicationId, certificateFile, name, type) {
+        return this.client.then(
+            client => {
+                return client.apis['Client Certificates'].post_applications__applicationId__client_certificates(
+                    {
+                        applicationId,
+                    },
+                    {
+                        requestBody: {
+                            certificate: certificateFile,
+                            name: name,
+                            type:type
+
+                        }
+                    }
+                );
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+    /**
+     * Get all certificates for a particular Application.
+     *
+     * @param applicationId application id of the api to which the certificate is added
+     */
+    getAllClientCertificates(applicationId) {
+
+
+        return this.client.then(
+            client => {
+                return client.apis['Client Certificates'].get_applications__applicationId__client_certificates(
+                    { applicationId: applicationId },
+                    this._requestMetaData(),
+                );
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+
+    /**
+     *
+     * @param {*} applicationId application id of the application to which the certificate belong
+     * @param {string} UUID
+     */
+    getClientCertificateByUUID(applicationId, UUID){
+        return this.client.then(
+            client =>{
+            return client.apis['Client Certificates'].get_applications__applicationId__client_certificates__UUID_(
+                {applicationId: applicationId,
+                 UUID:UUID
+                },
+                this._requestMetaData(),
+            );
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+
+    deleteClientCertificateByUUID(applicationId, UUID){
+        return this.client.then(
+            client =>{
+                return client.apis['Client Certificates'].delete_applications__applicationId__client_certificates__UUID_(
+                    {
+                        applicationId: applicationId,
+                        UUID: UUID
+                    },
+                    this._requestMetaData(),
+                );
+            },
+            this._requestMetaData()
+        );
+    }
+
 
     /**
      * Add new comment to an existing API
