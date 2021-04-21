@@ -150,15 +150,10 @@ function Endpoints(props) {
             }
             case 'select_endpoint_type': {
                 const { endpointImplementationType, endpointConfig } = value;
-                let { endpointSecurity } = initState;
-                if (endpointSecurity && (endpointSecurity.username === '')) {
-                    endpointSecurity = null;
-                }
                 return {
                     ...initState,
                     endpointConfig,
                     endpointImplementationType,
-                    endpointSecurity: null,
                 };
             }
             default: {
@@ -227,46 +222,96 @@ function Endpoints(props) {
      * @return {{isValid: boolean, message: string}} The endpoint validity information.
      * */
     const validate = (implementationType) => {
-        const { endpointConfig, endpointSecurity } = apiObject;
-        if (endpointSecurity) {
-            if (endpointSecurity.type === 'OAUTH') {
-                if (endpointSecurity.grantType === 'PASSWORD') {
-                    if (endpointSecurity.tokenUrl === null
-                        || endpointSecurity.apiKey === null
-                        || endpointSecurity.apiSecret === null
-                        || endpointSecurity.username === null
-                        || endpointSecurity.password === null) {
-                        return {
-                            isValid: false,
-                            message: intl.formatMessage({
-                                id: 'Apis.Details.Endpoints.Endpoints.missing.security.oauth.password.error',
-                                defaultMessage: 'Endpoint Security Token URL'
-                                        + '/API Key/API Secret/Username/Password should not be empty',
-                            }),
-                        };
+        const { endpointConfig } = apiObject;
+        if (endpointConfig && endpointConfig.endpoint_security) {
+            const { production, sandbox } = endpointConfig.endpoint_security;
+            if (production && production.enabled) {
+                if (production.type === 'OAUTH') {
+                    if (production.grantType === 'PASSWORD') {
+                        if (production.tokenUrl === null
+                            || production.tokenUrl === ''
+                            || production.clientId === null
+                            || production.clientSecret === null
+                            || production.username === null
+                            || production.username === ''
+                            || production.password === null) {
+                            return {
+                                isValid: false,
+                                message: intl.formatMessage({
+                                    id: 'Apis.Details.Endpoints.Endpoints.missing.security.oauth.password.error',
+                                    defaultMessage: 'Endpoint Security Token URL'
+                                            + '/API Key/API Secret/Username/Password should not be empty',
+                                }),
+                            };
+                        }
+                    } else if (production.grantType === 'CLIENT_CREDENTIALS') {
+                        if (production.tokenUrl === null
+                            || production.tokenUrl === ''
+                            || production.clientId === null
+                            || production.clientSecret === null) {
+                            return {
+                                isValid: false,
+                                message: intl.formatMessage({
+                                    id: 'Apis.Details.Endpoints.Endpoints.missing.security.oauth.client.error',
+                                    defaultMessage: 'Endpoint Security Token URL'
+                                            + '/API Key/API Secret should not be empty',
+                                }),
+                            };
+                        }
                     }
-                } else if (endpointSecurity.grantType === 'CLIENT_CREDENTIALS') {
-                    if (endpointSecurity.tokenUrl === null
-                        || endpointSecurity.apiKey === null
-                        || endpointSecurity.apiSecret === null) {
-                        return {
-                            isValid: false,
-                            message: intl.formatMessage({
-                                id: 'Apis.Details.Endpoints.Endpoints.missing.security.oauth.client.error',
-                                defaultMessage: 'Endpoint Security Token URL'
-                                        + '/API Key/API Secret should not be empty',
-                            }),
-                        };
-                    }
+                } else if (production.username === '' || production.password === null) {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.security.username.error',
+                            defaultMessage: 'Endpoint Security User Name/ Password should not be empty',
+                        }),
+                    };
                 }
-            } else if (endpointSecurity.username === '' || endpointSecurity.password === null) {
-                return {
-                    isValid: false,
-                    message: intl.formatMessage({
-                        id: 'Apis.Details.Endpoints.Endpoints.missing.security.username.error',
-                        defaultMessage: 'Endpoint Security User Name/ Password should not be empty',
-                    }),
-                };
+            }
+            if (sandbox && sandbox.enabled) {
+                if (sandbox.type === 'OAUTH') {
+                    if (sandbox.grantType === 'PASSWORD') {
+                        if (sandbox.tokenUrl === null
+                            || sandbox.tokenUrl === ''
+                            || sandbox.clientId === null
+                            || sandbox.clientSecret === null
+                            || sandbox.username === null
+                            || sandbox.username === ''
+                            || sandbox.password === null) {
+                            return {
+                                isValid: false,
+                                message: intl.formatMessage({
+                                    id: 'Apis.Details.Endpoints.Endpoints.missing.security.oauth.password.error',
+                                    defaultMessage: 'Endpoint Security Token URL'
+                                            + '/API Key/API Secret/Username/Password should not be empty',
+                                }),
+                            };
+                        }
+                    } else if (sandbox.grantType === 'CLIENT_CREDENTIALS') {
+                        if (sandbox.tokenUrl === null
+                            || sandbox.tokenUrl === ''
+                            || sandbox.clientId === null
+                            || sandbox.clientSecret === null) {
+                            return {
+                                isValid: false,
+                                message: intl.formatMessage({
+                                    id: 'Apis.Details.Endpoints.Endpoints.missing.security.oauth.client.error',
+                                    defaultMessage: 'Endpoint Security Token URL'
+                                            + '/API Key/API Secret should not be empty',
+                                }),
+                            };
+                        }
+                    }
+                } else if (sandbox.username === '' || sandbox.password === null) {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.security.username.error',
+                            defaultMessage: 'Endpoint Security User Name/ Password should not be empty',
+                        }),
+                    };
+                }
             }
         }
         if (endpointConfig === null) {
