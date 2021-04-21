@@ -4727,7 +4727,7 @@ public class ApiMgtDAO {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 String keyManagerName = rs.getString("NAME");
                 String keyManagerTenantDomain = rs.getString("TENANT_DOMAIN");
-                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
