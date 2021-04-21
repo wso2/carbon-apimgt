@@ -4680,7 +4680,6 @@ public class ApiMgtDAO {
      */
     public void deleteApplication(Application application) throws APIManagementException {
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
@@ -4727,12 +4726,14 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 String keyManagerName = rs.getString("NAME");
+                String keyManagerTenantDomain = rs.getString("TENANT_DOMAIN");
                 // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
-                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                    KeyManager keyManager =
+                            KeyManagerHolder.getKeyManagerInstance(keyManagerTenantDomain, keyManagerName);
                     if (keyManager != null) {
                         try {
                             keyManager.deleteMappedApplication(consumerKey);
