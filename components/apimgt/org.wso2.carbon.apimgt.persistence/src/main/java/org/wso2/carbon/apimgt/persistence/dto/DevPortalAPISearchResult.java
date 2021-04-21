@@ -9,6 +9,16 @@ import java.util.List;
 public class DevPortalAPISearchResult {
     private int returnedAPIsCount;
     private int totalAPIsCount;
+
+    private List<DevPortalAPI> devPortalAPIList = new ArrayList<>();
+
+    public void setDevPortalAPIList(List<DevPortalAPI> devPortalAPIList){
+        this.devPortalAPIList = devPortalAPIList;
+    }
+    public List<DevPortalAPI> getDevPortalAPIList(){
+        return devPortalAPIList;
+    }
+
     private List<DevPortalAPIInfo> devPortalAPIInfoList= new ArrayList<>();
 
     public int getTotalAPIsCount() {
@@ -18,6 +28,7 @@ public class DevPortalAPISearchResult {
     public void setTotalAPIsCount(int totalAPIsCount) {
         this.totalAPIsCount = totalAPIsCount;
     }
+
 
     public List<DevPortalAPIInfo> getDevPortalAPIInfoList() {
         return devPortalAPIInfoList;

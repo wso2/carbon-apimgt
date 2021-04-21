@@ -22,6 +22,12 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
+    public static final String GET_API_TIME_DETAILS = "SELECT API.API_UUID,API.CREATED_TIME,API.UPDATED_TIME,API.API_TYPE FROM AM_API API WHERE API.API_UUID = ?";
+
+    public static final String GET_URL_BY_LABEL_ID = "Select * from  AM_LABEL_URLS where LABEL_ID= ? ";
+    public static final String GET_LABEL_BY_TENANT = "select * from AM_LABELS where AM_LABELS.TENANT_DOMAIN= ? ";
+
+
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
             " SELECT " +
             "   API.API_NAME," +

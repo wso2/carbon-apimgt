@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -41,6 +42,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.Time;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
@@ -53,6 +56,20 @@ import java.util.Set;
  */
 public interface APIConsumer extends APIManager {
 
+    List<Label> getLabelDataFromDAO() throws APIManagementException;
+
+    Float getRatingFromDAO(String Id) throws APIManagementException;
+
+    Set<URITemplate> getURITemplateFromDAO(String Id) throws APIManagementException;
+
+    List<Scope> getScopeDataDromDAO(String Id) throws APIManagementException;
+
+
+    //Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException, UserStoreException;
+
+    //String getApiTypeFromDAO(String Id) ;
+
+    Time getTimeDetailsFromDAO(String Id);
     /**
      * @param subscriberId id of the Subscriber
      * @return Subscriber

@@ -122,3 +122,4 @@ public class EndpointConfigContext extends ConfigContextDecorator {
     }
 
 }
+

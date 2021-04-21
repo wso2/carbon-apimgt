@@ -382,3 +382,4 @@ public class RestApiAdminUtils {
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
     }
 }
+

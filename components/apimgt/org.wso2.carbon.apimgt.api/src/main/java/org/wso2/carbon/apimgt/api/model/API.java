@@ -98,7 +98,7 @@ public class API implements Serializable {
     private String inSequence;
     private String outSequence;
     private String faultSequence;
-    
+
     private Mediation inSequenceMediation;
     private Mediation outSequenceMediation;
     private Mediation faultSequenceMediation;
@@ -127,7 +127,7 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
-    
+
     private List<SOAPToRestSequence> soapToRestSequences;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
@@ -1179,6 +1179,54 @@ public class API implements Serializable {
 
         this.keyManagers = keyManagers;
     }
+
+//    public Mediation getInSequenceMediation() {
+//        return inSequenceMediation;
+//    }
+//
+//    public void setInSequenceMediation(Mediation inSequenceMediation) {
+//        this.inSequenceMediation = inSequenceMediation;
+//    }
+//
+//    public Mediation getOutSequenceMediation() {
+//        return outSequenceMediation;
+//    }
+//
+//    public void setOutSequenceMediation(Mediation outSequenceMediation) {
+//        this.outSequenceMediation = outSequenceMediation;
+//    }
+
+//    public Mediation getFaultSequenceMediation() {
+//        return faultSequenceMediation;
+//    }
+//
+//    public void setFaultSequenceMediation(Mediation faultSequenceMediation) {
+//        this.faultSequenceMediation = faultSequenceMediation;
+//    }
+
+//    public boolean isRevision() {
+//        return isRevision;
+//    }
+//
+//    public void setRevision(boolean revision) {
+//        isRevision = revision;
+//    }
+//
+//    public String getRevisionedApiId() {
+//        return revisionedApiId;
+//    }
+
+//    public void setRevisionedApiId(String revisionedApiId) {
+//        this.revisionedApiId = revisionedApiId;
+//    }
+//
+//    public int getRevisionId() {
+//        return revisionId;
+//    }
+//
+//    public void setRevisionId(int revisionId) {
+//        this.revisionId = revisionId;
+//    }
 
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;

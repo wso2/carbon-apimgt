@@ -2823,7 +2823,6 @@ public class APIMappingUtil {
 
         return null;
     }
-
     /**
      * Set API categories to API or APIProduct based on the instance type of the DTO object passes.
      *
@@ -2831,7 +2830,6 @@ public class APIMappingUtil {
      * @param model API or APIProduct
      */
     private static void setAPICategoriesToModel(Object dto, Object model, String provider) {
-
         List<String> apiCategoryNames = new ArrayList<>();
         if (dto instanceof APIDTO) {
             APIDTO apiDTO = (APIDTO) dto;
@@ -2923,7 +2921,6 @@ public class APIMappingUtil {
         }
         return awsEndpointConfig;
     }
-
     public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {
 
         APIRevisionDTO apiRevisionDTO = new APIRevisionDTO();
@@ -2954,7 +2951,6 @@ public class APIMappingUtil {
         apiRevisionDTO.setDeploymentInfo(apiRevisionDeploymentDTOS);
         return apiRevisionDTO;
     }
-
     public static APIRevisionListDTO fromListAPIRevisiontoDTO(List<APIRevision> apiRevisionList)
             throws APIManagementException {
 
@@ -2967,7 +2963,6 @@ public class APIMappingUtil {
         apiRevisionListDTO.setList(apiRevisionDTOS);
         return apiRevisionListDTO;
     }
-
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model)
             throws APIManagementException {
 
@@ -2991,7 +2986,6 @@ public class APIMappingUtil {
         }
         return apiRevisionDeploymentDTO;
     }
-
     public static APIRevisionDeploymentListDTO fromListAPIRevisionDeploymentToDTO(
             List<APIRevisionDeployment> apiRevisionDeploymentList)
             throws APIManagementException {
@@ -3005,3 +2999,4 @@ public class APIMappingUtil {
         return apiRevisionDeploymentListDTO;
     }
 }
+

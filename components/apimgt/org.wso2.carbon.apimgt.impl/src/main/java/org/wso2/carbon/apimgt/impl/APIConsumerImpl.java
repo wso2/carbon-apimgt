@@ -76,6 +76,8 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.Time;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -167,6 +169,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -190,6 +193,10 @@ import java.util.regex.Pattern;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.wsdl.Definition;
+
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getAPIScopes;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTiers;
+import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.replaceEmailDomainBack;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -269,6 +276,53 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get Subscriber", e);
         }
         return subscriber;
+    }
+
+
+    @Override
+    public List<Label> getLabelDataFromDAO() throws APIManagementException {
+        //List<Label> labels = ApiMgtDAO.getInstance().getAllLabels(MultitenantUtils.getTenantDomain("wso2.anonymous.user"));
+        return null;
+    }
+
+    @Override
+    public Float getRatingFromDAO(String Id) throws APIManagementException {
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier1);
+        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);
+        return rating;
+    }
+
+    @Override
+    public Set<URITemplate> getURITemplateFromDAO(String Id) throws APIManagementException {
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+
+        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiIdentifier1);
+
+        return uriTemplates;
+    }
+
+    @Override
+    public List<Scope> getScopeDataDromDAO(String Id) throws APIManagementException {
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(apiIdentifier1.getProviderName()));
+
+
+        Map<String, Scope> scopeToKeyMapping = getAPIScopes(apiIdentifier1, tenantDomainName);
+        Set<Scope> scopes = new LinkedHashSet<>(scopeToKeyMapping.values());
+
+
+        List<Scope> scopeList = new ArrayList<>(scopes);
+
+        return scopeList;
+    }
+
+
+
+    @Override
+    public Time getTimeDetailsFromDAO(String s) {
+        Time time = ApiMgtDAO.getInstance().getApiTimeDetails(s);
+        return time;
     }
 
 

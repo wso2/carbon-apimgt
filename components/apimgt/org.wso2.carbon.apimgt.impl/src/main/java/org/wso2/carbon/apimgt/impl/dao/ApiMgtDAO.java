@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -67,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Time;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -151,6 +153,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.GET_API_TIME_DETAILS;
+
 /**
  * This class represent the ApiMgtDAO.
  */
@@ -188,6 +192,89 @@ public class ApiMgtDAO {
         }
 
         return INSTANCE;
+    }
+    public Time getApiTimeDetails(String Id){
+        String uuid = null;
+        String createTime = null;
+        String lastUpdate = null;
+        String type = null;
+        Time time = new Time();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(GET_API_TIME_DETAILS)) {
+            statement.setString(1, Id);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                uuid =  resultSet.getString("API_UUID");
+                time.setUuid(uuid);
+                createTime = resultSet.getString("CREATED_TIME");
+                time.setCreatedTime(createTime);
+                lastUpdate = resultSet.getString("UPDATED_TIME");
+                time.setLastUpdate(lastUpdate);
+                type = resultSet.getString("API_TYPE");
+                time.setType(type);
+            }
+        } catch (SQLException e) {
+
+        }
+        return time;
+    }
+    /**
+     * Returns the Label List for the TenantId.
+     *
+     * @param tenantDomain The tenant domain.
+     * @return List of labels.
+     */
+    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+        List<Label> labelList = new ArrayList<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_LABEL_BY_TENANT)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, tenantDomain);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        String labelId = rs.getString("LABEL_ID");
+                        String labelName = rs.getString("NAME");
+                        String description = rs.getString("DESCRIPTION");
+
+                        Label label = new Label();
+                        label.setLabelId(labelId);
+                        label.setName(labelName);
+                        label.setDescription(description);
+                        label.setAccessUrls(getAccessUrlList(connection, labelId));
+                        labelList.add(label);
+                    }
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to get Labels of " + tenantDomain, e);
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Labels of " + tenantDomain, e);
+        }
+        return labelList;
+    }
+    private List<String> getAccessUrlList(Connection connection, String labelId) throws APIManagementException {
+        List<String> hostList = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_URL_BY_LABEL_ID)) {
+            statement.setString(1, labelId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    String host = rs.getString("ACCESS_URL");
+                    hostList.add(host);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get label list: " , e);
+        }
+        return hostList;
     }
 
     public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
@@ -2880,6 +2967,72 @@ public class ApiMgtDAO {
         }
     }
 
+//    /**
+//     * @param providerName Name of the provider
+//     * @param identifier APIIdentifier which contains API name and version
+//     * @return UserApplicationAPIUsage of given provider
+//     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
+//     *                                                           UserApplicationAPIUsage for given provider
+//     */
+//    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier)
+//            throws APIManagementException {
+//        Connection connection = null;
+//        PreparedStatement ps = null;
+//        ResultSet result = null;
+//
+//        try {
+//            String sqlQuery = SQLConstants.GET_APP_API_USAGE_BY_PROVIDER_AND_ID_SQL;
+//            connection = APIMgtDBUtil.getConnection();
+//
+//            ps = connection.prepareStatement(sqlQuery);
+//            ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
+//            ps.setString(2, identifier.getApiName());
+//            ps.setString(3, identifier.getVersion());
+//            result = ps.executeQuery();
+//
+//            Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
+//            while (result.next()) {
+//                int subId = result.getInt("SUBSCRIPTION_ID");
+//                Map<String, String> keyData = getAccessTokenData(subId);
+//                String accessToken = keyData.get("token");
+//                String tokenStatus = keyData.get("status");
+//                String userId = result.getString("USER_ID");
+//                String application = result.getString("APPNAME");
+//                int appId = result.getInt("APPLICATION_ID");
+//                String subStatus = result.getString("SUB_STATUS");
+//                String subsCreateState = result.getString("SUBS_CREATE_STATE");
+//                String key = userId + "::" + application;
+//                UserApplicationAPIUsage usage = userApplicationUsages.get(key);
+//                if (usage == null) {
+//                    usage = new UserApplicationAPIUsage();
+//                    usage.setUserId(userId);
+//                    usage.setApplicationName(application);
+//                    usage.setAppId(appId);
+//                    usage.setAccessToken(accessToken);
+//                    usage.setAccessTokenStatus(tokenStatus);
+//                    userApplicationUsages.put(key, usage);
+//                }
+//                APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"), result.getString
+//                        ("API_NAME"), result.getString("API_VERSION"));
+//                SubscribedAPI apiSubscription = new SubscribedAPI(new Subscriber(userId), apiId);
+//                apiSubscription.setSubStatus(subStatus);
+//                apiSubscription.setSubCreatedStatus(subsCreateState);
+//                apiSubscription.setUUID(result.getString("SUB_UUID"));
+//                apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
+//                Application applicationObj = new Application(result.getString("APP_UUID"));
+//                apiSubscription.setApplication(applicationObj);
+//                usage.addApiSubscriptions(apiSubscription);
+//            }
+//            return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
+//        } catch (SQLException e) {
+//            handleException("Failed to find API Usage for :" + providerName, e);
+//            return null;
+//        } finally {
+//            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+//        }
+//    }
+
+
     /**
      * @param providerName Name of the provider
      * @return UserApplicationAPIUsage of given provider
@@ -4821,6 +4974,34 @@ public class ApiMgtDAO {
 
         }
     }
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return Map<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
+//    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+//
+//        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement preparedStatement = connection
+//                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+//            preparedStatement.setInt(1, appId);
+//
+//            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+//                while (resultSet.next()) {
+//                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+//                    String keyManager = resultSet.getString("KEY_MANAGER");
+//                    consumerKeysOfApplication.put(consumerKey, keyManager);
+//                }
+//            }
+//        } catch (SQLException e) {
+//            String msg = "Error occurred while getting consumer keys for application " + appId;
+//            log.error(msg, e);
+//            throw new APIManagementException(msg, e);
+//        }
+//        return consumerKeysOfApplication;
+//    }
 
     /**
      * Retrieves the consumer keys and keymanager in a given application
@@ -13538,6 +13719,38 @@ public class ApiMgtDAO {
         }
         return envList;
     }
+
+//    /**
+//     * Returns the Label detail for name and the TenantId.
+//     *
+//     * @param tenantDomain The tenant domain.
+//     * @return List of labels.
+//     */
+//    public Label getLabelDetailByLabelAndTenantDomain(String labelName, String tenantDomain)
+//            throws APIManagementException {
+//
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection
+//                     .prepareStatement(SQLConstants.GET_LABEL_DETAIL_BY_LABEL_AND_TENANT)) {
+//            statement.setString(1, tenantDomain);
+//            statement.setString(2, labelName);
+//            try (ResultSet rs = statement.executeQuery()) {
+//                if (rs.next()) {
+//                    String labelId = rs.getString("LABEL_ID");
+//                    String description = rs.getString("DESCRIPTION");
+//                    Label label = new Label();
+//                    label.setLabelId(labelId);
+//                    label.setName(labelName);
+//                    label.setDescription(description);
+//                    label.setAccessUrls(getAccessUrlList(connection, labelId));
+//                    return label;
+//                }
+//            }
+//        } catch (SQLException e) {
+//            handleException("Failed to get Label of " + tenantDomain, e);
+//        }
+//        return null;
+//    }
 
     /**
      * Returns the Environment for the uuid in the tenant domain.
