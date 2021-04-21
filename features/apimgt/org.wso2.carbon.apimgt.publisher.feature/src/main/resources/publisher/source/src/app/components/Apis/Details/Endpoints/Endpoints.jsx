@@ -169,13 +169,13 @@ function Endpoints(props) {
      * @param {boolean} isRedirect Used for dynamic endpoints to redirect to the runtime config page.
      */
     const handleSave = (isRedirect) => {
-        const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
+        const { endpointConfig, endpointImplementationType } = apiObject;
         setUpdating(true);
         if (endpointImplementationType === 'INLINE') {
             api.updateSwagger(swagger).then((resp) => {
                 setSwagger(resp.obj);
             }).then(() => {
-                updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
+                updateAPI({ endpointConfig, endpointImplementationType });
             }).finally(() => {
                 setUpdating(false);
                 if (isRedirect) {

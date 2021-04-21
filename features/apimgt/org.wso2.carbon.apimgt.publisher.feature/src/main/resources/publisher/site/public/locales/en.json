@@ -4061,6 +4061,12 @@
       "value": "Go To"
     }
   ],
+  "Apis.Details.GoTo.button.placeholder": [
+    {
+      "type": 0,
+      "value": "Page Search"
+    }
+  ],
   "Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected": [
     {
       "type": 0,
@@ -4223,16 +4229,16 @@
       "value": "Select a plan for the API product."
     }
   ],
-  "Apis.Details.LifeCycle.components": [
-    {
-      "type": 0,
-      "value": "Publish API without deployments"
-    }
-  ],
-  "Apis.Details.LifeCycle.publish.content": [
+  "Apis.Details.LifeCycle.components.confirm.publish.message": [
     {
       "type": 0,
       "value": "The API will not be available for consumption unless it is deployed."
+    }
+  ],
+  "Apis.Details.LifeCycle.components.confirm.publish.title": [
+    {
+      "type": 0,
+      "value": "Publish API without deployments"
     }
   ],
   "Apis.Details.LifeCycle.publish.content.info.deployments": [
@@ -7795,6 +7801,12 @@
     {
       "type": 0,
       "value": "Create API"
+    }
+  ],
+  "ServiceCatalog.CreateApi.update.btn.in.progress": [
+    {
+      "type": 0,
+      "value": "Creating API ..."
     }
   ],
   "ServiceCatalog.Listing.Delete.cancel": [

@@ -45,8 +45,8 @@ function Listing() {
     const intl = useIntl();
 
     // Get Services
-    const getData = () => {
-        const promisedServices = ServiceCatalog.searchServices();
+    const getData = (limit = 10, offset = 0) => {
+        const promisedServices = ServiceCatalog.searchServices(limit, offset);
         promisedServices.then((data) => {
             const { body } = data;
             setServicesData(body);
@@ -69,9 +69,7 @@ function Listing() {
         });
     };
 
-    useEffect(() => {
-        getData();
-    }, []);
+    useEffect(getData, []);
 
     const onDelete = (serviceId) => {
         const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
@@ -127,6 +125,7 @@ function Listing() {
                                     serviceList={servicesData.list}
                                     pagination={servicesData.pagination}
                                     onDelete={onDelete}
+                                    getData={getData}
                                 />
                             )
                             : <ServicesTableView serviceList={servicesData.list} onDelete={onDelete} />)}

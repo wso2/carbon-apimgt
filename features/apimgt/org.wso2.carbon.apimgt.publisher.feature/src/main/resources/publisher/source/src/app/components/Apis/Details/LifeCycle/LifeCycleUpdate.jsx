@@ -22,26 +22,16 @@ import Grid from '@material-ui/core/Grid';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
-import { injectIntl, FormattedMessage } from 'react-intl';
-import Typography from '@material-ui/core/Typography';
+import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
-import LaunchIcon from '@material-ui/icons/Launch';
-// import Box from '@material-ui/core/Box';
-import Link from '@material-ui/core/Link';
-import { Link as RouterLink } from 'react-router-dom';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import PublishWithoutDeploy from 'AppComponents/Apis/Details/LifeCycle/Components/PublishWithoutDeploy';
 import Configurations from 'Config';
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
@@ -97,11 +87,12 @@ class LifeCycleUpdate extends Component {
             deploymentsAvailable: false,
         };
         this.setIsOpen = this.setIsOpen.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
     /**
      *
-     * Set Deployment availbility
+     * Set Deployment availability
      */
     componentDidMount() {
         const {
@@ -342,58 +333,6 @@ class LifeCycleUpdate extends Component {
                         </div>
                     </ScopeValidation>
                 </Grid>
-                <Dialog
-                    open={isOpen}
-                    onClose={() => this.setIsOpen(false)}
-                    aria-labelledby='alert-dialog-title'
-                    aria-describedby='alert-dialog-description'
-                >
-                    <DialogTitle id='alert-dialog-title'>
-                        <FormattedMessage
-                            id='Apis.Details.LifeCycle.components'
-                            defaultMessage='Publish API without deployments'
-                        />
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id='alert-dialog-description'>
-                            <Typography variant='subtitle1' display='block' gutterBottom>
-                                <FormattedMessage
-                                    id='Apis.Details.LifeCycle.publish.content'
-                                    defaultMessage={'The API will not be available for '
-                                        + 'consumption unless it is deployed.'}
-                                />
-                            </Typography>
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button
-                            onClick={() => {
-                                this.setIsOpen(false);
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            color='primary'
-                            onClick={() => this.handleClick()}
-                        >
-                            Publish
-                        </Button>
-                        <Link
-                            component={RouterLink}
-                            to={'/apis/' + api.id + '/deployments'}
-                        >
-                            <Box fontSize='button.fontSize' display='flex' fontFamily='fontFamily'>
-                                <FormattedMessage
-                                    id='Apis.Details.LifeCycle.publish.content.info.deployments'
-                                    defaultMessage='Deployments'
-                                />
-                                <LaunchIcon fontSize='small' />
-                            </Box>
-
-                        </Link>
-                    </DialogActions>
-                </Dialog>
                 {/* Page error banner */}
                 {pageError && (
                     <Grid item xs={11}>
@@ -408,6 +347,12 @@ class LifeCycleUpdate extends Component {
                     </Grid>
                 )}
                 {/* end of Page error banner */}
+                <PublishWithoutDeploy
+                    apiID={api.id}
+                    handleClick={this.handleClick}
+                    handleClose={() => this.setIsOpen(false)}
+                    open={isOpen}
+                />
             </Grid>
         );
     }
