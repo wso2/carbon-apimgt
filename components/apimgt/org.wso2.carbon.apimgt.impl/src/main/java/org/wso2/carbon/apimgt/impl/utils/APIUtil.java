@@ -10409,7 +10409,7 @@ public final class APIUtil {
         }
     }
 
-    public static Certificate getCertificateFromTrustStore(String certAlias) throws APIManagementException {
+    public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
 
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
@@ -10818,11 +10818,11 @@ public final class APIUtil {
      * @return true if certificate exist in truststore
      * @throws APIManagementException
      */
-    public static boolean isCertificateExistsInTrustStore(X509Certificate certificate) throws APIManagementException {
+    public static boolean isCertificateExistsInListenerTrustStore(X509Certificate certificate) throws APIManagementException {
 
         if (certificate != null) {
             try {
-                KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+                KeyStore trustStore = ServiceReferenceHolder.getInstance().getListenerTrustStore();
                 if (trustStore != null) {
                     CertificateFactory cf = CertificateFactory.getInstance("X.509");
                     byte[] certificateEncoded = certificate.getEncoded();

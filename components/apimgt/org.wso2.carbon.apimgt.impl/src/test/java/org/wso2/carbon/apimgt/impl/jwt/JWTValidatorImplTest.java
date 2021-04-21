@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
 
@@ -283,10 +282,10 @@ public class JWTValidatorImplTest {
         if (headers.containsKey(getClientCertificateHeader())) {
             try {
                 if (!isClientCertificateValidationEnabled() || APIUtil
-                        .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
+                        .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                     String certificate = (String) headers.get(getClientCertificateHeader());
                     X509Certificate x509Certificate = getCertificateFromBase64EncodedString(certificate);
-                    if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
+                    if (APIUtil.isCertificateExistsInListenerTrustStore(x509Certificate)) {
                         return x509Certificate;
                     } else {
                         log.debug("Certificate is Header is not exist in truststore");
