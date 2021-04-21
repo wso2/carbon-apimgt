@@ -441,14 +441,8 @@ public class Utils {
                     if (!isClientCertificateValidationEnabled() || APIUtil
                             .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                         X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                        if (APIUtil.isCertificateExistsInListenerTrustStore(x509Certificate)) {
-                            // If valid client certificate is sent via header give it priority over the transport level cert
-                            axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
-                            return x509Certificate;
-                        } else {
-                            log.debug("Certificate in Header didn't exist in truststore");
-                            return null;
-                        }
+                        axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
+                        return x509Certificate;
                     }
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
