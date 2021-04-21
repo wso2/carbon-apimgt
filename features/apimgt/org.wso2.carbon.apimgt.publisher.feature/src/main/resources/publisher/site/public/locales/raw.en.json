@@ -3739,7 +3739,7 @@
     "defaultMessage": "Error while loading services"
   },
   "ServiceCatalog.Listing.Listing.heading": {
-    "defaultMessage": "Service Catalog"
+    "defaultMessage": "Services"
   },
   "ServiceCatalog.Listing.Listing.heading.displaying.service": {
     "defaultMessage": "Service"
