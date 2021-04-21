@@ -29,6 +29,7 @@ const config = {
         filename: '[name].[contenthash].bundle.js',
         chunkFilename: '[name].[contenthash].bundle.js',
         publicPath: 'site/public/dist/',
+        globalObject: 'this'
     },
     node: {
         fs: 'empty',
