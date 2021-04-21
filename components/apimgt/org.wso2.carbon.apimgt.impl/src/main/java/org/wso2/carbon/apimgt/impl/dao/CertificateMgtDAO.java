@@ -771,22 +771,6 @@ public class CertificateMgtDAO {
                     }
                 }
             }
-            if (!isExist) {
-                selectCertificateForName = SQLConstants.CertificateConstants.SELECT_CERTIFICATE_FOR_ALIAS;
-                try (PreparedStatement preparedStatement = connection.prepareStatement(selectCertificateForName)) {
-                    preparedStatement.setString(1, name + "_" + tenantId);
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        if (resultSet.next()) {
-                            isExist = true;
-                            if (log.isDebugEnabled()) {
-                                log.debug(
-                                        "Alias " + name +
-                                                " exist already and uploaded as a certificate for the backend");
-                            }
-                        }
-                    }
-                }
-            }
         } catch (SQLException e) {
             handleException("Database error while checking whether alias " + name + " exist in the database.", e);
         }
