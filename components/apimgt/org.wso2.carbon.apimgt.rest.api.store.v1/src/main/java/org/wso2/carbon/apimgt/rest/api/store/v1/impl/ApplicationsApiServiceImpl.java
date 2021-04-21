@@ -470,16 +470,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 200 Response if successfully deleted the application
      */
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String xWSO2Tenant,
-                                                    MessageContext messageContext) {
+    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
-                    apiConsumer.removeApplication(application, username, tenantDomain);
+                    apiConsumer.removeApplication(application, username);
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

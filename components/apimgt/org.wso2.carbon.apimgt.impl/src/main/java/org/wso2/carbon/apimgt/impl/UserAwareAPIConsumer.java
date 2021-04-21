@@ -93,9 +93,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void removeApplication(Application application, String username, String tenantDomain) throws APIManagementException {
+    public void removeApplication(Application application, String username) throws APIManagementException {
         checkSubscribePermission();
-        super.removeApplication(application, username, tenantDomain);
+        super.removeApplication(application, username);
     }
      @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId) throws
