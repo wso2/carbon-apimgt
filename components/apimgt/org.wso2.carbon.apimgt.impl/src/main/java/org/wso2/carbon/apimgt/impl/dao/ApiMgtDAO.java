@@ -106,7 +106,6 @@ import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -5034,7 +5033,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteApplication(Application application) throws APIManagementException {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;

@@ -1493,7 +1493,6 @@ paths:
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/requestedTenant'
       tags:
         - Applications
       responses:
