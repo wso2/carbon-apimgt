@@ -7881,53 +7881,6 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    APIInfo:
-      title: API Info object with basic API details.
-      type: object
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: CalculatorAPI
-        description:
-          type: string
-          example: A calculator API that supports basic operations
-        context:
-          type: string
-          example: CalculatorAPI
-        version:
-          type: string
-          example: 1.0.0
-        provider:
-          type: string
-          description: |
-            If the provider value is not given, the user invoking the API will be used as the provider.
-          example: admin
-        type:
-          type: string
-          example: HTTP
-        lifeCycleStatus:
-          type: string
-          example: CREATED
-        workflowStatus:
-          type: string
-          example: APPROVED
-        hasThumbnail:
-          type: boolean
-          example: true
-        securityScheme:
-          type: array
-          items:
-            type: string
-        createdTime:
-          type: string
-          example : 2021-02-11 09:57:25
-        updatedTime:
-          type: string
-          example : 2021-02-11 09:57:25
-
     Topic:
       title: Topic object
       required:
@@ -8389,6 +8342,66 @@ components:
       x-scopes:
         - apim:api_create
         - apim:api_import_export
+
+    APIInfo:
+      title: API Info object with basic API details.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: CalculatorAPI
+        description:
+          type: string
+          example: A calculator API that supports basic operations
+        context:
+          type: string
+          example: CalculatorAPI
+        additionalProperties:
+          type: array
+          description: Map of custom properties of API
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+        version:
+          type: string
+          example: 1.0.0
+        provider:
+          type: string
+          description: |
+            If the provider value is not given, the user invoking the API will be used as the provider.
+          example: admin
+        type:
+          type: string
+          example: HTTP
+        lifeCycleStatus:
+          type: string
+          example: CREATED
+        workflowStatus:
+          type: string
+          example: APPROVED
+        hasThumbnail:
+          type: boolean
+          example: true
+        securityScheme:
+          type: array
+          items:
+            type: string
+        createdTime:
+          type: string
+          example: 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example: 2021-02-11 09:57:25
+
 
     #-----------------------------------------------------
     # The API Revision resource

@@ -650,6 +650,25 @@ public class APIMappingUtil {
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setType(api.getType());
+        if (api.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = api.getAdditionalProperties();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
+                String key = (String) propertyKey;
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                } else {
+                    additionalPropertiesDTO.setName(key);
+                    additionalPropertiesDTO.setDisplay(false);
+                }
+                additionalPropertiesList.add(additionalPropertiesDTO);
+            }
+            apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
+        }
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
