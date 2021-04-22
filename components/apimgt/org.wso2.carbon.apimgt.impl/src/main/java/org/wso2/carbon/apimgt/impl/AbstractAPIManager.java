@@ -1736,9 +1736,9 @@ public abstract class AbstractAPIManager implements APIManager {
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      * The different versions of the same API will not be take into consideration.
      *
-     * @param apiIdentifier API Identifier
-     * @param scopeKey   candidate scope key
-     * @param organizationId   Identifier of an organization
+     * @param apiIdentifier  API Identifier
+     * @param scopeKey       candidate scope key
+     * @param organizationId Identifier of an organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */

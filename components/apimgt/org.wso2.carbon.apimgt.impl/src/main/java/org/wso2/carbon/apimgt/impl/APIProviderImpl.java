@@ -8923,9 +8923,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 compoundResult.addAll(docMap.entrySet());
                 compoundResult.addAll(productDocMap.entrySet());
                 compoundResult.sort(new ContentSearchResultNameComparator());
-                result.put("length", results.getTotalCount() );
+                result.put("length", results.getTotalCount());
             } else {
-                result.put("length", compoundResult.size() );
+                result.put("length", compoundResult.size());
             }
 
         } catch (APIPersistenceException e) {
@@ -9838,7 +9838,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
-        jwtTokenInfoDTO.setExpirationTime(60*1000);
+        jwtTokenInfoDTO.setExpirationTime(60 * 1000);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }

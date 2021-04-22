@@ -1090,7 +1090,6 @@ public class APIConsumerImplTest {
     }
 
 
-
     @Test
     public void testRemoveSubscription() throws APIManagementException, WorkflowException, APIPersistenceException {
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
@@ -1144,7 +1143,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testAddSubscription() throws APIManagementException {
-        API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        API api = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
         Application application = new Application(1);
         api.setStatus(APIConstants.PUBLISHED);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -1154,7 +1153,7 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "user1",application).getSubscriptionUUID(),
+        Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "user1", application).getSubscriptionUUID(),
                 subscribedAPI.getUUID());
         try {
             api.setStatus(APIConstants.CREATED);
