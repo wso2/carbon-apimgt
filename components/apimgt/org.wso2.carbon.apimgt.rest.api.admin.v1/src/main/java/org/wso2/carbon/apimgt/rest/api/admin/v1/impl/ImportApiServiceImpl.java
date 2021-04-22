@@ -334,8 +334,12 @@ public class ImportApiServiceImpl implements ImportApiService {
         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
         apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter(GRANT_TYPES));
         if (apiKey.getGrantTypes() != null &&
-                apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)) {
+                (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) || apiKey.getGrantTypes().contains(GRANT_TYPE_CODE))) {
             apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter(REDIRECT_URIS));
+
+            if (StringUtils.isEmpty(apiKey.getCallbackUrl()) && !StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
+                apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+            }
         }
 
         long validityPeriod = OAuthServerConfiguration.getInstance().getApplicationAccessTokenValidityPeriodInSeconds();
