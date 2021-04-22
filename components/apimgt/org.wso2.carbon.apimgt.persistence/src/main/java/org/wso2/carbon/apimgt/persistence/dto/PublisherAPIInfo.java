@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * A subset of org.wso2.carbon.apimgt.persistence.models.PublisherAPI. Minimal API information required only for
@@ -37,6 +38,15 @@ public class PublisherAPIInfo {
     private String createdTime;
     private Date updatedTime;
     private String description;
+    private Map<String, String> additionalProperties;
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
 
     public String getCreatedTime() {
         return createdTime;
