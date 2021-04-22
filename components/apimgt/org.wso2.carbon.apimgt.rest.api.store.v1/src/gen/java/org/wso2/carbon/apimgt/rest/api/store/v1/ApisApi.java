@@ -370,7 +370,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete an API Comment", notes = "Remove a Comment ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:admin", description = "")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Comments",  })
     @ApiResponses(value = { 

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.core.models.Extension;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,10 +68,10 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
@@ -195,7 +196,6 @@ public class APIMappingUtil {
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setType(dto.getType().toString());
-        model.setTestKey(dto.getTestKey());
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
         }
@@ -205,14 +205,13 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-        if (dto.isEnableStore() != null) {
-            model.setEnableStore(dto.isEnableStore());
-        }
+        model.setEnableStore(true);
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
+            model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
         }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
@@ -306,10 +305,15 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
-        Map<String, String> additionalProperties = dto.getAdditionalProperties();
+        List<APIAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                model.addProperty(entry.getKey(), entry.getValue());
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                if (property.isDisplay()) {
+                    model.addProperty(property.getName() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, property
+                            .getValue());
+                } else {
+                    model.addProperty(property.getName(), property.getValue());
+                }
             }
         }
 
@@ -321,13 +325,6 @@ public class APIMappingUtil {
             model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
             model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
-        }
-        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
-            List<String> gatewaysList = dto.getGatewayEnvironments();
-            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
-        } else if (dto.getGatewayEnvironments() != null) {
-            //this means the provided gatewayEnvironments is "" (empty)
-            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
         }
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
         CORSConfiguration corsConfiguration;
@@ -343,7 +340,6 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
-        setEndpointSecurityFromApiDTOToModel(dto, model);
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
@@ -354,6 +350,7 @@ public class APIMappingUtil {
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
             if (websubSubscriptionConfigurationDTO != null) {
                 websubSubscriptionConfiguration = new WebsubSubscriptionConfiguration(
+                        websubSubscriptionConfigurationDTO.isEnable(),
                         websubSubscriptionConfigurationDTO.getSecret(),
                         websubSubscriptionConfigurationDTO.getSigningAlgorithm(),
                         websubSubscriptionConfigurationDTO.getSignatureHeader());
@@ -381,7 +378,7 @@ public class APIMappingUtil {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             try {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                                                getTenantId(tenantDomain);
+                        getTenantId(tenantDomain);
                 serviceInfoJson = (JSONObject) parser.parse(mapper.writeValueAsString(serviceInfoDTO));
 
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
@@ -390,7 +387,7 @@ public class APIMappingUtil {
                 if (service == null) {
                     if (log.isDebugEnabled()) {
                         log.debug("A service with key" + dto.getServiceInfo().getKey() + " referenced in the API "
-                                                        + "information is not available in the service catalog");
+                                + "information is not available in the service catalog");
                     }
                 } else {
                     serviceInfoJson.put("md5", service.getMd5());
@@ -656,11 +653,16 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
-        apiInfoDTO.setCreatedTime(api.getCreatedTime());
-        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-            apiInfoDTO.setHasThumbnail(true);
-        } else {
-            apiInfoDTO.setHasThumbnail(false);
+        apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
+        if (api.getCreatedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
+            apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
+        }
+        if (api.getLastUpdated() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date lastUpdatedTime = api.getLastUpdated();
+            apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
         }
         return apiInfoDTO;
     }
@@ -834,19 +836,6 @@ public class APIMappingUtil {
         return context;
     }
 
-    private static void setEndpointSecurityFromApiDTOToModel(APIDTO dto, API api) {
-
-        APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
-        if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
-            api.setEndpointSecured(true);
-            api.setEndpointUTUsername(securityDTO.getUsername());
-            api.setEndpointUTPassword(securityDTO.getPassword());
-            if (APIEndpointSecurityDTO.TypeEnum.DIGEST.equals(securityDTO.getType())) {
-                api.setEndpointAuthDigest(true);
-            }
-        }
-    }
-
     private static void setMaxTpsFromApiDTOToModel(APIDTO dto, API api) {
 
         APIMaxTpsDTO maxTpsDTO = dto.getMaxTps();
@@ -896,19 +885,19 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         }
         dto.setDescription(model.getDescription());
-
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
-        dto.setEnableStore(model.isEnableStore());
-        dto.setTestKey(model.getTestKey());
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
+        if (model.getAdvertiseOnlyAPIVendor() != null) {
+            advertiseInfoDTO.setVendor(AdvertiseInfoDTO.VendorEnum.valueOf(model.getAdvertiseOnlyAPIVendor()));
+        }
         dto.setAdvertiseInfo(advertiseInfoDTO);
 
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
@@ -963,7 +952,6 @@ public class APIMappingUtil {
                             }
                         }
 
-
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1010,9 +998,7 @@ public class APIMappingUtil {
                 log.error("Error while decrypting client credentials for API: " + model.getId(), e);
             }
         }
-      /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
-            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
-        }*/
+        dto.setHasThumbnail(!StringUtils.isBlank(model.getThumbnailUrl()));
         List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
         String inMedPolicyName = model.getInSequence();
         if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
@@ -1152,12 +1138,22 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                } else {
+                    additionalPropertiesDTO.setName(key);
+                    additionalPropertiesDTO.setDisplay(false);
+                }
+                additionalPropertiesList.add(additionalPropertiesDTO);
             }
-            dto.setAdditionalProperties(additionalPropertiesMap);
+            dto.setAdditionalProperties(additionalPropertiesList);
         }
 
         if (model.getImplementation() != null) {
@@ -1176,9 +1172,6 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
-        List<String> environmentsList = new ArrayList<String>();
-        environmentsList.addAll(model.getEnvironments());
-        dto.setGatewayEnvironments(environmentsList);
         APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
         CORSConfiguration corsConfiguration = model.getCorsConfiguration();
         if (corsConfiguration == null) {
@@ -1200,6 +1193,7 @@ public class APIMappingUtil {
         if (websubSubscriptionConfiguration == null) {
             websubSubscriptionConfiguration = APIUtil.getDefaultWebsubSubscriptionConfiguration();
         }
+        websubSubscriptionConfigurationDTO.setEnable(websubSubscriptionConfiguration.isEnable());
         websubSubscriptionConfigurationDTO.setSecret(websubSubscriptionConfiguration.getSecret());
         websubSubscriptionConfigurationDTO.setSigningAlgorithm(websubSubscriptionConfiguration.getSigningAlgorithm());
         websubSubscriptionConfigurationDTO.setSignatureHeader(websubSubscriptionConfiguration.getSignatureHeader());
@@ -1254,9 +1248,11 @@ public class APIMappingUtil {
             return scopeDTOS;
         }
         Map<String, String> scopes = securityScheme.flows.implicit.scopes;
-        Map<String, String> xScopeBindings =
-                (Map<String, String>) securityScheme.flows.implicit.getExtension("x-scopes-bindings").value;
-
+        Map<String, String> scopeBindings = new HashMap<>();
+        Extension xScopesBindings = securityScheme.flows.implicit.getExtension("x-scopes-bindings");
+        if (xScopesBindings != null) {
+            scopeBindings = (Map<String, String>) xScopesBindings.value;
+        }
 
         for (Map.Entry<String, String> aScope : scopes.entrySet()) {
             ScopeDTO scopeDTO = new ScopeDTO();
@@ -1264,7 +1260,7 @@ public class APIMappingUtil {
             scopeDTO.setDisplayName(aScope.getKey());
             scopeDTO.setDescription(aScope.getValue());
 
-            String roles = xScopeBindings.get(aScope.getKey());
+            String roles = scopeBindings.get(aScope.getKey());
             if (roles == null || roles.isEmpty()) {
                 scopeDTO.setBindings(Collections.emptyList());
             } else {
@@ -1337,7 +1333,8 @@ public class APIMappingUtil {
         Map endpointConfig = (Map) dto.getEndpointConfig();
         if (api.isEndpointSecured()) {
             endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_ENABLED, true);
-            endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIEndpointSecurityDTO.TypeEnum.BASIC);
+            endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
@@ -1347,7 +1344,8 @@ public class APIMappingUtil {
                 endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
             if (api.isEndpointAuthDigest()) {
-                endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIEndpointSecurityDTO.TypeEnum.DIGEST);
+                endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             }
             JSONObject endpointSecurityModel = new JSONObject();
             endpointSecurityModel.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityObject);
@@ -1945,8 +1943,7 @@ public class APIMappingUtil {
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
                 if (wsUriMappings != null) {
-                    String wsUriMapping = wsUriMappings
-                            .get(operationsDTO.getTarget() + "_" + operationsDTO.getVerb().toLowerCase());
+                    String wsUriMapping = wsUriMappings.get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
                     if (wsUriMapping != null) {
                         operationsDTO.setUriMapping(wsUriMapping);
                     }
@@ -2081,8 +2078,6 @@ public class APIMappingUtil {
         productDto.setTags(tagsToReturn);
 
         productDto.setEnableSchemaValidation(product.isEnabledSchemaValidation());
-        productDto.setEnableStore(product.isEnableStore());
-        productDto.setTestKey(product.getTestKey());
 
         productDto.setIsRevision(product.isRevision());
         productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
@@ -2200,19 +2195,25 @@ public class APIMappingUtil {
             productDto.setTransport(Arrays.asList(product.getTransports().split(",")));
         }
 
-        List<String> environmentsList = new ArrayList<String>();
-        environmentsList.addAll(product.getEnvironments());
-        productDto.setGatewayEnvironments(environmentsList);
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
-            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                } else {
+                    additionalPropertiesDTO.setName(key);
+                    additionalPropertiesDTO.setDisplay(false);
+                }
+                additionalPropertiesList.add(additionalPropertiesDTO);
             }
-            productDto.setAdditionalProperties(additionalPropertiesMap);
+            productDto.setAdditionalProperties(additionalPropertiesList);
         }
-
         if (product.getApiSecurity() != null) {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
         }
@@ -2298,7 +2299,6 @@ public class APIMappingUtil {
         product.setContext(context);
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
-        product.setTestKey(dto.getTestKey());
 
         List<String> apiProductTags = dto.getTags();
         Set<String> tagsToReturn = new HashSet<>(apiProductTags);
@@ -2307,11 +2307,7 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             product.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-
-        if (dto.isEnableStore() != null) {
-            product.setEnableStore(dto.isEnableStore());
-        }
-
+        product.setEnableStore(true);
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             product.setResponseCache(APIConstants.ENABLED);
         } else {
@@ -2367,10 +2363,15 @@ public class APIMappingUtil {
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
         }
 
-        Map<String, String> additionalProperties = dto.getAdditionalProperties();
+        List<APIAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                product.addProperty(entry.getKey(), entry.getValue());
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                if (property.isDisplay()) {
+                    product.addProperty(property.getName() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, property
+                            .getValue());
+                } else {
+                    product.addProperty(property.getName(), property.getValue());
+                }
             }
         }
         if (dto.getSubscriptionAvailableTenants() != null) {
@@ -2380,13 +2381,6 @@ public class APIMappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         product.setTransports(transports);
 
-        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
-            List<String> gatewaysList = dto.getGatewayEnvironments();
-            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
-        } else if (dto.getGatewayEnvironments() != null) {
-            //this means the provided gatewayEnvironments is "" (empty)
-            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
-        }
 
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 

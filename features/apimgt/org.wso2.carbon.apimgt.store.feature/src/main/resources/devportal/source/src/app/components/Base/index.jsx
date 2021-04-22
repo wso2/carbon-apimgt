@@ -576,7 +576,9 @@ class Layout extends React.Component {
                                 )}
                             </Toolbar>
                         </AppBar>
-                        <div className={classes.contentWrapper}>{children}</div>
+                        <main>
+                            <div className={classes.contentWrapper}>{children}</div>
+                        </main>
                         {footerActive && <div className={classes.push} />}
                     </div>
                     {footerActive && (

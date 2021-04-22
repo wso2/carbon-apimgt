@@ -36,7 +36,7 @@
       },
       {
         "Name": "apim:api_generate_key",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
         "Name": "apim:api_view",
@@ -293,6 +293,22 @@
       {
         "Name": "apim:environment_read",
         "Roles": "admin"
+      },
+      {
+        "Name": "service_catalog:service_view",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "service_catalog:service_write",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:comment_view",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:comment_write",
+        "Roles": "admin,Internal/creator,Internal/publisher"
       }
     ]
   },

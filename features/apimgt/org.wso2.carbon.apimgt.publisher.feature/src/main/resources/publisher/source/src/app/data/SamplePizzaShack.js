@@ -387,7 +387,6 @@ const getSampleAPIData = () => {
         policies: ['Unlimited'],
         securityScheme: ['oauth2'],
         visibility: 'PUBLIC',
-        gatewayEnvironments: ['Production and Sandbox'],
         businessInformation: {
             businessOwner: 'Jane Roe',
             businessOwnerEmail: 'marketing@pizzashack.com',

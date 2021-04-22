@@ -101,11 +101,16 @@ export default function Resources(props) {
 
     /**
      *
-     *
-     * @param {*} currenPaths
-     * @param {*} action
+     * **** NOTE: This reducer function needs to be a pure JS function, Mean we cant refer to external states, or
+     * variables within the `operationsReducer` function. Please avoid making external references.
+     * We need to remove already used `openAPISpec`,`setSecurityDefScopes` etc.
+     * Source : https://github.com/facebook/react/issues/16295#issuecomment-610098654
+     * @param {Object} currentOperations Current state
+     * @param {Object} operationAction action and payload
+     * @return {Object} next next state
      */
     function operationsReducer(currentOperations, operationAction) {
+        // Please read the note above before updating the reducer
         const { action, data } = operationAction;
         const { target, verb, value } = data || {};
         let updatedOperation;
@@ -459,6 +464,10 @@ export default function Resources(props) {
                 }
             });
     }, []);
+
+    useEffect(() => {
+        setApiThrottlingPolicy(api.apiThrottlingPolicy);
+    }, [api.apiThrottlingPolicy]);
 
     useEffect(() => {
         if (api.apitype !== 'APIProduct') {

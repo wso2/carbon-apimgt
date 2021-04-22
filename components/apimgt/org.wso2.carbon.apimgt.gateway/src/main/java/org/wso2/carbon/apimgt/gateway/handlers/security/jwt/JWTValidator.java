@@ -27,10 +27,13 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
-import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -41,14 +44,14 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -75,28 +78,34 @@ public class JWTValidator {
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
 
-    public JWTValidator(APIKeyValidator apiKeyValidator) throws APIManagementException{
-
+    public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain) throws APIManagementException{
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.apiKeyValidator = apiKeyValidator;
-        jwtConfigurationDto =
-                (JWTConfigurationDto) ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
-        jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
+        ExtendedJWTConfigurationDto extendedJWTConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+        this.jwtConfigurationDto = new JWTConfigurationDto(extendedJWTConfigurationDto);
+        jwtGenerationEnabled = extendedJWTConfigurationDto.isEnabled();
         apiMgtGatewayJWTGenerator =
                 ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
-                        .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+                        .get(this.jwtConfigurationDto.getGatewayJWTGeneratorImpl());
         if (jwtGenerationEnabled) {
             // Set certificate to jwtConfigurationDto
-            jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+            if (extendedJWTConfigurationDto.isTenantBasedSigningEnabled()) {
+                this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+            } else {
+                this.jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                this.jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+            }
 
             // Set private key to jwtConfigurationDto
-            jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
 
             // Set ttl to jwtConfigurationDto
-            jwtConfigurationDto.setTtl(getTtl());
+            this.jwtConfigurationDto.setTtl(getTtl());
 
             //setting the jwt configuration dto
-            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
+            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
         }
 
         jwtValidationService = ServiceReferenceHolder.getInstance().getJwtValidationService();

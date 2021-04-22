@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import java.io.ByteArrayInputStream;
 
 /**
@@ -63,6 +64,9 @@ public class AWSLambdaMediator extends AbstractMediator {
     public boolean mediate(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
+
+        // Set lambda backend invocation start time for analytics
+        messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
 
         String payload;
         if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {

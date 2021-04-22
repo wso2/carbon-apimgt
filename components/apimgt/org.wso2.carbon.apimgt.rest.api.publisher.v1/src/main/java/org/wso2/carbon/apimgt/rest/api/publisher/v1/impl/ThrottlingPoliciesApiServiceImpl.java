@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -95,12 +96,12 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        SubscriptionPolicy[] subscriptionPolicies = Arrays.asList(apiProvider.getPolicies(userName,
-                PolicyConstants.POLICY_LEVEL_SUB)).toArray(new SubscriptionPolicy[0]);
+        Policy[] policies = apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_SUB);
         List<SubscriptionPolicy> streamingPolicies = new ArrayList<>();
-        for (SubscriptionPolicy subscriptionPolicy:subscriptionPolicies) {
-            if (subscriptionPolicy.getDefaultQuotaPolicy().getType().equals(EVENT_COUNT_TYPE))
-            streamingPolicies.add(subscriptionPolicy);
+        for (Policy policy : policies) {
+            if (EVENT_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+                streamingPolicies.add((SubscriptionPolicy) policy);
+            }
         }
         SubscriptionPolicyListDTO subscriptionPolicyListDTO = new SubscriptionPolicyListDTO();
         List<SubscriptionPolicyDTO> subscriptionPolicyDTOs = subscriptionPolicyListDTO.getList();

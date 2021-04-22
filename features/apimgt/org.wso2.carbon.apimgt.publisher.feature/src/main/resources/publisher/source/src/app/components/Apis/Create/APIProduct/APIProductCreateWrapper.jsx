@@ -192,7 +192,6 @@ export default function ApiProductCreateWrapper(props) {
             policies,
             apis: apiResources,
         };
-        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
         apiData.transport = ['http', 'https'];
         const newAPIProduct = new APIProduct(apiData);
         newAPIProduct

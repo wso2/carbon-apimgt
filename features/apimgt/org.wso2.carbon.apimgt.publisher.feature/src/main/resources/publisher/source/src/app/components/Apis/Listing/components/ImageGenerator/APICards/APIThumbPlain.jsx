@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { isRestricted } from 'AppData/AuthManager';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -257,14 +258,17 @@ function APIThumbPlain(props) {
                             />
                         )}
                     </Box>
-
-                    <DeleteApiButton
-                        setLoading={setLoading}
-                        api={api}
-                        updateData={updateData}
-                        isAPIProduct={isAPIProduct}
-                    />
-                    {loading && <CircularProgress className={classes.deleteProgress} />}
+                    {!isRestricted(['apim:api_create'], api) && (
+                        <>
+                            <DeleteApiButton
+                                setLoading={setLoading}
+                                api={api}
+                                updateData={updateData}
+                                isAPIProduct={isAPIProduct}
+                            />
+                            {loading && <CircularProgress className={classes.deleteProgress} />}
+                        </>
+                    )}
                 </Box>
             </CardContent>
         </Card>

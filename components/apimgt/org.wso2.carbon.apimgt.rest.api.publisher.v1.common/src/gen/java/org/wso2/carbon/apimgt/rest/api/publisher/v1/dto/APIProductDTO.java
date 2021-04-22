@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
@@ -68,8 +67,6 @@ return null;
     }
     private StateEnum state = null;
     private Boolean enableSchemaValidation = null;
-    private Boolean enableStore = null;
-    private String testKey = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
     private Integer revisionId = null;
@@ -143,7 +140,6 @@ return null;
     }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
-    private List<String> gatewayEnvironments = new ArrayList<String>();
 
     @XmlType(name="ApiTypeEnum")
     @XmlEnum(String.class)
@@ -217,7 +213,7 @@ return null;
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-    private Map<String, String> additionalProperties = new HashMap<String, String>();
+    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
     private APIMonetizationInfoDTO monetization = null;
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
@@ -367,40 +363,6 @@ return null;
   }
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
-  }
-
-  /**
-   **/
-  public APIProductDTO enableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("enableStore")
-  public Boolean isEnableStore() {
-    return enableStore;
-  }
-  public void setEnableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-  }
-
-  /**
-   **/
-  public APIProductDTO testKey(String testKey) {
-    this.testKey = testKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "8swdwj9080edejhj", value = "")
-  @JsonProperty("testKey")
-  public String getTestKey() {
-    return testKey;
-  }
-  public void setTestKey(String testKey) {
-    this.testKey = testKey;
   }
 
   /**
@@ -579,24 +541,6 @@ return null;
   }
 
   /**
-   * List of gateway environments the API Product is available 
-   **/
-  public APIProductDTO gatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[\"Production and Sandbox\"]", value = "List of gateway environments the API Product is available ")
-  @JsonProperty("gatewayEnvironments")
-  public List<String> getGatewayEnvironments() {
-    return gatewayEnvironments;
-  }
-  public void setGatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-  }
-
-  /**
    * The API type to be used. Accepted values are API, APIPRODUCT
    **/
   public APIProductDTO apiType(ApiTypeEnum apiType) {
@@ -758,18 +702,19 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public APIProductDTO additionalProperties(Map<String, String> additionalProperties) {
+  public APIProductDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
   @ApiModelProperty(value = "Map of custom properties of API")
+      @Valid
   @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
+  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
@@ -934,8 +879,6 @@ return null;
         Objects.equals(hasThumbnail, apIProduct.hasThumbnail) &&
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
-        Objects.equals(enableStore, apIProduct.enableStore) &&
-        Objects.equals(testKey, apIProduct.testKey) &&
         Objects.equals(isRevision, apIProduct.isRevision) &&
         Objects.equals(revisionedApiProductId, apIProduct.revisionedApiProductId) &&
         Objects.equals(revisionId, apIProduct.revisionId) &&
@@ -946,7 +889,6 @@ return null;
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
         Objects.equals(accessControl, apIProduct.accessControl) &&
         Objects.equals(accessControlRoles, apIProduct.accessControlRoles) &&
-        Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(apiType, apIProduct.apiType) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(tags, apIProduct.tags) &&
@@ -969,7 +911,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, testKey, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -985,8 +927,6 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
-    sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
-    sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiProductId: ").append(toIndentedString(revisionedApiProductId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
@@ -997,7 +937,6 @@ return null;
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
-    sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");

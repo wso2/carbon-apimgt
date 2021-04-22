@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
@@ -107,6 +108,16 @@ public class SubscriptionThrottlePolicyMappingUtil {
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
         }
         policyDTO.setType(SUBSCRIPTION_THROTTLE_POLICY_TYPE);
+        if (APIConstants.COMMERCIAL_TIER_PLAN.equals(subscriptionPolicy.getBillingPlan())) {
+            MonetizationInfoDTO monetizationInfoDTO = new MonetizationInfoDTO();
+            if (APIConstants.Monetization.FIXED_RATE.equalsIgnoreCase(subscriptionPolicy.getMonetizationPlan())) {
+                monetizationInfoDTO.setMonetizationPlan(MonetizationInfoDTO.MonetizationPlanEnum.FIXEDRATE);
+            } else {
+                monetizationInfoDTO.setMonetizationPlan(MonetizationInfoDTO.MonetizationPlanEnum.DYNAMICRATE);
+            }
+            monetizationInfoDTO.setProperties(subscriptionPolicy.getMonetizationPlanProperties());
+            policyDTO.setMonetization(monetizationInfoDTO);
+        }
         return policyDTO;
     }
 
@@ -151,7 +162,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
             //if no custom attributes are set, assign an empty byte array
             subscriptionPolicy.setCustomAttributes(new JSONArray().toJSONString().getBytes());
         }
-        if (dto.getMonetization() != null &&
+        if (dto.getMonetization() != null && dto.getMonetization().getMonetizationPlan() != null &&
                 StringUtils.isNotBlank(dto.getMonetization().getMonetizationPlan().name())) {
             String tierMonetizationPlan = dto.getMonetization().getMonetizationPlan().toString();
             subscriptionPolicy.setMonetizationPlan(tierMonetizationPlan);

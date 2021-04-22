@@ -171,7 +171,7 @@ class Wizard extends Component {
         const CurrentStepComponent = stepComponents[currentStep];
         return (
             <>
-                <Typography variant='h4' className={classes.titleSub}>
+                <Typography variant='h4' component='h2' className={classes.titleSub}>
                     <FormattedMessage
                         id={'Apis.Details.Credentials.Credentials'
                     + '.api.credentials.generate'}
@@ -213,7 +213,7 @@ class Wizard extends Component {
                     <Box py={1} mb={1} mx='auto' display='flex'>
                         {stepStatus === this.stepStatuses.BLOCKED && (
                             <Box pt={2} px={3} display='flex'>
-                                <Typography variant='h5'>
+                                <Typography variant='h5' component='label'>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
                                                 + 'for.this.step.has'}

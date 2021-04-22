@@ -87,6 +87,9 @@ const styles = theme => ({
     leftCell: {
         width: 150,
     },
+    summaryView: {
+        'word-break': 'break-word',
+    },
 });
 /**
  *
@@ -195,7 +198,7 @@ function View(props) {
                                             />
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className={classes.summaryView}>
                                         <Typography variant="body1">{doc.summary}</Typography>
                                     </TableCell>
                                 </TableRow>
@@ -234,7 +237,7 @@ function View(props) {
                     <Paper className={classes.paper}>
                         {doc.sourceType === 'MARKDOWN' && (
                             <Suspense fallback={<CircularProgress />}>
-                                <ReactMarkdown escapeHtml={false} source={code} />
+                                <ReactMarkdown escapeHtml source={code} />
                             </Suspense>
                         )}
                         {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}

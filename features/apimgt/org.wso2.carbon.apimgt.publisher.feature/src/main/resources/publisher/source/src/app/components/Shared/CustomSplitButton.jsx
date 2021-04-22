@@ -24,17 +24,14 @@ export default function CustomSplitButton(props) {
     const anchorRef = React.useRef(null);
     const [selectedIndex, setSelectedIndex] = React.useState(1);
 
-    const handleClick = () => {
-        if (`${options[selectedIndex]}` === 'Save') {
+    const handleClick = (event, index) => {
+        setSelectedIndex(index);
+        setOpen(false);
+        if (`${options[index]}` === 'Save') {
             handleSave();
         } else {
             handleSaveAndDeploy();
         }
-    };
-
-    const handleMenuItemClick = (event, index) => {
-        setSelectedIndex(index);
-        setOpen(false);
     };
 
     const handleToggle = () => {
@@ -60,7 +57,11 @@ export default function CustomSplitButton(props) {
                     disabled={isUpdating}
                     style={{ width: '200px' }}
                 >
-                    <Button onClick={handleClick} disabled={isUpdating} style={{ width: '200px' }}>
+                    <Button
+                        onClick={(event) => handleClick(event, selectedIndex)}
+                        disabled={isUpdating}
+                        style={{ width: '200px' }}
+                    >
                         {options[selectedIndex]}
                         {isUpdating && <CircularProgress size={24} />}
                     </Button>
@@ -91,7 +92,7 @@ export default function CustomSplitButton(props) {
                                             <MenuItem
                                                 key={option}
                                                 selected={index === selectedIndex}
-                                                onClick={(event) => handleMenuItemClick(event, index)}
+                                                onClick={(event) => handleClick(event, index)}
                                             >
                                                 {option}
                                             </MenuItem>

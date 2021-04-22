@@ -22,15 +22,26 @@ import Grid from '@material-ui/core/Grid';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
-import { injectIntl } from 'react-intl';
+import { injectIntl, FormattedMessage } from 'react-intl';
+import Typography from '@material-ui/core/Typography';
 import API from 'AppData/api';
 import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
+import LaunchIcon from '@material-ui/icons/Launch';
+// import Box from '@material-ui/core/Box';
+import Link from '@material-ui/core/Link';
+import { Link as RouterLink } from 'react-router-dom';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Configurations from 'Config';
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
@@ -82,7 +93,32 @@ class LifeCycleUpdate extends Component {
             newState: null,
             isUpdating: null,
             pageError: null,
+            isOpen: false,
+            deploymentsAvailable: false,
         };
+        this.setIsOpen = this.setIsOpen.bind(this);
+    }
+
+    /**
+     *
+     * Set Deployment availbility
+     */
+    componentDidMount() {
+        const {
+            api: { id: apiUUID },
+        } = this.props;
+        this.api.getRevisionsWithEnv(apiUUID).then((result) => {
+            this.setState({ deploymentsAvailable: result.body.count > 0 });
+        });
+    }
+
+    /**
+     *
+     * Set isOpen state of the dialog box which shows the caution message when publish without deploying
+     * @param {Boolean} isOpen Should dialog box is open or not
+     */
+    setIsOpen(isOpen) {
+        this.setState({ isOpen });
     }
 
     /**
@@ -102,9 +138,10 @@ class LifeCycleUpdate extends Component {
         promisedUpdate
             .then((response) => {
                 /* TODO: Handle IO erros ~tmkb */
+                // get the latest state of the API
+                this.context.updateAPI();
                 const newState = response.body.lifecycleState.state;
                 const { workflowStatus } = response.body;
-                this.context.updateAPI({ enableStore: true });
                 this.setState({ newState });
                 const { intl } = this.props;
 
@@ -139,11 +176,24 @@ class LifeCycleUpdate extends Component {
 
     /**
      *
+     * Set handle click warning
+     */
+    handleClick() {
+        const {
+            api: { id: apiUUID },
+        } = this.props;
+        this.setIsOpen(false);
+        this.updateLCStateOfAPI(apiUUID, 'Publish');
+    }
+
+    /**
+     *
      *
      * @param {*} event event
      * @memberof LifeCycleUpdate
      */
     updateLifeCycleState(event) {
+        const { deploymentsAvailable } = this.state;
         event.preventDefault();
         let action = event.currentTarget.getAttribute('data-value');
         if (action === 'Deploy To Test') {
@@ -152,7 +202,11 @@ class LifeCycleUpdate extends Component {
         const {
             api: { id: apiUUID },
         } = this.props;
-        this.updateLCStateOfAPI(apiUUID, action);
+        if (action === 'Publish' && !deploymentsAvailable) {
+            this.setIsOpen(true);
+        } else {
+            this.updateLCStateOfAPI(apiUUID, action);
+        }
     }
 
     /**
@@ -164,7 +218,7 @@ class LifeCycleUpdate extends Component {
             api, lcState, classes, theme, handleChangeCheckList, checkList, certList,
         } = this.props;
         const lifecycleStates = [...lcState.availableTransitions];
-        const { newState, pageError } = this.state;
+        const { newState, pageError, isOpen } = this.state;
         const isWorkflowPending = api.workflowStatus && api.workflowStatus === this.WORKFLOW_STATUS.CREATED;
         const lcMap = new Map();
         lcMap.set('Published', 'Publish');
@@ -183,6 +237,9 @@ class LifeCycleUpdate extends Component {
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
+                if (state.displayName === 'Deploy as a Prototype') {
+                    state.displayName = 'Prototype';
+                }
                 return {
                     ...state,
                     disabled: !isPrototype || (api.type !== 'WEBSUB' && api.endpointConfig == null),
@@ -285,6 +342,58 @@ class LifeCycleUpdate extends Component {
                         </div>
                     </ScopeValidation>
                 </Grid>
+                <Dialog
+                    open={isOpen}
+                    onClose={() => this.setIsOpen(false)}
+                    aria-labelledby='alert-dialog-title'
+                    aria-describedby='alert-dialog-description'
+                >
+                    <DialogTitle id='alert-dialog-title'>
+                        <FormattedMessage
+                            id='Apis.Details.LifeCycle.components'
+                            defaultMessage='Publish API without deployments'
+                        />
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id='alert-dialog-description'>
+                            <Typography variant='subtitle1' display='block' gutterBottom>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.publish.content'
+                                    defaultMessage={'The API will not be available for '
+                                        + 'consumption unless it is deployed.'}
+                                />
+                            </Typography>
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            onClick={() => {
+                                this.setIsOpen(false);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            color='primary'
+                            onClick={() => this.handleClick()}
+                        >
+                            Publish
+                        </Button>
+                        <Link
+                            component={RouterLink}
+                            to={'/apis/' + api.id + '/deployments'}
+                        >
+                            <Box fontSize='button.fontSize' display='flex' fontFamily='fontFamily'>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.publish.content.info.deployments'
+                                    defaultMessage='Deployments'
+                                />
+                                <LaunchIcon fontSize='small' />
+                            </Box>
+
+                        </Link>
+                    </DialogActions>
+                </Dialog>
                 {/* Page error banner */}
                 {pageError && (
                     <Grid item xs={11}>

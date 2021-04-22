@@ -615,6 +615,13 @@ public interface APIProvider extends APIManager {
     void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException;
 
     /**
+     * Delete the Tier Permissions
+     * @param tierName  Tier Name
+     * @throws APIManagementException
+     */
+    void deleteTierPermissions(String tierName) throws APIManagementException;
+
+    /**
      * Get the list of Tier Permissions
      *
      * @return Tier Permission Set

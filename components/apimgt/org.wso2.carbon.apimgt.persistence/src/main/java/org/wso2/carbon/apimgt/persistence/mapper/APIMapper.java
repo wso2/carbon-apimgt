@@ -74,6 +74,8 @@ public interface APIMapper {
     @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
+    @Mapping(source = "updatedTime", target = "lastUpdated")
+    @Mapping(source = "additionalProperties", target = "additionalProperties")
     API toApi(PublisherAPIInfo api);
 
     @Mapping(source = "providerName", target = "id.providerName")

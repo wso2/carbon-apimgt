@@ -18,10 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
-import org.apache.axis2.clustering.state.Replicator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.throttle.core.AccessRateController;
-import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
 import org.apache.synapse.commons.throttle.core.ThrottleConfiguration;
 import org.apache.synapse.commons.throttle.core.ThrottleContext;
 import org.apache.synapse.commons.throttle.core.ThrottleDataHolder;
@@ -51,11 +48,6 @@ public class APIThrottleHandlerWrapper extends APIThrottleHandler {
     @Override
     protected int resolveTenantId() {
         return -1234;
-    }
-
-    @Override
-    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String
-            errorDescription) {
     }
 
     @Override

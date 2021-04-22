@@ -148,7 +148,7 @@ function EndpointSecurity(props) {
     ];
     useEffect(() => {
         let tmpSecurity = {};
-        if (securityInfo !== null) {
+        if (securityInfo) {
             tmpSecurity = { ...securityInfo };
             const {
                 type, username, password, grantType, tokenUrl, clientId, clientSecret, customParameters,
@@ -163,7 +163,7 @@ function EndpointSecurity(props) {
             tmpSecurity.customParameters = customParameters;
         }
         setEndpointSecurityInfo(tmpSecurity);
-    }, [props]);
+    }, [securityInfo]);
 
     /**
      * Validating whether token url is in a proper format

@@ -1133,9 +1133,11 @@ public class OASParserUtil {
         if (api.isEndpointSecured()) {
             ObjectNode securityConfigObj = objectMapper.createObjectNode();
             if (api.isEndpointAuthDigest()) {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             } else {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             }
             if (!StringUtils.isEmpty(api.getEndpointUTUsername())) {
                 securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());

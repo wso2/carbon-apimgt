@@ -86,8 +86,13 @@ export default class ScopeValidation extends React.Component {
     static hasScopes(currentResourcePath, currentResourceMethod) {
         const userScopes = AuthManager.getUser().scopes;
         const validScope = APIClient.getScopeForResource(currentResourcePath, currentResourceMethod);
-        return validScope.then((scope) => {
-            return userScopes.includes(scope);
+        return validScope.then((scopes) => {
+            for (const scope of scopes) {
+                if (userScopes.includes(scope)) {
+                    return true;
+                }
+            }
+            return false;
         });
     }
 

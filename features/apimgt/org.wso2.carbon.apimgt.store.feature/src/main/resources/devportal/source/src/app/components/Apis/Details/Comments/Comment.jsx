@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Typography, Tooltip } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -25,10 +26,9 @@ import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
-import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
@@ -111,6 +111,9 @@ class Comment extends React.Component {
         this.handleClose = this.handleClose.bind(this);
         this.filterRemainingComments = this.filterRemainingComments.bind(this);
         this.filterCommentToDelete = this.filterCommentToDelete.bind(this);
+        this.handleLoadMoreReplies = this.handleLoadMoreReplies.bind(this);
+        this.handleAddReply = this.handleAddReply.bind(this);
+        this.handleDeleteReply = this.handleDeleteReply.bind(this);
     }
 
     /**
@@ -214,7 +217,7 @@ class Comment extends React.Component {
 
         const { deleteComment } = this.state;
         const {
-            apiId, allComments, commentsUpdate, intl,
+            apiId, intl, onDeleteComment,
         } = this.props;
         const commentIdOfCommentToDelete = deleteComment.id;
         const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
@@ -224,14 +227,12 @@ class Comment extends React.Component {
             .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
                 if (parentCommentIdOfCommentToDelete === null) {
-                    const remainingComments = allComments.filter(this.filterRemainingComments);
-                    commentsUpdate(remainingComments);
+                    if (onDeleteComment) {
+                        onDeleteComment(commentIdOfCommentToDelete);
+                    }
                     Alert.info('Comment has been successfully deleted');
                 } else {
-                    const index = allComments.findIndex(this.filterCommentToDelete);
-                    const remainingReplies = allComments[index].replies.list.filter(this.filterRemainingComments);
-                    allComments[index].replies.list = remainingReplies;
-                    commentsUpdate(allComments);
+                    this.handleDeleteReply(parentCommentIdOfCommentToDelete, commentIdOfCommentToDelete);
                     Alert.info('Reply comment has been successfully deleted');
                 }
             })
@@ -254,13 +255,148 @@ class Comment extends React.Component {
     }
 
     /**
+     * Handles loading more comment replies
+     * @param {Object} comment comment for which replies should be loaded
+     * @memberof Comments
+     */
+    handleLoadMoreReplies(comment) {
+        const { apiId, comments, updateComment } = this.props;
+        const { id, replies: { count, list } } = comment;
+        const restApi = new API();
+
+        restApi
+            .getAllCommentReplies(apiId, id, 3, count)
+            .then((result) => {
+                if (result.body) {
+                    const { list: replyList, count: replyCount } = result.body;
+                    const existingComment = comments.find((entry) => entry.id === id);
+
+                    const newRepliesList = list.concat(replyList);
+                    const newCount = count + replyCount;
+                    const newLimit = newCount <= 3 ? 3 : newCount;
+
+                    const updatedComment = {
+                        ...existingComment,
+                        replies: {
+                            count: newCount,
+                            list: newRepliesList,
+                            pagination: { ...existingComment.replies.pagination, limit: newLimit },
+                        },
+                    };
+                    if (updateComment) {
+                        updateComment(updatedComment);
+                    }
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+            });
+    }
+
+    /**
+     * Delete reply
+     * @param {string} parentCommentId parent comment of reply
+     * @param {string} replyCommentId deleted reply comment
+     * @memberof Comments
+     */
+    handleDeleteReply(parentCommentId, replyCommentId) {
+        const { comments, updateComment, apiId } = this.props;
+        const existingComment = comments.find((item) => item.id === parentCommentId);
+        const { replies } = existingComment;
+        // updated values
+        const updatedRepliesList = replies.list.filter((reply) => reply.id !== replyCommentId);
+        const newTotal = replies.pagination.total - 1;
+        const newLimit = replies.pagination.limit > newTotal ? newTotal : replies.pagination.limit;
+        const newCount = replies.count - 1;
+
+        if (newTotal > newCount) {
+            const restApi = new API();
+            restApi
+                .getAllCommentReplies(apiId, parentCommentId, 1, newLimit - 1)
+                .then((result) => {
+                    if (result.body) {
+                        const updatedComment = {
+                            ...existingComment,
+                            replies: {
+                                ...replies,
+                                list: [...updatedRepliesList, ...result.body.list],
+                                pagination: {
+                                    ...replies.pagination,
+                                    total: newTotal,
+                                },
+                            },
+                        };
+                        if (updateComment) {
+                            updateComment(updatedComment);
+                        }
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        } else {
+            const updatedComment = {
+                ...existingComment,
+                replies: {
+                    ...replies,
+                    count: newCount,
+                    list: updatedRepliesList,
+                    pagination: {
+                        ...replies.pagination,
+                        limit: newLimit,
+                        total: newTotal,
+                    },
+                },
+            };
+            if (updateComment) {
+                updateComment(updatedComment);
+            }
+        }
+    }
+
+    /**
+     * Add new reply
+     * @param {Object} comment added reply comment
+     * @memberof Comments
+     */
+    handleAddReply(comment) {
+        const { comments, updateComment } = this.props;
+        const { parentCommentId } = comment;
+        const existingComment = comments.find((item) => item.id === parentCommentId);
+        const { replies } = existingComment;
+        const newCount = (replies.count || 0) + 1;
+        const newLimit = newCount <= 3 ? 3 : newCount;
+        const updatedComment = {
+            ...existingComment,
+            replies: {
+                ...replies,
+                count: newCount,
+                list: [...replies.list, comment],
+                pagination: {
+                    ...replies.pagination,
+                    limit: newLimit,
+                    offset: replies.pagination.offset || 0,
+                    total: replies.pagination.total + 1,
+                },
+            },
+        };
+        if (updateComment) {
+            updateComment(updatedComment);
+        }
+    }
+
+    /**
      * Render method of the component
      * @returns {React.Component} Comment html component
      * @memberof Comment
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate, isOverview,
+            classes, comments, apiId, allComments, isOverview, crossTenentUser,
         } = this.props;
 
         const { editIndex, openDialog, replyId } = this.state;
@@ -298,14 +434,16 @@ class Comment extends React.Component {
 
                                             <Typography className={classes.commentText}>{comment.content}</Typography>
 
-                                            <CommentOptions
-                                                comment={comment}
-                                                editIndex={editIndex}
-                                                index={index}
-                                                showAddComment={this.showAddComment}
-                                                handleClickOpen={this.handleClickOpen}
-                                                showEditComment={this.showEditComment}
-                                            />
+                                            {!crossTenentUser && (
+                                                <CommentOptions
+                                                    comment={comment}
+                                                    editIndex={editIndex}
+                                                    index={index}
+                                                    showAddComment={this.showAddComment}
+                                                    handleClickOpen={this.handleClickOpen}
+                                                    showEditComment={this.showEditComment}
+                                                />
+                                            )}
 
                                             {comment.id === replyId && (
                                                 <Box ml={6} mb={2}>
@@ -313,9 +451,9 @@ class Comment extends React.Component {
                                                         apiId={apiId}
                                                         replyTo={comment.id}
                                                         allComments={allComments}
-                                                        commentsUpdate={commentsUpdate}
                                                         handleShowReply={this.handleShowReply}
                                                         cancelButton
+                                                        addReply={this.handleAddReply}
                                                     />
                                                 </Box>
                                             )}
@@ -348,25 +486,53 @@ class Comment extends React.Component {
                                                                     <CommentEdit
                                                                         apiId={apiId}
                                                                         allComments={reply}
-                                                                        commentsUpdate={commentsUpdate}
                                                                         comment={reply}
                                                                         toggleShowEdit={this.handleShowEdit}
                                                                     />
                                                                 )}
 
-                                                                <CommentOptions
-                                                                    comment={reply}
-                                                                    editIndex={editIndex}
-                                                                    index={index}
-                                                                    showAddComment={this.showAddComment}
-                                                                    handleClickOpen={this.handleClickOpen}
-                                                                    showEditComment={this.showEditComment}
-                                                                />
+                                                                {!crossTenentUser && (
+                                                                    <CommentOptions
+                                                                        comment={reply}
+                                                                        editIndex={editIndex}
+                                                                        index={index}
+                                                                        showAddComment={this.showAddComment}
+                                                                        handleClickOpen={this.handleClickOpen}
+                                                                        showEditComment={this.showEditComment}
+                                                                    />
+                                                                )}
                                                             </Grid>
                                                         </Grid>
                                                     </Box>
                                                 </>
                                             ))}
+                                            {comment.replies && comment.replies.count < comment.replies.pagination.total
+                                                && (
+                                                    <div className={classes.contentWrapper}>
+                                                        <Grid container spacing={4} className={classes.root}>
+                                                            <Grid item>
+                                                                <Typography className={classes.verticalSpace} variant='body1'>
+                                                                    <a
+                                                                        className={classes.link + ' ' + classes.loadMoreLink}
+                                                                        onClick={() => this.handleLoadMoreReplies(comment)}
+                                                                        onKeyDown={() => this.handleLoadMoreReplies(comment)}
+                                                                    >
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.Comments.Comment.load.more.replies'
+                                                                            defaultMessage='Show More Replies'
+                                                                        />
+                                                                    </a>
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <Typography className={classes.verticalSpace} zvariant='body1'>
+                                                                    {'(' + (comment.replies.count) + ' of '
+                                                                        + comment.replies.pagination.total + ')'}
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </div>
+                                                )}
                                         </Grid>
                                     </Grid>
                                 </div>
@@ -392,9 +558,10 @@ Comment.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
-    commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
     isOverview: PropTypes.bool,
+    crossTenentUser: PropTypes.bool.isRequired,
+    updateComment: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Comment));

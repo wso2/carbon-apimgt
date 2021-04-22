@@ -3650,9 +3650,16 @@ components:
           example: true
           default: false
         additionalProperties:
-          type: object
-          additionalProperties:
-            type: string
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
           description: |
             Custom(user defined) properties of API
           example: {}
@@ -3665,10 +3672,10 @@ components:
             properties:
               environmentName:
                 type: string
-                example: Production and Sandbox
+                example: Default
               environmentDisplayName:
                 type: string
-                example: Production and Sandbox
+                example: Default
               environmentType:
                 type: string
                 example: hybrid
@@ -5053,6 +5060,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:
@@ -5646,3 +5659,4 @@ components:
             apim:store_settings: Retrieve Developer Portal settings
             apim:sub_alert_manage: Retrieve, subscribe and configure Developer Portal alert types
             apim:app_import_export: Import and export applications related operations
+            apim:admin: Manage all admin operations

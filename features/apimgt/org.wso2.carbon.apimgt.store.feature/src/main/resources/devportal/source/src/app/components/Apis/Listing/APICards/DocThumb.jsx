@@ -40,6 +40,8 @@ const styles = (theme) => ({
     },
     thumbRight: {
         alignSelf: 'flex-end',
+        display: 'flex',
+        flexDirection: 'column',
     },
     thumbInfo: {
         display: 'flex',
@@ -64,8 +66,8 @@ const styles = (theme) => ({
     },
     thumbWrapper: {
         position: 'relative',
-        paddingTop: 20,
-        marginRight: theme.spacing(2),
+        paddingTop: 15,
+        marginLeft: theme.spacing(2),
     },
     deleteIcon: {
         fill: 'red',
@@ -195,7 +197,7 @@ class DocThumb extends React.Component {
                             <Typography variant='subtitle1' align='right' className={classes.contextBox}>
                                 {apiVersion}
                             </Typography>
-                            <Typography variant='caption' gutterBottom align='right'>
+                            <Typography variant='caption' gutterBottom align='right' component='div'>
                                 <FormattedMessage defaultMessage='API Version' id='Apis.Listing.DocThumb.apiVersion' />
                             </Typography>
                         </div>

@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This Class used to handle DAO access for
+ * This Class used to handle DAO access for subscription Validation.
  */
 public class SubscriptionValidationDAO {
 
@@ -141,31 +141,6 @@ public class SubscriptionValidationDAO {
                 list.add(application);
             }
         }
-    }
-
-    /*
-     * This method can be used to retrieve all the ApplicationKeyMappings in the database
-     *
-     * @return {@link List<ApplicationKeyMapping>}
-     * */
-    public List<ApplicationKeyMapping> getAllApplicationKeyMappings() {
-
-        List<ApplicationKeyMapping> keyMappings = new ArrayList<>();
-
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn
-                        .prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
-                ResultSet resultSet = ps.executeQuery();
-        ) {
-
-            populateApplicationKeyMappingsList(keyMappings, resultSet);
-
-        } catch (SQLException e) {
-            log.error("Error in loading Application Key Mappings : ", e);
-        }
-
-        return keyMappings;
     }
 
     /*
@@ -385,12 +360,7 @@ public class SubscriptionValidationDAO {
      * */
     public List<API> getAllApis(String organization) {
 
-        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
-                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
-                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
-                "AM_DEPLOYMENT_REVISION_MAPPING " +
-                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+        String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
@@ -477,10 +447,13 @@ public class SubscriptionValidationDAO {
         if (resultSet != null && subscriptions != null) {
             while (resultSet.next()) {
                 Subscription subscription = new Subscription();
+                subscription.setSubscriptionUUID(resultSet.getString("SUBSCRIPTION_UUID"));
                 subscription.setSubscriptionId(resultSet.getInt("SUB_ID"));
                 subscription.setPolicyId(resultSet.getString("TIER"));
                 subscription.setApiId(resultSet.getInt("API_ID"));
                 subscription.setAppId(resultSet.getInt("APP_ID"));
+                subscription.setApiUUID(resultSet.getString("API_UUID"));
+                subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                 subscription.setSubscriptionState(resultSet.getString("STATUS"));
                 subscriptions.add(subscription);
             }
@@ -558,6 +531,7 @@ public class SubscriptionValidationDAO {
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
                 keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                keyMapping.setApplicationUUID(resultSet.getString("UUID"));
                 keyMappings.add(keyMapping);
             }
 
@@ -732,11 +706,13 @@ public class SubscriptionValidationDAO {
             try (ResultSet resultSet = ps.executeQuery()) {
                 if (resultSet.next()) {
                     Subscription subscription = new Subscription();
-
+                    subscription.setSubscriptionUUID(resultSet.getString("SUBSCRIPTION_UUID"));
                     subscription.setSubscriptionId(resultSet.getInt("SUB_ID"));
                     subscription.setPolicyId(resultSet.getString("TIER"));
                     subscription.setApiId(resultSet.getInt("API_ID"));
                     subscription.setAppId(resultSet.getInt("APP_ID"));
+                    subscription.setApiUUID(resultSet.getString("API_UUID"));
+                    subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
                     return subscription;
                 }
@@ -744,6 +720,40 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading Subscription by apiId : " + apiId + " appId: " + appId, e);
+        }
+        return null;
+    }
+
+    /*
+     * @param subscriptionId : unique identifier of a subscription
+     * @return {@link Subscription}
+     * */
+    public Subscription getSubscription(String apiUUID, String applicationUUID) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_APP_UUID_API_UUID_SQL)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, applicationUUID);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    Subscription subscription = new Subscription();
+                    subscription.setSubscriptionUUID(resultSet.getString("SUBSCRIPTION_UUID"));
+                    subscription.setSubscriptionId(resultSet.getInt("SUB_ID"));
+                    subscription.setPolicyId(resultSet.getString("TIER"));
+                    subscription.setApiId(resultSet.getInt("API_ID"));
+                    subscription.setAppId(resultSet.getInt("APP_ID"));
+                    subscription.setApiUUID(resultSet.getString("API_UUID"));
+                    subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
+                    subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    return subscription;
+                }
+
+            }
+        } catch (SQLException e) {
+            log.error(String.format("Error in loading Subscription by apiUUID : %s applicationUUID: %s", apiUUID,
+                    applicationUUID), e);
         }
         return null;
     }
@@ -980,6 +990,7 @@ public class SubscriptionValidationDAO {
                     keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                     keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
                     keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    keyMapping.setApplicationUUID(resultSet.getString("UUID"));
                     return keyMapping;
                 }
             }
@@ -992,11 +1003,7 @@ public class SubscriptionValidationDAO {
 
     public List<API> getAllApis(String organization, String deployment) {
 
-        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
-                "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME FROM AM_API LEFT JOIN " +
-                "AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING " +
-                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+        String sql = SubscriptionValidationSQLConstants.GET_ALL_APIS_BY_ORGANIZATION_AND_DEPLOYMENT_SQL;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
@@ -1045,13 +1052,7 @@ public class SubscriptionValidationDAO {
 
     private void attachURlMappingDetailsOfApiProduct(Connection connection, API api) throws SQLException {
 
-        String sql = "SELECT AM_API_URL_MAPPING.URL_MAPPING_ID,AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING" +
-                ".AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
-                "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN " +
-                "AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING.URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING" +
-                ".URL_MAPPING_ID " +
-                "WHERE AM_API_URL_MAPPING.URL_MAPPING_ID IN (SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE " +
-                "API_ID= ? )";
+        String sql = SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, api.getApiId());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -1080,13 +1081,7 @@ public class SubscriptionValidationDAO {
 
     public API getAPIByContextAndVersion(String context, String version, String deployment) {
 
-        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
-                "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
-                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
-                "AM_DEPLOYMENT_REVISION_MAPPING " +
-                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.CONTEXT = ? " +
-                "AND AM_API.API_VERSION= ?";
+        String sql = SubscriptionValidationSQLConstants.GET_API_BY_CONTEXT_AND_VERSION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, context);
@@ -1131,14 +1126,8 @@ public class SubscriptionValidationDAO {
 
     private void attachURLMappingDetails(Connection connection, String revisionId, API api) throws SQLException {
 
-        String sql =
-                "SELECT AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING" +
-                        ".AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
-                        "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN " +
-                        "AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING" +
-                        ".URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING.URL_MAPPING_ID WHERE AM_API_URL_MAPPING" +
-                        ".API_ID=? AND AM_API_URL_MAPPING.REVISION_UUID=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SubscriptionValidationSQLConstants.GET_URI_TEMPLATES_BY_API_SQL)) {
             preparedStatement.setInt(1, api.getApiId());
             preparedStatement.setString(2, revisionId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -1168,10 +1157,8 @@ public class SubscriptionValidationDAO {
     private boolean isAPIDefaultVersion(Connection connection, String provider, String name, String version)
             throws SQLException {
 
-        String sql = "SELECT PUBLISHED_DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND " +
-                "API_PROVIDER = ? AND PUBLISHED_DEFAULT_API_VERSION = ?";
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SubscriptionValidationSQLConstants.GET_DEFAULT_VERSION_API_SQL)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, provider);
             preparedStatement.setString(3, version);
@@ -1183,11 +1170,7 @@ public class SubscriptionValidationDAO {
 
     public API getApiByUUID(String apiId, String deployment, String organization) {
 
-        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
-                "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME FROM AM_API LEFT JOIN " +
-                "AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING " +
-                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.API_UUID = ? ";
+        String sql = SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("AND AM_API.CONTEXT NOT LIKE /t/%");
         } else {

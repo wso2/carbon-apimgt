@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -563,6 +564,19 @@ public abstract class AbstractAPIManager implements APIManager {
                 endTenantFlow();
             }
         }
+    }
+
+
+    /**
+     * Returns the minimalistic information about the API given the UUID. This will only query from AM database AM_API
+     * table.
+     *
+     * @param id UUID of the API
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    public APIInfo getAPIInfoByUUID(String id) throws APIManagementException {
+        return apiMgtDAO.getAPIInfoByUUID(id);
     }
 
     /**
@@ -1722,9 +1736,9 @@ public abstract class AbstractAPIManager implements APIManager {
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      * The different versions of the same API will not be take into consideration.
      *
-     * @param apiIdentifier API Identifier
-     * @param scopeKey   candidate scope key
-     * @param organizationId   Identifier of an organization
+     * @param apiIdentifier  API Identifier
+     * @param scopeKey       candidate scope key
+     * @param organizationId Identifier of an organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */

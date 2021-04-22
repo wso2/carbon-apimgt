@@ -89,6 +89,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
     public static final String API_OVERVIEW_ADVERTISE_ONLY = "overview_advertiseOnly";
+    public static final String API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR = "overview_vendor";
     public static final String API_OVERVIEW_ENDPOINT_CONFIG = "overview_endpointConfig";
 
     public static final String API_OVERVIEW_SUBSCRIPTION_AVAILABILITY = "overview_subscriptionAvailability";

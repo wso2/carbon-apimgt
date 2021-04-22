@@ -225,7 +225,7 @@ class Sdk extends React.Component {
         return (
             <>
                 <div className={classes.titleWrappper}>
-                    <Typography variant='h4' className={classes.titleSub}>
+                    <Typography variant='h4' component='h2' className={classes.titleSub}>
                         <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
                     </Typography>
                     {filteredLanguageList && this.state.sdkLanguages.length >= this.filter_threshold && (

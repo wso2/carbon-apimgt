@@ -181,7 +181,7 @@ class ThumbnailView extends Component {
             open: false,
             file: null,
             thumbnail: null,
-            selectedTab: 'design',
+            selectedTab: 'upload',
             category: MaterialIcons.categories[0].name,
             selectedIcon: null,
             selectedIconUpdate: null,
@@ -243,6 +243,8 @@ class ThumbnailView extends Component {
                 }
                 /* eslint prefer-destructuring: ["error", {VariableDeclarator: {object: true}}] */
                 fileObj = file[0];
+            } else if (selectedTab === 'remove') {
+                fileObj = new File([], 'FileName.jpg', { type: 'application/json' });
             } else {
                 if (!selectedIconUpdate && !colorUpdate && !backgroundIndexUpdate) {
                     Alert.error(intl.formatMessage({
@@ -349,6 +351,8 @@ class ThumbnailView extends Component {
         } = this.state;
         if (selectedTab === 'upload') {
             return !(file && file[0]) || uploading; // If no files is uploaded retrun true
+        } else if (selectedTab === 'remove') {
+            return false;
         } else {
             // If one of them is selected we return false
             return !(selectedIconUpdate || backgroundIndexUpdate || colorUpdate) || uploading;
@@ -417,22 +421,22 @@ class ThumbnailView extends Component {
                             onChange={this.handleChange}
                         >
                             <FormControlLabel
-                                value='design'
-                                control={<Radio color='primary' />}
-                                label={(
-                                    <FormattedMessage
-                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.design'
-                                        defaultMessage='Design'
-                                    />
-                                )}
-                            />
-                            <FormControlLabel
                                 value='upload'
                                 control={<Radio color='primary' />}
                                 label={(
                                     <FormattedMessage
                                         id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload'
                                         defaultMessage='Upload'
+                                    />
+                                )}
+                            />
+                            <FormControlLabel
+                                value='remove'
+                                control={<Radio color='primary' />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.ThumbnailView.remove'
+                                        defaultMessage='Remove'
                                     />
                                 )}
                             />
@@ -635,10 +639,16 @@ class ThumbnailView extends Component {
                                     <CircularProgress size={16} />
                                 </>
                             )}
-                            {selectedTab !== 'design' && !uploading && (
+                            {selectedTab === 'upload' && !uploading && (
                                 <FormattedMessage
                                     id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn'
                                     defaultMessage='Upload'
+                                />
+                            )}
+                            {selectedTab === 'remove' && !uploading && (
+                                <FormattedMessage
+                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn'
+                                    defaultMessage='Remove'
                                 />
                             )}
                         </Button>

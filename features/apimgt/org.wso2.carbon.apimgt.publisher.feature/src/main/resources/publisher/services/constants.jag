@@ -19,8 +19,7 @@
 
  // TODO: Wrap these consts with an object and do `require` when needed ~tmkb
 var SETTINGS_REST_API_URL_SUFFIX = "/api/am/publisher/v2/settings";
-// var SERVICE_CATALOG_SETTINGS_REST_API_URL_SUFFIX = "/api/service-catalog/v0.9/settings";
-var SERVICE_CATALOG_SETTINGS_REST_API_URL_SUFFIX = "/api/am/publisher/v2/settings";
+var SERVICE_CATALOG_SETTINGS_REST_API_URL_SUFFIX = "/api/am/service-catalog/v0/settings";
 var DCR_URL_SUFFIX =  "/client-registration/v0.17/register";
 var AUTHORIZE_ENDPOINT_SUFFIX = "/oauth2/authorize";
 var OIDC_LOGOUT_ENDPOINT_SUFFIX = "/oidc/logout";

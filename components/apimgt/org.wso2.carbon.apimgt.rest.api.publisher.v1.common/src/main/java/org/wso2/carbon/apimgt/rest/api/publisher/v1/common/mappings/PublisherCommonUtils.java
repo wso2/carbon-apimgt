@@ -29,6 +29,7 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -68,6 +70,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -78,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -89,6 +93,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.namespace.QName;
 
 /**
  * This is a publisher rest api utility class.
@@ -185,7 +190,7 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
                         LinkedHashMap<String, String> customParametersHashMap =
                                 (LinkedHashMap<String, String>) endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                                        .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
                     }
 
@@ -368,7 +373,7 @@ public class PublisherCommonUtils {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
+            String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -581,12 +586,12 @@ public class PublisherCommonUtils {
      * @param additionalProperties Map<String, String>  properties to validate
      * @return error message if there is an validation error with additional properties.
      */
-    public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
+    public static String validateAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
 
         if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                String propertyKey = entry.getKey().trim();
-                String propertyValue = entry.getValue();
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                String propertyKey = property.getName();
+                String propertyValue = property.getValue();
                 if (propertyKey.contains(" ")) {
                     return "Property names should not contain space character. Property '" + propertyKey + "' "
                             + "contains space in it.";
@@ -796,8 +801,20 @@ public class PublisherCommonUtils {
         return sb.toString();
     }
 
-    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) {
+    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol)
+            throws APIManagementException {
+        if (ServiceEntry.DefinitionType.ASYNC_API.equals(definitionType)) {
+            if (protocol.isEmpty()) {
+                throw new APIManagementException("A protocol should be specified in the Async API definition",
+                        ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION);
+            } else if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase()) &&
+                    !APIConstants.API_TYPE_SSE.equals(protocol.toUpperCase()) &&
+                    !APIConstants.API_TYPE_WS.equals(protocol.toUpperCase())) {
+                throw new APIManagementException("Unsupported protocol specified in Async API Definition",
+                        ExceptionCodes.UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION);
+            }
 
+        }
         switch (definitionType) {
             case WSDL1:
             case WSDL2:
@@ -1035,6 +1052,11 @@ public class PublisherCommonUtils {
         } else {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
+            List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition,
+                    existingAPI.getId());
+            existingAPI.setSoapToRestSequences(sequenceList);
+        }
         Set<URITemplate> uriTemplates = null;
         uriTemplates = oasParser.getURITemplates(apiDefinition);
 
@@ -1204,7 +1226,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the thumbnail
      */
     public static void updateThumbnail(InputStream fileInputStream, String fileContentType, APIProvider apiProvider,
-            String apiId, String tenantDomain) throws APIManagementException {
+                                       String apiId, String tenantDomain) throws APIManagementException {
         ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
         apiProvider.setThumbnailToAPI(apiId, apiImage, tenantDomain);
     }
@@ -1262,7 +1284,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the documentation content
      */
     public static void addDocumentationContent(Documentation documentation, APIProvider apiProvider, String apiId,
-            String documentId, String tenantDomain, String inlineContent) throws APIManagementException {
+                                               String documentId, String tenantDomain, String inlineContent)
+            throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         content.setSourceType(DocumentationContent.ContentSourceType.valueOf(documentation.getSourceType().toString()));
         content.setTextContent(inlineContent);
@@ -1282,7 +1305,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the documentation file
      */
     public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
-            APIProvider apiProvider, String apiId, String documentId, String tenantDomain)
+                                                      APIProvider apiProvider, String apiId,
+                                                      String documentId, String tenantDomain)
             throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
@@ -1488,7 +1512,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the WSDL resource
      */
     public static void addWsdl(String fileContentType, InputStream fileInputStream, API api, APIProvider apiProvider,
-            String tenantDomain) throws APIManagementException {
+                               String tenantDomain) throws APIManagementException {
         ResourceFile wsdlResource;
         if (APIConstants.APPLICATION_ZIP.equals(fileContentType) || APIConstants.APPLICATION_X_ZIP_COMPRESSED
                 .equals(fileContentType)) {
@@ -1512,10 +1536,101 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating the API
      */
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
-            APIProvider apiProvider, String tenantDomain) throws APIManagementException, FaultGatewaysException {
+                                                                     APIProvider apiProvider, String tenantDomain)
+            throws APIManagementException, FaultGatewaysException {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
         updatedAPI.setSoapToRestSequences(list);
         return apiProvider.updateAPI(updatedAPI, api);
+    }
+
+    /**
+     * Add mediation sequences from file content.
+     *
+     * @param content            File content of the mediation policy to be added
+     * @param type               Type (in/out/fault) of the mediation policy to be added
+     * @param apiProvider        API Provider
+     * @param apiId              API ID of the mediation policy
+     * @param tenantDomain       Tenant domain of the API
+     * @param existingMediations Existing mediation sequences
+     *                           (This can be null when adding an API specific sequence)
+     * @return Added mediation
+     * @throws Exception If an error occurs while adding the mediation sequence
+     */
+    public static Mediation addMediationPolicyFromFile(String content, String type, APIProvider apiProvider,
+            String apiId, String tenantDomain, List<Mediation> existingMediations, boolean isAPISpecific)
+            throws Exception {
+        if (StringUtils.isNotEmpty(content)) {
+            OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(content.getBytes()));
+            String localName = seqElement.getLocalName();
+            String fileName = seqElement.getAttributeValue(new QName("name"));
+            Mediation existingMediation = (existingMediations != null) ?
+                    checkInExistingMediations(existingMediations, fileName, type) :
+                    null;
+            // existingGlobalMediations will not be null for only API specific sequences.
+            // Otherwise, the value of this variable will be set before coming into this function
+            if (!isAPISpecific) {
+                if (existingMediation != null) {
+                    log.debug("Sequence" + fileName + " already exists");
+                } else {
+                    return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
+                            tenantDomain);
+                }
+            } else {
+                if (existingMediation != null) {
+                    // This will happen only when updating an API specific sequence using apictl
+                    apiProvider.deleteApiSpecificMediationPolicy(apiId, existingMediation.getUuid(), tenantDomain);
+                }
+                return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
+                        tenantDomain);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add API specific mediation sequences from file content.
+     *
+     * @param localName    Local name of the mediation policy to be added
+     * @param content      File content of the mediation policy to be added
+     * @param fileName     File name of the mediation policy to be added
+     * @param type         Type (in/out/fault) of the mediation policy to be added
+     * @param apiProvider  API Provider
+     * @param apiId        API ID of the mediation policy
+     * @param tenantDomain Tenant domain of the API
+     * @return
+     * @throws APIManagementException If the sequence is malformed.
+     */
+    private static Mediation addApiSpecificMediationPolicyFromFile(String localName, String content, String fileName,
+            String type, APIProvider apiProvider, String apiId, String tenantDomain) throws APIManagementException {
+        if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
+            Mediation mediationPolicy = new Mediation();
+            mediationPolicy.setConfig(content);
+            mediationPolicy.setName(fileName);
+            mediationPolicy.setType(type);
+            // Adding API specific mediation policy
+            return apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, tenantDomain);
+        } else {
+            throw new APIManagementException("Sequence is malformed");
+        }
+    }
+
+    /**
+     * Check whether a mediation policy included in a list.
+     *
+     * @param existingMediations Existing mediations as a list
+     * @param mediationName      Mediation name to be checked
+     * @param type               Type of the mediation to be checked
+     * @return Matched mediation
+     */
+    public static Mediation checkInExistingMediations(List<Mediation> existingMediations, String mediationName,
+            String type) {
+        for (Mediation mediation : existingMediations) {
+            if (StringUtils.equals(mediation.getName(), mediationName) && StringUtils
+                    .equals(type.toLowerCase(), mediation.getType().toLowerCase())) {
+                return mediation;
+            }
+        }
+        return null;
     }
 }

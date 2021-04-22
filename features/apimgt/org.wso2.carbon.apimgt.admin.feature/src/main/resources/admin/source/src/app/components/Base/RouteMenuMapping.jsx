@@ -23,7 +23,6 @@ import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscription/index';
@@ -34,16 +33,11 @@ import GatewayEnvironments from 'AppComponents/GatewayEnvironments/ListGWEnviorn
 import AdvancedThrottlePolicies from 'AppComponents/Throttling/Advanced';
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
-import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
-import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
 import KeyManagers from 'AppComponents/KeyManagers';
-import ManageAlerts from 'AppComponents/ManageAlerts/ManageAlerts.jsx';
 import ListRoles from 'AppComponents//RolePermissions/ListRoles.jsx';
 
 import GamesIcon from '@material-ui/icons/Games';
 import CategoryIcon from '@material-ui/icons/Category';
-import BugReportIcon from '@material-ui/icons/BugReport';
-import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PolicyIcon from '@material-ui/icons/Policy';
 import BlockIcon from '@material-ui/icons/Block';
 import AssignmentIcon from '@material-ui/icons/Assignment';
@@ -165,7 +159,7 @@ const RouteMenuMapping = (intl) => [
                     id: 'Base.RouteMenuMapping.blacklisted.items',
                     defaultMessage: 'Deny Policies',
                 }),
-                path: '/throttling/blacklisted',
+                path: '/throttling/deny-policies',
                 component: BlacklistThrottlingPolicies,
                 icon: <BlockIcon />,
             },
@@ -211,41 +205,6 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Edit Key Manager',
                 }),
                 path: '/settings/key-managers/(.*?)$',
-            },
-        ],
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.manage.alerts',
-            defaultMessage: 'Manage Alerts',
-        }),
-        path: '/analytics/manage-alerts',
-        component: ManageAlerts,
-        icon: <NotificationsIcon />,
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.bot.detection',
-            defaultMessage: 'Bot Detection',
-        }),
-        children: [
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.bot.detection.data',
-                    defaultMessage: 'Bot Detection Data',
-                }),
-                path: '/settings/bot-detection/bot-detected-data-list',
-                component: ListDetectedBotData,
-                icon: <BugReportIcon />,
-            },
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.configure.emails',
-                    defaultMessage: 'Configure Emails',
-                }),
-                path: '/settings/bot-detection/bot-detection-email-configuration',
-                component: ListEmails,
-                icon: <MailOutlineIcon />,
             },
         ],
     },

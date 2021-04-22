@@ -58,7 +58,7 @@ public class EnvironmentDTO   {
   @ApiModelProperty(example = "us-region", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)") @Size(min=1,max=255)  public String getName() {
+ @Pattern(regexp="^[a-zA-Z0-9_-]+$") @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
