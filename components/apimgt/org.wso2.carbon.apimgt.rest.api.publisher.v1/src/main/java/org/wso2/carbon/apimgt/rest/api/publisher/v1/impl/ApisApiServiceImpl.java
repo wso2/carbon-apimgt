@@ -4246,7 +4246,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
             } else {
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+                List<APIRevision> apiNotDeployedRevisions = new ArrayList<>();
+                for (APIRevision apiRevision : apiRevisions) {
+                    if (apiRevision.getApiRevisionDeploymentList().size() == 0) {
+                        apiNotDeployedRevisions.add(apiRevision);
+                    }
+                }
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiNotDeployedRevisions);
             }
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {

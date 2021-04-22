@@ -912,7 +912,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
             } else {
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+                List<APIRevision> apiProductNotDeployedRevisions = new ArrayList<>();
+                for (APIRevision apiRevision : apiRevisions) {
+                    if (apiRevision.getApiRevisionDeploymentList().size() == 0) {
+                        apiProductNotDeployedRevisions.add(apiRevision);
+                    }
+                }
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiProductNotDeployedRevisions);
             }
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
