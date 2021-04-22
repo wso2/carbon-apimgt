@@ -1118,7 +1118,7 @@ public class APIConsumerImplTest {
         subscribedAPINew.setUUID(uuid);
         subscribedAPINew.setApplication(application);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
-        apiConsumer.removeSubscription(subscribedAPINew);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationNameFromId(Mockito.anyInt());
         String workflowExtRef = "test_wf_ref";
         String workflowExtRef1 = "complete_wf_ref";
