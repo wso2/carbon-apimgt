@@ -2272,6 +2272,14 @@ public class ApiMgtDAO {
                 String consumerKey = rs.getString("CONSUMER_KEY");
                 String keyManagerName = rs.getString("KEY_MANAGER");
                 if (consumerKey != null) {
+                    KeyManagerConfigurationDTO keyManagerConfiguration = getKeyManagerConfigurationByName(
+                            tenntDomain, keyManagerName);
+                    if (keyManagerConfiguration == null) {
+                        keyManagerConfiguration = getKeyManagerConfigurationByUUID(keyManagerName);
+                        if (keyManagerConfiguration != null) {
+                            keyManagerName = keyManagerConfiguration.getName();
+                        }
+                    }
                     KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenntDomain,keyManagerName);
                     if (keyManager != null){
                         OAuthApplicationInfo oAuthApplication = keyManager.retrieveApplication(consumerKey);
