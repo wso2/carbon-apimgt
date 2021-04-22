@@ -38,9 +38,7 @@ import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
@@ -54,24 +52,6 @@ import org.wso2.carbon.apimgt.persistence.mongodb.utils.MongoDBUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.APIDocumentation;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.Documentation;
-import org.wso2.carbon.apimgt.persistence.dto.Mediation;
-import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
-import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
@@ -630,6 +610,9 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         ObjectId docId = new ObjectId();
         APIDocumentation apiDocumentation = DocumentationMapper.INSTANCE.toAPIDocumentation(documentation);
         apiDocumentation.setId(docId);
+        if (documentation.getType() == DocumentationType.OTHER) {
+            apiDocumentation.setOtherTypeName(documentation.getOtherTypeName());
+        }
         FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
         options.returnDocument(ReturnDocument.AFTER);
         MongoDBPublisherAPI updatedAPI = collection.findOneAndUpdate(eq("_id", new ObjectId(apiId)),
@@ -708,6 +691,9 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             throws DocumentationPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(org.getName());
         APIDocumentation apiDocumentation = DocumentationMapper.INSTANCE.toAPIDocumentation(documentation);
+        if (documentation.getType() == DocumentationType.OTHER) {
+            apiDocumentation.setOtherTypeName(documentation.getOtherTypeName());
+        }
         ObjectId docId = apiDocumentation.getId();
         APIDocumentation mongodbAPIDocumentation = getMongodbAPIDocumentation(org, apiId, docId.toHexString());
         if (mongodbAPIDocumentation != null) {

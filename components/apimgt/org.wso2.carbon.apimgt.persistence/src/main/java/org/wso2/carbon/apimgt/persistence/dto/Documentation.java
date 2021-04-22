@@ -35,6 +35,7 @@ public class Documentation extends DocumentationInfo {
     private Date lastUpdated;
     private String filePath;
     private Date createdDate;
+    private String otherTypeName;
 
     public String getOtherTypeName() {
         return otherTypeName;
@@ -43,8 +44,6 @@ public class Documentation extends DocumentationInfo {
     public void setOtherTypeName(String otherTypeName) {
         this.otherTypeName = otherTypeName;
     }
-
-    private String otherTypeName;
 
     public String getFilePath() {
         return filePath;
