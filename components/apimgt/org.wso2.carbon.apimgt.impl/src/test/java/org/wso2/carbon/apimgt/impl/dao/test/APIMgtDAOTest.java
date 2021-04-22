@@ -955,7 +955,7 @@ public class APIMgtDAOTest {
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry");
         assertEquals(status, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
-        boolean applicationExist = apiMgtDAO.isApplicationExist(application.getName(), subscriber.getName(), null);
+        boolean applicationExist = apiMgtDAO.isApplicationExist(application.getName(), subscriber.getName(), null, "org1");
         assertTrue(applicationExist);
         assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null));
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);

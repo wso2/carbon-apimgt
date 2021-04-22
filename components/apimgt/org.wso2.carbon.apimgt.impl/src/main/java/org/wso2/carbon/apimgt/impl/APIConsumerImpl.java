@@ -3541,7 +3541,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setApplicationAttributes(null);
         }
         application.setUUID(UUID.randomUUID().toString());
-        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
+        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId(), organizationId)) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
         }

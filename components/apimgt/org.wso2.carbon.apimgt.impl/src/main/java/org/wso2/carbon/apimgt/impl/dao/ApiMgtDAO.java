@@ -3848,7 +3848,8 @@ public class ApiMgtDAO {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public boolean isApplicationExist(String appName, String username, String groupId) throws APIManagementException {
+    public boolean isApplicationExist(String appName, String username, String groupId,
+                                      String organizationId) throws APIManagementException {
 
         if (username == null) {
             return false;
@@ -3894,7 +3895,8 @@ public class ApiMgtDAO {
                     int noOfParams = grpIdArray.length;
                     preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);
                     preparedStatement.setString(1, appName);
-                    int paramIndex = noOfParams + 1;
+                    preparedStatement.setString(2, organizationId);
+                    int paramIndex = noOfParams + 2;
                     preparedStatement.setString(++paramIndex, tenantDomain);
                     preparedStatement.setString(++paramIndex, subscriber.getName());
                     preparedStatement.setString(++paramIndex, tenantDomain + '/' + groupId);
@@ -3906,8 +3908,9 @@ public class ApiMgtDAO {
                     }
                     preparedStatement = connection.prepareStatement(sqlQuery);
                     preparedStatement.setString(1, appName);
-                    preparedStatement.setString(2, groupId);
-                    preparedStatement.setString(3, subscriber.getName());
+                    preparedStatement.setString(2, organizationId);
+                    preparedStatement.setString(3, groupId);
+                    preparedStatement.setString(4, subscriber.getName());
                 }
             } else {
                 if (forceCaseInsensitiveComparisons) {
@@ -3917,7 +3920,8 @@ public class ApiMgtDAO {
                 }
                 preparedStatement = connection.prepareStatement(sqlQuery);
                 preparedStatement.setString(1, appName);
-                preparedStatement.setString(2, subscriber.getName());
+                preparedStatement.setString(2, organizationId);
+                preparedStatement.setString(3, subscriber.getName());
             }
 
             resultSet = preparedStatement.executeQuery();
