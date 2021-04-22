@@ -906,7 +906,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
                 List<APIRevision> apiDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                    if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                         apiDeployedRevisions.add(apiRevision);
                     }
                 }
@@ -914,7 +914,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             } else {
                 List<APIRevision> apiProductNotDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().size() == 0) {
+                    if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                         apiProductNotDeployedRevisions.add(apiRevision);
                     }
                 }
