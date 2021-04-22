@@ -284,6 +284,11 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
 
+            //set boolean for Solace API
+            artifact.setAttribute(APIConstants.API_IS_SOLACE_API, Boolean.toString(api.isSolaceAPI()));
+
+            //set solace transport protocols
+            artifact.setAttribute(APIConstants.SOLACE_API_TRANSPORT_PROTOCOLS, api.getSolaceTransportProtocols());
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -757,6 +762,8 @@ public class RegistryPersistenceUtil {
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
+            api.setSolaceAPI(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_IS_SOLACE_API)));
+            api.setSolaceTransportProtocols(artifact.getAttribute(APIConstants.SOLACE_API_TRANSPORT_PROTOCOLS));
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);

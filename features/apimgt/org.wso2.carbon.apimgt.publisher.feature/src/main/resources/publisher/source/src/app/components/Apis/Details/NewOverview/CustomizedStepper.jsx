@@ -460,45 +460,47 @@ export default function CustomizedStepper() {
                                             </Grid>
                                         </Box>
                                     )}
-                                    <Box ml={6}>
-                                        <Grid
-                                            container
-                                            direction='row'
-                                            justify='center'
-                                            style={{ marginLeft: '2px' }}
-                                        >
-                                            <Grid item>
-                                                {isTierAvailable ? (
-                                                    <CheckIcon className={classes.iconTrue} />
-                                                ) : (
-                                                    <CloseIcon className={classes.iconFalse} />
-                                                )}
-                                            </Grid>
-                                            <Box ml={1}>
+                                    {!api.solaceAPI && (
+                                        <Box ml={6}>
+                                            <Grid
+                                                container
+                                                direction='row'
+                                                justify='center'
+                                                style={{ marginLeft: '2px' }}
+                                            >
                                                 <Grid item>
-                                                    <Link
-                                                        underline='none'
-                                                        component={RouterLink}
-                                                        className={classes.pageLinks}
-                                                        to={'/apis/' + api.id + '/subscriptions'}
-                                                    >
-                                                        <Typography variant='h7'>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.Overview.CustomizedStepper.Tier'
-                                                                defaultMessage=' Business Plan'
-                                                            />
-                                                        </Typography>
-                                                        <Box ml={1}>
-                                                            <LinkIcon
-                                                                color='primary'
-                                                                fontSize='small'
-                                                            />
-                                                        </Box>
-                                                    </Link>
+                                                    {isTierAvailable ? (
+                                                        <CheckIcon className={classes.iconTrue} />
+                                                    ) : (
+                                                        <CloseIcon className={classes.iconFalse} />
+                                                    )}
                                                 </Grid>
-                                            </Box>
-                                        </Grid>
-                                    </Box>
+                                                <Box ml={1}>
+                                                    <Grid item>
+                                                        <Link
+                                                            underline='none'
+                                                            component={RouterLink}
+                                                            className={classes.pageLinks}
+                                                            to={'/apis/' + api.id + '/subscriptions'}
+                                                        >
+                                                            <Typography variant='h7'>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.Overview.CustomizedStepper.Tier'
+                                                                    defaultMessage=' Business Plan'
+                                                                />
+                                                            </Typography>
+                                                            <Box ml={1}>
+                                                                <LinkIcon
+                                                                    color='primary'
+                                                                    fontSize='small'
+                                                                />
+                                                            </Box>
+                                                        </Link>
+                                                    </Grid>
+                                                </Box>
+                                            </Grid>
+                                        </Box>
+                                    )}
                                 </div>
                             )}
                             {label === 'Deploy' && (

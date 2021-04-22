@@ -948,6 +948,10 @@ public class PublisherCommonUtils {
                     ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
 
+        if (body.isSolaceAPI() == null) {
+            body.setSolaceAPI(false);
+        }
+
         API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
         //Overriding some properties:
         //only allow CREATED as the stating state for the new api if not status is PROTOTYPED

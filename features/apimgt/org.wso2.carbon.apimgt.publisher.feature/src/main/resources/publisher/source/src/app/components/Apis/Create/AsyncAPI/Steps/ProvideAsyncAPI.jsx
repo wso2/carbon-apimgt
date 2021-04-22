@@ -45,6 +45,8 @@ import Banner from 'AppComponents/Shared/Banner';
 import APIValidation from 'AppData/APIValidation';
 import API from 'AppData/api';
 import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
+import CheckCircleSharpIcon from '@material-ui/icons/CheckCircleSharp';
+import Chip from '@material-ui/core/Chip';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
@@ -68,6 +70,7 @@ export default function ProvideAsyncAPI(props) {
     const [isValid, setValidity] = useState({});
     const [isValidating, setIsValidating] = useState(false);
     const [validationErrors, setValidationErrors] = useState([]);
+    const [isSolaceAPI, setIsSolaceAPI] = useState(null);
 
     /**
      *
@@ -87,6 +90,7 @@ export default function ProvideAsyncAPI(props) {
                 const {
                     body: { isValid: isValidFile, info, errors },
                 } = response;
+                setIsSolaceAPI(info.isSolaceAPI);
                 if (isValidFile) {
                     validFile = file;
                     inputsDispatcher({ action: 'preSetAPI', value: info });
@@ -315,6 +319,16 @@ export default function ProvideAsyncAPI(props) {
                         />
                     )}
                 </Grid>
+                {isSolaceAPI && isSolaceAPI === true && (
+                    <Grid item xs={10} md={11}>
+                        <Chip
+                            label='Identified as Solace Event Portal API'
+                            icon={<CheckCircleSharpIcon style={{ color: 'green' }} />}
+                            variant='outlined'
+                            style={{ color: 'green' }}
+                        />
+                    </Grid>
+                )}
                 <Grid item xs={2} md={5} />
             </Grid>
         </>

@@ -490,7 +490,7 @@ class Details extends React.Component {
 
                                     </>
                                 )}
-                                {showTryout && (
+                                {showTryout && !api.solaceAPI && (
                                     <LeftMenuItem
                                         text={(
                                             <FormattedMessage

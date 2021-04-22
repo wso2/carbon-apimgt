@@ -37,8 +37,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
 
-import CheckCircleSharpIcon from '@material-ui/icons/CheckCircleSharp';
 import Chip from '@material-ui/core/Chip';
+import { upperCaseString } from 'AppData/stringFormatter';
 import ProvideAsyncAPI from './Steps/ProvideAsyncAPI';
 
 /**
@@ -64,7 +64,6 @@ export default function ApiCreateAsyncAPI(props) {
      */
     function apiInputsReducer(currentState, inputAction) {
         const { action, value } = inputAction;
-        console.log(inputAction);
         switch (action) {
             case 'type':
             case 'inputValue':
@@ -72,6 +71,7 @@ export default function ApiCreateAsyncAPI(props) {
             case 'version':
             case 'endpoint':
             case 'isSolaceAPI':
+            case 'solaceTransportProtocols':
             case 'protocol':
             case 'context':
             case 'policies':
@@ -87,6 +87,7 @@ export default function ApiCreateAsyncAPI(props) {
                     context: value.context,
                     endpoint: value.endpoints && value.endpoints[0],
                     isSolaceAPI: value.isSolaceAPI,
+                    solaceTransportProtocols: value.solaceTransportProtocols,
                 };
             default:
                 return currentState;
@@ -171,7 +172,7 @@ export default function ApiCreateAsyncAPI(props) {
     function createAPI() {
         setCreating(true);
         const {
-            name, version, context, endpoint, policies, inputValue, inputType, protocol,
+            name, version, context, endpoint, policies, inputValue, inputType, protocol, isSolaceAPI,
         } = apiInputs;
         const additionalProperties = {
             name,
@@ -179,7 +180,11 @@ export default function ApiCreateAsyncAPI(props) {
             context,
             policies,
             type: protocolKeys[protocol],
+            solaceAPI: isSolaceAPI,
         };
+        if (isSolaceAPI) {
+            additionalProperties.type = protocolKeys.WebSub;
+        }
         if (endpoint) {
             additionalProperties.endpointConfig = {
                 endpoint_type: 'http',
@@ -272,51 +277,76 @@ export default function ApiCreateAsyncAPI(props) {
                             endpointPlaceholderText='Streaming Provider'
                             appendChildrenBeforeEndpoint
                         >
-                            {apiInputs.isSolaceAPI === true && (
-                                <Chip
-                                    label='Identified as Solace Event Portal API'
-                                    icon={<CheckCircleSharpIcon style={{ color: 'green' }} />}
-                                    variant='outlined'
-                                    style={{ color: 'green' }}
-                                />
-                            )}
-                            <TextField
-                                fullWidth
-                                select
-                                label={(
+                            <Grid container spacing={2}>
+                                {apiInputs.isSolaceAPI === true && apiInputs.solaceTransportProtocols.length !== 0 && (
                                     <>
-                                        <FormattedMessage
-                                            id='Apis.Create.asyncAPI.Components.SelectPolicies.business.plans'
-                                            defaultMessage='Protocol'
-                                        />
-                                        <sup className={classes.mandatoryStar}>*</sup>
+                                        <Grid item xs={12} md={6} lg={3}>
+                                            <Typography component='p' variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.NewOverview.MetaData.solace.transports'
+                                                    defaultMessage='Available Protocols'
+                                                />
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={6} lg={9}>
+                                            {apiInputs.solaceTransportProtocols.map((protocol) => (
+                                                <Chip
+                                                    key={protocol}
+                                                    label={upperCaseString(protocol)}
+                                                    style={{
+                                                        'font-size': 13,
+                                                        height: 20,
+                                                        marginRight: 5,
+                                                    }}
+                                                    color='primary'
+                                                />
+                                            ))}
+                                        </Grid>
                                     </>
                                 )}
-                                value={apiInputs.protocol}
-                                name='protocol'
-                                SelectProps={{
-                                    multiple: false,
-                                    renderValue: (selected) => (selected),
-                                }}
-                                margin='normal'
-                                variant='outlined'
-                                InputProps={{
-                                    id: 'itest-id-apipolicies-input',
-                                }}
-                                onChange={handleOnChangeForProtocol}
-                            >
-                                {protocols.map((protocol) => (
-                                    <MenuItem
-                                        dense
-                                        disableGutters={false}
-                                        id={protocol.name}
-                                        key={protocol.name}
-                                        value={protocol.displayName}
-                                    >
-                                        <ListItemText primary={protocol.displayName} secondary={protocol.description} />
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                            </Grid>
+                            {!apiInputs.isSolaceAPI && (
+                                <TextField
+                                    fullWidth
+                                    select
+                                    label={(
+                                        <>
+                                            <FormattedMessage
+                                                id='Apis.Create.asyncAPI.Components.SelectPolicies.business.plans'
+                                                defaultMessage='Protocol'
+                                            />
+                                            <sup className={classes.mandatoryStar}>*</sup>
+                                        </>
+                                    )}
+                                    value={apiInputs.protocol}
+                                    name='protocol'
+                                    SelectProps={{
+                                        multiple: false,
+                                        renderValue: (selected) => (selected),
+                                    }}
+                                    margin='normal'
+                                    variant='outlined'
+                                    InputProps={{
+                                        id: 'itest-id-apipolicies-input',
+                                    }}
+                                    onChange={handleOnChangeForProtocol}
+                                >
+                                    {protocols.map((protocol) => (
+                                        <MenuItem
+                                            dense
+                                            disableGutters={false}
+                                            id={protocol.name}
+                                            key={protocol.name}
+                                            value={protocol.displayName}
+                                        >
+                                            <ListItemText
+                                                primary={protocol.displayName}
+                                                secondary={protocol.description}
+                                            />
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            )}
                         </DefaultAPIForm>
                     )}
                 </Grid>

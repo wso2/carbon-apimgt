@@ -24,47 +24,25 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
-import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationAttributesDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -265,6 +243,11 @@ public class APIMappingUtil {
         dto.setCategories(categoryNamesList);
         dto.setKeyManagers(model.getKeyManagers());
 
+        dto.setSolaceAPI(model.isSolaceAPI());
+        if (model.getSolaceTransportProtocols() != null) {
+            dto.setSolaceTransportProtocols(Arrays.asList(model.getSolaceTransportProtocols().split(",")));
+        }
+
         return dto;
     }
 
@@ -459,7 +442,64 @@ public class APIMappingUtil {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, tenantDomain));
         }
+
+        if (apidto.isSolaceAPI()) {
+            apidto.setSolaceEndpointURLs(setEndpointURLsForSolaceAPI(model, tenantDomain));
+        }
         return apidto;
+    }
+
+    private static List<APISolaceEndpointURLsDTO> setEndpointURLsForSolaceAPI(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+        APIDTO apidto = fromAPItoDTO(model.getApi(), tenantDomain);
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
+        List<APISolaceEndpointURLsDTO> solaceEndpointURLsList = new ArrayList<>();
+        for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
+            if (revisionDeployment.isDisplayOnDevportal()) {
+                // Deployed environment
+                ThirdPartyEnvironment environment = thirdPartyEnvironments.get(revisionDeployment.getDeployment());
+                if (environment != null) {
+                    if ("solace".equalsIgnoreCase(environment.getProvider())) {
+                        APISolaceEndpointURLsDTO dto = new APISolaceEndpointURLsDTO();
+                        dto.setEnvironmentName(environment.getName());
+                        dto.setEnvironmentDisplayName(environment.getDisplayName());
+                        dto.setEnvironmentOrganization(environment.getOrganization());
+                        dto.setSolaceURLs(getSolaceURLs(environment.getOrganization(), environment.getName(), apidto.getSolaceTransportProtocols()));
+                        solaceEndpointURLsList.add(dto);
+                    }
+                }
+            }
+        }
+        return solaceEndpointURLsList;
+    }
+
+    private static List<APISolaceURLsDTO> getSolaceURLs(String organizationName, String environmentName, List<String> availableProtocols) {
+        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        List<APISolaceURLsDTO> solaceURLsDTOs = new ArrayList<>();
+        HttpResponse response = solaceAdminApis.environmentGET(organizationName, environmentName);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            String responseString = null;
+            try {
+                responseString = EntityUtils.toString(response.getEntity());
+                org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
+                for (int i = 0; i < protocols.length(); i++) {
+                    org.json.JSONObject protocolDetails = protocols.getJSONObject(i);
+                    String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
+                    if (availableProtocols.contains(protocolName)) {
+                        String endpointURI = protocolDetails.getString("uri");
+                        APISolaceURLsDTO apiSolaceURLsDTO = new APISolaceURLsDTO();
+                        apiSolaceURLsDTO.setProtocol(protocolName);
+                        apiSolaceURLsDTO.setEndpointURL(endpointURI);
+                        solaceURLsDTOs.add(apiSolaceURLsDTO);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return solaceURLsDTOs;
     }
 
     private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {

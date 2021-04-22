@@ -343,7 +343,7 @@ public class SolaceAdminApis {
         return requestBody;
     }
 
-    private HashSet<String> getProtocols (AaiChannelItem channel) {
+    public HashSet<String> getProtocols (AaiChannelItem channel) {
 
         HashSet<String> protocols = new HashSet<>();
 

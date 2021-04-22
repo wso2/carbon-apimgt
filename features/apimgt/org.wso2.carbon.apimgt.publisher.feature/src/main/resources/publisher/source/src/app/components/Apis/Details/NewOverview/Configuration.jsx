@@ -55,62 +55,96 @@ function Configuration(props) {
             </div>
             <Box p={1}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} md={6} lg={4}>
-                        {/* Transports */}
-                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                            <FormattedMessage
-                                id='Apis.Details.NewOverview.MetaData.transports'
-                                defaultMessage='Transports'
-                            />
-                            <Tooltip
-                                interactive
-                                placement='top'
-                                tabIndex='-1'
-                                classes={{
-                                    tooltip: parentClasses.htmlTooltip,
-                                }}
-                                title={(
-                                    <>
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.MetaData.transport.tooltip'
-                                            defaultMessage={
-                                                'HTTP is less secure than HTTPS and '
-                                                + 'makes your API vulnerable to security threats.'
-                                            }
+                    {!api.solaceAPI && (
+                        <>
+                            <Grid item xs={12} md={6} lg={4}>
+                                {/* Transports */}
+                                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.MetaData.transports'
+                                        defaultMessage='Transports'
+                                    />
+                                    <Tooltip
+                                        interactive
+                                        placement='top'
+                                        tabIndex='-1'
+                                        classes={{
+                                            tooltip: parentClasses.htmlTooltip,
+                                        }}
+                                        title={(
+                                            <>
+                                                <FormattedMessage
+                                                    id='Apis.Details.NewOverview.MetaData.transport.tooltip'
+                                                    defaultMessage={
+                                                        'HTTP is less secure than HTTPS and '
+                                                        + 'makes your API vulnerable to security threats.'
+                                                    }
+                                                />
+                                            </>
+                                        )}
+                                    >
+                                        <Button className={parentClasses.helpButton}>
+                                            <HelpOutline className={parentClasses.helpIcon} />
+                                        </Button>
+                                    </Tooltip>
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} md={6} lg={8}>
+                                <Typography component='p' variant='body1'>
+                                    {api.transport && api.transport.length !== 0 && (
+                                        <>
+                                            {api.transport.map((item, index) => (
+                                                <span>
+                                                    {upperCaseString(item)}
+                                                    {api.transport.length !== index + 1 && ', '}
+                                                </span>
+                                            ))}
+                                        </>
+                                    )}
+                                    {!api.transport && (
+                                        <>
+                                            <Typography
+                                                component='p'
+                                                variant='body1'
+                                                className={parentClasses.notConfigured}
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Details.NewOverview.MetaData.transports.not.set'
+                                                    defaultMessage='-'
+                                                />
+                                            </Typography>
+                                        </>
+                                    )}
+                                </Typography>
+                            </Grid>
+                        </>
+                    )}
+                    {api.solaceAPI && (
+                        <>
+                            <Grid item xs={12} md={6} lg={4}>
+                                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.MetaData.solace.transports'
+                                        defaultMessage='Available Protocols'
+                                    />
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} md={6} lg={8}>
+                                {api.solaceTransportProtocols
+                                    && api.solaceTransportProtocols.map((protocol) => (
+                                        <Chip
+                                            key={protocol}
+                                            label={upperCaseString(protocol)}
+                                            style={{
+                                                'font-size': 13,
+                                                height: 20,
+                                                marginRight: 5,
+                                            }}
                                         />
-                                    </>
-                                )}
-                            >
-                                <Button className={parentClasses.helpButton}>
-                                    <HelpOutline className={parentClasses.helpIcon} />
-                                </Button>
-                            </Tooltip>
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={8}>
-                        <Typography component='p' variant='body1'>
-                            {api.transport && api.transport.length !== 0 && (
-                                <>
-                                    {api.transport.map((item, index) => (
-                                        <span>
-                                            {upperCaseString(item)}
-                                            {api.transport.length !== index + 1 && ', '}
-                                        </span>
                                     ))}
-                                </>
-                            )}
-                            {!api.transport && (
-                                <>
-                                    <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.MetaData.transports.not.set'
-                                            defaultMessage='-'
-                                        />
-                                    </Typography>
-                                </>
-                            )}
-                        </Typography>
-                    </Grid>
+                            </Grid>
+                        </>
+                    )}
                     <Grid item xs={12} md={6} lg={4}>
                         {/* API Security */}
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
@@ -298,7 +332,7 @@ function Configuration(props) {
                             {api.visibility === 'RESTRICTED' && ' ) '}
                         </Typography>
                     </Grid>
-                    <Policies parentClasses={parentClasses} />
+                    {!api.solaceAPI && (<Policies parentClasses={parentClasses} />)}
                     {api.apiType === API.CONSTS.APIProduct ? null : (
                         <>
                             <Grid item xs={12} md={6} lg={4}>

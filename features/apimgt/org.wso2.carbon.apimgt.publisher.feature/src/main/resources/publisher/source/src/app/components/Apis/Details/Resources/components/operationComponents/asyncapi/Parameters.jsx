@@ -35,7 +35,7 @@ import ListParameters from './ListParameters';
  */
 export default function Parameters(props) {
     const {
-        operation, spec, target, verb, operationsDispatcher,
+        operation, spec, target, verb, operationsDispatcher, disableForSolace,
     } = props;
     let haveParameters = false;
     Object.entries(operation.parameters).forEach(() => {
@@ -58,6 +58,7 @@ export default function Parameters(props) {
                         operationsDispatcher={operationsDispatcher}
                         operation={operation}
                         spec={spec}
+                        disableForSolace={disableForSolace}
                     />
                 )}
             </Grid>
@@ -72,4 +73,9 @@ Parameters.propTypes = {
     operationsDispatcher: PropTypes.func.isRequired,
     operation: PropTypes.shape({}).isRequired,
     resolvedSpec: PropTypes.shape({}).isRequired,
+    disableForSolace: PropTypes.bool,
+};
+
+Parameters.defaultProps = {
+    disableForSolace: false,
 };

@@ -37,7 +37,7 @@ import ListPayloadProperties from './ListPayloadProperties';
  */
 export default function PayloadProperties(props) {
     const {
-        operation, operationsDispatcher, target, verb, disableUpdate,
+        operation, operationsDispatcher, target, verb, disableUpdate, disableForSolace,
     } = props;
     return (
         <>
@@ -50,12 +50,14 @@ export default function PayloadProperties(props) {
             <Grid item xs={1} />
             <Grid item xs={11}>
                 {!disableUpdate && (
-                    <AddPayloadProperty
-                        target={target}
-                        verb={verb}
-                        operationsDispatcher={operationsDispatcher}
-                        operation={operation}
-                    />
+                    (!disableForSolace) && (
+                        <AddPayloadProperty
+                            target={target}
+                            verb={verb}
+                            operationsDispatcher={operationsDispatcher}
+                            operation={operation}
+                        />
+                    )
                 )}
             </Grid>
             <Grid item md={1} />
@@ -66,6 +68,7 @@ export default function PayloadProperties(props) {
                     verb={verb}
                     operationsDispatcher={operationsDispatcher}
                     operation={operation}
+                    disableForSolace={disableForSolace}
                 />
             </Grid>
         </>
@@ -80,8 +83,10 @@ PayloadProperties.propTypes = {
     operation: PropTypes.shape({}).isRequired,
     disableUpdate: PropTypes.bool,
     resolvedSpec: PropTypes.shape({}).isRequired,
+    disableForSolace: PropTypes.bool,
 };
 
 PayloadProperties.defaultProps = {
     disableUpdate: false,
+    disableForSolace: false,
 };

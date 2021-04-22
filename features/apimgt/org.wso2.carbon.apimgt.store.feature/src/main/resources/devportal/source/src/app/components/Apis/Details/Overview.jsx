@@ -48,6 +48,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
 import API from 'AppData/api';
 import View from 'AppComponents/Apis/Details/Documents/View';
+import SolaceEndpoints from 'AppComponents/Apis/Details/SolaceEndpoints';
 import Environments from './Environments';
 import Comments from './Comments/Comments';
 import OverviewDocuments from './OverviewDocuments';
@@ -414,39 +415,57 @@ function Overview() {
                             </Box>
                         </Box>
                         <Box display='flex' flexDirection='row' alignItems='center' mt={2} pr={6}>
-                            <Environments updateSelectedEndpoint={updateSelectedEndpoint} selectedEndpoint={selectedEndpoint} />
+                            {
+                                api.solaceAPI ? (
+                                    <SolaceEndpoints />
+                                ) : (
+                                    <Environments updateSelectedEndpoint={updateSelectedEndpoint} selectedEndpoint={selectedEndpoint} />
+                                )
+                            }
                         </Box>
-                        <Box mt={6}>
-                            <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.business.plans.title'
-                                    defaultMessage='Business Plans'
-                                />
-                            </Typography>
-                        </Box>
-                        <Box flexWrap='wrap' display='flex' flexDirection='row' alignItems='center' mt={2} ml={1} textAlign='center'>
-                            {allPolicies && allPolicies.map((tier) => (
-                                <Card className={classes.cardRoot} key={tier.name}>
-                                    <CardContent>
-                                        <Typography className={classes.cardMainTitle} color='textSecondary' gutterBottom>
-                                            {tier.name}
-                                        </Typography>
-                                        <Box mt={2}>
-                                            <Typography className={classes.requestCount} color='textSecondary'>
-                                                {tier.requestCount === 2147483647 ? 'Unlimited' : tier.requestCount}
-                                            </Typography>
-                                        </Box>
-                                        <Box>
-                                            <Typography className={classes.requestUnit} color='textSecondary'>
-                                                Requests/
-                                                {tier.timeUnit}
-                                            </Typography>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                        {!api.solaceAPI && (
+                            <>
+                                <Box mt={6}>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.business.plans.title'
+                                            defaultMessage='Business Plans'
+                                        />
+                                    </Typography>
+                                </Box>
+                                <Box
+                                    flexWrap='wrap'
+                                    display='flex'
+                                    flexDirection='row'
+                                    alignItems='center'
+                                    mt={2}
+                                    ml={1}
+                                    textAlign='center'
+                                >
+                                    {allPolicies && allPolicies.map((tier) => (
+                                        <Card className={classes.cardRoot} key={tier.name}>
+                                            <CardContent>
+                                                <Typography className={classes.cardMainTitle} color='textSecondary' gutterBottom>
+                                                    {tier.name}
+                                                </Typography>
+                                                <Box mt={2}>
+                                                    <Typography className={classes.requestCount} color='textSecondary'>
+                                                        {tier.requestCount === 2147483647 ? 'Unlimited' : tier.requestCount}
+                                                    </Typography>
+                                                </Box>
+                                                <Box>
+                                                    <Typography className={classes.requestUnit} color='textSecondary'>
+                                                        Requests/
+                                                        {tier.timeUnit}
+                                                    </Typography>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
 
-                        </Box>
+                                </Box>
+                            </>
+                        )}
                         {(showCredentials && subscribedApplications.length > 0) && (
                             <>
                                 <Box mt={6}>

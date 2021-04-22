@@ -482,7 +482,8 @@ export default function Topics(props) {
                     <Banner onClose={() => setPageError(null)} disableActions type='error' message={pageError} />
                 </Grid>
             )}
-            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && api.type === 'WEBSUB' && (
+            {!isRestricted(['apim:api_create'], api) && !disableAddOperation
+            && api.type === 'WEBSUB' && !api.solaceAPI && (
                 <Grid item md={12} xs={12}>
                     <SubscriptionConfig
                         websubSubscriptionConfigDispatcher={websubSubscriptionConfigDispatcher}
@@ -490,7 +491,7 @@ export default function Topics(props) {
                     />
                 </Grid>
             )}
-            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && (
+            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && !api.solaceAPI && (
                 <Grid item md={12} xs={12}>
                     <AddOperation operationsDispatcher={operationsDispatcher} isAsyncAPI={isAsyncAPI} api={api} />
                 </Grid>
@@ -522,6 +523,7 @@ export default function Topics(props) {
                                                     markAsDelete={Boolean(markedOperations[target]
                                                         && markedOperations[target].subscribe)}
                                                     onMarkAsDelete={onMarkAsDelete}
+                                                    disableDelete={api.solaceAPI}
                                                 />
                                             </Grid>
                                         )}
@@ -539,6 +541,7 @@ export default function Topics(props) {
                                                     markAsDelete={Boolean(markedOperations[target]
                                                         && markedOperations[target].publish)}
                                                     onMarkAsDelete={onMarkAsDelete}
+                                                    disableDelete={api.solaceAPI}
                                                 />
                                             </Grid>
                                         )}

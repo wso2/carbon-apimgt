@@ -1907,4 +1907,6 @@ public interface APIProvider extends APIManager {
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
 
     String generateApiKey(String apiId) throws APIManagementException;
+
+    List<String> getTransportProtocolsForSolaceAPI(String definition);
 }

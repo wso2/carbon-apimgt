@@ -403,6 +403,15 @@ public class APIMappingUtil {
             }
         }
 
+        if (dto.isSolaceAPI() != null) {
+            model.setSolaceAPI(dto.isSolaceAPI());
+        }
+
+        if (dto.getSolaceTransportProtocols() != null) {
+            String solaceTransports = StringUtils.join(dto.getSolaceTransportProtocols(), ',');
+            model.setSolaceTransportProtocols(solaceTransports);
+        }
+
         return model;
     }
 
@@ -1233,6 +1242,11 @@ public class APIMappingUtil {
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
 
+        dto.setSolaceAPI(model.isSolaceAPI());
+        if (model.getSolaceTransportProtocols() != null) {
+            dto.setSolaceTransportProtocols(Arrays.asList(model.getSolaceTransportProtocols().split(",")));
+        }
+
         return dto;
     }
 
@@ -1824,7 +1838,9 @@ public class APIMappingUtil {
     }
 
     public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
-            APIDefinitionValidationResponse model, boolean returnContent) {
+            APIDefinitionValidationResponse model, boolean returnContent) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
@@ -1842,6 +1858,9 @@ public class APIMappingUtil {
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
                 infoDTO.isSolaceAPI(AsyncApiParserUtil.isSolaceAPIFromAsyncAPIDefinition(model.getContent()));
+                if (infoDTO.isIsSolaceAPI()) {
+                    infoDTO.solaceTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(model.getContent()));
+                }
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {

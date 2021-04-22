@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -9927,5 +9928,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error("Error occurred while deleting the API Product '" +apiNameWithContext+ "' from Solace Broker");
             throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());
         }
+    }
+
+    @Override
+    public List<String> getTransportProtocolsForSolaceAPI(String definition) {
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
+        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        HashSet<String> solaceTransportProtocols = new HashSet<>();
+        for (AaiChannelItem channel : aai20Document.getChannels()) {
+            solaceTransportProtocols.addAll(solaceAdminApis.getProtocols(channel));
+        }
+        ArrayList<String> solaceTransportProtocolsList = new ArrayList<>(solaceTransportProtocols);
+        return solaceTransportProtocolsList;
     }
 }

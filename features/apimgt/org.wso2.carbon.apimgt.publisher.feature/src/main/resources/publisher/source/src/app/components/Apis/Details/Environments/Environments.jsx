@@ -216,7 +216,7 @@ const useStyles = makeStyles((theme) => ({
     },
     cardHeight: {
         boxShadow: 1,
-        height: '90%',
+        height: '100%',
     },
     cardContentHeight: {
         boxShadow: 1,
@@ -363,7 +363,6 @@ export default function Environments() {
 
     const thirdPartyEnvWithEndpoints = [];
     useEffect(() => {
-        console.log('effect on');
         const promise = restApi.getAsyncAPIDefinition(api.id);
         promise.then(async (response) => {
             const doc = await parse(response.data);
@@ -778,7 +777,7 @@ export default function Environments() {
                     for (let i = 0; i < envList.length; i++) {
                         body1.push({
                             name: envList[i],
-                            vhost: vhostList.find((v) => v.env === envList[i]).vhost,
+                            vhost: !api.solaceAPI ? vhostList.find((v) => v.env === envList[i]).vhost : ' ',
                             displayOnDevportal: true,
                         });
                     }
@@ -1356,6 +1355,7 @@ export default function Environments() {
                     createDeployRevision={createDeployRevision}
                     description
                     setDescription={setDescription}
+                    isSolaceAPI={api.solaceAPI}
                 />
             )}
             {allRevisions && allRevisions.length !== 0 && (
@@ -1501,118 +1501,111 @@ export default function Environments() {
                                 {currentLength + '/' + maxCommentLength}
                             </Typography>
                         </Box>
-                        <Box mt={2}>
-                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.api.gateways.heading'
-                                    defaultMessage='API Gateways'
-                                />
-                            </Typography>
-                            <Grid
-                                container
-                                spacing={3}
-                            >
-                                {settings.environment.map((row) => (
-                                    <Grid item xs={4}>
-                                        <Card
-                                            className={clsx(SelectedEnvironment
-                                                && SelectedEnvironment.includes(row.name)
-                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
-                                            variant='outlined'
-                                        >
-                                            <Box height='100%'>
-                                                <CardHeader
-                                                    action={(
-                                                        <Checkbox
-                                                            id={row.name.split(' ').join('')}
-                                                            value={row.name}
-                                                            checked={SelectedEnvironment.includes(row.name)}
-                                                            onChange={handleChange}
-                                                            color='primary'
-                                                            icon={<RadioButtonUncheckedIcon />}
-                                                            checkedIcon={<CheckCircleIcon color='primary' />}
-                                                            inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                        />
-                                                    )}
-                                                    title={(
-                                                        <Typography variant='subtitle2'>
-                                                            {row.displayName}
-                                                        </Typography>
-                                                    )}
-                                                    subheader={(
-                                                        <Typography
-                                                            variant='body2'
-                                                            color='textSecondary'
-                                                            gutterBottom
-                                                        >
-                                                            {row.type}
-                                                        </Typography>
-                                                    )}
-                                                />
-                                                <CardContent className={classes.cardContentHeight}>
-                                                    <Grid
-                                                        container
-                                                        direction='column'
-                                                        spacing={2}
-                                                    >
-                                                        <Grid item xs={12}>
-                                                            <Tooltip
-                                                                title={getVhostHelperText(row.name,
-                                                                    selectedVhostDeploy)}
-                                                                placement='bottom'
+                        {!api.solaceAPI && (
+                            <Box mt={2}>
+                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.api.gateways.heading'
+                                        defaultMessage='API Gateways'
+                                    />
+                                </Typography>
+                                <Grid
+                                    container
+                                    spacing={3}
+                                >
+                                    {settings.environment.map((row) => (
+                                        <Grid item xs={4}>
+                                            <Card
+                                                className={clsx(SelectedEnvironment
+                                                    && SelectedEnvironment.includes(row.name)
+                                                    ? (classes.changeCard)
+                                                    : (classes.noChangeCard), classes.cardHeight)}
+                                                variant='outlined'
+                                            >
+                                                <Box height='100%'>
+                                                    <CardHeader
+                                                        action={(
+                                                            <Checkbox
+                                                                id={row.name.split(' ').join('')}
+                                                                value={row.name}
+                                                                checked={SelectedEnvironment.includes(row.name)}
+                                                                onChange={handleChange}
+                                                                color='primary'
+                                                                icon={<RadioButtonUncheckedIcon />}
+                                                                checkedIcon={<CheckCircleIcon color='primary' />}
+                                                                inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                                            />
+                                                        )}
+                                                        title={(
+                                                            <Typography variant='subtitle2'>
+                                                                {row.displayName}
+                                                            </Typography>
+                                                        )}
+                                                        subheader={(
+                                                            <Typography
+                                                                variant='body2'
+                                                                color='textSecondary'
+                                                                gutterBottom
                                                             >
-                                                                <TextField
-                                                                    id='vhost-selector'
-                                                                    select
-                                                                    label={(
-                                                                        <FormattedMessage
-                                                                            id='Apis.Details.Environments.deploy.vhost'
-                                                                            defaultMessage='VHost'
-                                                                        />
-                                                                    )}
-                                                                    SelectProps={{
-                                                                        MenuProps: {
-                                                                            anchorOrigin: {
-                                                                                vertical: 'bottom',
-                                                                                horizontal: 'left',
-                                                                            },
-                                                                            getContentAnchorEl: null,
-                                                                        },
-                                                                    }}
-                                                                    name={row.name}
-                                                                    value={selectedVhostDeploy.find(
-                                                                        (v) => v.env === row.name,
-                                                                    ).vhost}
-                                                                    onChange={handleVhostDeploySelect}
-                                                                    margin='dense'
-                                                                    variant='outlined'
-                                                                    fullWidth
-                                                                    helperText={getVhostHelperText(row.name,
-                                                                        selectedVhostDeploy, true)}
+                                                                {row.type}
+                                                            </Typography>
+                                                        )}
+                                                    />
+                                                    <CardContent className={classes.cardContentHeight}>
+                                                        <Grid
+                                                            container
+                                                            direction='column'
+                                                            spacing={2}
+                                                        >
+                                                            <Grid item xs={12}>
+                                                                <Tooltip
+                                                                    title={getVhostHelperText(row.name,
+                                                                        selectedVhostDeploy)}
+                                                                    placement='bottom'
                                                                 >
-                                                                    {row.vhosts.map(
-                                                                        (vhost) => (
-                                                                            <MenuItem value={vhost.host}>
-                                                                                {vhost.host}
-                                                                            </MenuItem>
-                                                                        ),
-                                                                    )}
-                                                                </TextField>
-                                                            </Tooltip>
-                                                        </Grid>
-                                                        <Grid item>
-                                                            {allEnvRevision
-                                                                && allEnvRevision.filter(
-                                                                    (o1) => {
-                                                                        if (o1.deploymentInfo.filter(
-                                                                            (o2) => o2.name === row.name,
-                                                                        ).length > 0) {
-                                                                            return o1;
-                                                                        }
-                                                                        return null;
-                                                                    },
-                                                                ).length !== 0 ? (
-                                                                    allEnvRevision && allEnvRevision.filter(
+                                                                    <TextField
+                                                                        id='vhost-selector'
+                                                                        select
+                                                                        label={(
+                                                                            <FormattedMessage
+                                                                                id='Apis.Details.
+                                                                                Environments.deploy.vhost'
+                                                                                defaultMessage='VHost'
+                                                                            />
+                                                                        )}
+                                                                        SelectProps={{
+                                                                            MenuProps: {
+                                                                                anchorOrigin: {
+                                                                                    vertical: 'bottom',
+                                                                                    horizontal: 'left',
+                                                                                },
+                                                                                getContentAnchorEl: null,
+                                                                            },
+                                                                        }}
+                                                                        name={row.name}
+                                                                        value={selectedVhostDeploy.find(
+                                                                            (v) => v.env === row.name,
+                                                                        ).vhost}
+                                                                        onChange={handleVhostDeploySelect}
+                                                                        margin='dense'
+                                                                        variant='outlined'
+                                                                        fullWidth
+                                                                        helperText={getVhostHelperText(row.name,
+                                                                            selectedVhostDeploy, true)}
+                                                                    >
+                                                                        {row.vhosts.map(
+                                                                            (vhost) => (
+                                                                                <MenuItem value={vhost.host}>
+                                                                                    {vhost.host}
+                                                                                </MenuItem>
+                                                                            ),
+                                                                        )}
+                                                                    </TextField>
+                                                                </Tooltip>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                {allEnvRevision
+                                                                    && allEnvRevision.filter(
                                                                         (o1) => {
                                                                             if (o1.deploymentInfo.filter(
                                                                                 (o2) => o2.name === row.name,
@@ -1621,34 +1614,46 @@ export default function Environments() {
                                                                             }
                                                                             return null;
                                                                         },
-                                                                    ).map((o3) => (
-                                                                        <div>
-                                                                            <Chip
-                                                                                label={o3.displayName}
-                                                                                style={{ backgroundColor: '#15B8CF' }}
-                                                                            />
-                                                                        </div>
-                                                                    ))) : (
-                                                                // eslint-disable-next-line react/jsx-indent
-                                                                    <div />
-                                                                )}
+                                                                    ).length !== 0 ? (
+                                                                        allEnvRevision && allEnvRevision.filter(
+                                                                            (o1) => {
+                                                                                if (o1.deploymentInfo.filter(
+                                                                                    (o2) => o2.name === row.name,
+                                                                                ).length > 0) {
+                                                                                    return o1;
+                                                                                }
+                                                                                return null;
+                                                                            },
+                                                                        ).map((o3) => (
+                                                                            <div>
+                                                                                <Chip
+                                                                                    label={o3.displayName}
+                                                                                    style={{
+                                                                                        backgroundColor: '#15B8CF',
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        ))) : (
+                                                                    // eslint-disable-next-line react/jsx-indent
+                                                                        <div />
+                                                                    )}
+                                                            </Grid>
+                                                            <Grid item />
                                                         </Grid>
-                                                        <Grid item />
-                                                    </Grid>
-                                                </CardContent>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Box>
-                        {(api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE')
-                        && (allThirdPartyEnvironments.length > 0) && (
+                                                    </CardContent>
+                                                </Box>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
+                        )}
+                        {(api.solaceAPI) && (allThirdPartyEnvironments.length > 0) && (
                             <Box mt={2}>
                                 <Typography variant='h6' align='left' className={classes.sectionTitle}>
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.third.party.environments.heading'
-                                        defaultMessage='Third-Party Environments'
+                                        id='Apis.Details.Environments.Environments.solace.platform.environments.heading'
+                                        defaultMessage='Solace Platform Environments'
                                     />
                                 </Typography>
                                 <Grid
@@ -1935,7 +1940,7 @@ export default function Environments() {
                     </DialogActions>
                 </Dialog>
             </Grid>
-            {allRevisions && allRevisions.length !== 0 && (
+            {allRevisions && allRevisions.length !== 0 && !api.solaceAPI && (
                 <Box mx='auto' mt={5}>
                     <Typography variant='h6' className={classes.sectionTitle}>
                         <FormattedMessage
@@ -2178,13 +2183,13 @@ export default function Environments() {
                     </TableContainer>
                 </Box>
             )}
-            {(api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE')
+            {allRevisions && allRevisions.length !== 0 && (api.solaceAPI === true)
             && (allThirdPartyEnvironments.length > 0) && (
                 <Box mx='auto' mt={5}>
                     <Typography variant='h6' className={classes.sectionTitle}>
                         <FormattedMessage
-                            id='Apis.Details.Third.Party.Environments'
-                            defaultMessage='Third-Party Messaging Environments'
+                            id='Apis.Details.Solace.Platform.Environments'
+                            defaultMessage='Solace Platform Environments'
                         />
                     </Typography>
                     <TableContainer component={Paper}>

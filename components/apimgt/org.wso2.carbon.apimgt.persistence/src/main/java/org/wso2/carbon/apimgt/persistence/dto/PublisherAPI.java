@@ -92,6 +92,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
+    private boolean isSolaceAPI = false;
+    private String solaceTransportProtocols;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
         return soapToRestSequences;
@@ -547,6 +549,16 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setWsUriMapping(Map<String, String> wsUriMapping) {
         this.wsUriMapping = wsUriMapping;
+    }
+
+    public boolean isSolaceAPI() { return isSolaceAPI; }
+
+    public void setSolaceAPI(boolean solaceAPI) { isSolaceAPI = solaceAPI; }
+
+    public String getSolaceTransportProtocols() { return solaceTransportProtocols; }
+
+    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
     }
 
     @Override

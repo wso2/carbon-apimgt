@@ -243,7 +243,7 @@ export default function DevelopSectionMenu(props) {
                 <AccordionDetails>
                     <div>
                         {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised
-                            && !api.isWebSocket() && (
+                            && !api.isWebSocket() && !api.solaceAPI && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.runtime.configs',
@@ -291,7 +291,7 @@ export default function DevelopSectionMenu(props) {
                                 Icon={<EndpointIcon />}
                             />
                         )}
-                        {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct && (
+                        {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct && !api.solaceAPI && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.left.menu.scope',
@@ -315,7 +315,7 @@ export default function DevelopSectionMenu(props) {
                         {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                             <>
                                 {!isAPIProduct && api.advertiseInfo
-                                    && !api.advertiseInfo.advertised && (
+                                    && !api.advertiseInfo.advertised && !api.solaceAPI && (
                                     <LeftMenuItem
                                         text={intl.formatMessage({
                                             id: 'Apis.Details.index.monetization',

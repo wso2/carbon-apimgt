@@ -3716,6 +3716,45 @@ components:
         lastUpdatedTime:
           type: string
           example: 2020-10-31T13:57:16.229
+        solaceAPI:
+          title: field to identify API as Solace API
+          type: boolean
+          example:
+            true
+        solaceTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the solace API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
+        solaceEndpointURLs:
+          type: array
+          items:
+            type: object
+            properties:
+              environmentName:
+                type: string
+                example: Default
+              environmentDisplayName:
+                type: string
+                example: Default
+              environmentOrganization:
+                type: string
+                example: Default
+              solaceURLs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    protocol:
+                      type: string
+                      example: Defalt
+                    endpointURL:
+                      type: string
+                      example: Default
     APIMonetizationInfo:
       title: API monetization object
       required:

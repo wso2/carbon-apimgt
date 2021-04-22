@@ -208,6 +208,32 @@ public class API implements Serializable {
      */
     private int revisionId;
 
+    /**
+     * Property to indicate whether this is a solace API.
+     */
+    private boolean isSolaceAPI = false;
+
+    public boolean isSolaceAPI() {
+        return isSolaceAPI;
+    }
+
+    public void setSolaceAPI(boolean solaceAPI) {
+        isSolaceAPI = solaceAPI;
+    }
+
+    /**
+     * Property to hold Solace API transport protocols
+     */
+    private String solaceTransportProtocols;
+
+    public String getSolaceTransportProtocols() {
+        return solaceTransportProtocols;
+    }
+
+    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+    }
+
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }

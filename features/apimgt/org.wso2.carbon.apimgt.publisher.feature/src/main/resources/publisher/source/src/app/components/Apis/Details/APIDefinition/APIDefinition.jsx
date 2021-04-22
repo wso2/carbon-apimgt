@@ -730,18 +730,20 @@ class APIDefinition extends React.Component {
                             )}
                         </Typography>
                         {asyncAPI ? (
-                            <Button
-                                size='small'
-                                className={classes.button}
-                                onClick={this.openEditor}
-                                disabled={isRestricted(['apim:api_create'], api)}
-                            >
-                                <EditRounded className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.edit'
-                                    defaultMessage='Edit'
-                                />
-                            </Button>
+                            (!api.solaceAPI) && (
+                                <Button
+                                    size='small'
+                                    className={classes.button}
+                                    onClick={this.openEditor}
+                                    disabled={isRestricted(['apim:api_create'], api)}
+                                >
+                                    <EditRounded className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.APIDefinition.edit'
+                                        defaultMessage='Edit'
+                                    />
+                                </Button>
+                            )
                         ) : (
                             !(graphQL || api.type === API.CONSTS.APIProduct) && (
                                 <Button

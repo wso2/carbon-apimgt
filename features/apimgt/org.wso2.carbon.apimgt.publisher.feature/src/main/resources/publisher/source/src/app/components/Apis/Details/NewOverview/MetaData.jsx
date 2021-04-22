@@ -135,7 +135,7 @@ function MetaData(props) {
                         </>
                     )}
                     {/* Type */}
-                    {api.apiType === API.CONSTS.APIProduct ? null : (
+                    {api.apiType === API.CONSTS.APIProduct ? null : !api.solaceAPI && (
                         <>
                             <Grid item xs={12} md={6} lg={4}>
                                 <>

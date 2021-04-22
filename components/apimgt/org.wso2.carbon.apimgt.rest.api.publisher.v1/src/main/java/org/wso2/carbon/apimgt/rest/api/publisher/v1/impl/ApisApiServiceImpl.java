@@ -72,35 +72,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -4364,13 +4336,20 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
             String environment = apiRevisionDeploymentDTO.getName();
             if (environments.get(environment) == null) {
-                RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                if (thirdPartyEnvironments != null) {
+                    if (thirdPartyEnvironments.get(environment) == null) {
+                        RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    }
+                } else {
+                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                }
             }
             apiRevisionDeployment.setDeployment(environment);
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
@@ -4439,6 +4418,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -4448,7 +4428,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiRevisionDeployment.setRevisionUUID(revisionId);
                 String environment = apiRevisionDeploymentDTO.getName();
                 if (environments.get(environment) == null) {
-                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    if (thirdPartyEnvironments != null) {
+                        if (thirdPartyEnvironments.get(environment) == null) {
+                            RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                        }
+                    } else {
+                        RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    }
                 }
                 apiRevisionDeployment.setDeployment(environment);
                 apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
@@ -4950,6 +4936,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String protocol = validationResponse.getProtocol();
             if (isServiceAPI) {
                 apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
+            }
+            if (apiDTOFromProperties.isSolaceAPI()) {
+                apiDTOFromProperties.getPolicies().add("AsyncUnlimited");
+                apiDTOFromProperties.getTags().add("SolaceAPI");
+                apiDTOFromProperties.setSolaceTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(definitionToAdd));
             }
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
