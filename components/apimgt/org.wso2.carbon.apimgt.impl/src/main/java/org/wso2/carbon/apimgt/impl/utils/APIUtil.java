@@ -171,6 +171,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -7401,6 +7402,7 @@ public final class APIUtil {
         String proxyPort = configuration.getFirstProperty(APIConstants.PROXY_PORT);
         String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
         String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
+        String nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
 
         PoolingHttpClientConnectionManager pool = null;
         try {
@@ -7417,7 +7419,12 @@ public final class APIUtil {
 
         if (Boolean.parseBoolean(proxyEnabled)) {
             HttpHost host = new HttpHost(proxyHost, Integer.parseInt(proxyPort), protocol);
-            DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(host);
+            DefaultProxyRoutePlanner routePlanner;
+            if (!StringUtils.isBlank(nonProxyHosts)) {
+                routePlanner = new ExtendedProxyRoutePlanner(host, configuration);
+            } else {
+                routePlanner = new DefaultProxyRoutePlanner(host);
+            }
             clientBuilder = clientBuilder.setRoutePlanner(routePlanner);
             if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
                 CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
