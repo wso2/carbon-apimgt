@@ -32,13 +32,17 @@ import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import EditIcon from '@material-ui/icons/Edit';
 
+let limit = Configurations.app.applicationCount;
+
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
 export default function ListApplications() {
+    const itemsPerPage = Configurations.app.applicationCount;
     const intl = useIntl();
     const [applicationList, setApplicationList] = useState([]);
+    const [loadNextActive, setLoadNextActive] = useState(false);
     /**
     * API call to get application list
     * @returns {Promise}.
@@ -46,15 +50,24 @@ export default function ListApplications() {
     function apiCall() {
         const restApi = new API();
         return restApi
-            .getApplicationList()
+            .getApplicationList(limit, 0)
             .then((result) => {
-                setApplicationList(result.body.list);
-                return result.body.list;
+                const { count, list } = result.body;
+                if (count === limit && !loadNextActive) {
+                    setLoadNextActive(true);
+                }
+                if (count < limit && loadNextActive) {
+                    setLoadNextActive(false);
+                }
+                limit += itemsPerPage;
+                setApplicationList(list);
+                return list;
             })
             .catch((error) => {
                 throw error;
             });
     }
+
     const columProps = [
         { name: 'applicationId', options: { display: false } },
         {
@@ -166,6 +179,13 @@ export default function ListApplications() {
                 applicationList,
             }}
             DeleteComponent={() => <span />}
+            muiDataTableOptions={{ pagination: false }}
+            loadNextFeature={
+                {
+                    active: true,
+                    loadNextActive,
+                }
+            }
         />
     );
 }

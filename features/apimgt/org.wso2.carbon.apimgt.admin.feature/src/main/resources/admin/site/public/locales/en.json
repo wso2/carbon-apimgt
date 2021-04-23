@@ -45,6 +45,7 @@
   "AdminPages.Addons.ListBase.noDataError": "Error while retrieving data.",
   "AdminPages.Addons.ListBase.nodata.message": "No items yet",
   "AdminPages.Addons.ListBase.reload": "Reload",
+  "AdminPages.Addons.ListBase.show.more": "Show More",
   "AdminPages.ApiCategories.AddEdit.form.add.successful": "API Category added successfully",
   "AdminPages.ApiCategories.AddEdit.form.edit.successful": "API Category edited successfully",
   "AdminPages.ApiCategories.AddEdit.form.name": "Name",

@@ -24,7 +24,7 @@ const AppConfig = {
             timeout: 2000, // Defines the timeout for the above periodical session status check
         },
         docUrl: 'https://apim.docs.wso2.com/en/3.2.0/',
-        applicationCount: 100
+        applicationCount: 50,
     },
     idp: {
         origin: 'https://localhost:9443',
