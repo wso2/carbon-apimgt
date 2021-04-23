@@ -39,6 +39,9 @@ import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
 import { Link as RouterLink } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
 import Alert from '@material-ui/lab/Alert';
+import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
+
 
 const useStyles = makeStyles((theme) => ({
     searchBar: {
@@ -79,13 +82,17 @@ function ListBase(props) {
         },
         noDataMessage,
         addedActions,
+        muiDataTableOptions,
+        loadNextFeature: { active: loadNextFeatureActive, loadNextActive },
     } = props;
 
     const classes = useStyles();
     const [searchText, setSearchText] = useState('');
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
+    const [nextOneLoading, setNextOneLoading] = useState(false);
     const intl = useIntl();
+
 
     const filterData = (event) => {
         setSearchText(event.target.value);
@@ -116,7 +123,9 @@ function ListBase(props) {
 
     const fetchData = () => {
         // Fetch data from backend when an apiCall is provided
-        setData(null);
+        if (!loadNextFeatureActive) {
+            setData(null);
+        }
         if (apiCall) {
             const promiseAPICall = apiCall();
             promiseAPICall.then((LocalData) => {
@@ -135,6 +144,9 @@ function ListBase(props) {
                         id: 'AdminPages.Addons.ListBase.noDataError',
                         defaultMessage: 'Error while retrieving data.',
                     }));
+                })
+                .finally(() => {
+                    setNextOneLoading(false);
                 });
         }
     };
@@ -142,6 +154,12 @@ function ListBase(props) {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const loadNext = () => {
+        setNextOneLoading(true);
+        fetchData();
+    };
+
     let columns = [];
     if (columProps) {
         columns = [
@@ -226,6 +244,7 @@ function ListBase(props) {
         responsive: 'stacked',
         searchText,
         onColumnSortChange,
+        ...muiDataTableOptions,
     };
 
     // If no apiCall is provided OR,
@@ -252,7 +271,7 @@ function ListBase(props) {
     }
 
     // If apiCall is provided and data is not retrieved yet, display progress component
-    if (!error && apiCall && !data) {
+    if (!error && apiCall && !data && !loadNextFeatureActive) {
         return (
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
@@ -327,6 +346,19 @@ function ListBase(props) {
                             options={options}
                         />
                     )}
+                    {(nextOneLoading && loadNextActive) && (
+                        <InlineProgress />
+                    )}
+                    {(!nextOneLoading && loadNextActive) && (
+                        <Box p={2} textAlign='center'>
+                            <Button onClick={loadNext}>
+                                <FormattedMessage
+                                    id='AdminPages.Addons.ListBase.show.more'
+                                    defaultMessage='Show More'
+                                />
+                            </Button>
+                        </Box>
+                    )}
                 </div>
                 {data && data.length === 0 && (
                     <div className={classes.contentWrapper}>
@@ -365,6 +397,8 @@ ListBase.defaultProps = {
     DeleteComponent: null,
     editComponentProps: {},
     columProps: null,
+    muiDataTableOptions: {},
+    loadNextFeature: { active: false, loadNextActive: false },
 };
 ListBase.propTypes = {
     EditComponent: PropTypes.element,
@@ -391,5 +425,7 @@ ListBase.propTypes = {
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
     addedActions: PropTypes.shape({}),
+    muiDataTableOptions: PropTypes.shape({}),
+    loadNextFeature: PropTypes.shape({}),
 };
 export default ListBase;

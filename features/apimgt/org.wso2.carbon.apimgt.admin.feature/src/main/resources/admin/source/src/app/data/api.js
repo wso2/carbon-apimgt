@@ -396,11 +396,10 @@ class API extends Resource {
     /**
      * Get a list of applications from all users
      */
-    getApplicationList() {
-        const limit = Configurations.app.applicationCount
+    getApplicationList(limit=10, offset=0) {
         return this.client.then((client) => {
             return client.apis['Application (Collection)'].get_applications(
-                {limit},
+                {limit,offset},
                 this._requestMetaData(),
             );
         });
