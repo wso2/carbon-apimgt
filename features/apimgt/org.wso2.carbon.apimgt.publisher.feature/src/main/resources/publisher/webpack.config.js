@@ -188,7 +188,7 @@ module.exports = (env, argv) => {
             }),
         ],
     };
-    const isAnalysis = process.env && process.env.NODE_ENV === 'analysis';
+    const isAnalysis = process.env && process.env.NODE_ENVS === 'analysis';
     if (isAnalysis) {
         config.plugins.push(new BundleAnalyzerPlugin());
     }

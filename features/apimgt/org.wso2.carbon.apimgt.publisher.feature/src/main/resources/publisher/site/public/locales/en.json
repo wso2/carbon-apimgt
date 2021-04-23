@@ -4055,6 +4055,12 @@
       "value": "* You are not authorized to publish the API to external developer portals due to insufficient permissions"
     }
   ],
+  "Apis.Details.GoTo.Components.GoToSuggestions.no.result": [
+    {
+      "type": 0,
+      "value": "There are no results for this query"
+    }
+  ],
   "Apis.Details.GoTo.GoTo.btn": [
     {
       "type": 0,

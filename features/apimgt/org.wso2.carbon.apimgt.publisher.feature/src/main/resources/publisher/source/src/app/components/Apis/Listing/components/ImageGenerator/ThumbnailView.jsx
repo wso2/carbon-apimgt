@@ -30,14 +30,12 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Paper from '@material-ui/core/Paper';
 import Slide from '@material-ui/core/Slide';
-import Select from '@material-ui/core/Select';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
-import { SketchPicker } from 'react-color';
 import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import MaterialIcons from 'MaterialIcons';
@@ -45,8 +43,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Configurations from 'Config';
 
-import ImageGenerator from './ImageGenerator';
-import Background from './Background';
 import BaseThumbnail from './BaseThumbnail';
 
 const windowURL = window.URL || window.webkitURL;
@@ -142,20 +138,6 @@ const styles = (theme) => ({
     },
 });
 
-/**
- * Give the icons array from category name
- *
- * @param {*} category
- * @param {*} allKeys
- * @returns
- */
-function FindCategoryKeys(category) {
-    for (let i = 0; i < MaterialIcons.categories.length; i++) {
-        if (MaterialIcons.categories[i].name === category) {
-            return MaterialIcons.categories[i].icons;
-        }
-    }
-}
 /**
  * Slide up transition for modal
  *
@@ -364,20 +346,16 @@ class ThumbnailView extends Component {
      */
     render() {
         const {
-            api, classes, width, height, isEditable, theme, intl, imageUpdate,
+            api, classes, width, height, isEditable, intl, imageUpdate,
         } = this.props;
-        const colorPairs = theme.custom.thumbnail.backgrounds;
         const maxSize = 1000000;
         const {
             file,
             thumbnail,
             selectedTab,
             selectedIcon,
-            selectedIconUpdate,
             color,
-            colorUpdate,
             backgroundIndex,
-            backgroundIndexUpdate,
             uploading,
         } = this.state;
         let { category } = this.state;
@@ -506,102 +484,6 @@ class ThumbnailView extends Component {
                                             defaultMessage='Maximum file size limit to 1MB'
                                         />
                                     </Typography>
-                                </Grid>
-                            </Grid>
-                        )}
-                        {selectedTab === 'design' && (
-                            <Grid container spacing={4}>
-                                <Grid item xs={3} className={classes.imageGenWrapper}>
-                                    <ImageGenerator
-                                        width={width}
-                                        height={height}
-                                        api={api}
-                                        fixedIcon={{
-                                            key: selectedIconUpdate,
-                                            color: colorUpdate,
-                                            backgroundIndex: backgroundIndexUpdate,
-                                            category,
-                                            api,
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={9}>
-                                    <div className={classes.subtitleWrapper}>
-                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage
-                                                id={
-                                                    'Apis.Listing.components'
-                                                    + '.ImageGenerator.ThumbnailView.select.category'
-                                                }
-                                                defaultMessage='Select Category'
-                                            />
-                                        </Typography>
-                                        <Select
-                                            native
-                                            value={this.state.category}
-                                            onChange={this.handleSelectionChange('category')}
-                                        >
-                                            {MaterialIcons.categories.map((cat) => (
-                                                <option value={cat.name}>{cat.name}</option>
-                                            ))}
-                                        </Select>
-                                    </div>
-                                    <Typography component='p' variant='body1' className={classes.body}>
-                                        <FormattedMessage
-                                            id='Apis.Listing.components.ImageGenerator.ThumbnailView.select.an.icon'
-                                            defaultMessage='Select an icon from the Material Icons for your API.'
-                                        />
-                                    </Typography>
-                                    <div style={{ background: '#efefef', maxHeight: 180, overflow: 'scroll' }}>
-                                        {FindCategoryKeys(category).map((icon) => (
-                                            <Icon className={classes.iconView} onClick={() => this.selectIcon(icon.id)}>
-                                                {icon.id}
-                                            </Icon>
-                                        ))}
-                                    </div>
-                                    <div className={classes.subtitleWrapper}>
-                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage
-                                                id={
-                                                    'Apis.Listing.components.ImageGenerator.ThumbnailView.select.'
-                                                    + 'color.for.the.icon'
-                                                }
-                                                defaultMessage='Select a color for the icon'
-                                            />
-                                        </Typography>
-                                    </div>
-                                    <SketchPicker
-                                        color={this.state.color || '#ffffff'}
-                                        onChangeComplete={this.handleChangeComplete}
-                                    />
-                                    {(!theme.custom.thumbnailTemplates || !theme.custom.thumbnailTemplates.active) && (
-                                        <>
-                                            <div className={classes.subtitleWrapper}>
-                                                <Typography
-                                                    component='p'
-                                                    variant='subtitle2'
-                                                    className={classes.subtitle}
-                                                >
-                                                    <FormattedMessage
-                                                        id={
-                                                            'Apis.Listing.components.ImageGenerator.'
-                                                        + 'ThumbnailView.select.background'
-                                                        }
-                                                        defaultMessage='Select a Background'
-                                                    />
-                                                </Typography>
-                                            </div>
-                                            {colorPairs.map((colorPair, index) => (
-                                                <div
-                                                    className={classes.backgroundSelection}
-                                                    onClick={() => this.selectBackground(index)}
-                                                    onKeyDown={() => { }}
-                                                >
-                                                    <Background width={100} height={100} colorPair={colorPair} />
-                                                </div>
-                                            ))}
-                                        </>
-                                    )}
                                 </Grid>
                             </Grid>
                         )}

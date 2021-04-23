@@ -27,8 +27,12 @@ import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import { isRestricted } from 'AppData/AuthManager';
 import MUIDataTable from 'mui-datatables';
-import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
+
 
 const useStyles = makeStyles((theme) => ({
     contentInside: {
@@ -231,10 +235,10 @@ function ServicesTableView(props) {
                             return (
                                 <Tooltip
                                     placement='top-start'
-                                    title={moment(createdTime).format('lll')}
+                                    title={dayjs(createdTime).format('lll')}
                                     aria-label='add'
                                 >
-                                    <span>{moment(createdTime).fromNow()}</span>
+                                    <span>{dayjs(createdTime).fromNow()}</span>
                                 </Tooltip>
                             );
                         }

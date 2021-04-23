@@ -17,7 +17,7 @@
  */
 
 import React, {
-    useState, useEffect, useCallback, useReducer, useMemo,
+    useState, useEffect, useCallback, useReducer, useMemo, Suspense, lazy,
 } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
@@ -41,7 +41,10 @@ import Alert from 'AppComponents/Shared/MuiAlert';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import CONSTS from 'AppData/Constants';
-import SwaggerUI from './SwaggerUI';
+
+// disabled because webpack magic comment for chunk name require to be in the same line
+// eslint-disable-next-line max-len
+const SwaggerUI = lazy(() => import('AppComponents/Apis/Details/TryOut/SwaggerUI' /* webpackChunkName: "TryoutConsoleSwaggerUI" */));
 
 dayjs.extend(relativeTime);
 
@@ -295,12 +298,18 @@ const TryOutConsole = () => {
                     </Grid>
                 </Box>
                 {updatedOasDefinition ? (
-                    <SwaggerUI
-                        api={api}
-                        accessTokenProvider={() => apiKey}
-                        spec={updatedOasDefinition}
-                        authorizationHeader='Internal-Key'
-                    />
+                    <Suspense
+                        fallback={(
+                            <CircularProgress />
+                        )}
+                    >
+                        <SwaggerUI
+                            api={api}
+                            accessTokenProvider={() => apiKey}
+                            spec={updatedOasDefinition}
+                            authorizationHeader='Internal-Key'
+                        />
+                    </Suspense>
                 ) : <CircularProgress />}
             </Paper>
         </>

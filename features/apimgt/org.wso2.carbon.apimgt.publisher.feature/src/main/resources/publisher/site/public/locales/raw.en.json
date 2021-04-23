@@ -1902,6 +1902,9 @@
   "Apis.Details.ExternalStores.ExternalStores.update.not.allowed": {
     "defaultMessage": "* You are not authorized to publish the API to external developer portals due to insufficient permissions"
   },
+  "Apis.Details.GoTo.Components.GoToSuggestions.no.result": {
+    "defaultMessage": "There are no results for this query"
+  },
   "Apis.Details.GoTo.GoTo.btn": {
     "defaultMessage": "Go To"
   },

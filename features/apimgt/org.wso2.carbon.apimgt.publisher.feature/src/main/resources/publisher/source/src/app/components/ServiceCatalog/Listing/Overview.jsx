@@ -45,7 +45,6 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import SwaggerUI from 'AppComponents/Apis/Details/APIDefinition/swaggerUI/SwaggerUI';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import { isRestricted } from 'AppData/AuthManager';
@@ -54,10 +53,15 @@ import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import { Link } from 'react-router-dom';
 import Paper from '@material-ui/core/Paper';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import LocalOfferOutlinedIcon from '@material-ui/icons/LocalOfferOutlined';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
+dayjs.extend(relativeTime);
+// disabled because webpack magic comment for chunk name require to be in the same line
+// eslint-disable-next-line max-len
+const SwaggerUI = lazy(() => import('AppComponents/Apis/Details/APIDefinition/swaggerUI/SwaggerUI' /* webpackChunkName: "ServiceOverviewSwaggerUI" */));
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 const useStyles = makeStyles((theme) => ({
@@ -642,9 +646,9 @@ function Overview(props) {
                                             <TableCell>
                                                 <Tooltip
                                                     placement='right'
-                                                    title={moment(service.createdTime).format('lll')}
+                                                    title={dayjs(service.createdTime).format('lll')}
                                                 >
-                                                    <span>{moment(service.createdTime).fromNow()}</span>
+                                                    <span>{dayjs(service.createdTime).fromNow()}</span>
                                                 </Tooltip>
                                             </TableCell>
                                         </TableRow>
