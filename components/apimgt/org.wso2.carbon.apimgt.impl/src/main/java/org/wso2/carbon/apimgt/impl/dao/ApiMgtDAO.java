@@ -1818,7 +1818,7 @@ public class ApiMgtDAO {
                             result.getString("API_VERSION"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
-                    initSubscribedAPIDetailed(connection,subscribedAPI, subscriber, result);
+                    initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
                     subscribedAPIs.add(subscribedAPI);
                 }
             }
@@ -4363,7 +4363,7 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
 
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(connection,application);
+                    setGroupIdInApplication(connection, application);
                 }
 
                 //setting subscription count
@@ -5360,45 +5360,45 @@ public class ApiMgtDAO {
         if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             subscriptionIDColumn = "subscription_id";
         }
-            try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
-                    new String[]{subscriptionIDColumn})) {
-                if (!isProduct) {
-                    tier = apiTypeWrapper.getApi().getId().getTier();
-                    preparedStForInsert.setString(1, tier);
-                    preparedStForInsert.setString(10, tier);
-                } else {
-                    tier = apiTypeWrapper.getApiProduct().getId().getTier();
-                    preparedStForInsert.setString(1, tier);
-                    preparedStForInsert.setString(10, tier);
-                }
-                preparedStForInsert.setInt(2, id);
-                preparedStForInsert.setInt(3, application.getId());
-                preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
-                        APIConstants.SubscriptionStatus.UNBLOCKED);
-                preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-                preparedStForInsert.setString(6, subscriber);
+        try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
+                new String[]{subscriptionIDColumn})) {
+            if (!isProduct) {
+                tier = apiTypeWrapper.getApi().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+            } else {
+                tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+            }
+            preparedStForInsert.setInt(2, id);
+            preparedStForInsert.setInt(3, application.getId());
+            preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
+                    APIConstants.SubscriptionStatus.UNBLOCKED);
+            preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            preparedStForInsert.setString(6, subscriber);
 
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                preparedStForInsert.setTimestamp(7, timestamp);
-                preparedStForInsert.setTimestamp(8, timestamp);
-                preparedStForInsert.setString(9, subscriptionUUID);
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            preparedStForInsert.setTimestamp(7, timestamp);
+            preparedStForInsert.setTimestamp(8, timestamp);
+            preparedStForInsert.setString(9, subscriptionUUID);
 
-                preparedStForInsert.executeUpdate();
-                try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
-                    while (rs.next()) {
-                        //subscriptionId = rs.getInt(1);
-                        subscriptionId = Integer.parseInt(rs.getString(1));
-                    }
+            preparedStForInsert.executeUpdate();
+            try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
+                while (rs.next()) {
+                    //subscriptionId = rs.getInt(1);
+                    subscriptionId = Integer.parseInt(rs.getString(1));
                 }
             }
+        }
 
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
-                    application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
-                    APIConstants.SubscriptionStatus.UNBLOCKED));
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
+                application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
+                APIConstants.SubscriptionStatus.UNBLOCKED));
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
 
         return subscriptionId;
@@ -7701,7 +7701,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit,
-     Integer offset) throws APIManagementException {
+                                   Integer offset) throws APIManagementException {
 
         CommentList commentList = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -7733,7 +7733,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private CommentList getComments(Identifier identifier, String parentCommentID, Integer limit, Integer offset,
-     Connection connection) throws
+                                    Connection connection) throws
             APIManagementException {
 
         List<Comment> list = new ArrayList<Comment>();
@@ -14122,7 +14122,7 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 if (multiGroupAppSharingEnabled) {
                     if (StringUtils.isEmpty(application.getGroupId())) {
-                        application.setGroupId(getGroupId(connection,application.getId()));
+                        application.setGroupId(getGroupId(connection, application.getId()));
                     }
                 }
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
