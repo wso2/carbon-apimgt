@@ -258,10 +258,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getSubscriptionByUUID(uuid);
     }
 
-    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
+    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, String organizationId)
             throws APIManagementException, FaultGatewaysException {
         checkAccessControlPermission(apiIdentifier);
-        return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
+        return super.changeLifeCycleStatus(apiIdentifier, targetStatus, organizationId);
     }
 
     @Override

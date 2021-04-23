@@ -303,7 +303,7 @@ public class ImportUtils {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
                             ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 }
-                apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
+                apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction, organizationId);
             }
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -401,8 +401,8 @@ public class ImportUtils {
     /**
      * Process the properties specific to advertise only APIs
      *
-     * @param importedApiDTO               API DTO to import
-     * @param tokenScopes Scopes of the token
+     * @param importedApiDTO API DTO to import
+     * @param tokenScopes    Scopes of the token
      */
     private static void processAdvertiseOnlyPropertiesInDTO(APIDTO importedApiDTO, String[] tokenScopes) {
         // Only the users who has admin privileges (apim:admin scope) are allowed to set the original devportal URL.
@@ -1259,7 +1259,7 @@ public class ImportUtils {
                                     .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
                                             organizationId) :
                             PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid(),
-                            organizationId);
+                                    organizationId);
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
@@ -1427,7 +1427,7 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while adding the mediation policy
      */
     private static void addCustomSequencesToRegistry(String sequencesDirectoryPath, String type, API importedApi,
-            APIProvider apiProvider, String tenantDomain, List<Mediation> existingAPISpecificMediationsList)
+                                                     APIProvider apiProvider, String tenantDomain, List<Mediation> existingAPISpecificMediationsList)
             throws APIManagementException {
         String apiSpecificSequenceFilePath =
                 sequencesDirectoryPath + File.separator + type + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX
@@ -1852,8 +1852,8 @@ public class ImportUtils {
      * @throws APIImportExportException If there is an error in importing an API
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
-                  Boolean rotateRevision, Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
-                  String[] tokenScopes, String organizationId) throws APIManagementException {
+                                              Boolean rotateRevision, Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
+                                              String[] tokenScopes, String organizationId) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -2110,8 +2110,8 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-                 APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
-                 String[] tokenScopes, String organizationId) throws IOException, APIManagementException {
+                                                     APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
+                                                     String[] tokenScopes, String organizationId) throws IOException, APIManagementException {
 
         JsonObject dependentAPIParamsConfigObject = null;
         // Retrieve the dependent APIs param configurations from the params file of the API Product

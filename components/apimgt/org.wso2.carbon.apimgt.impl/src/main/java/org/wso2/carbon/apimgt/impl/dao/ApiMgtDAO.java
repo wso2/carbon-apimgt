@@ -7099,7 +7099,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
 
-            id = getAPIID(apiId, connection);
+            id = getAPIIDFromIdentifierMatchingOrganization(apiId, organizationId);
 
             prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
             prepStmt.setInt(1, id);
@@ -8147,6 +8147,36 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
         }
         return identifier;
+    }
+
+    /**
+     * Get API ID by the API Identifier.
+     *
+     * @param identifier     API Identifier
+     * @param organizationId Identifier of an Organization
+     * @return String ID
+     * @throws APIManagementException if an error occurs
+     */
+    public int getAPIIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
+            throws APIManagementException {
+        int apiId = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_API_ID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(4, organizationId);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    apiId = resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
+                    + identifier.getVersion(), e);
+        }
+        return apiId;
     }
 
     /**
