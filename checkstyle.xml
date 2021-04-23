@@ -40,7 +40,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
     -->
 
     <module name="FileLength">
-        <property name="max" value="3000" />
+        <property name="max" value="3500" />
         <property name="severity" value="warning" />
     </module>
 
@@ -115,7 +115,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
 
         <module name="MethodLength">
             <property name="tokens" value="METHOD_DEF" />
-            <property name="max" value="300" />
+            <property name="max" value="400" />
             <property name="countEmpty" value="false" />
             <property name="severity" value="warning" />
         </module>

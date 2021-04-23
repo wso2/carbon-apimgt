@@ -1427,7 +1427,7 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while adding the mediation policy
      */
     private static void addCustomSequencesToRegistry(String sequencesDirectoryPath, String type, API importedApi,
-                                                     APIProvider apiProvider, String tenantDomain, List<Mediation> existingAPISpecificMediationsList)
+                     APIProvider apiProvider, String tenantDomain, List<Mediation> existingAPISpecificMediationsList)
             throws APIManagementException {
         String apiSpecificSequenceFilePath =
                 sequencesDirectoryPath + File.separator + type + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX
@@ -1445,9 +1445,8 @@ public class ImportUtils {
                                 .addMediationPolicyFromFile(sequenceContent, type, apiProvider, importedApi.getUuid(),
                                         tenantDomain, existingAPISpecificMediationsList, Boolean.TRUE);
                     } catch (IOException e) {
-                        log.error(
-                                "I/O error while writing sequence data to the registry : " + individualSequenceLocation,
-                                e);
+                        log.error("I/O error while writing sequence data to the registry : " +
+                                individualSequenceLocation, e);
                     } catch (Exception e) {
                         throw new APIManagementException(
                                 "An Error has occurred while adding mediation policy" + StringUtils.SPACE + e
@@ -1727,8 +1726,8 @@ public class ImportUtils {
                     String method = "";
                     String resource = "";
                     if (fileName.split(".xml").length != 0) {
-                        method =
-                                fileName.split(".xml")[0].substring(file.getFileName().toString().lastIndexOf("_") + 1);
+                        method = fileName.split(".xml")[0].substring(file.getFileName().toString()
+                                .lastIndexOf("_") + 1);
                         resource = fileName.substring(0, fileName.indexOf("_"));
                     }
                     try (InputStream inputFlowStream = new FileInputStream(file.toFile())) {
@@ -1852,8 +1851,8 @@ public class ImportUtils {
      * @throws APIImportExportException If there is an error in importing an API
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
-                                              Boolean rotateRevision, Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
-                                              String[] tokenScopes, String organizationId) throws APIManagementException {
+                  Boolean rotateRevision, Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
+                      String[] tokenScopes, String organizationId) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -1980,8 +1979,8 @@ public class ImportUtils {
                 //environments
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {
-                log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +
-                        " in any of the gateway environments.");
+                log.info("Valid deployment environments were not found for the imported artifact.Hence not deployed"
+                        + " in any of the gateway environments.");
             }
 
             return importedApiProduct;
@@ -2110,8 +2109,8 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-                                                     APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
-                                                     String[] tokenScopes, String organizationId) throws IOException, APIManagementException {
+                    APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
+                    String[] tokenScopes, String organizationId) throws IOException, APIManagementException {
 
         JsonObject dependentAPIParamsConfigObject = null;
         // Retrieve the dependent APIs param configurations from the params file of the API Product
