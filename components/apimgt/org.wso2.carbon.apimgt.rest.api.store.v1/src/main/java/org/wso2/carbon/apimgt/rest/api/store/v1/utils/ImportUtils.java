@@ -139,7 +139,7 @@ public class ImportUtils {
      *
      * @param subscribedAPIs Subscribed APIs
      * @param userId         Username of the subscriber
-     * @param appId          Application Id
+     * @param application    Application
      * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
      * @return a list of APIIdentifiers of the skipped subscriptions
@@ -177,14 +177,16 @@ public class ImportUtils {
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
                     ApiTypeWrapper apiTypeWrapper = null;
+                    String apiOrApiProductUuid;
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                        apiOrApiProductUuid = apiConsumer.getAPIProduct(apiProduct.getId()).getUuid();
                     } else {
                         API api = (API) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(api);
+                        apiOrApiProductUuid = apiConsumer.getAPI(api.getId()).getUuid();
                     }
+                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, tenantDomain);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
