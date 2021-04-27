@@ -463,7 +463,7 @@ public enum ExceptionCodes implements ErrorHandler {
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
 
     //Service Catalog related error codes
-    SERVICE_VERSION_IS_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version");
+    SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version");
 
     private final long errorCode;
     private final String errorMessage;
