@@ -4244,13 +4244,19 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
                 List<APIRevision> apiDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                    if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                         apiDeployedRevisions.add(apiRevision);
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
             } else {
-                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+                List<APIRevision> apiNotDeployedRevisions = new ArrayList<>();
+                for (APIRevision apiRevision : apiRevisions) {
+                    if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                        apiNotDeployedRevisions.add(apiRevision);
+                    }
+                }
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiNotDeployedRevisions);
             }
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
