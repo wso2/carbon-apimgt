@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +25,10 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIRealmUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommenterInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommenterInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.PaginationDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

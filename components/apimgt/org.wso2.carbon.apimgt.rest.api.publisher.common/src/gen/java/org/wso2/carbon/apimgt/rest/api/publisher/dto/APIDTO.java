@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,19 +6,19 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIThreatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 

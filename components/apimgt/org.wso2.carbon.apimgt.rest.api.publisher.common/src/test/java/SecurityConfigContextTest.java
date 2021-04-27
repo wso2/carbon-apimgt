@@ -30,11 +30,11 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.EndpointSecurityModel;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.SecurityConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.EndpointSecurityModel;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.SecurityConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

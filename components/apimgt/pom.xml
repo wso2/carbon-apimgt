@@ -57,7 +57,7 @@
         <module>org.wso2.carbon.apimgt.throttle.policy.deployer</module>
         <module>org.wso2.carbon.apimgt.rest.api.service.catalog</module>
         <module>org.wso2.carbon.apimgt.rest.api.common</module>
-        <module>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</module>
+        <module>org.wso2.carbon.apimgt.rest.api.publisher.common</module>
         <module>org.wso2.carbon.apimgt.common.gateway</module>
         <module>org.wso2.carbon.apimgt.common.jms</module>
         <module>org.wso2.carbon.apimgt.common.analytics</module>

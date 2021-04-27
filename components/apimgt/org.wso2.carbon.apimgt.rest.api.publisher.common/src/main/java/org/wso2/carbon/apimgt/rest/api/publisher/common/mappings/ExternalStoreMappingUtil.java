@@ -16,13 +16,13 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIExternalStoreDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIExternalStoreListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExternalStoreDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExternalStoreListDTO;
 
 import java.sql.Timestamp;
 import java.util.Collection;

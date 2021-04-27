@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,10 +27,10 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SecurityAuditAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SettingsDTO;
 
 import java.util.ArrayList;
 import java.util.Iterator;

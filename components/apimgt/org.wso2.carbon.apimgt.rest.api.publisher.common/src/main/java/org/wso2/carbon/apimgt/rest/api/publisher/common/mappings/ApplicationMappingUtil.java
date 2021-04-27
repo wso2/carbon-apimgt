@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationInfoDTO;
 
 /**
  * This class is responsible for mapping APIM core application related objects into REST API application related DTOs.

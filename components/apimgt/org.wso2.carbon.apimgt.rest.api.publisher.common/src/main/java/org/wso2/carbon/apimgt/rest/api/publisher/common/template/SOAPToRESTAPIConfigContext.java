@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.template;
 
 import org.apache.velocity.VelocityContext;
 import org.json.simple.JSONObject;

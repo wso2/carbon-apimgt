@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

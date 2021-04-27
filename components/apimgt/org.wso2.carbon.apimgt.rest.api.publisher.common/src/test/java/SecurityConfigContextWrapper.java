@@ -17,9 +17,9 @@
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.SecurityConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.SecurityConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 
 import java.util.Map;
 

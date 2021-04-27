@@ -16,11 +16,11 @@
  *  under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificateValidityDTO;
 
 /**
  * This class is responsible for comverting between certificate objects.

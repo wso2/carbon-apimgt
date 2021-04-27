@@ -15,11 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.KeyManagerInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.KeyManagerInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.KeyManagerListDTO;
 
 import java.util.ArrayList;
 import java.util.List;

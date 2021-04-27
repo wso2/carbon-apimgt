@@ -15,15 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
+package org.wso2.carbon.apimgt.rest.api.publisher.common;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.SOAPToRESTAPIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.SOAPToRESTAPIConfigContext;
 
 import java.util.List;
 

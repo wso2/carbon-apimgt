@@ -52,12 +52,12 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -163,7 +163,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
@@ -242,7 +242,7 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.publisher.v1.common:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.publisher.common:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>

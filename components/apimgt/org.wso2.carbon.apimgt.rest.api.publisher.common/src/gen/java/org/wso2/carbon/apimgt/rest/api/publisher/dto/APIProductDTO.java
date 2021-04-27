@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,12 +6,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ProductAPIDTO;
 import javax.validation.constraints.*;
 
 

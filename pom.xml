@@ -609,7 +609,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.common</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
@@ -703,7 +703,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>

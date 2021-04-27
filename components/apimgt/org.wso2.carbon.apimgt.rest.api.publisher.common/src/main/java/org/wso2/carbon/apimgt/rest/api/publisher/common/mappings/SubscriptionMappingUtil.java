@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -24,12 +24,12 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClaimDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ClaimDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriberInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;

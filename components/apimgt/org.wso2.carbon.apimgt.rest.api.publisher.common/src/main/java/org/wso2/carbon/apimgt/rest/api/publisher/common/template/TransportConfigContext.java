@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.template;
 
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;

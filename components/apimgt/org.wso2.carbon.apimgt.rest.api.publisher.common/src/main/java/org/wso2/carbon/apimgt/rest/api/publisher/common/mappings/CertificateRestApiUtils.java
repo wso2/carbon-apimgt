@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import com.nimbusds.jose.util.StandardCharset;
 import org.apache.commons.codec.binary.Base64;
@@ -33,11 +33,11 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ClientCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.PaginationDTO;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

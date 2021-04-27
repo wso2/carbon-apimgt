@@ -28,9 +28,9 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ResourceConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.ResourceConfigContext;
 
 import java.util.LinkedHashSet;
 import java.util.List;

@@ -16,7 +16,7 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -25,12 +25,12 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EventCountLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EventCountLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlingPolicyListDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

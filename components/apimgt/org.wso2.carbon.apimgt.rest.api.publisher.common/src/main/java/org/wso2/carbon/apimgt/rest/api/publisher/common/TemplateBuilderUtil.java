@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
+package org.wso2.carbon.apimgt.rest.api.publisher.common;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -56,12 +56,12 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.ImportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.template.APITemplateBuilderImpl;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationPolicyDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 

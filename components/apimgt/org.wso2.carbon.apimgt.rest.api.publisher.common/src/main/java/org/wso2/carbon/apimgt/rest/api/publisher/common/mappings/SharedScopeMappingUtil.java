@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
+package org.wso2.carbon.apimgt.rest.api.publisher.common.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -8,12 +8,12 @@ import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIResourceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SharedScopeUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SharedScopeUsedAPIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SharedScopeUsedAPIResourceInfoDTO;
 
 import java.util.ArrayList;
 import java.util.Arrays;

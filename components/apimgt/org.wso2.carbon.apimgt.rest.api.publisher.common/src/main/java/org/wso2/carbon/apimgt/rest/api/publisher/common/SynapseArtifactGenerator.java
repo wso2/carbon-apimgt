@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
+package org.wso2.carbon.apimgt.rest.api.publisher.common;
 
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
@@ -39,10 +39,10 @@ import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.ImportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDTO;
 
 import java.io.File;
 import java.io.InputStream;

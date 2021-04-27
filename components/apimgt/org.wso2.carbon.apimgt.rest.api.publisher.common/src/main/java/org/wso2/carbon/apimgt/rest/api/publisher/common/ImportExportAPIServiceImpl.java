@@ -17,7 +17,7 @@
  */
 
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
+package org.wso2.carbon.apimgt.rest.api.publisher.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
@@ -32,11 +32,11 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.ExportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.common.mappings.ImportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;

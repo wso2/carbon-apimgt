@@ -191,7 +191,7 @@
                             <resources>
                                 <resource>
                                     <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources
                                     </directory>
                                     <includes>
                                         <include>publisher-api.yaml</include>

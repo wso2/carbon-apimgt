@@ -1,11 +1,11 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestCountLimitAllOfDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottleLimitBaseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.RequestCountLimitAllOfDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitBaseDTO;
 import javax.validation.constraints.*;
 
 
