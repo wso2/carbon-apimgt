@@ -208,7 +208,7 @@ public class JWTValidator {
                 endUserToken = (String) token;
                 String[] splitToken = ((String) token).split("\\.");
                 JSONObject payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                long exp = payload.getLong("exp");
+                long exp = payload.getLong("exp") * 1000L;
                 long timestampSkew = getTimeStampSkewInSeconds() * 1000;
                 valid = (exp - System.currentTimeMillis() > timestampSkew);
             }
