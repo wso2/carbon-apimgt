@@ -170,8 +170,8 @@ public class APIMappingUtil {
 
         context = context.startsWith("/") ? context : ("/" + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
-                dto.getId() == null) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && dto.getId() == null
+                && !context.contains("/t/" + providerDomain)) {
             //Create tenant aware context for API
             context = "/t/" + providerDomain + context;
         }
