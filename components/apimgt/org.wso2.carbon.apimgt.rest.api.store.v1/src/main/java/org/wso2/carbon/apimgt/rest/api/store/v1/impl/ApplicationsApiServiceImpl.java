@@ -220,7 +220,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
             }
 
-            if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId) && update != null
+            if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organizationId) && update != null
                     && update) {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);

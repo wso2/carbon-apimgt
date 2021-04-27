@@ -5415,7 +5415,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProduct.setDefinition(updatedProductSwagger);
     }
 
-    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action, String organizationId)
             throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
@@ -5434,7 +5434,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
 
-                int apiId = apiMgtDAO.getAPIID(apiIdentifier);
+                int apiId = apiMgtDAO.getAPIIDFromIdentifierMatchingOrganization(apiIdentifier, organizationId);
                 String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -5567,7 +5567,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = api.getId().getVersion();
                 String currentStatus = api.getStatus();
 
-                int apiId = apiMgtDAO.getAPIID(api.getId());
+                int apiId = apiMgtDAO.getAPIIDFromIdentifierMatchingOrganization(api.getId(), organizationId);
 
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),

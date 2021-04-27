@@ -42,6 +42,15 @@ public class APIDocumentation {
     private DocumentationType type;
     private DocumentationInfo.DocumentSourceType sourceType;
     private String contentType;
+    private String otherTypeName;
+
+    public String getOtherTypeName() {
+        return otherTypeName;
+    }
+
+    public void setOtherTypeName(String otherTypeName) {
+        this.otherTypeName = otherTypeName;
+    }
 
     public String getContentType() {
         return contentType;

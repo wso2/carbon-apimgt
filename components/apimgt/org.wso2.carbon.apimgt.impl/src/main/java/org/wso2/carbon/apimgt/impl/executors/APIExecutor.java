@@ -257,7 +257,8 @@ public class APIExecutor implements Execution {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
                             versionComparator.compare(oldAPI, api) < 0 &&
                             (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                        apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
+                        //As this class is not used anywhere, we don't need to populate orgID here.
+                        apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE, null);
 
                     }
                 }

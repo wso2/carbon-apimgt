@@ -1818,7 +1818,7 @@ public class ApiMgtDAO {
                             result.getString("API_VERSION"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
-                    initSubscribedAPIDetailed(connection,subscribedAPI, subscriber, result);
+                    initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
                     subscribedAPIs.add(subscribedAPI);
                 }
             }
@@ -3848,7 +3848,8 @@ public class ApiMgtDAO {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public boolean isApplicationExist(String appName, String username, String groupId) throws APIManagementException {
+    public boolean isApplicationExist(String appName, String username, String groupId,
+                                      String organizationId) throws APIManagementException {
 
         if (username == null) {
             return false;
@@ -3894,7 +3895,8 @@ public class ApiMgtDAO {
                     int noOfParams = grpIdArray.length;
                     preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);
                     preparedStatement.setString(1, appName);
-                    int paramIndex = noOfParams + 1;
+                    preparedStatement.setString(2, organizationId);
+                    int paramIndex = noOfParams + 2;
                     preparedStatement.setString(++paramIndex, tenantDomain);
                     preparedStatement.setString(++paramIndex, subscriber.getName());
                     preparedStatement.setString(++paramIndex, tenantDomain + '/' + groupId);
@@ -3906,8 +3908,9 @@ public class ApiMgtDAO {
                     }
                     preparedStatement = connection.prepareStatement(sqlQuery);
                     preparedStatement.setString(1, appName);
-                    preparedStatement.setString(2, groupId);
-                    preparedStatement.setString(3, subscriber.getName());
+                    preparedStatement.setString(2, organizationId);
+                    preparedStatement.setString(3, groupId);
+                    preparedStatement.setString(4, subscriber.getName());
                 }
             } else {
                 if (forceCaseInsensitiveComparisons) {
@@ -3917,7 +3920,8 @@ public class ApiMgtDAO {
                 }
                 preparedStatement = connection.prepareStatement(sqlQuery);
                 preparedStatement.setString(1, appName);
-                preparedStatement.setString(2, subscriber.getName());
+                preparedStatement.setString(2, organizationId);
+                preparedStatement.setString(3, subscriber.getName());
             }
 
             resultSet = preparedStatement.executeQuery();
@@ -4359,7 +4363,7 @@ public class ApiMgtDAO {
                 application.setOwner(rs.getString("CREATED_BY"));
 
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(connection,application);
+                    setGroupIdInApplication(connection, application);
                 }
 
                 //setting subscription count
@@ -5356,45 +5360,45 @@ public class ApiMgtDAO {
         if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             subscriptionIDColumn = "subscription_id";
         }
-            try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
-                    new String[]{subscriptionIDColumn})) {
-                if (!isProduct) {
-                    tier = apiTypeWrapper.getApi().getId().getTier();
-                    preparedStForInsert.setString(1, tier);
-                    preparedStForInsert.setString(10, tier);
-                } else {
-                    tier = apiTypeWrapper.getApiProduct().getId().getTier();
-                    preparedStForInsert.setString(1, tier);
-                    preparedStForInsert.setString(10, tier);
-                }
-                preparedStForInsert.setInt(2, id);
-                preparedStForInsert.setInt(3, application.getId());
-                preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
-                        APIConstants.SubscriptionStatus.UNBLOCKED);
-                preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-                preparedStForInsert.setString(6, subscriber);
+        try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
+                new String[]{subscriptionIDColumn})) {
+            if (!isProduct) {
+                tier = apiTypeWrapper.getApi().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+            } else {
+                tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+            }
+            preparedStForInsert.setInt(2, id);
+            preparedStForInsert.setInt(3, application.getId());
+            preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
+                    APIConstants.SubscriptionStatus.UNBLOCKED);
+            preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            preparedStForInsert.setString(6, subscriber);
 
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                preparedStForInsert.setTimestamp(7, timestamp);
-                preparedStForInsert.setTimestamp(8, timestamp);
-                preparedStForInsert.setString(9, subscriptionUUID);
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            preparedStForInsert.setTimestamp(7, timestamp);
+            preparedStForInsert.setTimestamp(8, timestamp);
+            preparedStForInsert.setString(9, subscriptionUUID);
 
-                preparedStForInsert.executeUpdate();
-                try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
-                    while (rs.next()) {
-                        //subscriptionId = rs.getInt(1);
-                        subscriptionId = Integer.parseInt(rs.getString(1));
-                    }
+            preparedStForInsert.executeUpdate();
+            try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
+                while (rs.next()) {
+                    //subscriptionId = rs.getInt(1);
+                    subscriptionId = Integer.parseInt(rs.getString(1));
                 }
             }
+        }
 
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
-                    application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
-                    APIConstants.SubscriptionStatus.UNBLOCKED));
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
+                tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
+                application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
+                APIConstants.SubscriptionStatus.UNBLOCKED));
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
 
         return subscriptionId;
@@ -7095,7 +7099,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
 
-            id = getAPIID(apiId, connection);
+            id = getAPIIDFromIdentifierMatchingOrganization(apiId, organizationId);
 
             prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
             prepStmt.setInt(1, id);
@@ -7697,7 +7701,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit,
-     Integer offset) throws APIManagementException {
+                                   Integer offset) throws APIManagementException {
 
         CommentList commentList = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -7729,7 +7733,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private CommentList getComments(Identifier identifier, String parentCommentID, Integer limit, Integer offset,
-     Connection connection) throws
+                                    Connection connection) throws
             APIManagementException {
 
         List<Comment> list = new ArrayList<Comment>();
@@ -8143,6 +8147,36 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
         }
         return identifier;
+    }
+
+    /**
+     * Get API ID by the API Identifier.
+     *
+     * @param identifier     API Identifier
+     * @param organizationId Identifier of an Organization
+     * @return String ID
+     * @throws APIManagementException if an error occurs
+     */
+    public int getAPIIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
+            throws APIManagementException {
+        int apiId = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_API_ID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(4, organizationId);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    apiId = resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
+                    + identifier.getVersion(), e);
+        }
+        return apiId;
     }
 
     /**
@@ -14088,7 +14122,7 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 if (multiGroupAppSharingEnabled) {
                     if (StringUtils.isEmpty(application.getGroupId())) {
-                        application.setGroupId(getGroupId(connection,application.getId()));
+                        application.setGroupId(getGroupId(connection, application.getId()));
                     }
                 }
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
