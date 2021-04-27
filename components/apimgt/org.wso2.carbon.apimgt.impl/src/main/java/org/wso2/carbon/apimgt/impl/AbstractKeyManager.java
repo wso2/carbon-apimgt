@@ -129,12 +129,13 @@ public abstract class AbstractKeyManager implements KeyManager {
             if (jsonObject != null) {
                 //create a map to hold json parsed objects.
                 Map<String, Object> params = (Map) jsonObject;
-                String grantTypeString = params.get(APIConstants.JSON_GRANT_TYPES).toString();
-                if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL()) &&
-                        StringUtils.isNotEmpty(jsonInput) &&
-                        (grantTypeString.contains("implicit") || grantTypeString.contains("authorization_code"))) {
-                    throw new EmptyCallbackURLForCodeGrantsException("The callback url must have at least one URI "
-                            + "value when using Authorization code or implicit grant types.");
+                if (params.get(APIConstants.JSON_GRANT_TYPES) != null) {
+                    String grantTypeString = params.get(APIConstants.JSON_GRANT_TYPES).toString();
+                    if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL()) &&
+                            (grantTypeString.contains("implicit") || grantTypeString.contains("authorization_code"))) {
+                        throw new EmptyCallbackURLForCodeGrantsException("The callback url must have at least one URI "
+                                + "value when using Authorization code or implicit grant types.");
+                    }
                 }
                 //set client Id
                 if (params.get(APIConstants.JSON_CLIENT_ID) != null) {
