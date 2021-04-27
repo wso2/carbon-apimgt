@@ -99,7 +99,7 @@ return null;
   @ApiModelProperty(example = "CalculatorApp", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Size(min=1,max=70)  public String getName() {
+ @Size(min=1,max=100)  public String getName() {
     return name;
   }
   public void setName(String name) {
