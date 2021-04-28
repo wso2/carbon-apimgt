@@ -19,6 +19,7 @@
     "author": "WSO2 Org",
     "license": "Apache-2.0",
     "dependencies": {
+        "@apidevtools/swagger-parser": "^10.0.1",
         "@hapi/hapi": "^18.4.1",
         "@material-ui/core": "^v4.11.0",
         "@material-ui/icons": "^v4.9.1",
@@ -36,6 +37,7 @@
         "file-loader": "^0.11.2",
         "html-to-draftjs": "^1.4.0",
         "js-yaml": "^3.14.0",
+        "lodash": "^4.17.19",
         "lodash.clonedeep": "^4.5.0",
         "lodash.isempty": "^4.4.0",
         "material-ui-chip-input": "^1.1.0",
@@ -65,7 +67,6 @@
         "react-tap-event-plugin": "^2.0.1",
         "react-toastify": "^1.7.0",
         "swagger-client": "^3.9.4",
-        "@apidevtools/swagger-parser": "^10.0.1",
         "swagger-ui": "^3.25.0",
         "swagger-ui-react": "^3.25.0",
         "typeface-roboto": "0.0.35",
