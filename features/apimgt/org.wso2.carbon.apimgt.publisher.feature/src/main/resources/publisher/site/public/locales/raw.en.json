@@ -3784,10 +3784,10 @@
     "defaultMessage": "If you think this is by mistake, please contact your administrator"
   },
   "ServiceCatalog.Listing.Onboarding.no.services.yet.icon.alt.text": {
-    "defaultMessage": "No Services Yet"
+    "defaultMessage": "No Services yet"
   },
   "ServiceCatalog.Listing.Onboarding.no.services.yet.title": {
-    "defaultMessage": "No Services Yet"
+    "defaultMessage": "No Services yet"
   },
   "ServiceCatalog.Listing.Onboarding.sample.add": {
     "defaultMessage": "Add Sample Service"
