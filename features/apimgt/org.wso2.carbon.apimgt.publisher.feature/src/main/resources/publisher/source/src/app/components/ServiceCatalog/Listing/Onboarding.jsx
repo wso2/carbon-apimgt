@@ -27,6 +27,8 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import { useTheme } from '@material-ui/styles';
 import Alert from 'AppComponents/Shared/Alert';
+import Typography from '@material-ui/core/Typography';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import OnboardingMenuCard from 'AppComponents/ServiceCatalog/Listing/components/OnboardingMenuCard';
 import Configurations from 'Config';
@@ -43,9 +45,6 @@ const useStyles = makeStyles((theme) => ({
     cardIcons: {
         width: 190,
     },
-    cardContainer: {
-        height: theme.spacing(63),
-    },
 }));
 
 /**
@@ -57,6 +56,7 @@ function Onboarding() {
     const classes = useStyles();
     const intl = useIntl();
     const theme = useTheme();
+    const isXsOrBelow = useMediaQuery(theme.breakpoints.down('xs'));
     const [isScopeValid, setIsScopeValid] = useState(false);
     useEffect(() => {
         const hasScope = ScopeValidation
@@ -102,145 +102,138 @@ function Onboarding() {
                 spacing={5}
             >
                 {/* Link to docs to write your first integration */}
-                { getStartedLink !== '' && (
-                    <OnboardingMenuCard
-                        iconSrc={
-                            Configurations.app.context + '/site/public/images/wso2-intg-service-sample-icon.svg'
-                        }
-                        heading={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.learn.heading'
-                                defaultMessage='Learn to write your first'
-                            />
-                        )}
-                        subHeading={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.learn.heading.sub'
-                                defaultMessage='Integration Service'
-                            />
-                        )}
-                        description={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.learn.heading.text'
-                                defaultMessage='Create and Deploy your first Integration Service'
-                            />
-                        )}
-                    >
-                        <Button
-                            className={classes.actionStyle}
-                            size='large'
-                            variant='outlined'
-                            color='primary'
-                            href={getStartedLink}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
-                        >
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.learn.link'
-                                defaultMessage='Get Started'
-                            />
-                        </Button>
-                    </OnboardingMenuCard>
-                )}
-                {isScopeValid && (
-                    <OnboardingMenuCard
-                        iconSrc={
-                            Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'
-                        }
-                        heading={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.sample.heading'
-                                defaultMessage='Add a sample'
-                            />
-                        )}
-                        subHeading={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.sample.heading.sub'
-                                defaultMessage='Integration Service'
-                            />
-                        )}
-                        description={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.sample.heading.text'
-                                defaultMessage={'Deploy the Sample Integration Service'
-                                    + ' already available and get started in one click'}
-                            />
-                        )}
-                    >
-                        <Button
-                            className={classes.actionStyle}
-                            size='large'
-                            id='itest-services-landing-deploy-sample'
-                            variant='outlined'
-                            color='primary'
-                            onClick={handleOnClick}
-                            disabled={deployStatus.inprogress}
-                        >
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.sample.add'
-                                defaultMessage='Add Sample Service'
-                            />
-                            {deployStatus.inprogress && <CircularProgress size={15} />}
-                        </Button>
-                    </OnboardingMenuCard>
-                )}
-                {/* show No Services Yet message if both onboarding tiles are not present */}
-                {getStartedLink === ''
-                && !isScopeValid
-                && (
-                    <Grid item xs={12} md={4} lg={3}>
-                        <Grid
-                            container
-                            direction='row'
-                            justify='center'
-                            alignItems='flex-end'
-                            className={classes.cardContainer}
-                        >
-                            <Grid item xs={12}>
-                                <Box textAlign='center' pb={2}>
-                                    <img
-                                        className={classes.cardIcons}
-                                        src={Configurations.app.context
-                                            + '/site/public/images/wso2-intg-service-sample-icon.svg'}
-                                        alt={(
-                                            <FormattedMessage
-                                                id='ServiceCatalog.Listing.Onboarding.no.services.yet.icon.alt.text'
-                                                defaultMessage='No Services Yet'
-                                            />
-                                        )}
-                                        aria-hidden='true'
+                { isScopeValid ? (
+                    <>
+                        {getStartedLink !== '' && (
+                            <OnboardingMenuCard
+                                iconSrc={
+                                    Configurations.app.context + '/site/public/images/wso2-intg-service-sample-icon.svg'
+                                }
+                                heading={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Onboarding.learn.heading'
+                                        defaultMessage='Learn to write your first'
                                     />
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Box
-                                    textAlign='center'
-                                    fontSize='h4.fontSize'
-                                    fontFamily='fontFamily'
+                                )}
+                                subHeading={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Onboarding.learn.heading.sub'
+                                        defaultMessage='Integration Service'
+                                    />
+                                )}
+                                description={(
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Onboarding.learn.heading.text'
+                                        defaultMessage='Create and Deploy your first Integration Service'
+                                    />
+                                )}
+                            >
+                                <Button
+                                    className={classes.actionStyle}
+                                    size='large'
+                                    variant='outlined'
+                                    color='primary'
+                                    href={getStartedLink}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
                                 >
                                     <FormattedMessage
-                                        id='ServiceCatalog.Listing.Onboarding.no.services.yet.title'
-                                        defaultMessage='No Services Yet'
+                                        id='ServiceCatalog.Listing.Onboarding.learn.link'
+                                        defaultMessage='Get Started'
                                     />
+                                </Button>
+                            </OnboardingMenuCard>
+                        )}
+                        <OnboardingMenuCard
+                            iconSrc={
+                                Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'
+                            }
+                            heading={(
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Onboarding.sample.heading'
+                                    defaultMessage='Add a sample'
+                                />
+                            )}
+                            subHeading={(
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Onboarding.sample.heading.sub'
+                                    defaultMessage='Integration Service'
+                                />
+                            )}
+                            description={(
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Onboarding.sample.heading.text'
+                                    defaultMessage={'Deploy the Sample Integration Service'
+                                        + ' already available and get started in one click'}
+                                />
+                            )}
+                        >
+                            <Button
+                                className={classes.actionStyle}
+                                size='large'
+                                id='itest-services-landing-deploy-sample'
+                                variant='outlined'
+                                color='primary'
+                                onClick={handleOnClick}
+                                disabled={deployStatus.inprogress}
+                            >
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Onboarding.sample.add'
+                                    defaultMessage='Add Sample Service'
+                                />
+                                {deployStatus.inprogress && <CircularProgress size={15} />}
+                            </Button>
+                        </OnboardingMenuCard>
+                    </>
+                ) : (
+                    <Grid
+                        container
+                        direction='row'
+                        justify='center'
+                        alignItems='flex-end'
+                    >
+                        <Grid item xs={12}>
+                            <Box pt={isXsOrBelow ? 2 : 7} />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box textAlign='center' pb={2}>
+                                <img
+                                    className={classes.cardIcons}
+                                    src={Configurations.app.context
+                                        + '/site/public/images/wso2-intg-service-sample-icon.svg'}
+                                    alt={(
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Onboarding.no.services.yet.icon.alt.text'
+                                            defaultMessage='No Services yet'
+                                        />
+                                    )}
+                                    aria-hidden='true'
+                                />
+                            </Box>
+                        </Grid>
+                        <Grid item md={12}>
+                            <Typography
+                                id='itest-apis-welcome-msg'
+                                display='block'
+                                gutterBottom
+                                align='center'
+                                variant='h4'
+                            >
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Onboarding.no.services.yet.title'
+                                    defaultMessage='No Services yet'
+                                />
+                                <Box color='text.secondary' pt={2}>
+                                    <Typography display='block' gutterBottom align='center' variant='body1'>
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Onboarding.no.services.yet.description'
+                                            defaultMessage={'If you think this is by mistake, '
+                                            + 'please contact your administrator'}
+                                        />
+                                    </Typography>
                                 </Box>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Box
-                                    mx={1}
-                                    textAlign='center'
-                                    color='text.secondary'
-                                    fontSize='body1.fontSize'
-                                    fontFamily='fontFamily'
-                                    height={60}
-                                >
-                                    <FormattedMessage
-                                        id='ServiceCatalog.Listing.Onboarding.no.services.yet.description'
-                                        defaultMessage={'If you think this is by mistake, '
-                                        + 'please contact your administrator'}
-                                    />
-                                </Box>
-                            </Grid>
+                            </Typography>
                         </Grid>
                     </Grid>
                 )}

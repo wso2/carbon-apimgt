@@ -269,7 +269,8 @@ export default {
             onboarding: {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
-                getStartedLink: 'https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/',
+                // 'https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/'
+                getStartedLink: '',
             },
             icons: {
                 graphql: '/site/public/images/service_catalog/icons/graphql.svg',

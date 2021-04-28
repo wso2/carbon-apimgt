@@ -7934,13 +7934,13 @@
   "ServiceCatalog.Listing.Onboarding.no.services.yet.icon.alt.text": [
     {
       "type": 0,
-      "value": "No Services Yet"
+      "value": "No Services yet"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.no.services.yet.title": [
     {
       "type": 0,
-      "value": "No Services Yet"
+      "value": "No Services yet"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.sample.add": [
