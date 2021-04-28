@@ -74,6 +74,7 @@
         "url-loader": "^0.5.9"
     },
     "devDependencies": {
+        "@apidevtools/swagger-parser": "^10.0.1",
         "@babel/core": "^7.6.4",
         "@babel/plugin-proposal-class-properties": "^7.4.4",
         "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
@@ -87,6 +88,7 @@
         "babel-jest": "^24.8.0",
         "babel-loader": "^8.0.6",
         "babel-plugin-dynamic-import-node": "^2.2.0",
+        "cross-env": "^7.0.0",
         "css-loader": "^0.28.2",
         "enzyme": "^3.8.0",
         "enzyme-adapter-react-16": "^1.15.1",
@@ -106,8 +108,8 @@
         "mock-local-storage": "^1.0.2",
         "monaco-editor-webpack-plugin": "^1.7.0",
         "prettier": "^1.19.1",
+        "rimraf": "^3.0.2",
         "style-loader": "^0.18.1",
-        "@apidevtools/swagger-parser": "^10.0.1",
         "webpack": "v4.28.4",
         "webpack-bundle-analyzer": "^2.9.1",
         "webpack-cli": "^3.3.2",
