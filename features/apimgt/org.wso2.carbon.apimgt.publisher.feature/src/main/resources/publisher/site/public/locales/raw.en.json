@@ -1902,6 +1902,9 @@
   "Apis.Details.ExternalStores.ExternalStores.update.not.allowed": {
     "defaultMessage": "* You are not authorized to publish the API to external developer portals due to insufficient permissions"
   },
+  "Apis.Details.GoTo.Components.GoToSuggestions.no.result": {
+    "defaultMessage": "There are no results for this query"
+  },
   "Apis.Details.GoTo.GoTo.btn": {
     "defaultMessage": "Go To"
   },
@@ -3182,6 +3185,15 @@
   },
   "Apis.Listing.ApiThumb.version": {
     "defaultMessage": "Version"
+  },
+  "Apis.Listing.Landing.index.no.apis.description": {
+    "defaultMessage": "If you think this is by mistake, please contact your administrator"
+  },
+  "Apis.Listing.Landing.index.no.apis.icon.alt.text": {
+    "defaultMessage": "No APIs yet"
+  },
+  "Apis.Listing.Landing.index.no.apis.title": {
+    "defaultMessage": "No APIs yet"
   },
   "Apis.Listing.SampleAPI.SampleAPI.create.new": {
     "defaultMessage": "Let’s get started !"
