@@ -49,6 +49,7 @@ public class GraphQLAPIHandlerTest {
 
         graphQLAPIHandler.getNestedLevelOperations(selectionList, supportedFields, operationArray);
         Assert.assertEquals("Different no of operations are found", 2, operationArray.size());
-        Assert.assertFalse(operationArray.contains(newSearchField.getName()));
+        Assert.assertFalse("Fragment should not in the operation list",
+                operationArray.contains(newSearchField.getName()));
     }
 }
