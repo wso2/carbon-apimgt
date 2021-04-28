@@ -4269,6 +4269,10 @@ paths:
               schema:
                 type: string
           content:
+            application/json:
+              schema:
+                type: string
+                format: binary
             application/zip:
               schema:
                 type: string
