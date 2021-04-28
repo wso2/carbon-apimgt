@@ -33,7 +33,7 @@
         "lodash.isempty": "^4.4.0",
         "material-ui-chip-input": "^1.1.0",
         "moment": "^2.26.0",
-        "mui-datatables": "^2.15.0",
+        "mui-datatables": "^3.7.6",
         "prop-types": "^15.5.10",
         "qs": "^6.9.4",
         "rc-notification": "^3.0.1",
