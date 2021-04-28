@@ -202,7 +202,8 @@ const Alerts = (props) => {
      * @param {string} email The email address that is being added.
      * */
     const handleAddEmail = (email) => {
-        const newEmail = [...emails].push(email);
+        const newEmail = [...emails];
+        newEmail.push(email);
         setEmailsList(newEmail);
     };
 
