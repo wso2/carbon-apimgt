@@ -18,22 +18,22 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +42,7 @@ import java.util.Set;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+    public static ApplicationDTO fromApplicationtoDTO (Application application) throws APIManagementException {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingPolicy(application.getTier());
@@ -63,6 +63,65 @@ public class ApplicationMappingUtil {
             applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.valueOf(application.getTokenType()));
         }
 
+        applicationDTO.setContainsSolaceApis(containsSolaceApis(application));
+        if (applicationDTO.isContainsSolaceApis()) {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+            for (SubscribedAPI subscribedAPI : subscriptions) {
+                API api = apiConsumer.getAPI(subscribedAPI.getApiId());
+                if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+                    applicationDTO.setSolaceOrganization(apiConsumer.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
+                }
+            }
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+            Map<String, ThirdPartyEnvironment> thirdPartyEnvironmentMap = APIUtil.getReadOnlyThirdPartyEnvironments();
+            HttpResponse response = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application);
+            List<ApplicationSolaceDeployedEnvironmentsDTO> solaceEnvironments = new ArrayList<>();
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                try {
+                    String responseString = EntityUtils.toString(response.getEntity());
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                    if (jsonObject.getJSONArray("environments") != null) {
+                        JSONArray environmentsArray = jsonObject.getJSONArray("environments");
+                        for (int i = 0; i < environmentsArray.length(); i++) {
+                            ApplicationSolaceDeployedEnvironmentsDTO applicationSolaceDeployedEnvironmentsDTO = new ApplicationSolaceDeployedEnvironmentsDTO();
+                            org.json.JSONObject environmentObject = environmentsArray.getJSONObject(i);
+                            if (environmentObject.getString("name") != null) {
+                                String environmentName = environmentObject.getString("name");
+                                ThirdPartyEnvironment thirdPartyEnvironment = thirdPartyEnvironmentMap.get(environmentName);
+                                if (thirdPartyEnvironment != null) {
+                                    applicationSolaceDeployedEnvironmentsDTO.setEnvironmentName(thirdPartyEnvironment.getName());
+                                    applicationSolaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(thirdPartyEnvironment.getDisplayName());
+                                    applicationSolaceDeployedEnvironmentsDTO.setOrganizationName(thirdPartyEnvironment.getOrganization());
+                                    if (environmentObject.getJSONObject("permissions") != null) {
+                                        org.json.JSONObject permissionsObject = environmentObject.getJSONObject("permissions");
+                                        if (permissionsObject.getJSONArray("publish") != null) {
+                                            List<String> publishTopics = new ArrayList<>();
+                                            for (int j = 0; j < permissionsObject.getJSONArray("publish").length(); j++) {
+                                                publishTopics.add(permissionsObject.getJSONArray("publish").getString(j));
+                                            }
+                                            applicationSolaceDeployedEnvironmentsDTO.setPublishTopics(publishTopics);
+                                        }
+                                        if (permissionsObject.getJSONArray("subscribe") != null) {
+                                            List<String> subscribeTopics = new ArrayList<>();
+                                            for (int j = 0; j < permissionsObject.getJSONArray("subscribe").length(); j++) {
+                                                subscribeTopics.add(permissionsObject.getJSONArray("subscribe").getString(j));
+                                            }
+                                            applicationSolaceDeployedEnvironmentsDTO.setSubscribeTopics(subscribeTopics);
+                                        }
+                                    }
+                                }
+                            }
+                            solaceEnvironments.add(applicationSolaceDeployedEnvironmentsDTO);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            applicationDTO.setSolaceDeployedEnvironments(solaceEnvironments);
+        }
+
         //todo: Uncomment when this is implemented
         /*List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
         for(APIKey apiKey : application.getKeys()) {
@@ -71,6 +130,29 @@ public class ApplicationMappingUtil {
         }
         applicationDTO.setKeys(applicationKeyDTOs);*/
         return applicationDTO;
+    }
+
+    public static boolean containsSolaceApis(Application application) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+        for (SubscribedAPI subscribedAPI : subscriptions) {
+            API api = apiConsumer.getAPI(subscribedAPI.getApiId());
+            /*List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(api.getUuid());
+            for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
+                if (revisionDeployment.isDisplayOnDevportal()) {
+                    if (thirdPartyEnvironments != null) {
+                        ThirdPartyEnvironment environment = thirdPartyEnvironments.get(revisionDeployment.getDeployment());
+                        if (environment != null) {
+                            if ("solace".equalsIgnoreCase(environment.getProvider())) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }*/
+            return apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api);
+        }
+        return false;
     }
 
     public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String username) {

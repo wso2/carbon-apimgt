@@ -969,4 +969,10 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
+
+    void renameSolaceApplication(String organization, Application application) throws APIManagementException;
+
+    boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException;
+
+    String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException;
 }

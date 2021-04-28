@@ -6720,7 +6720,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return requestBody;
     }
 
-    private boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException {
+    public boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException {
         Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
         for (APIRevisionDeployment deployment : deployments) {
@@ -6737,7 +6737,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return false;
     }
 
-    private String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException {
+    @Override
+    public String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException {
         Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
         for (APIRevisionDeployment deployment : deployments) {
@@ -6778,8 +6779,42 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         );
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             log.info("API product '" +apiProductName+ "' unsubscribed from Solace application '" +application.getName()+ "'");
+            try {
+                String responseString = EntityUtils.toString(response.getEntity());
+                org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                if (jsonObject.getJSONArray("apiProducts") != null) {
+                    if (jsonObject.getJSONArray("apiProducts").length() == 0) {
+                        // delete application in Solace because of 0 number of api products
+                        HttpResponse response2 = solaceAdminApis.deleteApplication(
+                                getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api),
+                                application
+                        );
+                        if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+                            log.info("Successfully deleted application '" +application.getName()+ "' in Solace Broker");
+                        } else {
+                            log.error("Error while deleting application '" +application.getName()+ "' in Solace");
+                            throw new APIManagementException("Error while deleting application '" +application.getName()+ "' in Solace");
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             log.error("Error while unsubscribing API product '" +apiProductName+ "' from Solace Application '" +application.getName()+ "'");
+            throw new APIManagementException(response.getStatusLine().getStatusCode() +"-"+ response.getStatusLine().getReasonPhrase());
+        }
+    }
+
+    @Override
+    public void renameSolaceApplication(String organization, Application application) throws APIManagementException {
+        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        log.info("Renaming solace application display name....");
+        HttpResponse response = solaceAdminApis.renameApplication(organization, application);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            log.info("Renamed solace application display name into '" + application.getName() + "'");
+        } else {
+            log.error("Error while renaming solace Application display name....");
             throw new APIManagementException(response.getStatusLine().getStatusCode() +"-"+ response.getStatusLine().getReasonPhrase());
         }
     }

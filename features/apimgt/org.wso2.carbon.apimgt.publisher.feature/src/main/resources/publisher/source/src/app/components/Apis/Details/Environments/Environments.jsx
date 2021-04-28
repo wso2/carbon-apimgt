@@ -1374,7 +1374,7 @@ export default function Environments() {
                     </Typography>
                 </Grid>
             )}
-            {!api.isRevision && allRevisions && allRevisions.length !== 0
+            {!api.isRevision && allRevisions && allRevisions.length !== 0 && !api.solaceAPI
             && (
                 <Grid container>
                     <Button
@@ -1761,7 +1761,7 @@ export default function Environments() {
                     </DialogActions>
                 </Dialog>
             </Grid>
-            {allRevisions && allRevisions.length !== 0 && (
+            {allRevisions && allRevisions.length !== 0 && !api.solaceAPI && (
                 <>
                     <Grid
                         container

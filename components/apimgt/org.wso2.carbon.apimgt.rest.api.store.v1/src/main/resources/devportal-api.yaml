@@ -3855,6 +3855,31 @@ components:
           type: boolean
           readOnly: true
           example: false
+        containsSolaceApis:
+          type: boolean
+          example: false
+        solaceOrganization:
+          type: string
+          example: default
+        solaceDeployedEnvironments:
+          type: array
+          items:
+            type: object
+            properties:
+              environmentName:
+                type: string
+              environmentDisplayName:
+                type: string
+              organizationName:
+                type: string
+              publishTopics:
+                type: array
+                items:
+                  type: string
+              subscribeTopics:
+                type: array
+                items:
+                  type: string
     ApplicationInfo:
       title: Application info object with basic application details
       type: object

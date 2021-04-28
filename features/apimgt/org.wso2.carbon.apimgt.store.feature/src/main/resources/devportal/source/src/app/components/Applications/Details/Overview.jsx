@@ -12,6 +12,9 @@ import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import {
+    Grid, List, ListItem, MenuItem, Paper, TextField,
+} from '@material-ui/core';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -73,6 +76,23 @@ const useStyles = makeStyles((theme) => ({
     actionPanel: {
         justifyContent: 'flex-start',
     },
+    Paper: {
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(2),
+    },
+    Paper2: {
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(2),
+        height: '80%',
+    },
+    list: {
+        width: '100%',
+        maxWidth: 800,
+        backgroundColor: theme.palette.background.paper,
+        position: 'relative',
+        overflow: 'auto',
+        maxHeight: 175,
+    },
 }));
 
 /**
@@ -86,6 +106,7 @@ function Overview(props) {
     const [tierDescription, setTierDescription] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const { match: { params: { applicationId } } } = props;
+    const [environment, setEnvironment] = useState(null);
     useEffect(() => {
         const client = new API();
         // Get application
@@ -97,6 +118,9 @@ function Overview(props) {
                 promisedTier.then((tierResponse) => {
                     setTierDescription(tierResponse.obj.description);
                     setApplication(appInner);
+                    if (appInner.solaceDeployedEnvironments !== null) {
+                        setEnvironment(appInner.solaceDeployedEnvironments[0]);
+                    }
                 });
             }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -116,6 +140,13 @@ function Overview(props) {
     if (!application) {
         return <Loading />;
     }
+    if (environment) {
+        console.log(environment);
+    }
+    const handleChange = (event) => {
+        setEnvironment(event.target.value);
+        console.log(event.target.value);
+    };
     return (
         <>
             <div className={classes.root}>
@@ -232,6 +263,79 @@ function Overview(props) {
 
                     </TableBody>
                 </Table>
+                {application.containsSolaceApis === true && environment && (
+                    <div className={classes.root}>
+                        <Typography id='itest-api-details-bushiness-plans-head' variant='h5'>
+                            <FormattedMessage
+                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
+                                defaultMessage='Available Topics'
+                            />
+                        </Typography>
+                        <Typography variant='caption' gutterBottom>
+                            <FormattedMessage
+                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.APIProduct.sub.heading'
+                                defaultMessage='Topics permitted to access from solace applications'
+                            />
+                        </Typography>
+                        <Paper className={classes.Paper}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        select
+                                        onChange={handleChange}
+                                        value={environment.environmentDisplayName}
+                                        style={{ maxWidth: '50%' }}
+                                        variant='outlined'
+                                    >
+                                        {application.solaceDeployedEnvironments.map((e) => (
+                                            <MenuItem key={e} value={e.environmentDisplayName}>
+                                                {e.environmentDisplayName}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
+                                                defaultMessage='Publish Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {environment.publishTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
+                                                defaultMessage='Subscribe Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {environment.subscribeTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </div>
+                )}
             </div>
         </>
     );

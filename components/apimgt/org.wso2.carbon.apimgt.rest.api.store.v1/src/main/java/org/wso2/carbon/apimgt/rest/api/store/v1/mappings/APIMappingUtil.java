@@ -457,16 +457,18 @@ public class APIMappingUtil {
         List<APISolaceEndpointURLsDTO> solaceEndpointURLsList = new ArrayList<>();
         for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
             if (revisionDeployment.isDisplayOnDevportal()) {
-                // Deployed environment
-                ThirdPartyEnvironment environment = thirdPartyEnvironments.get(revisionDeployment.getDeployment());
-                if (environment != null) {
-                    if ("solace".equalsIgnoreCase(environment.getProvider())) {
-                        APISolaceEndpointURLsDTO dto = new APISolaceEndpointURLsDTO();
-                        dto.setEnvironmentName(environment.getName());
-                        dto.setEnvironmentDisplayName(environment.getDisplayName());
-                        dto.setEnvironmentOrganization(environment.getOrganization());
-                        dto.setSolaceURLs(getSolaceURLs(environment.getOrganization(), environment.getName(), apidto.getSolaceTransportProtocols()));
-                        solaceEndpointURLsList.add(dto);
+                if (thirdPartyEnvironments != null) {
+                    // Deployed environment
+                    ThirdPartyEnvironment environment = thirdPartyEnvironments.get(revisionDeployment.getDeployment());
+                    if (environment != null) {
+                        if ("solace".equalsIgnoreCase(environment.getProvider())) {
+                            APISolaceEndpointURLsDTO dto = new APISolaceEndpointURLsDTO();
+                            dto.setEnvironmentName(environment.getName());
+                            dto.setEnvironmentDisplayName(environment.getDisplayName());
+                            dto.setEnvironmentOrganization(environment.getOrganization());
+                            dto.setSolaceURLs(getSolaceURLs(environment.getOrganization(), environment.getName(), apidto.getSolaceTransportProtocols()));
+                            solaceEndpointURLsList.add(dto);
+                        }
                     }
                 }
             }

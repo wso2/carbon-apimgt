@@ -481,6 +481,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         apiConsumer.updateApplication(application);
 
+        ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationtoDTO(apiConsumer.getApplicationByUUID(applicationId));
+        if (newApp.isContainsSolaceApis()) {
+            if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
+                apiConsumer.renameSolaceApplication(newApp.getSolaceOrganization(), application);
+            }
+        }
+
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
     }
