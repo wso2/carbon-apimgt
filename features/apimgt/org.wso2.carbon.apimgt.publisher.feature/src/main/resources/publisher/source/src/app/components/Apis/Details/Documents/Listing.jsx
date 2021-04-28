@@ -29,10 +29,10 @@ import Typography from '@material-ui/core/Typography';
 import AddCircle from '@material-ui/icons/AddCircle';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import { isRestricted } from 'AppData/AuthManager';
-import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
 import Edit from './Edit';
@@ -134,11 +134,22 @@ class Listing extends React.Component {
      */
     getDocumentsList() {
         const { api, intl } = this.props;
+        const  getSortOrder = (prop) => {    
+            return function(a, b) {    
+                if (a[prop] > b[prop]) {    
+                    return 1;    
+                } else if (a[prop] < b[prop]) {    
+                    return -1;    
+                }    
+                return 0;    
+            }    
+        }  
         if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
             docs.then((response) => {
                 const documentList = response.body.list.filter((item) => item.otherTypeName !== '_overview');
+                documentList.sort(getSortOrder('name'));
                 this.setState({ docs: documentList });
             }).catch((errorResponse) => {
                 const errorData = JSON.parse(errorResponse.message);
@@ -155,6 +166,7 @@ class Listing extends React.Component {
             const docs = newApi.getDocuments(this.props.api.id);
             docs.then((response) => {
                 const documentList = response.body.list.filter((item) => item.otherTypeName !== '_overview');
+                documentList.sort(getSortOrder('name'));
                 this.setState({ docs: documentList });
             }).catch((errorResponse) => {
                 const errorData = JSON.parse(errorResponse.message);
@@ -172,9 +184,6 @@ class Listing extends React.Component {
         this.setState((oldState) => {
             return { showAddDocs: !oldState.showAddDocs };
         });
-    }
-    setFoo() {
-        this.setState({ foo: 'test' });
     }
     render() {
         const { classes, api, isAPIProduct } = this.props;
@@ -222,6 +231,7 @@ class Listing extends React.Component {
                         return null;
                     },
                     filter: false,
+                    sort: false,
                     label: (
                         <FormattedMessage
                             id='Apis.Details.Documents.Listing.column.header.name'
@@ -238,18 +248,25 @@ class Listing extends React.Component {
                         defaultMessage='sourceType'
                     />
                 ),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'type',
                 label: (
                     <FormattedMessage id='Apis.Details.Documents.Listing.column.header.type' defaultMessage='type' />
                 ),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'sourceUrl',
                 options: {
                     display: 'excluded',
                     filter: false,
+                    sort: false,
                 },
             },
             {
@@ -417,17 +434,20 @@ class Listing extends React.Component {
                         return null;
                     },
                     filter: false,
+                    sort: false,
                 },
             },
         ];
-
+        if(!docs){
+            return (<Progress />);
+        }
         return (
             <React.Fragment>
                 {docsToDelete && (
                     <DeleteMultiple getDocumentsList={this.getDocumentsList} docsToDelete={docsToDelete} docs={docs} />
                 )}
                 <div className={classes.titleWrapper}>
-                    <Typography variant='h4' className={classes.mainTitle}>
+                    <Typography id='itest-api-details-documents-head' variant='h4' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Listing.documents.listing.title'
                             defaultMessage='Documents'

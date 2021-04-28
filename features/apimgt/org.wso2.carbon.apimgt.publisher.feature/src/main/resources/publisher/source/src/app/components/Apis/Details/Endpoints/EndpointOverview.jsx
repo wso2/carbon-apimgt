@@ -137,7 +137,7 @@ function EndpointOverview(props) {
         updateSwagger,
         saveAndRedirect,
     } = props;
-    const { endpointConfig, endpointSecurity } = api;
+    const { endpointConfig } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
     const [supportedEnpointTypes, setSupportedEndpointType] = useState([]);
 
@@ -160,7 +160,7 @@ function EndpointOverview(props) {
     const [typeChangeConfirmation, setTypeChangeConfirmation] = useState({ openDialog: false });
 
     const handleToggleEndpointSecurity = () => {
-        const tmpSecurityInfo = endpointSecurityInfo === null ? {
+        const tmpSecurityInfo = !endpointSecurityInfo ? {
             production: {
                 enabled: false,
                 type: null,
@@ -242,7 +242,6 @@ function EndpointOverview(props) {
             ];
         } else if (type === 'SOAP' || type === 'SOAPTOREST') {
             supportedEndpointTypes = [
-                { key: 'http', value: 'HTTP/REST Endpoint' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototype Endpoint' },
@@ -276,11 +275,7 @@ function EndpointOverview(props) {
         setSupportedEndpointType(supportedTypeLists);
         setEpConfig(endpointConfig);
         setEndpointType(epType);
-        if (endpointConfig.endpoint_security) {
-            setEndpointSecurityInfo(endpointConfig.endpoint_security);
-        } else {
-            setEndpointSecurityInfo(endpointSecurity);
-        }
+        setEndpointSecurityInfo(endpointConfig.endpoint_security);
     }, [props]);
 
 
@@ -707,6 +702,7 @@ function EndpointOverview(props) {
                                                     <FormControlLabel
                                                         control={(
                                                             <Checkbox
+                                                                disabled={isRestricted(['apim:api_create'], api)}
                                                                 checked={endpointCategory.prod}
                                                                 value='prod'
                                                                 color='primary'
@@ -848,6 +844,7 @@ function EndpointOverview(props) {
                                                         <FormControlLabel
                                                             control={(
                                                                 <Checkbox
+                                                                    disabled={isRestricted(['apim:api_create'], api)}
                                                                     checked={endpointCategory.sandbox}
                                                                     value='sandbox'
                                                                     color='primary'
@@ -994,6 +991,7 @@ function EndpointOverview(props) {
                                 <LoadbalanceFailoverConfig
                                     handleEndpointCategorySelect={handleEndpointCategorySelect}
                                     toggleAdvanceConfig={toggleAdvanceConfig}
+                                    toggleESConfig={toggleEndpointSecurityConfig}
                                     endpointsDispatcher={endpointsDispatcher}
                                     epConfig={(cloneDeep(epConfig))}
                                     endpointSecurityInfo={endpointSecurityInfo}

@@ -27,24 +27,14 @@ import List from '@material-ui/icons/List';
 import GridOn from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import APICreateMenu from './APICreateMenu';
 
 const styles = (theme) => ({
-    rightIcon: {
-        marginLeft: theme.spacing(1),
-    },
     button: {
         margin: theme.spacing(1),
         marginBottom: 0,
-    },
-    buttonRight: {
-        display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
     },
     root: {
         height: 70,
@@ -52,12 +42,8 @@ const styles = (theme) => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
     },
-    mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
-    },
     mainTitleWrapper: {
+        paddingLeft: 35,
         display: 'flex',
         justifyContent: 'center',
         flexDirection: 'column',
@@ -66,13 +52,6 @@ const styles = (theme) => ({
         flexGrow: 1,
         display: 'flex',
         alignItems: 'center',
-    },
-    content: {
-        flexGrow: 1,
-    },
-    createButton: {
-        color: '#000000',
-        background: '#15b8cf',
     },
 });
 
@@ -90,21 +69,21 @@ function getTitleForArtifactType(props, count) {
         return isSingular ? (
             <FormattedMessage
                 id='Apis.Listing.components.TopMenu.search.results.singular'
-                defaultMessage='Search Result'
+                defaultMessage='Search result'
             />
         ) : (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Results' />
+            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search results' />
         );
     } else if (isAPIProduct) {
         return isSingular ? (
             <FormattedMessage
                 id='Apis.Listing.components.TopMenu.apiproduct.singular'
-                defaultMessage='API Product'
+                defaultMessage='API product'
             />
         ) : (
             <FormattedMessage
-                id='Apis.Listing.components.TopMenu.apiproducts'
-                defaultMessage='API Products'
+                id='Apis.Listing.components.TopMenu.apiproducts.results'
+                defaultMessage='API products'
             />
         );
     } else {
@@ -124,25 +103,28 @@ function getTitleForArtifactType(props, count) {
  */
 function TopMenu(props) {
     const {
-        classes, data, setListType, theme, count, isAPIProduct, listType, showToggle,
+        classes, data, setListType, count, isAPIProduct, listType, showToggle, query,
     } = props;
-    const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
     if (count > 0) {
         return (
             <div className={classes.root}>
-                <div className={classes.mainIconWrapper}>
-                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-                </div>
                 <div className={classes.mainTitleWrapper}>
                     {data && (
                         <>
                             <Typography variant='h5' className={classes.mainTitle} component='div'>
-                                {isAPIProduct ? (
+                                {isAPIProduct && (
                                     <FormattedMessage
                                         id='Apis.Listing.components.TopMenu.apiproducts'
                                         defaultMessage='API Products'
                                     />
-                                ) : (
+                                )}
+                                { query && (
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.unified.search'
+                                        defaultMessage='Unified search'
+                                    />
+                                )}
+                                { !query && !isAPIProduct && (
                                     <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
                                 )}
                             </Typography>
@@ -170,16 +152,17 @@ function TopMenu(props) {
                 </div>
                 <VerticalDivider height={70} />
                 <div className={classes.APICreateMenu}>
-                    {isAPIProduct ? (
+                    {isAPIProduct && (
                         <Link to='/api-products/create'>
-                            <Button variant='contained' className={classes.createButton}>
+                            <Button variant='contained' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.create.an.api.product'
                                     defaultMessage='Create an API Product'
                                 />
                             </Button>
                         </Link>
-                    ) : (
+                    )}
+                    {!query && !isAPIProduct && (
                         <APICreateMenu>
                             <FormattedMessage
                                 id='Apis.Listing.components.TopMenu.create.api'
@@ -189,22 +172,16 @@ function TopMenu(props) {
                     )}
                 </div>
                 {showToggle && (
-                    <div className={classes.buttonRight}>
-                        <IconButton
-                            className={classes.button}
-                            disabled={data.length === 0}
-                            onClick={() => setListType('list')}
-                        >
-                            <List color={listType === 'list' ? 'primary' : 'default'} />
-                        </IconButton>
-                        <IconButton
-                            className={classes.button}
-                            disabled={data.length === 0}
-                            onClick={() => setListType('grid')}
-                        >
-                            <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
-                        </IconButton>
-                    </div>
+                    <Box height={32} m='auto' mr={8}>
+                        <ButtonGroup color='primary' aria-label='outlined primary button group'>
+                            <IconButton onClick={() => setListType('grid')} aria-label='list'>
+                                <GridOn color={listType === 'grid' ? 'primary' : 'disabled'} />
+                            </IconButton>
+                            <IconButton onClick={() => setListType('list')} aria-label='grid'>
+                                <List color={listType === 'list' ? 'primary' : 'disabled'} />
+                            </IconButton>
+                        </ButtonGroup>
+                    </Box>
                 )}
             </div>
         );
@@ -226,4 +203,4 @@ TopMenu.propTypes = {
     showToggle: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(TopMenu);
+export default withStyles(styles)(TopMenu);

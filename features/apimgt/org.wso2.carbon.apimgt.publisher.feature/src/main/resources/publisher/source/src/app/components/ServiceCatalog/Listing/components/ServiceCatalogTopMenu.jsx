@@ -44,7 +44,7 @@ function ServiceCatalogTopMenu(props) {
             display='flex'
             alignItems='center'
             height={72}
-            borderColor='grey.500'
+            borderColor='text.secondary'
         >
             <Grid
                 container
@@ -56,7 +56,7 @@ function ServiceCatalogTopMenu(props) {
                     <Typography variant='h4'>
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Listing.heading'
-                            defaultMessage='Service Catalog'
+                            defaultMessage='Services'
                         />
                     </Typography>
                     {totalServices > 0 && (

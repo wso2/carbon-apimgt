@@ -25,7 +25,6 @@ import HeaderOriginal from './HeaderOriginal';
  * props to override the defualt look and feel.
  * <HeaderOriginal avatar={<NewSettings />}
         user={user}
-        settings={<NewSettings />}
         menuItems={[<SettingsButton />, <SettingsButton />]}
     />
  * @param {object} props props passed down from the parent.

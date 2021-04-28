@@ -139,7 +139,7 @@ public class ImportUtils {
      *
      * @param subscribedAPIs Subscribed APIs
      * @param userId         Username of the subscriber
-     * @param appId          Application Id
+     * @param application    Application
      * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
      * @return a list of APIIdentifiers of the skipped subscriptions
@@ -147,7 +147,9 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-            int appId, Boolean update, APIConsumer apiConsumer) throws APIManagementException, UserStoreException {
+                                                          Application application, Boolean update,
+                                                          APIConsumer apiConsumer) throws APIManagementException,
+            UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
@@ -175,14 +177,16 @@ public class ImportUtils {
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
                     ApiTypeWrapper apiTypeWrapper = null;
+                    String apiOrApiProductUuid;
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                        apiOrApiProductUuid = apiConsumer.getAPIProduct(apiProduct.getId()).getUuid();
                     } else {
                         API api = (API) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(api);
+                        apiOrApiProductUuid = apiConsumer.getAPI(api.getId()).getUuid();
                     }
+                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, tenantDomain);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -192,10 +196,11 @@ public class ImportUtils {
                         // Add subscription if update flag is not specified
                         // It will throw an error if subscriber already exists
                         if (update == null || !update) {
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
+                                , application.getId())) {
                             // on update skip subscriptions that already exists
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
                     } else {
                         log.error("Failed to import Subscription as API/API Product " + name + "-" + version

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -35,6 +35,8 @@ import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
 import { FormattedMessage, useIntl } from 'react-intl';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
@@ -148,6 +150,7 @@ function CreateApi(props) {
         definitionType,
         serviceVersion,
         serviceUrl,
+        usage,
     } = props;
     const classes = useStyles();
     const intl = useIntl();
@@ -156,24 +159,8 @@ function CreateApi(props) {
     const [pageError, setPageError] = useState(null);
     const [type, setType] = useState('');
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const [policies, setPolicies] = useState([]);
-
-    useEffect(() => {
-        API.policies('subscription').then((response) => {
-            const allPolicies = response.body.list;
-            if (allPolicies.length === 0) {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Create.Default.APICreateDefault.error.policies.not.available',
-                    defaultMessage: 'Throttling policies not available. Contact your administrator',
-                }));
-            } else if (allPolicies.filter((p) => p.name === 'Unlimited').length > 0) {
-                setPolicies(['Unlimited']);
-            } else {
-                setPolicies([allPolicies[0].name]);
-            }
-        });
-    }, []);
     /**
      * This method gets the context for the API from the service url
      *
@@ -189,23 +176,22 @@ function CreateApi(props) {
                     path = path.slice(0, -1); // Remove leading `/` because of context validation failure
                 }
                 return path;
+            } else {
+                return url.replace(/[^a-zA-Z ]/g, ''); // we need to remove the special chars from context.
             }
         }
         return url;
     }
 
     const initialState = {
-        name: serviceDisplayName ? serviceDisplayName.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') : serviceDisplayName,
-        context: getContextFromServiceUrl(serviceUrl),
+        name: serviceDisplayName
+            ? serviceDisplayName.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') + (usage === 0 ? '' : usage + 1)
+            : serviceDisplayName + (usage === 0 ? '' : usage + 1),
+        context: getContextFromServiceUrl(serviceUrl) + (usage === 0 ? '' : usage + 1),
         version: serviceVersion,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    const toggleOpen = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setOpen(!open);
-    };
     const handleClose = () => {
         setOpen(false);
     };
@@ -312,13 +298,29 @@ function CreateApi(props) {
         }
     }
 
-    useEffect(() => {
-        validate('name', name);
+    const toggleOpen = (event) => {
         validate('context', context);
-        validate('version', version);
-    }, []);
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen(!open);
+    };
 
-    const runAction = () => {
+    const runAction = async () => {
+        setIsProcessing(true);
+        const response = await API.policies('subscription');
+        const allPolicies = response.body.list;
+        let policies;
+        if (allPolicies.length === 0) {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Create.Default.APICreateDefault.error.policies.not.available',
+                defaultMessage: 'Throttling policies not available. Contact your administrator',
+            }));
+            throw new Error('Throttling policies not available. Contact your administrator');
+        } else if (allPolicies.filter((p) => p.name === 'Unlimited').length > 0) {
+            policies = ['Unlimited'];
+        } else {
+            policies = [allPolicies[0].name];
+        }
         const promisedCreateApi = API.createApiFromService(serviceKey, { ...state, policies }, type);
         promisedCreateApi.then((data) => {
             const apiInfo = data;
@@ -337,10 +339,10 @@ function CreateApi(props) {
                     defaultMessage: 'Error while creating API from service',
                     id: 'ServiceCatalog.CreateApi.error.create.api',
                 }));
-                setPageError('ServiceCatalog.CreateApi.error.create.api');
+                setPageError('Error while creating API from service');
             }
             console.error(error);
-        });
+        }).finally(() => setIsProcessing(false));
     };
 
     return (
@@ -588,7 +590,7 @@ function CreateApi(props) {
                         className={classes.actionButtonStyle}
                     >
                         <Grid item>
-                            <Button onClick={toggleOpen} color='primary'>
+                            <Button disabled={isProcessing} onClick={toggleOpen} color='primary'>
                                 <FormattedMessage
                                     id='ServiceCatalog.CreateApi.cancel.btn'
                                     defaultMessage='Cancel'
@@ -598,12 +600,20 @@ function CreateApi(props) {
                                 onClick={runAction}
                                 color='primary'
                                 variant='contained'
-                                disabled={!isFormValid}
+                                disabled={!isFormValid || isProcessing}
                             >
-                                <FormattedMessage
-                                    id='ServiceCatalog.CreateApi.update.btn'
-                                    defaultMessage='Create API'
-                                />
+                                {isProcessing ? (
+                                    <FormattedMessage
+                                        id='ServiceCatalog.CreateApi.update.btn.in.progress'
+                                        defaultMessage='Creating API ...'
+                                    />
+                                ) : (
+                                    <FormattedMessage
+                                        id='ServiceCatalog.CreateApi.update.btn'
+                                        defaultMessage='Create API'
+                                    />
+                                )}
+                                {isProcessing && <CircularProgress size={15} />}
                             </Button>
                         </Grid>
                     </Grid>

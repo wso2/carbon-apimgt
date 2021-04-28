@@ -90,7 +90,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setName(model.getName());
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
-            Map<String,URLMapping> urlMappings = model.getAllResources();
+            Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
@@ -121,7 +121,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setName(model.getName());
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
-            Map<String,URLMapping> urlMappings = model.getAllResources();
+            Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
@@ -196,6 +196,9 @@ public class SubscriptionValidationDataUtil {
         if (model != null) {
             for (Subscription subsModel : model) {
                 SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+                subscriptionDTO.setSubscriptionUUID(subsModel.getSubscriptionUUID());
+                subscriptionDTO.setApplicationUUID(subsModel.getApplicationUUID());
+                subscriptionDTO.setApiUUID(subsModel.getApiUUID());
                 subscriptionDTO.setApiId(subsModel.getApiId());
                 subscriptionDTO.setAppId(subsModel.getAppId());
                 subscriptionDTO.setSubscriptionId(subsModel.getSubscriptionId());
@@ -213,7 +216,7 @@ public class SubscriptionValidationDataUtil {
         return subscriptionListDTO;
     }
 
-    public static SubscriptionPolicyListDTO fromSubscriptionPolicyToSubscriptionPolicyListDTO (
+    public static SubscriptionPolicyListDTO fromSubscriptionPolicyToSubscriptionPolicyListDTO(
             List<SubscriptionPolicy> model) {
 
         SubscriptionPolicyListDTO subscriptionPolicyListDTO = new SubscriptionPolicyListDTO();
@@ -243,7 +246,7 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a quota policy object of a policy into a Throttle Limit DTO object
+     * Converts a quota policy object of a policy into a Throttle Limit DTO object.
      *
      * @param policy policy model object
      * @return Throttle Limit DTO
@@ -259,7 +262,7 @@ public class SubscriptionValidationDataUtil {
         } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
             defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
-        } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())){
+        } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
             EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
             defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
         }
@@ -267,7 +270,7 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a quota policy object of a condition group into a Throttle Limit DTO object
+     * Converts a quota policy object of a condition group into a Throttle Limit DTO object.
      *
      * @param apiPolicyConditionGroup condition group model object
      * @return Throttle Limit DTO
@@ -284,7 +287,7 @@ public class SubscriptionValidationDataUtil {
             } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
                 BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
                 defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
-            } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())){
+            } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
                 EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
                 defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
             }
@@ -294,7 +297,7 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a Bandwidth Limit model object into a Bandwidth Limit DTO object
+     * Converts a Bandwidth Limit model object into a Bandwidth Limit DTO object.
      *
      * @param bandwidthLimit Bandwidth Limit model object
      * @return Bandwidth Limit DTO object derived from model
@@ -310,7 +313,7 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a Request Count Limit model object into a Request Count Limit DTO object
+     * Converts a Request Count Limit model object into a Request Count Limit DTO object.
      *
      * @param requestCountLimit Request Count Limit model object
      * @return Request Count DTO object derived from model
@@ -325,9 +328,9 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a Event Count Limit model object into a Event Count Limit DTO object
+     * Converts a Event Count Limit model object into a Event Count Limit DTO object.
      *
-     * @param EventCountLimit Event Count Limit model object
+     * @param eventCountLimit Event Count Limit model object
      * @return Event Count Limit DTO object derived from model
      */
     private static EventCountLimitDTO fromEventCountLimitToDTO(EventCountLimit eventCountLimit) {
@@ -386,12 +389,12 @@ public class SubscriptionValidationDataUtil {
                     group.setDefaultLimit(getThrottleLimitDTO(retGroup));
                     group.setPolicyId(retGroup.getPolicyId());
 
-                    List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition = 
+                    List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition =
                             new ArrayList<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO>();
 
                     List<ConditionDTO> retrievedConditions = retGroup.getConditionDTOS();
                     for (ConditionDTO retrievedCondition : retrievedConditions) {
-                        org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO conditionDTO = 
+                        org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO conditionDTO =
                                 new org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO();
                         conditionDTO.setConditionType(retrievedCondition.getConditionType());
                         conditionDTO.setIsInverted(retrievedCondition.isInverted());
@@ -422,6 +425,7 @@ public class SubscriptionValidationDataUtil {
                 applicationKeyMappingDTO.setConsumerKey(applicationKeyMapping.getConsumerKey());
                 applicationKeyMappingDTO.setKeyType(applicationKeyMapping.getKeyType());
                 applicationKeyMappingDTO.setKeyManager(applicationKeyMapping.getKeyManager());
+                applicationKeyMappingDTO.setApplicationUUID(applicationKeyMapping.getApplicationUUID());
                 applicationKeyMappingListDTO.getList().add(applicationKeyMappingDTO);
 
             }
@@ -461,6 +465,7 @@ public class SubscriptionValidationDataUtil {
     }
 
     private static ScopeDTO fromScopeToScopeDto(Scope scope) {
+
         ScopeDTO scopeDTO = new ScopeDTO();
         scopeDTO.setName(scope.getKey());
         scopeDTO.setDisplayName(scope.getName());
@@ -473,12 +478,13 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a list of global policy objects into a global policy list DTO object
+     * Converts a list of global policy objects into a global policy list DTO object.
      *
      * @param globalPolicies list of global policy objects
      * @return global policy list DTO
      */
     public static GlobalPolicyListDTO fromGlobalPolicyToGlobalPolicyListDTO(List<GlobalPolicy> globalPolicies) {
+
         GlobalPolicyListDTO globalPolicyListDTO = new GlobalPolicyListDTO();
         if (globalPolicies != null) {
             for (GlobalPolicy globalPolicy : globalPolicies) {

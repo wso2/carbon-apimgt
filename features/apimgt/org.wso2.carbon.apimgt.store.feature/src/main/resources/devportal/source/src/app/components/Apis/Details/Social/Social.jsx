@@ -69,7 +69,10 @@ function Social() {
     const { name: apiName } = api;
     const apiUrl = encodeURI(window.location);
     const theme = useTheme();
-    const { github_repo: github, slack_url: slack } = api.additionalProperties;
+    const [slack, github] = [
+        api.additionalProperties.find((prop) => prop.name === 'slack_url'),
+        api.additionalProperties.find((prop) => prop.name === 'github_repo'),
+    ];
     const {
         custom: {
             social: {
@@ -88,7 +91,7 @@ function Social() {
                         <a
                             className={classes.socialLink}
                             id='Slack'
-                            href={slack}
+                            href={slack.value}
                             target='_blank'
                             rel='noopener noreferrer'
                             title='Slack'
@@ -105,7 +108,7 @@ function Social() {
                         <a
                             className={classes.socialLink}
                             id='github'
-                            href={github}
+                            href={github.value}
                             target='_blank'
                             rel='noopener noreferrer'
                             title='GitHub'

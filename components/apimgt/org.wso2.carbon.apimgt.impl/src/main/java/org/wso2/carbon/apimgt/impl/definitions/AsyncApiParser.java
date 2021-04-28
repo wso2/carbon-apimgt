@@ -36,10 +36,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AsyncApiParser extends APIDefinition {
 
@@ -1434,23 +1436,28 @@ public class AsyncApiParser extends APIDefinition {
                 Aai20ChannelItem channel = (Aai20ChannelItem) entry.getValue();
                 if (includePublish && channel.publish != null) {
                     uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_PUBLISH,
-                            (Aai20Operation) channel.publish, scopes));
+                            (Aai20Operation) channel.publish, scopes, channel));
                 }
                 if (channel.subscribe != null) {
                     uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_SUBSCRIBE,
-                            (Aai20Operation) channel.subscribe, scopes));
+                            (Aai20Operation) channel.subscribe, scopes, channel));
                 }
             }
         }
         return uriTemplates;
     }
 
-    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes)
-            throws APIManagementException {
+    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes,
+                                         Aai20ChannelItem channel) throws APIManagementException {
         URITemplate template = new URITemplate();
         template.setHTTPVerb(verb);
         template.setHttpVerbs(verb);
         template.setUriTemplate(target);
+
+        Extension authTypeExtension = channel.getExtension(APIConstants.SWAGGER_X_AUTH_TYPE);
+        if (authTypeExtension != null && authTypeExtension.value instanceof String) {
+            template.setAuthType(authTypeExtension.value.toString());
+        }
 
         List<String> opScopes = getScopeOfOperations(operation);
         if (!opScopes.isEmpty()) {
@@ -1482,7 +1489,16 @@ public class AsyncApiParser extends APIDefinition {
     private List<String> getScopeOfOperationsFromExtensions(Aai20Operation operation) {
         Extension scopeBindings = operation.getExtension("x-scopes");
         if (scopeBindings != null) {
-            return (List<String>) scopeBindings.value;
+            if (scopeBindings.value instanceof LinkedHashMap) {
+                return (List<String>) ((LinkedHashMap) scopeBindings.value)
+                        .values()
+                        .stream()
+                        .collect(Collectors.toList());
+            }
+
+            if (scopeBindings.value instanceof ArrayList) {
+                return (List<String>) scopeBindings.value;
+            }
         }
         return Collections.emptyList();
     }
@@ -1495,16 +1511,20 @@ public class AsyncApiParser extends APIDefinition {
             Aai20SecurityScheme oauth2 = (Aai20SecurityScheme) document.components.securitySchemes.get("oauth2");
             if (oauth2 != null && oauth2.flows != null && oauth2.flows.implicit != null) {
                 Map<String, String> scopes = oauth2.flows.implicit.scopes;
-                Map<String, String> scopeBindings = (Map<String, String>) oauth2.flows.implicit.getExtension(
-                        APIConstants.SWAGGER_X_SCOPES_BINDINGS).value;
-                if (scopes != null && scopeBindings != null) {
+                Extension xScopesBindings = oauth2.flows.implicit.getExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                Map<String, String> scopeBindings = new HashMap<>();
+                if (xScopesBindings != null) {
+                    scopeBindings = (Map<String, String>) xScopesBindings.value;
+                }
+                if (scopes != null) {
                     for (Map.Entry<String, String> entry : scopes.entrySet()) {
                         Scope scope = new Scope();
                         scope.setKey(entry.getKey());
                         scope.setName(entry.getKey());
                         scope.setDescription(entry.getValue());
-                        if (scopeBindings.get(scope.getKey()) != null) {
-                            scope.setRoles(scopeBindings.get(scope.getKey()));
+                        String scopeBinding = scopeBindings.get(scope.getKey());
+                        if (scopeBinding != null) {
+                            scope.setRoles(scopeBinding);
                         }
                         scopeSet.add(scope);
                     }
@@ -1849,7 +1869,7 @@ public class AsyncApiParser extends APIDefinition {
             if (publishOperation != null) {
                 Extension xUriMapping = publishOperation.getExtension("x-uri-mapping");
                 if (xUriMapping != null) {
-                    wsUriMapping.put(entry.getKey() + "_publish", xUriMapping.value.toString());
+                    wsUriMapping.put("PUBLISH_" + entry.getKey(), xUriMapping.value.toString());
                 }
             }
 
@@ -1857,7 +1877,7 @@ public class AsyncApiParser extends APIDefinition {
             if (subscribeOperation != null)  {
                 Extension xUriMapping = subscribeOperation.getExtension("x-uri-mapping");
                 if (xUriMapping != null) {
-                    wsUriMapping.put(entry.getKey() + "_subscribe", xUriMapping.value.toString());
+                    wsUriMapping.put("SUBSCRIBE_" + entry.getKey(), xUriMapping.value.toString());
                 }
             }
         }

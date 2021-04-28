@@ -38,33 +38,38 @@ import Box from '@material-ui/core/Box';
  * @returns {any} Listing Page for Services
  */
 function Listing() {
-    const [servicesData, setServicesData] = useState([]);
-    const [notFound, setNotFound] = useState(true);
+    const [servicesData, setServicesData] = useState(null);
+    const [notFound, setNotFound] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isGridView, setIsGridView] = useState(true);
     const intl = useIntl();
 
     // Get Services
-    const getData = () => {
-        const promisedServices = ServiceCatalog.searchServices();
+    const getData = (limit = 10, offset = 0) => {
+        const promisedServices = ServiceCatalog.searchServices(limit, offset);
         promisedServices.then((data) => {
             const { body } = data;
             setServicesData(body);
-            setNotFound(false);
         }).catch((error) => {
             console.error(error);
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while loading services',
-                id: 'ServiceCatalog.Listing.Listing.error.loading',
-            }));
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error while loading services',
+                    id: 'ServiceCatalog.Listing.Listing.error.loading',
+                }));
+            }
+            const { status } = error;
+            if (status === 404) {
+                setNotFound(true);
+            }
         }).finally(() => {
             setLoading(false);
         });
     };
 
-    useEffect(() => {
-        getData();
-    }, []);
+    useEffect(getData, []);
 
     const onDelete = (serviceId) => {
         const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
@@ -111,7 +116,7 @@ function Listing() {
                         setIsGridView={setIsGridView}
                     />
                 </Grid>
-                <Box px={8} pt={4}>
+                <Box px={4} pt={4}>
                     <Grid xs={12}>
                         {!haveServices && <Onboarding />}
                         {haveServices && (isGridView
@@ -120,6 +125,7 @@ function Listing() {
                                     serviceList={servicesData.list}
                                     pagination={servicesData.pagination}
                                     onDelete={onDelete}
+                                    getData={getData}
                                 />
                             )
                             : <ServicesTableView serviceList={servicesData.list} onDelete={onDelete} />)}

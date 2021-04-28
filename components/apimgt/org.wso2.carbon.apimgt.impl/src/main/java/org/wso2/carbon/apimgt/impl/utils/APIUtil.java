@@ -137,6 +137,8 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -152,7 +154,15 @@ import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -229,8 +239,6 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
-import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -294,7 +302,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
@@ -7701,7 +7708,8 @@ public final class APIUtil {
     }
 
     public static WebsubSubscriptionConfiguration getDefaultWebsubSubscriptionConfiguration() {
-        return new WebsubSubscriptionConfiguration("", "SHA-256", "x-hub-signature");
+        return new WebsubSubscriptionConfiguration(false, "",
+                APIConstants.DEFAULT_WEBSUB_SIGNING_ALGO, APIConstants.DEFAULT_WEBSUB_SIGNATURE_HEADER);
     }
 
     /**
@@ -10145,13 +10153,7 @@ public final class APIUtil {
 
             jwtHeader.append("\"x5t\":\"");
             jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"kid\":\"");
-            jwtHeader.append(getKID(base64UrlEncodedThumbPrint, getJWSCompliantAlgorithmCode(signatureAlgorithm)));
-            jwtHeader.append("\"");
-
-            jwtHeader.append("}");
+            jwtHeader.append("\"}");
             return jwtHeader.toString();
 
         } catch (Exception e) {
@@ -10407,7 +10409,7 @@ public final class APIUtil {
         }
     }
 
-    public static Certificate getCertificateFromTrustStore(String certAlias) throws APIManagementException {
+    public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
 
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
@@ -10816,11 +10818,11 @@ public final class APIUtil {
      * @return true if certificate exist in truststore
      * @throws APIManagementException
      */
-    public static boolean isCertificateExistsInTrustStore(X509Certificate certificate) throws APIManagementException {
+    public static boolean isCertificateExistsInListenerTrustStore(X509Certificate certificate) throws APIManagementException {
 
         if (certificate != null) {
             try {
-                KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+                KeyStore trustStore = ServiceReferenceHolder.getInstance().getListenerTrustStore();
                 if (trustStore != null) {
                     CertificateFactory cf = CertificateFactory.getInstance("X.509");
                     byte[] certificateEncoded = certificate.getEncoded();
@@ -10851,6 +10853,17 @@ public final class APIUtil {
             return true;
         }
         return Boolean.parseBoolean(anonymousMode);
+    }
+
+    public static boolean isTenantDevportalAnonymous(String tenantDomain) throws APIManagementException {
+
+        JSONObject tenantConfig = getTenantConfig(tenantDomain);
+        if (tenantConfig.containsKey(APIConstants.ENABLE_ANONYMOUS_MODE)) {
+            Boolean anonymousEnabled = (boolean) tenantConfig.get(APIConstants.ENABLE_ANONYMOUS_MODE);
+            return anonymousEnabled;
+        } else {
+            return true;
+        }
     }
 
     public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {
@@ -11396,10 +11409,6 @@ public final class APIUtil {
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
-        // Invalidate Cache
-        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .getCache(APIConstants.REST_API_SCOPE_CACHE)
-                .put(tenantDomain, null);
     }
 
     /**

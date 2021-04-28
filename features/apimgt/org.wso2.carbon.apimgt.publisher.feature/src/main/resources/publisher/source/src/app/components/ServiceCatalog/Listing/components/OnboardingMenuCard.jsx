@@ -49,11 +49,11 @@ function OnboardingMenuCard(props) {
                     container
                     direction='row'
                     justify='center'
-                    alignItems='flex-start'
+                    alignItems='flex-end'
                     className={classes.cardContainer}
                 >
                     <Grid item xs={12}>
-                        <Box textAlign='center' pt={9} pb={2}>
+                        <Box textAlign='center' pb={2}>
                             <img
                                 className={classes.cardIcons}
                                 src={iconSrc}
@@ -85,12 +85,13 @@ function OnboardingMenuCard(props) {
                             color='text.secondary'
                             fontSize='body1.fontSize'
                             fontFamily='fontFamily'
+                            height={60}
                         >
                             {description}
                         </Box>
                     </Grid>
                     <Grid item xs={12}>
-                        <Box justifyContent='center' display='flex'>
+                        <Box justifyContent='center' mb={2} display='flex'>
                             {children}
                         </Box>
                     </Grid>

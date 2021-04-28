@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
@@ -156,12 +155,6 @@ public class APIControllerUtil {
         }
         importedApiDto.setEndpointConfig(endpointConfig);
 
-        //handle gateway environments
-        if (envParams.get(ImportExportConstants.GATEWAY_ENVIRONMENTS_FIELD) != null) {
-            List<String> environments = setupGatewayEnvironments(
-                    envParams.get(ImportExportConstants.GATEWAY_ENVIRONMENTS_FIELD).getAsJsonArray());
-            importedApiDto.setGatewayEnvironments(environments);
-        }
 
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
@@ -330,11 +323,11 @@ public class APIControllerUtil {
                             if (StringUtils.equals(type.getAsString().toLowerCase(),
                                     APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
                                 endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIEndpointSecurityDTO.TypeEnum.DIGEST.toString());
+                                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
                             } else if (StringUtils.equals(type.getAsString().toLowerCase(),
                                     APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
                                 endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIEndpointSecurityDTO.TypeEnum.BASIC.toString());
+                                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
                             } else {
                                 // If the type is not either basic or digest, return an error
                                 throw new APIManagementException(
@@ -930,6 +923,14 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+                oldFile.delete();
+            }
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+                oldFile.delete();
+            }
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
@@ -991,6 +992,14 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+                oldFile.delete();
+            }
+            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+                oldFile.delete();
+            }
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, updatedCertsArray);
         } catch (APIImportExportException e) {

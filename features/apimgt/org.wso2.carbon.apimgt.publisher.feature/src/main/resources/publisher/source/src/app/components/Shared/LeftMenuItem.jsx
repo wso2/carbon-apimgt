@@ -96,8 +96,6 @@ const useStyles = makeStyles((theme) => ({
     },
     selectedMenu: {
         backgroundColor: theme.palette.background.appBarSelected,
-        width: '100%',
-        paddingRight: theme.spacing(5),
     },
 
 }));

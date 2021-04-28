@@ -110,6 +110,10 @@ public enum ExceptionCodes implements ErrorHandler {
     DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
     EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
 
+    //Lifecycle related codes
+    API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
+            "Updating the API is restricted as as it is %s."),
+
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
     RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
@@ -454,7 +458,12 @@ public enum ExceptionCodes implements ErrorHandler {
     SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
                                                     "when overwrite is false"),
     MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION(900911, "Missing protocol in Async API Definition", 400,
-            "Missing protocol in Async API Definition");
+            "Missing protocol in Async API Definition"),
+    UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION(900912, "Unsupported protocol specified in Async API " +
+               "Definition", 400, "Unsupported protocol specified in Async API Definition"),
+
+    //Service Catalog related error codes
+    SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version");
 
     private final long errorCode;
     private final String errorMessage;

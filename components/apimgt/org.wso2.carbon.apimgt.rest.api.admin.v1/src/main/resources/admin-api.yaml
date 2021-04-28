@@ -3519,7 +3519,6 @@ components:
     MonetizationInfo:
       title: API monetization details object
       required:
-      - monetizationPlan
       - properties
       type: object
       properties:
@@ -3806,7 +3805,7 @@ components:
         name:
           maxLength: 255
           minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
+          pattern: '^[a-zA-Z0-9_-]+$'
           type: string
           example: us-region
         displayName:

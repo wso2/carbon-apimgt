@@ -23,6 +23,7 @@ import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
+import { isRestricted } from 'AppData/AuthManager';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
@@ -39,7 +40,6 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTheme } from '@material-ui/core';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
@@ -63,7 +63,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
 import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
-import CONSTS from 'AppData/Constants';
+import Utils from 'AppData/Utils';
 import DisplayDevportal from './DisplayDevportal';
 import DeploymentOnbording from './DeploymentOnbording';
 
@@ -139,7 +139,12 @@ const useStyles = makeStyles((theme) => ({
     textShape2: {
         marginTop: 8,
         marginLeft: 115,
+        height: '18px',
         fontFamily: 'sans-serif',
+    },
+    textPadding: {
+        height: '25px',
+        paddingBottom: '2px',
     },
     textDelete: {
         marginTop: 8,
@@ -195,6 +200,7 @@ const useStyles = makeStyles((theme) => ({
     shapeCircleBlack: {
         backgroundColor: '#000000',
         alignSelf: 'center',
+        paddingLeft: '15px',
         width: 15,
         height: 15,
     },
@@ -282,6 +288,18 @@ const useStyles = makeStyles((theme) => ({
     textCount: {
         marginTop: theme.spacing(-2.5),
     },
+    containerInline: {
+        display: 'inline-flex',
+    },
+    containerOverflow: {
+        display: 'grid',
+        gridGap: '16px',
+        paddingLeft: '48px',
+        gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))',
+        gridAutoFlow: 'column',
+        gridAutoColumns: 'minmax(160px,1fr)',
+        overflowX: 'auto',
+    },
 }));
 
 /**
@@ -291,8 +309,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
-    const theme = useTheme();
-    const { maxCommentLength } = theme.custom;
+    const maxCommentLength = '255';
     const intl = useIntl();
     const { api } = useContext(APIContext);
     const history = useHistory();
@@ -327,19 +344,7 @@ export default function Environments() {
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revision}
-    const allEnvDeployments = [];
-    settings.environment.forEach((env) => {
-        const revision = allEnvRevision && allEnvRevision.find(
-            (r) => r.deploymentInfo.some((e) => e.name === env.name),
-        );
-        const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
-        const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
-        let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
-        if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
-            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
-        }
-        allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
-    });
+    const allEnvDeployments = Utils.getAllEnvironmentDeployments(settings.environment, allEnvRevision);
 
     const toggleOpenConfirmDelete = (revisionName, revisionId) => {
         setRevisionToDelete([revisionName, revisionId]);
@@ -362,7 +367,9 @@ export default function Environments() {
     };
 
     const handleClickOpen = () => {
-        setOpen(true);
+        if (!isRestricted(['apim:api_create', 'apim:api_publish'], api)) {
+            setOpen(true);
+        }
     };
 
     const handleDeleteSelect = (event) => {
@@ -861,8 +868,7 @@ export default function Environments() {
         const openPopover = Boolean(anchorEl);
         item1 = (
             <Grid
-                container
-                direction='container'
+                className={classes.containerInline}
             >
                 <Grid item className={classes.shapeRec} />
                 <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -913,8 +919,7 @@ export default function Environments() {
     }
     const item2 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -925,8 +930,7 @@ export default function Environments() {
     );
     const item3 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -936,8 +940,7 @@ export default function Environments() {
     );
     const item4 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -954,8 +957,7 @@ export default function Environments() {
     );
     const item5 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -989,8 +991,7 @@ export default function Environments() {
         const openPopover = Boolean(anchorEl1);
         item6 = (
             <Grid
-                container
-                direction='container'
+                className={classes.containerInline}
             >
                 <Grid item className={classes.shapeRec} />
                 <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -1067,6 +1068,7 @@ export default function Environments() {
                                     )}
                                     size='small'
                                     type='submit'
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     startIcon={<RestoreIcon />}
                                 >
                                     <FormattedMessage
@@ -1079,9 +1081,9 @@ export default function Environments() {
                                     onClick={() => toggleOpenConfirmDelete(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
-                                    disabled={allEnvRevision && allEnvRevision.filter(
+                                    disabled={(allEnvRevision && allEnvRevision.filter(
                                         (o1) => o1.id === allRevisions[revision].id,
-                                    ).length !== 0}
+                                    ).length !== 0) || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1101,13 +1103,14 @@ export default function Environments() {
                             <Grid className={classes.textShape2}>
                                 {allRevisions[revision].displayName}
                             </Grid>
-                            <Grid>
+                            <Grid className={classes.textPadding}>
                                 <Button
                                     className={classes.textShape3}
                                     onClick={() => toggleOpenConfirmRestore(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     type='submit'
                                     startIcon={<RestoreIcon />}
                                 >
@@ -1121,9 +1124,9 @@ export default function Environments() {
                                     onClick={() => toggleOpenConfirmDelete(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
-                                    disabled={allEnvRevision && allEnvRevision.filter(
+                                    disabled={(allEnvRevision && allEnvRevision.filter(
                                         (o1) => o1.id === allRevisions[revision].id,
-                                    ).length !== 0}
+                                    ).length !== 0) || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1271,7 +1274,7 @@ export default function Environments() {
             )}
             {allRevisions && allRevisions.length !== 0 && (
                 <Grid md={12}>
-                    <Typography variant='h5' gutterBottom>
+                    <Typography id='itest-api-details-deployments-head' variant='h5' gutterBottom>
                         <FormattedMessage
                             id='Apis.Details.Environments.Environments.deployments.heading'
                             defaultMessage='Deployments'
@@ -1290,6 +1293,7 @@ export default function Environments() {
                 <Grid container>
                     <Button
                         onClick={toggleDeployRevisionPopup}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         variant='contained'
                         color='primary'
                         size='large'
@@ -1568,7 +1572,8 @@ export default function Environments() {
                             }
                             color='primary'
                             disabled={SelectedEnvironment.length === 0
-                                || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)}
+                                || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)
+                                || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.deploy.deploy'
@@ -1612,12 +1617,10 @@ export default function Environments() {
                         </Grid>
 
                     </Grid>
-                    <Box ml={6} lassName={classes.gridOverflow}>
+                    <Box className={classes.containerOverflow}>
                         <Grid
-                            container
-                            direction='row'
-                            alignItems='flex-start'
                             xs={12}
+                            className={classes.containerInline}
                         >
                             {items}
                             {confirmDeleteDialog}
@@ -1911,7 +1914,9 @@ export default function Environments() {
                                                         <Button
                                                             className={classes.button1}
                                                             variant='outlined'
-                                                            disabled={api.isRevision}
+                                                            disabled={api.isRevision
+                                                                || isRestricted(['apim:api_create',
+                                                                    'apim:api_publish'], api)}
                                                             onClick={() => undeployRevision(
                                                                 allEnvDeployments[row.name].revision.id, row.name,
                                                             )}

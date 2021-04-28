@@ -35,17 +35,24 @@ public class VHost {
     private Integer httpsPort = DEFAULT_HTTPS_PORT;
     private Integer wsPort = DEFAULT_WS_PORT;
     private Integer wssPort = DEFAULT_WSS_PORT;
+    private Integer websubHttpPort = DEFAULT_WEBSUB_HTTP_PORT;
+    private Integer websubHttpsPort = DEFAULT_WEBSUB_HTTPS_PORT;
 
     public static final int DEFAULT_HTTP_PORT = 80;
     public static final int DEFAULT_HTTPS_PORT = 443;
     public static final int DEFAULT_WS_PORT = 9099;
     public static final int DEFAULT_WSS_PORT = 8099;
+    public static final int DEFAULT_WEBSUB_HTTP_PORT = 9021;
+    public static final int DEFAULT_WEBSUB_HTTPS_PORT = 8021;
 
     public static final String HTTP_PROTOCOL = "http";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String WS_PROTOCOL = "ws";
     public static final String WSS_PROTOCOL = "wss";
     public static final String PROTOCOL_SEPARATOR = "://";
+
+    private static final String WEBSUB_HTTP_PROTOCOL = "websub_http";
+    private static final String WEBSUB_HTTPS_PROTOCOL = "websub_https";
 
     public VHost() {
     }
@@ -96,6 +103,22 @@ public class VHost {
 
     public void setWssPort(Integer wssPort) {
         this.wssPort = wssPort;
+    }
+
+    public Integer getWebsubHttpPort() {
+        return websubHttpPort;
+    }
+
+    public void setWebsubHttpPort(Integer websubHttpPort) {
+        this.websubHttpPort = websubHttpPort;
+    }
+
+    public Integer getWebsubHttpsPort() {
+        return websubHttpsPort;
+    }
+
+    public void setWebsubHttpsPort(Integer websubHttpsPort) {
+        this.websubHttpsPort = websubHttpsPort;
     }
 
     public String getHttpUrl() {
@@ -162,6 +185,14 @@ public class VHost {
                         // URL is not parsing for ws protocols, hence change to http
                         url = new URL(HTTP_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
                         vhost.setWsPort(url.getPort() < 0 ? DEFAULT_WS_PORT : url.getPort());
+                        break;
+                    case WEBSUB_HTTP_PROTOCOL:
+                        url = new URL(HTTP_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
+                        vhost.setWebsubHttpPort(url.getPort() < 0 ? DEFAULT_WEBSUB_HTTP_PORT : url.getPort());
+                        break;
+                    case WEBSUB_HTTPS_PROTOCOL:
+                        url = new URL(HTTPS_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
+                        vhost.setWebsubHttpsPort(url.getPort() < 0 ? DEFAULT_WEBSUB_HTTPS_PORT : url.getPort());
                         break;
                 }
             } catch (MalformedURLException e) {

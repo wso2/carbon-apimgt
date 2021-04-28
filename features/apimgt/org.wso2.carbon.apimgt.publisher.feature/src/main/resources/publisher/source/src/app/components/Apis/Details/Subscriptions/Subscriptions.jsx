@@ -30,6 +30,7 @@ import CONSTS from 'AppData/Constants';
 import Progress from 'AppComponents/Shared/Progress';
 import { FormattedMessage } from 'react-intl';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import { isRestricted } from 'AppData/AuthManager';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 import SubscriptionAvailability from './SubscriptionAvailability';
@@ -131,7 +132,7 @@ function Subscriptions(props) {
                         type='submit'
                         variant='contained'
                         color='primary'
-                        disabled={api.isRevision}
+                        disabled={api.isRevision || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         onClick={() => saveAPI()}
                     >
                         <FormattedMessage

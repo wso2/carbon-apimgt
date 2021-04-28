@@ -46,10 +46,8 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { isRestricted } from 'AppData/AuthManager';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Configurations from 'Config';
 import EditableRow from './EditableRow';
 
-const propertyDisplaySuffix = Configurations.app.propertyDisplaySuffix || '__display';
 const useStyles = makeStyles((theme) => ({
     root: {
         paddingTop: 0,
@@ -60,10 +58,6 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    button: {
-        marginLeft: theme.spacing(2),
-        color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     FormControl: {
         padding: 0,
@@ -187,7 +181,7 @@ function Properties(props) {
     const handleChange = (name) => (event) => {
         const { value } = event.target;
         if (name === 'propertyKey') {
-            setPropertyKey(isVisibleInStore ? value + propertyDisplaySuffix : value);
+            setPropertyKey(value);
         } else if (name === 'propertyValue') {
             setPropertyValue(value);
         }
@@ -204,8 +198,6 @@ function Properties(props) {
         if (itemValue === null) {
             return false;
         } else if (!isVisibleInStore && itemValue === '') {
-            return true;
-        } else if (isVisibleInStore && itemValue.replace(propertyDisplaySuffix, '') === '') {
             return true;
         } else {
             return false;
@@ -281,26 +273,42 @@ function Properties(props) {
      * @param {*} oldKey
      * @memberof Properties
      */
-    const handleDelete = (apiAdditionalProperties, oldKey) => {
-        const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
-
-        if (Object.prototype.hasOwnProperty.call(additionalPropertiesCopy, oldKey)) {
-            delete additionalPropertiesCopy[oldKey];
-        }
+    const handleDelete = (oldKey) => {
+        let additionalPropertiesCopy = cloneDeep(additionalProperties);
+        additionalPropertiesCopy = additionalPropertiesCopy.filter((property) => property.name !== oldKey);
         setAdditionalProperties(additionalPropertiesCopy);
 
         if (additionalPropertiesCopy !== additionalProperties) {
             setIsAdditionalPropertiesStale(true);
         }
     };
-    const validateBeforeAdd = (fieldKey, fieldValue, additionalPropertiesCopy, action = 'add') => {
-        if (additionalPropertiesCopy[fieldKey] != null && action === 'add') {
-            Alert.warning(intl.formatMessage({
-                id: `Apis.Details.Properties.Properties.
-                    property.name.exists`,
-                defaultMessage: 'Property name already exists',
-            }));
-            return false;
+    const validateBeforeAdd = (fieldKey, fieldValue, additionalPropertiesCopy, action = 'add', oldKey) => {
+        if (additionalPropertiesCopy != null && action === 'add') {
+            let valid = true;
+            additionalPropertiesCopy.forEach((property) => {
+                if (property.name === fieldKey) {
+                    Alert.warning(intl.formatMessage({
+                        id: `Apis.Details.Properties.Properties.
+                            property.name.exists`,
+                        defaultMessage: 'Property name already exists',
+                    }));
+                    valid = false;
+                }
+            });
+            return valid;
+        } else if (additionalPropertiesCopy != null && action === 'update' && oldKey === fieldKey) {
+            let valid = true;
+            additionalPropertiesCopy.forEach((property) => {
+                if (property.name === fieldKey) {
+                    Alert.warning(intl.formatMessage({
+                        id: `Apis.Details.Properties.Properties.
+                                property.name.exists`,
+                        defaultMessage: 'Property name already exists',
+                    }));
+                    valid = false;
+                }
+            });
+            return valid;
         } else if (validateEmpty(fieldKey) || validateEmpty(fieldValue)) {
             Alert.warning(intl.formatMessage({
                 id: `Apis.Details.Properties.Properties.
@@ -330,11 +338,11 @@ function Properties(props) {
      * @memberof Properties
      */
     const handleUpdateList = (oldRow, newRow) => {
-        // const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
+        const additionalPropertiesCopy = cloneDeep(additionalProperties);
 
-        const { oldKey, oldValue } = oldRow;
-        const { newKey, newValue } = newRow;
-        if (oldKey === newKey && oldValue === newValue) {
+        const { oldKey, oldValue, isDisplayInStore } = oldRow;
+        const { newKey, newValue, display } = newRow;
+        if (oldKey === newKey && oldValue === newValue && isDisplayInStore === display) {
             Alert.warning(intl.formatMessage({
                 id: `Apis.Details.Properties.Properties.
                     no.changes.to.save`,
@@ -342,20 +350,26 @@ function Properties(props) {
             }));
             return false;
         }
-        if (!validateBeforeAdd(newKey, newValue, additionalProperties, 'update')) {
+        if (!validateBeforeAdd(newKey, newValue, additionalPropertiesCopy, 'update')) {
             return false;
         }
 
-        if (Object.prototype.hasOwnProperty.call(additionalProperties, newKey) && oldKey === newKey) {
-            // Only the value is updated
-            if (newValue && oldValue !== newValue) {
-                additionalProperties[oldKey] = newValue;
+        const newProperty = {
+            name: newKey,
+            value: newValue,
+            display,
+        };
+        let newPropertiesList = additionalPropertiesCopy.map((property) => {
+            if (property.name === newKey) {
+                return newProperty;
             }
-        } else {
-            delete additionalProperties[oldKey];
-            additionalProperties[newKey] = newValue;
+            return property;
+        });
+        if (oldKey !== newKey) {
+            newPropertiesList = newPropertiesList.filter((property) => property.name !== oldKey);
+            newPropertiesList = [...newPropertiesList, newProperty];
         }
-        setAdditionalProperties(additionalProperties);
+        setAdditionalProperties(newPropertiesList);
         return true;
     };
     /**
@@ -365,10 +379,14 @@ function Properties(props) {
      * @memberof Properties
      */
     const handleAddToList = () => {
-        const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
+        const additionalPropertiesCopy = cloneDeep(additionalProperties);
         if (validateBeforeAdd(propertyKey, propertyValue, additionalPropertiesCopy, 'add')) {
-            additionalPropertiesCopy[propertyKey] = propertyValue;
-            setAdditionalProperties(additionalPropertiesCopy);
+            const newProperty = {
+                name: propertyKey,
+                value: propertyValue,
+                display: isVisibleInStore,
+            };
+            setAdditionalProperties([...additionalPropertiesCopy, newProperty]);
             setPropertyKey(null);
             setPropertyValue(null);
         }
@@ -386,13 +404,6 @@ function Properties(props) {
     };
 
     const handleChangeVisibleInStore = (event) => {
-        if (event.target.checked) {
-            setPropertyKey(propertyKey + propertyDisplaySuffix);
-        } else {
-            setPropertyKey(propertyKey.indexOf(propertyDisplaySuffix) !== -1
-                ? propertyKey.replace(propertyDisplaySuffix, '')
-                : propertyKey);
-        }
         setIsVisibleInStore(event.target.checked);
     };
     /**
@@ -404,12 +415,12 @@ function Properties(props) {
      * @memberof Properties
      */
     const renderAdditionalProperties = () => {
-        const items = [];
-        for (const key in additionalProperties) {
-            if (Object.prototype.hasOwnProperty.call(additionalProperties, key)) {
-                items.push(<EditableRow
-                    oldKey={key}
-                    oldValue={additionalProperties[key]}
+        const items = additionalProperties.map((property) => {
+            return (
+                <EditableRow
+                    oldKey={property.name}
+                    oldValue={property.value}
+                    isDisplayInStore={property.display}
                     handleUpdateList={handleUpdateList}
                     handleDelete={handleDelete}
                     apiAdditionalProperties={additionalProperties}
@@ -419,16 +430,14 @@ function Properties(props) {
                     api={api}
                     validateEmpty={validateEmpty}
                     isKeyword={isKeyword}
-                />);
-            }
-        }
+                />
+            );
+        });
         return items;
     };
     const getKeyValue = () => {
         if (propertyKey === null) {
             return '';
-        } else if (propertyKey.indexOf(propertyDisplaySuffix) !== -1) {
-            return propertyKey.replace(propertyDisplaySuffix, '');
         } else {
             return propertyKey;
         }
@@ -444,15 +453,25 @@ function Properties(props) {
             <div className={classes.titleWrapper}>
                 {api.apiType === API.CONSTS.APIProduct
                     ? (
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography
+                            id='itest-api-details-api-products-properties-head'
+                            variant='h4'
+                            align='left'
+                            className={classes.mainTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Properties.Properties.api.product.properties'
-                                defaultMessage='API Properties'
+                                defaultMessage='API Product Properties'
                             />
                         </Typography>
                     )
                     : (
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography
+                            id='itest-api-details-api-properties-head'
+                            variant='h4'
+                            align='left'
+                            className={classes.mainTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Properties.Properties.api.properties'
                                 defaultMessage='API Properties'
@@ -461,19 +480,22 @@ function Properties(props) {
                     )}
 
                 {(!isEmpty(additionalProperties) || showAddProperty) && (
-                    <Button
-                        size='small'
-                        className={classes.button}
-                        onClick={toggleAddProperty}
-                        disabled={showAddProperty
+                    <Box ml={1}>
+                        <Button
+                            variant='outlined'
+                            color='primary'
+                            size='small'
+                            onClick={toggleAddProperty}
+                            disabled={showAddProperty
                             || isRestricted(['apim:api_create', 'apim:api_publish'], api) || api.isRevision}
-                    >
-                        <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage
-                            id='Apis.Details.Properties.Properties.add.new.property'
-                            defaultMessage='Add New Property'
-                        />
-                    </Button>
+                        >
+                            <AddCircle className={classes.buttonIcon} />
+                            <FormattedMessage
+                                id='Apis.Details.Properties.Properties.add.new.property'
+                                defaultMessage='Add New Property'
+                            />
+                        </Button>
+                    </Box>
                 )}
             </div>
             <Typography variant='caption' component='div' className={classes.helpText}>
@@ -520,9 +542,8 @@ function Properties(props) {
                                 )}
                             <div className={classes.actions}>
                                 <Button
-                                    variant='contained'
+                                    variant='outlined'
                                     color='primary'
-                                    className={classes.button}
                                     onClick={toggleAddProperty}
                                     disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                         || api.isRevision}

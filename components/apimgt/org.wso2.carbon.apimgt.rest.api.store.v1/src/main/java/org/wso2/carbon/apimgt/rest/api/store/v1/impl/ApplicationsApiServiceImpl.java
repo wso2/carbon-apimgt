@@ -91,7 +91,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,10 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
-import javax.validation.Valid;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -240,7 +236,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = ImportUtils
-                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application.getId(),
+                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application,
                                 update, apiConsumer);
             }
             Application importedApplication = apiConsumer.getApplicationById(application.getId());
@@ -590,7 +586,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String[] splitToken = apiKey.split("\\.");
                 String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
                 String certAlias = APIUtil.getSigningAlias(splitToken);
-                Certificate certificate = APIUtil.getCertificateFromTrustStore(certAlias);
+                Certificate certificate = APIUtil.getCertificateFromParentTrustStore(certAlias);
                 if(APIUtil.verifyTokenSignature(splitToken, certificate, signatureAlgorithm)) {
                     APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                     Application application = apiConsumer.getApplicationByUUID(applicationId);

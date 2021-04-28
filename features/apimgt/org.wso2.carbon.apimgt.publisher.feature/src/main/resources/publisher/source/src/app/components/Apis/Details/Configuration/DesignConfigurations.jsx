@@ -20,6 +20,7 @@ import React, {
     useReducer,
     useContext,
     useState,
+    useMemo,
     useEffect,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
@@ -30,11 +31,6 @@ import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import CONSTS from 'AppData/Constants';
@@ -46,7 +42,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api.js';
 import APIProduct from 'AppData/APIProduct';
 import DefaultVersion from './components/DefaultVersion';
-import MarkdownEditor from './components/MarkdownEditor';
+import DescriptionEditor from './components/DescriptionEditor';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
@@ -151,8 +147,62 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        additionalProperties: { ...api.additionalProperties },
+        additionalProperties: [...api.additionalProperties],
     };
+}
+
+/**
+     *
+     * Reduce the configuration UI related actions in to updated state
+     * @param {*} state current state
+     * @param {*} configAction dispatched configuration action
+     * @returns {Object} updated state
+     */
+function configReducer(state, configAction) {
+    const { action, value } = configAction;
+    const nextState = copyAPIConfig(state);
+    switch (action) {
+        case 'description':
+        case 'isDefaultVersion':
+        case 'authorizationHeader':
+        case 'responseCachingEnabled':
+        case 'cacheTimeout':
+        case 'enableSchemaValidation':
+        case 'visibility':
+        case 'maxTps':
+        case 'categories':
+        case 'tags':
+            nextState[action] = value;
+            return nextState;
+        case 'accessControl':
+            nextState[action] = value;
+            if (value === 'NONE') {
+                nextState.accessControlRoles = [];
+            }
+            return nextState;
+        case 'accessControlRoles':
+            return { ...copyAPIConfig(state), [action]: value };
+        case 'visibleRoles':
+            return { ...copyAPIConfig(state), [action]: value };
+        case 'github_repo':
+        case 'slack_url': {
+            const targetProperty = nextState.additionalProperties.find((property) => property.name === action);
+            const updatedProperty = {
+                name: action,
+                value,
+                display: true,
+            };
+            if (targetProperty) {
+                nextState.additionalProperties = [
+                    ...nextState.additionalProperties.filter((property) => property.name !== action), updatedProperty];
+            } else {
+                nextState.additionalProperties.push(updatedProperty);
+            }
+            return nextState;
+        }
+        default:
+            return state;
+    }
 }
 /**
  * This component handles the basic configurations UI in the API details page
@@ -162,47 +212,6 @@ function copyAPIConfig(api) {
  * @returns
  */
 export default function DesignConfigurations() {
-    /**
-     *
-     * Reduce the configuration UI related actions in to updated state
-     * @param {*} state current state
-     * @param {*} configAction dispatched configuration action
-     * @returns {Object} updated state
-     */
-    function configReducer(state, configAction) {
-        const { action, value } = configAction;
-        const nextState = copyAPIConfig(state);
-        switch (action) {
-            case 'description':
-            case 'isDefaultVersion':
-            case 'authorizationHeader':
-            case 'responseCachingEnabled':
-            case 'cacheTimeout':
-            case 'enableSchemaValidation':
-            case 'visibility':
-            case 'maxTps':
-            case 'categories':
-            case 'tags':
-                nextState[action] = value;
-                return nextState;
-            case 'accessControl':
-                nextState[action] = value;
-                if (value === 'NONE') {
-                    nextState.accessControlRoles = [];
-                }
-                return nextState;
-            case 'accessControlRoles':
-                return { ...copyAPIConfig(state), [action]: value };
-            case 'visibleRoles':
-                return { ...copyAPIConfig(state), [action]: value };
-            case 'github_repo':
-            case 'slack_url':
-                nextState.additionalProperties[action] = value;
-                return nextState;
-            default:
-                return state;
-        }
-    }
     const { api, updateAPI } = useContext(APIContext);
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
@@ -210,7 +219,11 @@ export default function DesignConfigurations() {
     const [descriptionType, setDescriptionType] = useState('');
     const [overview, setOverview] = useState('');
     const [overviewDocument, setOverviewDocument] = useState(null);
-
+    const [slackURLProperty, githubURLProperty] = useMemo(() => [
+        apiConfig.additionalProperties.find((prop) => prop.name === 'slack_url'),
+        apiConfig.additionalProperties.find((prop) => prop.name === 'github_repo'),
+    ],
+    [apiConfig.additionalProperties]);
     const invalidTagsExist = apiConfig.tags.find((tag) => {
         return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag));
     });
@@ -353,13 +366,16 @@ export default function DesignConfigurations() {
         }
         setIsUpdating(false);
     }
-
+    const isDisabled = isUpdating || api.isRevision || invalidTagsExist
+    || isRestricted(['apim:api_create', 'apim:api_publish'], api)
+    || (apiConfig.visibility === 'RESTRICTED'
+        && apiConfig.visibleRoles.length === 0);
     return (
         <>
             <Container maxWidth='md'>
                 <Grid container spacing={2}>
                     <Grid item md={12}>
-                        <Typography variant='h5'>
+                        <Typography id='itest-api-details-design-config-head' variant='h5'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.Design.topic.header'
                                 defaultMessage='Design Configurations'
@@ -401,30 +417,12 @@ export default function DesignConfigurations() {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} md={10}>
-                                                <FormControl component='fieldset'>
-                                                    <FormLabel component='legend'>Description Type</FormLabel>
-                                                    <RadioGroup
-                                                        row
-                                                        aria-label='description-type'
-                                                        value={descriptionType}
-                                                        onChange={handleChange}
-                                                    >
-                                                        <FormControlLabel
-                                                            value={CONSTS.DESCRIPTION_TYPES.DESCRIPTION}
-                                                            control={<Radio />}
-                                                            label='Description'
-                                                        />
-                                                        <FormControlLabel
-                                                            value={CONSTS.DESCRIPTION_TYPES.OVERVIEW}
-                                                            control={<Radio />}
-                                                            label='Overview'
-                                                        />
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <MarkdownEditor
+                                                <DescriptionEditor
                                                     api={apiConfig}
+                                                    disabled={isDisabled}
                                                     updateContent={updateContent}
                                                     descriptionType={descriptionType}
+                                                    handleChange={handleChange}
                                                     overview={overview}
                                                 />
                                             </Grid>
@@ -447,7 +445,11 @@ export default function DesignConfigurations() {
                                         />
                                     </Box>
                                     <Box py={1}>
-                                        <Social api={apiConfig} configDispatcher={configDispatcher} />
+                                        <Social
+                                            slackURL={slackURLProperty && slackURLProperty.value}
+                                            githubURL={githubURLProperty && githubURLProperty.value}
+                                            configDispatcher={configDispatcher}
+                                        />
                                     </Box>
                                     <Box py={1}>
                                         {api.apiType !== API.CONSTS.APIProduct && (
@@ -456,11 +458,7 @@ export default function DesignConfigurations() {
                                     </Box>
                                     <Box pt={2}>
                                         <Button
-                                            disabled={
-                                                isUpdating || api.isRevision || invalidTagsExist
-                                                || (apiConfig.visibility === 'RESTRICTED'
-                                                    && apiConfig.visibleRoles.length === 0)
-                                            }
+                                            disabled={isDisabled}
                                             type='submit'
                                             variant='contained'
                                             color='primary'

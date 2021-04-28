@@ -24,11 +24,13 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
+import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import Dropzone from 'react-dropzone';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -452,10 +454,7 @@ function EditMediationPolicy(props) {
                             onChange={handleChange}
                         >
                             {globalMediationPolicies.map((seq) => (
-                                <div>
-                                    <Button onClick={() => handleDownload(seq.id)}>
-                                        <Icon>arrow_downward</Icon>
-                                    </Button>
+                                <Box display='flex' justifyContent='space-between'>
                                     <FormControlLabel
                                         control={(
                                             <Radio
@@ -471,7 +470,24 @@ function EditMediationPolicy(props) {
                                         value={seq.name}
                                         checked={localSelectedPolicyFile.name === seq.name}
                                     />
-                                </div>
+                                    <Box mr={22}>
+                                        <Tooltip
+                                            title={(
+                                                <FormattedMessage
+                                                    id='Apis.Details.MediationPolicies.EditMediationPolicy.download'
+                                                    defaultMessage='Download'
+                                                />
+                                            )}
+                                            aria-label='Download policy'
+                                            placement='right-end'
+                                            interactive
+                                        >
+                                            <Button onClick={() => handleDownload(seq.id)}>
+                                                <Icon>vertical_align_bottom</Icon>
+                                            </Button>
+                                        </Tooltip>
+                                    </Box>
+                                </Box>
                             ))}
                         </RadioGroup>
                     )}

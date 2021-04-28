@@ -277,6 +277,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setApplicationName(APIConstants.BASIC_AUTH_APPLICATION_NAME);
                     authContext.setApplicationId(domainQualifiedUserName); //Set username as application ID in basic auth scenario
                     authContext.setApplicationUUID(domainQualifiedUserName); //Set username as application ID in basic auth scenario
+                    authContext.setSubscriber(APIConstants.BASIC_AUTH_APPLICATION_OWNER); //Set application owner in basic auth scenario
                     authContext.setConsumerKey(null);
                     APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
                 }

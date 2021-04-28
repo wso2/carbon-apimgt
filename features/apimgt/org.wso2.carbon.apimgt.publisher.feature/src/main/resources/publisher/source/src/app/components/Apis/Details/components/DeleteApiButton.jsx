@@ -3,20 +3,19 @@ import React from 'react';
 import {
     Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
 } from '@material-ui/core/';
-import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
-import Slide from '@material-ui/core/Slide';
 import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-
+import IconButton from '@material-ui/core/IconButton';
 import API from 'AppData/api';
 import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = (theme) => ({
     root: {
@@ -48,12 +47,13 @@ const styles = (theme) => ({
         paddingRight: theme.spacing(2),
     },
     delete: {
+        color: theme.custom.apis.listing.deleteButtonColor,
+        cursor: 'pointer',
+        padding: theme.spacing(0.4),
         display: 'flex',
         flexDirection: 'column',
         textAlign: 'center',
-        color: theme.custom.deleteButtonColor,
         justifyContent: 'center',
-        cursor: 'pointer',
     },
     linkText: {
         fontSize: theme.typography.fontSize,
@@ -195,25 +195,35 @@ class DeleteApiButton extends React.Component {
                         className={classNames({ [classes.inlineBlock]: updateData, [classes.flexBox]: !updateData })}
                     >
                         {!updateData && (<VerticalDivider height={70} />)}
-                        <a
-                            id='itest-id-deleteapi-icon-button'
-                            onClick={this.handleRequestOpen}
-                            onKeyDown={this.handleRequestOpen}
-                            className={classes.delete}
-                        >
-                            <div>
+                        <Box className={classes.delete}>
+                            <IconButton
+                                id='itest-id-deleteapi-icon-button'
+                                onClick={this.handleRequestOpen}
+                                onKeyDown={this.handleRequestOpen}
+                                className={classes.delete}
+                                disabled={isRestricted(['apim:api_delete'], api)}
+                                aria-label='delete'
+                                disableFocusRipple
+                                disableRipple
+                            >
                                 <DeleteIcon />
-                            </div>
-                            <Typography variant='caption'>
+                            </IconButton>
+                            <Box
+                                fontFamily='fontFamily'
+                                fontSize='caption.fontSize'
+                                onClick={this.handleRequestOpen}
+                                onKeyDown={this.handleRequestOpen}
+                            >
+
                                 <FormattedMessage
                                     id='Apis.Details.components.DeleteApiButton.delete'
                                     defaultMessage='Delete'
                                 />
-                            </Typography>
-                        </a>
+                            </Box>
+                        </Box>
                     </Box>
                 </ScopeValidation>
-                <Dialog open={this.state.openMenu} transition={Slide}>
+                <Dialog open={this.state.openMenu}>
                     <DialogTitle>
                         <FormattedMessage
                             id='Apis.Details.components.DeleteApiButton.title'

@@ -8,7 +8,6 @@ import java.util.Set;
 public class GatewayArtifactSynchronizerProperties {
 
     private boolean saveArtifactsEnabled = false;
-    private boolean publishDirectlyToGatewayEnabled = true;
     private boolean retrieveFromStorageEnabled = false;
     private String saverName = APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME;
     private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
@@ -70,14 +69,8 @@ public class GatewayArtifactSynchronizerProperties {
         this.gatewayLabels = gatewayLabels;
     }
 
-    public boolean isPublishDirectlyToGatewayEnabled() {
-
-        return publishDirectlyToGatewayEnabled;
-    }
-
     public void setPublishDirectlyToGatewayEnabled(boolean publishDirectlyToGatewayEnabled) {
 
-        this.publishDirectlyToGatewayEnabled = publishDirectlyToGatewayEnabled;
     }
 
     public boolean isRetrieveFromStorageEnabled() {

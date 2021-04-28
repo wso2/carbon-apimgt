@@ -130,6 +130,10 @@ const suggestions = {
             route: 'configuration',
         },
         {
+            label: 'Thumbnail',
+            route: 'configuration',
+        },
+        {
             label: 'Description',
             route: 'configuration',
         },
@@ -176,6 +180,14 @@ const suggestions = {
         {
             label: 'Subscription Availability',
             route: 'subscriptions',
+        },
+        {
+            label: 'Revisions',
+            route: 'deployments',
+        },
+        {
+            label: 'VHosts',
+            route: 'deployments',
         },
     ],
     apiOnly: [

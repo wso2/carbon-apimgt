@@ -45,7 +45,9 @@ public final class RestApiConstants {
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+    public static final String CREATOR_SCOPE = "apim:api_create";
     public static final String ADMIN_SCOPE = "apim:admin";
+    public static final String PUBLISHER_SCOPE = "apim:api_publish";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
@@ -302,6 +304,6 @@ public final class RestApiConstants {
     public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
 
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
-            Arrays.asList("jpg", "png", "jpeg", "gif"));
+            Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
 }

@@ -645,7 +645,9 @@ public class OAS3Parser extends APIDefinition {
         if (StringUtils.isEmpty(openAPI.getInfo().getVersion())) {
             openAPI.getInfo().setVersion(swaggerData.getVersion());
         }
-        preserveResourcePathOrderFromAPI(swaggerData, openAPI);
+        if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+            preserveResourcePathOrderFromAPI(swaggerData, openAPI);
+        }
         return Json.pretty(openAPI);
     }
 

@@ -10,12 +10,15 @@ import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 import Avatar from '@material-ui/core/Avatar';
 import { Link as RouterLink } from 'react-router-dom';
+import { isRestricted } from 'AppData/AuthManager';
 import Link from '@material-ui/core/Link';
 import Tooltip from '@material-ui/core/Tooltip';
 import Chip from '@material-ui/core/Chip';
 
 import CreateAPIButton from 'AppComponents/ServiceCatalog/CreateApi';
 import DeleteServiceButton from 'AppComponents/ServiceCatalog/Listing/Delete';
+import LetterGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/LetterGenerator';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -88,9 +91,10 @@ export default function ServiceCard(props) {
             >
                 <CardMedia
                     className={classes.media}
-                    image={`${Configurations.app.context}/site/public/images/service_catalog/`
-                        + 'wso2micro-integrator-active_bright.png'}
-                    title={service.name}
+                    component={LetterGenerator}
+                    width={theme.spacing(25)}
+                    height={theme.spacing(15)}
+                    artifact={service}
                 />
                 <Box p={1} pb={0}>
                     <Tooltip placement='top-start' interactive title={service.name}>
@@ -187,23 +191,26 @@ export default function ServiceCard(props) {
                                 </Box>
                             </Grid>
                         </Box>
-                        <Grid item>
-                            <CreateAPIButton
-                                isIconButton
-                                serviceDisplayName={service.name}
-                                serviceKey={service.serviceKey}
-                                definitionType={service.definitionType}
-                                serviceVersion={service.version}
-                                serviceUrl={service.serviceUrl}
-                            />
-                            <DeleteServiceButton
-                                id='itest-service-card-delete'
-                                serviceDisplayName={service.name}
-                                serviceId={service.id}
-                                onDelete={onDelete}
-                                isIconButton
-                            />
-                        </Grid>
+                        {!isRestricted(['apim:api_create']) && (
+                            <Grid item>
+                                <CreateAPIButton
+                                    isIconButton
+                                    serviceDisplayName={service.name}
+                                    serviceKey={service.serviceKey}
+                                    definitionType={service.definitionType}
+                                    serviceVersion={service.version}
+                                    serviceUrl={service.serviceUrl}
+                                    usage={service.usage}
+                                />
+                                <DeleteServiceButton
+                                    id='itest-service-card-delete'
+                                    serviceDisplayName={service.name}
+                                    serviceId={service.id}
+                                    onDelete={onDelete}
+                                    isIconButton
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 </Box>
             </Link>

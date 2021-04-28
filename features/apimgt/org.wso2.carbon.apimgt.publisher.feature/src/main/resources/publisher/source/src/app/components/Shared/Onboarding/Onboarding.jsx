@@ -11,14 +11,6 @@ const useStyles = makeStyles({
     root: {
         flexGrow: 1,
     },
-    dividerCls: {
-        height: '180px',
-        position: 'absolute',
-        top: '50%',
-        '-ms-transform': 'translateY(-50%)',
-        transform: 'translateY(-50%)',
-        margin: 'auto',
-    },
 });
 
 const Onboarding = (props) => {
@@ -33,7 +25,6 @@ const Onboarding = (props) => {
                 container
                 direction='column'
                 justify='center'
-                spacing={5}
             >
                 <Grid item xs={12}>
                     <Box pt={isXsOrBelow ? 2 : 7} />
@@ -56,7 +47,6 @@ const Onboarding = (props) => {
                             direction='row'
                             justify='center'
                             alignItems='flex-start'
-                            spacing={3}
                         >
                             {children}
                         </Grid>

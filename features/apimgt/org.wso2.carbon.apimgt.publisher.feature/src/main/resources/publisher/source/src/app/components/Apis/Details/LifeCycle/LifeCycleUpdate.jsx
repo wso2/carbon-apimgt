@@ -31,6 +31,7 @@ import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
+import PublishWithoutDeploy from 'AppComponents/Apis/Details/LifeCycle/Components/PublishWithoutDeploy';
 import Configurations from 'Config';
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
@@ -82,7 +83,33 @@ class LifeCycleUpdate extends Component {
             newState: null,
             isUpdating: null,
             pageError: null,
+            isOpen: false,
+            deploymentsAvailable: false,
         };
+        this.setIsOpen = this.setIsOpen.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    /**
+     *
+     * Set Deployment availability
+     */
+    componentDidMount() {
+        const {
+            api: { id: apiUUID },
+        } = this.props;
+        this.api.getRevisionsWithEnv(apiUUID).then((result) => {
+            this.setState({ deploymentsAvailable: result.body.count > 0 });
+        });
+    }
+
+    /**
+     *
+     * Set isOpen state of the dialog box which shows the caution message when publish without deploying
+     * @param {Boolean} isOpen Should dialog box is open or not
+     */
+    setIsOpen(isOpen) {
+        this.setState({ isOpen });
     }
 
     /**
@@ -102,9 +129,10 @@ class LifeCycleUpdate extends Component {
         promisedUpdate
             .then((response) => {
                 /* TODO: Handle IO erros ~tmkb */
+                // get the latest state of the API
+                this.context.updateAPI();
                 const newState = response.body.lifecycleState.state;
                 const { workflowStatus } = response.body;
-                this.context.updateAPI({ enableStore: true });
                 this.setState({ newState });
                 const { intl } = this.props;
 
@@ -139,11 +167,24 @@ class LifeCycleUpdate extends Component {
 
     /**
      *
+     * Set handle click warning
+     */
+    handleClick() {
+        const {
+            api: { id: apiUUID },
+        } = this.props;
+        this.setIsOpen(false);
+        this.updateLCStateOfAPI(apiUUID, 'Publish');
+    }
+
+    /**
+     *
      *
      * @param {*} event event
      * @memberof LifeCycleUpdate
      */
     updateLifeCycleState(event) {
+        const { deploymentsAvailable } = this.state;
         event.preventDefault();
         let action = event.currentTarget.getAttribute('data-value');
         if (action === 'Deploy To Test') {
@@ -152,7 +193,11 @@ class LifeCycleUpdate extends Component {
         const {
             api: { id: apiUUID },
         } = this.props;
-        this.updateLCStateOfAPI(apiUUID, action);
+        if (action === 'Publish' && !deploymentsAvailable) {
+            this.setIsOpen(true);
+        } else {
+            this.updateLCStateOfAPI(apiUUID, action);
+        }
     }
 
     /**
@@ -164,7 +209,7 @@ class LifeCycleUpdate extends Component {
             api, lcState, classes, theme, handleChangeCheckList, checkList, certList,
         } = this.props;
         const lifecycleStates = [...lcState.availableTransitions];
-        const { newState, pageError } = this.state;
+        const { newState, pageError, isOpen } = this.state;
         const isWorkflowPending = api.workflowStatus && api.workflowStatus === this.WORKFLOW_STATUS.CREATED;
         const lcMap = new Map();
         lcMap.set('Published', 'Publish');
@@ -183,6 +228,9 @@ class LifeCycleUpdate extends Component {
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
+                if (state.displayName === 'Deploy as a Prototype') {
+                    state.displayName = 'Prototype';
+                }
                 return {
                     ...state,
                     disabled: !isPrototype || (api.type !== 'WEBSUB' && api.endpointConfig == null),
@@ -299,6 +347,12 @@ class LifeCycleUpdate extends Component {
                     </Grid>
                 )}
                 {/* end of Page error banner */}
+                <PublishWithoutDeploy
+                    apiID={api.id}
+                    handleClick={this.handleClick}
+                    handleClose={() => this.setIsOpen(false)}
+                    open={isOpen}
+                />
             </Grid>
         );
     }

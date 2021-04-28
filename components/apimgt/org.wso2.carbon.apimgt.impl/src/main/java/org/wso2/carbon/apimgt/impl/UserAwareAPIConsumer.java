@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
  * User aware APIConsumer implementation which ensures that the invoking user has the
@@ -55,8 +54,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     @Override
     public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper,
-                                                String userId, int applicationId) throws APIManagementException {
-        return super.addSubscription(apiTypeWrapper, userId, applicationId);
+                                                String userId, Application application) throws APIManagementException {
+        return super.addSubscription(apiTypeWrapper, userId, application);
     }
 
     @Override
@@ -134,5 +133,13 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         //TO-DO Commented to since need to work for monodb should be move to registry persistent impl
 //        checkAccessControlPermission(identifier);
         return apiTypeWrapper;
+    }
+
+    @Override
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+        API api = super.getLightweightAPI(identifier, orgId);
+        checkVisibilityPermission(userNameWithoutChange, api.getVisibility(),
+                api.getVisibleRoles());
+        return api;
     }
 }
