@@ -49,7 +49,13 @@ const styles = (theme) => ({
         display: 'flex',
         alignItems: 'center',
         '& span': {
-            marginLeft: theme.spacing(1),
+            marginLeft: theme.spacing(),
+        },
+        '& span.material-icons': {
+            marginLeft: 0,
+            color: '#444',
+            marginRight: theme.spacing(),
+            fontSize: 18,
         },
     },
 });
