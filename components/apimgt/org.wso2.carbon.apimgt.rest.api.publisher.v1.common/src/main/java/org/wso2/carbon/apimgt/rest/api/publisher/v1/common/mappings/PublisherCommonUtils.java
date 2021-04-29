@@ -586,12 +586,13 @@ public class PublisherCommonUtils {
      * @param additionalProperties Map<String, String>  properties to validate
      * @return error message if there is an validation error with additional properties.
      */
-    public static String validateAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+    public static String validateAdditionalProperties(Map<String, APIAdditionalPropertiesDTO> additionalProperties) {
 
         if (additionalProperties != null) {
-            for (APIAdditionalPropertiesDTO property : additionalProperties) {
-                String propertyKey = property.getName();
-                String propertyValue = property.getValue();
+
+            for (Map.Entry<String, APIAdditionalPropertiesDTO> property : additionalProperties.entrySet()) {
+                String propertyKey = property.getKey();
+                String propertyValue = property.getValue().getValue();
                 if (propertyKey.contains(" ")) {
                     return "Property names should not contain space character. Property '" + propertyKey + "' "
                             + "contains space in it.";

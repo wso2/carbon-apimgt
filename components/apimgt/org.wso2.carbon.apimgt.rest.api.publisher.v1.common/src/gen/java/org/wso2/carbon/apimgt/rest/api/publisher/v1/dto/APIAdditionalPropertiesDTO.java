@@ -20,26 +20,8 @@ import javax.validation.Valid;
 
 public class APIAdditionalPropertiesDTO   {
   
-    private String name = null;
     private String value = null;
-    private Boolean display = null;
-
-  /**
-   **/
-  public APIAdditionalPropertiesDTO name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
-  }
+    private Boolean display = false;
 
   /**
    **/
@@ -85,14 +67,13 @@ public class APIAdditionalPropertiesDTO   {
       return false;
     }
     APIAdditionalPropertiesDTO apIAdditionalProperties = (APIAdditionalPropertiesDTO) o;
-    return Objects.equals(name, apIAdditionalProperties.name) &&
-        Objects.equals(value, apIAdditionalProperties.value) &&
+    return Objects.equals(value, apIAdditionalProperties.value) &&
         Objects.equals(display, apIAdditionalProperties.display);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, value, display);
+    return Objects.hash(value, display);
   }
 
   @Override
@@ -100,7 +81,6 @@ public class APIAdditionalPropertiesDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIAdditionalPropertiesDTO {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("    display: ").append(toIndentedString(display)).append("\n");
     sb.append("}");

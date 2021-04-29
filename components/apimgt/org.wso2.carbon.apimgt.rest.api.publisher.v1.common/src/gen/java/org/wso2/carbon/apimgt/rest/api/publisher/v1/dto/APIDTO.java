@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
@@ -177,7 +179,7 @@ return null;
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
+    private Map<String, APIAdditionalPropertiesDTO> additionalProperties = new HashMap<String, APIAdditionalPropertiesDTO>();
     private APIMonetizationInfoDTO monetization = null;
 
     @XmlType(name="AccessControlEnum")
@@ -824,21 +826,20 @@ return null;
   }
 
   /**
-   * Map of custom properties of API
    **/
-  public APIDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public APIDTO additionalProperties(Map<String, APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Map of custom properties of API")
+  @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public Map<String, APIAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(Map<String, APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 

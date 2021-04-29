@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import javax.validation.constraints.*;
 
@@ -27,7 +29,7 @@ public class APIInfoDTO   {
     private String name = null;
     private String description = null;
     private String context = null;
-    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
+    private Map<String, APIAdditionalPropertiesDTO> additionalProperties = new HashMap<String, APIAdditionalPropertiesDTO>();
     private String version = null;
     private String provider = null;
     private String type = null;
@@ -107,21 +109,20 @@ public class APIInfoDTO   {
   }
 
   /**
-   * Map of custom properties of API
    **/
-  public APIInfoDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public APIInfoDTO additionalProperties(Map<String, APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Map of custom properties of API")
+  @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public Map<String, APIAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(Map<String, APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
