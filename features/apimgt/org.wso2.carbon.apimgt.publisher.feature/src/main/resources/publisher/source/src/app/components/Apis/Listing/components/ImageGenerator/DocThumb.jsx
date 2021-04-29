@@ -16,13 +16,13 @@
  * under the License.
  */
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import green from '@material-ui/core/colors/green';
 
@@ -43,6 +43,73 @@ const styles = (theme) => ({
         color: green[200],
         position: 'absolute',
         marginLeft: '200px',
+    },
+    thumbHeader: {
+        width: '90%',
+        whiteSpace: 'nowrap',
+        color: theme.palette.text.secondary,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        'padding-left': '5px',
+    },
+    imageWrapper: {
+        color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        width: theme.custom.thumbnail.width + theme.spacing(1),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    thumbContent: {
+        width: theme.custom.thumbnail.width - theme.spacing(1),
+        backgroundColor: theme.palette.background.paper,
+        padding: theme.spacing(1),
+    },
+    thumbLeft: {
+        alignSelf: 'flex-start',
+        flex: 1,
+        'padding-left': '5px',
+        'padding-right': '65px',
+    },
+    thumbRight: {
+        alignSelf: 'flex-end',
+    },
+    thumbInfo: {
+        display: 'flex',
+    },
+    contextBox: {
+        width: '110px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        display: 'inline-block',
+        lineHeight: '1em',
+        'padding-top': 5,
+        'padding-right': 5,
+        'padding-bottom': 1.5,
+        textAlign: 'left',
+    },
+    imageOverlap: {
+        position: 'absolute',
+        bottom: 1,
+        backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
+    },
+    row: {
+        display: 'inline-block',
+    },
+    textWrapper: {
+        color: theme.palette.text.secondary,
+        textDecoration: 'none',
+    },
+    thumbBy: {
+        'padding-left': '5px',
+    },
+    thumbRightBy: {
+        'margin-right': '5px',
     },
 });
 
@@ -83,7 +150,6 @@ class DocThumb extends Component {
     render() {
         const { classes, doc } = this.props;
         const { isHover } = this.state;
-
         return (
             <Card
                 onMouseOver={this.toggleMouseOver}
@@ -94,40 +160,55 @@ class DocThumb extends Component {
                 className={classes.card}
             >
                 <CardMedia src='None' component={BaseThumbnail} height={140} title='Thumbnail' api={doc} />
-                <CardContent className={classes.docDetails}>
-                    <Typography gutterBottom variant='h5' component='h2'>
-                        {doc.name}
-                    </Typography>
-                    <Grid container>
-                        <Grid item md={6}>
+                <CardContent className={classes.apiDetails}>
+                    <div className={classes.textWrapper}>
+                        <Link to='/'>
+                            <Typography gutterBottom variant='h4' className={classes.thumbHeader} title={doc.name}>
+                                {doc.name}
+                            </Typography>
+                        </Link>
+                    </div>
+                    <div className={classes.row}>
+                        <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
                             <FormattedMessage
                                 id='Apis.Listing.components.ImageGenerator.DocThumb.sourceType'
-                                defaultMessage='Source Type'
+                                defaultMessage='Source Type:'
                             />
-:
-                            <Typography variant='body1'>{doc.sourceType}</Typography>
-                        </Grid>
-                        <Grid item md={6}>
-                            <FormattedMessage
-                                id='Apis.Listing.components.ImageGenerator.DocThumb.apiName'
-                                defaultMessage='API Name'
-                            />
-:
-                            <Typography className={classes.providerText} variant='body1' gutterBottom>
-                                {doc.apiName}
-                            </Typography>
-                        </Grid>
-                        <Grid item md={6}>
-                            <FormattedMessage
-                                id='Apis.Listing.components.ImageGenerator.DocThumb.apiVersion'
-                                defaultMessage='API Version'
-                            />
-:
-                            <Typography variant='body1' gutterBottom>
-                                {doc.apiVersion}
-                            </Typography>
-                        </Grid>
-                    </Grid>
+                            {doc.sourceType}
+                        </Typography>
+                    </div>
+                    <div className={classes.thumbInfo}>
+                        <div className={classes.row}>
+                            <div className={classes.thumbLeft}>
+                                <Typography variant='subtitle1'>{doc.apiName}</Typography>
+                            </div>
+
+                            <div className={classes.thumbLeft}>
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.DocThumb.apiName'
+                                        defaultMessage='API Name'
+                                    />
+                                </Typography>
+                            </div>
+                        </div>
+                        <div className={classes.row}>
+                            <div className={classes.thumbRight}>
+                                <Typography variant='subtitle1' align='right' className={classes.contextBox}>
+                                    {doc.apiVersion}
+                                </Typography>
+                            </div>
+
+                            <div className={classes.thumbRight}>
+                                <Typography variant='caption' gutterBottom align='right' className={classes.context}>
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.ImageGenerator.DocThumb.apiVersion'
+                                        defaultMessage='API Version'
+                                    />
+                                </Typography>
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         );
