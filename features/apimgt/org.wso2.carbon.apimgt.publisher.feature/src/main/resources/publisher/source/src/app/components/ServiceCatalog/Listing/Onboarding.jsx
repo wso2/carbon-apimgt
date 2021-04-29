@@ -101,9 +101,9 @@ function Onboarding() {
                 alignItems='center'
                 spacing={5}
             >
-                {/* Link to docs to write your first integration */}
                 { isScopeValid ? (
                     <>
+                        {/* Link to docs to write your first integration */}
                         {getStartedLink !== '' && (
                             <OnboardingMenuCard
                                 iconSrc={
@@ -145,6 +145,7 @@ function Onboarding() {
                                 </Button>
                             </OnboardingMenuCard>
                         )}
+                        {/* Deploy Sample Service */}
                         <OnboardingMenuCard
                             iconSrc={
                                 Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'
