@@ -4796,7 +4796,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 // modify updatedAppInfo by merging the stored OAuth Application Info
                 updatedAppInfo = mergeStoredAppInfoWithUpdatedAppInfo(storedOAuthApplicationInfo, updatedAppInfo);
             }
-            apiMgtDAO.updateApplicationKeyTypeMetaData(application.getId(), tokenType, keyManagerName, updatedAppInfo);
+            apiMgtDAO.updateApplicationKeyTypeMetaData(application.getId(), tokenType, keyManagerName,
+                    keyManagerConfiguration.getUuid(), updatedAppInfo);
             JSONObject appLogObject = new JSONObject();
             appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, updatedAppInfo.getClientName());
             appLogObject.put("Updated Oauth app with Call back URL", callbackUrl);
