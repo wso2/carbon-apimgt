@@ -416,7 +416,7 @@ public class RegistrySearchUtil {
 
     public static String getPublisherSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
         String newSearchQuery = constructNewSearchQuery(searchQuery);
-        if ("".equals(searchQuery)) {// if (!query.contains(APIConstants.TYPE)) {
+        if (!newSearchQuery.contains(APIConstants.TYPE)) {
             String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY
                     + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST);
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
