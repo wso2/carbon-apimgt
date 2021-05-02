@@ -267,13 +267,13 @@ function Overview(props) {
                     <div className={classes.root}>
                         <Typography id='itest-api-details-bushiness-plans-head' variant='h5'>
                             <FormattedMessage
-                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
+                                id='solace.application.available.topics.heading'
                                 defaultMessage='Available Topics'
                             />
                         </Typography>
                         <Typography variant='caption' gutterBottom>
                             <FormattedMessage
-                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.APIProduct.sub.heading'
+                                id='solace.application.available.topics.subheading'
                                 defaultMessage='Topics permitted to access from solace applications'
                             />
                         </Typography>
@@ -298,7 +298,7 @@ function Overview(props) {
                                     <Paper className={classes.Paper2}>
                                         <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
                                             <FormattedMessage
-                                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
+                                                id='solace.application.topics.publish'
                                                 defaultMessage='Publish Topics'
                                             />
                                         </Typography>
@@ -317,7 +317,7 @@ function Overview(props) {
                                     <Paper className={classes.Paper2}>
                                         <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
                                             <FormattedMessage
-                                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
+                                                id='solace.application.topics.subscribe'
                                                 defaultMessage='Subscribe Topics'
                                             />
                                         </Typography>

@@ -178,7 +178,7 @@ public class SolaceAdminApis {
         return null;
     }
 
-    public HttpResponse applicationPatchRemoveSubscription(String organization, Application application, String apiProductName) {
+    public HttpResponse applicationPatchRemoveSubscription(String organization, Application application, List<String> apiProductsToRemove) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID());
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
@@ -191,7 +191,7 @@ public class SolaceAdminApis {
             e.printStackTrace();
         }
         // remove API product from arrayList
-        apiProducts.remove(apiProductName);
+        apiProducts.removeAll(apiProductsToRemove);
 
         org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
         StringEntity params = null;

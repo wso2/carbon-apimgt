@@ -137,19 +137,6 @@ public class ApplicationMappingUtil {
         Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
         for (SubscribedAPI subscribedAPI : subscriptions) {
             API api = apiConsumer.getAPI(subscribedAPI.getApiId());
-            /*List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(api.getUuid());
-            for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
-                if (revisionDeployment.isDisplayOnDevportal()) {
-                    if (thirdPartyEnvironments != null) {
-                        ThirdPartyEnvironment environment = thirdPartyEnvironments.get(revisionDeployment.getDeployment());
-                        if (environment != null) {
-                            if ("solace".equalsIgnoreCase(environment.getProvider())) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }*/
             return apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api);
         }
         return false;
