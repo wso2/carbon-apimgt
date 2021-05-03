@@ -3760,12 +3760,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                             authorizedRoles, docContentPath, registry);
                 } else if (APIConstants.IMPLEMENTATION_TYPE_FILE.equals(docType)) {
-                    String docFilePath = APIUtil.getDocumentationFilePath(api.getId(),
-                            artifact.getAttribute(APIConstants.DOC_FILE_PATH).split(
-                                    APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR)[1]);
-                    APIUtil.clearResourcePermissions(docFilePath, api.getId(), tenantId);
-                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
-                            authorizedRoles, docFilePath, registry);
+                    String artifactDocFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+                    if (!StringUtils.isEmpty(artifactDocFilePath)) {
+                        String docFilePath = APIUtil.getDocumentationFilePath(api.getId(),
+                                artifactDocFilePath.split(
+                                        APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR)[1]);
+                        APIUtil.clearResourcePermissions(docFilePath, api.getId(), tenantId);
+                        APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                authorizedRoles, docFilePath, registry);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("File type document " + documentation.getName() + " is not associated with a "
+                                    + "file yet, hence setting document visibility is skipped.");
+                        }
+                    }
+
                 }
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error in retrieving Tenant Information while updating the " +

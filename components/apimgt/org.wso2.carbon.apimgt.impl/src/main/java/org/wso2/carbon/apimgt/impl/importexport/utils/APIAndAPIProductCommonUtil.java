@@ -87,8 +87,8 @@ public class APIAndAPIProductCommonUtil {
     /**
      * Retrieve thumbnail image for the exporting API or API Product and store it in the archive directory.
      *
-     * @param identifier                ID of the requesting API or API Product
-     * @param registry                  Current tenant registry
+     * @param identifier ID of the requesting API or API Product
+     * @param registry   Current tenant registry
      * @throws APIImportExportException If an error occurs while retrieving image from the registry or
      *                                  storing in the archive directory
      */
@@ -138,15 +138,15 @@ public class APIAndAPIProductCommonUtil {
      * Retrieve documentation for the exporting API or API Product and store it in the archive directory.
      * FILE, INLINE, MARKDOWN and URL documentations are handled.
      *
-     * @param identifier    ID of the requesting API or API Product
-     * @param registry      Current tenant registry
-     * @param docList       Documentation list of the exporting API or API Product
-     * @param exportFormat  Format for export
+     * @param identifier   ID of the requesting API or API Product
+     * @param registry     Current tenant registry
+     * @param docList      Documentation list of the exporting API or API Product
+     * @param exportFormat Format for export
      * @throws APIImportExportException If an error occurs while retrieving documents from the
      *                                  registry or storing in the archive directory
      */
     public static void exportAPIOrAPIProductDocumentation(String archivePath, List<Documentation> docList,
-                                               Identifier identifier, Registry registry, ExportFormat exportFormat)
+                                                          Identifier identifier, Registry registry, ExportFormat exportFormat)
             throws APIImportExportException {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -159,8 +159,10 @@ public class APIAndAPIProductCommonUtil {
                 String localFileName = null;
                 docDirectoryPath = File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
                 if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
-                    localFileName = doc.getFilePath().substring(
-                            doc.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
+                    if (doc.getFilePath() != null) {
+                        localFileName = doc.getFilePath().substring(
+                                doc.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
+                    }
                     resourcePath = APIUtil.getDocumentationFilePath(identifier, localFileName);
                     docDirectoryPath += File.separator + APIImportExportConstants.FILE_DOCUMENT_DIRECTORY;
                     doc.setFilePath(localFileName);
@@ -223,6 +225,7 @@ public class APIAndAPIProductCommonUtil {
             throw new APIImportExportException(errorMessage, e);
         }
     }
+
     /**
      * Retrieve API Definition as JSON.
      *
@@ -254,14 +257,14 @@ public class APIAndAPIProductCommonUtil {
     /**
      * Export Mutual SSL related certificates
      *
-     * @param apiTypeWrapper    API or API Product to be exported
-     * @param tenantId          Tenant id of the user
-     * @param provider          Api Provider
-     * @param exportFormat      Export format of file
+     * @param apiTypeWrapper API or API Product to be exported
+     * @param tenantId       Tenant id of the user
+     * @param provider       Api Provider
+     * @param exportFormat   Export format of file
      * @throws APIImportExportException
      */
     public static void exportClientCertificates(String archivePath, ApiTypeWrapper apiTypeWrapper, int tenantId, APIProvider provider,
-                                                 ExportFormat exportFormat) throws APIImportExportException {
+                                                ExportFormat exportFormat) throws APIImportExportException {
 
         List<ClientCertificateDTO> certificateMetadataDTOS;
         try {
@@ -303,9 +306,9 @@ public class APIAndAPIProductCommonUtil {
      * Replace original provider name from imported API properties with the logged in username
      * This method is used when "preserveProvider" property is set to false.
      *
-     * @param apiTypeWrapper    Imported API or API Product
-     * @param currentDomain     Current domain name
-     * @param previousDomain    Original domain name
+     * @param apiTypeWrapper Imported API or API Product
+     * @param currentDomain  Current domain name
+     * @param previousDomain Original domain name
      */
     public static void setCurrentProviderToAPIProperties(ApiTypeWrapper apiTypeWrapper, String currentDomain, String previousDomain) {
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(currentDomain) &&
@@ -334,7 +337,7 @@ public class APIAndAPIProductCommonUtil {
      * @throws APIImportExportException If getting lifecycle action failed
      */
     public static String getLifeCycleAction(String tenantDomain, String currentStatus, String targetStatus,
-                                             APIProvider provider) throws APIImportExportException {
+                                            APIProvider provider) throws APIImportExportException {
 
         LifeCycle lifeCycle = new LifeCycle();
         // Parse DOM of APILifeCycle
@@ -421,8 +424,8 @@ public class APIAndAPIProductCommonUtil {
     /**
      * This method update the API or API Product with the icon to be displayed at the API store.
      *
-     * @param pathToArchive Location of the extracted folder of the API or API Product
-     * @param apiTypeWrapper   The imported API object
+     * @param pathToArchive  Location of the extracted folder of the API or API Product
+     * @param apiTypeWrapper The imported API object
      */
     public static void addAPIOrAPIProductImage(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
 
@@ -444,9 +447,9 @@ public class APIAndAPIProductCommonUtil {
     /**
      * This method update the API Product with the thumbnail image from imported API Product.
      *
-     * @param imageFile             Image file
-     * @param apiTypeWrapper        API or API Product to update
-     * @param apiProvider           API Provider
+     * @param imageFile      Image file
+     * @param apiTypeWrapper API or API Product to update
+     * @param apiProvider    API Provider
      */
     private static void updateAPIOrAPIProductWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
 
@@ -494,8 +497,8 @@ public class APIAndAPIProductCommonUtil {
     /**
      * This method adds the documents to the imported API or API Product.
      *
-     * @param pathToArchive     Location of the extracted folder of the API or API Product
-     * @param apiTypeWrapper    Imported API or API Product
+     * @param pathToArchive  Location of the extracted folder of the API or API Product
+     * @param apiTypeWrapper Imported API or API Product
      */
     public static void addAPIOrAPIProductDocuments(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
 
@@ -623,7 +626,8 @@ public class APIAndAPIProductCommonUtil {
             }
             Gson gson = new Gson();
             List<ClientCertificateDTO> certificateMetadataDTOS = gson.fromJson(jsonContent,
-                    new TypeToken<ArrayList<ClientCertificateDTO>>(){}.getType());
+                    new TypeToken<ArrayList<ClientCertificateDTO>>() {
+                    }.getType());
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
                 apiProvider.addClientCertificate(
                         APIUtil.replaceEmailDomainBack(certDTO.getApiIdentifier().getProviderName()),

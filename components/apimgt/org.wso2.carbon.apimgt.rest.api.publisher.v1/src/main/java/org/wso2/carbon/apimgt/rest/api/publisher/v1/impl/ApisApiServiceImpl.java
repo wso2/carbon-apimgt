@@ -1806,14 +1806,19 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                 String resource = documentation.getFilePath();
                 Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
-                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
-                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
-                contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
-                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
-                return Response.ok(fileDataStream)
-                        .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
-                        .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
-                        .build();
+                if (!docResourceMap.isEmpty()) {
+                    Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
+                    Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+                    contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
+                    String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
+                    return Response.ok(fileDataStream)
+                            .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
+                            .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                            .build();
+                } else {
+                    return Response.noContent().build();
+                }
+
             } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
                 String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
                 return Response.ok(content)

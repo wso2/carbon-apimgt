@@ -6775,6 +6775,13 @@ public final class APIUtil {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
         InputStream inStream = null;
+        if (StringUtils.isEmpty(resourceUrl)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Document Resource Path is empty");
+            }
+            return documentMap;
+        }
+
         String[] resourceSplitPath =
                 resourceUrl.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
         if (resourceSplitPath.length == 2) {
