@@ -11339,25 +11339,26 @@ public final class APIUtil {
         return apimConfig.getContainerMgtAttributes();
     }
 
-    public static String getX509certificateContent(Certificate certificate)
-            throws java.security.cert.CertificateEncodingException {
 
-        byte[] encoded = Base64.encodeBase64(certificate.getEncoded());
-        String base64EncodedString =
-                APIConstants.BEGIN_CERTIFICATE_STRING
-                        .concat(new String(encoded)).concat("\n")
-                        .concat(APIConstants.END_CERTIFICATE_STRING);
-        return Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
+    public static String getX509certificateContent(String certificate) {
+        String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+
+        return content.trim();
     }
 
     public static X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
             throws APIManagementException {
 
         if (base64EncodedCertificate != null) {
-            base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
-                    replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+            try {
+                base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                String msg = "Error while URL decoding certificate";
+                throw new APIManagementException(msg, e);
+            }
 
+            base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                 return X509Certificate.getInstance(inputStream);
