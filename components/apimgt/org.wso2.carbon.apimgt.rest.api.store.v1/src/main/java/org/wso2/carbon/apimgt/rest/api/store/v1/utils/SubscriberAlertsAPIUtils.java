@@ -69,7 +69,7 @@ public class SubscriberAlertsAPIUtils {
      * deleted APIs.
      * @return A map with [api name, version list]
      * */
-    public static Map<String, List<String>> getConfigAPIs() throws APIManagementException {
+    public static Map<String, List<String>> getAvailableAPIs() throws APIManagementException {
         String userName = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
         List<API> remainAPIs = apiConsumer.getAllAPIs();

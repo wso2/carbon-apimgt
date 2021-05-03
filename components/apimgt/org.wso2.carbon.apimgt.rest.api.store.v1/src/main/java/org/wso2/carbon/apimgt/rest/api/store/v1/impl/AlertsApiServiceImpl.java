@@ -84,14 +84,14 @@ public class AlertsApiServiceImpl implements AlertsApiService {
         String userName = RestApiUtil.getLoggedInUsername();
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
-            Map<String, List<String>> remainAPIVersionInfo = SubscriberAlertsAPIUtils.getConfigAPIs();
+            Map<String, List<String>> availableAPIInfo = SubscriberAlertsAPIUtils.getAvailableAPIs();
             List<Map<String, String>> alertConfigList = storeAlertConfigurator
                     .getAlertConfiguration(userName, alertType);
             List<AlertConfigDTO> alertConfigDTOList = new ArrayList<>();
             for (Map<String, String> alertConfig : alertConfigList) {
                 String applicationId = alertConfig.get("applicationId");
                 String applicationName = SubscriberAlertsAPIUtils.getApplicationNameById(Integer.parseInt(applicationId));
-                List<String> remainVersions = remainAPIVersionInfo.get(alertConfig.get("apiName"));
+                List<String> remainVersions = availableAPIInfo.get(alertConfig.get("apiName"));
                 if (applicationName != null && remainVersions != null) {
                         String configVersion = alertConfig.get("apiVersion");
                         for (String version : remainVersions) {
