@@ -3339,18 +3339,6 @@
   "Apis.Listing.components.ImageGenerator.ThumbnailView.saving.btn": {
     "defaultMessage": "Saving"
   },
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.an.icon": {
-    "defaultMessage": "Select an icon from the Material Icons for your API."
-  },
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.background": {
-    "defaultMessage": "Select a Background"
-  },
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.category": {
-    "defaultMessage": "Select Category"
-  },
-  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.color.for.the.icon": {
-    "defaultMessage": "Select a color for the icon"
-  },
   "Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.error": {
     "defaultMessage": "Error occurred while uploading new thumbnail. Please try again."
   },

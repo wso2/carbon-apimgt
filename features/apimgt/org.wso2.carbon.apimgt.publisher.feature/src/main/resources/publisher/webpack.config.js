@@ -29,6 +29,7 @@ const { clientRoutingBypass, devServerBefore } = require('./services/dev_proxy/a
 // https://github.com/webpack/webpack/issues/6460#issuecomment-364286147
 module.exports = (env, argv) => {
     const isDevelopmentBuild = argv.mode === 'development';
+    const isTestBuild = process.env && process.env.WSO2_UI_TEST === 'ci';
     /**
      * Notes:
      *      - swaggerWorkerInit entry has being removed until we resolve
@@ -41,8 +42,9 @@ module.exports = (env, argv) => {
         },
         output: {
             path: path.resolve(__dirname, 'site/public/dist'),
-            filename: isDevelopmentBuild ? '[name].bundle.js' : '[name].[contenthash].bundle.js',
-            chunkFilename: isDevelopmentBuild ? '[name].chunk.bundle.js' : '[name].[contenthash].bundle.js',
+            filename: isDevelopmentBuild || isTestBuild ? '[name].bundle.js' : '[name].[contenthash].bundle.js',
+            chunkFilename: isDevelopmentBuild || isTestBuild
+                ? '[name].chunk.bundle.js' : '[name].[contenthash].bundle.js',
             publicPath: 'site/public/dist/',
             globalObject: 'this',
         },
@@ -67,10 +69,10 @@ module.exports = (env, argv) => {
          *      https://github.com/gaearon/react-hot-loader
         */
         devServer: {
-            open: true,
+            open: !isTestBuild,
             openPage: 'publisher',
             inline: true,
-            hotOnly: true,
+            hotOnly: !isTestBuild,
             hot: true,
             publicPath: '/site/public/dist/',
             writeToDisk: false,
@@ -81,8 +83,15 @@ module.exports = (env, argv) => {
                     target: 'https://localhost:9443/publisher',
                     secure: false,
                 },
+                '/api/am/publisher/v2/swagger.yaml': {
+                    target: 'https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml',
+                    secure: false,
+                    changeOrigin: true,
+                    pathRewrite: { '^/api/am/publisher/v2/swagger.yaml': '' },
+                },
                 '/api/am': {
-                    target: 'https://localhost:9443',
+                    target: 'http://localhost:4010',
+                    pathRewrite: { '^/api/am/publisher/v2/': '' },
                     secure: false,
                 },
                 '/publisher/services': {
