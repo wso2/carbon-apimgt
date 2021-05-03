@@ -3769,8 +3769,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                                 authorizedRoles, docFilePath, registry);
                     } else {
-                        log.debug("File type document " + documentation.getName() + " is not associated with a "
-                                + "file yet, hence setting document visibility is skipped." );
+                        if (log.isDebugEnabled()) {
+                            log.debug("File type document " + documentation.getName() + " is not associated with a "
+                                    + "file yet, hence setting document visibility is skipped.");
+                        }
                     }
 
                 }
