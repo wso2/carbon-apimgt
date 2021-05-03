@@ -22,12 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Base64;
+import java.util.*;
 
 public class SubscriberAlertsAPIUtils {
 
@@ -56,6 +59,33 @@ public class SubscriberAlertsAPIUtils {
         APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
         Application application = apiConsumer.getApplicationsByName(userName, applicationName, null);
         return application != null ? application.getId() : null;
+    }
+
+    /**
+     * Get a map of API name, version list. This is used to filter the retrieved alert configurations as there can be
+     * deleted APIs.
+     * @return A map with [api name, version list]
+     * */
+    public static Map<String, List<String>> getConfigAPIs() throws APIManagementException {
+        String userName = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+        List<API> remainAPIs = apiConsumer.getAllAPIs();
+        Map<String, List<String>> remainAPINameVersionMap = new HashMap<>();
+
+        for (API api : remainAPIs) {
+            List<String> versions;
+            APIIdentifier identifier = api.getId();
+            if (remainAPINameVersionMap.containsKey(identifier.getApiName())) {
+                versions = remainAPINameVersionMap.get(identifier.getApiName());
+                versions.add(identifier.getVersion());
+                remainAPINameVersionMap.put(identifier.getApiName(), versions);
+            } else {
+                versions = new ArrayList<>();
+                versions.add(identifier.getVersion());
+                remainAPINameVersionMap.put(identifier.getApiName(), versions);
+            }
+        }
+        return remainAPINameVersionMap;
     }
 
     /**
