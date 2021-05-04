@@ -22,6 +22,9 @@ const AppConfig = {
             timeout: 4000 // Defines the timeout for the above periodical session status check
         },
         propertyDisplaySuffix: '__display'
+    },
+    markdown: {
+        escapeHtml: false,
     }
 };
 
