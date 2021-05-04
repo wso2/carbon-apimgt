@@ -125,8 +125,9 @@ public class ImportUtils {
         apiKey.setConsumerSecret(new String(Base64.decodeBase64(applicationKeyDto.getConsumerSecret())));
         apiKey.setKeyManager(applicationKeyDto.getKeyManager());
         apiKey.setGrantTypes(StringUtils.join(applicationKeyDto.getSupportedGrantTypes(), ", "));
-        if (apiKey.getGrantTypes() != null && apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey
-                .getGrantTypes().contains(GRANT_TYPE_CODE)) {
+
+        if (apiKey.getGrantTypes() != null && (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT)
+                || apiKey.getGrantTypes().contains(GRANT_TYPE_CODE))) {
             apiKey.setCallbackUrl(applicationKeyDto.getCallbackUrl());
         }
         apiKey.setValidityPeriod(applicationKeyDto.getToken().getValidityTime());
@@ -292,10 +293,13 @@ public class ImportUtils {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, apiKey.getConsumerSecret());
             }
         }
+        if (!StringUtils.isEmpty(apiKey.getCallbackUrl())) {
+            jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, apiKey.getCallbackUrl());
+        }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null);
+                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null, true);
     }
 }
