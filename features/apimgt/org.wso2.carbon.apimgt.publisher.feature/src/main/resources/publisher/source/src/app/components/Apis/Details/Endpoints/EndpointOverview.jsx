@@ -115,7 +115,7 @@ const styles = (theme) => ({
 });
 
 const endpointTypes = [
-    { key: 'http', value: 'HTTP/REST Endpoint' },
+    { key: 'http', value: 'HTTP/Passthrough' },
     { key: 'default', value: 'Dynamic Endpoints' },
     { key: 'address', value: 'HTTP/SOAP Endpoint' },
     { key: 'prototyped', value: 'Prototype Endpoint' },
@@ -237,22 +237,23 @@ function EndpointOverview(props) {
         let supportedEndpointTypes = [];
         if (type === 'GRAPHQL') {
             supportedEndpointTypes = [
-                { key: 'http', value: 'HTTP/REST Endpoint' },
+                { key: 'http', value: 'HTTP/Passthrough' },
                 { key: 'default', value: 'Dynamic Endpoints' },
             ];
         } else if (type === 'SOAP' || type === 'SOAPTOREST') {
             supportedEndpointTypes = [
+                { key: 'http', value: 'HTTP/Passthrough' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototype Endpoint' },
             ];
         } else if (type === 'SSE') {
             supportedEndpointTypes = [
-                { key: 'http', value: 'HTTP/REST Endpoint' },
+                { key: 'http', value: 'HTTP/Passthrough' },
             ];
         } else {
             supportedEndpointTypes = [
-                { key: 'http', value: 'HTTP/REST Endpoint' },
+                { key: 'http', value: 'HTTP/Passthrough' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototype Endpoint' },
