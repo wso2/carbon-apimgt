@@ -65,6 +65,7 @@ import { ConfirmDialog } from 'AppComponents/Shared/index';
 import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
 import Utils from 'AppData/Utils';
 import { parse } from '@asyncapi/parser';
+import { upperCaseString } from 'AppData/stringFormatter';
 import DisplayDevportal from './DisplayDevportal';
 import DeploymentOnbording from './DeploymentOnbording';
 
@@ -2267,7 +2268,7 @@ export default function Environments() {
                                                         <Grid container spacing={2}>
                                                             <Grid item>
                                                                 <Chip
-                                                                    label={e.protocol}
+                                                                    label={upperCaseString(e.protocol)}
                                                                     size='small'
                                                                     color='primary'
                                                                     variant='outlined'

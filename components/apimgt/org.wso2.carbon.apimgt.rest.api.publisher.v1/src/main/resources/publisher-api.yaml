@@ -7851,6 +7851,9 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
+        isSolaceAPI:
+          type: boolean
+          example: false
 
     Topic:
       title: Topic object

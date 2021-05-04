@@ -674,6 +674,7 @@ public class APIMappingUtil {
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
         }
+        apiInfoDTO.setIsSolaceAPI(api.isSolaceAPI());
         return apiInfoDTO;
     }
 

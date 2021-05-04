@@ -63,6 +63,7 @@ export default function ListParameters(props) {
                     verb={verb}
                     editingParameter={editingParameter}
                     setEditingParameter={setEditingParameter}
+                    disableForSolaceAPI={disableForSolace}
                 />
             )}
             <Table className={classes.table} aria-label='parameters list'>
@@ -116,7 +117,6 @@ export default function ListParameters(props) {
                                             <IconButton
                                                 onClick={() => setEditingParameter({ name: k, ...v })}
                                                 fontSize='small'
-                                                disabled={disableForSolace}
                                             >
                                                 <EditIcon fontSize='small' />
                                             </IconButton>

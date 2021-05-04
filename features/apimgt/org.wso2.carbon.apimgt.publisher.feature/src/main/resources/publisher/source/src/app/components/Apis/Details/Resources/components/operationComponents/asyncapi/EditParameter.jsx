@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function EditParameter(props) {
     const {
-        operationsDispatcher, target, verb, editingParameter, setEditingParameter,
+        operationsDispatcher, target, verb, editingParameter, setEditingParameter, disableForSolaceAPI,
     } = props;
 
     /**
@@ -121,53 +121,57 @@ export default function EditParameter(props) {
             </DialogTitle>
             <DialogContent>
                 <Grid container direction='row' spacing={2} justify='flex-start' alignItems='center'>
-                    <Grid item md={6}>
-                        <FormControl
-                            required
-                            fullWidth
-                            margin='dense'
-                            variant='outlined'
-                            className={classes.formControl}
-                        >
-                            <InputLabel required id='edit-parameter-type'>
-                                <FormattedMessage
-                                    id='Apis.Details.Topics.components.operationComponents.EditParameter.data.type'
-                                    defaultMessage='Data Type'
-                                />
-                            </InputLabel>
-
-                            <Select
-                                value={parameter.schema ? parameter.schema.type : ''}
-                                onChange={
-                                    ({ target: { name, value } }) => parameterActionDispatcher({ action: name, value })
-                                }
-                                inputProps={{
-                                    name: 'type',
-                                    id: 'edit-parameter-type',
-                                }}
-                                MenuProps={{
-                                    getContentAnchorEl: null,
-                                    anchorOrigin: {
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
-                                    },
-                                }}
+                    {!disableForSolaceAPI && (
+                        <Grid item md={6}>
+                            <FormControl
+                                required
+                                fullWidth
+                                margin='dense'
+                                variant='outlined'
+                                className={classes.formControl}
                             >
-                                {getSupportedDataTypes().map((dataType) => (
-                                    <MenuItem value={dataType} dense>
-                                        {capitalizeFirstLetter(dataType)}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <FormHelperText>
-                                <FormattedMessage
-                                    id={'Apis.Details.Topics.components.operationComponents.EditParameter.'
-                                    + 'select.data.type'}
-                                    defaultMessage='Select the Data Type'
-                                />
-                            </FormHelperText>
-                        </FormControl>
-                    </Grid>
+                                <InputLabel required id='edit-parameter-type'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Topics.components.operationComponents.EditParameter.data.type'
+                                        defaultMessage='Data Type'
+                                    />
+                                </InputLabel>
+
+                                <Select
+                                    value={parameter.schema ? parameter.schema.type : ''}
+                                    onChange={
+                                        ({ target: { name, value } }) => parameterActionDispatcher({
+                                            action: name, value,
+                                        })
+                                    }
+                                    inputProps={{
+                                        name: 'type',
+                                        id: 'edit-parameter-type',
+                                    }}
+                                    MenuProps={{
+                                        getContentAnchorEl: null,
+                                        anchorOrigin: {
+                                            vertical: 'bottom',
+                                            horizontal: 'left',
+                                        },
+                                    }}
+                                >
+                                    {getSupportedDataTypes().map((dataType) => (
+                                        <MenuItem value={dataType} dense>
+                                            {capitalizeFirstLetter(dataType)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                                <FormHelperText>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Topics.components.operationComponents.EditParameter.'
+                                        + 'select.data.type'}
+                                        defaultMessage='Select the Data Type'
+                                    />
+                                </FormHelperText>
+                            </FormControl>
+                        </Grid>
+                    )}
                     <Grid item md={6} />
                     <Grid item md={12}>
                         <TextField

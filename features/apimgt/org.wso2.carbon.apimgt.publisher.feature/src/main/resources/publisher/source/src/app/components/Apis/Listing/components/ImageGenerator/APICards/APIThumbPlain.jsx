@@ -249,12 +249,20 @@ function APIThumbPlain(props) {
                                 color='primary'
                             />
                         )}
-                        {(api.type === 'WEBSUB') && (
+                        {(api.type === 'WEBSUB') && !api.isSolaceAPI && (
                             <Chip
                                 size='small'
                                 classes={{ root: classes.thumbRightBy, label: classes.thumbRightByLabel }}
                                 label='WEBSUB'
                                 color='primary'
+                            />
+                        )}
+                        {(api.type === 'WEBSUB') && api.isSolaceAPI && (
+                            <Chip
+                                size='small'
+                                classes={{ root: classes.thumbRightBy, label: classes.thumbRightByLabel }}
+                                label='SOLACE API'
+                                style={{ backgroundColor: '#00c995' }}
                             />
                         )}
                     </Box>

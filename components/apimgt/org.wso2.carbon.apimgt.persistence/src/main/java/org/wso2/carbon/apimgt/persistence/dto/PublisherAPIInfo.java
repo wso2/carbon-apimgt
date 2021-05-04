@@ -36,6 +36,15 @@ public class PublisherAPIInfo {
     private String thumbnail; // thumbnail is not required for normal ApiGet
     private String createdTime;
     private Date updatedTime;
+    private boolean isSolaceAPI;
+
+    public boolean isSolaceAPI() {
+        return isSolaceAPI;
+    }
+
+    public void setSolaceAPI(boolean solaceAPI) {
+        isSolaceAPI = solaceAPI;
+    }
 
     public String getApiName() {
         return apiName;
