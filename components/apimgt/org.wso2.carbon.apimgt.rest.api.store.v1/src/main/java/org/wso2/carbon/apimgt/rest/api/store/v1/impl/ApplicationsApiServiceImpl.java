@@ -545,7 +545,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName, xWSO2Tenant);
+                            jsonParams, keyManagerName, xWSO2Tenant, false);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);

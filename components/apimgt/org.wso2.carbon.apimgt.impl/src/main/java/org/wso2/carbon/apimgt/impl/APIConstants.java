@@ -1942,6 +1942,7 @@ public final class APIConstants {
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
+    public static final String JSON_CALLBACK_URL = "callbackUrl";
 
     /**
      * Publisher Access Control related registry properties and values.

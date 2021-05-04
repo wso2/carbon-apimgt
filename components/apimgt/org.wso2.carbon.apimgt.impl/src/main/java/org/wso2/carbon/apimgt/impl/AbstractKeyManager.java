@@ -129,6 +129,9 @@ public abstract class AbstractKeyManager implements KeyManager {
             if (jsonObject != null) {
                 //create a map to hold json parsed objects.
                 Map<String, Object> params = (Map) jsonObject;
+                if (params.get(APIConstants.JSON_CALLBACK_URL) != null) {
+                    oAuthApplicationInfo.setCallBackURL((String) params.get(APIConstants.JSON_CALLBACK_URL));
+                }
                 if (params.get(APIConstants.JSON_GRANT_TYPES) != null) {
                     String grantTypeString = params.get(APIConstants.JSON_GRANT_TYPES).toString();
                     if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL()) &&
