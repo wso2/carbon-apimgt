@@ -190,7 +190,10 @@ class DeleteApiButton extends React.Component {
         return (
             <>
                 {/* allowing delete based on scopes */}
-                <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={path}>
+                <ScopeValidation
+                    resourceMethod={resourceMethod.DELETE}
+                    resourcePath={path}
+                >
                     <Box
                         className={classNames({ [classes.inlineBlock]: updateData, [classes.flexBox]: !updateData })}
                     >
