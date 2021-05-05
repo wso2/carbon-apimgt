@@ -798,7 +798,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         // Delete Default API
         String qualifiedDefaultApiName = GatewayUtils.getQualifiedDefaultApiName(gatewayAPIDTO.getProvider(),
                 gatewayAPIDTO.getName());
-        if (restapiAdminServiceProxy.getApi(qualifiedDefaultApiName) != null) {
+        if (restapiAdminServiceProxy.getApi(qualifiedDefaultApiName) != null && gatewayAPIDTO
+                .getDefaultAPIDefinition() != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedDefaultApiName);
         }
         if (log.isDebugEnabled()) {
