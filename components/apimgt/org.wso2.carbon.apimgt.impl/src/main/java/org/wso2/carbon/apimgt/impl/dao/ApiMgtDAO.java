@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -4827,12 +4828,12 @@ public class ApiMgtDAO {
      * Retrieves the consumer keys and keymanager in a given application
      *
      * @param appId application id
-     * @return Map<ConsumerKey, keyManager>
+     * @return Map<ConsumerKey, Pair<keyManagerName, keyManagerTenantDomain>
      * @throws APIManagementException
      */
-    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+    public Map<String, Pair<String, String>> getConsumerKeysForApplication(int appId) throws APIManagementException {
 
-        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+        Map<String, Pair<String, String>> consumerKeysOfApplication = new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection
                      .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
@@ -4841,8 +4842,9 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String consumerKey = resultSet.getString("CONSUMER_KEY");
-                    String keyManager = resultSet.getString("NAME");
-                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                    String keyManagerName = resultSet.getString("NAME");
+                    String keyManagerTenantDomain = resultSet.getString("TENANT_DOMAIN");
+                    consumerKeysOfApplication.put(consumerKey, Pair.of(keyManagerName, keyManagerTenantDomain));
                 }
             }
         } catch (SQLException e) {

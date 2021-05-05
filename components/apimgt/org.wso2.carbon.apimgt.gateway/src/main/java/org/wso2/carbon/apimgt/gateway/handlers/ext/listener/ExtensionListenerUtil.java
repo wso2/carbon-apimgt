@@ -309,6 +309,9 @@ public class ExtensionListenerUtil {
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while setting payload " + axis2MC.getLogIDString(), e);
             }
+        } else if (extensionResponseDTO.getPayload() == null && contentType == null &&
+                ExtensionResponseStatus.RETURN_ERROR.toString().equals(extensionResponseDTO.getResponseStatus())) {
+            axis2MC.setProperty(APIConstants.NO_ENTITY_BODY, true);
         }
     }
 
