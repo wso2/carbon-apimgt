@@ -763,6 +763,9 @@ public class RegistryForumManager implements ForumManager {
         Registry registry;
 
         try {
+            final int MAX_RATE = 5;
+            final int MIN_RATE = 1;
+            rating = (rating > MAX_RATE) ? MAX_RATE : ((rating < MIN_RATE) ? MIN_RATE : rating);
             registry = getRegistry(username, tenantDomain);
             GenericArtifactManager artifactManager = getArtifactManager(registry, TOPIC_RXT_KEY);
             GenericArtifact genericArtifact = artifactManager.getGenericArtifact(topicId);
