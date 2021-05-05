@@ -242,6 +242,7 @@ export default {
                 serviceCatalogApiIcon: '/site/public/images/landing-icons/servicecatalogapi.svg',
                 scopesAddIcon: '/site/public/images/landing-icons/scopes.svg',
                 apiproductAddIcon: '/site/public/images/landing-icons/apiproduct.svg',
+                noApisIcon: '/site/public/images/landing-icons/noapi.svg',
             },
             menu: {
                 primary: '#34679D',

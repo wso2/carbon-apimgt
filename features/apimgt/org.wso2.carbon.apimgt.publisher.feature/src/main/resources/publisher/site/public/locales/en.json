@@ -6713,6 +6713,24 @@
       "value": "Version"
     }
   ],
+  "Apis.Listing.Landing.index.no.apis.description": [
+    {
+      "type": 0,
+      "value": "If you think this is by mistake, please contact your administrator"
+    }
+  ],
+  "Apis.Listing.Landing.index.no.apis.icon.alt.text": [
+    {
+      "type": 0,
+      "value": "No APIs yet"
+    }
+  ],
+  "Apis.Listing.Landing.index.no.apis.title": [
+    {
+      "type": 0,
+      "value": "No APIs yet"
+    }
+  ],
   "Apis.Listing.SampleAPI.SampleAPI.create.new": [
     {
       "type": 0,

@@ -3186,6 +3186,15 @@
   "Apis.Listing.ApiThumb.version": {
     "defaultMessage": "Version"
   },
+  "Apis.Listing.Landing.index.no.apis.description": {
+    "defaultMessage": "If you think this is by mistake, please contact your administrator"
+  },
+  "Apis.Listing.Landing.index.no.apis.icon.alt.text": {
+    "defaultMessage": "No APIs yet"
+  },
+  "Apis.Listing.Landing.index.no.apis.title": {
+    "defaultMessage": "No APIs yet"
+  },
   "Apis.Listing.SampleAPI.SampleAPI.create.new": {
     "defaultMessage": "Let’s get started !"
   },

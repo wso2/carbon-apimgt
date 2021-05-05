@@ -241,15 +241,14 @@ function Environments(props) {
                         </Paper>
                     </>
                 )}
-                {!selectedEndpoint && (api.lifeCycleStatus !== 'PROTOTYPED') && (
+                {(!selectedEndpoint && (api.lifeCycleStatus !== 'PROTOTYPED')) ? (
                     <Typography variant='subtitle2' component='p' gutterBottom align='left' className={classes.sectionTitle}>
                         <FormattedMessage
                             id='Apis.Details.Environments.label.noendpoint'
                             defaultMessage='No endpoints yet.'
                         />
                     </Typography>
-                )}
-                <GoToTryOut />
+                ) : <GoToTryOut />}
             </Box>
             <Box ml={8} alignItems='center' mt={1}>
                 {selectedEndpoint && (
