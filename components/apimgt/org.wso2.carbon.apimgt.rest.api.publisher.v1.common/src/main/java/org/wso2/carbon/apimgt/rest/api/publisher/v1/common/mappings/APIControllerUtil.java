@@ -725,8 +725,8 @@ public class APIControllerUtil {
             JsonElement sandboxEndpoints = loadBalancedConfigs
                     .get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY);
             if (sandboxEndpoints != null) {
-                updatedSOAPEndpointParams
-                        .add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY, sandboxEndpoints.getAsJsonArray());
+                updatedSOAPEndpointParams.add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY,
+                        handleSoapFailoverAndLoadBalancedEndpointValues(sandboxEndpoints.getAsJsonArray()));
             }
 
         } else if (ImportExportConstants.FAILOVER_ROUTING_POLICY
