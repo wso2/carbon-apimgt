@@ -11,7 +11,7 @@
         "build:dev": "rimraf site/public/dist/ && cross-env NODE_ENV=development webpack -d --watch ",
         "analysis": "cross-env NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source/**/*.js source/**/*.jsx source/src/app/**/*.jsx",
-        "i18n": "cross-env NODE_ENV=development extract-messages -l=en -o site//public//locales// -d en --extractFromFormatMessageCall --flat 'source//src//app//**//*.jsx'",
+        "i18n": "extract-messages -l=en -o site//public//locales// -d en --extractFromFormatMessageCall --flat 'source//src//app//**//*.jsx'",
         "check-unused": "webpack --mode production --env.unused true --display errors-only"
     },
     "repository": {
