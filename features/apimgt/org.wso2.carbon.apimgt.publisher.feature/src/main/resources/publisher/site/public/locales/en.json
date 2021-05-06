@@ -931,7 +931,7 @@
   "Apis.Listing.components.APICreateMenu.secondary.ws": "Design and prototype a new WebSocket API",
   "Apis.Listing.components.ImageGenerator.DocThumb.apiName": "API Name",
   "Apis.Listing.components.ImageGenerator.DocThumb.apiVersion": "API Version",
-  "Apis.Listing.components.ImageGenerator.DocThumb.sourceType": "Source Type",
+  "Apis.Listing.components.ImageGenerator.DocThumb.sourceType": "Source Type:",
   "Apis.Listing.components.ImageGenerator.ThumbnailView.cancel.btn": "CANCEL",
   "Apis.Listing.components.ImageGenerator.ThumbnailView.design": "Design",
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": "Save",
