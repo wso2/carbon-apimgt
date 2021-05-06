@@ -57,6 +57,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -4562,31 +4563,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return ApiEndpointValidationResponseDTO Response DTO containing validity information of the HEAD request made
      * to test the endpoint url
      */
-    public static ApiEndpointValidationResponseDTO sendHttpHEADRequest(String urlVal) {
+    public static ApiEndpointValidationResponseDTO sendHttpHEADRequest(String urlVal) throws APIManagementException {
 
         ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
-        HttpHead head = new HttpHead(urlVal);
-        org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
-        // extract the host name and add the Host http header for sanity
-        head.addHeader("Host", urlVal.replaceAll("https?://", "").
-                replaceAll("(/.*)?", ""));
-        client.getParams().setParameter("http.socket.timeout", 4000);
-        client.getParams().setParameter("http.connection.timeout", 4000);
-        HttpMethod method = new HeadMethod(urlVal);
+        org.apache.http.client.HttpClient client = APIUtil.getHttpClient(urlVal);
+        HttpHead method = new HttpHead(urlVal);
 
-        if (System.getProperty(APIConstants.HTTP_PROXY_HOST) != null &&
-                System.getProperty(APIConstants.HTTP_PROXY_PORT) != null) {
-            log.debug("Proxy configured, hence routing through configured proxy");
-            String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
-            String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
-            HostConfiguration hostConfiguration = client.getHostConfiguration();
-            hostConfiguration.setProxy(proxyHost, Integer.parseInt(proxyPort));
-            client.setHostConfiguration(hostConfiguration);
-        }
         try {
-            int statusCode = client.executeMethod(method);
-            apiEndpointValidationResponseDTO.setStatusCode(statusCode);
-            apiEndpointValidationResponseDTO.setStatusMessage(HttpStatus.getStatusText(statusCode));
+            HttpResponse response = client.execute(method);
+            apiEndpointValidationResponseDTO.setStatusCode(response.getStatusLine().getStatusCode());
+            apiEndpointValidationResponseDTO.setStatusMessage(response.getStatusLine().getReasonPhrase());
         } catch (UnknownHostException e) {
             log.error("UnknownHostException occurred while sending the HEAD request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError("Unknown Host");
