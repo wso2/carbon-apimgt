@@ -19,14 +19,16 @@
 import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { StylesProvider, jssPreset } from '@material-ui/styles';
+import { StylesProvider as StylesProviderCore, jssPreset as jssPresetCore } from '@material-ui/core/styles';
+import { StylesProvider as StylesProviderPlain, jssPreset as jssPresetPlain } from '@material-ui/styles';
 import { IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import merge from 'lodash.merge';
 import cloneDeep from 'lodash.clonedeep';
 import { create } from 'jss';
 import rtl from 'jss-rtl';
-import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider as ThemeProviderWithMui, createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider as ThemeProviderPlain } from '@material-ui/core/styles';
 import Utils from 'AppData/Utils';
 import Settings from 'Settings';
 import Logout from './app/components/Logout';
@@ -38,6 +40,10 @@ import DefaultConfigurations from './defaultTheme';
 import AuthManager from './app/data/AuthManager';
 import Loading from './app/components/Base/Loading/Loading';
 import CONSTS from './app/data/Constants';
+
+const MuiThemeProvider = ThemeProviderPlain || ThemeProviderWithMui;
+const StylesProvider = StylesProviderCore || StylesProviderPlain;
+const jssPreset = jssPresetPlain || jssPresetCore;
 
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
@@ -324,7 +330,7 @@ class DevPortal extends React.Component {
                     <Helmet>
                         <title>{this.getTitle(theme)}</title>
                     </Helmet>
-                    <ThemeProvider theme={createMuiTheme(theme)}>
+                    <MuiThemeProvider theme={createMuiTheme(theme)}>
                         <StylesProvider jss={jss}>
                             {this.loadCustomCSS(theme)}
                             <BrowserRouter basename={context}>
@@ -338,7 +344,7 @@ class DevPortal extends React.Component {
                                 </Suspense>
                             </BrowserRouter>
                         </StylesProvider>
-                    </ThemeProvider>
+                    </MuiThemeProvider>
                 </SettingsProvider>
             );
         } else {

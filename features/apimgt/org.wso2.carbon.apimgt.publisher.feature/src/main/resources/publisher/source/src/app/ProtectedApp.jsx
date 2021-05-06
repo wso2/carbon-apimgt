@@ -19,7 +19,8 @@
 import React, { Component, Suspense, lazy } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { ThemeProvider } from '@material-ui/styles';
+import { ThemeProvider as CoreThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider as NormalThemeProvider } from '@material-ui/styles';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -40,6 +41,7 @@ import Configurations from 'Config';
 import Scopes from 'AppComponents/Scopes/Scopes';
 import merge from 'lodash/merge';
 
+const ThemeProvider = CoreThemeProvider || NormalThemeProvider;
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
     <Suspense fallback={<Progress per={50} message='Loading components ...' />}>
