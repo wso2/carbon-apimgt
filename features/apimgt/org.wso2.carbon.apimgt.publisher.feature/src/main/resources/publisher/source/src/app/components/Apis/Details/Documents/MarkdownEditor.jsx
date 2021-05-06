@@ -72,6 +72,7 @@ function Transition(props) {
 }
 
 function MarkdownEditor(props) {
+    const skipHtml = Configurations.app.markdown.skipHtml;
     const { intl, showAtOnce, history } = props;
     const { api, isAPIProduct } = useContext(APIContext);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -197,7 +198,7 @@ function MarkdownEditor(props) {
                         <Grid item xs={6}>
                             <div className={classes.markdownViewWrapper}>
                                 <Suspense fallback={<CircularProgress />}>
-                                    <ReactMarkdown escapeHtml={Configurations.markdown.escapeHtml} source={code} />
+                                    <ReactMarkdown skipHtml={skipHtml} source={code} />
                                 </Suspense>
                             </div>
                         </Grid>
