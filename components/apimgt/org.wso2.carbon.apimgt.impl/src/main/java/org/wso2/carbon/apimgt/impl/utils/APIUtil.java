@@ -7117,6 +7117,11 @@ public final class APIUtil {
         String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
         String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
         String nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
+        String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
+
+        if (proxyProtocol != null) {
+            protocol = proxyProtocol;
+        }
 
         PoolingHttpClientConnectionManager pool = null;
         try {
