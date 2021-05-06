@@ -321,7 +321,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                                 <div class="add-padding-2x app-data ">
                                     <%if(api.resultType == null || api.resultType == "API"){%>
                                         <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=encode.forHtml(api.name)%>"><%=encode.forHtml(api.name)%></a></h4>
-                                        <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
+                                        <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=encode.forHtml(api.version)%></a></h5>
                                         <%if(api.isAdvertiseOnly) {%>
                                             <p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
                                         <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>

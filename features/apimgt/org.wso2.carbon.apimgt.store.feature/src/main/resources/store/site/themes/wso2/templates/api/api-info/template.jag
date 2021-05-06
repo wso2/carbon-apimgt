@@ -139,13 +139,13 @@ var isOAuthProtected = false;
                                         <div class="form-group">
                                             <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Version:")%></strong></label>
                                             <div class="col-xs-8 col-sm-8">
-                                              <p class="form-control-static"><%=api.version%></p>
+                                              <p class="form-control-static"><%=encode.forHtml(api.version)%></p>
                                             </div>
                                         </div>
                                     <div class="form-group">
                                         <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("By:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
-                                            <p class="form-control-static"><%=jagg.validateForScript(displayOwner)%></p>
+                                            <p class="form-control-static"><%=encode.forHtml(jagg.validateForScript(displayOwner))%></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
