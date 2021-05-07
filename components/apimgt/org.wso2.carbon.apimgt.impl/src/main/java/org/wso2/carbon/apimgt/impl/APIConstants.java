@@ -1341,6 +1341,7 @@ public final class APIConstants {
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
     public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
+    public static final String PROXY_PROTOCOL = "ProxyConfig.Protocol";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -1943,6 +1944,7 @@ public final class APIConstants {
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
+    public static final String JSON_CALLBACK_URL = "callbackUrl";
 
     /**
      * Publisher Access Control related registry properties and values.
