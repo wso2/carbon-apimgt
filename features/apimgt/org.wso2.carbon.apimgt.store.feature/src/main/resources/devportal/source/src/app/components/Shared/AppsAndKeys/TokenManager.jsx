@@ -47,9 +47,12 @@ const styles = (theme) => ({
         '& span, & h6, & label, & input': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
         },
+        '& .Mui-disabled span': {
+            color: theme.palette.grey[500],
+        },
         '& input:disabled': {
-            backgroundColor: '#f8f8f8',
-            color: '#9d9d9d',
+            backgroundColor: theme.palette.grey[100],
+            color: theme.palette.grey[500],
         },
         position: 'relative',
     },
@@ -206,6 +209,7 @@ class TokenManager extends React.Component {
             providedConsumerKey: '',
             providedConsumerSecret: '',
             validating: false,
+            importDisabled: false,
         };
         this.keyStates = {
             COMPLETED: 'COMPLETED',
@@ -315,7 +319,7 @@ class TokenManager extends React.Component {
                     const { keyRequest } = this.state;
 
                     if (keys.size > 0 && keys.get(selectedTab) && keys.get(selectedTab).keyType === keyType) {
-                        const { callbackUrl, supportedGrantTypes, additionalProperties } = keys.get(selectedTab);
+                        const { callbackUrl, supportedGrantTypes, additionalProperties, mode } = keys.get(selectedTab);
                         const newRequest = {
                             ...keyRequest,
                             callbackUrl: callbackUrl || '',
@@ -324,6 +328,7 @@ class TokenManager extends React.Component {
                         };
                         this.setState({
                             keys, keyRequest: newRequest, keyManagers: responseKeyManagerList, selectedTab,
+                            importDisabled: mode === 'MAPPED',
                         });
                     } else {
                         const selectdKMGrants = selectdKM.availableGrantTypes || [];
@@ -620,6 +625,7 @@ class TokenManager extends React.Component {
          const {
              keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
              providedConsumerSecret, selectedTab, keyManagers, validating, hasError,
+             importDisabled,
          } = this.state;
          if (keyManagers && keyManagers.length === 0) {
              return (
@@ -751,6 +757,7 @@ class TokenManager extends React.Component {
                                                  isUserOwner={isUserOwner}
                                                  key={key}
                                                  provideOAuthKeySecret={this.provideOAuthKeySecret}
+                                                 importDisabled={importDisabled}
                                              />
                                          </Box>
                                      )
@@ -836,7 +843,7 @@ class TokenManager extends React.Component {
                                                      color='primary'
                                                      className={classes.button}
                                                      onClick={key ? this.updateKeys : this.generateKeys}
-                                                     disabled={hasError || (isLoading || !keymanager.enableOAuthAppCreation)}
+                                                     disabled={hasError || (isLoading || !keymanager.enableOAuthAppCreation) || importDisabled}
                                                  >
                                                      {key ? 'Update' : 'Generate Keys'}
                                                      {isLoading && <CircularProgress size={20} />}
