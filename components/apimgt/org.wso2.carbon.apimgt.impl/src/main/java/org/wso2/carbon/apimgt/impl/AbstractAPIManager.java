@@ -3212,31 +3212,48 @@ public abstract class AbstractAPIManager implements APIManager {
         for (APIKey apiKey : apiKeyList) {
             String keyManagerName = apiKey.getKeyManager();
             String consumerKey = apiKey.getConsumerKey();
+            String tenantDomain = this.tenantDomain;
+            if (StringUtils.isNotEmpty(xWso2Tenant)) {
+                tenantDomain = xWso2Tenant;
+            }
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            if (keyManagerConfigurationDTO == null) {
+                keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                if (keyManagerConfigurationDTO != null) {
+                    keyManagerName = keyManagerConfigurationDTO.getName();
+                } else {
+                    log.error("Key Manager: " + keyManagerName + " not found in database.");
+                    continue;
+                }
+            }
+            if (tenantDomain != null && !tenantDomain.equalsIgnoreCase(
+                    keyManagerConfigurationDTO.getTenantDomain())) {
+                continue;
+            }
+            KeyManager keyManager;
+            if (keyManagerConfigurationDTO.isEnabled()) {
+                keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            } else {
+                continue;
+            }
+            apiKey.setKeyManager(keyManagerConfigurationDTO.getName());
+
             if (StringUtils.isNotEmpty(consumerKey)) {
-                String tenantDomain = this.tenantDomain;
-                if (StringUtils.isNotEmpty(xWso2Tenant)) {
-                    tenantDomain = xWso2Tenant;
-                }
-                KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
-                if (keyManagerConfigurationDTO == null) {
-                    keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
-                    if (keyManagerConfigurationDTO != null) {
-                        keyManagerName = keyManagerConfigurationDTO.getName();
+                if (keyManager != null) {
+                    if (APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())
+                            && !isOauthAppValidationEnabled()) {
+                        resultantApiKeyList.add(apiKey);
                     } else {
-                        log.error("Key Manager: " + keyManagerName + " not found in database.");
-                        continue;
-                    }
-                }
-                if (tenantDomain != null && !tenantDomain.equalsIgnoreCase(
-                        keyManagerConfigurationDTO.getTenantDomain())) {
-                        continue;
-                }
-                if (keyManagerConfigurationDTO  != null && keyManagerConfigurationDTO.isEnabled()) {
-                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
-                    if (keyManager != null) {
-                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        OAuthApplicationInfo oAuthApplicationInfo;
+                        try {
+                            oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        } catch (APIManagementException e) {
+                            log.error("Error while retrieving Application Information", e);
+                            continue;
+                        }
                         if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
-                            OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
+                            OAuthApplicationInfo storedOAuthApplicationInfo = new Gson()
+                                    .fromJson(apiKey.getAppMetaData()
                                     , OAuthApplicationInfo.class);
                             if (oAuthApplicationInfo == null) {
                                 oAuthApplicationInfo = storedOAuthApplicationInfo;
@@ -3279,18 +3296,18 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (tokenInfo != null) {
                             apiKey.setAccessToken(tokenInfo.getAccessToken());
                             apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
-                            apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.debug("Access token does not exist for Consumer Key: " + consumerKey);
                             }
                         }
-                        apiKey.setKeyManager(keyManagerConfigurationDTO.getName());
                         resultantApiKeyList.add(apiKey);
-                    } else {
-                        log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                     }
+                } else {
+                    log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                 }
+            } else {
+                resultantApiKeyList.add(apiKey);
             }
         }
         return resultantApiKeyList;
@@ -3715,5 +3732,14 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiDocContent;
 
+    }
+
+    protected boolean isOauthAppValidationEnabled() {
+        String oauthAppValidation = getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
+        if (StringUtils.isNotEmpty(oauthAppValidation)) {
+            return Boolean.parseBoolean(oauthAppValidation);
+        }
+        return true;
     }
 }

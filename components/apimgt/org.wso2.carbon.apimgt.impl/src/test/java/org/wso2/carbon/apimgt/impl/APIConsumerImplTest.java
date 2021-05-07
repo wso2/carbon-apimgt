@@ -916,19 +916,38 @@ public class APIConsumerImplTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL)).
                 thenReturn("http://localhost");
 
+        int appId = 123456;
+        String appName = "app1";
+        String userId = "1";
+        String tokenType = "access";
+        String kmName = "defaultTestKM";
+        String kmUUID = "kmuuid";
+
         Application application = Mockito.mock(Application.class);
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.when(ApplicationUtils
-                .retrieveApplication("app1", "1", null))
+                .retrieveApplication(appName, userId, null))
                 .thenReturn(application);
         Mockito.when(application.getSubscriber()).thenReturn(subscriber);
-        Mockito.when(subscriber.getName()).thenReturn("1");
+        Mockito.when(application.getId()).thenReturn(appId);
+        Mockito.when(subscriber.getName()).thenReturn(userId);
+
+        APIKey apiKey = Mockito.mock(APIKey.class);
+        Mockito.when(apiKey.getCreateMode()).thenReturn(APIConstants.OAuthAppMode.CREATED.name());
+        Mockito.when(apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(appId, kmUUID, tokenType))
+                .thenReturn(apiKey);
+
+        KeyManagerConfigurationDTO testKeyManagerConfiguration = new KeyManagerConfigurationDTO();
+        testKeyManagerConfiguration.setEnabled(true);
+        testKeyManagerConfiguration.setUuid(kmUUID);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(SAMPLE_TENANT_DOMAIN_1, kmName))
+                .thenReturn(testKeyManagerConfiguration);
 
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertEquals(apiConsumer
-                .updateAuthClient("1", "app1", "access", "www.host.com", new String[0], null, null, null, null,
-                        "default")
+                .updateAuthClient(userId, appName, tokenType, "www.host.com", new String[0], null, null, null, null,
+                        kmName)
                 .getClientName(), clientName);
     }
 
@@ -1088,13 +1107,13 @@ public class APIConsumerImplTest {
         Map<String, Object> result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
                         "identity.com/auth", null, "3600", "api_view", "2", null, "default", null, false);
-        Assert.assertEquals(result.size(), 9);
+        Assert.assertEquals(result.size(), 10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
                         "3600", "api_view", "2", null, "default", null, false);
-        Assert.assertEquals(result.size(), 9);
+        Assert.assertEquals(result.size(), 10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
     }
@@ -1300,7 +1319,7 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
-        Assert.assertEquals(7, apiConsumer.mapExistingOAuthClient("", "admin", "1",
+        Assert.assertEquals(8, apiConsumer.mapExistingOAuthClient("", "admin", "1",
                 "app1", "refresh", "DEFAULT", "default").size());
     }
 
