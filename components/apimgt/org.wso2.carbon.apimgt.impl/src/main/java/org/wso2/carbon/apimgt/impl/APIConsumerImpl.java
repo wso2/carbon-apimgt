@@ -25,6 +25,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -3871,7 +3872,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
-        Map<String, String> consumerKeysOfApplication = null;
+        Map<String, Pair<String, String>> consumerKeysOfApplication = null;
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
@@ -4058,13 +4059,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         if (consumerKeysOfApplication != null && consumerKeysOfApplication.size() > 0) {
-            for (Map.Entry<String, String> entry : consumerKeysOfApplication.entrySet()) {
+            for (Map.Entry<String, Pair<String, String>> entry : consumerKeysOfApplication.entrySet()) {
                 String consumerKey = entry.getKey();
-                String keymanager = entry.getValue();
+                String keyManagerName = entry.getValue().getKey();
+                String keyManagerTenantDomain = entry.getValue().getValue();
                 ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
                         UUID.randomUUID().toString(), System.currentTimeMillis(),
-                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(), tenantId, tenantDomain,
-                        application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keymanager);
+                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), keyManagerTenantDomain,
+                        application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
+                        keyManagerName);
                 APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
         }

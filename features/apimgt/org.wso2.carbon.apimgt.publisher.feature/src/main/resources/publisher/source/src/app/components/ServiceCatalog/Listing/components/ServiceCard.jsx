@@ -18,6 +18,9 @@ import Chip from '@material-ui/core/Chip';
 import CreateAPIButton from 'AppComponents/ServiceCatalog/CreateApi';
 import DeleteServiceButton from 'AppComponents/ServiceCatalog/Listing/Delete';
 import LetterGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/LetterGenerator';
+import {
+    ScopeValidation, resourceMethod, resourcePath, client,
+} from 'AppData/ScopeValidation';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -202,13 +205,20 @@ export default function ServiceCard(props) {
                                     serviceUrl={service.serviceUrl}
                                     usage={service.usage}
                                 />
-                                <DeleteServiceButton
-                                    id='itest-service-card-delete'
-                                    serviceDisplayName={service.name}
-                                    serviceId={service.id}
-                                    onDelete={onDelete}
-                                    isIconButton
-                                />
+                                {/* allowing delete service based on scopes */}
+                                <ScopeValidation
+                                    resourcePath={resourcePath.SINGLE_SERVICE}
+                                    resourceMethod={resourceMethod.DELETE}
+                                    client={client.SERVICE_CATALOG_CLIENT}
+                                >
+                                    <DeleteServiceButton
+                                        id='itest-service-card-delete'
+                                        serviceDisplayName={service.name}
+                                        serviceId={service.id}
+                                        onDelete={onDelete}
+                                        isIconButton
+                                    />
+                                </ScopeValidation>
                             </Grid>
                         )}
                     </Grid>
