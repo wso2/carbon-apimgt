@@ -250,7 +250,7 @@ function devServerBefore(app, server, compiler) {
         const keys = oauthAppCache();
         const tokens = await generateToken(code, keys);
         setResponseSessionCookies(res, tokens.access_token, tokens.refresh_token,
-            tokens.idToken, session_state, tokens.expiresIn);
+            tokens.id_token, session_state, tokens.expires_in);
         res.redirect('/publisher/');
     });
 }

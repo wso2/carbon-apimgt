@@ -56,7 +56,7 @@ function renderInput(inputProps) {
     }
     return (
         <TextField
-            id='searchQuery'
+            id='searchQuery' // Pay attention to usages when renaming this ID
             InputProps={{
                 inputRef: ref,
                 className: classes.input,

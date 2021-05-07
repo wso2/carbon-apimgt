@@ -125,7 +125,7 @@ const styles = (theme) => ({
 
 const APIDetailsTopMenu = (props) => {
     const {
-        classes, theme, api, isAPIProduct, imageUpdate, intl,
+        classes, theme, api, isAPIProduct, imageUpdate, intl, openPageSearch, setOpenPageSearch,
     } = props;
     const history = useHistory();
     const prevLocation = history.location.pathname;
@@ -335,7 +335,12 @@ const APIDetailsTopMenu = (props) => {
             </div>
 
             <VerticalDivider height={70} />
-            <GoTo api={api} isAPIProduct={isAPIProduct} />
+            <GoTo
+                setOpenPageSearch={setOpenPageSearch}
+                openPageSearch={openPageSearch}
+                api={api}
+                isAPIProduct={isAPIProduct}
+            />
             {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
             {(isVisibleInStore || isAPIProduct) && (
                 <a

@@ -90,8 +90,8 @@ module.exports = (env, argv) => {
                     pathRewrite: { '^/api/am/publisher/v2/swagger.yaml': '' },
                 },
                 '/api/am': {
-                    target: 'http://localhost:4010',
-                    pathRewrite: { '^/api/am/publisher/v2/': '' },
+                    target: 'https://localhost:9443',
+                    // pathRewrite: { '^/api/am/publisher/v2/': '' },
                     secure: false,
                 },
                 '/publisher/services': {

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
@@ -137,10 +137,28 @@ const styles = (theme) => ({
  * @returns
  */
 function Overview(props) {
-    const { classes, api: newApi } = props;
+    const { classes, api: newApi, setOpenPageSearch } = props;
     const { api } = useContext(ApiContext);
     let loadEndpoints;
-
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 's') {
+                const { target } = event;
+                // prevent opening page search when typing `s` in header API search input
+                if (target.id !== 'searchQuery') {
+                    setOpenPageSearch(true);
+                }
+                // TO prevent overlapping the event handlers in header search and page search itself
+                if (target.id !== 'page-search-input' && target.id !== 'searchQuery') {
+                    event.preventDefault(); // To prevent form submissions
+                }
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [setOpenPageSearch]);
     if (api.apiType === API.CONSTS.API) {
         loadEndpoints = <Endpoints parentClasses={classes} api={api} />;
     }

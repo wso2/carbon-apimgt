@@ -20,7 +20,7 @@
 
 /* eslint no-unused-expressions: 0 */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Downshift from 'downshift';
 import { makeStyles } from '@material-ui/core/styles';
@@ -137,11 +137,15 @@ renderInput.propTypes = {
  * @returns {*} Downshift element
  */
 function GoTo(props) {
-    const { isAPIProduct, api } = props;
+    const {
+        isAPIProduct, api, openPageSearch, setOpenPageSearch,
+    } = props;
     const classes = useStyles();
-    const [showSearch, setShowSearch] = useState(false);
+    const [showSearch, setShowSearch] = useState(openPageSearch);
     const intl = useIntl();
-
+    useEffect(() => {
+        setShowSearch(openPageSearch);
+    }, [openPageSearch]);
     let isGraphQL = false;
 
     if (api.type === 'GRAPHQL') {
@@ -152,6 +156,7 @@ function GoTo(props) {
     };
     const handleClickAway = () => {
         setShowSearch(false);
+        setOpenPageSearch(false);
     };
 
     return (
@@ -165,7 +170,7 @@ function GoTo(props) {
             <Backdrop className={classes.backdrop} open={showSearch} onClick={handleClickAway}>
                 <div onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} className={classes.downshiftWrapper}>
                     {showSearch && (
-                        <Downshift id='downshift-simple'>
+                        <Downshift id='page-search'>
                             {({
                                 getInputProps,
                                 getItemProps,

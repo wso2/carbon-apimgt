@@ -202,8 +202,10 @@ class Details extends Component {
             allRevisions: null,
             allEnvRevision: null,
             authorizedAPI: false,
+            openPageSearch: false,
         };
         this.setAPI = this.setAPI.bind(this);
+        this.setOpenPageSearch = this.setOpenPageSearch.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
         this.updateAPI = this.updateAPI.bind(this);
         this.setImageUpdate = this.setImageUpdate.bind(this);
@@ -305,6 +307,17 @@ class Details extends Component {
                         doRedirectToLogin();
                     }
                 });
+        }
+    }
+
+    /**
+     * Set open state for page search
+     * @param {*} status
+     */
+    setOpenPageSearch(status) {
+        const { openPageSearch } = this.state;
+        if (status !== openPageSearch) {
+            this.setState({ openPageSearch: status });
         }
     }
 
@@ -603,7 +616,8 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision, authorizedAPI,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision, openPageSearch,
+            authorizedAPI,
         } = this.state;
         const {
             classes,
@@ -782,7 +796,13 @@ class Details extends Component {
                                 getDeployedEnv: this.getDeployedEnv,
                             }}
                         >
-                            <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
+                            <APIDetailsTopMenu
+                                setOpenPageSearch={this.setOpenPageSearch}
+                                openPageSearch={openPageSearch}
+                                api={api}
+                                isAPIProduct={isAPIProduct}
+                                imageUpdate={imageUpdate}
+                            />
                             <div className={classes.contentInside}>
                                 <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
                                 <Switch>
@@ -790,9 +810,22 @@ class Details extends Component {
                                     <Route
                                         path={Details.subPaths.OVERVIEW_PRODUCT}
                                         key={Details.subPaths.OVERVIEW_PRODUCT}
-                                        component={() => <Overview api={api} />}
+                                        component={() => (
+                                            <Overview
+                                                setOpenPageSearch={this.setOpenPageSearch}
+                                                api={api}
+                                            />
+                                        )}
                                     />
-                                    <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
+                                    <Route
+                                        path={Details.subPaths.OVERVIEW}
+                                        component={() => (
+                                            <Overview
+                                                setOpenPageSearch={this.setOpenPageSearch}
+                                                api={api}
+                                            />
+                                        )}
+                                    />
                                     <Route
                                         path={Details.subPaths.API_DEFINITION}
                                         component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
