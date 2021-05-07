@@ -139,6 +139,7 @@ export default function ListRoles() {
             store -> [{ name: '', description: '', roles: []}],
         }
     */
+    const [searchPermissionMappings, setSearchPermissionMappings] = useState();
     const [appMappings, setAppMappings] = useState();
     const [roleAliases, setRoleAliases] = useState();
     const [systemScopes, setSystemScopes] = useState();
@@ -173,9 +174,28 @@ export default function ListRoles() {
         if (systemScopes && roleAliases) {
             const [roleMapping, appMapping] = extractMappings(systemScopes.list);
             setPermissionMappings(mergeRoleAliasesAndScopeMappings(roleAliases.list, roleMapping));
+            setSearchPermissionMappings(mergeRoleAliasesAndScopeMappings(roleAliases.list, roleMapping));
             setAppMappings(appMapping);
         }
     }, [roleAliases, systemScopes]);
+
+    const searchProps = {
+        searchPlaceholder: intl.formatMessage({
+            id: 'ScopeAssignments.List.search.default',
+            defaultMessage: 'Search by Role Name',
+        }),
+        active: true,
+    };
+
+    const onSearch = (searchKey) => {
+        const keys = Object.keys(permissionMappings);
+        const filteredKeys = keys.filter((key) => key.toLowerCase().includes(searchKey.target.value.toLowerCase()));
+        const newPermissionMappings = {};
+        for (let i = 0; i < filteredKeys.length; i++) {
+            newPermissionMappings[filteredKeys[i]] = permissionMappings[filteredKeys[i]];
+        }
+        setSearchPermissionMappings(newPermissionMappings);
+    };
 
     /*
         No need to create handleScopeMappingUpdate all the time ,
@@ -259,7 +279,11 @@ export default function ListRoles() {
     }
     return (
         <ContentBase title='Scope Assignments' pageDescription={pageDesc}>
-            <ListAddOns>
+            <ListAddOns
+                searchActive={searchProps.active}
+                searchPlaceholder={searchProps.searchPlaceholder}
+                filterData={onSearch}
+            >
                 <Grid item>
                     <Button
                         variant='contained'
@@ -285,9 +309,9 @@ export default function ListRoles() {
                     }
                 </Grid>
             </ListAddOns>
-            <AdminTable dataIDs={Object.keys(permissionMappings)} multiSelect={false}>
+            <AdminTable dataIDs={Object.keys(searchPermissionMappings)} multiSelect={false}>
                 <AdminTableHead headCells={headCells} />
-                <TableBody rows={Object.entries(permissionMappings).map(([role, mapping]) => {
+                <TableBody rows={Object.entries(searchPermissionMappings).map(([role, mapping]) => {
                     return [mapping.aliases ? (
                         <Box display='inline'>
                             {role}

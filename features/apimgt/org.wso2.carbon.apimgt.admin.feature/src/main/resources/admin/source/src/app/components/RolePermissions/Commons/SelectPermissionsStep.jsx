@@ -93,7 +93,7 @@ export default function SelectPermissionsStep(props) {
                                 variant='outlined'
                                 inputProps={{
                                     ...params.inputProps,
-                                    autoComplete: 'new-password', // disable autocomplete and autofill
+                                    autoComplete: 'off',
                                 }}
                             />
                         )}

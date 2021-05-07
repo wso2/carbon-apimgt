@@ -328,6 +328,7 @@
   "RolePermissions.TreeView.PermissionsSelector.scope.assignment.button": "Scope Assignments",
   "RolePermissions.TreeView.PermissionsSelector.scope.assignment.title": "Select Scope Assignments",
   "RolePermissions.TreeView.PermissionsSelector.update.scope.error": "Something went wrong while updating the permission",
+  "ScopeAssignments.List.search.default": "Search by Role Name",
   "TenantTheme.Upload.Theme.browse.files.to.upload": "Browse File to Upload",
   "TenantTheme.Upload.Theme.button.upload": "Upload",
   "TenantTheme.Upload.Theme.download.error": "Error downloading Tenant theme ZIP file",
