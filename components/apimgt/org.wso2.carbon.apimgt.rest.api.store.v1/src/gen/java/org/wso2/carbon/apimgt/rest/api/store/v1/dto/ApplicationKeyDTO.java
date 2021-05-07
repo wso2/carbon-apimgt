@@ -59,6 +59,40 @@ public enum KeyTypeEnum {
 }
 
     private KeyTypeEnum keyType = null;
+
+@XmlType(name="ModeEnum")
+@XmlEnum(String.class)
+public enum ModeEnum {
+
+    @XmlEnumValue("MAPPED") MAPPED(String.valueOf("MAPPED")), @XmlEnumValue("CREATED") CREATED(String.valueOf("CREATED"));
+
+
+    private String value;
+
+    ModeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static ModeEnum fromValue(String v) {
+        for (ModeEnum b : ModeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private ModeEnum mode = null;
     private String groupId = null;
     private ApplicationTokenDTO token = null;
     private Object additionalProperties = null;
@@ -208,6 +242,24 @@ public enum KeyTypeEnum {
   }
 
   /**
+   * Describe the which mode Application Mapped.
+   **/
+  public ApplicationKeyDTO mode(ModeEnum mode) {
+    this.mode = mode;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CREATED", value = "Describe the which mode Application Mapped.")
+  @JsonProperty("mode")
+  public ModeEnum getMode() {
+    return mode;
+  }
+  public void setMode(ModeEnum mode) {
+    this.mode = mode;
+  }
+
+  /**
    * Application group id (if any).
    **/
   public ApplicationKeyDTO groupId(String groupId) {
@@ -278,6 +330,7 @@ public enum KeyTypeEnum {
         Objects.equals(callbackUrl, applicationKey.callbackUrl) &&
         Objects.equals(keyState, applicationKey.keyState) &&
         Objects.equals(keyType, applicationKey.keyType) &&
+        Objects.equals(mode, applicationKey.mode) &&
         Objects.equals(groupId, applicationKey.groupId) &&
         Objects.equals(token, applicationKey.token) &&
         Objects.equals(additionalProperties, applicationKey.additionalProperties);
@@ -285,7 +338,7 @@ public enum KeyTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, groupId, token, additionalProperties);
+    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, mode, groupId, token, additionalProperties);
   }
 
   @Override
@@ -301,6 +354,7 @@ public enum KeyTypeEnum {
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    keyState: ").append(toIndentedString(keyState)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("    token: ").append(toIndentedString(token)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

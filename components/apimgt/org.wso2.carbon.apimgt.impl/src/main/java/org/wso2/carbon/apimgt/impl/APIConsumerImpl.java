@@ -2622,18 +2622,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         log.debug("Client ID not mapped previously with another application.");
 
         //createApplication on oAuthorization server.
-        OAuthApplicationInfo oAuthApplication;
-        String oauthAppValidation = getAPIManagerConfiguration()
-                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        if (StringUtils.isNotEmpty(oauthAppValidation)) {
-            if (Boolean.parseBoolean(oauthAppValidation)) {
-                oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
-            } else {
-                oAuthApplication = oauthAppRequest.getOAuthApplicationInfo();
-            }
-        } else {
-            oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
-        }
+        OAuthApplicationInfo oAuthApplication = isOauthAppValidationEnabled() ?
+                keyManager.mapOAuthApplication(oauthAppRequest) : oauthAppRequest.getOAuthApplicationInfo();
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
@@ -2669,6 +2659,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
         keyDetails.put("appDetails", oAuthApplication.getJsonString());
         keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
+        keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
 
         return keyDetails;
     }
@@ -4281,6 +4272,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
                 keyDetails.put("appDetails", applicationInfo.getJsonString());
                 keyDetails.put("keyMappingId",keyMappingId);
+                keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.CREATED.name());
             }
 
             // There can be instances where generating the Application Token is
@@ -4814,6 +4806,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
 
+            if (apiKey == null || APIConstants.OAuthAppMode.MAPPED.name().equals(apiKey.getCreateMode())) {
+                throw new APIManagementException("Mapped applications are not allowed to update.");
+            }
             //call update method.
             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
             if (storedOAuthApplicationInfo != null) {
@@ -4905,8 +4900,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
                              /* retrieving OAuth application information for specific consumer key */
                         consumerKey = apiKey.getConsumerKey();
-                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                        if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
+                        OAuthApplicationInfo oAuthApplicationInfo = null;
+                        if (isOauthAppValidationEnabled() || APIConstants.OAuthAppMode.CREATED.name()
+                                .equals(apiKey.getCreateMode())) {
+                            oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        }
+                        if (oAuthApplicationInfo != null
+                                && oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
                             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
                                             getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
                                     oAuthApplicationInfo.getCallBackURL(), null,
