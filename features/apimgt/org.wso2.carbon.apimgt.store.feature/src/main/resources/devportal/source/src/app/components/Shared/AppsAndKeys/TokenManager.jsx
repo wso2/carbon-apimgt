@@ -627,7 +627,6 @@ class TokenManager extends React.Component {
              providedConsumerSecret, selectedTab, keyManagers, validating, hasError,
              importDisabled,
          } = this.state;
-         console.log('importDisabled ' + importDisabled)
          if (keyManagers && keyManagers.length === 0) {
              return (
                  <div className={classes.root}>
