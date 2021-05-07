@@ -21,6 +21,7 @@ const AppConfig = {
             enabled: true, // If enabled, user will be logged out from the App when logged out from the IDP (eg: SSO logout from a different App).
             timeout: 4000, // Defines the timeout for the above periodical session status check
         },
+        mediationPolicyCount: 50,
         propertyDisplaySuffix: '__display',
         loadDefaultLocales: true, // If false, Default en.json file will not be used/loaded in app.
         // loadDefaultLocales = false is good for performance but text overrides using the locale file will not work
