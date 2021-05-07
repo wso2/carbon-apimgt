@@ -33,7 +33,7 @@ import TextField from '@material-ui/core/TextField';
 
 function ImportExternalApp(props) {
     const {
-        consumerKey, consumerSecret, onChange, isUserOwner, key, provideOAuthKeySecret, importDisabled,
+        consumerKey, consumerSecret, onChange, isUserOwner, key, provideOAuthKeySecret,
     } = props;
     const intl = useIntl();
 
@@ -63,7 +63,6 @@ function ImportExternalApp(props) {
                 color="secondary"
                 startIcon={<PlayForWorkIcon />}
                 onClick={handleClickOpen}
-                disabled={importDisabled}
             >
                 <FormattedMessage
                     defaultMessage='Provide Existing OAuth Keys'
@@ -209,14 +208,12 @@ ImportExternalApp.propTypes = {
     isUserOwner: PropTypes.string,
     key: PropTypes.shape({}).isRequired,
     provideOAuthKeySecret: PropTypes.func.isRequired,
-    importDisabled: PropTypes.bool,
 };
 
 ImportExternalApp.defaultProps = {
     consumerKey: '',
     consumerSecret: '',
     isUserOwner: false,
-    importDisabled: false,
 };
 
 export default ImportExternalApp;
