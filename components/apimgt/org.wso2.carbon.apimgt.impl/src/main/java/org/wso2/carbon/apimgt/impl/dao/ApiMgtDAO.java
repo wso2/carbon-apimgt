@@ -272,7 +272,6 @@ public class ApiMgtDAO {
             ps.setString(3, dto.getStatus().toString());
             ps.setString(4, dto.getKeyManager());
             ps.setString(5,UUID.randomUUID().toString());
-            ps.setString(6, APIConstants.OAuthAppMode.CREATED.name());
             ps.execute();
 
             conn.commit();
@@ -2272,7 +2271,6 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 String consumerKey = rs.getString("CONSUMER_KEY");
                 String keyManagerName = rs.getString("KEY_MANAGER");
-                String createMode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     KeyManagerConfigurationDTO keyManagerConfiguration = getKeyManagerConfigurationByName(
                             tenntDomain, keyManagerName);
@@ -2283,10 +2281,7 @@ public class ApiMgtDAO {
                         }
                     }
                     KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenntDomain,keyManagerName);
-                    boolean canRetrieveOauthApp =
-                            isOauthAppValidationEnabled() || APIConstants.OAuthAppMode.CREATED.name()
-                                    .equals(createMode);
-                    if (keyManager != null && canRetrieveOauthApp) {
+                    if (keyManager != null){
                         OAuthApplicationInfo oAuthApplication = keyManager.retrieveApplication(consumerKey);
                         keyTypeWiseOAuthApps.put(keyManagerName,oAuthApplication);
                     }
@@ -8800,11 +8795,6 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
-                    String createMode = resultSet.getString("CREATE_MODE");
-                    if (StringUtils.isEmpty(createMode)) {
-                        createMode = APIConstants.OAuthAppMode.CREATED.name();
-                    }
-                    apiKey.setCreateMode(createMode);
                     try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
                         if (appInfo != null) {
                             apiKey.setAppMetaData(IOUtils.toString(appInfo));
@@ -8837,11 +8827,6 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
-                    String createMode = resultSet.getString("CREATE_MODE");
-                    if (StringUtils.isEmpty(createMode)) {
-                        createMode = APIConstants.OAuthAppMode.CREATED.name();
-                    }
-                    apiKey.setCreateMode(createMode);
                     try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
                         if (appInfo != null) {
                             apiKey.setAppMetaData(IOUtils.toString(appInfo));
@@ -15431,17 +15416,5 @@ public class ApiMgtDAO {
             handleException("Failed to delete tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
-    }
-
-    protected boolean isOauthAppValidationEnabled() {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
-        String isOauthAppValidationEnabled = configuration
-                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        if (StringUtils.isNotEmpty(isOauthAppValidationEnabled)) {
-            return Boolean.parseBoolean(isOauthAppValidationEnabled);
-        }
-        return true;
     }
 }
