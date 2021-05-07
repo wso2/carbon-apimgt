@@ -9677,7 +9677,6 @@ components:
         businessOwnerEmail:
           type: string
           example: businessowner@wso2.com
-          pattern: '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$'
         technicalOwner:
           maxLength: 120
           type: string
