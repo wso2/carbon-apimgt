@@ -5011,13 +5011,6 @@ definitions:
           - PRODUCTION
           - SANDBOX
         example: PRODUCTION
-      mode:
-        type: string
-        description: Describe the which mode Application Mapped.
-        example: CREATED
-        enum:
-          - MAPPED
-          - CREATED
       groupId:
         type: string
         description: Application group id (if any).
