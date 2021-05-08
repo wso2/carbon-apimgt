@@ -3880,6 +3880,17 @@ components:
                 type: array
                 items:
                   type: string
+              solaceURLs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    protocol:
+                      type: string
+                      example: Defalt
+                    endpointURL:
+                      type: string
+                      example: Default
     ApplicationInfo:
       title: Application info object with basic application details
       type: object

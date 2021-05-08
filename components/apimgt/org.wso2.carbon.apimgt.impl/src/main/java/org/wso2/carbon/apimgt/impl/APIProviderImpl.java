@@ -9923,7 +9923,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error("Error occurred while deleting the API '" + apiNameForRegistration + "' from Solace Broker");
                 throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
             }
-
+        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT) {
+            log.error("Cannot undeploy. Solace API product '" + apiNameWithContext + "' is subscribed for a solace Application");
+            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());
         } else {
             log.error("Error occurred while deleting the API Product '" +apiNameWithContext+ "' from Solace Broker");
             throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());

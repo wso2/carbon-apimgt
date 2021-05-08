@@ -110,6 +110,19 @@ public class ApplicationMappingUtil {
                                             applicationSolaceDeployedEnvironmentsDTO.setSubscribeTopics(subscribeTopics);
                                         }
                                     }
+                                    if (environmentObject.getJSONArray("messagingProtocols") != null) {
+                                        List<APISolaceURLsDTO> endpointUrls = new ArrayList<>();
+                                        JSONArray protocolsArray = environmentObject.getJSONArray("messagingProtocols");
+                                        for (int j = 0; j < protocolsArray.length(); j++) {
+                                            APISolaceURLsDTO solaceURLsDTO = new APISolaceURLsDTO();
+                                            String protocol = protocolsArray.getJSONObject(j).getJSONObject("protocol").getString("name");
+                                            String uri = protocolsArray.getJSONObject(j).getString("uri");
+                                            solaceURLsDTO.setProtocol(protocol);
+                                            solaceURLsDTO.setEndpointURL(uri);
+                                            endpointUrls.add(solaceURLsDTO);
+                                        }
+                                        applicationSolaceDeployedEnvironmentsDTO.setSolaceURLs(endpointUrls);
+                                    }
                                 }
                             }
                             solaceEnvironments.add(applicationSolaceDeployedEnvironmentsDTO);

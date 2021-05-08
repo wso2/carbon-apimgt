@@ -15,6 +15,9 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import {
     Grid, List, ListItem, MenuItem, Paper, TextField,
 } from '@material-ui/core';
+import { upperCaseString } from 'AppData/stringFormatter';
+import Chip from '@material-ui/core/Chip';
+import InputBase from '@material-ui/core/InputBase';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -92,6 +95,49 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         overflow: 'auto',
         maxHeight: 175,
+    },
+    urlPaper: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        border: `solid 1px ${theme.palette.grey[300]}`,
+        '& .MuiInputBase-root:before,  .MuiInputBase-root:hover': {
+            borderBottom: 'none !important',
+            color: theme.palette.primary.main,
+        },
+        '& .MuiSelect-select': {
+            color: theme.palette.primary.main,
+            paddingLeft: theme.spacing(),
+        },
+        '& .MuiInputBase-input': {
+            color: theme.palette.primary.main,
+        },
+        '& .material-icons': {
+            fontSize: 16,
+            color: `${theme.palette.grey[700]} !important`,
+        },
+        borderRadius: 10,
+        marginRight: theme.spacing(),
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+    },
+    avatar: {
+        width: 30,
+        height: 30,
+        background: 'transparent',
+        border: `solid 1px ${theme.palette.grey[300]}`,
+    },
+    iconStyle: {
+        cursor: 'pointer',
+        margin: '-10px 0',
+        padding: '0 0 0 5px',
+        '& .material-icons': {
+            fontSize: 18,
+            color: '#9c9c9c',
+        },
     },
 }));
 
@@ -294,7 +340,60 @@ function Overview(props) {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid item xs={4}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.protocols.endpoints'
+                                                defaultMessage='Protocols & Endpoints'
+                                            />
+                                        </Typography>
+                                        <Grid container spacing={2} xs={12}>
+                                            <Grid item xs={12} />
+                                            {environment.solaceURLs.map((u) => (
+                                                <Grid item xs={12}>
+                                                    <Grid container spacing={2} xs={12}>
+                                                        <Grid
+                                                            item
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                            }}
+                                                        >
+                                                            <Chip
+                                                                label={upperCaseString(u.protocol)}
+                                                                color='primary'
+                                                                style={{
+                                                                    width: '60px',
+                                                                }}
+                                                                size='small'
+                                                            />
+                                                        </Grid>
+                                                        <Grid
+                                                            item
+                                                            xs={10}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                            }}
+                                                        >
+                                                            <Paper id='gateway-envirounment' component='form' className={classes.urlPaper}>
+                                                                <InputBase
+                                                                    inputProps={{ 'aria-label': 'api url' }}
+                                                                    value={u.endpointURL}
+                                                                    className={classes.input}
+                                                                />
+                                                            </Paper>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={4}>
                                     <Paper className={classes.Paper2}>
                                         <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
                                             <FormattedMessage
@@ -313,7 +412,7 @@ function Overview(props) {
                                         </List>
                                     </Paper>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid item xs={4}>
                                     <Paper className={classes.Paper2}>
                                         <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
                                             <FormattedMessage

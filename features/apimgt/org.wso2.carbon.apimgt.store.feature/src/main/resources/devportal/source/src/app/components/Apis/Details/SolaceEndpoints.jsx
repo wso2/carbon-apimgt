@@ -148,7 +148,14 @@ function SolaceEndpoints() {
                                                         />
                                                     </Typography>
                                                 </Grid>
-                                                <Grid item>
+                                                <Grid
+                                                    item
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
                                                     <Chip
                                                         label={upperCaseString(p.protocol)}
                                                         color='primary'

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceURLsDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,6 +28,7 @@ public class ApplicationSolaceDeployedEnvironmentsDTO   {
     private String organizationName = null;
     private List<String> publishTopics = new ArrayList<String>();
     private List<String> subscribeTopics = new ArrayList<String>();
+    private List<APISolaceURLsDTO> solaceURLs = new ArrayList<APISolaceURLsDTO>();
 
   /**
    **/
@@ -113,6 +115,24 @@ public class ApplicationSolaceDeployedEnvironmentsDTO   {
     this.subscribeTopics = subscribeTopics;
   }
 
+  /**
+   **/
+  public ApplicationSolaceDeployedEnvironmentsDTO solaceURLs(List<APISolaceURLsDTO> solaceURLs) {
+    this.solaceURLs = solaceURLs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("solaceURLs")
+  public List<APISolaceURLsDTO> getSolaceURLs() {
+    return solaceURLs;
+  }
+  public void setSolaceURLs(List<APISolaceURLsDTO> solaceURLs) {
+    this.solaceURLs = solaceURLs;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -127,12 +147,13 @@ public class ApplicationSolaceDeployedEnvironmentsDTO   {
         Objects.equals(environmentDisplayName, applicationSolaceDeployedEnvironments.environmentDisplayName) &&
         Objects.equals(organizationName, applicationSolaceDeployedEnvironments.organizationName) &&
         Objects.equals(publishTopics, applicationSolaceDeployedEnvironments.publishTopics) &&
-        Objects.equals(subscribeTopics, applicationSolaceDeployedEnvironments.subscribeTopics);
+        Objects.equals(subscribeTopics, applicationSolaceDeployedEnvironments.subscribeTopics) &&
+        Objects.equals(solaceURLs, applicationSolaceDeployedEnvironments.solaceURLs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, environmentDisplayName, organizationName, publishTopics, subscribeTopics);
+    return Objects.hash(environmentName, environmentDisplayName, organizationName, publishTopics, subscribeTopics, solaceURLs);
   }
 
   @Override
@@ -145,6 +166,7 @@ public class ApplicationSolaceDeployedEnvironmentsDTO   {
     sb.append("    organizationName: ").append(toIndentedString(organizationName)).append("\n");
     sb.append("    publishTopics: ").append(toIndentedString(publishTopics)).append("\n");
     sb.append("    subscribeTopics: ").append(toIndentedString(subscribeTopics)).append("\n");
+    sb.append("    solaceURLs: ").append(toIndentedString(solaceURLs)).append("\n");
     sb.append("}");
     return sb.toString();
   }
