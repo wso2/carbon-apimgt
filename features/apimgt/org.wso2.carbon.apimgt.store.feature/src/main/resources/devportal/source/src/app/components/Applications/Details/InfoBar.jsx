@@ -32,6 +32,7 @@ import API from 'AppData/api';
 import Application from 'AppData/Application';
 import Alert from 'AppComponents/Shared/Alert';
 import AuthManager from 'AppData/AuthManager';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import DeleteConfirmation from '../Listing/DeleteConfirmation';
 
 /**
@@ -400,7 +401,10 @@ class InfoBar extends React.Component {
                         </div>
                     </Grid>
                     {isUserOwner && (
-                        <>
+                        <ScopeValidation
+                            resourcePath={resourcePaths.SINGLE_APPLICATION}
+                            resourceMethod={resourceMethods.PUT}
+                        >
                             <VerticalDivider height={70} />
                             <Grid item xs={1} m={1} className={classes.editButton}>
                                 <Link to={`/applications/${applicationId}/edit/fromView`} className={classes.editButton}>
@@ -453,7 +457,7 @@ class InfoBar extends React.Component {
                                     toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                 />
                             </Grid>
-                        </>
+                        </ScopeValidation>
                     )}
                 </div>
             </div>
