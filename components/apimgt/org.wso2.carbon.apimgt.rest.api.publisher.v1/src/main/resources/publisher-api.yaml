@@ -4134,7 +4134,6 @@ paths:
           in: query
           description: External Store Ids of stores which the API needs to be published
             or updated.
-          required: true
           schema:
             type: string
         - $ref: '#/components/parameters/If-Match'
@@ -9678,7 +9677,6 @@ components:
         businessOwnerEmail:
           type: string
           example: businessowner@wso2.com
-          pattern: '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$'
         technicalOwner:
           maxLength: 120
           type: string
