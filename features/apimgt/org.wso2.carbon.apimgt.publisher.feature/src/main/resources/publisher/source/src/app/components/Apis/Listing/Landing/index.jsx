@@ -22,6 +22,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
@@ -122,7 +123,7 @@ const APILanding = () => {
                         <Box textAlign='center' pb={2}>
                             <img
                                 className={classes.cardIcons}
-                                src={noApisIcon}
+                                src={Configurations.app.context + noApisIcon}
                                 alt={(
                                     <FormattedMessage
                                         id='Apis.Listing.Landing.index.no.apis.icon.alt.text'
