@@ -3279,6 +3279,32 @@ public class SQLConstants {
                         "AND API.API_UUID = WH.API_UUID " +
                         "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
 
+        public static final String GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL =
+                "SELECT WH.API_UUID AS API_UUID, " +
+                        "WH.APPLICATION_ID AS APPLICATION_ID, " +
+                        "WH.HUB_CALLBACK_URL AS HUB_CALLBACK_URL, " +
+                        "WH.HUB_TOPIC AS HUB_TOPIC, " +
+                        "WH.HUB_SECRET AS HUB_SECRET, " +
+                        "WH.EXPIRY_AT AS EXPIRY_AT, " +
+                        "API.CONTEXT AS API_CONTEXT, "  +
+                        "API.API_VERSION AS API_VERSION, "  +
+                        "API.API_TIER AS API_TIER, "  +
+                        "API.API_ID AS API_ID, "  +
+                        "SUB.TIER_ID AS SUB_TIER, " +
+                        "APP.APPLICATION_TIER AS APPLICATION_TIER, " +
+                        "SUBSCRIBER.USER_ID AS SUBSCRIBER, " +
+                        "SUBSCRIBER.TENANT_ID AS TENANT_ID " +
+                        "FROM AM_WEBHOOKS_SUBSCRIPTION WH, " +
+                        "AM_API API, " +
+                        "AM_SUBSCRIPTION SUB, " +
+                        "AM_APPLICATION APP, " +
+                        "AM_SUBSCRIBER SUBSCRIBER " +
+                        "WHERE WH.EXPIRY_AT >= ? AND WH.TENANT_DOMAIN = ? " +
+                        "AND API.API_ID = SUB.API_ID " +
+                        "AND WH.APPLICATION_ID::integer = SUB.APPLICATION_ID " +
+                        "AND API.API_UUID = WH.API_UUID " +
+                        "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
+
         public static final String UPDATE_DELIVERY_STATE =
                 "UPDATE AM_WEBHOOKS_SUBSCRIPTION SET DELIVERED_AT = ?, DELIVERY_STATE = ? WHERE API_UUID = ? AND " +
                         "APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
