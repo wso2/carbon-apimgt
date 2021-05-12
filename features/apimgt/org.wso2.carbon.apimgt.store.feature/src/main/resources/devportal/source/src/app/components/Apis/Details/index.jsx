@@ -53,7 +53,7 @@ const Sdk = lazy(() => import('./Sdk' /* webpackChunkName: "APISdk" */));
 
 const LoadableSwitch = withRouter((props) => {
     const { match, api } = props;
-    const apiUuid = match.params.api_uuid;
+    const apiUuid = match.params.apiUuid;
     const path = '/apis/';
     const { advertised } = api.advertiseInfo;
     const redirectURL = path + apiUuid + '/overview';
@@ -68,7 +68,7 @@ const LoadableSwitch = withRouter((props) => {
     return (
         <Suspense fallback={<Progress />}>
             <Switch>
-                <Redirect exact from={`/apis/${apiUuid}`} to={redirectURL} />
+                <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/documents' component={Documents} />
                 <Route exact path='/apis/:apiUuid/credentials/wizard' component={Wizard} />
@@ -309,7 +309,7 @@ class Details extends React.Component {
             xo: null,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
-        this.api_uuid = this.props.match.params.api_uuid;
+        this.api_uuid = this.props.match.params.apiUuid;
         this.handleDrawerClose = this.handleDrawerClose.bind(this);
         this.handleDrawerOpen = this.handleDrawerOpen.bind(this);
     }
@@ -321,6 +321,15 @@ class Details extends React.Component {
      */
     componentDidMount() {
         this.updateSubscriptionData();
+    }
+
+    componentDidUpdate(prevProps) {
+        const { match: { params: {apiUuid: prevApiUuid}} } = prevProps;
+        const { match: { params: {apiUuid: newApiUuid}} } = this.props;
+        if ( prevApiUuid !== newApiUuid ) {
+            this.api_uuid = newApiUuid;
+            this.updateSubscriptionData();
+        } 
     }
 
     handleDrawerOpen() {
