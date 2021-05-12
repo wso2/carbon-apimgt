@@ -86,16 +86,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
@@ -103,7 +98,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset,
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
                     limit);
             
 
@@ -133,10 +128,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving APIs";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
+        } 
         return null;
     }
 

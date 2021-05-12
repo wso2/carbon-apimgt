@@ -248,7 +248,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
@@ -259,7 +259,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
             Map<String, Object> result;
 
-            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
