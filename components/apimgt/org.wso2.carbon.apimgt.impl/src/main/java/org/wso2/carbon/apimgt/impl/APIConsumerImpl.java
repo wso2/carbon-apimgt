@@ -4079,6 +4079,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    @Deprecated
     public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
                                                                          String tokenType, String callbackUrl,
                                                                          String[] allowedDomains, String validityTime,
@@ -4086,8 +4087,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String jsonString,
                                                                          String keyManagerName, String tenantDomain)
             throws APIManagementException {
-        return requestApprovalForApplicationRegistration(userId, applicationName,tokenType, callbackUrl, allowedDomains,
-                validityTime, tokenScope, groupingId, jsonString, keyManagerName, tenantDomain, false);
+        return requestApprovalForApplicationRegistration(userId, applicationName, tokenType, callbackUrl,
+                allowedDomains, validityTime, tokenScope, groupingId, jsonString, keyManagerName, tenantDomain, false);
     }
 
     /**
@@ -4103,7 +4104,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString,
                                                                          String keyManagerName, String tenantDomain,
-                                                                         boolean isImported)
+                                                                         boolean isImportMode)
     throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
@@ -4139,7 +4140,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
             if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation) {
-                if (isImported) {
+                if (isImportMode) {
                     log.debug("Importing application when KM OAuth App creation is disabled. Trying to map keys");
                     // passing null `clientId` is ok here since the id/secret pair is included
                     // in the `jsonString` and ApplicationUtils#createOauthAppRequest logic handles it.
