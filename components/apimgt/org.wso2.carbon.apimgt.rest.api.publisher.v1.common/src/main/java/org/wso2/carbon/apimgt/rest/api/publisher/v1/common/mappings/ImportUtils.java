@@ -1582,7 +1582,7 @@ public class ImportUtils {
                     certificateContent = FileUtils.readFileToString(
                             new File(pathToCertificatesDirectory + File.separator + certificateFileName));
                     certificateContent = StringUtils.substringBetween(certificateContent,
-                            APIConstants.BEGIN_CERTIFICATE_STRING, APIConstants.END_CERTIFICATE_STRING);
+                            APIConstants.BEGIN_CERTIFICATE_STRING, APIConstants.END_CERTIFICATE_STRING).trim();
                 }
             }
         }

@@ -1090,8 +1090,10 @@ public class APIMappingUtil {
             } else {
                 asyncAPIDefinition = apiProvider.getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
             }
-            List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
-            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+            if (asyncAPIDefinition != null) {
+                List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
+                dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+            }
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();

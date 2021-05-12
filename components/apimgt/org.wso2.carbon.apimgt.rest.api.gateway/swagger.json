@@ -299,6 +299,52 @@
           }
         }
       }
+    },
+    "/subscriptions" : {
+      "get" : {
+        "summary" : "Get Subscriptions stored in in-memory",
+        "description" : "This operation is used to get the Subscriptions from the storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "operationId" : "getSubscriptions",
+        "parameters" : [ {
+          "name" : "apiUUID",
+          "in" : "query",
+          "description" : "UUID of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "applicationUUID",
+          "in" : "query",
+          "description" : "UUID of the Application\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSubscriptions successfully Retrieved From the Storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/SubscriptionList"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -410,6 +456,50 @@
         }
       },
       "title" : "Description of individual errors that may have occurred during a request."
+    },
+    "SubscriptionList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Subscriptions returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Subscription"
+          }
+        }
+      },
+      "title" : "Application List"
+    },
+    "Subscription" : {
+      "properties" : {
+        "subscriptionUUID" : {
+          "type" : "string"
+        },
+        "subscriptionId" : {
+          "type" : "integer"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "apiUUID" : {
+          "type" : "string"
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "applicationUUID" : {
+          "type" : "string"
+        },
+        "appId" : {
+          "type" : "integer"
+        },
+        "subscriptionState" : {
+          "type" : "string"
+        }
+      }
     }
   },
   "parameters" : {
@@ -417,6 +507,20 @@
       "name" : "apiName",
       "in" : "query",
       "description" : "Name of the API\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "apiUUID" : {
+      "name" : "apiUUID",
+      "in" : "query",
+      "description" : "UUID of the API\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "applicationUUID" : {
+      "name" : "applicationUUID",
+      "in" : "query",
+      "description" : "UUID of the Application\n",
       "required" : true,
       "type" : "string"
     },
