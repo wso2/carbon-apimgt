@@ -911,7 +911,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
-            } else {
+            } else if (StringUtils.equalsIgnoreCase(query, "deployed:false")) {
                 List<APIRevision> apiProductNotDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
                     if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
@@ -919,6 +919,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiProductNotDeployedRevisions);
+            } else {
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
             }
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {

@@ -4252,7 +4252,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
-            } else {
+            } else if (StringUtils.equalsIgnoreCase(query, "deployed:false")) {
                 List<APIRevision> apiNotDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
                     if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
@@ -4260,6 +4260,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiNotDeployedRevisions);
+            } else {
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
             }
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
