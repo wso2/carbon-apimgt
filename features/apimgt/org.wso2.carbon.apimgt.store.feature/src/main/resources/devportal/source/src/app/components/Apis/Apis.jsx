@@ -50,7 +50,7 @@ function Apis() {
                     <CommonListing {...props} />)}
             />
             <Route
-                path='/apis/:api_uuid/'
+                path='/apis/:apiUuid/'
                 render={(props) => (
                     <Details {...props} />)}
             />
