@@ -317,8 +317,6 @@
   "RolePermissions.Common.AddRoleWizard.add.mapping.title": "",
   "RolePermissions.Common.AddRoleWizard.add.scope.error": "",
   "RolePermissions.Common.DeletePermission.delete.scope.error": "",
-  "RolePermissions.Common.SelectPermissionsStep.scope.select.custom.warning": "",
-  "RolePermissions.Common.SelectPermissionsStep.scope.select.warning": "",
   "RolePermissions.ListRoles.error.retrieving.perm": "",
   "RolePermissions.ListRoles.page.description": "",
   "RolePermissions.ListRoles.permission.denied.content": "",
