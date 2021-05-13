@@ -559,6 +559,7 @@ public class SQLConstants {
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
             "   AND API.API_ID=SUBS.API_ID " +
+            "   AND API.ORGANIZATION_ID = ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_CLIENT_OF_APPLICATION_SQL =

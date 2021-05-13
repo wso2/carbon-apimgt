@@ -632,7 +632,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                Identifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId, String organizationId) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain) throws APIManagementException;
 

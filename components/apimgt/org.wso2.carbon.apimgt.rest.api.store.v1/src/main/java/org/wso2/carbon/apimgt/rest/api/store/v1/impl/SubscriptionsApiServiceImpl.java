@@ -109,10 +109,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 if (apiTypeWrapper.isAPIProduct()) {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
-                            apiTypeWrapper.getApiProduct().getId(), groupId);
+                            apiTypeWrapper.getApiProduct().getId(), groupId, organizationId);
                 } else {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
-                            apiTypeWrapper.getApi().getId(), groupId);
+                            apiTypeWrapper.getApi().getId(), groupId, organizationId);
                 }
 
                 //sort by application name

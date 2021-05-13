@@ -1788,7 +1788,7 @@ public class ApiMgtDAO {
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get SubscribedAPIs
      */
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId)
+    public Set<SubscribedAPI> getSubscribedAPIs(String organizationId, Subscriber subscriber, String groupingId)
             throws APIManagementException {
 
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
@@ -1803,7 +1803,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(sqlQuery);
-             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, ps)) {
+             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, ps, organizationId)) {
             while (result.next()) {
                 String apiType = result.getString("TYPE");
 
@@ -1834,7 +1834,7 @@ public class ApiMgtDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber,
-                                               PreparedStatement statement) throws SQLException {
+                                               PreparedStatement statement, String organizationId) throws SQLException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
@@ -1850,15 +1850,18 @@ public class ApiMgtDAO {
                 }
                 statement.setString(++paramIndex, tenantDomain);
                 statement.setString(++paramIndex, subscriber.getName());
+                statement.setString(++paramIndex, organizationId);
 
             } else {
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
+                statement.setString(++paramIndex, organizationId);
             }
         } else {
             statement.setInt(++paramIndex, tenantId);
             statement.setString(++paramIndex, subscriber.getName());
+            statement.setString(++paramIndex, organizationId);
         }
 
         return statement.executeQuery();
