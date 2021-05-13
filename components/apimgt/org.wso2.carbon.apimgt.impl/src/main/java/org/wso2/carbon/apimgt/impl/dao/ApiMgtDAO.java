@@ -1544,7 +1544,8 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
-                                                         int startSubIndex, int endSubIndex, String groupingId)
+                                                         int startSubIndex, int endSubIndex, String groupingId,
+                                                         String organizationId)
             throws APIManagementException {
 
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
@@ -1553,7 +1554,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(sqlQuery);
-             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, applicationName, ps)) {
+             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, applicationName, organizationId, ps)) {
             int index = 0;
             while (result.next()) {
                 if (index >= startSubIndex && index < endSubIndex) {
@@ -1629,7 +1630,7 @@ public class ApiMgtDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber, String applicationName,
-                                               PreparedStatement statement) throws SQLException {
+                                               String organizationId, PreparedStatement statement) throws SQLException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
@@ -1642,6 +1643,7 @@ public class ApiMgtDAO {
 
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, organizationId);
                 for (String groupId : groupIDArray) {
                     statement.setString(++paramIndex, groupId);
                 }
@@ -1650,12 +1652,14 @@ public class ApiMgtDAO {
             } else {
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, organizationId);
                 statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
             statement.setInt(++paramIndex, tenantId);
             statement.setString(++paramIndex, applicationName);
+            statement.setString(++paramIndex, organizationId);
             statement.setString(++paramIndex, subscriber.getName());
         }
 

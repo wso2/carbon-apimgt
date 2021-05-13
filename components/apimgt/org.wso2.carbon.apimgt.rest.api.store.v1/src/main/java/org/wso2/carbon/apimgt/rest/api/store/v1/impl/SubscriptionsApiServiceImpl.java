@@ -139,8 +139,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
 
-                subscriptions = apiConsumer
-                        .getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, limit, groupId);
+                subscriptions = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, limit,
+                        groupId, organizationId);
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
