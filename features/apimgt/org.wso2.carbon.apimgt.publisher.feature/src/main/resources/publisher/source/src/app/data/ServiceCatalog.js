@@ -116,12 +116,12 @@ class ServiceCatalog {
      * Get details of Services
      * @returns {promise} Service Entry promise.
      */
-    static searchServices() {
+    static searchServices(limit = 10, offset = 0) {
         const serviceCatalog = new APIClientFactory()
             .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
         return serviceCatalog.then((client) => {
-            return client.apis.Services.searchServices();
+            return client.apis.Services.searchServices({ limit, offset });
         });
     }
 

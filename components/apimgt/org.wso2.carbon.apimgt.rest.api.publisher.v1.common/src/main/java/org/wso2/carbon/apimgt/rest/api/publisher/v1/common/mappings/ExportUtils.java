@@ -767,8 +767,8 @@ public class ExportUtils {
         certificateMetadataDTOS.forEach(metadataDTO -> {
             try (ByteArrayInputStream certificate = certificateManager.getCertificateContent(metadataDTO.getAlias())) {
                 byte[] certificateContent = IOUtils.toByteArray(certificate);
-                String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING
-                        .concat(new String(Base64.encodeBase64(certificateContent))).concat("\n")
+                String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator())
+                        .concat(new String(Base64.encodeBase64(certificateContent))).concat(System.lineSeparator())
                         .concat(APIConstants.END_CERTIFICATE_STRING);
                 CommonUtil.writeFile(certDirectoryPath + File.separator + metadataDTO.getAlias() + ".crt",
                         certificateContentEncoded);
@@ -889,8 +889,8 @@ public class ExportUtils {
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
                 }
             } else {
-                String asyncApiJson = new AsyncApiParser().generateAsyncAPIDefinition(
-                        APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()));
+                String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(
+                        APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
                 CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
                         exportFormat, asyncApiJson);
             }
@@ -965,8 +965,9 @@ public class ExportUtils {
         clientCertificateDTOs.forEach(metadataDTO -> {
             try {
                 String certificateContent = metadataDTO.getCertificate();
-                String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING.concat(certificateContent)
-                        .concat("\n").concat(APIConstants.END_CERTIFICATE_STRING);
+                String certificateContentEncoded = APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator())
+                        .concat(certificateContent)
+                        .concat(System.lineSeparator()).concat(APIConstants.END_CERTIFICATE_STRING);
                 CommonUtil.writeFile(certDirectoryPath + File.separator + metadataDTO.getAlias() + ".crt",
                         certificateContentEncoded);
                 // Add the file name to the Certificate Metadata

@@ -173,6 +173,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
@@ -7083,6 +7084,7 @@ public final class APIUtil {
         String proxyPort = configuration.getFirstProperty(APIConstants.PROXY_PORT);
         String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
         String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
+        String nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
 
         PoolingHttpClientConnectionManager pool = null;
         try {
@@ -7099,7 +7101,12 @@ public final class APIUtil {
 
         if (Boolean.parseBoolean(proxyEnabled)) {
             HttpHost host = new HttpHost(proxyHost, Integer.parseInt(proxyPort), protocol);
-            DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(host);
+            DefaultProxyRoutePlanner routePlanner;
+            if (!StringUtils.isBlank(nonProxyHosts)) {
+                routePlanner = new ExtendedProxyRoutePlanner(host, configuration);
+            } else {
+                routePlanner = new DefaultProxyRoutePlanner(host);
+            }
             clientBuilder = clientBuilder.setRoutePlanner(routePlanner);
             if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
                 CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -10410,7 +10417,7 @@ public final class APIUtil {
         }
     }
 
-    public static Certificate getCertificateFromTrustStore(String certAlias) throws APIManagementException {
+    public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
 
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
@@ -10819,11 +10826,11 @@ public final class APIUtil {
      * @return true if certificate exist in truststore
      * @throws APIManagementException
      */
-    public static boolean isCertificateExistsInTrustStore(X509Certificate certificate) throws APIManagementException {
+    public static boolean isCertificateExistsInListenerTrustStore(X509Certificate certificate) throws APIManagementException {
 
         if (certificate != null) {
             try {
-                KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+                KeyStore trustStore = ServiceReferenceHolder.getInstance().getListenerTrustStore();
                 if (trustStore != null) {
                     CertificateFactory cf = CertificateFactory.getInstance("X.509");
                     byte[] certificateEncoded = certificate.getEncoded();
@@ -11340,25 +11347,26 @@ public final class APIUtil {
         return apimConfig.getContainerMgtAttributes();
     }
 
-    public static String getX509certificateContent(Certificate certificate)
-            throws java.security.cert.CertificateEncodingException {
 
-        byte[] encoded = Base64.encodeBase64(certificate.getEncoded());
-        String base64EncodedString =
-                APIConstants.BEGIN_CERTIFICATE_STRING
-                        .concat(new String(encoded)).concat("\n")
-                        .concat(APIConstants.END_CERTIFICATE_STRING);
-        return Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
+    public static String getX509certificateContent(String certificate) {
+        String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+
+        return content.trim();
     }
 
     public static X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
             throws APIManagementException {
 
         if (base64EncodedCertificate != null) {
-            base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
-                    replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+            try {
+                base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                String msg = "Error while URL decoding certificate";
+                throw new APIManagementException(msg, e);
+            }
 
+            base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                 return X509Certificate.getInstance(inputStream);

@@ -173,7 +173,8 @@ public class WebhooksDAO {
                 encryptedSecret = encryptSecret(properties.getProperty(APIConstants.Webhooks.SECRET));
             }
             prepareStmt.setString(6, encryptedSecret);
-            prepareStmt.setString(7, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
+            String leaseSeconds = properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS);
+            prepareStmt.setInt(7, leaseSeconds == null ? 0 : Integer.parseInt(leaseSeconds));
             Timestamp updatedTime = (Timestamp) properties.get(APIConstants.Webhooks.UPDATED_AT);
             prepareStmt.setTimestamp(8, updatedTime);
             long expiryTime = Long.parseLong(properties.getProperty(APIConstants.Webhooks.EXPIRY_AT));
@@ -197,7 +198,8 @@ public class WebhooksDAO {
                 encryptedSecret = encryptSecret(properties.getProperty(APIConstants.Webhooks.SECRET));
             }
             prepareStmt.setString(1, encryptedSecret);
-            prepareStmt.setString(2, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
+            String leaseSeconds = properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS);
+            prepareStmt.setInt(2, leaseSeconds == null ? 0 : Integer.parseInt(leaseSeconds));
             Timestamp updatedTime = (Timestamp) properties.get(APIConstants.Webhooks.UPDATED_AT);
             prepareStmt.setTimestamp(3, updatedTime);
             long expiryTime = Long.parseLong(properties.getProperty(APIConstants.Webhooks.EXPIRY_AT));
@@ -266,10 +268,14 @@ public class WebhooksDAO {
     public List<Subscription> getSubscriptionsList(String tenantDomain) throws APIManagementException {
 
         List<Subscription> subscriptionsList = new ArrayList<>();
-
+        String sqlQuery = SQLConstants.WebhooksSqlConstants.GET_ALL_VALID_SUBSCRIPTIONS;
+        String postgreSQLQuery = SQLConstants.WebhooksSqlConstants.GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                sqlQuery = postgreSQLQuery;
+            }
             try (PreparedStatement preparedStatement = conn
-                    .prepareStatement(SQLConstants.WebhooksSqlConstants.GET_ALL_VALID_SUBSCRIPTIONS)) {
+                    .prepareStatement(sqlQuery)) {
                 long currentTime = Instant.now().toEpochMilli();
                 preparedStatement.setLong(1, currentTime);
                 preparedStatement.setString(2, tenantDomain);
@@ -371,7 +377,8 @@ public class WebhooksDAO {
                 encryptedSecret = encryptSecret(properties.getProperty(APIConstants.Webhooks.SECRET));
             }
             preparedStatement.setString(6, encryptedSecret);
-            preparedStatement.setString(7, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
+            String leaseSeconds = properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS);
+            preparedStatement.setInt(7, leaseSeconds == null ? 0 : Integer.parseInt(leaseSeconds));
             Timestamp updatedTime = (Timestamp)properties.get(APIConstants.Webhooks.UPDATED_AT);
             preparedStatement.setTimestamp(8, updatedTime);
             preparedStatement.executeUpdate();

@@ -907,11 +907,19 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
                 List<APIRevision> apiDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                    if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                         apiDeployedRevisions.add(apiRevision);
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
+            } else if (StringUtils.equalsIgnoreCase(query, "deployed:false")) {
+                List<APIRevision> apiProductNotDeployedRevisions = new ArrayList<>();
+                for (APIRevision apiRevision : apiRevisions) {
+                    if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                        apiProductNotDeployedRevisions.add(apiRevision);
+                    }
+                }
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiProductNotDeployedRevisions);
             } else {
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
             }

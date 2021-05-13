@@ -8622,6 +8622,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setApiLevelPolicy(apiLevelTier);
         }
     }
+    private void populateAPITier(APIProduct apiProduct) throws APIManagementException {
+
+        if (apiProduct.isRevision()) {
+            String apiLevelTier = apiMgtDAO.getAPILevelTier(apiProduct.getRevisionedApiProductId(), apiProduct.getUuid());
+            apiProduct.setProductLevelPolicy(apiLevelTier);
+        }
+    }
 
     private void populateRevisionInformation(API api, String revisionUUID) throws APIManagementException {
         APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(revisionUUID);
@@ -8671,6 +8678,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIProductInformation(uuid, requestedTenantDomain, org, product);
                 populateRevisionInformation(product, uuid);
                 populateAPIStatus(product);
+                populateAPITier(product);
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid

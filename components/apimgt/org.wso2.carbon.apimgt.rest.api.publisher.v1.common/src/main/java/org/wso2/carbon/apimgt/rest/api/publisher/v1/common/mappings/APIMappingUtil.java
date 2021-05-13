@@ -170,8 +170,8 @@ public class APIMappingUtil {
 
         context = context.startsWith("/") ? context : ("/" + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
-                dto.getId() == null) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && dto.getId() == null
+                && !context.contains("/t/" + providerDomain)) {
             //Create tenant aware context for API
             context = "/t/" + providerDomain + context;
         }
@@ -1097,8 +1097,10 @@ public class APIMappingUtil {
             } else {
                 asyncAPIDefinition = apiProvider.getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
             }
-            List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
-            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+            if (asyncAPIDefinition != null) {
+                List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
+                dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+            }
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();

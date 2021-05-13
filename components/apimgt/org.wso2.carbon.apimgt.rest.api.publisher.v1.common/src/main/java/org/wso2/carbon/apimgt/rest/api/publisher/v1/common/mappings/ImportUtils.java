@@ -281,7 +281,10 @@ public class ImportUtils {
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organizationId);
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
-            addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
+            if (StringUtils
+                    .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
+                addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
+            }
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
                 addAPISequences(extractedFolderPath, importedApi, apiProvider);
@@ -1582,7 +1585,7 @@ public class ImportUtils {
                     certificateContent = FileUtils.readFileToString(
                             new File(pathToCertificatesDirectory + File.separator + certificateFileName));
                     certificateContent = StringUtils.substringBetween(certificateContent,
-                            APIConstants.BEGIN_CERTIFICATE_STRING, APIConstants.END_CERTIFICATE_STRING);
+                            APIConstants.BEGIN_CERTIFICATE_STRING, APIConstants.END_CERTIFICATE_STRING).trim();
                 }
             }
         }
@@ -1700,12 +1703,9 @@ public class ImportUtils {
      */
     private static void addSOAPToREST(API importedApi, String swaggerContent, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
-        if (StringUtils.equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            PublisherCommonUtils
-                    .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider,
-                            tenantDomain);
-        }
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        PublisherCommonUtils
+                .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider, tenantDomain);
     }
 
     public static List<SoapToRestMediationDto> retrieveSoapToRestFlowMediations(String pathToArchive, String type)
