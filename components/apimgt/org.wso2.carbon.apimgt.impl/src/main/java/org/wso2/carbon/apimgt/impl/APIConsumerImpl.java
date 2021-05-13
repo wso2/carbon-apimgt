@@ -2637,11 +2637,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getSubscriptionById(subscriptionId);
     }
 
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId) throws APIManagementException {
+    public Set<SubscribedAPI> getSubscribedAPIs(String organizationId, Subscriber subscriber, String groupingId) throws APIManagementException {
         Set<SubscribedAPI> originalSubscribedAPIs;
         Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
         try {
-            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, groupingId);
+            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organizationId, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
@@ -2656,12 +2656,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    private Set<SubscribedAPI> getLightWeightSubscribedAPIs(Subscriber subscriber, String groupingId) throws
+    private Set<SubscribedAPI> getLightWeightSubscribedAPIs(String organizationId, Subscriber subscriber,
+                                                            String groupingId) throws
             APIManagementException {
         Set<SubscribedAPI> originalSubscribedAPIs;
         Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
         try {
-            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, groupingId);
+            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organizationId, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
@@ -2712,12 +2713,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
-                                                         int startSubIndex, int endSubIndex, String groupingId)
+                                                         int startSubIndex, int endSubIndex, String groupingId,
+                                                         String organizationId)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
             subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,
-                    endSubIndex, groupingId);
+                    endSubIndex, groupingId, organizationId);
             if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : subscribedAPIs) {
@@ -4360,10 +4362,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId)
+    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier,
+                                                       String groupingId, String organizationId)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
-        Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, groupingId);
+        Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organizationId, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
             if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
@@ -5078,7 +5081,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier,
                                                                   String groupingId) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
-        Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(subscriber, groupingId);
+        Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(null, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
             if (api.getApiId().equals(apiIdentifier)) {
                 subscribedAPISet.add(api);

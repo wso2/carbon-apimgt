@@ -109,10 +109,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 if (apiTypeWrapper.isAPIProduct()) {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
-                            apiTypeWrapper.getApiProduct().getId(), groupId);
+                            apiTypeWrapper.getApiProduct().getId(), groupId, organizationId);
                 } else {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
-                            apiTypeWrapper.getApi().getId(), groupId);
+                            apiTypeWrapper.getApi().getId(), groupId, organizationId);
                 }
 
                 //sort by application name
@@ -139,8 +139,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
 
-                subscriptions = apiConsumer
-                        .getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, limit, groupId);
+                subscriptions = apiConsumer.getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, limit,
+                        groupId, organizationId);
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,

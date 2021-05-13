@@ -257,7 +257,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-                                                  int endSubIndex, String groupingId) throws APIManagementException;
+                                                  int endSubIndex, String groupingId, String organizationId) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -632,7 +632,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                Identifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId, String organizationId) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain) throws APIManagementException;
 

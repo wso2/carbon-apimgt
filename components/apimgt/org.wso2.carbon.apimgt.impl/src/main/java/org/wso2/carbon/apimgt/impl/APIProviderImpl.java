@@ -3151,7 +3151,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-        return newAPI;
+        return getAPIbyUUID(newAPIId, organizationId);
     }
 
     public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
@@ -8713,7 +8713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);
-                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("length", searchAPIs.getReturnedAPIsCount());
                 result.put("isMore", true);
             } else {
                 result.put("apis", apiSet);

@@ -1868,10 +1868,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException {
+    public Set<API> getSubscriberAPIs(Subscriber subscriber, String organizationId) throws APIManagementException {
 
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, null);
+        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, null, organizationId);
         for (SubscribedAPI subscribedApi : subscribedAPIs) {
             Application application = subscribedApi.getApplication();
             if (application != null) {

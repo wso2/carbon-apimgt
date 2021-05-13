@@ -382,7 +382,7 @@ public interface APIManager {
      * @return Set<API>
      * @throws APIManagementException if failed to get API for subscriber
      */
-    Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
+    Set<API> getSubscriberAPIs(Subscriber subscriber, String organizationId) throws APIManagementException;
 
     /**
      * Associates the given icon image with the specified path.
