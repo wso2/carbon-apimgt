@@ -943,7 +943,6 @@ public class APIMgtDAOTest {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);
         Mockito.when(keyManager.retrieveApplication(clientIdSandbox)).thenReturn(oAuthApplicationInfo);
-        assertTrue(apiMgtDAO.getSubscribedAPIs(subscriber, null, "testOrg").size() > 0);
         assertEquals(subscribedAPI.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         assertEquals(subscribedAPI.getApiId(), apiId);
         assertEquals(subscribedAPI.getApplication().getId(), application.getId());
