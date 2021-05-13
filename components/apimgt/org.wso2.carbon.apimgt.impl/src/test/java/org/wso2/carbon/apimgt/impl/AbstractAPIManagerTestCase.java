@@ -1175,7 +1175,7 @@ public class AbstractAPIManagerTestCase {
         subscribedAPI2.setApplication(application);
         subscribedAPIs.add(subscribedAPI1);
         subscribedAPIs.add(subscribedAPI2);
-        Mockito.when(apiMgtDAO.getSubscribedAPIs((Subscriber) Mockito.any(), Mockito.anyString(), "testorg"))
+        Mockito.when(apiMgtDAO.getSubscribedAPIs((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(subscribedAPIs);
         UserRegistry registry = Mockito.mock(UserRegistry.class);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, null, registry,
