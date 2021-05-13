@@ -625,22 +625,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-
-            float avgRating = apiConsumer.getAverageAPIRating(identifier);
+            float avgRating = apiConsumer.getAverageAPIRating(id);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
-                userRating = apiConsumer.getUserRating(identifier, username);
+                userRating = apiConsumer.getUserRating(id, username);
             }
             List<RatingDTO> ratingDTOList = new ArrayList<>();
-            JSONArray array = apiConsumer.getAPIRatings(identifier);
+            JSONArray array = apiConsumer.getAPIRatings(id);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -887,34 +878,34 @@ public class ApisApiServiceImpl implements ApisApiService {
             switch (rating) {
                 //Below case 0[Rate 0] - is to remove ratings from a user
                 case 0: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_ZERO, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_ZERO, username);
                     break;
                 }
                 case 1: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_ONE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_ONE, username);
                     break;
                 }
                 case 2: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_TWO, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_TWO, username);
                     break;
                 }
                 case 3: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_THREE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_THREE, username);
                     break;
                 }
                 case 4: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_FOUR, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_FOUR, username);
                     break;
                 }
                 case 5: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_FIVE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_FIVE, username);
                     break;
                 }
                 default: {
                     RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
                 }
             }
-            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -950,15 +941,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            //this will fail if user doesn't have access to the API or the API does not exist
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -1002,7 +985,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
-            apiConsumer.removeAPIRating(identifier, username);
+            apiConsumer.removeAPIRating(apiId, username);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

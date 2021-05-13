@@ -1909,25 +1909,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void rateAPI(Identifier id, APIRating rating, String user) throws APIManagementException {
+    public void rateAPI(String id, APIRating rating, String user) throws APIManagementException {
         apiMgtDAO.addRating(id, rating.getRating(), user);
     }
 
     @Override
-    public void removeAPIRating(Identifier id, String user) throws APIManagementException {
+    public void removeAPIRating(String id, String user) throws APIManagementException {
         apiMgtDAO.removeAPIRating(id, user);
     }
 
     @Override
-    public int getUserRating(Identifier apiId, String user) throws APIManagementException {
-        return apiMgtDAO.getUserRating(apiId, user);
+    public int getUserRating(String uuid, String user) throws APIManagementException {
+        return apiMgtDAO.getUserRating(uuid, user);
     }
 
     @Override
-    public JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException {
+    public JSONObject getUserRatingInfo(String id, String user) throws APIManagementException {
         JSONObject obj = apiMgtDAO.getUserRatingInfo(id, user);
         if (obj == null || obj.isEmpty()) {
-            String msg = "Failed to get API ratings for API " + id.getName() + " for user " + user;
+            String msg = "Failed to get API ratings for API with UUID " + id + " for user " + user;
             log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }
@@ -1935,12 +1935,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
+    public JSONArray getAPIRatings(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRatings(apiId);
     }
 
     @Override
-    public float getAverageAPIRating(Identifier apiId) throws APIManagementException {
+    public float getAverageAPIRating(String apiId) throws APIManagementException {
         return apiMgtDAO.getAverageRating(apiId);
     }
 
@@ -5784,7 +5784,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getId()));
+                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);

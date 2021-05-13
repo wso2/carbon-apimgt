@@ -188,6 +188,7 @@ public class APIProviderImplTest {
     private APIManagerConfiguration config;
     private APIPersistence apiPersistenceInstance;
     private String superTenantDomain;
+    private String apiUUID = "12640983654";
 
     @Before
     public void init() throws Exception {
@@ -1137,8 +1138,7 @@ public class APIProviderImplTest {
     @Test
     public void testDeleteWorkflowTask() throws APIManagementException, WorkflowException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        Mockito.when(apimgtDAO.getAPIID(apiId)).thenReturn(1111);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1111);
         WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
         WorkflowExecutor apiStateChangeWFExecutor = Mockito.mock(WorkflowExecutor.class);
@@ -1147,8 +1147,8 @@ public class APIProviderImplTest {
         WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(workflowDTO);
-        apiProvider.deleteWorkflowTask(apiId);
-        Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiId);
+        apiProvider.deleteWorkflowTask(apiUUID);
+        Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
     }
 
     @Test
@@ -1950,7 +1950,8 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
 
-        Mockito.when(apimgtDAO.getAPIID(apiId)).thenReturn(1);
+        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId)).thenReturn(apiUUID);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
 
         //Workflow has started already
         WorkflowDTO wfDTO = Mockito.mock(WorkflowDTO.class);
@@ -3353,7 +3354,7 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
-        Mockito.when(apimgtDAO.getAPIID(apiId)).thenReturn(1);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
 
         //Workflow has not started, this will trigger the executor
         WorkflowDTO wfDTO1 = Mockito.mock(WorkflowDTO.class);

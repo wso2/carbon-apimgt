@@ -408,7 +408,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
 
             if (apiId == -1) {
                 return null;
@@ -638,7 +638,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
 
             if (apiId == -1) {
                 return null;
@@ -922,7 +922,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
             if (apiId == -1) {
                 return null;
             }
@@ -1048,7 +1048,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
             if (apiId == -1) {
                 return null;
             }
@@ -3327,7 +3327,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             api = new API(new APIIdentifier(providerName, apiName, apiVersion));
-            int apiId = ApiMgtDAO.getInstance().getAPIID(oldId);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
             if (apiId == -1) {
                 return null;
             }
@@ -3399,7 +3399,7 @@ public final class APIUtil {
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             HashMap<Integer, Set<String>> resourceScopes;
-            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(oldId);
+            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(artifact.getId());
 
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
@@ -4786,7 +4786,7 @@ public final class APIUtil {
         return uriTemplate;
     }
 
-    public static float getAverageRating(Identifier id) throws APIManagementException {
+    public static float getAverageRating(String id) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(id);
     }
@@ -9806,7 +9806,7 @@ public final class APIUtil {
             apiProductIdentifier.setUUID(artifact.getId());
             apiProduct = new APIProduct(apiProductIdentifier);
             apiProduct.setUuid(artifact.getId());
-            apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
+            apiProduct.setRating(Float.toString(getAverageRating(artifact.getId())));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
             setResourceProperties(apiProduct, registry, artifactPath);
@@ -10319,16 +10319,16 @@ public final class APIUtil {
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param apiIdentifier Api identifier
+     * @param uuid Api uuid
      * @param workflowType  workflow type
      * @return WorkflowDTO
      * @throws APIManagementException
      */
-    public static WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
+    public static WorkflowDTO getAPIWorkflowStatus(String uuid, String workflowType)
             throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier);
+        int apiId = apiMgtDAO.getAPIID(uuid);
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
         return wfDTO;

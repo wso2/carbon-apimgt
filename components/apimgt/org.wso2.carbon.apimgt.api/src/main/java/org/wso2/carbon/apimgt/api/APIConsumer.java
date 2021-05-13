@@ -164,7 +164,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void rateAPI(Identifier apiId, APIRating rating, String user) throws APIManagementException;
+    void rateAPI(String apiId, APIRating rating, String user) throws APIManagementException;
     /**
      * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
@@ -172,7 +172,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void removeAPIRating(Identifier id, String user) throws APIManagementException;
+    void removeAPIRating(String id, String user) throws APIManagementException;
 
     /** returns the SubscribedAPI object which is related to the subscriptionId
      *
@@ -639,13 +639,13 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
 
-    int getUserRating(Identifier apiId, String user) throws APIManagementException;
+    int getUserRating(String apiId, String user) throws APIManagementException;
 
-    JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException;
+    JSONObject getUserRatingInfo(String id, String user) throws APIManagementException;
 
-    float getAverageAPIRating(Identifier apiId) throws APIManagementException;
+    float getAverageAPIRating(String apiId) throws APIManagementException;
 
-    JSONArray getAPIRatings(Identifier apiId) throws APIManagementException;
+    JSONArray getAPIRatings(String apiId) throws APIManagementException;
 
     /**
      * Get a list of published APIs by the given provider.

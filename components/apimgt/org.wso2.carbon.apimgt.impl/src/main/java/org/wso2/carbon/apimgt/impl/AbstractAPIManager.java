@@ -547,8 +547,7 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
                 API api = getApiForPublishing(registry, apiArtifact);
-                APIIdentifier apiIdentifier = api.getId();
-                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiIdentifier, WF_TYPE_AM_API_STATE);
+                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(api.getUuid(), WF_TYPE_AM_API_STATE);
                 if (workflowDTO != null) {
                     WorkflowStatus status = workflowDTO.getStatus();
                     api.setWorkflowStatus(status.toString());
@@ -3863,14 +3862,14 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
         // workflow status
         APIIdentifier apiId = api.getId();
-        WorkflowDTO workflow = APIUtil.getAPIWorkflowStatus(apiId, WF_TYPE_AM_API_STATE);
+        WorkflowDTO workflow = APIUtil.getAPIWorkflowStatus(api.getUuid(), WF_TYPE_AM_API_STATE);
         if (workflow != null) {
             WorkflowStatus status = workflow.getStatus();
             api.setWorkflowStatus(status.toString());
         }
         // TODO try to use a single query to get info from db
         // Ratings
-        int internalId = apiMgtDAO.getAPIID(apiId);
+        int internalId = apiMgtDAO.getAPIID(api.getUuid());
         api.setRating(APIUtil.getAverageRating(internalId));
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);

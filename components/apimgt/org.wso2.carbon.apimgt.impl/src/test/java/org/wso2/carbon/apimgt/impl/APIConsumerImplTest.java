@@ -610,10 +610,10 @@ public class APIConsumerImplTest {
     @Test
     public void testGetUserRating() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        when(apiMgtDAO.getUserRating(apiIdentifier, "admin")).thenReturn(2);
+        String uuid = UUID.randomUUID().toString();
+        when(apiMgtDAO.getUserRating(uuid, "admin")).thenReturn(2);
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        assertEquals(2, apiConsumer.getUserRating(apiIdentifier, "admin"));
+        assertEquals(2, apiConsumer.getUserRating(uuid, "admin"));
     }
 
 
@@ -1409,24 +1409,24 @@ public class APIConsumerImplTest {
 
     @Test
     public void testRemoveAPIRating() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        String uuid = UUID.randomUUID().toString();
         String user = "Tom";
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).removeAPIRating(identifier, user);
-        apiConsumer.removeAPIRating(identifier, user);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeAPIRating(identifier, user);
+        Mockito.doNothing().when(apiMgtDAO).removeAPIRating(uuid, user);
+        apiConsumer.removeAPIRating(uuid, user);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeAPIRating(uuid, user);
 
     }
 
     @Test
     public void testRateAPI() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        String uuid = UUID.randomUUID().toString();
         APIRating apiRating = APIRating.RATING_FOUR;
         String user = "Tom";
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).addRating(identifier, apiRating.getRating(), user);
-        apiConsumer.rateAPI(identifier, apiRating, user);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(identifier, apiRating.getRating(), user);
+        Mockito.doNothing().when(apiMgtDAO).addRating(uuid, apiRating.getRating(), user);
+        apiConsumer.rateAPI(uuid, apiRating, user);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(uuid, apiRating.getRating(), user);
     }
 
     @Test
