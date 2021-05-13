@@ -341,7 +341,7 @@ public class ImportApiServiceImpl implements ImportApiService {
                 apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
             }
         }
-
+        apiKey.setAdditionalProperties(oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));
         long validityPeriod = OAuthServerConfiguration.getInstance().getApplicationAccessTokenValidityPeriodInSeconds();
         apiKey.setValidityPeriod(validityPeriod);
         apiKey.setTokenScope(DEFAULT_TOKEN_SCOPE);

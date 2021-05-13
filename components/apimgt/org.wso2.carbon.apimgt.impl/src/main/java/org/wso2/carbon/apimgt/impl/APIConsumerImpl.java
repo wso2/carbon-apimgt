@@ -165,7 +165,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.validation.constraints.NotNull;
@@ -4266,12 +4265,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put("keyState", appRegWFDto.getStatus().toString());
             OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
             String keyMappingId = apiMgtDAO.getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(application.getId(),
-                    tokenType,keyManagerId);
+                    tokenType, keyManagerId);
             if (applicationInfo != null) {
                 keyDetails.put("consumerKey", applicationInfo.getClientId());
                 keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
                 keyDetails.put("appDetails", applicationInfo.getJsonString());
-                keyDetails.put("keyMappingId",keyMappingId);
+                keyDetails.put("keyMappingId", keyMappingId);
                 keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.CREATED.name());
             }
 
