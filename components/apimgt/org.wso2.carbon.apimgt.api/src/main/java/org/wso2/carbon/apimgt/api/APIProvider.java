@@ -44,12 +44,12 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param uuid Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String uuid, Comment comment, String user) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
@@ -772,19 +772,19 @@ public interface APIProvider extends APIManager {
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws APIManagementException If failed to get all external stores for the API
      */
-    Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    Set<APIStore> getExternalAPIStores(String apiId) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws APIManagementException If failed to get all the published external stores for the API
      */
-    Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    Set<APIStore> getPublishedExternalAPIStores(String apiId) throws APIManagementException;
 
     /**
      * Checks the Gateway Type

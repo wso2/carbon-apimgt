@@ -332,12 +332,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -345,7 +339,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setEntryPoint("PUBLISHER");
             comment.setUser(username);
             comment.setApiId(apiId);
-            String createdCommentId = apiProvider.addComment(identifier, comment, username);
+            String createdCommentId = apiProvider.addComment(apiId, comment, username);
             Comment createdComment = apiProvider.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
@@ -572,15 +566,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
-                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
-            } else {
-                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            }
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiId);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                 return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
@@ -634,7 +622,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             GraphqlComplexityInfo graphqlComplexityInfo =
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
             if (APIConstants.GRAPHQL_API.equals(existingAPI.getType())) {
-                apiProvider.addOrUpdateComplexityDetails(apiInfo.toAPIIdentifier(), graphqlComplexityInfo);
+                apiProvider.addOrUpdateComplexityDetails(apiId, graphqlComplexityInfo);
                 return Response.ok().build();
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
@@ -1010,7 +998,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 baseUrl = APIConstants.BASE_AUDIT_URL;
             }
             // Retrieve the uuid from the database
-            String auditUuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
+            String auditUuid = ApiMgtDAO.getInstance().getAuditApiId(api.getUuid());
             if (auditUuid != null) {
                 updateAuditApi(apiDefinition, apiToken, auditUuid, baseUrl, isDebugEnabled);
             } else {
@@ -1972,23 +1960,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
 
-        APIIdentifier apiIdentifier = null;
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        try {
-            apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while getting API: " + apiId;
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-
-        Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
+        Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiId);
         APIExternalStoreListDTO apiExternalStoreListDTO =
                 ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
         return Response.ok().entity(apiExternalStoreListDTO).build();
@@ -2684,7 +2657,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
         if (apiProvider.publishToExternalAPIStores(api, externalStoreIdList)) {
-            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getId());
+            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getUuid());
             APIExternalStoreListDTO apiExternalStoreListDTO =
                     ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
             return Response.ok().entity(apiExternalStoreListDTO).build();

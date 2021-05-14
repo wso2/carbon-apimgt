@@ -1389,7 +1389,7 @@ public class APIUtilTest {
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
 
         HashMap<String, String> urlPatterns = getURLTemplatePattern(expectedAPI.getUriTemplates());
-        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(APIIdentifier.class))).thenReturn
+        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(String.class))).thenReturn
                 (urlPatterns);
 
         CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
@@ -1466,7 +1466,7 @@ public class APIUtilTest {
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
 
         HashMap<String, String> urlPatterns = getURLTemplatePattern(expectedAPI.getUriTemplates());
-        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(APIIdentifier.class))).thenReturn
+        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(String.class))).thenReturn
                 (urlPatterns);
 
         CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();

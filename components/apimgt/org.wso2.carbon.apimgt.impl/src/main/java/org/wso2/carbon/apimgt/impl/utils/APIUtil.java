@@ -497,7 +497,7 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
@@ -738,7 +738,7 @@ public final class APIUtil {
             api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
 
-            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
@@ -3395,7 +3395,7 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            Map<String, Scope> scopeToKeyMapping = getAPIScopes(oldId, tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(artifact.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             HashMap<Integer, Set<String>> resourceScopes;
@@ -4862,8 +4862,7 @@ public final class APIUtil {
 
     public static GraphqlComplexityInfo getComplexityDetails(API api) throws APIManagementException {
 
-        APIIdentifier identifier = api.getId();
-        return ApiMgtDAO.getInstance().getComplexityDetails(identifier);
+        return ApiMgtDAO.getInstance().getComplexityDetails(api.getUuid());
     }
 
     public static boolean isAPIManagementEnabled() {
@@ -11275,15 +11274,14 @@ public final class APIUtil {
     /**
      * Get scopes attached to the API.
      *
-     * @param identifier   API Identifier
+     * @param id   API uuid
      * @param tenantDomain Tenant Domain
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scope attached to API
      */
-    public static Map<String, Scope> getAPIScopes(APIIdentifier identifier, String tenantDomain)
+    public static Map<String, Scope> getAPIScopes(String id, String tenantDomain)
             throws APIManagementException {
-
-        Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(identifier);
+        Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(id);
         return getScopes(scopeKeys, tenantDomain);
     }
 

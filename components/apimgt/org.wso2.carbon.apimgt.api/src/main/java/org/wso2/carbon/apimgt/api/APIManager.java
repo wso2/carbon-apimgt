@@ -313,21 +313,21 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param  apiId ID of the API
+     * @param  apiId UUID of the API
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
-    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+    GraphqlComplexityInfo getComplexityDetails(String apiId) throws APIManagementException;
 
 
     /**
      * Add or Updates the complexity details given the GraphqlComplexityInfo object
      *
-     * @param apiIdentifier         APIIdentifier
+     * @param uuid         API uuid
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException if failed to update complexity details
      */
-    void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+    void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException;
 
 

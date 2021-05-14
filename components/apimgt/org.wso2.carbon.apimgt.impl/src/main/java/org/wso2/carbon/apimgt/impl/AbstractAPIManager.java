@@ -1683,14 +1683,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+    public GraphqlComplexityInfo getComplexityDetails(String uuid) throws APIManagementException {
 
-        return apiMgtDAO.getComplexityDetails(apiIdentifier);
+        return apiMgtDAO.getComplexityDetails(uuid);
     }
 
-    public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+    public void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
 
-        apiMgtDAO.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+        apiMgtDAO.addOrUpdateComplexityDetails(uuid, graphqlComplexityInfo);
     }
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
@@ -3892,7 +3892,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setAvailableTiers(availableTier);
 
         //Scopes
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getUuid(), requestedTenantDomain);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
         //templates

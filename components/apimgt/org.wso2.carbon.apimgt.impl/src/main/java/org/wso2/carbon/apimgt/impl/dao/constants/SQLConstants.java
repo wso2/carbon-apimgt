@@ -1653,6 +1653,9 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER=? AND API_NAME=? AND API_VERSION=? ";
 
+    public static final String REMOVE_FROM_API_SQL_NEW =
+            "DELETE FROM AM_API WHERE API_UUID=?";
+
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
@@ -1811,9 +1814,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1824,9 +1825,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1837,9 +1836,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL";
 

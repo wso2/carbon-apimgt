@@ -374,20 +374,20 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param uuid Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String uuid, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier      Api identifier
+     * @param uuid      Api uuid
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
+    Comment[] getComments(String uuid, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
@@ -424,11 +424,11 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to delete a comment.
      *
-     * @param identifier API Identifier
+     * @param uuid API uuid
      * @param commentId  Comment ID
-     * @throws APIManagementException if failed to delete comment for identifier
+     * @throws APIManagementException if failed to delete comment for api uuid
      */
-    void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+    void deleteComment(String uuid, String commentId) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
@@ -805,13 +805,13 @@ public interface APIConsumer extends APIManager {
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
     /**
-     * Returns a set of scopes associated with a list of API identifiers.
+     * Returns a set of scopes associated with a list of API uuids.
      *
-     * @param identifiers list of API identifiers
+     * @param uuids list of API uuids
      * @return set of scopes.
      * @throws APIManagementException
      */
-    Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException;
+    Set<Scope> getScopesBySubscribedAPIs(List<String> uuids) throws APIManagementException;
 
     /**
      * Returns a set of scopes associated with an application subscription.

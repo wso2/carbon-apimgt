@@ -3263,8 +3263,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setSubscriber(userId);
             workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
             workflowDTO.setApplicationId(applicationId);
+            String status = null;
+            if (apiIdentifier != null) {
+                status = apiMgtDAO.getSubscriptionStatus(apiIdentifier.getUUID(), applicationId);
+            } else if (apiProdIdentifier != null) {
+                status = apiMgtDAO.getSubscriptionStatus(apiProdIdentifier.getUUID(), applicationId);
+            }
 
-            String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
                 try {
                     createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
@@ -3429,14 +3434,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(uuid, comment, user);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier, String parentCommentID)
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(String uuid, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(identifier, parentCommentID);
+        return apiMgtDAO.getComments(uuid, parentCommentID);
     }
 
     @Override
@@ -3458,8 +3463,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-        apiMgtDAO.deleteComment(identifier, commentId);
+    public void deleteComment(String uuid, String commentId) throws APIManagementException {
+        apiMgtDAO.deleteComment(uuid, commentId);
     }
 
     @Override
@@ -4543,10 +4548,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return null;
 	}
 
-    public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
+    public Set<Scope> getScopesBySubscribedAPIs(List<String> uuids)
             throws APIManagementException {
-
-        Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
+        Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(uuids);
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
     }
 

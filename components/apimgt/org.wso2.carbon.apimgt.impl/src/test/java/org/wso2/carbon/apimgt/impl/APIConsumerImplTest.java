@@ -818,7 +818,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        List<APIIdentifier> identifiers = new ArrayList<>();
+        List<String> identifiers = new ArrayList<>();
         Set<String> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesBySubscribedAPIs(identifiers)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesBySubscribedAPIs(identifiers));
@@ -1112,13 +1112,11 @@ public class APIConsumerImplTest {
     public void testGetComments() throws APIManagementException {
         Comment comment = new Comment();
         Comment[] comments = new Comment[] { comment };
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.getComments(identifier, null)).thenReturn(comments);
-        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier, null).length, 1);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier, null);
+        String uuid = UUID.randomUUID().toString();
+        Mockito.when(apiMgtDAO.getComments(uuid, null)).thenReturn(comments);
+        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(uuid, null).length, 1);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(uuid, null);
     }
-
-
 
     @Test
     public void testRemoveSubscriber() throws APIManagementException {
@@ -1164,7 +1162,7 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPI = new SubscribedAPI("api1");
         subscribedAPI.setTier(new Tier("Gold"));
         Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
-        Mockito.when(apiMgtDAO.getSubscriptionStatus(identifier, 1))
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(uuid, 1))
                 .thenReturn(APIConstants.SubscriptionStatus.ON_HOLD);
         apiConsumer.removeSubscription(subscribedAPINew);
         Mockito.when(apiMgtDAO.retrieveWorkflow(workflowExtRef1)).thenReturn(subscriptionWorkflowDTO);

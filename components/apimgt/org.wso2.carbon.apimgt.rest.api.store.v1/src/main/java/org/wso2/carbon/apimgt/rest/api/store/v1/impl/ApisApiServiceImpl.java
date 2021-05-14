@@ -150,10 +150,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
+                GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiId);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                 return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
@@ -240,12 +239,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -253,7 +246,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setEntryPoint("DEVPORTAL");
             comment.setUser(username);
             comment.setApiId(apiId);
-            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            String createdCommentId = apiConsumer.addComment(apiId, comment, username);
             Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
