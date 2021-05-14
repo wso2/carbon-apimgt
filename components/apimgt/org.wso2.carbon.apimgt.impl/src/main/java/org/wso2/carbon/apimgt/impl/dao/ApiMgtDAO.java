@@ -5309,8 +5309,8 @@ public class ApiMgtDAO {
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
-            id = identifier.getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
+            id = getAPIIDFromIdentifierMatchingOrganization((APIIdentifier) identifier, getOrganizationIDByAPIUUID(apiUUID));
         } else {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
