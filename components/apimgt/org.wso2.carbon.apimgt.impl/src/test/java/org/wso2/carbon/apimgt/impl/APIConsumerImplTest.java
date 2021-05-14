@@ -540,7 +540,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetTagsWithAttributes() throws Exception {
         Registry userRegistry = Mockito.mock(Registry.class);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
         System.setProperty(CARBON_HOME, "");
         PowerMockito.mockStatic(GovernanceUtils.class);
         UserRegistry userRegistry1 = Mockito.mock(UserRegistry.class);
