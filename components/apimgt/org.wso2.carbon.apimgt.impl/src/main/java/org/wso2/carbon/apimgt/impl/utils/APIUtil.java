@@ -6701,10 +6701,10 @@ public final class APIUtil {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
-            throws APIManagementException {
+    public static boolean isApplicationExist(String subscriber, String applicationName, String groupId,
+                                             String organization) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId);
+        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId, organization);
     }
 
     /**

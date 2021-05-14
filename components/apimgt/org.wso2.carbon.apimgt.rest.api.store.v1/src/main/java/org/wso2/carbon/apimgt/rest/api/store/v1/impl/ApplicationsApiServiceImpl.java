@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -108,6 +109,10 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+    
+    private String getOrganization(MessageContext messageContext) {
+        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
+    }
 
     /**
      * Retrieves all the applications that the user has access to
@@ -133,7 +138,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        
+//        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain(); // todo: use the resolver and remove
+        String organization = getOrganization(messageContext); // TODO under testing
+
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
         // todo: what are the applications shared to group "g2" among them. 
@@ -144,7 +151,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application[] applications;
             applications = apiConsumer
                     .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
-                            sortOrder);
+                            sortOrder, organization);
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
@@ -219,14 +226,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
             }
 
-            if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId) && update != null
+//            String organization = RestApiCommonUtil.getLoggedInUserTenantDomain(); // todo: use the resolver and remove
+            String organization = getOrganization(messageContext); // TODO under testing
+
+            if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organization) && update != null
                     && update) {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
                         oldApplication.getUUID());
             } else {
-                application = preProcessAndAddApplication(ownerId, applicationDTO);
+                application = preProcessAndAddApplication(ownerId, applicationDTO, organization);
             }
 
             // Get keys to import
@@ -284,8 +294,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
         String username = RestApiCommonUtil.getLoggedInUsername();
+//        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain(); // todo: use the resolver and remove
+        String organization = getOrganization(messageContext); // TODO under testing
         try {
-            Application createdApplication = preProcessAndAddApplication(username, body);
+            Application createdApplication = preProcessAndAddApplication(username, body, organization);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header
@@ -314,9 +326,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      *
      * @param username       Username
      * @param applicationDto Application DTO
+     * @param organization   Identifier of an organization
      * @return Created application
      */
-    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto)
+    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto, String organization)
             throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -346,7 +359,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
 
-        int applicationId = apiConsumer.addApplication(application, username);
+        int applicationId = apiConsumer.addApplication(application, username, organization);
 
         //retrieves the created application and send as the response
         return apiConsumer.getApplicationById(applicationId);
@@ -744,7 +757,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName, xWSO2Tenant);
+                            jsonParams, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1095,7 +1108,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName, xWSO2Tenant);
+                                application.getName(), keyType, tokenType, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1113,8 +1126,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdOauthKeysGet(String applicationId,
                                                           String xWso2Tenant, MessageContext messageContext)
             throws APIManagementException {
-
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, xWso2Tenant);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, tenantDomain);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);

@@ -3554,7 +3554,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return {@link String}
      */
     @Override
-    public int addApplication(Application application, String userId)
+    public int addApplication(Application application, String userId, String organization)
             throws APIManagementException {
 
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
@@ -3631,7 +3631,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setApplicationAttributes(null);
         }
         application.setUUID(UUID.randomUUID().toString());
-        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
+        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId(), organization)) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
         }
@@ -3639,7 +3639,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isBlank(application.getCallbackUrl())) {
             application.setCallbackUrl(null);
         }
-        int applicationId = apiMgtDAO.addApplication(application, userId);
+        int applicationId = apiMgtDAO.addApplication(application, userId, organization);
 
         JSONObject appLogObject = new JSONObject();
         appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -4620,21 +4620,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Returns all applications associated with given subscriber, groupingId and search criteria.
      *
-     * @param subscriber Subscriber
-     * @param groupingId The groupId to which the applications must belong.
-     * @param offset     The offset.
-     * @param search     The search string.
-     * @param sortColumn The sort column.
-     * @param sortOrder  The sort order.
+     * @param subscriber   Subscriber
+     * @param groupingId   The groupId to which the applications must belong.
+     * @param offset       The offset.
+     * @param search       The search string.
+     * @param sortColumn   The sort column.
+     * @param sortOrder    The sort order.
+     * @param organization Identifier of an Organization
      * @return Application[] The Applications.
      * @throws APIManagementException
      */
     @Override
-    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start , int offset
-            , String search, String sortColumn, String sortOrder)
+    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset
+            , String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException {
         return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
-                search, sortColumn, sortOrder);
+                search, sortColumn, sortOrder, organization);
     }
 
 

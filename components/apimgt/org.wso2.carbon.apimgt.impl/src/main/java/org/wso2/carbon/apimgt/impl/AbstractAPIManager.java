@@ -1800,10 +1800,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
-            //Add a default application once subscriber is added
-            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
-                addDefaultApplicationForSubscriber(subscriber);
-            }
         } catch (APIManagementException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
@@ -1816,40 +1812,6 @@ public abstract class AbstractAPIManager implements APIManager {
     protected String getTenantDomain(String username) {
 
         return MultitenantUtils.getTenantDomain(username);
-    }
-
-    /**
-     * Add default application on the first time a subscriber is added to the database
-     *
-     * @param subscriber Subscriber
-     * @throws APIManagementException if an error occurs while adding default application
-     */
-    private void addDefaultApplicationForSubscriber(Subscriber subscriber) throws APIManagementException {
-
-        Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
-        if (APIUtil.isEnabledUnlimitedTier()) {
-            defaultApp.setTier(APIConstants.UNLIMITED_TIER);
-        } else {
-            Map<String, Tier> throttlingTiers = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE,
-                    getTenantDomain(subscriber.getName()));
-            Set<Tier> tierValueList = new HashSet<Tier>(throttlingTiers.values());
-            List<Tier> sortedTierList = APIUtil.sortTiers(tierValueList);
-            defaultApp.setTier(sortedTierList.get(0).getName());
-        }
-        //application will not be shared within the group
-        defaultApp.setGroupId("");
-        defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
-        defaultApp.setUUID(UUID.randomUUID().toString());
-        defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
-        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName());
-
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                tenantDomain, applicationId, defaultApp.getUUID(), defaultApp.getName(),
-                defaultApp.getTokenType(),
-                defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
-                subscriber.getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     public void updateSubscriber(Subscriber subscriber)

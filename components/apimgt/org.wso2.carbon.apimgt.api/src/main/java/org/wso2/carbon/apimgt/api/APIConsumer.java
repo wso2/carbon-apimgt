@@ -443,12 +443,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Adds an application
      *
-     * @param application Application
-     * @param userId      User Id
+     * @param application  Application
+     * @param userId       User Id
+     * @param organization Identifier of an organization
      * @return Id of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-    int addApplication(Application application, String userId) throws APIManagementException;
+    int addApplication(Application application, String userId, String organization) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -553,16 +554,19 @@ public interface APIConsumer extends APIManager {
 
     /**
      * Returns a list of applications for a given subscriber
-     *  @param subscriber Subscriber
+     *
+     * @param subscriber   Subscriber
      * @param search
      * @param start
      * @param offset
-     * @param groupingId the groupId to which the applications must belong.  @return Applications
+     * @param groupingId   the groupId to which the applications must belong.
+     * @param organization Identifier of an organization
+     * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset ,
-                                                String search, String sortColumn, String sortOrder)
+    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
+                                                String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException;
 
 

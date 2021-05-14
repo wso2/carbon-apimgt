@@ -2981,15 +2981,16 @@ public class ApiMgtDAO {
         return subscriptions;
     }
 
-    public int addApplication(Application application, String userId) throws APIManagementException {
 
+    public int addApplication(Application application, String userId, String organization)
+            throws APIManagementException {
         Connection conn = null;
         int applicationId = 0;
         String loginUserName = getLoginUserName(userId);
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            applicationId = addApplication(application, loginUserName, conn);
+            applicationId = addApplication(application, loginUserName, conn, organization);
             Subscriber subscriber = getSubscriber(userId);
             String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
@@ -3602,11 +3603,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param application Application
-     * @param userId      User Id
+     * @param application  Application
+     * @param userId       User Id
+     * @param organization Identifier of an organization
      * @throws APIManagementException if failed to add Application
      */
-    public int addApplication(Application application, String userId, Connection conn)
+    public int addApplication(Application application, String userId, Connection conn, String organization)
             throws APIManagementException, SQLException {
 
         PreparedStatement ps = null;
@@ -3658,6 +3660,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(10, timestamp);
             ps.setString(11, application.getUUID());
             ps.setString(12, String.valueOf(application.getTokenType()));
+            ps.setString(13, organization);
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -3842,7 +3845,8 @@ public class ApiMgtDAO {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public boolean isApplicationExist(String appName, String username, String groupId) throws APIManagementException {
+    public boolean isApplicationExist(String appName, String username, String groupId,
+                                      String organization) throws APIManagementException {
 
         if (username == null) {
             return false;
@@ -3888,7 +3892,8 @@ public class ApiMgtDAO {
                     int noOfParams = grpIdArray.length;
                     preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);
                     preparedStatement.setString(1, appName);
-                    int paramIndex = noOfParams + 1;
+                    preparedStatement.setString(2, organization);
+                    int paramIndex = noOfParams + 2;
                     preparedStatement.setString(++paramIndex, tenantDomain);
                     preparedStatement.setString(++paramIndex, subscriber.getName());
                     preparedStatement.setString(++paramIndex, tenantDomain + '/' + groupId);
@@ -3900,8 +3905,9 @@ public class ApiMgtDAO {
                     }
                     preparedStatement = connection.prepareStatement(sqlQuery);
                     preparedStatement.setString(1, appName);
-                    preparedStatement.setString(2, groupId);
-                    preparedStatement.setString(3, subscriber.getName());
+                    preparedStatement.setString(2, organization);
+                    preparedStatement.setString(3, groupId);
+                    preparedStatement.setString(4, subscriber.getName());
                 }
             } else {
                 if (forceCaseInsensitiveComparisons) {
@@ -3911,7 +3917,8 @@ public class ApiMgtDAO {
                 }
                 preparedStatement = connection.prepareStatement(sqlQuery);
                 preparedStatement.setString(1, appName);
-                preparedStatement.setString(2, subscriber.getName());
+                preparedStatement.setString(2, organization);
+                preparedStatement.setString(3, subscriber.getName());
             }
 
             resultSet = preparedStatement.executeQuery();
@@ -3962,7 +3969,7 @@ public class ApiMgtDAO {
             }
             preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setString(1, appName);
-            preparedStatement.setString(2, subscriber.getName());
+            preparedStatement.setString(3, subscriber.getName());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 appId = resultSet.getInt("APPLICATION_ID");
@@ -4233,18 +4240,19 @@ public class ApiMgtDAO {
     /**
      * #TODO later we might need to use only this method.
      *
-     * @param subscriber The subscriber.
-     * @param groupingId The groupId to which the applications must belong.
-     * @param start      The start index.
-     * @param offset     The offset.
-     * @param search     The search string.
-     * @param sortOrder  The sort order.
-     * @param sortColumn The sort column.
+     * @param subscriber   The subscriber.
+     * @param groupingId   The groupId to which the applications must belong.
+     * @param start        The start index.
+     * @param offset       The offset.
+     * @param search       The search string.
+     * @param sortOrder    The sort order.
+     * @param sortColumn   The sort column.
+     * @param organization Identifier of an organization
      * @return Application[] The array of applications.
      * @throws APIManagementException
      */
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start,
-                                                       int offset, String search, String sortColumn, String sortOrder)
+                                                       int offset, String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException {
 
         Connection connection = null;
@@ -4308,6 +4316,7 @@ public class ApiMgtDAO {
                     prepStmt.setString(++noOfParams, tenantDomain);
                     prepStmt.setString(++noOfParams, subscriber.getName());
                     prepStmt.setString(++noOfParams, tenantDomain + '/' + groupingId);
+                    prepStmt.setString(++noOfParams, organization);
                     prepStmt.setString(++noOfParams, "%" + search + "%");
                     prepStmt.setInt(++noOfParams, start);
                     prepStmt.setInt(++noOfParams, offset);
@@ -4315,16 +4324,18 @@ public class ApiMgtDAO {
                     prepStmt = connection.prepareStatement(sqlQuery);
                     prepStmt.setString(1, groupingId);
                     prepStmt.setString(2, subscriber.getName());
-                    prepStmt.setString(3, "%" + search + "%");
-                    prepStmt.setInt(4, start);
-                    prepStmt.setInt(5, offset);
+                    prepStmt.setString(3, organization);
+                    prepStmt.setString(4, "%" + search + "%");
+                    prepStmt.setInt(5, start);
+                    prepStmt.setInt(6, offset);
                 }
             } else {
                 prepStmt = connection.prepareStatement(sqlQuery);
                 prepStmt.setString(1, subscriber.getName());
-                prepStmt.setString(2, "%" + search + "%");
-                prepStmt.setInt(3, start);
-                prepStmt.setInt(4, offset);
+                prepStmt.setString(2, organization);
+                prepStmt.setString(3, "%" + search + "%");
+                prepStmt.setInt(4, start);
+                prepStmt.setInt(5, offset);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Query: " + sqlQuery);
