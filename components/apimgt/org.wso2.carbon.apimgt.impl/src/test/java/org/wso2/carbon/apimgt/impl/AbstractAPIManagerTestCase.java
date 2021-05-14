@@ -141,7 +141,6 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_RESOURCE_ID = "xyz";
     public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
-    public static final String SAMPLE_ORGANIZATION_ID = "testOrg";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
@@ -1184,7 +1183,7 @@ public class AbstractAPIManagerTestCase {
         resource.setUUID(SAMPLE_RESOURCE_ID);
         Mockito.when(registry.get(Mockito.anyString())).thenThrow(RegistryException.class).thenReturn(resource);
         try {
-            abstractAPIManager.getSubscriberAPIs(subscriber, "testorg");
+            abstractAPIManager.getSubscriberAPIs(subscriber, APIConstants.ORGANIZATION_ID);
             Assert.fail("Registry exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Failed to get APIs for subscriber: "));
@@ -1195,7 +1194,7 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.when(APIUtil.getAPI((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any())).thenReturn(new API
                 (getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION)));
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(abstractAPIManager.getSubscriberAPIs(subscriber, "testorg").size(), 1);
+        Assert.assertEquals(abstractAPIManager.getSubscriberAPIs(subscriber, APIConstants.ORGANIZATION_ID).size(), 1);
 
     }
 

@@ -689,7 +689,7 @@ public class APIConsumerImplTest {
         APIIdentifier apiId1 = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         Tier tier = Mockito.mock(Tier.class);
 
-        when(apiMgtDAO.getSubscribedAPIs("testorg", subscriber, "testID" )).thenReturn(originalSubscribedAPIs);
+        when(apiMgtDAO.getSubscribedAPIs(APIConstants.ORGANIZATION_ID, subscriber, "testID" )).thenReturn(originalSubscribedAPIs);
         when(subscribedAPI.getTier()).thenReturn(tier);
         when(tier.getName()).thenReturn("tier");
         when(subscribedAPI.getApiId()).thenReturn(apiId1);
@@ -705,7 +705,7 @@ public class APIConsumerImplTest {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
-        assertNotNull(apiConsumer.getSubscribedIdentifiers(subscriber, apiId1, "testID", "testorg"));
+        assertNotNull(apiConsumer.getSubscribedIdentifiers(subscriber, apiId1, "testID", APIConstants.ORGANIZATION_ID));
     }
 
     @Test
@@ -737,10 +737,10 @@ public class APIConsumerImplTest {
         Subscriber subscriber = new Subscriber("Subscriber");
         Tier tier = Mockito.mock(Tier.class);
 
-        when(apiMgtDAO.getSubscribedAPIs("testorg", subscriber, "testID")).thenReturn(originalSubscribedAPIs);
+        when(apiMgtDAO.getSubscribedAPIs(APIConstants.ORGANIZATION_ID, subscriber, "testID")).thenReturn(originalSubscribedAPIs);
         when(subscribedAPI.getTier()).thenReturn(tier);
         when(tier.getName()).thenReturn("tier");
-        assertNotNull(apiConsumer.getSubscribedAPIs("testorg", subscriber, "testID"));
+        assertNotNull(apiConsumer.getSubscribedAPIs(APIConstants.ORGANIZATION_ID, subscriber, "testID"));
     }
 
     @Test
@@ -775,8 +775,8 @@ public class APIConsumerImplTest {
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "org1")).
                 thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
-        assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", APIConstants.ORGANIZATION_ID)).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID", APIConstants.ORGANIZATION_ID));
     }
 
     @Test
@@ -788,8 +788,8 @@ public class APIConsumerImplTest {
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "org1")).thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
-        assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", APIConstants.ORGANIZATION_ID)).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID", APIConstants.ORGANIZATION_ID));
     }
 
     @Test
@@ -907,7 +907,7 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Assert.assertEquals(
                 apiConsumer.getApplicationsWithPagination(new Subscriber("sub1"), "1", 0, 5,
-                        "", "", "ASC", "testorg").length, 2);
+                        "", "", "ASC", APIConstants.ORGANIZATION_ID).length, 2);
     }
 
     @Test
@@ -1182,16 +1182,16 @@ public class APIConsumerImplTest {
         tierMap.put("tier1", new Tier("Platinum"));
         PowerMockito.when(APIUtil.getTiers(Mockito.anyInt())).thenThrow(APIManagementException.class)
                 .thenReturn(tierMap);
-        Mockito.when(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg"))
+        Mockito.when(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", APIConstants.ORGANIZATION_ID))
                 .thenReturn(subscribedAPIs, null, subscribedAPIs);
         try {
-            apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg");
+            apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", APIConstants.ORGANIZATION_ID);
             Assert.fail("API Management exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Failed to get APIs of"));
         }
-        Assert.assertNull(apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg"));
-        Assert.assertEquals(1, apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", "testorg").size());
+        Assert.assertNull(apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", APIConstants.ORGANIZATION_ID));
+        Assert.assertEquals(1, apiConsumer.getPaginatedSubscribedAPIs(subscriber, "app1", 0, 5, "group_id_1", APIConstants.ORGANIZATION_ID).size());
 
     }
 
