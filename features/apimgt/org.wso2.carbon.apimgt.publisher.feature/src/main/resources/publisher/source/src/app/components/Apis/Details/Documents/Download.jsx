@@ -38,7 +38,11 @@ function Download(props) {
         promised_get_content
             .then((done) => {
                 setIsSuccessful(true);
-                setIsFileAvailable(true);
+                if (done.data.size > 0) {
+                    setIsFileAvailable(true);
+                } else {
+                    setIsFileAvailable(false);
+                }
             })
             .catch((error) => {
                 setIsSuccessful(true);
