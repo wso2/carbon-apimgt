@@ -2526,7 +2526,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            API api = apiProvider.getAPI(apiIdentifier);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             Map<String, String> monetizedPoliciesToPlanMapping = monetizationImplementation.
                     getMonetizedPoliciesToPlanMapping(api);
@@ -2566,7 +2566,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
-            API api = apiProvider.getAPI(apiIdentifier);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
                 String errorMessage = "API " + apiIdentifier.getApiName() +
                         " should be in published state to configure monetization.";
@@ -2844,7 +2844,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            API api = apiProvider.getAPI(apiIdentifier);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
                 String errorMessage = "API " + apiIdentifier.getApiName() +
                         " should be in published state to get total revenue.";
@@ -3468,7 +3468,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, tenantDomain);
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
+            API createdApi = apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain);
             return createdApi;
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
@@ -4938,6 +4938,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String definitionToAdd = validationResponse.getJsonContent();
             String protocol = validationResponse.getProtocol();
             if (isServiceAPI) {
@@ -4960,7 +4961,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
-            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
+            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
