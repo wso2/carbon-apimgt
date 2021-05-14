@@ -25,6 +25,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -2643,6 +2644,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
                         tenantDomain, keyManagerName);
 
+        // if clientId is null in the argument `ApplicationUtils#createOauthAppRequest` will set it using
+        // the props in `jsonString`. Hence we are taking the updated `clientId` here
+        clientId = oauthAppRequest.getOAuthApplicationInfo().getClientId();
+
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         if (keyManager == null) {
             throw new APIManagementException(
@@ -3871,7 +3876,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
-        Map<String, String> consumerKeysOfApplication = null;
+        Map<String, Pair<String, String>> consumerKeysOfApplication = null;
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
@@ -3942,11 +3947,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             // cleanup pending application registration tasks
-            Map<String,String> keyManagerWiseProductionKeyStatus = apiMgtDAO
+            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
                     .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-            Map<String,String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
+            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
                     .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) ->{
+            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) -> {
                 if (WorkflowStatus.CREATED.toString().equals(state)) {
                     try {
                         String applicationRegistrationExternalRef = apiMgtDAO
@@ -3965,8 +3970,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
 
-            } );
-            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) ->{
+            });
+            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) -> {
                 if (WorkflowStatus.CREATED.toString().equals(state)) {
                     try {
                         String applicationRegistrationExternalRef = apiMgtDAO
@@ -4058,16 +4063,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         if (consumerKeysOfApplication != null && consumerKeysOfApplication.size() > 0) {
-            for (Map.Entry<String, String> entry : consumerKeysOfApplication.entrySet()) {
+            for (Map.Entry<String, Pair<String, String>> entry : consumerKeysOfApplication.entrySet()) {
                 String consumerKey = entry.getKey();
-                String keymanager = entry.getValue();
+                String keyManagerName = entry.getValue().getKey();
+                String keyManagerTenantDomain = entry.getValue().getValue();
                 ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
                         UUID.randomUUID().toString(), System.currentTimeMillis(),
-                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(), tenantId, tenantDomain,
-                        application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keymanager);
+                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), keyManagerTenantDomain,
+                        application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
+                        keyManagerName);
                 APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
         }
+    }
+
+    @Override
+    @Deprecated
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                         String tokenType, String callbackUrl,
+                                                                         String[] allowedDomains, String validityTime,
+                                                                         String tokenScope, String groupingId,
+                                                                         String jsonString,
+                                                                         String keyManagerName, String tenantDomain)
+            throws APIManagementException {
+        return requestApprovalForApplicationRegistration(userId, applicationName, tokenType, callbackUrl,
+                allowedDomains, validityTime, tokenScope, groupingId, jsonString, keyManagerName, tenantDomain, false);
     }
 
     /**
@@ -4082,8 +4103,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString,
-                                                                         String keyManagerName, String tenantDomain)
-            throws APIManagementException {
+                                                                         String keyManagerName, String tenantDomain,
+                                                                         boolean isImportMode)
+    throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
         if (StringUtils.isEmpty(tenantDomain)) {
@@ -4098,7 +4120,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         String keyManagerId = null;
-        if (keyManagerName != null){
+        if (keyManagerName != null) {
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
             if (keyManagerConfiguration == null) {
@@ -4117,9 +4139,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
-            if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation){
-                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate " +
-                        "Client Application",ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+            if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation) {
+                if (isImportMode) {
+                    log.debug("Importing application when KM OAuth App creation is disabled. Trying to map keys");
+                    // passing null `clientId` is ok here since the id/secret pair is included
+                    // in the `jsonString` and ApplicationUtils#createOauthAppRequest logic handles it.
+                    return mapExistingOAuthClient(jsonString, userId, null, applicationName, tokenType,
+                            APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, tenantDomain);
+                } else {
+                    throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                            " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+                }
             }
         }
         try {

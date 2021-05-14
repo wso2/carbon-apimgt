@@ -166,41 +166,42 @@ public class CertificateMgtUtils {
                 }
 
                 //Read the client-truststore.jks into a KeyStore.
-                File trustStoreFile = new File(trustStoreDTO.getLocation());
-                try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                    KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
-                    trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
-                    CertificateFactory cf = CertificateFactory.getInstance(certificateType);
-                    while (serverCert.available() > 0) {
-                        Certificate certificate = cf.generateCertificate(serverCert);
-                        //Check whether the Alias exists in the trust store.
-                        if (trustStore.containsAlias(alias)) {
-                            isCertExists = true;
-                        } else {
-                            /*
-                             * If alias is not exists, check whether the certificate is expired or not. If expired
-                             * set the
-                             * expired flag.
-                             * */
-                            X509Certificate x509Certificate = (X509Certificate) certificate;
-                            if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
-                                expired = true;
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Provided certificate is expired.");
-                                }
+                synchronized (this) {
+                    File trustStoreFile = new File(trustStoreDTO.getLocation());
+                    try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+                        KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
+                        trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+                        CertificateFactory cf = CertificateFactory.getInstance(certificateType);
+                        while (serverCert.available() > 0) {
+                            Certificate certificate = cf.generateCertificate(serverCert);
+                            //Check whether the Alias exists in the trust store.
+                            if (trustStore.containsAlias(alias)) {
+                                isCertExists = true;
                             } else {
-                                //If not expired add the certificate to trust store.
-                                trustStore.setCertificateEntry(alias, certificate);
+                                /*
+                                 * If alias is not exists, check whether the certificate is expired or not. If expired
+                                 * set the
+                                 * expired flag.
+                                 * */
+                                X509Certificate x509Certificate = (X509Certificate) certificate;
+                                if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
+                                    expired = true;
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Provided certificate is expired.");
+                                    }
+                                } else {
+                                    //If not expired add the certificate to trust store.
+                                    trustStore.setCertificateEntry(alias, certificate);
+                                }
                             }
                         }
+                        try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
+                            trustStore.store(fileOutputStream, trustStoreDTO.getPassword());
+                        }
+                        return expired ? ResponseCode.CERTIFICATE_EXPIRED :
+                                                        isCertExists ? ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE : ResponseCode.SUCCESS;
                     }
-                    try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
-                        trustStore.store(fileOutputStream, trustStoreDTO.getPassword());
-                    }
-                    return expired ? ResponseCode.CERTIFICATE_EXPIRED :
-                            isCertExists ? ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE : ResponseCode.SUCCESS;
                 }
-
             }
         } catch (CertificateException e) {
             log.error("Error loading certificate.", e);
@@ -237,12 +238,14 @@ public class CertificateMgtUtils {
         ByteArrayInputStream serverCert = null;
 
         try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                trustStore.load(localTrustStoreStream, trustStorePassword);
-            }
-            if (StringUtils.isNotEmpty(alias) && trustStore.containsAlias(alias + "_" + tenantId)) {
-                responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+            synchronized (this) {
+                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+                    trustStore.load(localTrustStoreStream, trustStorePassword);
+                }
+                if (StringUtils.isNotEmpty(alias) && trustStore.containsAlias(alias + "_" + tenantId)) {
+                    responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+                }
             }
             if (responseCode != ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE) {
                 byte[] cert = (Base64.decodeBase64(certificate.getBytes(StandardCharsets.UTF_8)));
@@ -310,24 +313,26 @@ public class CertificateMgtUtils {
 
         boolean isExists; //Check for the existence of the certificate in trust store.
         try {
-            File trustStoreFile = new File(trustStoreDTO.getLocation());
-            KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
-            try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
-            }
-
-            if (trustStore.containsAlias(alias)) {
-                trustStore.deleteEntry(alias);
-                isExists = true;
-            } else {
-                isExists = false;
-                if (log.isDebugEnabled()) {
-                    log.debug("Certificate for alias '" + alias + "' not found in the trust store.");
+            synchronized (this) {
+                File trustStoreFile = new File(trustStoreDTO.getLocation());
+                KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
+                try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+                    trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
                 }
-            }
 
-            try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
-                trustStore.store(fileOutputStream, trustStoreDTO.getPassword());
+                if (trustStore.containsAlias(alias)) {
+                    trustStore.deleteEntry(alias);
+                    isExists = true;
+                } else {
+                    isExists = false;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Certificate for alias '" + alias + "' not found in the trust store.");
+                    }
+                }
+
+                try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
+                    trustStore.store(fileOutputStream, trustStoreDTO.getPassword());
+                }
             }
             return isExists ? ResponseCode.SUCCESS : ResponseCode.CERTIFICATE_NOT_FOUND;
         } catch (IOException e) {
@@ -368,7 +373,8 @@ public class CertificateMgtUtils {
      * @param alias        : Alias of the certificate that should be retrieved.
      * @return :
      */
-    public ResponseCode updateCertificate(String certificate, String alias) throws CertificateManagementException {
+    public synchronized ResponseCode updateCertificate(String certificate, String alias)
+                                    throws CertificateManagementException {
 
         try {
             File trustStoreFile = new File(trustStoreLocation);
@@ -428,7 +434,8 @@ public class CertificateMgtUtils {
      * @param alias : Alias of the certificate which information should be retrieved
      * @return : The details of the certificate as a MAP.
      */
-    public CertificateInformationDTO getCertificateInformation(String alias) throws CertificateManagementException {
+    public synchronized CertificateInformationDTO getCertificateInformation(String alias)
+                                    throws CertificateManagementException {
 
         CertificateInformationDTO certificateInformation = new CertificateInformationDTO();
         File trustStoreFile = new File(trustStoreLocation);
@@ -506,7 +513,7 @@ public class CertificateMgtUtils {
      * @return : The Certificate as a ByteArrayInputStream.
      * @throws CertificateManagementException :
      */
-    public ByteArrayInputStream getCertificateContent(String alias) throws CertificateManagementException {
+    public synchronized ByteArrayInputStream getCertificateContent(String alias) throws CertificateManagementException {
 
         File trustStoreFile = new File(trustStoreLocation);
         Certificate certificate;

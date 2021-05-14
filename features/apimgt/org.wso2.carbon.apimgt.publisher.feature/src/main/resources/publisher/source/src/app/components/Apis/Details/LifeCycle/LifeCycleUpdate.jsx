@@ -306,7 +306,10 @@ class LifeCycleUpdate extends Component {
                             ))}
                         </FormGroup>
                     )}
-                    <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+                    <ScopeValidation
+                        resourcePath={resourcePath.API_CHANGE_LC}
+                        resourceMethod={resourceMethod.POST}
+                    >
                         <div className={classes.buttonsWrapper}>
                             {!isWorkflowPending
                                 && lifecycleButtons.map((transitionState) => {

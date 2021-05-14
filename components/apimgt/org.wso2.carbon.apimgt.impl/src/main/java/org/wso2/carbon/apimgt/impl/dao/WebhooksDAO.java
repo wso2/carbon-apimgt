@@ -268,10 +268,14 @@ public class WebhooksDAO {
     public List<Subscription> getSubscriptionsList(String tenantDomain) throws APIManagementException {
 
         List<Subscription> subscriptionsList = new ArrayList<>();
-
+        String sqlQuery = SQLConstants.WebhooksSqlConstants.GET_ALL_VALID_SUBSCRIPTIONS;
+        String postgreSQLQuery = SQLConstants.WebhooksSqlConstants.GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                sqlQuery = postgreSQLQuery;
+            }
             try (PreparedStatement preparedStatement = conn
-                    .prepareStatement(SQLConstants.WebhooksSqlConstants.GET_ALL_VALID_SUBSCRIPTIONS)) {
+                    .prepareStatement(sqlQuery)) {
                 long currentTime = Instant.now().toEpochMilli();
                 preparedStatement.setLong(1, currentTime);
                 preparedStatement.setString(2, tenantDomain);

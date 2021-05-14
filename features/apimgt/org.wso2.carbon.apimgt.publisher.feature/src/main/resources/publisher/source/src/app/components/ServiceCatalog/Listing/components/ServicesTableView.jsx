@@ -30,6 +30,9 @@ import MUIDataTable from 'mui-datatables';
 import { FormattedMessage } from 'react-intl';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import {
+    ScopeValidation, resourceMethod, resourcePath, client,
+} from 'AppData/ScopeValidation';
 
 dayjs.extend(relativeTime);
 
@@ -293,11 +296,18 @@ function ServicesTableView(props) {
                                             serviceUrl={serviceUrl}
                                             usage={usage}
                                         />
-                                        <Delete
-                                            serviceDisplayName={name}
-                                            serviceId={id}
-                                            onDelete={onDelete}
-                                        />
+                                        {/* allowing delete service based on scopes */}
+                                        <ScopeValidation
+                                            resourcePath={resourcePath.SINGLE_SERVICE}
+                                            resourceMethod={resourceMethod.DELETE}
+                                            client={client.SERVICE_CATALOG_CLIENT}
+                                        >
+                                            <Delete
+                                                serviceDisplayName={name}
+                                                serviceId={id}
+                                                onDelete={onDelete}
+                                            />
+                                        </ScopeValidation>
                                     </Box>
                                 )}
                             </>

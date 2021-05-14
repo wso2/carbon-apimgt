@@ -6713,6 +6713,24 @@
       "value": "Version"
     }
   ],
+  "Apis.Listing.Landing.index.no.apis.description": [
+    {
+      "type": 0,
+      "value": "If you think this is by mistake, please contact your administrator"
+    }
+  ],
+  "Apis.Listing.Landing.index.no.apis.icon.alt.text": [
+    {
+      "type": 0,
+      "value": "No APIs yet"
+    }
+  ],
+  "Apis.Listing.Landing.index.no.apis.title": [
+    {
+      "type": 0,
+      "value": "No APIs yet"
+    }
+  ],
   "Apis.Listing.SampleAPI.SampleAPI.create.new": [
     {
       "type": 0,
@@ -7901,6 +7919,24 @@
       "value": "Get Started"
     }
   ],
+  "ServiceCatalog.Listing.Onboarding.no.services.yet.description": [
+    {
+      "type": 0,
+      "value": "If you think this is by mistake, please contact your administrator"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.no.services.yet.icon.alt.text": [
+    {
+      "type": 0,
+      "value": "No Services yet"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.no.services.yet.title": [
+    {
+      "type": 0,
+      "value": "No Services yet"
+    }
+  ],
   "ServiceCatalog.Listing.Onboarding.sample.add": [
     {
       "type": 0,
@@ -7922,7 +7958,7 @@
   "ServiceCatalog.Listing.Onboarding.sample.heading.text": [
     {
       "type": 0,
-      "value": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
+      "value": "Deploy the Sample Integration Service already available and get started in one click"
     }
   ],
   "ServiceCatalog.Listing.Overview.back.btn": [
