@@ -177,9 +177,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     }
 
-    @Override
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite,
-            String[] tokenScopes, String organization) throws APIManagementException {
+    @Override public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+            Boolean overwrite, String[] tokenScopes, String organization) throws APIManagementException {
 
         String extractedFolderPath;
         try {
@@ -187,8 +186,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
-        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
-                false, tokenScopes, null, organization);
+        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision,
+                overwrite, false, tokenScopes, null, organization);
     }
 
     @Override
