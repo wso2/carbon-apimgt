@@ -1849,19 +1849,19 @@ public class ApiMgtDAO {
                     statement.setString(++paramIndex, groupId);
                 }
                 statement.setString(++paramIndex, tenantDomain);
-                statement.setString(++paramIndex, subscriber.getName());
                 statement.setString(++paramIndex, organizationId);
-
+                statement.setString(++paramIndex, subscriber.getName());
             } else {
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, groupingId);
-                statement.setString(++paramIndex, subscriber.getName());
                 statement.setString(++paramIndex, organizationId);
+                statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
             statement.setInt(++paramIndex, tenantId);
-            statement.setString(++paramIndex, subscriber.getName());
             statement.setString(++paramIndex, organizationId);
+            statement.setString(++paramIndex, subscriber.getName());
+
         }
 
         return statement.executeQuery();
