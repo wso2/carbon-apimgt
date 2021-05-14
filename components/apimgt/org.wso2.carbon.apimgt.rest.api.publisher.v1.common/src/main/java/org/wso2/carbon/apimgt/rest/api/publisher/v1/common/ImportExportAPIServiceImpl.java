@@ -178,9 +178,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider,
-                         Boolean rotateRevision, Boolean overwrite,
-                         String[] tokenScopes) throws APIManagementException {
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite,
+            String[] tokenScopes, String organization) throws APIManagementException {
 
         String extractedFolderPath;
         try {
@@ -189,13 +188,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
-                false, tokenScopes, null);
+                false, tokenScopes, null, organization);
     }
 
     @Override
-    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
-                                       Boolean rotateRevision, Boolean overwriteAPIProduct,
-                                       Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
+            String organization)
             throws APIManagementException {
 
         String extractedFolderPath;
@@ -205,6 +204,6 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, rotateRevision, overwriteAPIProduct,
-                overwriteAPIs, importAPIs, tokenScopes);
+                overwriteAPIs, importAPIs, tokenScopes, organization);
     }
 }
