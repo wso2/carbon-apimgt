@@ -5310,7 +5310,7 @@ public class ApiMgtDAO {
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
-            id = getAPIIDFromIdentifierMatchingOrganization((APIIdentifier) identifier, apiUUID);
+            id = getAPIIDFromIdentifierMatchingOrganization((APIIdentifier) identifier, getOrganizationIDByAPIUUID(apiUUID));
         } else {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
