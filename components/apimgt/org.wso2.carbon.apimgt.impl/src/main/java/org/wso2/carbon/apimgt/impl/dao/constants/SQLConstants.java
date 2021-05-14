@@ -3292,6 +3292,23 @@ public class SQLConstants {
                         " AND APPLICATION_ID = ?" +
                         " AND TENANT_DOMAIN = ?";
     }
+    /**
+     * Static class to hold database queries related to external gateway webhooks subscriptions
+     */
+    public static class ExternalGatewayWebhooksSqlConstants {
+        public static final String FIND_SUBSCRIPTION =
+                "SELECT WH_SUBSCRIPTION_ID FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_SUBSCRIBER_NAME = ? AND " +
+                        "WH_CALLBACK_URL = ? AND  WH_TOPIC = ?";
+        public static final String ADD_SUBSCRIPTION =
+                "INSERT INTO GB_WEBHOOKS_SUBSCRIPTION (WH_SUBSCRIBER_NAME, WH_CALLBACK_URL, WH_TOPIC," +
+                        "EXPIRY_AT ) VALUES (?,?,?,?)";
+        public static final String GET_SUBSCRIPTIONS_FOR_TOPIC =
+                "SELECT WH_CALLBACK_URL, WH_SUBSCRIBER_NAME " +
+                        "FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_TOPIC= ? ";
+        public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE GB_WEBHOOKS_SUBSCRIPTION SET " +
+                "WH_CALLBACK_URL = ?, WH_TOPIC = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
+
+    }
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +

@@ -147,6 +147,8 @@ public final class APIConstants {
 
     public static final String SSL_VERIFY_CLIENT_STATUS_REQUIRE = "require";
 
+    public static final String TOPIC_CONNECTION_FACTORY = "TopicConnectionFactory";
+
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
     public static final String API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER = "<tenant-id>";

@@ -666,46 +666,6 @@
         }
       }
     },
-    "/synapse-attributes" : {
-      "get" : {
-        "tags" : [ "Retrieving Synapse artifacts" ],
-        "summary" : "Get API UUID and label associated with it",
-        "description" : "This will provide access to synapse artifacts in database.\n",
-        "parameters" : [ {
-          "name" : "apiName",
-          "in" : "query",
-          "description" : "**Search condition**.\n  API Name\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "tenantDomain",
-          "in" : "query",
-          "description" : "**Search condition**.\n tenantDomain associated with the API\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "version",
-          "in" : "query",
-          "description" : "**Search condition**.\nversion of the API\n",
-          "required" : false,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of gatewayRuntimeArtifacts",
-            "schema" : {
-              "$ref" : "#/definitions/SynapseAttributes"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/webhooks-subscriptions" : {
       "get" : {
         "tags" : [ "Retrieving webhooks subscriptions" ],
@@ -769,6 +729,36 @@
           }
         }
       }
+    },
+    "/gatewaybridge-subscription" : {
+      "post" : {
+        "summary" : "Add a subscription to deploy events.",
+        "description" : "External gateways subscribe to api deploy events.\n",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "subscription",
+          "description" : "The subscription to create.",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/EventSubscription"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Subscription Received success",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -801,6 +791,25 @@
         "throttle_state" : {
           "type" : "string",
           "description" : "throttle state."
+        }
+      }
+    },
+    "EventSubscription" : {
+      "type" : "object",
+      "required" : [ "subscriberName" ],
+      "properties" : {
+        "subscriberName" : {
+          "type" : "string"
+        },
+        "callback_url" : {
+          "type" : "string"
+        },
+        "topic" : {
+          "type" : "string"
+        },
+        "expiry_at" : {
+          "type" : "integer",
+          "format" : "int64"
         }
       }
     },

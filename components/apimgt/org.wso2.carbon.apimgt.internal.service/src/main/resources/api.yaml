@@ -568,7 +568,28 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-
+  /gatewaybridge-subscription:
+    post:
+      summary: Add a subscription to deploy events.
+      description: |
+        External gateways subscribe to api deploy events.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: subscription
+          description: The subscription to create.
+          schema:
+            $ref: '#/definitions/EventSubscription'
+      responses:
+        200:
+          description: 'Subscription Received success'
+          schema:
+            type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -623,6 +644,21 @@ definitions:
       throttle_state:
         type: string
         description: throttle state.
+
+  EventSubscription:
+    type: object
+    required:
+      - subscriberName
+    properties:
+      subscriberName:
+        type: string
+      callback_url:
+        type: string
+      topic:
+        type: string
+      expiry_at:
+        type: integer
+        format: int64
 
   Error:
     properties:
