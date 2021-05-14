@@ -31,7 +31,6 @@ import javax.xml.namespace.QName;
  */
 public final class APIConstants {
 
-
     public static final String ORGANIZATION_ID = "12345abcde";
     public static final String STRING = "string";
     public static final String OBJECT = "object";
@@ -1850,6 +1849,7 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
             "SSE"};
     public static final String API_PRODUCT_REVISION = "Current";
+
     public static class AdvancedThrottleConstants {
 
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -2045,9 +2045,9 @@ public final class APIConstants {
     public static final String[] SSE_DEFAULT_METHODS = {"get"};
     public static final String[] WS_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
-    public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
-    public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
-    public static final String[] WS_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] WEBSUB_SUPPORTED_METHODS = {"subscribe"};
+    public static final String[] SSE_SUPPORTED_METHODS = {"subscribe"};
+    public static final String[] WS_SUPPORTED_METHODS = {"subscribe"};
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
