@@ -257,6 +257,7 @@ public class APIMgtDAOTest {
         apiIdentifier.setTier("T1");
         apiIdentifier.setId(apiMgtDAO.getAPIID(apiIdentifier));
         API api = new API(apiIdentifier);
+        api.setOrganizationId("testOrg");
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiMgtDAO.addSubscription(apiTypeWrapper, application, "UNBLOCKED", "admin");
     }
@@ -404,6 +405,7 @@ public class APIMgtDAOTest {
 
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
+        api.setOrganizationId("testOrg");
         api.setContextTemplate("/context1/{version}");
         api.setUUID(UUID.randomUUID().toString());
         api.getId().setId(apiMgtDAO.addAPI(api, -1234));
@@ -428,6 +430,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId1 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V1.0.0");
         apiId1.setTier("T20");
         API api = new API(apiId1);
+        api.setOrganizationId("testOrg");
         api.setContext("/subForward");
         api.setContextTemplate("/subForward/{version}");
         api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID));
