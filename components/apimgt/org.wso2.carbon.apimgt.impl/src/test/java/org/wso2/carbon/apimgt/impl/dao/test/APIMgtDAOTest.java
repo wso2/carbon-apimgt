@@ -249,6 +249,13 @@ public class APIMgtDAOTest {
 
     }
 
+    public static void main(String[] args) throws Exception {
+        APIMgtDAOTest apiMgtDAOTest = new APIMgtDAOTest();
+        System.setProperty("APIManagerDBConfigurationPath", "/home/sarangan/Work/Repos/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.impl/src/test/resources/amConfig.xml");
+        apiMgtDAOTest.setUp();
+        apiMgtDAOTest.testAddSubscription();
+    }
+
     @Test
     public void testAddSubscription() throws Exception {
         Application application = new Application(100);
@@ -257,6 +264,7 @@ public class APIMgtDAOTest {
         apiIdentifier.setTier("T1");
         apiIdentifier.setId(apiMgtDAO.getAPIID(apiIdentifier));
         API api = new API(apiIdentifier);
+        api.setOrganizationId("testOrg");
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiMgtDAO.addSubscription(apiTypeWrapper, application, "UNBLOCKED", "admin");
     }
@@ -404,6 +412,7 @@ public class APIMgtDAOTest {
 
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
+        api.setOrganizationId("testOrg");
         api.setContextTemplate("/context1/{version}");
         api.setUUID(UUID.randomUUID().toString());
         api.getId().setId(apiMgtDAO.addAPI(api, -1234));
@@ -428,6 +437,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId1 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V1.0.0");
         apiId1.setTier("T20");
         API api = new API(apiId1);
+        api.setOrganizationId("testOrg");
         api.setContext("/subForward");
         api.setContextTemplate("/subForward/{version}");
         api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID));

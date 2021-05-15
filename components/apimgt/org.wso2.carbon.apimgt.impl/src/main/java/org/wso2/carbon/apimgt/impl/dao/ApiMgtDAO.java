@@ -5310,7 +5310,12 @@ public class ApiMgtDAO {
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
-            id = getAPIIDFromIdentifierMatchingOrganization((APIIdentifier) identifier, getOrganizationIDByAPIUUID(apiUUID));
+            if (apiUUID != null) {
+                id = getAPIIDFromIdentifierMatchingOrganization((APIIdentifier) identifier, getOrganizationIDByAPIUUID(apiUUID));
+            }
+            if (id == -1){
+                id = identifier.getId();
+            }
         } else {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
@@ -8166,7 +8171,7 @@ public class ApiMgtDAO {
      */
     public int getAPIIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
             throws APIManagementException {
-        int apiId = 0;
+        int apiId = -1;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                      .GET_API_ID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
