@@ -249,13 +249,6 @@ public class APIMgtDAOTest {
 
     }
 
-    public static void main(String[] args) throws Exception {
-        APIMgtDAOTest apiMgtDAOTest = new APIMgtDAOTest();
-        System.setProperty("APIManagerDBConfigurationPath", "/home/sarangan/Work/Repos/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.impl/src/test/resources/amConfig.xml");
-        apiMgtDAOTest.setUp();
-        apiMgtDAOTest.testAddSubscription();
-    }
-
     @Test
     public void testAddSubscription() throws Exception {
         Application application = new Application(100);
