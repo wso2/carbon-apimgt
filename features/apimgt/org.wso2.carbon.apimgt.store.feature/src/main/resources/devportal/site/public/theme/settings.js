@@ -18,7 +18,7 @@ const Settings = {
         },
         propertyDisplaySuffix: '__display',
         markdown: {
-            skipHtml: false,
+            skipHtml: true,
         }
     },
     grantTypes: {
