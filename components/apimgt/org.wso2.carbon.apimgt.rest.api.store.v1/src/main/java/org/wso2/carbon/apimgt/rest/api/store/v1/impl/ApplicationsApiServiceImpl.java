@@ -138,8 +138,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-//        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain(); // todo: use the resolver and remove
-        String organization = getOrganization(messageContext); // TODO under testing
+        String organization = getOrganization(messageContext);
 
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
@@ -226,8 +225,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
             }
 
-//            String organization = RestApiCommonUtil.getLoggedInUserTenantDomain(); // todo: use the resolver and remove
-            String organization = getOrganization(messageContext); // TODO under testing
+            String organization = getOrganization(messageContext);
 
             if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organization) && update != null
                     && update) {
@@ -294,8 +292,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
         String username = RestApiCommonUtil.getLoggedInUsername();
-//        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain(); // todo: use the resolver and remove
-        String organization = getOrganization(messageContext); // TODO under testing
+        String organization = getOrganization(messageContext);
         try {
             Application createdApplication = preProcessAndAddApplication(username, body, organization);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
