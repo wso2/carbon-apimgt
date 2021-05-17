@@ -121,7 +121,7 @@ public interface ImportExportAPI {
      * @throws APIManagementException If there is an error in importing an API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, String[] tokenScopes)
+                         Boolean overwrite, String[] tokenScopes, String organizationId)
             throws APIManagementException;
 
     /**
@@ -143,6 +143,6 @@ public interface ImportExportAPI {
      */
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
                                        Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
-                                       String[] tokenScopes)
+                                       String[] tokenScopes, String organizationId)
             throws APIManagementException;
 }

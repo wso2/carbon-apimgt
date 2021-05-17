@@ -432,6 +432,13 @@ public abstract class AbstractAPIManager implements APIManager {
         Registry registry;
         try {
             String apiTenantDomain = getTenantDomain(identifier);
+            String uuid;
+            if (identifier.getUUID() != null) {
+                uuid = identifier.getUUID();
+            } else {
+                uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+            }
+            String organizationId = apiMgtDAO.getOrganizationIDByAPIUUID(uuid);
             int apiTenantId = getTenantManager()
                     .getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
@@ -458,7 +465,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if (api.isAsync()) {
                 api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
             } else {
-                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, organizationId));
             }
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
@@ -1140,11 +1147,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException {
+    public ResourceFile getWSDL(String apiId, String organizationId) throws APIManagementException {
 
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
-                    apiPersistenceInstance.getWSDL(new Organization(tenantDomain), apiId);
+                    apiPersistenceInstance.getWSDL(new Organization(organizationId), apiId);
             if (resource != null) {
                 ResourceFile resourceFile = new ResourceFile(resource.getContent(), resource.getContentType());
                 resourceFile.setName(resource.getName());
@@ -1228,11 +1235,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException {
+    public String getGraphqlSchemaDefinition(String apiId, String organizationId) throws APIManagementException {
 
         String definition;
         try {
-            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(organizationId), apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
                     e);
@@ -1256,7 +1263,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiId.getUUID() != null) {
             id = apiId.getUUID();
         } else {
-            id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
+            id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion(), orgId);
         }
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(orgId), id);
@@ -1267,11 +1274,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+    public String getOpenAPIDefinition(String apiId, String organizationId) throws APIManagementException {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1340,11 +1347,11 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(String uuid, String organizationId) throws APIManagementException {
 
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organizationId);
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
@@ -1575,17 +1582,17 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param apiId                 artifact id of the api
      * @param docId                 artifact id of the document
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @param organizationId tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+    public Documentation getDocumentation(String apiId, String docId, String organizationId)
             throws APIManagementException {
 
         Documentation documentation = null;
         try {
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(new Organization(requestedTenantDomain), apiId, docId);
+                    .getDocumentation(new Organization(organizationId), apiId, docId);
             if (doc != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Retrieved doc: " + doc);
@@ -1603,12 +1610,12 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String organizationId)
             throws APIManagementException {
 
         try {
             DocumentContent content = apiPersistenceInstance
-                    .getDocumentationContent(new Organization(requestedTenantDomain), apiId, docId);
+                    .getDocumentationContent(new Organization(organizationId), apiId, docId);
             DocumentationContent docContent = null;
             if (content != null) {
                 docContent = DocumentMapper.INSTANCE.toDocumentationContent(content);
@@ -2245,6 +2252,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 
+    public boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String organizationId) throws APIManagementException {
+        return apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(contextTemplate, organizationId);
+    }
+
     @Override
     public List<String> getApiNamesMatchingContext(String contextTemplate) throws APIManagementException {
 
@@ -2772,6 +2783,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<String> getApiVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
 
         return apiMgtDAO.getAPIVersionsMatchingApiName(apiName, username);
+    }
+
+    @Override
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organizationId) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, organizationId);
     }
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
@@ -3849,8 +3865,9 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
 
-    protected void populateAPIInformation(String uuid, String requestedTenantDomain, Organization org, API api)
+    protected void populateAPIInformation(String uuid, String organizationId, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
+        Organization org = new Organization(organizationId);
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
@@ -3893,7 +3910,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setAvailableTiers(availableTier);
 
         //Scopes
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), organizationId);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
         //templates
@@ -3906,7 +3923,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setSwaggerDefinition(resourceConfigsString);
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-            api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, requestedTenantDomain));
+            api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, organizationId));
         }
 
         JSONParser jsonParser = new JSONParser();
@@ -3973,7 +3990,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // category array retrieved from artifact has only the category name, therefore we need to fetch
                 // categories
                 // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(organizationId);
 
                 // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
@@ -3989,9 +4006,10 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    protected void populateAPIProductInformation(String uuid, String requestedTenantDomain, Organization org,
-                                                 APIProduct apiProduct) throws APIManagementException, OASPersistenceException, ParseException {
+    protected void populateAPIProductInformation(String uuid, String organizationId, APIProduct apiProduct)
+            throws APIManagementException, OASPersistenceException, ParseException {
 
+        Organization org = new Organization(organizationId);
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
 
@@ -4006,7 +4024,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 Scope resourceScope = (Scope) it.next();
                 String scopeKey = resourceScope.getKey();
                 if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
-                    resourceScope = APIUtil.getScopeByName(scopeKey, requestedTenantDomain);
+                    resourceScope = APIUtil.getScopeByName(scopeKey, organizationId);
                     uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
                 } else {
                     resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
@@ -4086,7 +4104,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // category array retrieved from artifact has only the category name, therefore we need to fetch
                 // categories
                 // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(organizationId);
 
                 // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {

@@ -535,16 +535,16 @@ public class APIMappingUtil {
      * Returns an API with minimal info given the uuid.
      *
      * @param apiUUID               API uuid
-     * @param requestedTenantDomain tenant domain of the API
+     * @param organizationId  Identifier of an Organization
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+    public static API getAPIInfoFromUUID(String apiUUID, String organizationId)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, organizationId);
         return api;
     }
 
@@ -869,6 +869,7 @@ public class APIMappingUtil {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
         APIDTO dto = new APIDTO();
+        dto.setOrganizationId(model.getOrganizationId());
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
@@ -2707,18 +2708,18 @@ public class APIMappingUtil {
      * This method is used to retrieve APIIdentifier from the apiId or UUID.
      *
      * @param apiId
-     * @param requestedTenantDomain
+     * @param organizationId
      */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String organizationId)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, organizationId).getId();
         } else {
             apiIdentifier =
-                    apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), requestedTenantDomain).getId();
+                    apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), organizationId).getId();
         }
         return apiIdentifier;
     }
@@ -2763,17 +2764,17 @@ public class APIMappingUtil {
      * Returns the API given the uuid or the id in {provider}-{api}-{version} format.
      *
      * @param apiId                 uuid or the id in {provider}-{api}-{version} format
-     * @param requestedTenantDomain tenant domain of the API
+     * @param organizationId        Identifier of an Organization
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static API getAPIFromApiIdOrUUID(String apiId, String organizationId)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId, organizationId);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
             //Checks whether the logged in user's tenant and the API's tenant is equal

@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -62,7 +63,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIDTO apiDtoToReturn;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiId);
         API api;
         String exportAPIUUID;
 
@@ -91,7 +92,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         }
         //If an incorrect revision num provided or revision does not exists, working copy will be exported
         exportAPIUUID = (exportAPIUUID == null) ? apiId : exportAPIUUID;
-        api = apiProvider.getAPIbyUUID(exportAPIUUID, tenantDomain);
+        api = apiProvider.getAPIbyUUID(exportAPIUUID, organizationId);
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
@@ -105,9 +106,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiId);
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        API api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+        API api = apiProvider.getAPIbyUUID(revisionUUID, organizationId);
         api.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
@@ -180,7 +181,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider,
                          Boolean rotateRevision, Boolean overwrite,
-                         String[] tokenScopes) throws APIManagementException {
+                         String[] tokenScopes, String organizationId) throws APIManagementException {
 
         String extractedFolderPath;
         try {
@@ -189,13 +190,14 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
-                false, tokenScopes, null);
+                false, tokenScopes, null, organizationId);
     }
 
     @Override
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
                                        Boolean rotateRevision, Boolean overwriteAPIProduct,
-                                       Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+                                       Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
+                                       String organizationId)
             throws APIManagementException {
 
         String extractedFolderPath;
@@ -205,6 +207,6 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, rotateRevision, overwriteAPIProduct,
-                overwriteAPIs, importAPIs, tokenScopes);
+                overwriteAPIs, importAPIs, tokenScopes, organizationId);
     }
 }

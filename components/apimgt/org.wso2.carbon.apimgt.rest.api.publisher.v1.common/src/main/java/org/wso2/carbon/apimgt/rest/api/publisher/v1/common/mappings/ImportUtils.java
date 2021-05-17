@@ -147,7 +147,8 @@ public class ImportUtils {
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
                                 Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct,
                                 String[] tokenScopes,
-                                JsonObject dependentAPIParamsConfigObject) throws APIManagementException {
+                                JsonObject dependentAPIParamsConfigObject, String organizationId)
+            throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse validationResponse = null;
@@ -235,6 +236,7 @@ public class ImportUtils {
                 if (importedApiDTO.getOperations().isEmpty()) {
                     setOperationsToDTO(importedApiDTO, validationResponse);
                 }
+                targetApi.setOrganizationId(organizationId);
                 importedApi = PublisherCommonUtils
                         .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
             } else {
@@ -247,7 +249,7 @@ public class ImportUtils {
                 importedApiDTO.setLifeCycleStatus(currentStatus);
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider());
+                                importedApiDTO.getProvider(), organizationId);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -257,7 +259,8 @@ public class ImportUtils {
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false);
+                PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false,
+                        organizationId);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -1849,7 +1852,8 @@ public class ImportUtils {
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
                                               Boolean rotateRevision, Boolean overwriteAPIProduct,
-                                              Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+                                              Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
+                                              String organizationId)
             throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -1886,7 +1890,7 @@ public class ImportUtils {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
                 importedApiProductDTO = importDependentAPIs(extractedFolderPath, userName, preserveProvider,
-                        apiProvider, overwriteAPIs, rotateRevision, importedApiProductDTO, tokenScopes);
+                        apiProvider, overwriteAPIs, rotateRevision, importedApiProductDTO, tokenScopes, organizationId);
             } else {
                 // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are
                 // already in the APIM
@@ -2109,7 +2113,8 @@ public class ImportUtils {
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
                                                      APIProvider apiProvider, boolean overwriteAPIs,
                                                      Boolean rotateRevision, APIProductDTO apiProductDto,
-                                                     String[] tokenScopes) throws IOException, APIManagementException {
+                                                     String[] tokenScopes, String organizationId)
+            throws IOException, APIManagementException {
 
         JsonObject dependentAPIParamsConfigObject = null;
         // Retrieve the dependent APIs param configurations from the params file of the API Product
@@ -2163,13 +2168,13 @@ public class ImportUtils {
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                     rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
-                                    dependentAPIParamsConfigObject);
+                                    dependentAPIParamsConfigObject, organizationId);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                 rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
-                                dependentAPIParamsConfigObject);
+                                dependentAPIParamsConfigObject, organizationId);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -2185,7 +2190,7 @@ public class ImportUtils {
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                 rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
-                                dependentAPIParamsConfigObject);
+                                dependentAPIParamsConfigObject, organizationId);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs
                         // flag is specified,
@@ -2193,7 +2198,7 @@ public class ImportUtils {
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                     rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
-                                    dependentAPIParamsConfigObject);
+                                    dependentAPIParamsConfigObject, organizationId);
                         }
                     }
                 }

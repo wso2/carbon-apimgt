@@ -5313,6 +5313,29 @@ public final class APIUtil {
     }
 
     /**
+     * Helper method to get tenantId from tenantDomain
+     *
+     * @param tenantDomain tenant Domain
+     * @return tenantId
+     */
+    public static int retrieveTenantIdFromTenantDomain(String tenantDomain) {
+
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+
+        if (realmService == null || tenantDomain == null) {
+            return MultitenantConstants.SUPER_TENANT_ID;
+        }
+
+        try {
+            return realmService.getTenantManager().getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return MultitenantConstants.SUPER_TENANT_ID;
+    }
+
+    /**
      * Helper method to get tenantDomain from tenantId
      *
      * @param tenantId tenant Id
@@ -10628,7 +10651,7 @@ public final class APIUtil {
     public static List<APICategory> getAllAPICategoriesOfTenant(String tenantDomain) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = retrieveTenantIdFromTenantDomain(tenantDomain);
         return apiMgtDAO.getAllCategories(tenantId);
     }
 
@@ -11308,7 +11331,7 @@ public final class APIUtil {
 
     public static Scope getScopeByName(String scopeKey, String tenantDomain) throws APIManagementException {
 
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = APIUtil.retrieveTenantIdFromTenantDomain(tenantDomain);
         return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
     }
 

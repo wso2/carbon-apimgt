@@ -51,6 +51,7 @@ public class APIDTO   {
     private Integer cacheTimeout = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
+    private String organizationId = null;
     private Boolean isRevision = null;
     private String revisionedApiId = null;
     private Integer revisionId = null;
@@ -487,6 +488,23 @@ return null;
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
   }
+
+    /**
+     **/
+    public APIDTO organizationId(String organizationId) {
+        this.organizationId = organizationId;
+        return this;
+    }
+
+
+    @ApiModelProperty(example = "9125478", value = "")
+    @JsonProperty("organizationId")
+    public String getOrganizationId() {
+        return organizationId;
+    }
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
 
   /**
    **/
