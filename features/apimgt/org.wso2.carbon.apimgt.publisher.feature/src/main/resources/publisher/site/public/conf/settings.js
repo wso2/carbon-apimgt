@@ -23,7 +23,7 @@ const AppConfig = {
         },
         propertyDisplaySuffix: '__display',
         markdown: {
-            skipHtml: false,
+            skipHtml: true,
         }
     },
 };
