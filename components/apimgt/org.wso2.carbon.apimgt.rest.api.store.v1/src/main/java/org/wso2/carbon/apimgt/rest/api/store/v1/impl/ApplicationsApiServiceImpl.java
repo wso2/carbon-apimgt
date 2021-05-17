@@ -752,6 +752,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
                             jsonParams, keyManagerName, xWSO2Tenant);
+                    if (ApplicationMappingUtil.containsSolaceApis(application)) {
+                        ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationtoDTO(apiConsumer.getApplicationByUUID(applicationId));
+                        apiConsumer.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
+                    }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);

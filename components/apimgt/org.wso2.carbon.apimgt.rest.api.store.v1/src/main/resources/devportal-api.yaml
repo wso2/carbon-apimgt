@@ -3872,6 +3872,13 @@ components:
                 type: string
               organizationName:
                 type: string
+              SolaceTopicsObject:
+                type: object
+                properties:
+                  defaultSyntax:
+                    $ref: '#/components/schemas/SolaceTopics'
+                  mqttSyntax:
+                    $ref: '#/components/schemas/SolaceTopics'
               publishTopics:
                 type: array
                 items:
@@ -5334,6 +5341,18 @@ components:
         newPassword:
           type: string
           example: newpassword1234
+    SolaceTopics:
+      title: SolaceTopics
+      type: object
+      properties:
+        publishTopics:
+          type: array
+          items:
+            type: string
+        subscribeTopics:
+          type: array
+          items:
+            type: string
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

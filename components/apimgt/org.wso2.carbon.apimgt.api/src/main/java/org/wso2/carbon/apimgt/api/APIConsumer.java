@@ -975,4 +975,6 @@ public interface APIConsumer extends APIManager {
     boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException;
 
     String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException;
+
+    void patchSolaceApplicationClientId(String organization, Application application, String consumerKey) throws APIManagementException;
 }

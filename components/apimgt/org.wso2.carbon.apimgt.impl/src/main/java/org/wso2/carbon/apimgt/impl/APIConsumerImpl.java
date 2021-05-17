@@ -4075,7 +4075,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean applicationFoundInSolaceBroker = false;
         if (hasSubscribedAPIDeployedInSolace) {
             // check existence of application in Solace Broker
-            HttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment, application);
+            HttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment, application, "default");
             if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 applicationFoundInSolaceBroker = true;
                 log.info("Found application '" +application.getName()+ "' in Solace broker");
@@ -6702,7 +6702,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.info("Developer found in Solace Broker");
 
             //check application status
-            HttpResponse response2 = solaceAdminApis.applicationGet(organization, application);
+            HttpResponse response2 = solaceAdminApis.applicationGet(organization, application, "default");
             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 
                 // app already exists
@@ -6941,6 +6941,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             log.error("Error while renaming solace Application display name....");
             throw new APIManagementException(response.getStatusLine().getStatusCode() +"-"+ response.getStatusLine().getReasonPhrase());
+        }
+    }
+
+    @Override
+    public void patchSolaceApplicationClientId(String organization, Application application, String consumerKey) throws APIManagementException {
+        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        log.info("Identified as Solace Application. Patching ClientID in solace application.....");
+        HttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application, consumerKey);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            log.info("CliendID patched successfully for Solace application");
+        } else {
+            log.error("Error while patching clientID for Solace application");
         }
     }
 }

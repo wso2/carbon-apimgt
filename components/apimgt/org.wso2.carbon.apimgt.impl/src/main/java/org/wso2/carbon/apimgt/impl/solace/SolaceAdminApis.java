@@ -142,9 +142,14 @@ public class SolaceAdminApis {
     }
 
     // check application existence in solace
-    public HttpResponse applicationGet(String organization, Application application) {
+    public HttpResponse applicationGet(String organization, Application application, String syntax) {
         HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID());
+        HttpGet request;
+        if ("MQTT".equalsIgnoreCase(syntax)) {
+            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID() + "?topicSyntax=mqtt");
+        } else {
+            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID());
+        }
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
         try {
             return httpClient.execute(request);
@@ -162,11 +167,11 @@ public class SolaceAdminApis {
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         try {
-            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application), apiProducts);
+            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application, "default"), apiProducts);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
+        org.json.JSONObject requestBody = buildRequestBodyForApplicationPatchSubscriptions(apiProducts);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
@@ -186,14 +191,14 @@ public class SolaceAdminApis {
         // retrieve existing API products in the app
         ArrayList<String> apiProducts = new ArrayList<>();
         try {
-            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application), apiProducts);
+            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application, "default"), apiProducts);
         } catch (IOException e) {
             e.printStackTrace();
         }
         // remove API product from arrayList
         apiProducts.removeAll(apiProductsToRemove);
 
-        org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
+        org.json.JSONObject requestBody = buildRequestBodyForApplicationPatchSubscriptions(apiProducts);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
@@ -280,6 +285,24 @@ public class SolaceAdminApis {
         return null;
     }
 
+    //patch client ID for Solace application
+    public HttpResponse patchClientIdForApplication(String organization, Application application, String consumerKey) {
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID());
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey);
+        StringEntity params = null;
+        try {
+            params = new StringEntity(requestBody.toString());
+            request.setEntity(params);
+            return httpClient.execute(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public ArrayList<String> retrieveApiProductsInAnApplication(HttpResponse applicationGetResponse, ArrayList<String> apiProducts) throws IOException {
         String appGetResponse = EntityUtils.toString(applicationGetResponse.getEntity());
         JSONObject responseJson = new JSONObject(appGetResponse);
@@ -327,7 +350,7 @@ public class SolaceAdminApis {
                     org.json.JSONArray enumArray = schemaJson.getJSONArray("enum");
                     List<String> enumList = new ArrayList<>();
                     for (int i = 0; i < enumArray.length(); i++) {
-                        enumList.add(enumArray.getString(i));
+                        enumList.add(enumArray.get(i).toString());
                     }
                     //List<Object> enumList = enumArray.toList();
                     StringBuilder enumStringBuilder = new StringBuilder();
@@ -443,6 +466,7 @@ public class SolaceAdminApis {
         //add credentials
         org.json.JSONObject credentialsBody = new org.json.JSONObject();
         credentialsBody.put("expiresAt", -1);
+        credentialsBody.put("issuedAt", 0);
         org.json.JSONObject credentialsSecret = new org.json.JSONObject();
         credentialsSecret.put("consumerKey", appName+"-application-key");
         credentialsSecret.put("consumerSecret", appName+"-application-secret");
@@ -452,9 +476,32 @@ public class SolaceAdminApis {
         return requestBody;
     }
 
+    private org.json.JSONObject buildRequestBodyForApplicationPatchSubscriptions(ArrayList<String> apiProducts) {
+        org.json.JSONObject requestBody = new org.json.JSONObject();
+        org.json.JSONArray apiProductsArray = new org.json.JSONArray();
+        for (String x : apiProducts) {
+            apiProductsArray.put(x);
+        }
+        requestBody.put("apiProducts", apiProductsArray);
+        return requestBody;
+    }
+
     private org.json.JSONObject buildRequestBodyForRenamingApp(Application application) {
         org.json.JSONObject requestBody = new org.json.JSONObject();
         requestBody.put("displayName", application.getName());
+        return requestBody;
+    }
+
+    private org.json.JSONObject buildRequestBodyForClientIdPatch(Application application, String consumerKey) {
+        org.json.JSONObject requestBody = new org.json.JSONObject();
+        org.json.JSONObject credentialsBody = new org.json.JSONObject();
+        credentialsBody.put("expiresAt", -1);
+        credentialsBody.put("issuedAt", 0);
+        org.json.JSONObject credentialsSecret = new org.json.JSONObject();
+        credentialsSecret.put("consumerKey", consumerKey);
+        credentialsSecret.put("consumerSecret", application.getName()+"-application-secret");
+        credentialsBody.put("secret", credentialsSecret);
+        requestBody.put("credentials", credentialsBody);
         return requestBody;
     }
 
