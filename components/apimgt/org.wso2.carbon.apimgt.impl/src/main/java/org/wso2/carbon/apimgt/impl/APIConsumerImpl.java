@@ -25,6 +25,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -1802,118 +1803,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<Tag> getAllTags(String requestedTenantDomain) throws APIManagementException {
-
-        this.isTenantModeStoreView = (requestedTenantDomain != null);
-
-        if(requestedTenantDomain != null){
-            this.requestedTenant = requestedTenantDomain;
-        }
+    public Set<Tag> getAllTags(String organization) throws APIManagementException {
 
         /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
          */
         long lastUpdatedTimeAtStart = lastUpdatedTime;
         long currentTimeAtStart = System.currentTimeMillis();
-        if(isTagCacheEnabled && ( (currentTimeAtStart- lastUpdatedTimeAtStart) < tagCacheValidityTime)){
-            if(tagSet != null){
+        if (isTagCacheEnabled && ((currentTimeAtStart - lastUpdatedTimeAtStart) < tagCacheValidityTime)) {
+            if (tagSet != null) {
                 return tagSet;
             }
         }
-
-        TreeSet<Tag> tempTagSet = new TreeSet<Tag>(new Comparator<Tag>() {
-            @Override
-            public int compare(Tag o1, Tag o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        Registry userRegistry = null;
-        boolean isTenantFlowStarted = false;
-        String tagsQueryPath = null;
+        Organization org = new Organization(organization);
+        String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
+        String[] roles = APIUtil.getListOfRoles(userName);
+        Map<String, Object> properties = APIUtil.getUserProperties(userName);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-        	tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
-            Map<String, String> params = new HashMap<String, String>();
-            params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
-            //as a tenant, I'm browsing my own Store or I'm browsing a Store of another tenant..
-            if ((this.isTenantModeStoreView && this.tenantDomain==null) || (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant based store anonymous mode
-                int tenantId = getTenantId(this.requestedTenant);
-                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                userRegistry = registry;
-            }
-
-            Map<String, Tag> tagsData = new HashMap<String, Tag>();
-            try {
-            	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
-                if (requestedTenant != null ) {
-                    isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
-                }
-
-                Map <String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
-                criteriaPublished.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {{
-                    add(APIConstants.PUBLISHED);
-                }});
-                //rxt api media type
-                List<TermData> termsPublished = GovernanceUtils
-                        .getTermDataList(criteriaPublished, APIConstants.API_OVERVIEW_TAG,
-                                         APIConstants.API_RXT_MEDIA_TYPE, true);
-
-                if(termsPublished != null){
-                    for(TermData data : termsPublished){
-                        tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
-                    }
-                }
-
-                Map<String, List<String>> criteriaPrototyped = new HashMap<String, List<String>>();
-                criteriaPrototyped.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {{
-                    add(APIConstants.PROTOTYPED);
-                }});
-                //rxt api media type
-                List<TermData> termsPrototyped = GovernanceUtils
-                        .getTermDataList(criteriaPrototyped, APIConstants.API_OVERVIEW_TAG,
-                                         APIConstants.API_RXT_MEDIA_TYPE, true);
-
-                if(termsPrototyped != null){
-                    for(TermData data : termsPrototyped){
-                        tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
-                    }
-                }
-
-
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
-
+            Set<Tag> tempTagSet = apiPersistenceInstance.getAllTags(org, userCtx);
             synchronized (tagCacheMutex) {
                 lastUpdatedTime = System.currentTimeMillis();
                 this.tagSet = tempTagSet;
             }
-
-        } catch (RegistryException e) {
-        	try {
-        		//Before a tenant login to the store or publisher at least one time,
-        		//a registry exception is thrown when the tenant store is accessed in anonymous mode.
-        		//This fix checks whether query resource available in the registry. If not
-        		// give a warn.
-				if (userRegistry != null && !userRegistry.resourceExists(tagsQueryPath)) {
-					log.warn("Failed to retrieve tags query resource at " + tagsQueryPath);
-					return tagSet == null ? Collections.EMPTY_SET : tagSet;
-				}
-			} catch (RegistryException e1) {
-                // Even if we should ignore this exception, we are logging this as a warn log.
-                // The reason is that, this error happens when we try to add some additional logs in an error
-                // scenario and it does not affect the execution path.
-                log.warn("Unable to execute the resource exist method for tags query resource path : " + tagsQueryPath,
-                         e1);
-            }
-            handleException("Failed to get all the tags", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all the tags", e);
-        }
-
+        } catch (APIPersistenceException e) {
+            String msg = "Failed to get API tags";
+            throw new APIManagementException(msg, e);
+        } 
         return tagSet;
     }
 
@@ -2642,6 +2557,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
                         tenantDomain, keyManagerName);
+
+        // if clientId is null in the argument `ApplicationUtils#createOauthAppRequest` will set it using
+        // the props in `jsonString`. Hence we are taking the updated `clientId` here
+        clientId = oauthAppRequest.getOAuthApplicationInfo().getClientId();
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         if (keyManager == null) {
@@ -3871,7 +3790,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
-        Map<String, String> consumerKeysOfApplication = null;
+        Map<String, Pair<String, String>> consumerKeysOfApplication = null;
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
@@ -3942,11 +3861,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             // cleanup pending application registration tasks
-            Map<String,String> keyManagerWiseProductionKeyStatus = apiMgtDAO
+            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
                     .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-            Map<String,String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
+            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
                     .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) ->{
+            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) -> {
                 if (WorkflowStatus.CREATED.toString().equals(state)) {
                     try {
                         String applicationRegistrationExternalRef = apiMgtDAO
@@ -3965,8 +3884,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
 
-            } );
-            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) ->{
+            });
+            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) -> {
                 if (WorkflowStatus.CREATED.toString().equals(state)) {
                     try {
                         String applicationRegistrationExternalRef = apiMgtDAO
@@ -4058,16 +3977,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         if (consumerKeysOfApplication != null && consumerKeysOfApplication.size() > 0) {
-            for (Map.Entry<String, String> entry : consumerKeysOfApplication.entrySet()) {
+            for (Map.Entry<String, Pair<String, String>> entry : consumerKeysOfApplication.entrySet()) {
                 String consumerKey = entry.getKey();
-                String keymanager = entry.getValue();
+                String keyManagerName = entry.getValue().getKey();
+                String keyManagerTenantDomain = entry.getValue().getValue();
                 ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
                         UUID.randomUUID().toString(), System.currentTimeMillis(),
-                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(), tenantId, tenantDomain,
-                        application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keymanager);
+                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                        APIUtil.getTenantIdFromTenantDomain(keyManagerTenantDomain), keyManagerTenantDomain,
+                        application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
+                        keyManagerName);
                 APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             }
         }
+    }
+
+    @Override
+    @Deprecated
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                         String tokenType, String callbackUrl,
+                                                                         String[] allowedDomains, String validityTime,
+                                                                         String tokenScope, String groupingId,
+                                                                         String jsonString,
+                                                                         String keyManagerName, String tenantDomain)
+            throws APIManagementException {
+        return requestApprovalForApplicationRegistration(userId, applicationName, tokenType, callbackUrl,
+                allowedDomains, validityTime, tokenScope, groupingId, jsonString, keyManagerName, tenantDomain, false);
     }
 
     /**
@@ -4082,8 +4017,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString,
-                                                                         String keyManagerName, String tenantDomain)
-            throws APIManagementException {
+                                                                         String keyManagerName, String tenantDomain,
+                                                                         boolean isImportMode)
+    throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
         if (StringUtils.isEmpty(tenantDomain)) {
@@ -4098,7 +4034,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         String keyManagerId = null;
-        if (keyManagerName != null){
+        if (keyManagerName != null) {
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
             if (keyManagerConfiguration == null) {
@@ -4117,9 +4053,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
-            if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation){
-                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate " +
-                        "Client Application",ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+            if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation) {
+                if (isImportMode) {
+                    log.debug("Importing application when KM OAuth App creation is disabled. Trying to map keys");
+                    // passing null `clientId` is ok here since the id/secret pair is included
+                    // in the `jsonString` and ApplicationUtils#createOauthAppRequest logic handles it.
+                    return mapExistingOAuthClient(jsonString, userId, null, applicationName, tokenType,
+                            APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, tenantDomain);
+                } else {
+                    throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
+                            " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
+                }
             }
         }
         try {
@@ -4750,7 +4694,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
             //call update method.
             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
-            apiMgtDAO.updateApplicationKeyTypeMetaData(application.getId(), tokenType, keyManagerName, updatedAppInfo);
+            apiMgtDAO.updateApplicationKeyTypeMetaData(application.getId(), tokenType, keyManagerID, updatedAppInfo);
             JSONObject appLogObject = new JSONObject();
             appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, updatedAppInfo.getClientName());
             appLogObject.put("Updated Oauth app with Call back URL", callbackUrl);

@@ -123,7 +123,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
@@ -248,7 +247,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
@@ -259,7 +258,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
             Map<String, Object> result;
 
-            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
@@ -1535,14 +1534,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             //validate if api exists
             APIInfo apiInfo = validateAPIExistence(apiId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
             //check if the API has subscriptions
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId());
@@ -1558,7 +1557,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //deletes the API
-            apiProvider.deleteAPI(api);
+            apiProvider.deleteAPI(api, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -3012,10 +3011,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            ResourceFile thumbnailResource = apiProvider.getIcon(apiId, tenantDomain);
+            ResourceFile thumbnailResource = apiProvider.getIcon(apiId, organization);
 
             if (thumbnailResource != null) {
                 return Response
@@ -3051,7 +3050,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             String fileName = fileDetail.getDataHandler().getName();
             String extension = FilenameUtils.getExtension(fileName);
             if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
@@ -3063,7 +3062,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                 fileContentType = fileDetail.getContentType().toString();
             }
-            PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, tenantDomain);
+            PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, organization);
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
             FileInfoDTO infoDTO = new FileInfoDTO();
@@ -3706,6 +3705,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String serviceVersion, MessageContext messageContext) throws APIManagementException {
         URI newVersionedApiUri;
         APIDTO newVersionedApi = new APIDTO();
+        ServiceEntry service = new ServiceEntry();
         try {
             APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifierFromTable == null) {
@@ -3730,7 +3730,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 String serviceName = existingAPI.getServiceInfo("name");
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                ServiceEntry service = serviceCatalog.getServiceByNameAndVersion(serviceName, serviceVersion, tenantId);
+                service = serviceCatalog.getServiceByNameAndVersion(serviceName, serviceVersion, tenantId);
+                if (service == null) {
+                    throw new APIManagementException("No matching service version found", ExceptionCodes.SERVICE_VERSION_NOT_FOUND);
+                }
+            }
+            if (StringUtils.isNotEmpty(serviceVersion) && !serviceVersion
+                    .equals(existingAPI.getServiceInfo("version"))) {
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
@@ -3899,10 +3905,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite, tokenScopes);
+        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite, tokenScopes, organization);
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 
@@ -4005,7 +4013,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private APIDTO createAPIDTO(API existingAPI, String newVersion) {
         APIDTO apidto = new APIDTO();
         apidto.setName(existingAPI.getId().getApiName());
-        apidto.setContext(existingAPI.getContext());
+        apidto.setContext(existingAPI.getContextTemplate());
         apidto.setVersion(newVersion);
         return apidto;
     }
@@ -4240,11 +4248,19 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
                 List<APIRevision> apiDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                    if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                         apiDeployedRevisions.add(apiRevision);
                     }
                 }
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
+            } else if (StringUtils.equalsIgnoreCase(query, "deployed:false")) {
+                List<APIRevision> apiNotDeployedRevisions = new ArrayList<>();
+                for (APIRevision apiRevision : apiRevisions) {
+                    if (apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                        apiNotDeployedRevisions.add(apiRevision);
+                    }
+                }
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiNotDeployedRevisions);
             } else {
                 apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
             }
@@ -4363,6 +4379,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+
         Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
@@ -4384,7 +4402,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments);
+        apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
@@ -4431,6 +4449,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
             if (revisionId == null) {
@@ -4456,7 +4476,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }
         }
-        apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
+        apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {

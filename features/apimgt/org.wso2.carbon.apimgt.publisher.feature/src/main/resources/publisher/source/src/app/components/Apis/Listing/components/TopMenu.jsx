@@ -172,7 +172,7 @@ function TopMenu(props) {
                     )}
                 </div>
                 {showToggle && (
-                    <Box height={32} m='auto'>
+                    <Box height={32} m='auto' mr={8}>
                         <ButtonGroup color='primary' aria-label='outlined primary button group'>
                             <IconButton onClick={() => setListType('grid')} aria-label='list'>
                                 <GridOn color={listType === 'grid' ? 'primary' : 'disabled'} />

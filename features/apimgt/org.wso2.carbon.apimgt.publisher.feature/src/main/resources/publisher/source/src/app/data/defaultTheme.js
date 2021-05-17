@@ -242,6 +242,7 @@ export default {
                 serviceCatalogApiIcon: '/site/public/images/landing-icons/servicecatalogapi.svg',
                 scopesAddIcon: '/site/public/images/landing-icons/scopes.svg',
                 apiproductAddIcon: '/site/public/images/landing-icons/apiproduct.svg',
+                noApisIcon: '/site/public/images/landing-icons/noapi.svg',
             },
             menu: {
                 primary: '#34679D',
@@ -269,6 +270,7 @@ export default {
             onboarding: {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
+                getStartedLink: 'https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/',
             },
             icons: {
                 graphql: '/site/public/images/service_catalog/icons/graphql.svg',

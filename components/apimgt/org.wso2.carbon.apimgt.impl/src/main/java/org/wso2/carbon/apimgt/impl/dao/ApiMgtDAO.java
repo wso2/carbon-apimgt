@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -4691,7 +4692,6 @@ public class ApiMgtDAO {
      */
     public void deleteApplication(Application application) throws APIManagementException {
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
@@ -4737,13 +4737,15 @@ public class ApiMgtDAO {
             deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
             while (rs.next()) {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
-                String keyManagerName = rs.getString("KEY_MANAGER");
-                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                String keyManagerName = rs.getString("NAME");
+                String keyManagerTenantDomain = rs.getString("TENANT_DOMAIN");
+                // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
-                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                    KeyManager keyManager =
+                            KeyManagerHolder.getKeyManagerInstance(keyManagerTenantDomain, keyManagerName);
                     if (keyManager != null) {
                         try {
                             keyManager.deleteMappedApplication(consumerKey);
@@ -4837,12 +4839,12 @@ public class ApiMgtDAO {
      * Retrieves the consumer keys and keymanager in a given application
      *
      * @param appId application id
-     * @return Map<ConsumerKey, keyManager>
+     * @return Map<ConsumerKey, Pair<keyManagerName, keyManagerTenantDomain>
      * @throws APIManagementException
      */
-    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+    public Map<String, Pair<String, String>> getConsumerKeysForApplication(int appId) throws APIManagementException {
 
-        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+        Map<String, Pair<String, String>> consumerKeysOfApplication = new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection
                      .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
@@ -4851,8 +4853,9 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String consumerKey = resultSet.getString("CONSUMER_KEY");
-                    String keyManager = resultSet.getString("KEY_MANAGER");
-                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                    String keyManagerName = resultSet.getString("NAME");
+                    String keyManagerTenantDomain = resultSet.getString("TENANT_DOMAIN");
+                    consumerKeysOfApplication.put(consumerKey, Pair.of(keyManagerName, keyManagerTenantDomain));
                 }
             }
         } catch (SQLException e) {

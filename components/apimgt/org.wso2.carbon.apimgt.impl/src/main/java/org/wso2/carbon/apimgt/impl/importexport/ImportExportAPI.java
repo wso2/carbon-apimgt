@@ -117,11 +117,12 @@ public interface ImportExportAPI {
      * @param rotateRevision   If the maximum revision number reached, undeploy the earliest revision and create
      *                         a new revision
      * @param overwrite        Whether to update the API or not
+     * @param organization
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, String[] tokenScopes)
+                         Boolean overwrite, String[] tokenScopes, String organization)
             throws APIManagementException;
 
     /**
@@ -138,11 +139,12 @@ public interface ImportExportAPI {
      *                            existing dependent APIs of an API Product.
      * @param importAPIs          Whether to import the dependent APIs or not.
      * @param tokenScopes         Scopes in the passed token from the REST API call.
+     * @param organization
      * @return Imported API Product
      * @throws APIManagementException If there is an error in importing an API Product
      */
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
                                        Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
-                                       String[] tokenScopes)
+                                       String[] tokenScopes, String organization)
             throws APIManagementException;
 }

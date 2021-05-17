@@ -1146,7 +1146,9 @@ public abstract class AbstractAPIManager implements APIManager {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
                     apiPersistenceInstance.getWSDL(new Organization(tenantDomain), apiId);
             if (resource != null) {
-                return new ResourceFile(resource.getContent(), resource.getContentType());
+                ResourceFile resourceFile = new ResourceFile(resource.getContent(), resource.getContentType());
+                resourceFile.setName(resource.getName());
+                return resourceFile;
             } else {
                 String msg = "Failed to get WSDL. Artifact corresponding to artifactId " + apiId + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
@@ -4101,10 +4103,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException {
+    public ResourceFile getIcon(String apiId, String organization) throws APIManagementException {
 
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getThumbnail(new Organization(tenantDomain), apiId);
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
+                    .getThumbnail(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;

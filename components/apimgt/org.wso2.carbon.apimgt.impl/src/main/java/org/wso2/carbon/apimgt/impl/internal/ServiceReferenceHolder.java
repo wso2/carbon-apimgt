@@ -50,6 +50,7 @@ public class ServiceReferenceHolder {
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
     private KeyStore trustStore;
+    private KeyStore listenerTrustStore;
     private AccessTokenGenerator accessTokenGenerator;
     private KeyManagerConfigurationService keyManagerConfigurationService;
     private OAuthServerConfiguration oauthServerConfiguration;
@@ -264,5 +265,15 @@ public class ServiceReferenceHolder {
     public Set<String> getGatewayArtifactGeneratorTypes() {
 
         return gatewayArtifactGeneratorMap.keySet();
+    }
+
+    public KeyStore getListenerTrustStore() {
+
+        return listenerTrustStore;
+    }
+
+    public void setListenerTrustStore(KeyStore listenerTrustStore) {
+
+        this.listenerTrustStore = listenerTrustStore;
     }
 }
