@@ -145,9 +145,8 @@ public class ImportUtils {
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-                                Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct,
-                                String[] tokenScopes,
-                                JsonObject dependentAPIParamsConfigObject) throws APIManagementException {
+            Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct, String[] tokenScopes,
+            JsonObject dependentAPIParamsConfigObject, String organization) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse validationResponse = null;
@@ -341,7 +340,8 @@ public class ImportUtils {
                         //if the earliest revision is already deployed in gateway environments, it will be undeployed
                         //before deleting
                         apiProvider
-                                .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList);
+                                .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList,
+                                        organization);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
                         if (log.isDebugEnabled()) {
@@ -358,7 +358,7 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments);
+                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization);
                 if (log.isDebugEnabled()) {
                     log.debug("API: " + importedApi.getId().getApiName() + "_" + importedApi.getId().getVersion() +
                             " was deployed in " + apiRevisionDeployments.size() + " gateway environments.");
@@ -1848,9 +1848,8 @@ public class ImportUtils {
      * @throws APIImportExportException If there is an error in importing an API
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
-                                              Boolean rotateRevision, Boolean overwriteAPIProduct,
-                                              Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
-            throws APIManagementException {
+            Boolean rotateRevision, Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
+            String[] tokenScopes, String organization) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -1886,7 +1885,7 @@ public class ImportUtils {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
                 importedApiProductDTO = importDependentAPIs(extractedFolderPath, userName, preserveProvider,
-                        apiProvider, overwriteAPIs, rotateRevision, importedApiProductDTO, tokenScopes);
+                        apiProvider, overwriteAPIs, rotateRevision, importedApiProductDTO, tokenScopes, organization);
             } else {
                 // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are
                 // already in the APIM
@@ -2107,9 +2106,8 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-                                                     APIProvider apiProvider, boolean overwriteAPIs,
-                                                     Boolean rotateRevision, APIProductDTO apiProductDto,
-                                                     String[] tokenScopes) throws IOException, APIManagementException {
+            APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
+            String[] tokenScopes, String organization) throws IOException, APIManagementException {
 
         JsonObject dependentAPIParamsConfigObject = null;
         // Retrieve the dependent APIs param configurations from the params file of the API Product
@@ -2163,13 +2161,13 @@ public class ImportUtils {
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                     rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
-                                    dependentAPIParamsConfigObject);
+                                    dependentAPIParamsConfigObject, organization);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                 rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
-                                dependentAPIParamsConfigObject);
+                                dependentAPIParamsConfigObject, organization);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -2185,7 +2183,7 @@ public class ImportUtils {
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                 rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
-                                dependentAPIParamsConfigObject);
+                                dependentAPIParamsConfigObject, organization);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs
                         // flag is specified,
@@ -2193,7 +2191,7 @@ public class ImportUtils {
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
                                     rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
-                                    dependentAPIParamsConfigObject);
+                                    dependentAPIParamsConfigObject, organization);
                         }
                     }
                 }
