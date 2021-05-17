@@ -6843,7 +6843,7 @@ public class ApiMgtDAO {
     public int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
 
         int id = -1;
-        String getAPIQuery = SQLConstants.GET_API_ID_SQL_NEW;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL_BY_UUID;
 
         try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
             prepStmt.setString(1, uuid);
@@ -6932,7 +6932,7 @@ public class ApiMgtDAO {
         String deleteRatingsQuery = SQLConstants.REMOVE_FROM_API_RATING_SQL;
         String deleteSubscriptionQuery = SQLConstants.REMOVE_FROM_API_SUBSCRIPTION_SQL;
         String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
-        String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL_NEW;
+        String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL_BY_UUID;
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;

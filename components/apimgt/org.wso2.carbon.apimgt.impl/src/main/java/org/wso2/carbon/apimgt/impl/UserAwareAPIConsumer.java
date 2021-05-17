@@ -111,7 +111,7 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     @Override
     public void deleteComment(String uuid, String commentId) throws APIManagementException {
-        super.deleteComment(uuid,commentId);
+        super.deleteComment(uuid, commentId);
     }
 
     @Override

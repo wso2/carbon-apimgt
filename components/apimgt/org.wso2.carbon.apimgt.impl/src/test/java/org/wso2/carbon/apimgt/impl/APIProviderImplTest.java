@@ -140,7 +140,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.UUID;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.ArrayList;
 
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
