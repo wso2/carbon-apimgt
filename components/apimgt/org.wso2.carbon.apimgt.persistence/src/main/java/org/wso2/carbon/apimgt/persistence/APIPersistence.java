@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.persistence;
 
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -44,6 +45,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceExcepti
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This Interface defines the interface methods related to API operations and functionalities which incorporate with
@@ -507,5 +509,14 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
+    
+    /**
+     * Get a list of all the tagscategories of an organization
+     *
+     * @param org   Organization the tags are owned by
+     * @param ctx   UserContext the tags are visible to
+     * @return list of all the tags of an organization
+     */
+    Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
 }
