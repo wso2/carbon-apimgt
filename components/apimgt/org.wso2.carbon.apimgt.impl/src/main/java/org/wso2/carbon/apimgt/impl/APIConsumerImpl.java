@@ -4915,7 +4915,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
                              /* updating the owner of the OAuth application with userId */
                             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
-                                    oldUserName);
+                                    userId);
                             isAppUpdated = true;
                             audit.info("Successfully updated the owner of application " + application.getName() +
                                     " from " + oldUserName + " to " + userId + ".");
