@@ -3986,7 +3986,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
-    public void deleteAPI(API api) throws APIManagementException {
+    public void deleteAPI(API api, String organization) throws APIManagementException {
 
         try {
             int apiId = apiMgtDAO.getAPIID(api.getId());
@@ -4002,7 +4002,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            deleteAPIRevisions(api.getUuid(), tenantDomain);
+            deleteAPIRevisions(api.getUuid(), organization);
             deleteAPIFromDB(api);
             if (log.isDebugEnabled()) {
                 String logMessage =
@@ -4104,13 +4104,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void deleteAPIRevisions(String apiUUID, String tenantDomain) throws APIManagementException {
+    private void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
-                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
+                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList(), organization);
             }
-            deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), tenantDomain);
+            deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), organization);
         }
     }
 
@@ -8908,12 +8908,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void setThumbnailToAPI(String apiId, ResourceFile resource, String orgId) throws APIManagementException {
+    public void setThumbnailToAPI(String apiId, ResourceFile resource, String organization) throws APIManagementException {
 
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
-            apiPersistenceInstance.saveThumbnail(new Organization(orgId), apiId, iconResourceFile);
+            apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
@@ -9281,11 +9281,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
     public void deployAPIRevision(String apiId, String apiRevisionId,
-                                  List<APIRevisionDeployment> apiRevisionDeployments)
+            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9301,7 +9302,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        API api = getAPIbyUUID(apiId, apiRevision);
+        API api = getAPIbyUUID(apiId, apiRevision, organization);
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
@@ -9374,10 +9375,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private API getAPIbyUUID(String apiId, APIRevision apiRevision)
+    private API getAPIbyUUID(String apiId, APIRevision apiRevision, String organization)
             throws APIManagementException {
 
-        API api = getAPIbyUUID(apiRevision.getApiUUID(), tenantDomain);
+        API api = getAPIbyUUID(apiRevision.getApiUUID(), organization);
         api.setRevisionedApiId(apiRevision.getRevisionUUID());
         api.setRevisionId(apiRevision.getId());
         api.setUuid(apiId);
@@ -9401,11 +9402,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                              List<APIRevisionDeployment> apiRevisionDeployments)
+            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9418,7 +9420,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
-        API api = getAPIbyUUID(apiId, apiRevision);
+        API api = getAPIbyUUID(apiId, apiRevision, organization);
         removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
@@ -9463,7 +9465,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to delete APIRevision
      */
     @Override
-    public void deleteAPIRevision(String apiId, String apiRevisionId, String tenantDomain) throws APIManagementException {
+    public void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -9485,7 +9487,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance.deleteAPIRevision(new Organization(tenantDomain),
+            apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
                     apiIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to delete registry artifacts";
@@ -9498,7 +9500,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiIdentifier.getApiName(),
                         apiIdentifier.getVersion(),
-                        apiRevision.getRevisionUUID(), tenantDomain);
+                        apiRevision.getRevisionUUID(), organization);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error while deleting Runtime artifacts from artifact Store", e);
             }

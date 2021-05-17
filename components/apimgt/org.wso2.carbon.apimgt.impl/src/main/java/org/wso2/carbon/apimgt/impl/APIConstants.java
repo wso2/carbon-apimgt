@@ -347,8 +347,7 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
-    public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_RELATED_CUSTOM_PROPERTIES_SURFIX = "__display";
@@ -887,6 +886,7 @@ public final class APIConstants {
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
     public static final String DEFAULT_APPLICATION_DESCRIPTION = "This is the default application";
     public static final String BASIC_AUTH_APPLICATION_NAME = "BasicAuthApplication";
+    public static final String BASIC_AUTH_APPLICATION_OWNER = "BasicAuthApplicationOwner";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");
@@ -1402,6 +1402,7 @@ public final class APIConstants {
     public static final String PROXY_PORT = "ProxyConfig.Port";
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
+    public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -2046,7 +2047,7 @@ public final class APIConstants {
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
-    public static final String[] WS_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
@@ -2054,6 +2055,7 @@ public final class APIConstants {
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
+    public static final String JSON_CALLBACK_URL = "callbackUrl";
 
     /**
      * Publisher Access Control related registry properties and values.

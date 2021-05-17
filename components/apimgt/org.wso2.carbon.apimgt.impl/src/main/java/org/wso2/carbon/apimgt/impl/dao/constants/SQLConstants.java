@@ -1215,14 +1215,8 @@ public class SQLConstants {
             "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
 
     public static final String GET_CONSUMER_KEY_OF_APPLICATION_SQL =
-            " SELECT" +
-            "   CONSUMER_KEY," +
-            "   CREATE_MODE," +
-            "   KEY_MANAGER" +
-                    " FROM" +
-            "   AM_APPLICATION_KEY_MAPPING " +
-            " WHERE" +
-            "   APPLICATION_ID = ?";
+            "SELECT MAP.CONSUMER_KEY, MAP.CREATE_MODE, KM.NAME, KM.TENANT_DOMAIN FROM AM_APPLICATION_KEY_MAPPING MAP,"
+                    + " AM_KEY_MANAGER KM WHERE MAP.APPLICATION_ID = ? AND MAP.KEY_MANAGER = KM.UUID";
 
     public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTIONS_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
@@ -3283,6 +3277,32 @@ public class SQLConstants {
                         "WHERE WH.EXPIRY_AT >= ? AND WH.TENANT_DOMAIN = ? " +
                         "AND API.API_ID = SUB.API_ID " +
                         "AND WH.APPLICATION_ID = SUB.APPLICATION_ID " +
+                        "AND API.API_UUID = WH.API_UUID " +
+                        "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
+
+        public static final String GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL =
+                "SELECT WH.API_UUID AS API_UUID, " +
+                        "WH.APPLICATION_ID AS APPLICATION_ID, " +
+                        "WH.HUB_CALLBACK_URL AS HUB_CALLBACK_URL, " +
+                        "WH.HUB_TOPIC AS HUB_TOPIC, " +
+                        "WH.HUB_SECRET AS HUB_SECRET, " +
+                        "WH.EXPIRY_AT AS EXPIRY_AT, " +
+                        "API.CONTEXT AS API_CONTEXT, "  +
+                        "API.API_VERSION AS API_VERSION, "  +
+                        "API.API_TIER AS API_TIER, "  +
+                        "API.API_ID AS API_ID, "  +
+                        "SUB.TIER_ID AS SUB_TIER, " +
+                        "APP.APPLICATION_TIER AS APPLICATION_TIER, " +
+                        "SUBSCRIBER.USER_ID AS SUBSCRIBER, " +
+                        "SUBSCRIBER.TENANT_ID AS TENANT_ID " +
+                        "FROM AM_WEBHOOKS_SUBSCRIPTION WH, " +
+                        "AM_API API, " +
+                        "AM_SUBSCRIPTION SUB, " +
+                        "AM_APPLICATION APP, " +
+                        "AM_SUBSCRIBER SUBSCRIBER " +
+                        "WHERE WH.EXPIRY_AT >= ? AND WH.TENANT_DOMAIN = ? " +
+                        "AND API.API_ID = SUB.API_ID " +
+                        "AND WH.APPLICATION_ID::integer = SUB.APPLICATION_ID " +
                         "AND API.API_UUID = WH.API_UUID " +
                         "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
 

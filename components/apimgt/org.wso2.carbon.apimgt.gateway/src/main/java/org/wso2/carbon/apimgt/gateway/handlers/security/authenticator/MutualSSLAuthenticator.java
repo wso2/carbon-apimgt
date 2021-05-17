@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.util.ArrayList;
@@ -93,12 +94,17 @@ public class MutualSSLAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationResponse authenticate(MessageContext messageContext) {
+
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         // try to retrieve the certificate
         X509Certificate sslCertObject;
         try {
             sslCertObject = Utils.getClientCertificate(axis2MessageContext);
+            if (!APIUtil.isCertificateExistsInListenerTrustStore(sslCertObject)) {
+                log.debug("Certificate in Header didn't exist in truststore");
+                sslCertObject = null;
+            }
         } catch (APIManagementException e) {
             return new AuthenticationResponse(false, isMandatory, !isMandatory,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());

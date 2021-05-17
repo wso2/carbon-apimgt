@@ -1611,9 +1611,10 @@ public interface APIProvider extends APIManager {
     /**
      * Delete API
      * @param api API to delete
+     * @param organization
      * @throws APIManagementException
      */
-    void deleteAPI(API api) throws APIManagementException;
+    void deleteAPI(API api, String organization) throws APIManagementException;
     /**
      * Checks whether the given document already exists for the given api/product
      *
@@ -1776,9 +1777,10 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
      * Update the displayOnDevportal field in an existing deployments of an API
@@ -1825,9 +1827,10 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
      * Restore a provided API Revision as the working copy of the API
