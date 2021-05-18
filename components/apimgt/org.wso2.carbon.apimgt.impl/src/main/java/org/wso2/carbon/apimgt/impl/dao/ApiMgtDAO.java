@@ -2618,57 +2618,6 @@ public class ApiMgtDAO {
         return SQLConstants.GET_KEY_SQL_PREFIX + tokenStoreTable + SQLConstants.GET_KEY_SQL_SUFFIX;
     }
 
-    /**
-     * Get access token data based on application ID
-     *
-     * @param subscriptionId Subscription Id
-     * @return access token data
-     * @throws APIManagementException
-     */
-    public Map<String, String> getAccessTokenData(int subscriptionId) throws APIManagementException {
-        Map<String, String> apiKeys = new HashMap<String, String>();
-
-        if (APIUtil.checkAccessTokenPartitioningEnabled() && APIUtil.checkUserNameAssertionEnabled()) {
-            String[] keyStoreTables = APIUtil.getAvailableKeyStoreTables();
-            if (keyStoreTables != null) {
-                for (String keyStoreTable : keyStoreTables) {
-                    apiKeys = getAccessTokenData(subscriptionId, getKeysSqlUsingSubscriptionId(keyStoreTable));
-                    if (apiKeys.size() > 0) {
-                        break;
-                    }
-                }
-            }
-        } else {
-            apiKeys = getAccessTokenData(subscriptionId, getKeysSqlUsingSubscriptionId(null));
-        }
-        return apiKeys;
-    }
-
-    private Map<String, String> getAccessTokenData(int subscriptionId, String getKeysSql)
-            throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-        Map<String, String> apiKeys = new HashMap<String, String>();
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            ps = connection.prepareStatement(getKeysSql);
-            ps.setInt(1, subscriptionId);
-            result = ps.executeQuery();
-            while (result.next()) {
-                apiKeys.put("token", APIUtil.decryptToken(result.getString("ACCESS_TOKEN")));
-                apiKeys.put("status", result.getString("TOKEN_STATE"));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get keys for application: " + subscriptionId, e);
-        } catch (CryptoException e) {
-            handleException("Failed to get keys for application: " + subscriptionId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return apiKeys;
-    }
-
     private String getKeysSqlUsingSubscriptionId(String accessTokenStoreTable) {
         String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         if (accessTokenStoreTable != null) {
@@ -3002,7 +2951,7 @@ public class ApiMgtDAO {
      * Update the consumer key and application status for the given key type and application.
      *  @param application
      * @param keyType
-     * @param keyManagerName
+     * @param keyManagerId
      */
     public void updateApplicationKeyTypeMapping(Application application, String keyType,
                                                 String keyManagerId) throws APIManagementException {
@@ -3236,9 +3185,6 @@ public class ApiMgtDAO {
             Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
             while (result.next()) {
                 int subId = result.getInt("SUBSCRIPTION_ID");
-                Map<String, String> keyData = getAccessTokenData(subId);
-                String accessToken = keyData.get("token");
-                String tokenStatus = keyData.get("status");
                 String userId = result.getString("USER_ID");
                 String application = result.getString("APPNAME");
                 int appId = result.getInt("APPLICATION_ID");
@@ -3251,8 +3197,6 @@ public class ApiMgtDAO {
                     usage.setUserId(userId);
                     usage.setApplicationName(application);
                     usage.setAppId(appId);
-                    usage.setAccessToken(accessToken);
-                    usage.setAccessTokenStatus(tokenStatus);
                     userApplicationUsages.put(key, usage);
                 }
                 APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"), result.getString
@@ -3291,9 +3235,6 @@ public class ApiMgtDAO {
                 Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
                 while (result.next()) {
                     int subId = result.getInt("SUBSCRIPTION_ID");
-                    Map<String, String> keyData = getAccessTokenData(subId);
-                    String accessToken = keyData.get("token");
-                    String tokenStatus = keyData.get("status");
                     String userId = result.getString("USER_ID");
                     String application = result.getString("APPNAME");
                     int appId = result.getInt("APPLICATION_ID");
@@ -3306,8 +3247,6 @@ public class ApiMgtDAO {
                         usage.setUserId(userId);
                         usage.setApplicationName(application);
                         usage.setAppId(appId);
-                        usage.setAccessToken(accessToken);
-                        usage.setAccessTokenStatus(tokenStatus);
                         userApplicationUsages.put(key, usage);
                     }
                     APIProductIdentifier apiProductId = new APIProductIdentifier(result.getString("API_PROVIDER"), result.getString
