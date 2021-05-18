@@ -117,11 +117,12 @@ public interface ImportExportAPI {
      * @param rotateRevision   If the maximum revision number reached, undeploy the earliest revision and create
      *                         a new revision
      * @param overwrite        Whether to update the API or not
+     * @param organization
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, String[] tokenScopes,  String organization)
+                         Boolean overwrite, String[] tokenScopes, String organization)
             throws APIManagementException;
 
     /**

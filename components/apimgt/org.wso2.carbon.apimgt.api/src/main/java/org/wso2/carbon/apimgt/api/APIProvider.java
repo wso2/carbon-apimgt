@@ -161,11 +161,12 @@ public interface APIProvider extends APIManager {
      * Returns usage details of a particular published by a provider
      *
      * @param apiId API identifier
+     * @param organization
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
-    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException;
+    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organization) throws APIManagementException;
 
     /**
      * Returns usage details of a particular api product published by a provider
@@ -1776,9 +1777,10 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
      * Update the displayOnDevportal field in an existing deployments of an API
@@ -1825,9 +1827,10 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
      * Restore a provided API Revision as the working copy of the API

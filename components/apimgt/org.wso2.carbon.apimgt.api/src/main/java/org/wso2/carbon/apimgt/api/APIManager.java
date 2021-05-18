@@ -933,13 +933,13 @@ public interface APIManager {
 
     /**
      * @param searchQuery search query. ex : provider:admin
-     * @param orgId Identifier of an organization
+     * @param organization Identifier of an organization
      * @param start starting number
      * @param end ending number
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
             throws APIManagementException;
 
     /**

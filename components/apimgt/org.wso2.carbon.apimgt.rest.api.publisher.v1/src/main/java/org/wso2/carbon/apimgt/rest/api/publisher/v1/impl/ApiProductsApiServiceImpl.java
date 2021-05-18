@@ -722,6 +722,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
@@ -749,7 +750,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         importExportAPI.importAPIProduct(fileInputStream, preserveProvider, rotateRevision, overwriteAPIProduct,
                 overwriteAPIs, importAPIs, tokenScopes, organization);
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();

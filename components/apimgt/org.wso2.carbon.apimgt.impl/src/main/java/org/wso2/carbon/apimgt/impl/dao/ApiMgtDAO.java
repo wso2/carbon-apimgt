@@ -2823,11 +2823,12 @@ public class ApiMgtDAO {
     /**
      * @param providerName Name of the provider
      * @param identifier   APIIdentifier which contains API name and version
+     * @param organization
      * @return UserApplicationAPIUsage of given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
      *                                                           UserApplicationAPIUsage for given provider
      */
-    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier)
+    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier, String organization)
             throws APIManagementException {
 
         Connection connection = null;

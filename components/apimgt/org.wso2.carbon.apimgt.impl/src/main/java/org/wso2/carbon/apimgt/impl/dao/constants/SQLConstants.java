@@ -2111,7 +2111,7 @@ public class SQLConstants {
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ? " +
-                    "AND ORGANIZATION_ID = ?";
+                    "AND ORGANIZATION = ?";
 
     public static final String GET_API_NAMES_MATCHES_CONTEXT=
             "SELECT DISTINCT API_NAME FROM AM_API WHERE CONTEXT_TEMPLATE = ?";

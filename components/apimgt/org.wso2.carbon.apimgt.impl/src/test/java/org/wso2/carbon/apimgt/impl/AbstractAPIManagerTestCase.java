@@ -209,7 +209,7 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start,
+                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start,
                         int end) throws APIManagementException {
                     return null;
                 }
