@@ -1231,13 +1231,12 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs when retrieving API Identifier,
      *                                when checking whether the documentation exists and when adding the documentation
      */
-    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId)
+    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String organization)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (documentDto.getType() == null) {
             throw new APIManagementException("Documentation type cannot be empty",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
@@ -1255,11 +1254,11 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
 
-        if (apiProvider.isDocumentationExist(apiId, documentName, tenantDomain)) {
+        if (apiProvider.isDocumentationExist(apiId, documentName, organization)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
+        documentation = apiProvider.addDocumentation(apiId, documentation, organization);
 
         return documentation;
     }

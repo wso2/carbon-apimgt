@@ -278,7 +278,7 @@ public class ImportUtils {
             // implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organization);
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             if (StringUtils
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
@@ -1200,11 +1200,11 @@ public class ImportUtils {
 
     /**
      * This method adds the documents to the imported API or API Product.
-     *
-     * @param pathToArchive  Location of the extracted folder of the API or API Product
-     * @param apiTypeWrapper Imported API or API Product
+     *  @param pathToArchive    Location of the extracted folder of the API or API Product
+     * @param apiTypeWrapper    Imported API or API Product
+     * @param organization      Organization of the API or API Product
      */
-    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider, String organization) {
 
         String jsonContent = null;
         Identifier identifier = apiTypeWrapper.getId();
@@ -1257,8 +1257,8 @@ public class ImportUtils {
                     // Add the documentation DTO
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
-                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid()) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid());
+                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(), organization) :
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid(), organization);
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
@@ -1918,7 +1918,7 @@ public class ImportUtils {
             // implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApiProduct = new ApiTypeWrapper(importedApiProduct);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider, organization);
 
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Importing client certificates.");

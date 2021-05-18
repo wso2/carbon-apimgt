@@ -1340,11 +1340,11 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
 
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organization);
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {

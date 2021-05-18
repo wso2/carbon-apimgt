@@ -6101,9 +6101,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
-        checkAPIVisibilityRestriction(uuid, tenantDomain);
-        return super.getAllDocumentation(uuid, tenantDomain);
+    public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organization);
+        return super.getAllDocumentation(uuid, organization);
     }
 
     @Override

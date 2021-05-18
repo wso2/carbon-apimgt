@@ -260,11 +260,11 @@ public interface APIManager {
      * Returns a list of documentation attached to a particular API
      *
      * @param uuid id of the api
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(String uuid, String orgId) throws APIManagementException;
+    List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException;
     /**
      * Returns the specified document attached to the given API
      *

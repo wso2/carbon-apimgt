@@ -495,11 +495,11 @@ public interface APIProvider extends APIManager {
      *
      * @param uuid                API/Product Identifier
      * @param documentation       Documentation
-     * @param orgId               Identifier of an organization
+     * @param organization        Identifier of an organization
      * @return Documentation      created documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    Documentation addDocumentation(String uuid, Documentation documentation, String orgId) throws APIManagementException;
+    Documentation addDocumentation(String uuid, Documentation documentation, String organization) throws APIManagementException;
 
 
     /**
@@ -1623,7 +1623,7 @@ public interface APIProvider extends APIManager {
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
+    boolean isDocumentationExist(String uuid, String docName, String organization) throws APIManagementException;
 
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
