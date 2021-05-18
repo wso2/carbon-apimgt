@@ -53,7 +53,7 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
         }
 
         try {
-            OrganizationResolver resolver = (OrganizationResolver) APIUtil.getClassForName(className).newInstance();
+            OrganizationResolver resolver = (OrganizationResolver) Class.forName(className).newInstance();
             String organization = resolver.resolve(message);
             message.put(RestApiConstants.ORGANIZATION, organization);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
