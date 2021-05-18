@@ -163,6 +163,9 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.recovery.IdentityRecoveryConstants;
+import org.wso2.carbon.identity.recovery.util.Utils;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
@@ -179,6 +182,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -2408,18 +2412,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
         int tenantId = 0;
         Map<String, String> claimMap = new HashMap<>();
+        SortedMap<String, String> subscriberClaims = null;
+        String configuredClaims = "";
         try {
             tenantId = getTenantId(tenantDomain);
-        SortedMap<String, String> subscriberClaims =
-                APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
-        APIManagerConfiguration configuration = getAPIManagerConfiguration();
-        String configuredClaims = configuration
-                .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
-        if (subscriberClaims != null) {
-            for (String claimURI : configuredClaims.split(",")) {
-                claimMap.put(claimURI, subscriberClaims.get(claimURI));
+            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getUserStoreManager();
+            if (userStoreManager.isExistingUser(subscriber)) {
+                subscriberClaims = APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
+                APIManagerConfiguration configuration = getAPIManagerConfiguration();
+                configuredClaims = configuration.getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
             }
-        }
+            for (String claimURI : configuredClaims.split(",")) {
+                if (subscriberClaims != null) {
+                    claimMap.put(claimURI, subscriberClaims.get(claimURI));
+                }
+            }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for tenant domain "
                     + tenantDomain, e);
