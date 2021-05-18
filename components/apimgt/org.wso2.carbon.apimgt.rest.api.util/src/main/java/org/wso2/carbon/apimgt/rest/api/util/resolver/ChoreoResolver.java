@@ -31,7 +31,6 @@ public class ChoreoResolver implements OrganizationResolver {
                 for (int i = 0; i < queries.length; i++) {
                     if (queries[i].startsWith("organizationId")) {
                         organizationId = queries[i].split("=")[1];
-                        message.put(RestApiConstants.ORGANIZATION, organizationId);
                         break;
                     }
                 }
