@@ -164,6 +164,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             SubscriptionListDTO subscriptionListDTO;
             List<SubscribedAPI> apiUsages;
 
@@ -175,7 +176,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 } else {
                     apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 }
-                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier, organization);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 apiUsages = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToSubscribedAPIList(allApiUsage);
