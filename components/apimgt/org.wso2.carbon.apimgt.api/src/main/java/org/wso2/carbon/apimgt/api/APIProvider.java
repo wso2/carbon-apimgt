@@ -1720,10 +1720,10 @@ public interface APIProvider extends APIManager {
      * Adds a new APIRevision to an existing API
      *
      * @param apiRevision    APIRevision
-     * @param orgId          Identifier of an organization
+     * @param organization   Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    String addAPIRevision(APIRevision apiRevision, String orgId) throws APIManagementException;
+    String addAPIRevision(APIRevision apiRevision, String organization) throws APIManagementException;
 
     /**
      * Get a Revision Object related to provided revision UUID
@@ -1847,10 +1847,10 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         API UUID
      * @param apiRevisionId API Revision UUID
-     * @param orgId         Identifier of an organization
+     * @param organization  Identifier of an organization
      * @throws APIManagementException if failed to delete APIRevision
      */
-    void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
+    void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
 
     /**
 <<<<<<<<< Temporary merge branch 1

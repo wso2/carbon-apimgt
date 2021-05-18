@@ -1204,7 +1204,8 @@ public class ImportUtils {
      * @param apiTypeWrapper    Imported API or API Product
      * @param organization      Organization of the API or API Product
      */
-    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider, String organization) {
+    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider,
+            String organization) {
 
         String jsonContent = null;
         Identifier identifier = apiTypeWrapper.getId();
@@ -1257,8 +1258,10 @@ public class ImportUtils {
                     // Add the documentation DTO
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
-                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(), organization) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid(), organization);
+                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
+                                            organization) :
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid(),
+                                    organization);
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
