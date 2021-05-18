@@ -119,7 +119,10 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
-        applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
+        String mode = apiKey.getCreateMode();
+        if (mode != null) {
+            applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(mode));
+        }
         applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
         applicationKeyDTO.setKeyMappingId(apiKey.getMappingId());
         if (apiKey.getGrantTypes() != null) {
