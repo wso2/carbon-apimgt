@@ -50,7 +50,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     " AND " +
                     "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?" +
                     " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -83,7 +83,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     " AND " +
                     "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
                     " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -113,7 +113,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     " AND " +
                     "    SUB.USER_ID = ?"+
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
                     " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -144,7 +144,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     " AND " +
                     "   LOWER (SUB.USER_ID) = LOWER(?)" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
                     " ) a )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -177,7 +177,7 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +

@@ -46,7 +46,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " AND " +
                     "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?" +
                     " ORDER BY $1 $2 " +
@@ -76,7 +76,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " AND " +
                     "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) =LOWER (?)))"+
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
@@ -110,7 +110,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?" +
                     " ORDER BY $1 $2 " +
@@ -146,7 +146,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
@@ -176,7 +176,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " AND " +
                     "    SUB.USER_ID = ?"+
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
@@ -205,7 +205,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " AND " +
                     "   LOWER (SUB.USER_ID) =LOWER (?)" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +

@@ -49,7 +49,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   (GROUP_ID= ?  OR  ((GROUP_ID='' OR GROUP_ID IS NULL ) AND SUB.USER_ID=?))" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?" +
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
@@ -83,7 +83,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   (GROUP_ID= ?  OR ((GROUP_ID='' OR GROUP_ID IS NULL ) AND LOWER (SUB.USER_ID) = LOWER(?)))"+
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
@@ -119,7 +119,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?" +
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
@@ -157,7 +157,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
@@ -189,7 +189,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "    SUB.USER_ID = ?"+
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
@@ -221,7 +221,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   LOWER(SUB.USER_ID) = LOWER(?)" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
