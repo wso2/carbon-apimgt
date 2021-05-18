@@ -279,25 +279,25 @@ public interface APIManager {
     /**
      * Get a documentation by artifact Id
      *
-     * @param apiId   apiId
-     * @param docId   DocumentID
-     * @param orgId   Identifier of the organization
+     * @param apiId         apiId
+     * @param docId         DocumentID
+     * @param organization  Identifier of the organization
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-    Documentation getDocumentation(String apiId, String docId, String orgId)
+    Documentation getDocumentation(String apiId, String docId, String organization)
             throws APIManagementException;
 
     /**
      * Get a documentation Content by apiid and doc id
      *
-     * @param apiId  ID of the API
-     * @param docId  DocumentID
-     * @param orgId  Identifier of an organization
+     * @param apiId         ID of the API
+     * @param docId         DocumentID
+     * @param organization  Identifier of an organization
      * @return DocumentationContent
      * @throws APIManagementException if failed to get Documentation
      */
-    DocumentationContent getDocumentationContent(String apiId, String docId, String orgId)
+    DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException;
 
     /**

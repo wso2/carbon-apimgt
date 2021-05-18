@@ -468,10 +468,10 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId   api uuid
      * @param documentId ID of the documentation
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @throws APIManagementException if failed to remove documentation
      */
-    void removeDocumentation(String apiId, String documentId, String orgId) throws APIManagementException;
+    void removeDocumentation(String apiId, String documentId, String organization) throws APIManagementException;
     /**
      * Removes a given documentation
      *
@@ -505,13 +505,13 @@ public interface APIProvider extends APIManager {
     /**
      * Adds Document content to an API/Product
      *
-     * @param uuid    API/Product Identifier
-     * @param content Documentation content
-     * @param docId   doc uuid
-     * @param orgId   Identifier of an organization
+     * @param uuid          API/Product Identifier
+     * @param content       Documentation content
+     * @param docId         doc uuid
+     * @param organization  Identifier of an organization
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationContent(String uuid, String docId, String orgId, DocumentationContent content)
+    void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException;
 
     /**
@@ -550,11 +550,11 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         id of the document
      * @param documentation Documentation
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException;
+    Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
