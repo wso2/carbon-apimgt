@@ -5393,6 +5393,82 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns whether a given API Name already exists
+     *
+     * @param apiName        Name of the API
+     * @param organization Identifier of an Organization
+     * @return true/false
+     * @throws APIManagementException if failed to get API Names
+     */
+    public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String organization)
+            throws APIManagementException {
+
+        List<String> versionList = new ArrayList<String>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet resultSet = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiName);
+                ps.setString(2, organization);
+                resultSet = ps.executeQuery();
+                while (resultSet.next()) {
+                    versionList.add(resultSet.getString("API_VERSION"));
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback get API versions matches " +
+                        "API name " + apiName, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API versions matches API name" + apiName, e);
+        }
+        return versionList;
+    }
+
+    /**
+     * Returns whether a given API Context already exists
+     *
+     * @param contextTemplate Requested context template
+     * @param organization  Identifier of an Organization
+     * @return true/false
+     * @throws APIManagementException if failed to get API Contexts
+     */
+    public boolean isDuplicateContextTemplateMatchesOrganization(String contextTemplate, String organization) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet resultSet = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, contextTemplate.toLowerCase());
+                ps.setString(2, organization);
+
+                resultSet = ps.executeQuery();
+                if (resultSet.next()) {
+                    int count = resultSet.getInt("CTX_COUNT");
+                    return count > 0;
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback in getting count matches context " +
+                        "and organization", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate + " for the oraganization : "
+                    + organization, e);
+        }
+        return false;
+    }
+
+    /**
      * Add API metadata.
      *
      * @param api      API to add

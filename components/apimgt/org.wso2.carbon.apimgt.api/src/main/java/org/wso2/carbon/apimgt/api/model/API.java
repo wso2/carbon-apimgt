@@ -69,6 +69,7 @@ public class API implements Serializable {
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+    private String organizationId;
 
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
@@ -521,6 +522,14 @@ public class API implements Serializable {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public void setDescription(String description) {

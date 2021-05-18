@@ -2245,6 +2245,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 
+    public boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String organization) throws APIManagementException {
+        return apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(contextTemplate, organization);
+    }
+
     @Override
     public List<String> getApiNamesMatchingContext(String contextTemplate) throws APIManagementException {
 
@@ -2772,6 +2776,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<String> getApiVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
 
         return apiMgtDAO.getAPIVersionsMatchingApiName(apiName, username);
+    }
+
+    @Override
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, organization);
     }
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
