@@ -1100,9 +1100,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
                 jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
+                String organization = getOrganization(messageContext);
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                application.getName(), keyType, tokenType, keyManagerName, organization);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);

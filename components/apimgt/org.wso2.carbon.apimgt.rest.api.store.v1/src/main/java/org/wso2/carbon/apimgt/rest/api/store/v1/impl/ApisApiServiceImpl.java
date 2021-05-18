@@ -783,7 +783,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             return Response.ok().entity(apiSwagger).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UserStoreException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
