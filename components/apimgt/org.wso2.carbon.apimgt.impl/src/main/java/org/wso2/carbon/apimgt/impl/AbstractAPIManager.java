@@ -514,21 +514,21 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Get API by registry artifact id
      *
-     * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param uuid         Registry artifact id
+     * @param organization organization for the registry
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
 
         boolean tenantFlowStarted = false;
         try {
             Registry registry;
-            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
-                    (requestedTenantDomain)) {
+            if (organization != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
+                    (organization)) {
                 int id = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                startTenantFlow(requestedTenantDomain);
+                        .getTenantId(organization);
+                startTenantFlow(organization);
                 tenantFlowStarted = true;
                 registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {

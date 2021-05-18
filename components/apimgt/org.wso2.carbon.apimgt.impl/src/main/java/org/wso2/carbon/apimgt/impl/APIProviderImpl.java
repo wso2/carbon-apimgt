@@ -470,14 +470,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Returns usage details of a particular API
      *
      * @param apiId API identifier
+     * @param organization
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
      */
     @Override
-    public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException {
+    public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organization) throws APIManagementException {
         APIIdentifier apiIdEmailReplaced = new APIIdentifier(APIUtil.replaceEmailDomain(apiId.getProviderName()),
                 apiId.getApiName(), apiId.getVersion());
-        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(apiId.getProviderName(), apiId);
+        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(apiId.getProviderName(), apiId, organization);
         List<SubscribedAPI> subscribedAPIs = new ArrayList<SubscribedAPI>();
         for (UserApplicationAPIUsage usage : allApiResult) {
             for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
@@ -3986,7 +3987,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
-    public void deleteAPI(API api, String organization) throws APIManagementException {
+    public void deleteAPI(API api) throws APIManagementException {
 
         try {
             int apiId = apiMgtDAO.getAPIID(api.getId());
@@ -4002,7 +4003,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            deleteAPIRevisions(api.getUuid(), organization);
+            deleteAPIRevisions(api.getUuid(), api.getOrganization());
             deleteAPIFromDB(api);
             if (log.isDebugEnabled()) {
                 String logMessage =
@@ -8548,8 +8549,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        Organization org = new Organization(requestedTenantDomain);
+    public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
+        Organization org = new Organization(organization);
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
@@ -8559,8 +8560,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
-                populateAPIInformation(uuid, requestedTenantDomain, org, api);
-                loadMediationPoliciesToAPI(api, requestedTenantDomain);
+                populateAPIInformation(uuid, organization, org, api);
+                loadMediationPoliciesToAPI(api, organization);
                 populateRevisionInformation(api, uuid);
                 populateAPITier(api);
                 populateAPIStatus(api);

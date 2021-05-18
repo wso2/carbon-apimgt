@@ -1544,7 +1544,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             //check if the API has subscriptions
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId());
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId(), organization);
             if (apiUsages != null && apiUsages.size() > 0) {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
             }
@@ -1556,8 +1556,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         usedProductResources.toString() + " are used by one or more API Products", log);
             }
 
+            api.setOrganization(organization);
             //deletes the API
-            apiProvider.deleteAPI(api, organization);
+            apiProvider.deleteAPI(api);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
