@@ -11650,6 +11650,16 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
+    public static boolean isDefaultApplicationCreationEnabled() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String createDefaultApp = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_STORE_CREATE_DEFAULT_APPLICATION);
+        if (StringUtils.isNotEmpty(createDefaultApp)) {
+            return Boolean.parseBoolean(createDefaultApp);
+        }
+        return false;
+    }
 
     /**
      * Get UUID by the API Identifier.

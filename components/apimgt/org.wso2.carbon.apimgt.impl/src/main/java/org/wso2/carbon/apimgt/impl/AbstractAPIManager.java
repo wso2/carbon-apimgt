@@ -1802,8 +1802,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
-            //Add a default application once subscriber is added
-            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+            if (APIUtil.isDefaultApplicationCreationEnabled() &&
+                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+                // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
         } catch (APIManagementException e) {
