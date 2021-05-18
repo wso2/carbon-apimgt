@@ -153,6 +153,9 @@ function Overview(props) {
     const [notFound, setNotFound] = useState(false);
     const { match: { params: { applicationId } } } = props;
     const [environment, setEnvironment] = useState(null);
+    const [selectedProtocol, setSelectedProtocol] = useState(null);
+    const [selectedEndpoint, setSelectedEndpoint] = useState(null);
+    const [topics, setTopics] = useState(null);
     useEffect(() => {
         const client = new API();
         // Get application
@@ -166,6 +169,13 @@ function Overview(props) {
                     setApplication(appInner);
                     if (appInner.solaceDeployedEnvironments !== null) {
                         setEnvironment(appInner.solaceDeployedEnvironments[0]);
+                        setSelectedProtocol(appInner.solaceDeployedEnvironments[0].solaceURLs[0].protocol);
+                        setSelectedEndpoint(appInner.solaceDeployedEnvironments[0].solaceURLs[0].endpointURL);
+                        if (appInner.solaceDeployedEnvironments[0].solaceURLs[0].protocol === 'mqtt') {
+                            setTopics(appInner.solaceDeployedEnvironments[0].SolaceTopicsObject.mqttSyntax);
+                        } else {
+                            setTopics(appInner.solaceDeployedEnvironments[0].SolaceTopicsObject.defaultSyntax);
+                        }
                     }
                 });
             }).catch((error) => {
@@ -188,10 +198,28 @@ function Overview(props) {
     }
     if (environment) {
         console.log(environment);
+        console.log(topics);
     }
     const handleChange = (event) => {
         setEnvironment(event.target.value);
         console.log(event.target.value);
+    };
+    const handleChangeProtocol = (event) => {
+        setSelectedProtocol(event.target.value);
+        // console.log(event.target.value);
+        let protocol;
+        environment.solaceURLs.map((e) => {
+            if (e.protocol === event.target.value) {
+                setSelectedEndpoint(e.endpointURL);
+                protocol = e.protocol;
+            }
+            return null;
+        });
+        if (protocol === 'mqtt') {
+            setTopics(environment.SolaceTopicsObject.mqttSyntax);
+        } else {
+            setTopics(environment.SolaceTopicsObject.defaultSyntax);
+        }
     };
     return (
         <>
@@ -309,7 +337,7 @@ function Overview(props) {
 
                     </TableBody>
                 </Table>
-                {application.containsSolaceApis === true && environment && (
+                {/* {application.containsSolaceApis === true && environment && (
                     <div className={classes.root}>
                         <Typography id='itest-api-details-bushiness-plans-head' variant='h5'>
                             <FormattedMessage
@@ -422,6 +450,115 @@ function Overview(props) {
                                         </Typography>
                                         <List className={classes.list}>
                                             {environment.subscribeTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </div>
+                )} */}
+                {application.containsSolaceApis === true && environment && topics && (
+                    <div className={classes.root}>
+                        <Typography id='itest-api-details-bushiness-plans-head' variant='h5'>
+                            <FormattedMessage
+                                id='solace.application.available.topics.heading'
+                                defaultMessage='Available Topics'
+                            />
+                        </Typography>
+                        <Typography variant='caption' gutterBottom>
+                            <FormattedMessage
+                                id='solace.application.available.topics.subheading'
+                                defaultMessage='Topics permitted to access from solace applications'
+                            />
+                        </Typography>
+                        <Paper className={classes.Paper}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <Grid container spacing={2}>
+                                        <Grid item>
+                                            <TextField
+                                                select
+                                                onChange={handleChange}
+                                                value={environment.environmentDisplayName}
+                                                style={{ maxWidth: '100%' }}
+                                                variant='outlined'
+                                                label='Environment Name'
+                                            >
+                                                {application.solaceDeployedEnvironments.map((e) => (
+                                                    <MenuItem key={e} value={e.environmentDisplayName}>
+                                                        {e.environmentDisplayName}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item>
+                                            <TextField
+                                                select
+                                                onChange={handleChangeProtocol}
+                                                value={selectedProtocol}
+                                                style={{ maxWidth: '100%' }}
+                                                variant='outlined'
+                                                label='Protocol'
+                                            >
+                                                {environment.solaceURLs.map((e) => (
+                                                    <MenuItem key={e.protocol} value={e.protocol}>
+                                                        {upperCaseString(e.protocol)}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item>
+                                            {/* <Paper id='gateway-envirounment' component='form' className={classes.urlPaper}>
+                                                <InputBase
+                                                    inputProps={{ 'aria-label': 'api url' }}
+                                                    value={selectedEndpoint}
+                                                    className={classes.input}
+                                                />
+                                            </Paper> */}
+                                            <TextField
+                                                style={{ minWidth: '200%' }}
+                                                label='Endpoint URL'
+                                                value={selectedEndpoint}
+                                                variant='outlined'
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.topics.publish'
+                                                defaultMessage='Publish Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {topics.publishTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.topics.subscribe'
+                                                defaultMessage='Subscribe Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {topics.subscribeTopics.map((t) => (
                                                 <ListItem>
                                                     <Typography gutterBottom align='left'>
                                                         {t}
