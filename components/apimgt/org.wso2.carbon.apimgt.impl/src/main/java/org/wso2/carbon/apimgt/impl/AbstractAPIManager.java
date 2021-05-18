@@ -804,7 +804,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException {
 
-        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier, null);
         if (uuid == null) {
             return false;
         } else {
@@ -3862,14 +3862,25 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
         // workflow status
         APIIdentifier apiId = api.getId();
-        WorkflowDTO workflow = APIUtil.getAPIWorkflowStatus(api.getUuid(), WF_TYPE_AM_API_STATE);
+        WorkflowDTO workflow;
+        if (api.isRevision()) {
+            workflow = APIUtil.getAPIWorkflowStatus(api.getRevisionedApiId(), WF_TYPE_AM_API_STATE);
+        } else {
+            workflow = APIUtil.getAPIWorkflowStatus(api.getUuid(), WF_TYPE_AM_API_STATE);
+        }
         if (workflow != null) {
             WorkflowStatus status = workflow.getStatus();
             api.setWorkflowStatus(status.toString());
         }
         // TODO try to use a single query to get info from db
         // Ratings
-        int internalId = apiMgtDAO.getAPIID(api.getUuid());
+        int internalId;
+        if (api.isRevision()) {
+            //Get the original API ID if revisioned
+            internalId = apiMgtDAO.getAPIID(api.getRevisionedApiId());
+        } else {
+            internalId = apiMgtDAO.getAPIID(api.getUuid());
+        }
         api.setRating(APIUtil.getAverageRating(internalId));
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
@@ -3892,7 +3903,12 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setAvailableTiers(availableTier);
 
         //Scopes
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getUuid(), requestedTenantDomain);
+        Map<String, Scope> scopeToKeyMapping;
+        if (api.isRevision()) {
+            scopeToKeyMapping = APIUtil.getAPIScopes(api.getRevisionedApiId(), requestedTenantDomain);
+        } else {
+            scopeToKeyMapping = APIUtil.getAPIScopes(api.getUuid(), requestedTenantDomain);
+        }
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
         //templates

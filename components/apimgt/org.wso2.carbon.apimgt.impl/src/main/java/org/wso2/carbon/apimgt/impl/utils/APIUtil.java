@@ -11668,7 +11668,7 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, null);
     }
 
     /**

@@ -7691,7 +7691,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (identifier.getUUID() != null) {
                 apiProductUUID = identifier.getUUID();
             } else {
-                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier);
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, null);
             }
         }
         deleteAPIProduct(
@@ -8559,9 +8559,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
-                populateAPIInformation(uuid, organization, org, api);
                 loadMediationPoliciesToAPI(api, organization);
                 populateRevisionInformation(api, uuid);
+                populateAPIInformation(uuid, organization, org, api);
                 populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);

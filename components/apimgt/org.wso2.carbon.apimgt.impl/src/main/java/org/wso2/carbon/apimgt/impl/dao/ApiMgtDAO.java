@@ -8042,12 +8042,17 @@ public class ApiMgtDAO {
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
-    public String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException {
-
+    public String getUUIDFromIdentifier(APIProductIdentifier identifier, Connection connection) throws APIManagementException {
+        boolean isNewConnection = false;
         String uuid = null;
+        PreparedStatement prepStmt = null;
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            PreparedStatement prepStmt = connection.prepareStatement(sql);
+        try {
+            if (connection == null) {
+                connection = APIMgtDBUtil.getConnection();
+                isNewConnection = true;
+            }
+            prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getName());
             prepStmt.setString(3, identifier.getVersion());
@@ -8059,6 +8064,11 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to retrieve the UUID for the API Product : " + identifier.getName() + '-'
                     + identifier.getVersion(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, null, null);
+            if (isNewConnection) {
+                APIMgtDBUtil.closeAllConnections(null, connection, null);
+            }
         }
         return uuid;
     }
@@ -14110,7 +14120,7 @@ public class ApiMgtDAO {
                 if (productIdentifier.getUUID() != null) {
                     uuid = productIdentifier.getUUID();
                 } else {
-                    uuid = getUUIDFromIdentifier(productIdentifier);
+                    uuid = getUUIDFromIdentifier(productIdentifier, connection);
                 }
                 int productId = getAPIID(uuid, connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
