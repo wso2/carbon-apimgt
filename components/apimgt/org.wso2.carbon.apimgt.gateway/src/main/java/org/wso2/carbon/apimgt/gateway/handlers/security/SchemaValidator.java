@@ -52,8 +52,10 @@ public class SchemaValidator extends AbstractHandler {
     private static OpenApiInteractionValidator getOpenAPIValidator(String swagger) {
 
         OpenAPIParser openAPIParser = new OpenAPIParser();
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
         SwaggerParseResult swaggerParseResult =
-                openAPIParser.readContents(swagger, new ArrayList<>(), new ParseOptions());
+                openAPIParser.readContents(swagger, new ArrayList<>(), options);
         OpenAPI openAPI = swaggerParseResult.getOpenAPI();
         return OpenApiInteractionValidator
                 .createFor(openAPI)
