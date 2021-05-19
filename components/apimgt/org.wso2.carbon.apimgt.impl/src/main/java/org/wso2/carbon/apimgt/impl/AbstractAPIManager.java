@@ -509,21 +509,21 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Get API by registry artifact id
      *
-     * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param uuid         Registry artifact id
+     * @param organization organization for the registry
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
 
         boolean tenantFlowStarted = false;
         try {
             Registry registry;
-            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
-                    (requestedTenantDomain)) {
+            if (organization != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
+                    (organization)) {
                 int id = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                startTenantFlow(requestedTenantDomain);
+                        .getTenantId(organization);
+                startTenantFlow(organization);
                 tenantFlowStarted = true;
                 registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
@@ -542,8 +542,7 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
                 API api = getApiForPublishing(registry, apiArtifact);
-                APIIdentifier apiIdentifier = api.getId();
-                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(apiIdentifier, WF_TYPE_AM_API_STATE);
+                WorkflowDTO workflowDTO = APIUtil.getAPIWorkflowStatus(api.getUuid(), WF_TYPE_AM_API_STATE);
                 if (workflowDTO != null) {
                     WorkflowStatus status = workflowDTO.getStatus();
                     api.setWorkflowStatus(status.toString());
@@ -800,7 +799,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException {
 
-        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier, null);
         if (uuid == null) {
             return false;
         } else {
@@ -1672,14 +1671,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+    public GraphqlComplexityInfo getComplexityDetails(String uuid) throws APIManagementException {
 
-        return apiMgtDAO.getComplexityDetails(apiIdentifier);
+        return apiMgtDAO.getComplexityDetails(uuid);
     }
 
-    public void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+    public void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
 
-        apiMgtDAO.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+        apiMgtDAO.addOrUpdateComplexityDetails(uuid, graphqlComplexityInfo);
     }
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
@@ -1790,6 +1789,11 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
+            if (APIUtil.isDefaultApplicationCreationEnabled() &&
+                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+                // Add a default application once subscriber is added
+                addDefaultApplicationForSubscriber(subscriber);
+            }
         } catch (APIManagementException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
@@ -1802,6 +1806,40 @@ public abstract class AbstractAPIManager implements APIManager {
     protected String getTenantDomain(String username) {
 
         return MultitenantUtils.getTenantDomain(username);
+    }
+
+    /**
+     * Add default application on the first time a subscriber is added to the database
+     *
+     * @param subscriber Subscriber
+     * @throws APIManagementException if an error occurs while adding default application
+     */
+    private void addDefaultApplicationForSubscriber(Subscriber subscriber) throws APIManagementException {
+
+        Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
+        if (APIUtil.isEnabledUnlimitedTier()) {
+            defaultApp.setTier(APIConstants.UNLIMITED_TIER);
+        } else {
+            Map<String, Tier> throttlingTiers = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE,
+                    getTenantDomain(subscriber.getName()));
+            Set<Tier> tierValueList = new HashSet<Tier>(throttlingTiers.values());
+            List<Tier> sortedTierList = APIUtil.sortTiers(tierValueList);
+            defaultApp.setTier(sortedTierList.get(0).getName());
+        }
+        //application will not be shared within the group
+        defaultApp.setGroupId("");
+        defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        defaultApp.setUUID(UUID.randomUUID().toString());
+        defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
+        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName(), tenantDomain);
+
+        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
+                tenantDomain, applicationId, defaultApp.getUUID(), defaultApp.getName(),
+                defaultApp.getTokenType(),
+                defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
+                subscriber.getName());
+        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     public void updateSubscriber(Subscriber subscriber)
@@ -2195,8 +2233,8 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 
-    public boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String organizationId) throws APIManagementException {
-        return apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(contextTemplate, organizationId);
+    public boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String organization) throws APIManagementException {
+        return apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(contextTemplate, organization);
     }
 
     @Override
@@ -2729,8 +2767,8 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organizationId) throws APIManagementException {
-        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, organizationId);
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, organization);
     }
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
@@ -3822,14 +3860,22 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
         // workflow status
         APIIdentifier apiId = api.getId();
-        WorkflowDTO workflow = APIUtil.getAPIWorkflowStatus(apiId, WF_TYPE_AM_API_STATE);
+        WorkflowDTO workflow;
+        String currentApiUuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        workflow = APIUtil.getAPIWorkflowStatus(currentApiUuid, WF_TYPE_AM_API_STATE);
         if (workflow != null) {
             WorkflowStatus status = workflow.getStatus();
             api.setWorkflowStatus(status.toString());
         }
         // TODO try to use a single query to get info from db
         // Ratings
-        int internalId = apiMgtDAO.getAPIID(apiId);
+        int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         api.setRating(APIUtil.getAverageRating(internalId));
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
@@ -3852,7 +3898,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setAvailableTiers(availableTier);
 
         //Scopes
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(currentApiUuid, requestedTenantDomain);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
         //templates
@@ -4062,10 +4108,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public ResourceFile getIcon(String apiId, String organizationId) throws APIManagementException {
+    public ResourceFile getIcon(String apiId, String organization) throws APIManagementException {
+
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
-                    .getThumbnail(new Organization(organizationId), apiId);
+                    .getThumbnail(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;

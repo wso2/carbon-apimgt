@@ -35,7 +35,7 @@ public class SQLConstants {
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ?";
 
     public static final String GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL=
-            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND ORGANIZATION_ID = ?";
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND ORGANIZATION = ?";
 
     public static final String GET_APPLICATION_REGISTRATION_SQL =
             " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = " +
@@ -961,7 +961,7 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE, ORGANIZATION_ID)" +
+                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
             " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
@@ -1007,7 +1007,7 @@ public class SQLConstants {
             "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   LOWER(APP.NAME) = LOWER(?)" + "   " +
-            "   AND ORGANIZATION_ID = ? " +
+            "   AND ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
     public static final String GET_APPLICATION_ID_SQL =
@@ -1320,6 +1320,8 @@ public class SQLConstants {
 
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
+    public static final String GET_API_ID_SQL_BY_UUID =
+            "SELECT API.API_ID FROM AM_API API WHERE API.API_UUID = ?";
     public static final String GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER = "SELECT API_ID,API_UUID,API_PROVIDER," +
             "API_NAME,API_VERSION,CONTEXT,API_TYPE,STATUS FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
             "API_VERSION = ? ";
@@ -1669,6 +1671,9 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER=? AND API_NAME=? AND API_VERSION=? AND ORGANIZATION_ID=? ";
 
+    public static final String REMOVE_FROM_API_SQL_BY_UUID =
+            "DELETE FROM AM_API WHERE API_UUID=?";
+
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
@@ -1829,9 +1834,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1842,9 +1845,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1855,9 +1856,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL";
 
@@ -2132,7 +2131,7 @@ public class SQLConstants {
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ? " +
-                    "AND ORGANIZATION_ID = ?";
+                    "AND ORGANIZATION = ?";
 
     public static final String GET_API_NAMES_MATCHES_CONTEXT=
             "SELECT DISTINCT API_NAME FROM AM_API WHERE CONTEXT_TEMPLATE = ?";

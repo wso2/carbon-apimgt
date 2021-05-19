@@ -313,21 +313,21 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param  apiId ID of the API
+     * @param  apiId UUID of the API
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
-    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+    GraphqlComplexityInfo getComplexityDetails(String apiId) throws APIManagementException;
 
 
     /**
      * Add or Updates the complexity details given the GraphqlComplexityInfo object
      *
-     * @param apiIdentifier         APIIdentifier
+     * @param uuid         API uuid
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException if failed to update complexity details
      */
-    void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+    void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException;
 
 
@@ -738,11 +738,11 @@ public interface APIManager {
      * Returns a list of api versions that matches the given context template
      *
      * @param apiName             API name in the payload
-     * @param organizationId      Organization Identifier
+     * @param organization      Organization Identifier
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
+    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organization)
             throws APIManagementException;
 
     /**
@@ -933,13 +933,13 @@ public interface APIManager {
 
     /**
      * @param searchQuery search query. ex : provider:admin
-     * @param orgId Identifier of an organization
+     * @param organization Identifier of an organization
      * @param start starting number
      * @param end ending number
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
             throws APIManagementException;
 
     /**

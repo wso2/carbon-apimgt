@@ -20,6 +20,8 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -49,6 +52,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -99,6 +103,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
+import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
@@ -3606,5 +3611,92 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         }
 
+    }
+
+    @Override
+    public Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException {
+        TreeSet<Tag> tempTagSet = new TreeSet<Tag>(new Comparator<Tag>() {
+            @Override
+            public int compare(Tag o1, Tag o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        Registry userRegistry = null;
+        boolean tenantFlowStarted = false;
+        String tagsQueryPath = null;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            userRegistry = holder.getRegistry();
+
+            tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
+            Map<String, String> params = new HashMap<String, String>();
+            params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
+            String userNameLocal;
+            if (holder.isAnonymousMode()) {
+                userNameLocal = APIConstants.WSO2_ANONYMOUS_USER;
+            } else {
+                userNameLocal = getTenantAwareUsername(ctx.getUserame());
+            }
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+
+            Map<String, Tag> tagsData = new HashMap<String, Tag>();
+
+            Map<String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
+            criteriaPublished.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {
+                {
+                    add(APIConstants.PUBLISHED);
+                }
+            });
+            // rxt api media type
+            List<TermData> termsPublished = GovernanceUtils.getTermDataList(criteriaPublished,
+                    APIConstants.API_OVERVIEW_TAG, APIConstants.API_RXT_MEDIA_TYPE, true);
+
+            if (termsPublished != null) {
+                for (TermData data : termsPublished) {
+                    tempTagSet.add(new Tag(data.getTerm(), (int) data.getFrequency()));
+                }
+            }
+
+            Map<String, List<String>> criteriaPrototyped = new HashMap<String, List<String>>();
+            criteriaPrototyped.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {
+                {
+                    add(APIConstants.PROTOTYPED);
+                }
+            });
+            // rxt api media type
+            List<TermData> termsPrototyped = GovernanceUtils.getTermDataList(criteriaPrototyped,
+                    APIConstants.API_OVERVIEW_TAG, APIConstants.API_RXT_MEDIA_TYPE, true);
+
+            if (termsPrototyped != null) {
+                for (TermData data : termsPrototyped) {
+                    tempTagSet.add(new Tag(data.getTerm(), (int) data.getFrequency()));
+                }
+            }
+            return tempTagSet;
+
+        } catch (RegistryException e) {
+            try {
+                // Before a tenant login to the store or publisher at least one time,
+                // a registry exception is thrown when the tenant store is accessed in anonymous mode.
+                // This fix checks whether query resource available in the registry. If not
+                // give a warn.
+                if (userRegistry != null && !userRegistry.resourceExists(tagsQueryPath)) {
+                    log.warn("Failed to retrieve tags query resource at " + tagsQueryPath);
+                    return Collections.EMPTY_SET;
+                }
+            } catch (RegistryException e1) {
+                // Even if we should ignore this exception, we are logging this as a warn log.
+                // The reason is that, this error happens when we try to add some additional logs in an error
+                // scenario and it does not affect the execution path.
+                log.warn("Unable to execute the resource exist method for tags query resource path : " + tagsQueryPath,
+                        e1);
+            }
+            throw new APIPersistenceException("Failed to get all the tags", e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
     }
 }

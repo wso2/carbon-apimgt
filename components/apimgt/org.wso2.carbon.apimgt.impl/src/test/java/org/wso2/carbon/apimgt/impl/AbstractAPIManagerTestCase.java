@@ -211,8 +211,8 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start,
-                                                               int end) throws APIManagementException {
+                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start,
+                        int end) throws APIManagementException {
                     return null;
                 }
 
@@ -451,7 +451,7 @@ public class AbstractAPIManagerTestCase {
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion();
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier)).thenReturn("xxxxx");
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, null)).thenReturn("xxxxx");
         Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier));
     }
 

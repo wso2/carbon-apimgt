@@ -86,17 +86,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
                 query = query
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organizationId, offset, limit);
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
+                    limit);
+            
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
@@ -124,7 +128,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving APIs";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        }
+        } 
         return null;
     }
 
@@ -155,10 +159,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organizationId);
-            API api = apiConsumer.getAPIbyUUID(apiId, organizationId);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
+                GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiId);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                 return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
@@ -242,13 +245,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationId);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -256,7 +253,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setEntryPoint("DEVPORTAL");
             comment.setUser(username);
             comment.setApiId(apiId);
-            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            String createdCommentId = apiConsumer.addComment(apiId, comment, username);
             Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
@@ -590,22 +587,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, organizationId);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-
-            float avgRating = apiConsumer.getAverageAPIRating(identifier);
+            float avgRating = apiConsumer.getAverageAPIRating(id);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
-                userRating = apiConsumer.getUserRating(identifier, username);
+                userRating = apiConsumer.getUserRating(id, username);
             }
             List<RatingDTO> ratingDTOList = new ArrayList<>();
-            JSONArray array = apiConsumer.getAPIRatings(identifier);
+            JSONArray array = apiConsumer.getAPIRatings(id);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -755,11 +743,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdThumbnailGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+    public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, organizationId);
+
+            //this will fail if user does not have access to the API or the API does not exist
+            apiConsumer.getLightweightAPIByUUID(apiId, organization);
+            ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, organization);
 
             if (thumbnailResource != null) {
                 return Response
@@ -777,7 +768,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        }
+        } 
         return null;
     }
 
@@ -834,34 +825,34 @@ public class ApisApiServiceImpl implements ApisApiService {
             switch (rating) {
                 //Below case 0[Rate 0] - is to remove ratings from a user
                 case 0: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_ZERO, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_ZERO, username);
                     break;
                 }
                 case 1: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_ONE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_ONE, username);
                     break;
                 }
                 case 2: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_TWO, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_TWO, username);
                     break;
                 }
                 case 3: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_THREE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_THREE, username);
                     break;
                 }
                 case 4: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_FOUR, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_FOUR, username);
                     break;
                 }
                 case 5: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_FIVE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_FIVE, username);
                     break;
                 }
                 default: {
                     RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
                 }
             }
-            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -889,14 +880,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, organizationId);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -932,7 +916,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
-            apiConsumer.removeAPIRating(identifier, username);
+            apiConsumer.removeAPIRating(apiId, username);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

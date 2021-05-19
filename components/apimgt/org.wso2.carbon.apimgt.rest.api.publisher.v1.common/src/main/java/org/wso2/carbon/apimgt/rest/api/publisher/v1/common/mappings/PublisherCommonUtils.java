@@ -678,13 +678,15 @@ public class PublisherCommonUtils {
      * @param apiDto     API DTO of the API
      * @param oasVersion Open API Definition version
      * @param username   Username
-     * @param organizationId  Organization Identifier
+     * @param organization  Organization Identifier
      * @return Created API object
      * @throws APIManagementException Error while creating the API
      * @throws CryptoException        Error while encrypting
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
-                       String organizationId) throws APIManagementException, CryptoException {
+                                                           String organization)
+            throws APIManagementException, CryptoException {
+
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
@@ -718,8 +720,7 @@ public class PublisherCommonUtils {
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDto.setTransport(websocketTransports);
         }*/
-
-        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organizationId);
+        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organization);
         validateScopes(apiToAdd);
         //validate API categories
         List<APICategory> apiCategories = apiToAdd.getApiCategories();
@@ -835,11 +836,13 @@ public class PublisherCommonUtils {
      * @param body        APIDTO of the API
      * @param apiProvider API Provider
      * @param username    Username
+     * @param organization  Organization Identifier
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
     public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username,
-                                              String organizationId) throws APIManagementException {
+                                              String organization)
+            throws APIManagementException {
 
         String context = body.getContext();
         //Make sure context starts with "/". ex: /pizza
@@ -891,7 +894,7 @@ public class PublisherCommonUtils {
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),
-                organizationId);
+                organization);
         if (apiVersions.size() > 0) {
             //If any previous version exists
             for (String version : apiVersions) {
@@ -911,10 +914,11 @@ public class PublisherCommonUtils {
             }
         } else {
             //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organizationId)) {
+            if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
                 throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                        + context + " in the organization" + " : " + organizationId, ExceptionCodes.API_ALREADY_EXISTS);
+                        "Error occurred while adding the API. A duplicate API context already exists for "
+                                + context + " in the organization" + " : " + organization, ExceptionCodes
+                        .from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
             }
         }
 
@@ -981,12 +985,11 @@ public class PublisherCommonUtils {
     }
 
     public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
-                                             ServiceEntry service, String organizationId) throws APIManagementException,
-            FaultGatewaysException {
+                ServiceEntry service, String organization) throws APIManagementException, FaultGatewaysException {
 
         if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                 ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-            return updateSwagger(apiId, response, true, organizationId);
+            return updateSwagger(apiId, response, true, organization);
         } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
             return updateAsyncAPIDefinition(apiId, response);
         }
@@ -1035,17 +1038,18 @@ public class PublisherCommonUtils {
      *
      * @param apiId    API Id
      * @param response response of a swagger definition validation call
-     * @param organizationId Identifier of an Organization
+     * @param organization  Organization Identifier
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
-                                       String organizationId)
+                                       String organization)
             throws APIManagementException, FaultGatewaysException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, organizationId);
+        //this will fail if user does not have access to the API or the API does not exist
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         if (isServiceAPI) {
@@ -1095,15 +1099,15 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organizationId);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organizationId);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
         existingAPI.setOrganizationId(organizationId);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organizationId);
-        // TODO see why we need to get it instead of passing same
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
+        // instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -1238,10 +1242,11 @@ public class PublisherCommonUtils {
      * @param documentDto Document DTO
      * @param apiId       API UUID
      * @return Added documentation
+     * @param organization  Identifier of an Organization
      * @throws APIManagementException If an error occurs when retrieving API Identifier,
      *                                when checking whether the documentation exists and when adding the documentation
      */
-    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String organizationId)
+    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String organization)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1264,11 +1269,11 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
 
-        if (apiProvider.isDocumentationExist(apiId, documentName, organizationId)) {
+        if (apiProvider.isDocumentationExist(apiId, documentName, organization)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        documentation = apiProvider.addDocumentation(apiId, documentation, organizationId);
+        documentation = apiProvider.addDocumentation(apiId, documentation, organization);
 
         return documentation;
     }

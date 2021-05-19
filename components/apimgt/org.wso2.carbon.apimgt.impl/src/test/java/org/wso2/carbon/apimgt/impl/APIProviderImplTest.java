@@ -31,7 +31,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -118,7 +117,6 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBean
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -142,14 +140,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.UUID;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.ArrayList;
 
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -190,6 +189,7 @@ public class APIProviderImplTest {
     private APIManagerConfiguration config;
     private APIPersistence apiPersistenceInstance;
     private String superTenantDomain;
+    private String apiUUID = "12640983654";
 
     @Before
     public void init() throws Exception {
@@ -412,6 +412,7 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        api.setUuid(UUID.randomUUID().toString());
         APIPublisher publisher = Mockito.mock(APIPublisher.class);
 
         Set<APIStore> apiStores = new HashSet<APIStore>();
@@ -432,7 +433,7 @@ public class APIProviderImplTest {
 
         PowerMockito.when(APIUtil.getExternalStores(-1)).thenReturn(apiStores);
         PowerMockito.when(APIUtil.isAPIsPublishToExternalAPIStores(-1)).thenReturn(true);
-        Mockito.when(apimgtDAO.getExternalAPIStoresDetails(apiId)).thenReturn(apiStores);
+        Mockito.when(apimgtDAO.getExternalAPIStoresDetails(api.getUuid())).thenReturn(apiStores);
         Mockito.when(publisher.isAPIAvailable(api, apiStore)).thenReturn(true);
         Mockito.when(publisher.isAPIAvailable(api, apiStore1)).thenReturn(true);
         Mockito.when(APIUtil.getExternalAPIStore(apiStore.getName(), -1)).thenReturn(apiStore);
@@ -444,6 +445,7 @@ public class APIProviderImplTest {
     public void testGetExternalAPIStores() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
+        String uuid = UUID.randomUUID().toString();
         PowerMockito.when(APIUtil.isAPIsPublishToExternalAPIStores(-1)).thenReturn(true, false);
         Set<APIStore> apiStores = new HashSet<APIStore>();
         APIStore apiStore = new APIStore();
@@ -455,10 +457,10 @@ public class APIProviderImplTest {
         apiStore1.setDisplayName("testName1");
         apiStore1.setName("testStoreName1");
         apiStores.add(apiStore1);
-        Mockito.when(apimgtDAO.getExternalAPIStoresDetails(apiId)).thenReturn(apiStores);
-        Assert.assertNotNull(apiProvider.getExternalAPIStores(apiId));
+        Mockito.when(apimgtDAO.getExternalAPIStoresDetails(uuid)).thenReturn(apiStores);
+        Assert.assertNotNull(apiProvider.getExternalAPIStores(uuid));
         // return null
-        Assert.assertNull(apiProvider.getExternalAPIStores(apiId));
+        Assert.assertNull(apiProvider.getExternalAPIStores(uuid));
     }
 
     @Test
@@ -1140,8 +1142,7 @@ public class APIProviderImplTest {
     @Test
     public void testDeleteWorkflowTask() throws APIManagementException, WorkflowException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        Mockito.when(apimgtDAO.getAPIID(apiId)).thenReturn(1111);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1111);
         WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
         WorkflowExecutor apiStateChangeWFExecutor = Mockito.mock(WorkflowExecutor.class);
@@ -1150,8 +1151,8 @@ public class APIProviderImplTest {
         WorkflowDTO workflowDTO = Mockito.mock(WorkflowDTO.class);
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(1111),
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(workflowDTO);
-        apiProvider.deleteWorkflowTask(apiId);
-        Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiId);
+        apiProvider.deleteWorkflowTask(apiUUID);
+        Mockito.verify(apimgtDAO, Mockito.times(1)).getAPIID(apiUUID);
     }
 
     @Test
@@ -1956,7 +1957,8 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
 
-        Mockito.when(apimgtDAO.getAPIIDFromIdentifierMatchingOrganization(apiId, "org1")).thenReturn(1);
+        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId)).thenReturn(apiUUID);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
 
         //Workflow has started already
         WorkflowDTO wfDTO = Mockito.mock(WorkflowDTO.class);
@@ -3357,7 +3359,7 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
-        Mockito.when(apimgtDAO.getAPIIDFromIdentifierMatchingOrganization(apiId, "org1")).thenReturn(1);
+        Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
 
         //Workflow has not started, this will trigger the executor
         WorkflowDTO wfDTO1 = Mockito.mock(WorkflowDTO.class);

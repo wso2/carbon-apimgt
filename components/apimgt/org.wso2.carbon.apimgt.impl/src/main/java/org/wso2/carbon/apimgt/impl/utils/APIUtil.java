@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -407,7 +408,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
 
             if (apiId == -1) {
                 return null;
@@ -496,7 +497,7 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
@@ -638,7 +639,14 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            String currentApiUuid;
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(artifact.getId());
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                currentApiUuid = apiRevision.getApiUUID();
+            } else {
+                currentApiUuid = artifact.getId();
+            }
+            int apiId = ApiMgtDAO.getInstance().getAPIID(currentApiUuid);
 
             if (apiId == -1) {
                 return null;
@@ -738,7 +746,7 @@ public final class APIUtil {
             api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
 
-            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
@@ -923,7 +931,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
             if (apiId == -1) {
                 return null;
             }
@@ -1049,7 +1057,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
             if (apiId == -1) {
                 return null;
             }
@@ -3328,7 +3336,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             api = new API(new APIIdentifier(providerName, apiName, apiVersion));
-            int apiId = ApiMgtDAO.getInstance().getAPIID(oldId);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(artifact.getId());
             if (apiId == -1) {
                 return null;
             }
@@ -3396,11 +3404,11 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            Map<String, Scope> scopeToKeyMapping = getAPIScopes(oldId, tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(artifact.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             HashMap<Integer, Set<String>> resourceScopes;
-            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(oldId);
+            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(artifact.getId());
 
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
@@ -4787,7 +4795,7 @@ public final class APIUtil {
         return uriTemplate;
     }
 
-    public static float getAverageRating(Identifier id) throws APIManagementException {
+    public static float getAverageRating(String id) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(id);
     }
@@ -4863,8 +4871,7 @@ public final class APIUtil {
 
     public static GraphqlComplexityInfo getComplexityDetails(API api) throws APIManagementException {
 
-        APIIdentifier identifier = api.getId();
-        return ApiMgtDAO.getInstance().getComplexityDetails(identifier);
+        return ApiMgtDAO.getInstance().getComplexityDetails(api.getUuid());
     }
 
     public static boolean isAPIManagementEnabled() {
@@ -6704,9 +6711,9 @@ public final class APIUtil {
      * @throws APIManagementException if failed to get applications for given subscriber
      */
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId,
-                                             String organizationId) throws APIManagementException {
+                                             String organization) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId, organizationId) ;
+        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId, organization);
     }
 
     /**
@@ -9807,7 +9814,7 @@ public final class APIUtil {
             apiProductIdentifier.setUUID(artifact.getId());
             apiProduct = new APIProduct(apiProductIdentifier);
             apiProduct.setUuid(artifact.getId());
-            apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
+            apiProduct.setRating(Float.toString(getAverageRating(artifact.getId())));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
             setResourceProperties(apiProduct, registry, artifactPath);
@@ -10320,16 +10327,16 @@ public final class APIUtil {
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param apiIdentifier Api identifier
+     * @param uuid Api uuid
      * @param workflowType  workflow type
      * @return WorkflowDTO
      * @throws APIManagementException
      */
-    public static WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
+    public static WorkflowDTO getAPIWorkflowStatus(String uuid, String workflowType)
             throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier);
+        int apiId = apiMgtDAO.getAPIID(uuid);
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
         return wfDTO;
@@ -11276,15 +11283,21 @@ public final class APIUtil {
     /**
      * Get scopes attached to the API.
      *
-     * @param identifier   API Identifier
+     * @param id   API uuid
      * @param tenantDomain Tenant Domain
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scope attached to API
      */
-    public static Map<String, Scope> getAPIScopes(APIIdentifier identifier, String tenantDomain)
+    public static Map<String, Scope> getAPIScopes(String id, String tenantDomain)
             throws APIManagementException {
-
-        Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(identifier);
+        String currentApiUuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(id);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = id;
+        }
+        Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(currentApiUuid);
         return getScopes(scopeKeys, tenantDomain);
     }
 
@@ -11651,6 +11664,16 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
+    public static boolean isDefaultApplicationCreationEnabled() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String createDefaultApp = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_STORE_CREATE_DEFAULT_APPLICATION);
+        if (StringUtils.isNotEmpty(createDefaultApp)) {
+            return Boolean.parseBoolean(createDefaultApp);
+        }
+        return true;
+    }
 
     /**
      * Get UUID by the API Identifier.
@@ -11672,7 +11695,7 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, null);
     }
 
     /**

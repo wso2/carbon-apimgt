@@ -44,12 +44,12 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param uuid Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String uuid, Comment comment, String user) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
@@ -161,11 +161,12 @@ public interface APIProvider extends APIManager {
      * Returns usage details of a particular published by a provider
      *
      * @param apiId API identifier
+     * @param organization
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
-    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organizationId) throws APIManagementException;
+    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organization) throws APIManagementException;
 
     /**
      * Returns usage details of a particular api product published by a provider
@@ -771,19 +772,19 @@ public interface APIProvider extends APIManager {
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws APIManagementException If failed to get all external stores for the API
      */
-    Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    Set<APIStore> getExternalAPIStores(String apiId) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws APIManagementException If failed to get all the published external stores for the API
      */
-    Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    Set<APIStore> getPublishedExternalAPIStores(String apiId) throws APIManagementException;
 
     /**
      * Checks the Gateway Type
@@ -1480,10 +1481,10 @@ public interface APIProvider extends APIManager {
     /**
      * Remove pending lifecycle state change task for the given api.
      *
-     * @param apiIdentifier api identifier
+     * @param uuid api uuid
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException;
+    void deleteWorkflowTask(String uuid) throws APIManagementException;
 
     /**
      * This method returns the security audit properties
@@ -1776,10 +1777,10 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment>
-            apiRevisionDeployments, String organizationId) throws APIManagementException;
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
      * Update the displayOnDevportal field in an existing deployments of an API
@@ -1826,21 +1827,10 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment>
-            apiRevisionDeployments, String organizationId) throws APIManagementException;
-
-    /**
-     * Adds a new APIRevisionDeployment to an existing API
-     *
-     * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
-     * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @throws APIManagementException if failed to add APIRevision
-     */
-    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
-                           String organizationId) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
      * Restore a provided API Revision as the working copy of the API
