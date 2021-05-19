@@ -5812,10 +5812,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization)
             throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organization);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
                     uuid);
             if (devPortalApi != null) {
@@ -5825,15 +5825,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
+                    populateAPIProductInformation(uuid, organization, org, apiProduct);
                     populateAPIStatus(apiProduct);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateAPIInformation(uuid, organization, org, api);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
-                    api = addTiersToAPI(api, requestedTenantDomain);
+                    api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
             } else {
