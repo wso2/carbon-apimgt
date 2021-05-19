@@ -881,6 +881,7 @@ public class SQLConstants {
             "   AND API.API_ID = SUBS.API_ID " +
             "   AND API.API_NAME = ? " +
             "   AND API.API_VERSION = ? " +
+            "   AND API.ORGANIZATION_ID= ? " +
             "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             " ORDER BY " +
             "   APP.NAME";
