@@ -1801,8 +1801,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
-            //Add a default application once subscriber is added
-            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+            if (APIUtil.isDefaultApplicationCreationEnabled() &&
+                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+                // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
         } catch (APIManagementException e) {
@@ -1842,7 +1843,7 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         defaultApp.setUUID(UUID.randomUUID().toString());
         defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
-        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName(), tenantDomain);
 
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
