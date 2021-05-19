@@ -926,7 +926,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganizationId()),
+            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
                     APIMapper.INSTANCE.toPublisherApi(api));
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
@@ -995,7 +995,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
-        addLocalScopes(api.getId(), tenantId, api.getUriTemplates(), api.getOrganizationId());
+        addLocalScopes(api.getId(), tenantId, api.getUriTemplates(), api.getOrganization());
         addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -1583,7 +1583,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
 
         Gson gson = new Gson();
-        String organizationId = api.getOrganizationId();
+        String organizationId = api.getOrganization();
         Map<String, String> oldMonetizationProperties = gson.fromJson(existingAPI.getMonetizationProperties().toString(),
                 HashMap.class);
         if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
@@ -1828,9 +1828,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the existing local scope keys attached for the API
         Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the existing URI templates for the API
-        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
+        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganization());
         // Get the new local scope keys from URI templates
-        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, api.getOrganizationId(), uriTemplates);
+        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, api.getOrganization(), uriTemplates);
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
         // Get the existing versioned local scope keys attached for the API
         Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
@@ -2524,7 +2524,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
                     try {
-                        apiPersistenceInstance.updateAPI(new Organization(api.getOrganizationId()), publisherAPI);
+                        apiPersistenceInstance.updateAPI(new Organization(api.getOrganization()), publisherAPI);
                     } catch (APIPersistenceException e) {
                         handleException("Error while persisting the updated API ", e);
                     }
@@ -2779,7 +2779,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
         List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
         List<API> apiList = getAPIVersionsByProviderAndName(api.getId().getProviderName(), api.getId().getName(),
-                api.getOrganizationId());
+                api.getOrganization());
         APIVersionComparator versionComparator = new APIVersionComparator();
         for (API oldAPI : apiList) {
             if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
@@ -3057,7 +3057,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                    String organizationId) throws APIManagementException {
 
         API existingAPI = getAPIbyUUID(existingApiId, organizationId);
-        existingAPI.setOrganizationId(organizationId);
+        existingAPI.setOrganization(organizationId);
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
                     ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, existingApiId));
@@ -4051,7 +4051,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(api.getUuid());
-            apiPersistenceInstance.deleteAPI(new Organization(api.getOrganizationId()), api.getUuid());
+            apiPersistenceInstance.deleteAPI(new Organization(api.getOrganization()), api.getUuid());
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -4088,7 +4088,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get local scopes for the given API which are not already assigned for different versions of the same API
         Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganization());
         // Detach all the resource scopes from the API resources in KM
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -5431,10 +5431,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
-==== BASE ====
 
-                int apiId = apiMgtDAO.getAPIID(apiIdentifier);
-==== BASE ====
                 String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
                 int apiId = apiMgtDAO.getAPIID(uuid);
                 WorkflowStatus apiWFState = null;
@@ -5632,7 +5629,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //targetStatus = apiArtifact.getLifecycleState();
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                     apiPersistenceInstance.changeAPILifeCycle(new Organization(organizationId), uuid, targetStatus);
-                    api.setOrganizationId(organizationId);
+                    api.setOrganization(organizationId);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     //Sending Notifications to existing subscribers
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
@@ -5771,7 +5768,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (deprecateOldVersions) {
                 String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
                 String apiName = api.getId().getName();
-                List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName, api.getOrganizationId());
+                List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName, api.getOrganization());
                 APIVersionComparator versionComparator = new APIVersionComparator();
                 for (API oldAPI : apiList) {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
@@ -8593,7 +8590,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
-                api.setOrganizationId(organizationId);
+                api.setOrganization(organization);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 loadMediationPoliciesToAPI(api, organization);
@@ -9724,72 +9721,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIProductRevision(apiRevision);
-    }
-
-    /**
-     * Adds a new APIRevisionDeployment to an existing API
-     *
-     * @param apiId                  API UUID
-     * @param apiRevisionId          API Revision UUID
-     * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @throws APIManagementException if failed to add APIRevision
-     */
-    @Override
-    public void deployAPIRevision(String apiId, String apiRevisionId,
-                                  List<APIRevisionDeployment> apiRevisionDeployments, String organizationId)
-            throws APIManagementException {
-
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-        if (apiIdentifier == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
-        }
-        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
-        if (apiRevision == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
-                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
-        }
-        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
-                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        API api = getAPIbyUUID(apiId, apiRevision);
-        Set<String> environmentsToAdd = new HashSet<>();
-        Map<String, String> gatewayVhosts = new HashMap<>();
-        Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-            for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
-                if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
-                        apiRevisionDeployment.getDeployment())) {
-                    environmentsToRemove.add(currentapiRevisionDeployment);
-                }
-            }
-            environmentsToAdd.add(apiRevisionDeployment.getDeployment());
-            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
-        }
-        if (environmentsToRemove.size() > 0) {
-            apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-            removeFromGateway(api, environmentsToRemove, environmentsToAdd);
-        }
-        GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, gatewayVhosts,
-                        environmentsToRemove);
-        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-        if (environmentsToAdd.size() > 0) {
-            gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
-        }
-        String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
-        String defaultVersion = getDefaultVersion(apiIdentifier);
-        apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
-        if (publishedDefaultVersion != null) {
-            if (apiIdentifier.getVersion().equals(defaultVersion)) {
-                api.setAsPublishedDefaultVersion(true);
-            }
-            if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
-                APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
-                        api.getId().getApiName(), publishedDefaultVersion);
-                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
-            }
-        }
     }
 
     @Override

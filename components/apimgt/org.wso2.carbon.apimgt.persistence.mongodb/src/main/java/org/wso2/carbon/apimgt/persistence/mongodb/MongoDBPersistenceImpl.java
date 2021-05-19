@@ -1060,7 +1060,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Set<Tag> getAllTags(Organization org) {
+    public Set<Tag> getAllTags(Organization org, UserContext ctx) {
         Set<Tag> tagSet = new HashSet<>();
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
         Bson statusFilter = Filters.or(

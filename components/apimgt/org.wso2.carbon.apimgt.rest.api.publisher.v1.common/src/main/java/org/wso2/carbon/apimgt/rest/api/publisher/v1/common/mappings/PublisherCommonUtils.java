@@ -364,7 +364,7 @@ public class PublisherCommonUtils {
         apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, originalAPI.getOrganizationId());
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -388,10 +388,10 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        apiToUpdate.setOrganizationId(originalAPI.getOrganizationId());
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
 
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganizationId());
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         // TODO use returend api
     }
 
@@ -639,7 +639,7 @@ public class PublisherCommonUtils {
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
                 // already defined values for the existing shared scope.
-                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, api.getOrganizationId())) {
+                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, api.getOrganization())) {
                     throw new APIManagementException(
                             "Scope " + scopeName + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
@@ -900,15 +900,15 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organizationId)) {
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
                         throw new APIManagementException(
                                 "Error occurred while " + "adding the API. A duplicate API already exists for "
-                            + context + " in the organization : " + organizationId , ExceptionCodes.API_ALREADY_EXISTS);
+                            + context + " in the organization : " + organization , ExceptionCodes.API_ALREADY_EXISTS);
                     } else {
                         throw new APIManagementException(
                                 "Error occurred while adding API. API with name " + body.getName()
                                         + " already exists with different context" + context  + " in the organization" +
-                                        " : " + organizationId,  ExceptionCodes.API_ALREADY_EXISTS);
+                                        " : " + organization,  ExceptionCodes.API_ALREADY_EXISTS);
                     }
                 }
             }
@@ -971,7 +971,7 @@ public class PublisherCommonUtils {
             //assigning the owner as a different user
             apiToAdd.setApiOwner(provider);
         }
-        apiToAdd.setOrganizationId(organizationId);
+        apiToAdd.setOrganization(organization);
 
 
         if (body.getKeyManagers() instanceof List) {
@@ -1103,7 +1103,7 @@ public class PublisherCommonUtils {
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        existingAPI.setOrganizationId(organizationId);
+        existingAPI.setOrganization(organization);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it

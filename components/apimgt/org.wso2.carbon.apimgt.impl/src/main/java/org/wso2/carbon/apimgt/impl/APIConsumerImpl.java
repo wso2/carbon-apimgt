@@ -4009,7 +4009,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return requestApprovalForApplicationRegistration(userId, applicationName, tokenType, callbackUrl,
                 allowedDomains, validityTime, tokenScope, groupingId, jsonString, keyManagerName, tenantDomain, false);
     }
-
+    
     /**
      * This method specifically implemented for REST API by removing application and data access logic
      * from host object layer. So as per new implementation we need to pass requested scopes to this method

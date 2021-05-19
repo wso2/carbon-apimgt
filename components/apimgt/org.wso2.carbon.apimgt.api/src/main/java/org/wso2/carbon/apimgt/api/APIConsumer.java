@@ -524,6 +524,34 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Creates a request for getting Approval for Application Registration.
+     *
+     * @param userId          Subscriber name.
+     * @param applicationName of the Application.
+     * @param tokenType       Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl     callback URL
+     * @param allowedDomains  allowedDomains for token.
+     * @param validityTime    validity time period.
+     * @param tokenScope      Scopes for the requested tokens.
+     * @param groupingId      APIM application id.
+     * @param jsonString      Callback URL for the Application.
+     * @param keyManagerName  name of the key manager
+     * @param tenantDomain    tenant domain for the app registration request
+     * @throws APIManagementException if failed to applications for given subscriber
+     * @deprecated Use {@link #requestApprovalForApplicationRegistration(String, String, String, String, String[],
+     * String, String, String, String, String, String, boolean)} instead
+     */
+    @Deprecated
+    Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                 String tokenType,
+                                                                 String callbackUrl, String[] allowedDomains,
+                                                                 String validityTime,
+                                                                 String tokenScope, String groupingId,
+                                                                 String jsonString, String keyManagerName,
+                                                                 String tenantDomain)
+            throws APIManagementException;
+
+    /**
      * Creates a request for application update.
      *
      * @param userId          Subscriber name.

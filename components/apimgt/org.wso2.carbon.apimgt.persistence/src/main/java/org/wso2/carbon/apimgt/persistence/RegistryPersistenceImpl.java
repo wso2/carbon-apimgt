@@ -3514,11 +3514,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Set<Tag> getAllTags(Organization org) {
-        return null;
-    }
-
-    @Override
     public List<APICategory> getAllCategories(Organization org) throws APIPersistenceException {
         return null;
     }

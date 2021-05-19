@@ -2849,7 +2849,7 @@ public class ApiMgtDAO {
             ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
             ps.setString(2, identifier.getApiName());
             ps.setString(3, identifier.getVersion());
-            ps.setString(4, organizationId);
+            ps.setString(4, organization);
             result = ps.executeQuery();
 
             Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
@@ -5603,7 +5603,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUUID());
-            prepStmt.setString(11, api.getOrganizationId());
+            prepStmt.setString(11, api.getOrganization());
             prepStmt.setString(12, APIConstants.CREATED);
             prepStmt.execute();
 
@@ -6951,7 +6951,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(9, api.getId().getApiName());
             prepStmt.setString(10, api.getId().getVersion());
-            prepStmt.setString(11, api.getOrganizationId());
+            prepStmt.setString(11, api.getOrganization());
             prepStmt.execute();
             //}
 
@@ -14566,7 +14566,7 @@ public class ApiMgtDAO {
         List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
 
-        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier, api.getOrganization());
 
         for (URITemplate uriTemplate : uriTemplatesOfAPI) {
             Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();

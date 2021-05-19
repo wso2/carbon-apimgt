@@ -742,7 +742,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationId);
-            originalAPI.setOrganizationId(organizationId);
+            originalAPI.setOrganization(organizationId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
@@ -776,7 +776,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationId);
-            originalAPI.setOrganizationId(organizationId);
+            originalAPI.setOrganization(organizationId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
@@ -1471,7 +1471,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
-                    api.setOrganizationId(organizationId);
+                    api.setOrganization(organizationId);
                     apiProvider.updateAPI(api);
                 }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
@@ -1543,7 +1543,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             api.setOrganization(organization);
             //deletes the API
-            api.setOrganizationId(organizationId);
+            api.setOrganization(organizationId);
             apiProvider.deleteAPI(api);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -2486,6 +2486,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier;
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
@@ -2805,6 +2806,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
@@ -2838,7 +2840,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, organizationId);
-            api.setOrganizationId(organizationId);
+            api.setOrganization(organizationId);
             String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"").build();
@@ -3214,7 +3216,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Import the API and Definition
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
-            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
+            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineAPIDefinition,
                     apiDTOFromProperties, fileDetail, null, organization);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
@@ -3414,21 +3416,22 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
-
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
-                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, apiToAdd.getOrganizationId());
+                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, apiToAdd.getOrganization());
             } else if (fileDetail != null && fileInputStream != null) {
                 PublisherCommonUtils
                         .addWsdl(fileDetail.getContentType().toString(), fileInputStream, apiToAdd, apiProvider,
-                                apiToAdd.getOrganizationId());
+                                apiToAdd.getOrganization());
             }
 
             //add the generated swagger definition to SOAP
             APIDefinition oasParser = new OAS2Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
-            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, apiToAdd.getOrganizationId());
+            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, apiToAdd.getOrganization());
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain);

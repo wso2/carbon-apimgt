@@ -501,7 +501,7 @@ public final class APIUtil {
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getOrganizationId());
+                    api.getOrganization());
 
             for (URITemplate uriTemplate : uriTemplates) {
                 List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
@@ -750,7 +750,7 @@ public final class APIUtil {
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getOrganizationId());
+                    api.getOrganization());
 
             // AWS Lambda: get paths
             OASParserUtil oasParserUtil = new OASParserUtil();
