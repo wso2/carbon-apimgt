@@ -58,7 +58,7 @@ public class CertificateMgtDAO {
     private static CertificateMgtDAO certificateMgtDAO = new CertificateMgtDAO();
 
     /**
-     * Private constructorq
+     * Private constructor
      */
     private CertificateMgtDAO() {
 
