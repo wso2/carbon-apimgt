@@ -348,6 +348,39 @@ paths:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema"
 
+  /apis/{apiId}/idps:
+    get:
+      tags:
+        - Identity Providers
+      summary: Retrieve the Identity Providers associated with the API
+      description: |
+        This operation can be used to retrieve the all Identity Providers associated with the API
+      operationId: getIdpsOfAPI
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Identity Providers list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManagerList'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+      x-code-samples:
+        - lang: Curl
+          source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/devportal/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/idps"
+
   /apis/{apiId}/sdks/{language}:
     get:
       tags:

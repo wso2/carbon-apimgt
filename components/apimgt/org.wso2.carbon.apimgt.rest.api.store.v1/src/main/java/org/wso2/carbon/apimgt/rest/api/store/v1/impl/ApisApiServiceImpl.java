@@ -25,9 +25,11 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
@@ -42,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -69,6 +72,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUti
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -1006,6 +1011,35 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
+        return null;
+    }
+
+    @Override
+    public Response getIdpsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        String organization = APIUtils.getOrganization(messageContext);
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        List<String> configuredIDPs = new ArrayList<>();
+        if (!apiTypeWrapper.isAPIProduct()) {
+            API api = apiTypeWrapper.getApi();
+            configuredIDPs = api.getKeyManagers();
+        }
+        APIAdmin apiAdmin = new APIAdminImpl();
+        try {
+            List<KeyManagerConfigurationDTO> idpConfigurations = new ArrayList<>();
+            if (!configuredIDPs.isEmpty() && configuredIDPs.contains(APIConstants.KeyManager
+                    .API_LEVEL_ALL_KEY_MANAGERS)) {
+                idpConfigurations = apiAdmin.getKeyManagerConfigurationsByTenant(organization);
+            } else {
+                for (String idp : configuredIDPs) {
+                    idpConfigurations.add(apiAdmin.getKeyManagerConfigurationByName(organization, idp));
+                }
+            }
+            return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(idpConfigurations)).build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving IDP configurations associated " +
+                    "with API with ID " + apiId, log);
+        }
         return null;
     }
 
