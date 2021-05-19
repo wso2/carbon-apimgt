@@ -9434,7 +9434,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to restore APIRevision
      */
     @Override
-    public void restoreAPIRevision(String apiId, String apiRevisionId, String tenantDomain) throws APIManagementException {
+    public void restoreAPIRevision(String apiId, String apiRevisionId, String organizationId)
+            throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -9447,8 +9448,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
-                    apiIdentifier.getUUID(), apiRevision.getId());
+            apiPersistenceInstance
+                    .restoreAPIRevision(new Organization(organizationId), apiIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.

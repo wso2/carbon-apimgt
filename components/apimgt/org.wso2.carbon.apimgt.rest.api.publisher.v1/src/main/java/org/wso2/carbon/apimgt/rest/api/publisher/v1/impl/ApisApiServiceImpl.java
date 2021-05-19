@@ -4480,14 +4480,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         //validate if api exists
         APIInfo apiInfo = validateAPIExistence(apiId);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        apiProvider.restoreAPIRevision(apiId, revisionId, tenantDomain);
+        apiProvider.restoreAPIRevision(apiId, revisionId, organization);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
