@@ -7541,19 +7541,32 @@ public class ApiMgtDAO {
             int id = -1;
             String uuid;
             Identifier identifier;
+            String currentApiUuid;
             if (apiTypeWrapper.isAPIProduct()) {
                 identifier = apiTypeWrapper.getApiProduct().getId();
                 uuid = apiTypeWrapper.getApiProduct().getUuid();
+                APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+                if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                    currentApiUuid = apiRevision.getApiUUID();
+                } else {
+                    currentApiUuid = uuid;
+                }
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
                 uuid = apiTypeWrapper.getApi().getUuid();
+                APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+                if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                    currentApiUuid = apiRevision.getApiUUID();
+                } else {
+                    currentApiUuid = uuid;
+                }
             }
-            id = getAPIID(uuid, connection);
+            id = getAPIID(currentApiUuid, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 throw new APIManagementException(msg);
             }
-            commentList = getComments(uuid, parentCommentID, limit, offset, connection);
+            commentList = getComments(currentApiUuid, parentCommentID, limit, offset, connection);
         } catch (SQLException e) {
             handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
         }
