@@ -123,6 +123,7 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -900,6 +901,12 @@ public class APIProviderImplTest {
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
+
+        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
+        PowerMockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+        PowerMockito.when(userStoreManager.isExistingUser("admin")).thenReturn(true);
 
         SortedMap<String, String> claimValues = new TreeMap<String, String>();
         claimValues.put("claim1", "http://wso2.org/claim1");
