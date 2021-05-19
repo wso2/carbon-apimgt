@@ -212,7 +212,17 @@ function Properties(props) {
     };
 
     const isKeyword = (itemValue) => {
-        return keywords.includes(itemValue);
+        if (itemValue === null) {
+            return false;
+        }
+        return keywords.includes(itemValue.toLowerCase());
+    };
+    const hasWhiteSpace = (itemValue) => {
+        if (itemValue === null) {
+            return false;
+        }
+        const whitespaceChars = [' ', '\t', '\n'];
+        return Array.from(itemValue).some(char => whitespaceChars.includes(char));
     };
     /**
      *
@@ -285,6 +295,15 @@ function Properties(props) {
                     property.name.keyword.error`,
                 defaultMessage:
                 'Property name can not be a system reserved keyword',
+            }));
+            return false;
+        } else if (hasWhiteSpace(fieldKey)) {
+            Alert.warning(intl.formatMessage({
+                id:
+                    `Apis.Details.Properties.Properties.
+                    property.name.has.whitespaces`,
+                defaultMessage:
+                    'Property name can not have any whitespaces in it',
             }));
             return false;
         } else {
@@ -554,12 +573,12 @@ function Properties(props) {
                                                         onChange={handleChange('propertyKey')}
                                                         onKeyDown={handleKeyDown('propertyKey')}
                                                         helperText={validateEmpty(propertyKey) ? ''
-                                                            : iff(isKeyword(propertyKey), intl.formatMessage({
+                                                            : iff((isKeyword(propertyKey) || hasWhiteSpace(propertyKey)), intl.formatMessage({
                                                                 id: `Apis.Details.Properties.Properties.
                                                                     show.add.property.invalid.error`,
                                                                 defaultMessage: 'Invalid property name',
                                                             }), '')}
-                                                        error={validateEmpty(propertyKey) || isKeyword(propertyKey)}
+                                                        error={validateEmpty(propertyKey) || isKeyword(propertyKey) || hasWhiteSpace(propertyKey)}
                                                         disabled={isRestricted(
                                                             ['apim:api_create', 'apim:api_publish'],
                                                             api,
