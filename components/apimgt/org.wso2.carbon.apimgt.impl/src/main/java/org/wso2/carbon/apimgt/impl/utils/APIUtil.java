@@ -11658,7 +11658,7 @@ public final class APIUtil {
         if (StringUtils.isNotEmpty(createDefaultApp)) {
             return Boolean.parseBoolean(createDefaultApp);
         }
-        return false;
+        return true;
     }
 
     /**
