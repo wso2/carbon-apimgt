@@ -238,6 +238,9 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
+            URI uri = new URI(endpoint);
+            endpoint = uri.getHost();
+
             if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Call the search certificate api to get the filtered certificates for " +
@@ -255,7 +258,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             CertificatesDTO certificatesDTO = CertificateRestApiUtils.getPaginatedCertificates(certificates, limit,
                     offset, query);
             return Response.status(Response.Status.OK).entity(certificatesDTO).build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the certificates.", e, log);
         }
         return null;
