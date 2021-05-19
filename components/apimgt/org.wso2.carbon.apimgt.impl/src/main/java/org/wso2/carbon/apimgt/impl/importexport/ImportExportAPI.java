@@ -139,7 +139,7 @@ public interface ImportExportAPI {
      *                            existing dependent APIs of an API Product.
      * @param importAPIs          Whether to import the dependent APIs or not.
      * @param tokenScopes         Scopes in the passed token from the REST API call.
-     * @param organization
+     * @param organization  Organization Identifier
      * @return Imported API Product
      * @throws APIManagementException If there is an error in importing an API Product
      */
