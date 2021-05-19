@@ -52,16 +52,13 @@ import java.util.List;
  */
 public class CertificateMgtDAO {
 
-<<<<<<< HEAD
-=======
     private static final String CERTIFICATE_TABLE_NAME = "AM_CERTIFICATE_METADATA";
     private static final String PERCENTAGE_MARK = "%";
->>>>>>> 9ddd395ad32... Fix for not displaing endpoint certificate details in publisher endpoints tab.
     private static Log log = LogFactory.getLog(CertificateMgtDAO.class);
     private static CertificateMgtDAO certificateMgtDAO = new CertificateMgtDAO();
 
     /**
-     * Private constructor
+     * Private constructorq
      */
     private CertificateMgtDAO() {
 
