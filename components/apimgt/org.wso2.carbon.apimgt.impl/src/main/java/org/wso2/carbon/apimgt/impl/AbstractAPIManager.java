@@ -1339,11 +1339,11 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
 
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organization);
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
@@ -1574,17 +1574,17 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param apiId                 artifact id of the api
      * @param docId                 artifact id of the document
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @param organization tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+    public Documentation getDocumentation(String apiId, String docId, String organization)
             throws APIManagementException {
 
         Documentation documentation = null;
         try {
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(new Organization(requestedTenantDomain), apiId, docId);
+                    .getDocumentation(new Organization(organization), apiId, docId);
             if (doc != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Retrieved doc: " + doc);
@@ -1602,12 +1602,12 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException {
 
         try {
             DocumentContent content = apiPersistenceInstance
-                    .getDocumentationContent(new Organization(requestedTenantDomain), apiId, docId);
+                    .getDocumentationContent(new Organization(organization), apiId, docId);
             DocumentationContent docContent = null;
             if (content != null) {
                 docContent = DocumentMapper.INSTANCE.toDocumentationContent(content);

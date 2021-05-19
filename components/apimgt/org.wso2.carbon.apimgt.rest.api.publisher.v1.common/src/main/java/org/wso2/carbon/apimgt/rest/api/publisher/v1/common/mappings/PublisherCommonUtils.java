@@ -1277,17 +1277,17 @@ public class PublisherCommonUtils {
      * @param apiProvider   API Provider
      * @param apiId         API/API Product UUID
      * @param documentId    Document ID
-     * @param tenantDomain  Tenant domain of the API/API Product
+     * @param organization  Tenant domain of the API/API Product
      * @param inlineContent Inline content string
      * @throws APIManagementException If an error occurs while adding the documentation content
      */
     public static void addDocumentationContent(Documentation documentation, APIProvider apiProvider, String apiId,
-                                               String documentId, String tenantDomain, String inlineContent)
+                                               String documentId, String organization, String inlineContent)
             throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         content.setSourceType(DocumentationContent.ContentSourceType.valueOf(documentation.getSourceType().toString()));
         content.setTextContent(inlineContent);
-        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+        apiProvider.addDocumentationContent(apiId, documentId, organization, content);
     }
 
     /**

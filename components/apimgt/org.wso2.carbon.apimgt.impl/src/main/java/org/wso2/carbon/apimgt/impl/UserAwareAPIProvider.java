@@ -219,9 +219,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation, orgId);
+        return super.updateDocumentation(apiId, documentation, organization);
     }
 
     @Override
