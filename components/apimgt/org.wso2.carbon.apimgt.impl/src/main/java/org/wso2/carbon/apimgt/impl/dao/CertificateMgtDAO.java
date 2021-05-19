@@ -53,6 +53,7 @@ import java.util.List;
 public class CertificateMgtDAO {
 
     private static final String CERTIFICATE_TABLE_NAME = "AM_CERTIFICATE_METADATA";
+    private static final String PERCENTAGE_MARK = "%";
     private static Log log = LogFactory.getLog(CertificateMgtDAO.class);
     private static CertificateMgtDAO certificateMgtDAO = null;
     private static boolean initialAutoCommit = false;
@@ -454,7 +455,7 @@ public class CertificateMgtDAO {
 
             if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
                 preparedStatement.setString(2, alias);
-                preparedStatement.setString(3, endpoint);
+                preparedStatement.setString(3, PERCENTAGE_MARK + endpoint + PERCENTAGE_MARK);
             }
             resultSet = preparedStatement.executeQuery();
 

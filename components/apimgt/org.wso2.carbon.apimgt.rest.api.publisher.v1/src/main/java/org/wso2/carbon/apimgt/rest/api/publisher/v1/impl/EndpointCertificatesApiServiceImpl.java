@@ -238,6 +238,13 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
+            try {
+                URI uri = new URI(endpoint);
+                endpoint = uri.getHost();
+            } catch (Exception ignored) {
+                // Parsing the value of the endpoint as is, if the endpoint is not in the format of an URL.
+            }
+
             if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Call the search certificate api to get the filtered certificates for " +

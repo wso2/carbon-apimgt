@@ -3370,7 +3370,7 @@ public class SQLConstants {
         public static final String GET_CERTIFICATE_ALL_TENANTS = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE " +
                 "(ALIAS=?)";
         public static final String GET_CERTIFICATE_TENANT = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
-                "AND (ALIAS=? OR END_POINT=?)";
+                "AND (ALIAS=? OR END_POINT LIKE ?)";
 
         public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
                 "AND ALIAS=?";
