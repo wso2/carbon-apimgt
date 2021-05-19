@@ -134,7 +134,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-        return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
     }
 
 
@@ -682,8 +683,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String message = "Error generating the SDK. API id or language should not be empty";
             RestApiUtil.handleBadRequest(message, log);
         }
-        String tenant = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
-        APIDTO api = getAPIByAPIId(apiId, tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        APIDTO api = getAPIByAPIId(apiId, organization);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
@@ -1060,7 +1061,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
                                                      MessageContext messageContext) {
-        APIDTO apiInfo = getAPIByAPIId(apiId, xWSO2Tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        APIDTO apiInfo = getAPIByAPIId(apiId, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
 
@@ -1081,17 +1083,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByAPIId(String apiId, String xWSO2Tenant) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+    private APIDTO getAPIByAPIId(String apiId, String organization) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
 
             // Extracting clicked API name by the user, for the recommendation system
@@ -1101,7 +1096,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+                return APIMappingUtil.fromAPItoDTO(api, organization);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
@@ -1114,9 +1109,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

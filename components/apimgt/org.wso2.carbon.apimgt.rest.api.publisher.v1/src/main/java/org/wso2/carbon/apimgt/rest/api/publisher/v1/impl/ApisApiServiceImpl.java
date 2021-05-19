@@ -322,7 +322,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIDTO apiToReturn = getAPIByID(apiId, apiProvider);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         return Response.ok().entity(apiToReturn).build();
     }
 
@@ -3981,7 +3982,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPISubscriptionPolicies(String apiId, String ifNoneMatch, String xWSO2Tenant,
                                                      MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIDTO apiInfo = getAPIByID(apiId, apiProvider);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true);
 
@@ -4000,10 +4002,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByID(String apiId, APIProvider apiProvider) {
+    private APIDTO getAPIByID(String apiId, APIProvider apiProvider, String organization) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
 
             return APIMappingUtil.fromAPItoDTO(api, apiProvider);
         } catch (APIManagementException e) {
@@ -4509,15 +4510,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
 
         //validate if api exists
         APIInfo apiInfo = validateAPIExistence(apiId);
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        apiProvider.restoreAPIRevision(apiId, revisionId, tenantDomain);
-        APIDTO apiToReturn = getAPIByID(apiId, apiProvider);
+        apiProvider.restoreAPIRevision(apiId, revisionId, organization);
+        APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
     }
