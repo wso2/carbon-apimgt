@@ -1390,4 +1390,7 @@
         {% endfor %}
     </ExtensionListeners>
     {% endif %}
+    {% if apim.organization_resolver.resolver is defined %}
+     <OrganizationResolver>{{apim.organization_resolver.resolver}}</OrganizationResolver>
+    {% endif %}
 </APIManager>
