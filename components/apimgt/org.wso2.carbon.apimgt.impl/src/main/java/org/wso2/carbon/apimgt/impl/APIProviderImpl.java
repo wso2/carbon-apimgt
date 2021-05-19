@@ -5528,7 +5528,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIStateChangeResponse changeLifeCycleStatus(String orgId,String uuid, String action,
+    public APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action,
                             Map<String, Boolean> checklist) throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
@@ -5537,7 +5537,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
             //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
-            API api = getAPIbyUUID(uuid, this.tenantDomain);
+            API api = getAPIbyUUID(uuid, orgId);
             String targetStatus;
             if (api != null) {
 
@@ -5619,7 +5619,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     // if retired Delete Existing Gateway Deployments.
                     if (APIConstants.RETIRED.equals(targetStatus)){
-                        deleteAPIRevisions(uuid,tenantDomain);
+                        deleteAPIRevisions(uuid, orgId);
                     }
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                         apiMgtDAO.recordAPILifeCycleEvent(apiId, currentStatus.toUpperCase(),
