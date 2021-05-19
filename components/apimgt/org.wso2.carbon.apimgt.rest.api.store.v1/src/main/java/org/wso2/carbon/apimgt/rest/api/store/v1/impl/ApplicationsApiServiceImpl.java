@@ -1203,6 +1203,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             appToken.setTokenScopes(Arrays.asList(response.getScopes()));
                         }
                         appToken.setValidityTime(response.getValidityPeriod());
+                        // for solace applications
+                        if (ApplicationMappingUtil.containsSolaceApis(application)) {
+                            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(apiConsumer.getApplicationByUUID(applicationId));
+                            apiConsumer.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
+                        }
                         return Response.ok().entity(appToken).build();
                     } catch (APIManagementException e) {
                         RestApiUtil.handleBadRequest(e.getErrorHandler(), log);

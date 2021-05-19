@@ -6719,7 +6719,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 
                 // create new app
-                log.info("Solace application '" +application.getName()+ "' not found in Solace Broker. Creating new application......");
+                /*log.info("Solace application '" +application.getName()+ "' not found in Solace Broker. Creating new application......");
                 HttpResponse response4 = solaceAdminApis.createApplication(organization, application, apiProducts);
 
                 if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
@@ -6727,6 +6727,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     log.error("Error while creating Solace application '" +application.getName()+ "'");
                     throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().getReasonPhrase());
+                }*/
+
+                String responseString = EntityUtils.toString(response2.getEntity());
+                org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                if (jsonObject.getJSONObject("message") != null) {
+                    org.json.JSONObject messageObject = jsonObject.getJSONObject("message");
+                    if (messageObject.getInt("statusCode") == HttpStatus.SC_NOT_FOUND) {
+                        // create new app
+                        log.info("Solace application '" +application.getName()+ "' not found in Solace Broker. Creating new application......");
+                        HttpResponse response4 = solaceAdminApis.createApplication(organization, application, apiProducts);
+
+                        if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                            log.info("Solace application '" +application.getName()+ "' created successfully");
+                        } else {
+                            log.error("Error while creating Solace application '" +application.getName()+ "'");
+                            throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().getReasonPhrase());
+                        }
+                    } else {
+                        log.error("Error while searching for application '" +application.getName()+ "'");
+                        throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
+                    }
+                } else {
+                    log.error("Error while searching for application '" +application.getName()+ "'");
+                    throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
                 }
 
             } else {
