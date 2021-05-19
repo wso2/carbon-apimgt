@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -380,5 +381,15 @@ public class RestApiAdminUtils {
         FileUtils.copyDirectory(backupDirectory, tenantThemeDirectory);
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
+    }
+
+    /**
+     * Retrieve organization from msg ctx.
+     *
+     * @param messageContext msg ctx
+     * @return organization
+     */
+    public static String getOrganization(MessageContext messageContext) {
+        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
     }
 }
