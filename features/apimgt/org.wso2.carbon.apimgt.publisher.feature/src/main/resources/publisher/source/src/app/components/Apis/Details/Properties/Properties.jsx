@@ -222,7 +222,7 @@ function Properties(props) {
             return false;
         }
         const whitespaceChars = [' ', '\t', '\n'];
-        return Array.from(itemValue).some(char => whitespaceChars.includes(char));
+        return Array.from(itemValue).some((char) => whitespaceChars.includes(char));
     };
     /**
      *
@@ -573,12 +573,14 @@ function Properties(props) {
                                                         onChange={handleChange('propertyKey')}
                                                         onKeyDown={handleKeyDown('propertyKey')}
                                                         helperText={validateEmpty(propertyKey) ? ''
-                                                            : iff((isKeyword(propertyKey) || hasWhiteSpace(propertyKey)), intl.formatMessage({
+                                                            : iff((isKeyword(propertyKey)
+                                                                || hasWhiteSpace(propertyKey)), intl.formatMessage({
                                                                 id: `Apis.Details.Properties.Properties.
                                                                     show.add.property.invalid.error`,
                                                                 defaultMessage: 'Invalid property name',
                                                             }), '')}
-                                                        error={validateEmpty(propertyKey) || isKeyword(propertyKey) || hasWhiteSpace(propertyKey)}
+                                                        error={validateEmpty(propertyKey) || isKeyword(propertyKey)
+                                                        || hasWhiteSpace(propertyKey)}
                                                         disabled={isRestricted(
                                                             ['apim:api_create', 'apim:api_publish'],
                                                             api,
