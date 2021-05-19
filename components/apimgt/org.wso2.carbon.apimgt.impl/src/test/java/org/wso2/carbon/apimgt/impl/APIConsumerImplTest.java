@@ -610,10 +610,10 @@ public class APIConsumerImplTest {
     @Test
     public void testGetUserRating() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        when(apiMgtDAO.getUserRating(apiIdentifier, "admin")).thenReturn(2);
+        String uuid = UUID.randomUUID().toString();
+        when(apiMgtDAO.getUserRating(uuid, "admin")).thenReturn(2);
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        assertEquals(2, apiConsumer.getUserRating(apiIdentifier, "admin"));
+        assertEquals(2, apiConsumer.getUserRating(uuid, "admin"));
     }
 
 
@@ -796,10 +796,10 @@ public class APIConsumerImplTest {
         Mockito.when(application.getName()).thenReturn("app");
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
-        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "org1")).
                 thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
-        assertEquals(1, apiConsumer.addApplication(application, "userID"));
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
 
     @Test
@@ -810,15 +810,15 @@ public class APIConsumerImplTest {
         Mockito.when(application.getName()).thenReturn(appName);
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
-        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
-        assertEquals(1, apiConsumer.addApplication(application, "userID"));
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "org1")).thenReturn(false);
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
 
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        List<APIIdentifier> identifiers = new ArrayList<>();
+        List<String> identifiers = new ArrayList<>();
         Set<String> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesBySubscribedAPIs(identifiers)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesBySubscribedAPIs(identifiers));
@@ -931,12 +931,12 @@ public class APIConsumerImplTest {
         Application[] applications = new Application[] { new Application(1), new Application(2) };
         Mockito.when(apiMgtDAO
                 .getApplicationsWithPagination((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
-                        Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(applications);
+                        Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyString())).thenReturn(applications);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Assert.assertEquals(
                 apiConsumer.getApplicationsWithPagination(new Subscriber("sub1"), "1", 0, 5,
-                        "", "", "ASC").length, 2);
+                        "", "", "ASC", "testorg").length, 2);
     }
 
     @Test
@@ -1112,13 +1112,11 @@ public class APIConsumerImplTest {
     public void testGetComments() throws APIManagementException {
         Comment comment = new Comment();
         Comment[] comments = new Comment[] { comment };
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.getComments(identifier, null)).thenReturn(comments);
-        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier, null).length, 1);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier, null);
+        String uuid = UUID.randomUUID().toString();
+        Mockito.when(apiMgtDAO.getComments(uuid, null)).thenReturn(comments);
+        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(uuid, null).length, 1);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(uuid, null);
     }
-
-
 
     @Test
     public void testRemoveSubscriber() throws APIManagementException {
@@ -1164,7 +1162,7 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPI = new SubscribedAPI("api1");
         subscribedAPI.setTier(new Tier("Gold"));
         Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
-        Mockito.when(apiMgtDAO.getSubscriptionStatus(identifier, 1))
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(uuid, 1))
                 .thenReturn(APIConstants.SubscriptionStatus.ON_HOLD);
         apiConsumer.removeSubscription(subscribedAPINew);
         Mockito.when(apiMgtDAO.retrieveWorkflow(workflowExtRef1)).thenReturn(subscriptionWorkflowDTO);
@@ -1409,24 +1407,24 @@ public class APIConsumerImplTest {
 
     @Test
     public void testRemoveAPIRating() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        String uuid = UUID.randomUUID().toString();
         String user = "Tom";
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).removeAPIRating(identifier, user);
-        apiConsumer.removeAPIRating(identifier, user);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeAPIRating(identifier, user);
+        Mockito.doNothing().when(apiMgtDAO).removeAPIRating(uuid, user);
+        apiConsumer.removeAPIRating(uuid, user);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeAPIRating(uuid, user);
 
     }
 
     @Test
     public void testRateAPI() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        String uuid = UUID.randomUUID().toString();
         APIRating apiRating = APIRating.RATING_FOUR;
         String user = "Tom";
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).addRating(identifier, apiRating.getRating(), user);
-        apiConsumer.rateAPI(identifier, apiRating, user);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(identifier, apiRating.getRating(), user);
+        Mockito.doNothing().when(apiMgtDAO).addRating(uuid, apiRating.getRating(), user);
+        apiConsumer.rateAPI(uuid, apiRating, user);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(uuid, apiRating.getRating(), user);
     }
 
     @Test

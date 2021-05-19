@@ -164,7 +164,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void rateAPI(Identifier apiId, APIRating rating, String user) throws APIManagementException;
+    void rateAPI(String apiId, APIRating rating, String user) throws APIManagementException;
     /**
      * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
@@ -172,7 +172,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void removeAPIRating(Identifier id, String user) throws APIManagementException;
+    void removeAPIRating(String id, String user) throws APIManagementException;
 
     /** returns the SubscribedAPI object which is related to the subscriptionId
      *
@@ -374,20 +374,20 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param uuid Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String uuid, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier      Api identifier
+     * @param uuid      Api uuid
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
+    Comment[] getComments(String uuid, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
@@ -424,11 +424,11 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to delete a comment.
      *
-     * @param identifier API Identifier
+     * @param uuid API uuid
      * @param commentId  Comment ID
-     * @throws APIManagementException if failed to delete comment for identifier
+     * @throws APIManagementException if failed to delete comment for api uuid
      */
-    void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+    void deleteComment(String uuid, String commentId) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
@@ -443,12 +443,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Adds an application
      *
-     * @param application Application
-     * @param userId      User Id
+     * @param application  Application
+     * @param userId       User Id
+     * @param organization Identifier of an organization
      * @return Id of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-    int addApplication(Application application, String userId) throws APIManagementException;
+    int addApplication(Application application, String userId, String organization) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -583,16 +584,19 @@ public interface APIConsumer extends APIManager {
 
     /**
      * Returns a list of applications for a given subscriber
-     *  @param subscriber Subscriber
+     *
+     * @param subscriber   Subscriber
      * @param search
      * @param start
      * @param offset
-     * @param groupingId the groupId to which the applications must belong.  @return Applications
+     * @param groupingId   the groupId to which the applications must belong.
+     * @param organization Identifier of an organization
+     * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset ,
-                                                String search, String sortColumn, String sortOrder)
+    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
+                                                String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException;
 
 
@@ -639,13 +643,13 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
 
-    int getUserRating(Identifier apiId, String user) throws APIManagementException;
+    int getUserRating(String apiId, String user) throws APIManagementException;
 
-    JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException;
+    JSONObject getUserRatingInfo(String id, String user) throws APIManagementException;
 
-    float getAverageAPIRating(Identifier apiId) throws APIManagementException;
+    float getAverageAPIRating(String apiId) throws APIManagementException;
 
-    JSONArray getAPIRatings(Identifier apiId) throws APIManagementException;
+    JSONArray getAPIRatings(String apiId) throws APIManagementException;
 
     /**
      * Get a list of published APIs by the given provider.
@@ -805,13 +809,13 @@ public interface APIConsumer extends APIManager {
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
     /**
-     * Returns a set of scopes associated with a list of API identifiers.
+     * Returns a set of scopes associated with a list of API uuids.
      *
-     * @param identifiers list of API identifiers
+     * @param uuids list of API uuids
      * @return set of scopes.
      * @throws APIManagementException
      */
-    Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException;
+    Set<Scope> getScopesBySubscribedAPIs(List<String> uuids) throws APIManagementException;
 
     /**
      * Returns a set of scopes associated with an application subscription.

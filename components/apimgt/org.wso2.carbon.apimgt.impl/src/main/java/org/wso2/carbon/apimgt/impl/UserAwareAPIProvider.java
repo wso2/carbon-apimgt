@@ -505,8 +505,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
-        super.deleteWorkflowTask(apiIdentifier);
+    public void deleteWorkflowTask(String uuid) throws APIManagementException {
+        super.deleteWorkflowTask(uuid);
     }
 
     @Override

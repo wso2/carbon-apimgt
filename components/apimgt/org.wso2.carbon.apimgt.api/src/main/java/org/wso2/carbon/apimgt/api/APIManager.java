@@ -313,21 +313,21 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param  apiId ID of the API
+     * @param  apiId UUID of the API
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
-    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+    GraphqlComplexityInfo getComplexityDetails(String apiId) throws APIManagementException;
 
 
     /**
      * Add or Updates the complexity details given the GraphqlComplexityInfo object
      *
-     * @param apiIdentifier         APIIdentifier
+     * @param uuid         API uuid
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException if failed to update complexity details
      */
-    void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+    void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException;
 
 
@@ -555,6 +555,18 @@ public interface APIManager {
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
 
     /**
+     * Check if a given context template already exists in an organization
+     *
+     * @param contextTemplate - The contextTemplate to be checked for
+     *                        <p>
+     *                        Ex: /foo/{version}/bar
+     *                        </p>
+     * @return boolean - true if the template exists, false otherwise.
+     * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
+     */
+    boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String orgId) throws APIManagementException;
+
+    /**
      * get a set of API names that matches given context template
      *
      * @param contextTemplate context in the payload
@@ -721,6 +733,17 @@ public interface APIManager {
      * @return true, If resource exists
      */
     boolean checkIfResourceExists(String mediationPolicyPath) throws APIManagementException;
+
+    /**
+     * Returns a list of api versions that matches the given context template
+     *
+     * @param apiName             API name in the payload
+     * @param organization      Organization Identifier
+     * @return api versions that matches context template
+     * @throws APIManagementException If failed to get the list of api versions
+     */
+    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organization)
+            throws APIManagementException;
 
     /**
      * Returns a list of api versions that matches the given context template

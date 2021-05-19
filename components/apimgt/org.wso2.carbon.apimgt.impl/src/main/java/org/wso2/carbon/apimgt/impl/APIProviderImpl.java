@@ -1534,7 +1534,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getId());
+        int apiId = apiMgtDAO.getAPIID(api.getUuid());
 
         if (publishedDefaultVersion != null) {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
@@ -1661,7 +1661,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getId());
+        int apiId = apiMgtDAO.getAPIID(api.getUuid());
         if (publishedDefaultVersion != null) {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
@@ -1826,14 +1826,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the new URI templates for the API
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         // Get the existing local scope keys attached for the API
-        Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(apiIdentifier, tenantId);
+        Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the existing URI templates for the API
         Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
         // Get the new local scope keys from URI templates
         Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
         // Get the existing versioned local scope keys attached for the API
-        Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(apiIdentifier, tenantId);
+        Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the existing versioned local scope keys which needs to be removed (not updated) from the current updating
         // API and remove them from the oldLocalScopeKeys set before sending to KM, so that they will not be removed
         // from KM and can be still used by other versioned APIs.
@@ -2405,7 +2405,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
                             if(!APIConstants.CREATED.equals(newStatus)) {
                                 cleanUpPendingSubscriptionCreationProcessesByAPI(api.getId());
-                                apiMgtDAO.removeAllSubscriptions(api.getId());
+                                apiMgtDAO.removeAllSubscriptions(api.getUuid());
                             }
                             if (!failedToRemoveEnvironments.isEmpty()) {
                                 Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
@@ -2499,7 +2499,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
                             if(!APIConstants.CREATED.equals(newStatus)) {
                                 cleanUpPendingSubscriptionCreationProcessesByAPI(api.getId());
-                                apiMgtDAO.removeAllSubscriptions(api.getId());
+                                apiMgtDAO.removeAllSubscriptions(api.getUuid());
                             }
                             if (!failedToRemoveEnvironments.isEmpty()) {
                                 Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
@@ -2599,7 +2599,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
                             if(!APIConstants.CREATED.equals(newStatus)) {
                                 cleanUpPendingSubscriptionCreationProcessesByAPI(api.getId());
-                                apiMgtDAO.removeAllSubscriptions(api.getId());
+                                apiMgtDAO.removeAllSubscriptions(api.getUuid());
                             }
                             if (!failedToRemoveEnvironments.isEmpty()) {
                                 Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
@@ -3990,12 +3990,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteAPI(API api) throws APIManagementException {
 
         try {
-            int apiId = apiMgtDAO.getAPIID(api.getId());
+            int apiId = apiMgtDAO.getAPIID(api.getUuid());
 
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             //Check if there are already published external APIStores.If yes,removing APIs from them.
-            Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
+            Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getUuid());
             WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
             if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
                 for (APIStore store : apiStoreSet) {
@@ -4071,7 +4071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         // Get local scopes for the given API which are not already assigned for different versions of the same API
-        Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiIdentifier, tenantId);
+        Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
         Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
         // Detach all the resource scopes from the API resources in KM
@@ -4099,7 +4099,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         deleteScopes(localScopeKeysToDelete, tenantId);
-        apiMgtDAO.deleteAPI(apiIdentifier);
+        apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
         }
@@ -4406,7 +4406,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         if (!publishedStores.isEmpty()) {
-            addExternalAPIStoresDetails(api.getId(), publishedStores);
+            addExternalAPIStoresDetails(api.getUuid(), publishedStores);
         }
 
         if (failure) {
@@ -4425,7 +4425,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException {
-        Set<APIStore> publishedStores = getPublishedExternalAPIStores(api.getId());
+        Set<APIStore> publishedStores = getPublishedExternalAPIStores(api.getUuid());
         Set<APIStore> notPublishedAPIStores = new HashSet<APIStore>();
         Set<APIStore> updateApiStores = new HashSet<APIStore>();
         Set<APIStore> removedApiStores = new HashSet<APIStore>();
@@ -4472,7 +4472,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Update the APIs which are already exist in the external APIStore
         updateAPIInExternalAPIStores(api, updateApiStores);
         //Update database saved published APIStore details
-        updateExternalAPIStoresDetails(api.getId(), updateApiStores);
+        updateExternalAPIStoresDetails(api.getUuid(), updateApiStores);
 
         deleteFromExternalAPIStores(api, removedApiStores);
         if (failure) {
@@ -4503,7 +4503,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         if (!removalCompletedStores.isEmpty()) {
-            removeExternalAPIStoreDetails(api.getId(), removalCompletedStores);
+            removeExternalAPIStoreDetails(api.getUuid(), removalCompletedStores);
         }
 
         if (failure) {
@@ -4511,7 +4511,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void removeExternalAPIStoreDetails(APIIdentifier id, Set<APIStore> removalCompletedStores)
+    private void removeExternalAPIStoreDetails(String id, Set<APIStore> removalCompletedStores)
             throws APIManagementException {
         apiMgtDAO.deleteExternalAPIStoresDetails(id, removalCompletedStores);
     }
@@ -4563,7 +4563,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
 
-    private void updateExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
+    private void updateExternalAPIStoresDetails(String apiId, Set<APIStore> apiStoreSet)
             throws APIManagementException {
         apiMgtDAO.updateExternalAPIStoresDetails(apiId, apiStoreSet);
 
@@ -4571,7 +4571,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    private boolean addExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet) throws APIManagementException {
+    private boolean addExternalAPIStoresDetails(String apiId, Set<APIStore> apiStoreSet) throws APIManagementException {
         return apiMgtDAO.addExternalAPIStoresDetails(apiId, apiStoreSet);
     }
 
@@ -4579,11 +4579,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
     @Override
-    public Set<APIStore> getExternalAPIStores(APIIdentifier apiId)
+    public Set<APIStore> getExternalAPIStores(String apiId)
             throws APIManagementException {
         if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             SortedSet<APIStore> sortedApiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
@@ -4599,11 +4599,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
     @Override
-    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException {
+    public Set<APIStore> getPublishedExternalAPIStores(String apiId) throws APIManagementException {
         Set<APIStore> storesSet;
         SortedSet<APIStore> configuredAPIStores = new TreeSet<>(new APIStoreNameComparator());
         configuredAPIStores.addAll(APIUtil.getExternalStores(tenantId));
@@ -5415,9 +5415,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
-
-                int apiId = apiMgtDAO.getAPIID(apiIdentifier);
                 String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
+                int apiId = apiMgtDAO.getAPIID(uuid);
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                         WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -5549,7 +5548,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = api.getId().getVersion();
                 String currentStatus = api.getStatus();
 
-                int apiId = apiMgtDAO.getAPIID(api.getId());
+                int apiId = apiMgtDAO.getAPIID(api.getUuid());
 
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -7069,21 +7068,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param apiIdentifier Api identifier
+     * @param uuid Api uuid
      * @param workflowType  workflow type
      * @return WorkflowDTO
      * @throws APIManagementException
      */
-    public WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
+    public WorkflowDTO getAPIWorkflowStatus(String uuid, String workflowType)
             throws APIManagementException {
-        return APIUtil.getAPIWorkflowStatus(apiIdentifier, workflowType);
+        return APIUtil.getAPIWorkflowStatus(uuid, workflowType);
     }
 
     @Override
-    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
+    public void deleteWorkflowTask(String uuid) throws APIManagementException {
         int apiId;
         try {
-            apiId = apiMgtDAO.getAPIID(apiIdentifier);
+            apiId = apiMgtDAO.getAPIID(uuid);
             cleanUpPendingAPIStateChangeTask(apiId);
         } catch (APIManagementException e) {
             handleException("Error while deleting the workflow task.", e);
@@ -7692,7 +7691,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (identifier.getUUID() != null) {
                 apiProductUUID = identifier.getUUID();
             } else {
-                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier);
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, null);
             }
         }
         deleteAPIProduct(
@@ -8560,9 +8559,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
-                populateAPIInformation(uuid, organization, org, api);
                 loadMediationPoliciesToAPI(api, organization);
                 populateRevisionInformation(api, uuid);
+                populateAPIInformation(uuid, organization, org, api);
                 populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
@@ -8699,8 +8698,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(uuid, comment, user);
     }
 
     @Override
