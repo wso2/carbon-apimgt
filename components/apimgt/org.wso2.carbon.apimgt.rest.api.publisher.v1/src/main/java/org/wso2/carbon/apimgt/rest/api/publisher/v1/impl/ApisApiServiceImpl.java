@@ -2061,7 +2061,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPILifecycleState(String apiId, String ifNoneMatch, MessageContext messageContext) {
-        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId, organization);
         return Response.ok().entity(lifecycleStateDTO).build();
     }
 
@@ -2071,25 +2072,24 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId API Id
      * @return API Lifecycle state information
      */
-    private LifecycleStateDTO getLifecycleState(String apiId) {
-        return getLifecycleState(null, apiId);
+    private LifecycleStateDTO getLifecycleState(String apiId, String organization) {
+        return getLifecycleState(null, apiId, organization);
     }
 
-    private LifecycleStateDTO getLifecycleState(APIIdentifier identifier, String apiId) {
+    private LifecycleStateDTO getLifecycleState(APIIdentifier identifier, String apiId, String organization) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier;
             if (identifier == null) {
                 if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
-                    apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
+                    apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
                 } else {
                     apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 }
             } else {
                 apiIdentifier = identifier;
             }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, tenantDomain);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, organization);
             if (apiLCData == null) {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
@@ -3658,7 +3658,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .changeLifeCycleStatus(organization, apiId, action.toString(), lcMap);
 
             //returns the current lifecycle state
-            LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId); // todo try to prevent this call
+            LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId,
+                    organization); // todo try to prevent this call
 
             WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
                     .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
