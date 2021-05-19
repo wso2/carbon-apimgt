@@ -265,7 +265,7 @@ public class ImportUtils {
                 PublisherCommonUtils.addGraphQLSchema(importedApi, graphQLSchema, apiProvider);
                 graphqlComplexityInfo = retrieveGraphqlComplexityInfoFromArchive(extractedFolderPath, graphQLSchema);
                 if (graphqlComplexityInfo != null && graphqlComplexityInfo.getList().size() != 0) {
-                    apiProvider.addOrUpdateComplexityDetails(importedApi.getId(), graphqlComplexityInfo);
+                    apiProvider.addOrUpdateComplexityDetails(importedApi.getUuid(), graphqlComplexityInfo);
                 }
             }
             // Add/update Async API definition for streaming APIs
