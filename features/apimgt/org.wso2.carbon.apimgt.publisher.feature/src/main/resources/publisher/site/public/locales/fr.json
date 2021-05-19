@@ -678,6 +678,7 @@
   "Apis.Details.Properties.Properties.\n                    no.changes.to.save": "",
   "Apis.Details.Properties.Properties.\n                    property.name.empty.error": "",
   "Apis.Details.Properties.Properties.\n                    property.name.exists": "",
+  "Apis.Details.Properties.Properties.\n                    property.name.has.whitespaces": "",
   "Apis.Details.Properties.Properties.\n                    property.name.keyword.error": "",
   "Apis.Details.Properties.Properties.APIProduct.\n                                            add.new.property.message.content": "",
   "Apis.Details.Properties.Properties.add": "",
