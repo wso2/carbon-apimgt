@@ -2223,10 +2223,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
-    private void loadMediationPoliciesToAPI(API api, String organizationId) throws APIManagementException {
+    private void loadMediationPoliciesToAPI(API api, String organization) throws APIManagementException {
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
-            Organization org = new Organization(organizationId);
+            Organization org = new Organization(organization);
             String apiUUID = api.getUuid();
             // get all policies
             try {
@@ -8559,9 +8559,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
+                populateAPIInformation(uuid, organization, api);
                 loadMediationPoliciesToAPI(api, organization);
                 populateRevisionInformation(api, uuid);
-                populateAPIInformation(uuid, org, api);
                 populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
@@ -8628,9 +8628,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public APIProduct getAPIProductbyUUID(String uuid, String organizationId) throws APIManagementException {
+    public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {
         try {
-            Organization org = new Organization(organizationId);
+            Organization org = new Organization(organization);
             PublisherAPIProduct publisherAPIProduct = apiPersistenceInstance.getPublisherAPIProduct(org, uuid);
             if (publisherAPIProduct != null) {
                 APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
@@ -8638,7 +8638,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion(), uuid));
                 checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
                         product.getAccessControlRoles());
-                populateAPIProductInformation(uuid, org, product);
+                populateAPIProductInformation(uuid, organization, product);
                 populateRevisionInformation(product, uuid);
                 populateAPIStatus(product);
                 populateAPITier(product);
