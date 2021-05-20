@@ -5352,8 +5352,8 @@ public final class APIUtil {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
         try {
-            return realmService.getTenantManager().getTenantId(organization);
-        } catch (UserStoreException e) {
+            return getInternalOrganizationId(organization);
+        } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
         }
         return -1;
