@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util.resolver;
+package org.wso2.carbon.apimgt.api;
 
-import org.apache.cxf.message.Message;
+import java.util.Map;
 
 public interface OrganizationResolver {
 
     /**
-     * Resolve the organization from the cxf message
-     * @param message
+     * Resolve the organization 
+     * @param properties input properties to use for resolving
      * @return String organization 
+     * @throws APIManagementException
      */
-    public String resolve(Message message);
+    public String resolve(Map<String, Object> properties) throws APIManagementException;
+    
+    /**
+     * Get the internal ID for the provided organization
+     * @param organization
+     * @return id representing the organization
+     * @throws APIManagementException 
+     */
+    public int getInternalId(String organization) throws APIManagementException;
 
 }

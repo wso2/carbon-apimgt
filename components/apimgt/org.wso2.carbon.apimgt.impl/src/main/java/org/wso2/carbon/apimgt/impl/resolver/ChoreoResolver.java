@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util.resolver;
+package org.wso2.carbon.apimgt.impl.resolver;
 
-import org.apache.cxf.message.Message;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import java.util.Map;
+
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class ChoreoResolver implements OrganizationResolver {
 
     @Override
-    public String resolve(Message message) {
-        String queryString = (String) message.get(Message.QUERY_STRING);
+    public String resolve(Map<String, Object> properties) throws APIManagementException {
+        String queryString = (String) properties.get(APIConstants.PROPERTY_QUERY_KEY);
         String organizationId = null;
         if (queryString != null) {
             String[] queries = queryString.split("&");
@@ -37,6 +41,12 @@ public class ChoreoResolver implements OrganizationResolver {
             }
         }
         return organizationId;
+    }
+
+    @Override
+    public int getInternalId(String organization) throws APIManagementException {
+        // return supertenant id
+        return MultitenantConstants.SUPER_TENANT_ID;
     }
 
 }

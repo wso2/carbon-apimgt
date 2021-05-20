@@ -16,25 +16,25 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.HashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.resolver.OrganizationResolver;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 public class OrganizationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(OrganizationInterceptor.class);
-    private final String DEFAULT_RESOLVER = "org.wso2.carbon.apimgt.rest.api.util.resolver.OnPremResolver";
 
     public OrganizationInterceptor() {
         // We will use PRE_INVOKE phase as we need to process message before hit actual
@@ -45,19 +45,22 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
     @Override
     public void handleMessage(Message message) throws Fault {
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        String className = config.getFirstProperty(APIConstants.ORG_RESOLVER);
-        if (StringUtils.isEmpty(className)) {
-            className = DEFAULT_RESOLVER;
-        }
-
         try {
-            OrganizationResolver resolver = (OrganizationResolver) Class.forName(className).newInstance();
-            String organization = resolver.resolve(message);
+            OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+            
+            // populate properties needed for the resolver.
+            HashMap<String, Object> properties = new HashMap<String, Object>();
+            properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
+            properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+            
+            String organization = resolver.resolve(properties);
             message.put(RestApiConstants.ORGANIZATION, organization);
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            RestApiUtil.handleInternalServerError("Error while resolving the organization resolver", e, logger);
+        } catch (APIManagementException e) {
+            if (e instanceof APIMgtBadRequestException) {
+                RestApiUtil.handleBadRequest(e.getMessage(), 901300L, logger);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while resolving the organization resolver", e, logger);
+            }
         }
         logger.debug("Organization :" + message.get(RestApiConstants.ORGANIZATION));
     }
