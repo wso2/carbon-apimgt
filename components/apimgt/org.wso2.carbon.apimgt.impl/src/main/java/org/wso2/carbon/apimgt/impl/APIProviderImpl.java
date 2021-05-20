@@ -3068,6 +3068,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName());
         }
         APIIdentifier existingAPIId = existingAPI.getId();
+        String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
         String existingContext = existingAPI.getContext();
@@ -3137,6 +3138,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setStatus(existingAPIStatus);
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
+        existingAPI.setCreatedTime(existingAPICreatedTime);
         // update existing api with setLatest to false
         existingAPI.setLatest(false);
         if (isDefaultVersion) {
