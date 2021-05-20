@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
@@ -5057,6 +5058,26 @@ public final class APIUtil {
                 .isTenantActive(tenantId);
     }
 
+    public static OrganizationResolver getOrganizationResolver() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String className = config.getFirstProperty(APIConstants.ORG_RESOLVER);
+        if (StringUtils.isEmpty(className)) {
+            className = APIConstants.DEFAULT_ORG_RESOLVER;
+        }
+        OrganizationResolver resolver;
+        try {
+            resolver = (OrganizationResolver) Class.forName(className).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new APIManagementException("Error while resolving the organization resolver", e);
+        }
+        return resolver;
+    }
+    
+    public static int getInternalOrganizationId(String organization) throws APIManagementException {
+        return getOrganizationResolver().getInternalId(organization);
+    }
     /**
      * Retrieves the role list of system
      *
