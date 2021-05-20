@@ -34,9 +34,6 @@ public class SQLConstants {
     public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ?";
 
-    public static final String IS_ORGANIZATION_EXISTS =
-            "SELECT COUNT(*) AS ORG_COUNT FROM AM_API WHERE ORGANIZATION = ?";
-
     public static final String GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND ORGANIZATION = ?";
 

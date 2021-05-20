@@ -216,30 +216,6 @@ public class ApiMgtDAO {
         return versionList;
     }
 
-    public boolean isOrganizationIdExist(String organization) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        int count = 0;
-        ResultSet resultSet = null;
-
-        String sqlQuery = SQLConstants.IS_ORGANIZATION_EXISTS;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, organization);
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                count = resultSet.getInt("ORG_COUNT");
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check existence of organization " + organization, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-        return count > 0;
-    }
-
     /**
      * Persist the details of the token generation request (allowed domains & validity period) to be used back
      * when approval has been granted.

@@ -5892,7 +5892,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private API addTiersToAPI(API api, String organization) throws APIManagementException {
-        int tenantId = APIUtil.getTenantIdFromTenantDomainWithOrganization(organization);
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
 

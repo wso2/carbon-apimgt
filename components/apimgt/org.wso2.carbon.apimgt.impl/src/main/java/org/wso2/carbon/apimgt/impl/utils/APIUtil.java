@@ -5346,19 +5346,14 @@ public final class APIUtil {
      * @param organization Organization
      * @return tenantId
      */
-    public static int getTenantIdFromTenantDomainWithOrganization(String organization) {
+    public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
         if (realmService == null || organization == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
         try {
-            int orgId = realmService.getTenantManager().getTenantId(organization);
-            // Check if the organization is existing if orgId is -1
-            if (orgId == -1 && ApiMgtDAO.getInstance().isOrganizationIdExist(organization)) {
-                return MultitenantConstants.SUPER_TENANT_ID;
-            }
-            return orgId;
-        } catch (UserStoreException | APIManagementException e) {
+            return realmService.getTenantManager().getTenantId(organization);
+        } catch (UserStoreException e) {
             log.error(e.getMessage(), e);
         }
         return -1;
@@ -10680,7 +10675,7 @@ public final class APIUtil {
     public static List<APICategory> getAllAPICategoriesOfTenant(String organization) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int tenantId = getTenantIdFromTenantDomainWithOrganization(organization);
+        int tenantId = getInternalIdFromTenantDomainOrOrganization(organization);
         return apiMgtDAO.getAllCategories(tenantId);
     }
 
@@ -11366,7 +11361,7 @@ public final class APIUtil {
 
     public static Scope getScopeByName(String scopeKey, String organization) throws APIManagementException {
 
-        int tenantId = APIUtil.getTenantIdFromTenantDomainWithOrganization(organization);
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
     }
 
