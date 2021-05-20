@@ -28,6 +28,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -1015,17 +1016,17 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getIdpsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException {
-        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        String organization = APIUtils.getOrganization(messageContext);
-        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-        List<String> configuredIDPs = new ArrayList<>();
-        if (!apiTypeWrapper.isAPIProduct()) {
-            API api = apiTypeWrapper.getApi();
-            configuredIDPs = api.getKeyManagers();
-        }
-        APIAdmin apiAdmin = new APIAdminImpl();
+    public Response getIdpsOfAPI(String apiId, MessageContext messageContext) {
         try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            String organization = APIUtils.getOrganization(messageContext);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+            List<String> configuredIDPs = new ArrayList<>();
+            if (!apiTypeWrapper.isAPIProduct()) {
+                API api = apiTypeWrapper.getApi();
+                configuredIDPs = api.getKeyManagers();
+            }
+            APIAdmin apiAdmin = new APIAdminImpl();
             List<KeyManagerConfigurationDTO> idpConfigurations = new ArrayList<>();
             if (!configuredIDPs.isEmpty() && configuredIDPs.contains(APIConstants.KeyManager
                     .API_LEVEL_ALL_KEY_MANAGERS)) {
@@ -1036,6 +1037,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(idpConfigurations)).build();
+        } catch (APIMgtResourceNotFoundException e) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving IDP configurations associated " +
                     "with API with ID " + apiId, log);
