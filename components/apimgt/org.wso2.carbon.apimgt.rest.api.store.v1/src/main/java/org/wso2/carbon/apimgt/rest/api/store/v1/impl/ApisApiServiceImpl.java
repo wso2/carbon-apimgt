@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -552,7 +551,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -592,9 +590,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            apiConsumer.checkAPIVisibility(id, organization);
             float avgRating = apiConsumer.getAverageAPIRating(id);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
@@ -820,10 +820,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
             MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             int rating = 0;
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            //this will fail if user doesn't have access to the API or the API does not exist
+            apiConsumer.checkAPIVisibility(id, organization);
 
             if (body != null) {
                 rating = body.getRating();
@@ -883,9 +886,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            //this will fail if user doesn't have access to the API or the API does not exist
+            apiConsumer.checkAPIVisibility(id, organization);
             JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
@@ -910,9 +916,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch,
             MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            //this will fail if user doesn't have access to the API or the API does not exist
+            apiConsumer.checkAPIVisibility(apiId, organization);
             apiConsumer.removeAPIRating(apiId, username);
             return Response.ok().build();
         } catch (APIManagementException e) {

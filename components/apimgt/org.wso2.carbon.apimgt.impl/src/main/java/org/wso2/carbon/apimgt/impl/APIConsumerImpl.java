@@ -6106,6 +6106,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public void checkAPIVisibility(String uuid, String organization) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organization);
+    }
+
+    @Override
     public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
         checkAPIVisibilityRestriction(uuid, organization);
         return super.getAllDocumentation(uuid, organization);
