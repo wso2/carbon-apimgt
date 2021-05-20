@@ -382,14 +382,4 @@ public class RestApiAdminUtils {
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
     }
-
-    /**
-     * Retrieve organization from msg ctx.
-     *
-     * @param messageContext msg ctx
-     * @return organization
-     */
-    public static String getOrganization(MessageContext messageContext) {
-        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
-    }
 }

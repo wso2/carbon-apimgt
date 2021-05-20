@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -1388,5 +1389,15 @@ public class RestApiUtil {
             log.error("Error while retrieving Anonymous config from registry", e);
         }
         return true;
+    }
+
+    /**
+     * Retrieve organization from msg ctx.
+     *
+     * @param messageContext msg ctx
+     * @return organization
+     */
+    public static String getOrganization(MessageContext messageContext) {
+        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
     }
 }

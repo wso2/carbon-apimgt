@@ -1016,34 +1016,26 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getIdpsOfAPI(String apiId, MessageContext messageContext) {
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String organization = APIUtils.getOrganization(messageContext);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
-            List<String> configuredIDPs = new ArrayList<>();
-            if (!apiTypeWrapper.isAPIProduct()) {
-                API api = apiTypeWrapper.getApi();
-                configuredIDPs = api.getKeyManagers();
-            }
-            APIAdmin apiAdmin = new APIAdminImpl();
-            List<KeyManagerConfigurationDTO> idpConfigurations = new ArrayList<>();
-            if (!configuredIDPs.isEmpty() && configuredIDPs.contains(APIConstants.KeyManager
-                    .API_LEVEL_ALL_KEY_MANAGERS)) {
-                idpConfigurations = apiAdmin.getKeyManagerConfigurationsByTenant(organization);
-            } else {
-                for (String idp : configuredIDPs) {
-                    idpConfigurations.add(apiAdmin.getKeyManagerConfigurationByName(organization, idp));
-                }
-            }
-            return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(idpConfigurations)).build();
-        } catch (APIMgtResourceNotFoundException e) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving IDP configurations associated " +
-                    "with API with ID " + apiId, log);
+    public Response getIdpsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        String organization = RestApiUtil.getOrganization(messageContext);
+        ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+        List<String> configuredIDPs = new ArrayList<>();
+        if (!apiTypeWrapper.isAPIProduct()) {
+            API api = apiTypeWrapper.getApi();
+            configuredIDPs = api.getKeyManagers();
         }
-        return null;
+        APIAdmin apiAdmin = new APIAdminImpl();
+        List<KeyManagerConfigurationDTO> idpConfigurations = new ArrayList<>();
+        if (!configuredIDPs.isEmpty() && configuredIDPs.contains(APIConstants.KeyManager
+                .API_LEVEL_ALL_KEY_MANAGERS)) {
+            idpConfigurations = apiAdmin.getKeyManagerConfigurationsByTenant(organization);
+        } else {
+            for (String idp : configuredIDPs) {
+                idpConfigurations.add(apiAdmin.getKeyManagerConfigurationByName(organization, idp));
+            }
+        }
+        return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(idpConfigurations)).build();
     }
 
     private APIDTO getAPIByAPIId(String apiId, String organizationId, String tenantDomain) {

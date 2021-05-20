@@ -64,7 +64,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersGet(MessageContext messageContext) throws APIManagementException {
 
-        String organization = RestApiAdminUtils.getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
                 apiAdmin.getKeyManagerConfigurationsByTenant(organization);
@@ -76,7 +76,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersKeyManagerIdDelete(String keyManagerId, MessageContext messageContext)
             throws APIManagementException {
 
-        String organization = RestApiAdminUtils.getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId);
         return Response.ok().build();
@@ -85,7 +85,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersKeyManagerIdGet(String keyManagerId, MessageContext messageContext)
             throws APIManagementException {
 
-        String organization = RestApiAdminUtils.getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -99,7 +99,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext) {
 
-        String organization = RestApiAdminUtils.getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
@@ -128,7 +128,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
-        String organization = RestApiAdminUtils.getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =

@@ -1392,5 +1392,7 @@
     {% endif %}
     {% if apim.organization_resolver.resolver is defined %}
      <OrganizationResolver>{{apim.organization_resolver.resolver}}</OrganizationResolver>
+    {% else %}
+     <OrganizationResolver>org.wso2.carbon.apimgt.rest.api.util.resolver.ChoreoResolver</OrganizationResolver>
     {% endif %}
 </APIManager>

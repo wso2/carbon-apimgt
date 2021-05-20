@@ -35,6 +35,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -269,7 +270,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoDBDevPortalAPI mongoDBAPIDocument = collection.find(eq("_id", new ObjectId(apiId))).first();
         if (mongoDBAPIDocument == null) {
             String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
-            throw new APIPersistenceException(msg);
+            throw new APIPersistenceException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         return MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
     }
