@@ -788,7 +788,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "1.0.0");
         API api = new API(apiId);
-        api.setOrganizationId("org1");
+        api.setOrganization("org1");
         api.setContext("/getAPIVersionsMatchingApiName");
         api.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         api.setUUID(UUID.randomUUID().toString());
@@ -796,7 +796,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "2.0.0");
         API api2 = new API(apiId2);
-        api2.setOrganizationId("org2");
+        api2.setOrganization("org2");
         api2.setContext("/getAPIVersionsMatchingApiName");
         api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         api2.setUUID(UUID.randomUUID().toString());
@@ -844,7 +844,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry", "1.0.0");
         API api = new API(apiId);
-        api.setOrganizationId("org1");
+        api.setOrganization("org1");
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
@@ -853,7 +853,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
-        api1.setOrganizationId("org2");
+        api1.setOrganization("org2");
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
         api1.setUUID(UUID.randomUUID().toString());
@@ -920,7 +920,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry", "1.0.0");
         API api = new API(apiId);
-        api.setOrganizationId("testOrg");
+        api.setOrganization("testOrg");
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
@@ -1097,7 +1097,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("testAddUpdateDeleteBlockCondition",
                 "testAddUpdateDeleteBlockCondition", "1.0.0");
         API api = new API(apiId);
-        api.setOrganizationId("org1");
+        api.setOrganization("org1");
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
         api.setUUID(UUID.randomUUID().toString());
@@ -1166,7 +1166,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi",
                 "testAddAndGetApi", "1.0.0");
         API api = new API(apiIdentifier);
-        api.setOrganizationId("org1");
+        api.setOrganization("org1");
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         api.setUriTemplates(getUriTemplateSet());
@@ -1209,7 +1209,7 @@ public class APIMgtDAOTest {
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
         api.setUUID(UUID.randomUUID().toString());
-        api.setOrganizationId(organizationId);
+        api.setOrganization(organizationId);
         int apiId = apiMgtDAO.addAPI(api, -1234);
         apiMgtDAO.addURITemplates(apiId, api, -1234);
         HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(api.getUuid());
