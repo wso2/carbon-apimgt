@@ -2397,6 +2397,9 @@
   "Apis.Details.Properties.Properties.\n                    property.name.empty.error": {
     "defaultMessage": "Property name/value can not be empty"
   },
+  "Apis.Details.Properties.Properties.\n                    property.name.has.whitespaces": {
+    "defaultMessage": "Property name can not have any whitespaces in it"
+  },
   "Apis.Details.Properties.Properties.\n                    property.name.keyword.error": {
     "defaultMessage": "Property name can not be a system reserved keyword"
   },
