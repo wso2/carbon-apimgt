@@ -180,8 +180,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getLightweightAPIByUUID(String uuid, String organizationId) throws APIManagementException {
-        API api = super.getLightweightAPIByUUID(uuid, organizationId);
+    public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
+        API api = super.getLightweightAPIByUUID(uuid, organization);
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }
@@ -219,9 +219,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation, String organizationId) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation, organizationId);
+        return super.updateDocumentation(apiId, documentation, organization);
     }
 
     @Override

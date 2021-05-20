@@ -528,17 +528,17 @@ public class APIMappingUtil {
     /**
      * Returns an API with minimal info given the uuid.
      *
-     * @param apiUUID         API uuid
-     * @param organizationId  Identifier of an Organization
+     * @param apiUUID               API uuid
+     * @param organization organization of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String organizationId)
+    public static API getAPIInfoFromUUID(String apiUUID, String organization)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        api = apiProvider.getLightweightAPIByUUID(apiUUID, organizationId);
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, organization);
         return api;
     }
 

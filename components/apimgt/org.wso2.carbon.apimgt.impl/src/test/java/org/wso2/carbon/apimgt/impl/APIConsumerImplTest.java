@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -120,10 +119,11 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
-        KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class, APIPersistence.class})
-@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
+@PrepareForTest({ WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class,
+        ApplicationUtils.class, KeyManagerHolder.class, WorkflowExecutorFactory.class,
+        AbstractApplicationRegistrationWorkflowExecutor.class, ServiceReferenceHolder.class, MultitenantUtils.class,
+        RegistryUtils.class, Caching.class, APIPersistence.class, ApiMgtDAO.class })
+@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
@@ -1143,6 +1143,9 @@ public class APIConsumerImplTest {
         subscribedAPIOld.setApplication(application);
         Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
         DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
         Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
                 .thenReturn(devPortalAPI);

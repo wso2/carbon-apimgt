@@ -1328,10 +1328,11 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public List<Documentation> getAllDocumentation(String uuid, String organizationId) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
+
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = new Organization(organizationId);
+        Organization org = new Organization(organization);
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
@@ -1560,19 +1561,19 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Get a documentation by artifact Id
      *
-     * @param apiId          artifact id of the api
-     * @param docId          artifact id of the document
-     * @param organizationId tenant domain of the registry where the artifact is located
+     * @param apiId                 artifact id of the api
+     * @param docId                 artifact id of the document
+     * @param organization tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String apiId, String docId, String organizationId)
+    public Documentation getDocumentation(String apiId, String docId, String organization)
             throws APIManagementException {
 
         Documentation documentation = null;
         try {
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(new Organization(organizationId), apiId, docId);
+                    .getDocumentation(new Organization(organization), apiId, docId);
             if (doc != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Retrieved doc: " + doc);
@@ -1590,12 +1591,12 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String organizationId)
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException {
 
         try {
             DocumentContent content = apiPersistenceInstance
-                    .getDocumentationContent(new Organization(organizationId), apiId, docId);
+                    .getDocumentationContent(new Organization(organization), apiId, docId);
             DocumentationContent docContent = null;
             if (content != null) {
                 docContent = DocumentMapper.INSTANCE.toDocumentationContent(content);

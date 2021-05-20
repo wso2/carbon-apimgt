@@ -3516,9 +3516,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     @Override
-    public void removeDocumentation(String apiId, String docId, String organizationId) throws APIManagementException {
+    public void removeDocumentation(String apiId, String docId, String organization) throws APIManagementException {
         try {
-            apiPersistenceInstance.deleteDocumentation(new Organization(organizationId), apiId, docId);
+            apiPersistenceInstance.deleteDocumentation(new Organization(organization), apiId, docId);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
@@ -3686,14 +3686,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    public Documentation updateDocumentation(String apiId, Documentation documentation, String organizationId) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
 
         if (documentation != null) {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
-                        .updateDocumentation(new Organization(organizationId), apiId, mappedDoc);
+                        .updateDocumentation(new Organization(organization), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
@@ -3902,13 +3902,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Documentation addDocumentation(String uuid, Documentation documentation, String organizationId) throws APIManagementException {
+    public Documentation addDocumentation(String uuid, Documentation documentation, String organization) throws APIManagementException {
         if (documentation != null) {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
-                        new Organization(organizationId), uuid, mappedDoc);
+                        new Organization(organization), uuid, mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
                 }
@@ -3920,11 +3920,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean isDocumentationExist(String uuid, String docName, String organizationId) throws APIManagementException {
+    public boolean isDocumentationExist(String uuid, String docName, String organization) throws APIManagementException {
         boolean exist = false;
         UserContext ctx = null;
         try {
-            DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(new Organization(organizationId), uuid, 0, 0,
+            DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(new Organization(organization), uuid, 0, 0,
                     "name:" + docName, ctx);
             if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
                 String returnDocName = result.getDocumentationList().get(0).getName();
@@ -5545,8 +5545,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIStateChangeResponse changeLifeCycleStatus(String organizationId, String uuid, String action,
-                                                        Map<String, Boolean> checklist) throws APIManagementException, FaultGatewaysException {
+    public APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action,
+                            Map<String, Boolean> checklist) throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -5554,7 +5554,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
             //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
-            API api = getAPIbyUUID(uuid, organizationId);
+            API api = getAPIbyUUID(uuid, orgId);
             String targetStatus;
             if (api != null) {
 
@@ -5628,16 +5628,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-                    apiPersistenceInstance.changeAPILifeCycle(new Organization(organizationId), uuid, targetStatus);
-                    api.setOrganization(organizationId);
+                    apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
+                    api.setOrganization(orgId);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     //Sending Notifications to existing subscribers
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
                         sendEmailNotification(api);
                     }
                     // if retired Delete Existing Gateway Deployments.
-                    if (APIConstants.RETIRED.equals(targetStatus)) {
-                        deleteAPIRevisions(uuid, organizationId);
+                    if (APIConstants.RETIRED.equals(targetStatus)){
+                        deleteAPIRevisions(uuid, orgId);
                     }
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                         apiMgtDAO.recordAPILifeCycleEvent(apiId, currentStatus.toUpperCase(),
@@ -8769,9 +8769,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     @Override
-    public API getLightweightAPIByUUID(String uuid, String organizationId) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
         try {
-            Organization org = new Organization(organizationId);
+            Organization org = new Organization(organization);
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
@@ -8814,12 +8814,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addDocumentationContent(String uuid, String docId, String organizationId, DocumentationContent content)
+    public void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException {
         DocumentContent mappedContent = null;
         try {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
-            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organizationId), uuid, docId,
+            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organization), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId, e);
@@ -9194,7 +9194,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
-    public String addAPIRevision(APIRevision apiRevision, String organizationId) throws APIManagementException {
+    public String addAPIRevision(APIRevision apiRevision, String organization) throws APIManagementException {
         int revisionCountPerAPI = apiMgtDAO.getRevisionCountByAPI(apiRevision.getApiUUID());
         if (revisionCountPerAPI > 4) {
             String errorMessage = "Maximum number of revisions per API has reached. " +
@@ -9215,7 +9215,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiId.setUuid(apiRevision.getApiUUID());
         String revisionUUID;
         try {
-            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(organizationId),
+            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(organization),
                     apiId.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
@@ -9234,11 +9234,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 File artifact = importExportAPI
                         .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
                 gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
-                        apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL,
-                        artifact);
+                        apiId.getVersion(), apiRevision.getRevisionUUID(), organization, APIConstants.HTTP_PROTOCOL,
+                         artifact);
                 if (artifactSaver != null) {
                     artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                            apiRevision.getRevisionUUID(), tenantDomain, artifact);
+                            apiRevision.getRevisionUUID(), organization, artifact);
                 }
             } catch (APIImportExportException | ArtifactSynchronizerException e) {
                 throw new APIManagementException("Error while Store the Revision Artifact", e,
@@ -9468,7 +9468,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to restore APIRevision
      */
     @Override
-    public void restoreAPIRevision(String apiId, String apiRevisionId, String organizationId) throws APIManagementException {
+    public void restoreAPIRevision(String apiId, String apiRevisionId, String organization)
+            throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -9481,9 +9482,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance.restoreAPIRevision(new Organization(organizationId),
+            apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
-        } catch (APIPersistenceException e) {
+            } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));

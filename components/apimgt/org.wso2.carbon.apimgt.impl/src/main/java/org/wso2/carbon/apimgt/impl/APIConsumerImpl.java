@@ -6063,9 +6063,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
-    protected void checkAPIVisibilityRestriction(String apiId, String organizationId) throws APIManagementException {
+    protected void checkAPIVisibilityRestriction(String apiId, String organization) throws APIManagementException {
         try {
-            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organizationId), apiId);
+            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organization), apiId);
             if (api != null) {
                 checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
             }
@@ -6075,23 +6075,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String organizationId) throws APIManagementException {
-        checkAPIVisibilityRestriction(uuid, organizationId);
-        return super.getAllDocumentation(uuid, organizationId);
+    public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organization);
+        return super.getAllDocumentation(uuid, organization);
     }
 
     @Override
-    public Documentation getDocumentation(String apiId, String docId, String organizationId)
+    public Documentation getDocumentation(String apiId, String docId, String organization)
             throws APIManagementException {
-        checkAPIVisibilityRestriction(apiId, organizationId);
-        return super.getDocumentation(apiId, docId, organizationId);
+        checkAPIVisibilityRestriction(apiId, organization);
+        return super.getDocumentation(apiId, docId, organization);
     }
 
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String organizationId)
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException {
-        checkAPIVisibilityRestriction(apiId, organizationId);
-        return super.getDocumentationContent(apiId, docId, organizationId);
+        checkAPIVisibilityRestriction(apiId, organization);
+        return super.getDocumentationContent(apiId, docId, organization);
     }
 
     @Override
