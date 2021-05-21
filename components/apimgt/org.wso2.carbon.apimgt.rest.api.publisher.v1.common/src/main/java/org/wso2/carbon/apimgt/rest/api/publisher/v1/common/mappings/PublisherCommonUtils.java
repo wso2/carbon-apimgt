@@ -365,7 +365,7 @@ public class PublisherCommonUtils {
         apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -390,6 +390,7 @@ public class PublisherCommonUtils {
             }
         }
 
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
 
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
@@ -1096,6 +1097,7 @@ public class PublisherCommonUtils {
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
+        existingAPI.setOrganization(organization);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
