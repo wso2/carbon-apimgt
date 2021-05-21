@@ -76,11 +76,11 @@ public interface APIManager {
     /**
      * Returns details of an API
      * @param uuid   UUID of the API's registry artifact
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
+    API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
 
     /**
