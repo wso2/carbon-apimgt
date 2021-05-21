@@ -436,12 +436,12 @@ public interface APIProvider extends APIManager {
      * @param apiId          The id of the API to be copied
      * @param newVersion     The version of the new API
      * @param defaultVersion whether this version is default or not
-     * @param orgId          Identifier of an organization
+     * @param organization          Identifier of an organization
      * @return api created api
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String organization)
             throws APIManagementException;
 
     /**
