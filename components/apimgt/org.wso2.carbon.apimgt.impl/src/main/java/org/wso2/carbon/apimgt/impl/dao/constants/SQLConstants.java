@@ -881,6 +881,7 @@ public class SQLConstants {
             "   AND API.API_ID = SUBS.API_ID " +
             "   AND API.API_NAME = ? " +
             "   AND API.API_VERSION = ? " +
+            "   AND API.ORGANIZATION= ? " +
             "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             " ORDER BY " +
             "   APP.NAME";
@@ -960,8 +961,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1006,6 +1007,7 @@ public class SQLConstants {
             "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   LOWER(APP.NAME) = LOWER(?)" + "   " +
+            "   AND ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
     public static final String GET_APPLICATION_ID_SQL =
@@ -1318,6 +1320,8 @@ public class SQLConstants {
 
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
+    public static final String GET_API_ID_SQL_BY_UUID =
+            "SELECT API.API_ID FROM AM_API API WHERE API.API_UUID = ?";
     public static final String GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER = "SELECT API_ID,API_UUID,API_PROVIDER," +
             "API_NAME,API_VERSION,CONTEXT,API_TYPE,STATUS FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
             "API_VERSION = ? ";
@@ -1423,8 +1427,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1654,6 +1658,9 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER=? AND API_NAME=? AND API_VERSION=? ";
 
+    public static final String REMOVE_FROM_API_SQL_BY_UUID =
+            "DELETE FROM AM_API WHERE API_UUID=?";
+
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
@@ -1812,9 +1819,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1825,9 +1830,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1838,9 +1841,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL";
 

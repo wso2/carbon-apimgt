@@ -180,8 +180,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        API api = super.getLightweightAPIByUUID(uuid, requestedTenantDomain);
+    public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
+        API api = super.getLightweightAPIByUUID(uuid, organization);
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }
@@ -219,9 +219,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException {
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation, orgId);
+        return super.updateDocumentation(apiId, documentation, organization);
     }
 
     @Override
@@ -505,8 +505,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
-        super.deleteWorkflowTask(apiIdentifier);
+    public void deleteWorkflowTask(String uuid) throws APIManagementException {
+        super.deleteWorkflowTask(uuid);
     }
 
     @Override

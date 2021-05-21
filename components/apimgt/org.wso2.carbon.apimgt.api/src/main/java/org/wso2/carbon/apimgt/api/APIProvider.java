@@ -44,12 +44,12 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param uuid Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String uuid, Comment comment, String user) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
@@ -468,10 +468,10 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId   api uuid
      * @param documentId ID of the documentation
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @throws APIManagementException if failed to remove documentation
      */
-    void removeDocumentation(String apiId, String documentId, String orgId) throws APIManagementException;
+    void removeDocumentation(String apiId, String documentId, String organization) throws APIManagementException;
     /**
      * Removes a given documentation
      *
@@ -495,23 +495,23 @@ public interface APIProvider extends APIManager {
      *
      * @param uuid                API/Product Identifier
      * @param documentation       Documentation
-     * @param orgId               Identifier of an organization
+     * @param organization        Identifier of an organization
      * @return Documentation      created documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    Documentation addDocumentation(String uuid, Documentation documentation, String orgId) throws APIManagementException;
+    Documentation addDocumentation(String uuid, Documentation documentation, String organization) throws APIManagementException;
 
 
     /**
      * Adds Document content to an API/Product
      *
-     * @param uuid    API/Product Identifier
-     * @param content Documentation content
-     * @param docId   doc uuid
-     * @param orgId   Identifier of an organization
+     * @param uuid          API/Product Identifier
+     * @param content       Documentation content
+     * @param docId         doc uuid
+     * @param organization  Identifier of an organization
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationContent(String uuid, String docId, String orgId, DocumentationContent content)
+    void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException;
 
     /**
@@ -550,11 +550,11 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         id of the document
      * @param documentation Documentation
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException;
+    Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
@@ -772,19 +772,19 @@ public interface APIProvider extends APIManager {
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws APIManagementException If failed to get all external stores for the API
      */
-    Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    Set<APIStore> getExternalAPIStores(String apiId) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
      *
-     * @param apiId The API Identifier which need to update in db
+     * @param apiId The API uuid which need to update in db
      * @throws APIManagementException If failed to get all the published external stores for the API
      */
-    Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+    Set<APIStore> getPublishedExternalAPIStores(String apiId) throws APIManagementException;
 
     /**
      * Checks the Gateway Type
@@ -1481,10 +1481,10 @@ public interface APIProvider extends APIManager {
     /**
      * Remove pending lifecycle state change task for the given api.
      *
-     * @param apiIdentifier api identifier
+     * @param uuid api uuid
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException;
+    void deleteWorkflowTask(String uuid) throws APIManagementException;
 
     /**
      * This method returns the security audit properties
@@ -1623,7 +1623,7 @@ public interface APIProvider extends APIManager {
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
+    boolean isDocumentationExist(String uuid, String docName, String organization) throws APIManagementException;
 
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
@@ -1720,10 +1720,10 @@ public interface APIProvider extends APIManager {
      * Adds a new APIRevision to an existing API
      *
      * @param apiRevision    APIRevision
-     * @param orgId          Identifier of an organization
+     * @param organization   Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    String addAPIRevision(APIRevision apiRevision, String orgId) throws APIManagementException;
+    String addAPIRevision(APIRevision apiRevision, String organization) throws APIManagementException;
 
     /**
      * Get a Revision Object related to provided revision UUID
@@ -1774,10 +1774,10 @@ public interface APIProvider extends APIManager {
     /**
      * Adds a new APIRevisionDeployment to an existing API
      *
-     * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
-     * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization
+     * @param apiId                     API UUID
+     * @param apiRevisionId             API Revision UUID
+     * @param apiRevisionDeployments    List of APIRevisionDeployment objects
+     * @param organization              Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
@@ -1847,10 +1847,10 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         API UUID
      * @param apiRevisionId API Revision UUID
-     * @param orgId         Identifier of an organization
+     * @param organization  Identifier of an organization
      * @throws APIManagementException if failed to delete APIRevision
      */
-    void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
+    void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
 
     /**
 <<<<<<<<< Temporary merge branch 1

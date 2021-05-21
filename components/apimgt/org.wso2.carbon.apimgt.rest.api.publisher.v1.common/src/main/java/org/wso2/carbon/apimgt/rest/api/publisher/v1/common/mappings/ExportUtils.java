@@ -864,7 +864,8 @@ public class ExportUtils {
                     String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
-                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
+                            .getComplexityDetails(apiDtoToReturn.getId());
                     if (graphqlComplexityInfo.getList().size() != 0) {
                         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                                 GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
