@@ -2840,8 +2840,8 @@ public class ApiMgtDAO {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
      *                                                           UserApplicationAPIUsage for given provider
      */
-    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier, String organization)
-            throws APIManagementException {
+    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier,
+            String organization) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement ps = null;
@@ -2855,6 +2855,7 @@ public class ApiMgtDAO {
             ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
             ps.setString(2, identifier.getApiName());
             ps.setString(3, identifier.getVersion());
+            ps.setString(4, organization);
             result = ps.executeQuery();
 
             Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();

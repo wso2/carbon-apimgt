@@ -174,6 +174,15 @@ public interface APIConsumer extends APIManager {
      */
     void removeAPIRating(String id, String user) throws APIManagementException;
 
+    /**
+     * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
+     *
+     * @param apiId         The api identifier
+     * @param organization  Identifier of an organization
+     * @throws APIManagementException If an error occurs while rating the API
+     */
+    void checkAPIVisibility(String apiId, String organization) throws APIManagementException;
+
     /** returns the SubscribedAPI object which is related to the subscriptionId
      *
      * @param subscriptionId subscription id

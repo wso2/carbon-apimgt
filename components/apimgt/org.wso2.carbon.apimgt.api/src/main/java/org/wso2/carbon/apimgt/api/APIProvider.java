@@ -1774,10 +1774,10 @@ public interface APIProvider extends APIManager {
     /**
      * Adds a new APIRevisionDeployment to an existing API
      *
-     * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
-     * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization
+     * @param apiId                     API UUID
+     * @param apiRevisionId             API Revision UUID
+     * @param apiRevisionDeployments    List of APIRevisionDeployment objects
+     * @param organization              Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
