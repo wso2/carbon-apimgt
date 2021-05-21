@@ -794,88 +794,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public void addAPIOld(API api) throws APIManagementException {
-
-        validateApiInfo(api);
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        validateResourceThrottlingTiers(api, tenantDomain);
-        validateKeyManagers(api);
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-
-        //Add default API LC if it is not there
-        try {
-            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
-                    registryService.getConfigSystemRegistry(tenantId))) {
-                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
-                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
-                File file = new File(defaultLifecyclePath);
-                String content = null;
-                if (file != null && file.exists()) {
-                    content = FileUtils.readFileToString(file);
-                }
-                if (content != null) {
-                    CommonUtil.addLifecycle(content, registryService.getConfigSystemRegistry(tenantId),
-                            CommonUtil.getRootSystemRegistry(tenantId));
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Error occurred while adding default APILifeCycle.", e);
-        } catch (IOException e) {
-            handleException("Error occurred while loading APILifeCycle.xml.", e);
-        } catch (XMLStreamException e) {
-            handleException("Error occurred while adding default API LifeCycle.", e);
-        }
-
-        createAPI(api);
-
-        if (log.isDebugEnabled()) {
-            log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
-                    + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
-        }
-
-        int tenantId;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            throw new APIManagementException(
-                    "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
-        }
-        addAPI(api, tenantId);
-
-        JSONObject apiLogObject = new JSONObject();
-        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
-        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
-
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                APIConstants.AuditLogConstants.CREATED, this.username);
-
-        if (log.isDebugEnabled()) {
-            log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
-                    .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
-                    .getContext());
-        }
-
-        if (APIUtil.isAPIManagementEnabled()) {
-            Cache contextCache = APIUtil.getAPIContextCache();
-            Boolean apiContext = null;
-
-            Object cachedObject = contextCache.get(api.getContext());
-            if (cachedObject != null) {
-                apiContext = Boolean.valueOf(cachedObject.toString());
-            }
-            if (apiContext == null) {
-                contextCache.put(api.getContext(), Boolean.TRUE);
-            }
-        }
-
-        //notify key manager with API addition
-        registerOrUpdateResourceInKeyManager(api, tenantDomain);
-    }
-
     /**
      * Adds a new API to the Store
      *
@@ -994,7 +912,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while adding the API
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
-        int apiId = apiMgtDAO.addAPI(api, tenantId);
+        int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
@@ -3043,8 +2961,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
-                                   String tenantDomain) throws APIManagementException {
-        API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
+                                   String organization) throws APIManagementException {
+        API existingAPI = getAPIbyUUID(existingApiId, organization);
 
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
@@ -3075,46 +2993,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String newAPIId = newAPI.getUuid();
 
         // copy docs
-        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain);
+        List<Documentation> existingDocs = getAllDocumentation(existingApiId, organization);
 
         if (existingDocs != null) {
             for (Documentation documentation : existingDocs) {
-                Documentation newDoc = addDocumentation(newAPIId, documentation, tenantDomain);
+                Documentation newDoc = addDocumentation(newAPIId, documentation, organization);
                 DocumentationContent content = getDocumentationContent(existingApiId, documentation.getId(),
-                        tenantDomain); // TODO see whether we can optimize this
+                        organization); // TODO see whether we can optimize this
                 if (content != null) {
-                    addDocumentationContent(newAPIId, newDoc.getId(), tenantDomain, content);
+                    addDocumentationContent(newAPIId, newDoc.getId(), organization, content);
                 }
             }
         }
 
         // copy icon
-        ResourceFile icon = getIcon(existingApiId, tenantDomain);
+        ResourceFile icon = getIcon(existingApiId, organization);
         if (icon != null) {
-            setThumbnailToAPI(newAPIId, icon, tenantDomain);
+            setThumbnailToAPI(newAPIId, icon, organization);
         }
 
         // copy sequences
-        List<Mediation> mediationPolicies = getAllApiSpecificMediationPolicies(existingApiId, tenantDomain);
+        List<Mediation> mediationPolicies = getAllApiSpecificMediationPolicies(existingApiId, organization);
         if (mediationPolicies != null) {
             for (Mediation mediation : mediationPolicies) {
-                Mediation policy = getApiSpecificMediationPolicyByPolicyId(existingApiId, mediation.getUuid(), tenantDomain);
-                addApiSpecificMediationPolicy(newAPIId, policy, tenantDomain);
+                Mediation policy = getApiSpecificMediationPolicyByPolicyId(existingApiId, mediation.getUuid(), organization);
+                addApiSpecificMediationPolicy(newAPIId, policy, organization);
             }
         }
 
         // copy wsdl 
         if (existingAPI.getWsdlUrl() != null) {
-            ResourceFile wsdl = getWSDL(existingApiId, tenantDomain);
+            ResourceFile wsdl = getWSDL(existingApiId, organization);
             if (wsdl != null) {
-                addWSDLResource(newAPIId, wsdl, null, tenantDomain);
+                addWSDLResource(newAPIId, wsdl, null, organization);
             }
         }
 
         // copy graphql definition
-        String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, tenantDomain);
+        String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, organization);
         if(graphQLSchema != null) {
-            saveGraphqlSchemaDefinition(newAPIId, graphQLSchema, tenantDomain);
+            saveGraphqlSchemaDefinition(newAPIId, graphQLSchema, organization);
         }
 
         // update old api
@@ -3131,7 +3049,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.updateAPI(new Organization(tenantDomain),
+            apiPersistenceInstance.updateAPI(new Organization(organization),
                     APIMapper.INSTANCE.toPublisherApi(existingAPI));
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);

@@ -1179,7 +1179,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        Mockito.when(apimgtDAO.addAPI(api, -1234)).thenReturn(1);
+        Mockito.when(apimgtDAO.addAPI(api, -1234, "testOrg")).thenReturn(1);
         Mockito.doNothing().when(apimgtDAO).addURITemplates(1, api, -1234);
         Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
 
@@ -1373,7 +1373,7 @@ public class APIProviderImplTest {
         NotificationDTO notificationDTO = PowerMockito.mock(NotificationDTO.class);
         UserRegistry configRegistry = PowerMockito.mock(UserRegistry.class);
         RegistryService registryService = PowerMockito.mock(RegistryService.class);
-        Mockito.when(apimgtDAO.addAPI(api, -1)).thenReturn(1);
+        Mockito.when(apimgtDAO.addAPI(api, -1, "testOrg")).thenReturn(1);
         Mockito.doNothing().when(apimgtDAO).addURITemplates(1, api, -1);
         Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
         Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);

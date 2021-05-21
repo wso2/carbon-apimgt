@@ -3380,7 +3380,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
-                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
+                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd, organization);
             } else if (isSoapToRestConvertedAPI) {
                 String wsdlArchiveExtractedPath = null;
                 if (validationResponse.getWsdlArchiveInfo() != null) {
@@ -3446,9 +3446,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileDetail file details
      * @param url URL of the WSDL
      * @param apiToAdd API object to be added to the system (which is not added yet)
+     * @param organization Organization
      * @return API added api
      */
-    private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd,
+                              String organization) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -3726,7 +3728,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             null, service, organization);
                 }
             } else {
-                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
+                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             }
             //This URI used to set the location header of the POST response
