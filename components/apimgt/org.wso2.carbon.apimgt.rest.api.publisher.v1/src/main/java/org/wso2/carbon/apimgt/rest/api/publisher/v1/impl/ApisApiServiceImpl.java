@@ -1536,7 +1536,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             //check if the API has subscriptions
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId(), organization);
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
             if (apiUsages != null && apiUsages.size() > 0) {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
             }
