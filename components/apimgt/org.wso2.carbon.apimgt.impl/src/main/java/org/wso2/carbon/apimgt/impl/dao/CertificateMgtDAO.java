@@ -352,11 +352,6 @@ public class CertificateMgtDAO {
                         }
                         certificateMetadataList.add(certificateMetadataDTO);
                     }
-            if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
-                preparedStatement.setString(2, alias);
-                preparedStatement.setString(3, PERCENTAGE_MARK + endpoint + PERCENTAGE_MARK);
-            }
-            resultSet = preparedStatement.executeQuery();
                 }
             }
 
