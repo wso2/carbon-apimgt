@@ -501,22 +501,21 @@ public interface APIConsumer extends APIManager {
      * Creates a request for getting Approval for Application Registration.
      *
      * @param userId          Subsriber name.
-     * @param applicationName of the Application.
+     * @param application     The Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     callback URL
      * @param allowedDomains  allowedDomains for token.
      * @param validityTime    validity time period.
      * @param tokenScope      Scopes for the requested tokens.
-     * @param groupingId      APIM application id.
      * @param jsonString      Callback URL for the Application.
      * @param keyManagerName
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
                                                                   String tokenType,
                                                                   String callbackUrl, String[] allowedDomains,
                                                                   String validityTime,
-                                                                  String tokenScope, String groupingId,
+                                                                  String tokenScope,
                                                                   String jsonString, String keyManagerName,
                                                                   String tenantDomain)
             throws APIManagementException;
@@ -524,8 +523,8 @@ public interface APIConsumer extends APIManager {
     /**
      * Creates a request for application update.
      *
-     * @param userId          Subsriber name.
-     * @param applicationName of the Application.
+     * @param userId          Subscriber name.
+     * @param application     The Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     callback URL
      * @param allowedDomains  allowedDomains for token.
@@ -536,7 +535,7 @@ public interface APIConsumer extends APIManager {
      * @param keyManagerName
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
+    OAuthApplicationInfo updateAuthClient(String userId, Application application,
                                           String tokenType,
                                           String callbackUrl, String[] allowedDomains,
                                           String validityTime,
