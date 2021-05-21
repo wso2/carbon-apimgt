@@ -8682,9 +8682,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {
+    public List<APIResource> getUsedProductResources(String uuid) throws APIManagementException {
         List<APIResource> usedProductResources = new ArrayList<>();
-        Map<Integer, URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPIWithProductMapping(apiId);
+        Map<Integer, URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPIWithProductMapping(uuid);
         for (URITemplate uriTemplate : uriTemplates.values()) {
             // If existing URITemplate is used by any API Products
             if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {

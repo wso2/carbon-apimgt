@@ -1721,9 +1721,7 @@ public class SQLConstants {
                     " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
                     " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
                     " WHERE " +
-                    "  API.API_PROVIDER = ? AND " +
-                    "  API.API_NAME = ? AND " +
-                    "  API.API_VERSION = ? " +
+                    "  API.API_UUID = ? " +
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_URL_TEMPLATES_OF_API_REVISION_SQL =
@@ -1775,8 +1773,7 @@ public class SQLConstants {
                     "   (SELECT AUM.URL_MAPPING_ID " +
                     "   FROM AM_API_URL_MAPPING AUM " +
                     "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                    "   WHERE API.API_PROVIDER = ? AND " +
-                    "   API.API_NAME = ? AND API.API_VERSION = ? AND APM.REVISION_UUID = 'Current API')";
+                    "   WHERE API.API_UUID = ? AND APM.REVISION_UUID = 'Current API')";
 
     public static final String ADD_COMMENT_SQL =
             " INSERT INTO " +

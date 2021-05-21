@@ -1539,7 +1539,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
             }
 
-            List<APIResource> usedProductResources = apiProvider.getUsedProductResources(api.getId());
+            List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
 
             if (!usedProductResources.isEmpty()) {
                 RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
