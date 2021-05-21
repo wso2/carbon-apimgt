@@ -241,7 +241,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-                                                  int endSubIndex, String groupingId) throws APIManagementException;
+                                                  int endSubIndex, String groupingId, String organization) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -330,9 +330,10 @@ public interface APIConsumer extends APIManager {
      * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
+     * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(Identifier identifier, String userId, int applicationId) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId, String organization) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId
@@ -341,17 +342,19 @@ public interface APIConsumer extends APIManager {
      * @param userId        id of the user
      * @param applicationId Application Id
      * @param groupId       groupId of user
+     * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId,String groupId) throws
+    void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId, String organization) throws
             APIManagementException;
 
     /** Removes a subscription specified by SubscribedAPI object
      *
      * @param subscription SubscribedAPI object which contains the subscription information
+     * @param organization Organization
      * @throws APIManagementException
      */
-    void removeSubscription(SubscribedAPI subscription) throws APIManagementException;
+    void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException;
 
     /**
      * Remove a Subscriber
@@ -637,7 +640,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                Identifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId, String organization) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
@@ -898,7 +901,7 @@ public interface APIConsumer extends APIManager {
      */
     JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException;
 
-    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
+    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(String organization, Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
