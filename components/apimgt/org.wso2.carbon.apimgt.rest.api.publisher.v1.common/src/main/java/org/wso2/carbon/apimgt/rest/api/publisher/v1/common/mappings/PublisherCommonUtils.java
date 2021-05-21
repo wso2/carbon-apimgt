@@ -358,23 +358,23 @@ public class PublisherCommonUtils {
             apiToUpdate.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         }
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, originalAPI.getOrganization());
+            String oldDefinition = apiProvider
+                    .getOpenAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, tenantDomain);
+            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-            String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
+            String oldDefinition = apiProvider
+                    .getAsyncAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -393,8 +393,7 @@ public class PublisherCommonUtils {
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
 
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
-                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         // TODO use returend api
     }
 
