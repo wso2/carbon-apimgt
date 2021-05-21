@@ -261,7 +261,13 @@ public class CertificateMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             if (apiIdentifier != null) {
-                apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, connection);
+                String apiUuid;
+                if (apiIdentifier.getUUID() != null) {
+                    apiUuid = apiIdentifier.getUUID();
+                } else {
+                    apiUuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
+                }
+                apiId = ApiMgtDAO.getInstance().getAPIID(apiUuid, connection);
             }
             preparedStatement = connection.prepareStatement(selectQuery);
             preparedStatement.setBoolean(index, false);

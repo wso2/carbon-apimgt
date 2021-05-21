@@ -415,14 +415,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String documentName = body.getName();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             //this will fail if user does not have access to the API Product or the API Product does not exist
-            APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
-            if (apiProvider.isDocumentationExist(apiProductId, documentName, tenantDomain)) {
+            APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
+            if (apiProvider.isDocumentationExist(apiProductId, documentName, organization)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
             }
-            documentation = apiProvider.addDocumentation(apiProductId, documentation, tenantDomain);
+            documentation = apiProvider.addDocumentation(apiProductId, documentation, organization);
 
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID

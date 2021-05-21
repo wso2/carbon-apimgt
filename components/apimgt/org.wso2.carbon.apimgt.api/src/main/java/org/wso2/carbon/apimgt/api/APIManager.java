@@ -96,12 +96,12 @@ public interface APIManager {
     /**
      * Get API or APIProduct by registry artifact id
      *
-     * @param uuid   Registry artifact id
-     * @param orgId  Identifier of an organization
+     * @param uuid          Registry artifact id
+     * @param organization  Identifier of an organization
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
-    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId) throws APIManagementException;
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException;
 
     /**
      * Get minimal details of API by registry artifact id
@@ -260,11 +260,11 @@ public interface APIManager {
      * Returns a list of documentation attached to a particular API
      *
      * @param uuid id of the api
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(String uuid, String orgId) throws APIManagementException;
+    List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException;
     /**
      * Returns the specified document attached to the given API
      *
@@ -279,25 +279,25 @@ public interface APIManager {
     /**
      * Get a documentation by artifact Id
      *
-     * @param apiId   apiId
-     * @param docId   DocumentID
-     * @param orgId   Identifier of the organization
+     * @param apiId         apiId
+     * @param docId         DocumentID
+     * @param organization  Identifier of the organization
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-    Documentation getDocumentation(String apiId, String docId, String orgId)
+    Documentation getDocumentation(String apiId, String docId, String organization)
             throws APIManagementException;
 
     /**
      * Get a documentation Content by apiid and doc id
      *
-     * @param apiId  ID of the API
-     * @param docId  DocumentID
-     * @param orgId  Identifier of an organization
+     * @param apiId         ID of the API
+     * @param docId         DocumentID
+     * @param organization  Identifier of an organization
      * @return DocumentationContent
      * @throws APIManagementException if failed to get Documentation
      */
-    DocumentationContent getDocumentationContent(String apiId, String docId, String orgId)
+    DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
             throws APIManagementException;
 
     /**
@@ -313,21 +313,21 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param  apiId ID of the API
+     * @param  apiId UUID of the API
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
-    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+    GraphqlComplexityInfo getComplexityDetails(String apiId) throws APIManagementException;
 
 
     /**
      * Add or Updates the complexity details given the GraphqlComplexityInfo object
      *
-     * @param apiIdentifier         APIIdentifier
+     * @param uuid         API uuid
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException if failed to update complexity details
      */
-    void addOrUpdateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+    void addOrUpdateComplexityDetails(String uuid, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException;
 
 

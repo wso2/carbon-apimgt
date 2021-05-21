@@ -1909,25 +1909,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void rateAPI(Identifier id, APIRating rating, String user) throws APIManagementException {
+    public void rateAPI(String id, APIRating rating, String user) throws APIManagementException {
         apiMgtDAO.addRating(id, rating.getRating(), user);
     }
 
     @Override
-    public void removeAPIRating(Identifier id, String user) throws APIManagementException {
+    public void removeAPIRating(String id, String user) throws APIManagementException {
         apiMgtDAO.removeAPIRating(id, user);
     }
 
     @Override
-    public int getUserRating(Identifier apiId, String user) throws APIManagementException {
-        return apiMgtDAO.getUserRating(apiId, user);
+    public int getUserRating(String uuid, String user) throws APIManagementException {
+        return apiMgtDAO.getUserRating(uuid, user);
     }
 
     @Override
-    public JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException {
+    public JSONObject getUserRatingInfo(String id, String user) throws APIManagementException {
         JSONObject obj = apiMgtDAO.getUserRatingInfo(id, user);
         if (obj == null || obj.isEmpty()) {
-            String msg = "Failed to get API ratings for API " + id.getName() + " for user " + user;
+            String msg = "Failed to get API ratings for API with UUID " + id + " for user " + user;
             log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }
@@ -1935,12 +1935,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
+    public JSONArray getAPIRatings(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRatings(apiId);
     }
 
     @Override
-    public float getAverageAPIRating(Identifier apiId) throws APIManagementException {
+    public float getAverageAPIRating(String apiId) throws APIManagementException {
         return apiMgtDAO.getAverageRating(apiId);
     }
 
@@ -3263,8 +3263,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setSubscriber(userId);
             workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
             workflowDTO.setApplicationId(applicationId);
+            String status = null;
+            if (apiIdentifier != null) {
+                status = apiMgtDAO.getSubscriptionStatus(apiIdentifier.getUUID(), applicationId);
+            } else if (apiProdIdentifier != null) {
+                status = apiMgtDAO.getSubscriptionStatus(apiProdIdentifier.getUUID(), applicationId);
+            }
 
-            String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
                 try {
                     createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
@@ -3429,14 +3434,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(uuid, comment, user);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier, String parentCommentID)
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(String uuid, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(identifier, parentCommentID);
+        return apiMgtDAO.getComments(uuid, parentCommentID);
     }
 
     @Override
@@ -3458,8 +3463,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-        apiMgtDAO.deleteComment(identifier, commentId);
+    public void deleteComment(String uuid, String commentId) throws APIManagementException {
+        apiMgtDAO.deleteComment(uuid, commentId);
     }
 
     @Override
@@ -3473,7 +3478,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return {@link String}
      */
     @Override
-    public int addApplication(Application application, String userId)
+    public int addApplication(Application application, String userId, String organization)
             throws APIManagementException {
 
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
@@ -3550,7 +3555,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setApplicationAttributes(null);
         }
         application.setUUID(UUID.randomUUID().toString());
-        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
+        if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId(), organization)) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
         }
@@ -3558,7 +3563,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isBlank(application.getCallbackUrl())) {
             application.setCallbackUrl(null);
         }
-        int applicationId = apiMgtDAO.addApplication(application, userId);
+        int applicationId = apiMgtDAO.addApplication(application, userId, organization);
 
         JSONObject appLogObject = new JSONObject();
         appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -4543,10 +4548,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return null;
 	}
 
-    public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
+    public Set<Scope> getScopesBySubscribedAPIs(List<String> uuids)
             throws APIManagementException {
-
-        Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
+        Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(uuids);
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
     }
 
@@ -4564,21 +4568,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Returns all applications associated with given subscriber, groupingId and search criteria.
      *
-     * @param subscriber Subscriber
-     * @param groupingId The groupId to which the applications must belong.
-     * @param offset     The offset.
-     * @param search     The search string.
-     * @param sortColumn The sort column.
-     * @param sortOrder  The sort order.
+     * @param subscriber   Subscriber
+     * @param groupingId   The groupId to which the applications must belong.
+     * @param offset       The offset.
+     * @param search       The search string.
+     * @param sortColumn   The sort column.
+     * @param sortOrder    The sort order.
+     * @param organization Identifier of an Organization
      * @return Application[] The Applications.
      * @throws APIManagementException
      */
     @Override
-    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start , int offset
-            , String search, String sortColumn, String sortOrder)
+    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset
+            , String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException {
         return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
-                search, sortColumn, sortOrder);
+                search, sortColumn, sortOrder, organization);
     }
 
 
@@ -5784,7 +5789,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getId()));
+                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -5807,10 +5812,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization)
             throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organization);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
                     uuid);
             if (devPortalApi != null) {
@@ -5820,15 +5825,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
+                    populateAPIProductInformation(uuid, organization, apiProduct);
                     populateAPIStatus(apiProduct);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
-                    api = addTiersToAPI(api, requestedTenantDomain);
+                    api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -5886,14 +5891,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    private API addTiersToAPI(API api, String requestedTenantDomain) throws APIManagementException {
-        int tenantId = 0;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(requestedTenantDomain);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Error when getting tiers");
-        }
+    private API addTiersToAPI(API api, String organization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
 
@@ -5953,28 +5952,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Used to retrieve API/API Products without performing the visibility permission checks
      * @param uuid
-     * @param requestedTenantDomain
+     * @param organization
      * @return
      * @throws APIManagementException
      */
-    private ApiTypeWrapper getAPIorAPIProductByUUIDWithoutPermissionCheck(String uuid, String requestedTenantDomain)
+    private ApiTypeWrapper getAPIorAPIProductByUUIDWithoutPermissionCheck(String uuid, String organization)
             throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organization);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(), devPortalApi.getApiName(),
                             devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
+                    populateAPIProductInformation(uuid, organization, apiProduct);
 
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
-                    api = addTiersToAPI(api, requestedTenantDomain);
+                    api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -6089,9 +6088,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
-    protected void checkAPIVisibilityRestriction(String apiId, String tenantDomain) throws APIManagementException {
+    protected void checkAPIVisibilityRestriction(String apiId, String organization) throws APIManagementException {
         try {
-            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(tenantDomain), apiId);
+            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organization), apiId);
             if (api != null) {
                 checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
             }
@@ -6101,23 +6100,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
-        checkAPIVisibilityRestriction(uuid, tenantDomain);
-        return super.getAllDocumentation(uuid, tenantDomain);
+    public void checkAPIVisibility(String uuid, String organization) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organization);
     }
 
     @Override
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
-            throws APIManagementException {
-        checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
-        return super.getDocumentation(apiId, docId, requestedTenantDomain);
+    public List<Documentation> getAllDocumentation(String uuid, String organization) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organization);
+        return super.getAllDocumentation(uuid, organization);
     }
 
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+    public Documentation getDocumentation(String apiId, String docId, String organization)
             throws APIManagementException {
-        checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
-        return super.getDocumentationContent(apiId, docId, requestedTenantDomain);
+        checkAPIVisibilityRestriction(apiId, organization);
+        return super.getDocumentation(apiId, docId, organization);
+    }
+
+    @Override
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String organization)
+            throws APIManagementException {
+        checkAPIVisibilityRestriction(apiId, organization);
+        return super.getDocumentationContent(apiId, docId, organization);
     }
 
     @Override

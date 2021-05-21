@@ -48,17 +48,17 @@ public class RestApiPublisherUtils {
     /**
      * Attaches a file to the specified document
      *
-     * @param apiId identifier of the API, the document belongs to
+     * @param apiId         identifier of the API, the document belongs to
      * @param documentation Documentation object
-     * @param inputStream input Stream containing the file
-     * @param fileDetails file details object as cxf Attachment
+     * @param inputStream   input Stream containing the file
+     * @param fileDetails   file details object as cxf Attachment
+     * @param organization  identifier of an organization
      * @throws APIManagementException if unable to add the file
      */
     public static void attachFileToDocument(String apiId, Documentation documentation, InputStream inputStream,
-                                            Attachment fileDetails) throws APIManagementException {
+                                            Attachment fileDetails, String organization) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String documentId = documentation.getId();
         String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
         String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
@@ -89,7 +89,7 @@ public class RestApiPublisherUtils {
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
             PublisherCommonUtils
                     .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, apiId,
-                            documentId, tenantDomain);
+                            documentId, organization);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
