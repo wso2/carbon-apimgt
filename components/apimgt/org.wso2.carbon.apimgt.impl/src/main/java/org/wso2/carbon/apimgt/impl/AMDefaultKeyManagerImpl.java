@@ -34,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
@@ -228,7 +229,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
-                            throw new APIManagementException("Invalid application access token expiry time.");
+                            throw new APIManagementException("Invalid application access token expiry time.",
+                                    ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setApplicationAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
@@ -245,7 +247,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
-                            throw new APIManagementException("Invalid user access token expiry time.");
+                            throw new APIManagementException("Invalid user access token expiry time.",
+                                    ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setUserAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
