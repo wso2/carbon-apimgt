@@ -3382,7 +3382,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
-                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
+                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd, organization);
             } else if (isSoapToRestConvertedAPI) {
                 String wsdlArchiveExtractedPath = null;
                 if (validationResponse.getWsdlArchiveInfo() != null) {
@@ -3448,14 +3448,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileDetail file details
      * @param url URL of the WSDL
      * @param apiToAdd API object to be added to the system (which is not added yet)
+     * @param organization Organization
      * @return API added api
      */
-    private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd,
+                              String organization) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //adding the api
-            apiProvider.addAPI(apiToAdd);
+            apiProvider.addAPI(apiToAdd, organization);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             if (StringUtils.isNotBlank(url)) {
@@ -3518,7 +3520,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //adding the api
-            API createdApi = apiProvider.addAPI(apiToAdd);
+            API createdApi = apiProvider.addAPI(apiToAdd, organization);
 
             String swaggerStr = "";
             if (StringUtils.isNotBlank(url)) {
@@ -3842,7 +3844,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
             //adding the api
-            API createdApi = apiProvider.addAPI(apiToAdd);
+            API createdApi = apiProvider.addAPI(apiToAdd, organization);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema, tenantDomain);
@@ -4910,7 +4912,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            API addedAPI = apiProvider.addAPI(apiToAdd);
+            API addedAPI = apiProvider.addAPI(apiToAdd, organization);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
@@ -4973,7 +4975,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
                     definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
 
-            apiProvider.addAPI(apiToAdd);
+            apiProvider.addAPI(apiToAdd, organization);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain));
         } catch (APIManagementException e) {

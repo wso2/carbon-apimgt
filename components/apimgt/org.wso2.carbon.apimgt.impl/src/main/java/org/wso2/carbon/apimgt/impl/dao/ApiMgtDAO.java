@@ -5499,7 +5499,7 @@ public class ApiMgtDAO {
      * @return API Id of the successfully added API
      * @throws APIManagementException if fails to add API
      */
-    public int addAPI(API api, int tenantId) throws APIManagementException {
+    public int addAPI(API api, int tenantId, String organization) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -5535,6 +5535,7 @@ public class ApiMgtDAO {
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUUID());
             prepStmt.setString(11, APIConstants.CREATED);
+            prepStmt.setString(12, organization);
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();

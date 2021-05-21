@@ -755,7 +755,7 @@ public class PublisherCommonUtils {
         }
 
         //adding the api
-        apiProvider.addAPI(apiToAdd);
+        apiProvider.addAPI(apiToAdd, organization);
         return apiToAdd;
     }
 

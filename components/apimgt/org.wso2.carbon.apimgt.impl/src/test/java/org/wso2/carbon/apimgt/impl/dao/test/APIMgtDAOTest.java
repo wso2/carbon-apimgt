@@ -395,7 +395,7 @@ public class APIMgtDAOTest {
         api.setContext("/context1");
         api.setContextTemplate("/context1/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        api.getId().setId(apiMgtDAO.addAPI(api, -1234));
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234, "testOrg"));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, oldApiVersionList);
     }
@@ -419,7 +419,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId1);
         api.setContext("/subForward");
         api.setContextTemplate("/subForward/{version}");
-        api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID));
+        api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID, "testOrg"));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         // Add a subscription and update state to BLOCKED
         application.setId(applicationId);
@@ -434,7 +434,7 @@ public class APIMgtDAOTest {
         api2.setContext("/context1");
         api2.setContextTemplate("/context1/{version}");
         api2.setUuid(UUID.randomUUID().toString());
-        api2.getId().setId(apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID));
+        api2.getId().setId(apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID, "testOrg"));
         // once API v2.0.0 is added, v1.0.0 becomes an older version hence add it to oldApiVersionList
         oldApiVersionList.add(api);
 
@@ -455,7 +455,7 @@ public class APIMgtDAOTest {
         API api3 = new API(apiId3);
         api3.setContext("/context1");
         api3.setContextTemplate("/context1/{version}");
-        api3.getId().setId(apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID));
+        api3.getId().setId(apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID, "testOrg"));
         // Once API v2.0.0 is added, v2.0.0 becomes an older version hence add it to oldApiVersionList
         // This needs to be sorted as latest API last.
         oldApiVersionList.add(api2);
@@ -791,14 +791,14 @@ public class APIMgtDAOTest {
         api.setContext("/getAPIVersionsMatchingApiName");
         api.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "2.0.0");
         API api2 = new API(apiId2);
         api2.setContext("/getAPIVersionsMatchingApiName");
         api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         api2.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api2, -1234);
+        apiMgtDAO.addAPI(api2, -1234, "testOrg");
         List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiName("getAPIVersionsMatchingApiName",
                 "getAPIVersionsMatchingApiName");
         assertNotNull(versionList);
@@ -845,7 +845,7 @@ public class APIMgtDAOTest {
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        int internalAPIID2 = apiMgtDAO.addAPI(api, -1234);
+        int internalAPIID2 = apiMgtDAO.addAPI(api, -1234, "testOrg");
         api.getId().setId(internalAPIID2);
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
@@ -853,7 +853,7 @@ public class APIMgtDAOTest {
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
         api1.setUUID(UUID.randomUUID().toString());
-        int apiInternalId = apiMgtDAO.addAPI(api1, -1234);
+        int apiInternalId = apiMgtDAO.addAPI(api1, -1234, "testOrg");
         api1.getId().setId(apiInternalId);
         apiMgtDAO.createApplicationRegistrationEntry(applicationRegistrationWorkflowDTO, false);
         ApplicationRegistrationWorkflowDTO retrievedApplicationRegistrationWorkflowDTO = new
@@ -921,7 +921,7 @@ public class APIMgtDAOTest {
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
         api.setUUID(UUID.randomUUID().toString());
-        api.getId().setId(apiMgtDAO.addAPI(api, -1234));
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234, "testOrg"));
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
@@ -1095,7 +1095,7 @@ public class APIMgtDAOTest {
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
         BlockConditionsDTO apiBlockConditionDto = new BlockConditionsDTO();
         apiBlockConditionDto.setConditionValue("/testAddUpdateDeleteBlockCondition");
         apiBlockConditionDto.setConditionType(APIConstants.BLOCKING_CONDITIONS_API);
@@ -1167,7 +1167,7 @@ public class APIMgtDAOTest {
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
         api.setUUID(UUID.randomUUID().toString());
-        int apiID = apiMgtDAO.addAPI(api, -1234);
+        int apiID = apiMgtDAO.addAPI(api, -1234, "testOrg");
         apiMgtDAO.addURITemplates(apiID, api, -1234);
         apiMgtDAO.updateAPI(api);
         apiMgtDAO.updateURITemplates(api, -1234);
@@ -1201,7 +1201,7 @@ public class APIMgtDAOTest {
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
         api.setUUID(UUID.randomUUID().toString());
-        int apiId = apiMgtDAO.addAPI(api, -1234);
+        int apiId = apiMgtDAO.addAPI(api, -1234, "testOrg");
         apiMgtDAO.addURITemplates(apiId, api, -1234);
         HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(api.getUuid());
         Assert.assertTrue(result1.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
