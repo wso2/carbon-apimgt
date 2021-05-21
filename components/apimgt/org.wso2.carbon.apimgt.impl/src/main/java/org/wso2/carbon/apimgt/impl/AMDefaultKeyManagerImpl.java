@@ -229,8 +229,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
-                            throw new APIManagementException("Invalid application access token expiry time.",
-                                    ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                            throw new APIManagementException("Invalid application access token expiry time given for "
+                                    + applicationName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setApplicationAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
@@ -247,8 +247,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
-                            throw new APIManagementException("Invalid user access token expiry time.",
-                                    ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                            throw new APIManagementException("Invalid user access token expiry time given for "
+                                    + applicationName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setUserAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
