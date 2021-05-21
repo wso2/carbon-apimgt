@@ -1237,7 +1237,7 @@ public class APIProviderImplTest {
 
     @Test
     public void testGetAPIUsageByAPIId() throws APIManagementException, RegistryException, UserStoreException {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
+        String uuid = UUID.randomUUID().toString();
         SubscribedAPI subscribedAPI1 = new SubscribedAPI(new Subscriber("user1"),
                 new APIIdentifier("admin", "API1", "1.0.0"));
         SubscribedAPI subscribedAPI2 = new SubscribedAPI(new Subscriber("user1"),
@@ -1258,11 +1258,12 @@ public class APIProviderImplTest {
 
         UserApplicationAPIUsage[] apiResults = {apiResult1, apiResult2};
 
-        Mockito.when(apimgtDAO.getAllAPIUsageByProviderAndApiId(apiId.getProviderName(), apiId, "org1")).thenReturn(apiResults);
+        Mockito.when(apimgtDAO.getAllAPIUsageByProviderAndApiId(uuid, "org1"))
+                .thenReturn(apiResults);
 
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
 
-        List<SubscribedAPI> subscribedAPIs = apiProvider.getAPIUsageByAPIId(apiId, "org1");
+        List<SubscribedAPI> subscribedAPIs = apiProvider.getAPIUsageByAPIId(uuid, "org1");
 
         Assert.assertEquals(2, subscribedAPIs.size());
         Assert.assertEquals("user1", subscribedAPIs.get(0).getSubscriber().getName());

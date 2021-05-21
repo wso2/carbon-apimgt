@@ -2826,29 +2826,26 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param providerName Name of the provider
-     * @param identifier   APIIdentifier which contains API name and version
-     * @param organization
+     * @param uuid API uuid
+     * @param organization Organization of the API
      * @return UserApplicationAPIUsage of given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
      *                                                           UserApplicationAPIUsage for given provider
      */
-    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier,
-            String organization) throws APIManagementException {
+    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String uuid, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
 
         try {
-            String sqlQuery = SQLConstants.GET_APP_API_USAGE_BY_PROVIDER_AND_ID_SQL;
+            String sqlQuery = SQLConstants.GET_APP_API_USAGE_BY_UUID_SQL;
             connection = APIMgtDBUtil.getConnection();
 
             ps = connection.prepareStatement(sqlQuery);
-            ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
-            ps.setString(2, identifier.getApiName());
-            ps.setString(3, identifier.getVersion());
-            ps.setString(4, organization);
+            ps.setString(1, uuid);
+            ps.setString(2, organization);
             result = ps.executeQuery();
 
             Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
@@ -2881,7 +2878,7 @@ public class ApiMgtDAO {
             }
             return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
         } catch (SQLException e) {
-            handleException("Failed to find API Usage for :" + providerName, e);
+            handleException("Failed to find API Usage for API with UUID :" + uuid, e);
             return null;
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);

@@ -854,7 +854,7 @@ public class SQLConstants {
             " ORDER BY " +
             "   APP.NAME";
 
-    public static final String GET_APP_API_USAGE_BY_PROVIDER_AND_ID_SQL =
+    public static final String GET_APP_API_USAGE_BY_UUID_SQL =
             " SELECT " +
             "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
@@ -877,10 +877,8 @@ public class SQLConstants {
             " WHERE " +
             "   SUBS.APPLICATION_ID = APP.APPLICATION_ID " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
-            "   AND API.API_PROVIDER = ? " +
             "   AND API.API_ID = SUBS.API_ID " +
-            "   AND API.API_NAME = ? " +
-            "   AND API.API_VERSION = ? " +
+            "   AND API.API_UUID = ? " +
             "   AND API.ORGANIZATION= ? " +
             "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             " ORDER BY " +
