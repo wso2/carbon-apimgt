@@ -7978,19 +7978,18 @@ public class ApiMgtDAO {
     /**
      * Get API Context using a new DB connection.
      *
-     * @param identifier API Identifier
+     * @param uuid API uuid
      * @return API Context
      * @throws APIManagementException if an error occurs
      */
-    public String getAPIContext(APIIdentifier identifier) throws APIManagementException {
+    public String getAPIContext(String uuid) throws APIManagementException {
 
         String context = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            context = getAPIContext(identifier, connection);
+            context = getAPIContext(uuid, connection);
         } catch (SQLException e) {
             log.error("Failed to retrieve the API Context", e);
-            handleException("Failed to retrieve connection while getting the API Context for "
-                    + identifier.getProviderName() + '-' + identifier.getApiName() + '-' + identifier.getVersion(), e);
+            handleException("Failed to retrieve connection while getting the API Context for API with UUID " + uuid, e);
         }
         return context;
     }
@@ -7998,19 +7997,17 @@ public class ApiMgtDAO {
     /**
      * Get API Context by passing an existing DB connection.
      *
-     * @param identifier API Identifier
+     * @param uuid API uuid
      * @param connection DB Connection
      * @return API Context
      * @throws APIManagementException if an error occurs
      */
-    public String getAPIContext(APIIdentifier identifier, Connection connection) throws APIManagementException {
+    public String getAPIContext(String uuid, Connection connection) throws APIManagementException {
 
         String context = null;
-        String sql = SQLConstants.GET_API_CONTEXT_BY_API_NAME_SQL;
+        String sql = SQLConstants.GET_API_CONTEXT_BY_API_UUID_SQL;
         try (PreparedStatement prepStmt = connection.prepareStatement(sql)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getApiName());
-            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(1, uuid);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     context = resultSet.getString(1);
@@ -8018,8 +8015,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             log.error("Failed to retrieve the API Context", e);
-            handleException("Failed to retrieve the API Context for " + identifier.getProviderName() + '-'
-                    + identifier.getApiName() + '-' + identifier.getVersion(), e);
+            handleException("Failed to retrieve the API Context for API with UUID " + uuid, e);
         }
         return context;
     }

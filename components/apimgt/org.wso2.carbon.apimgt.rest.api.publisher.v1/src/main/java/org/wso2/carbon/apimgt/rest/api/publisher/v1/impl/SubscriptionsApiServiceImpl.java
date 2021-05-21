@@ -91,8 +91,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 String apiContext = "";
                 String apiVersion = "";
+
                 if (apiId instanceof APIIdentifier) {
-                    apiContext = apiProvider.getAPIContext((APIIdentifier) apiId);
+                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId);
+                    apiContext = apiProvider.getAPIContext(uuid);
                     apiVersion = apiId.getVersion();
                 } else if (apiId instanceof APIProductIdentifier) {
                     APIProduct product = apiProvider.getAPIProduct((APIProductIdentifier) apiId);
@@ -281,7 +283,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 String apiContext = "";
                 String apiVersion = "";
                 if (apiId instanceof APIIdentifier) {
-                    apiContext = apiProvider.getAPIContext((APIIdentifier) apiId);
+                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId);
+                    apiContext = apiProvider.getAPIContext(uuid);
                     apiVersion = apiId.getVersion();
                 } else if (apiId instanceof  APIProductIdentifier) {
                     APIProduct product = apiProvider.getAPIProduct((APIProductIdentifier) apiId);

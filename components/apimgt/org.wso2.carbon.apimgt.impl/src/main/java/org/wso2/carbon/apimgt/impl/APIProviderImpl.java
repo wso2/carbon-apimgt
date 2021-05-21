@@ -1121,14 +1121,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * This method is used to get the context of API identified by the given APIIdentifier
+     * This method is used to get the context of API identified by the given uuid
      *
-     * @param apiId api identifier
+     * @param uuid api uuid
      * @return apiContext
-     * @throws APIManagementException if failed to fetch the context for apiID
+     * @throws APIManagementException if failed to fetch the context for api uuid
      */
-    public String getAPIContext(APIIdentifier apiId) throws APIManagementException {
-        return apiMgtDAO.getAPIContext(apiId);
+    public String getAPIContext(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIContext(uuid);
     }
 
     /**
