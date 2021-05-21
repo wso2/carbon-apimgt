@@ -3858,8 +3858,9 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
 
-    protected void populateAPIInformation(String uuid, String requestedTenantDomain, Organization org, API api)
+    protected void populateAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
+        Organization org = new Organization(organization);
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
@@ -3910,7 +3911,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setAvailableTiers(availableTier);
 
         //Scopes
-        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(currentApiUuid, requestedTenantDomain);
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(currentApiUuid, organization);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
         //templates
@@ -3923,7 +3924,7 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setSwaggerDefinition(resourceConfigsString);
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-            api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, requestedTenantDomain));
+            api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, organization));
         }
 
         JSONParser jsonParser = new JSONParser();
@@ -3990,7 +3991,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // category array retrieved from artifact has only the category name, therefore we need to fetch
                 // categories
                 // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(organization);
 
                 // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
@@ -4006,9 +4007,9 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    protected void populateAPIProductInformation(String uuid, String requestedTenantDomain, Organization org,
-                                                 APIProduct apiProduct) throws APIManagementException, OASPersistenceException, ParseException {
-
+    protected void populateAPIProductInformation(String uuid, String organization, APIProduct apiProduct)
+            throws APIManagementException, OASPersistenceException, ParseException {
+        Organization org = new Organization(organization);
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
 
@@ -4023,7 +4024,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 Scope resourceScope = (Scope) it.next();
                 String scopeKey = resourceScope.getKey();
                 if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
-                    resourceScope = APIUtil.getScopeByName(scopeKey, requestedTenantDomain);
+                    resourceScope = APIUtil.getScopeByName(scopeKey, organization);
                     uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
                 } else {
                     resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
@@ -4103,7 +4104,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // category array retrieved from artifact has only the category name, therefore we need to fetch
                 // categories
                 // and fill out missing attributes before attaching the list to the api
-                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(organization);
 
                 // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
