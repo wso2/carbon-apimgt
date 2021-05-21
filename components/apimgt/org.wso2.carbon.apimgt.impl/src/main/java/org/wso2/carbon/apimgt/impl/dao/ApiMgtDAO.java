@@ -7337,17 +7337,14 @@ public class ApiMgtDAO {
         return new LinkedHashSet<>(uriTemplates.values());
     }
 
-    public Map<Integer, URITemplate> getURITemplatesOfAPIWithProductMapping(APIIdentifier identifier)
-            throws APIManagementException {
+    public Map<Integer, URITemplate> getURITemplatesOfAPIWithProductMapping(String uuid) throws APIManagementException {
 
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_WITH_PRODUCT_MAPPINGS_SQL)) {
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getName());
-            ps.setString(3, identifier.getVersion());
+            ps.setString(1, uuid);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7396,9 +7393,9 @@ public class ApiMgtDAO {
                 }
             }
 
-            setAssociatedAPIProductsURLMappings(identifier, uriTemplates);
+            setAssociatedAPIProductsURLMappings(uuid, uriTemplates);
         } catch (SQLException e) {
-            handleException("Failed to get URI Templates of API" + identifier, e);
+            handleException("Failed to get URI Templates of API with UUID " + uuid, e);
         }
         return uriTemplates;
     }
@@ -7427,14 +7424,12 @@ public class ApiMgtDAO {
         }
     }
 
-    private void setAssociatedAPIProductsURLMappings(APIIdentifier identifier, Map<Integer, URITemplate> uriTemplates)
+    private void setAssociatedAPIProductsURLMappings(String uuid, Map<Integer, URITemplate> uriTemplates)
             throws SQLException {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL)) {
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getName());
-            ps.setString(3, identifier.getVersion());
+            ps.setString(1, uuid);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String productName = rs.getString("API_NAME");

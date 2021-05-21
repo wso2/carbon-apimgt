@@ -1500,11 +1500,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Retrieve list of resources of the provided api that are used in other API products
-     * @param apiId ID of the API
+     * @param uuid UUID of the API
      * @return APIResource list of resources
      * @throws APIManagementException
      */
-    List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException ;
+    List<APIResource> getUsedProductResources(String uuid) throws APIManagementException ;
 
     /**
      * Delete API
