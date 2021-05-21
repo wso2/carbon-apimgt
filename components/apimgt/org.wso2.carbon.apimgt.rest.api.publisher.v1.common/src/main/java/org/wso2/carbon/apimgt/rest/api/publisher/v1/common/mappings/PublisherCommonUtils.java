@@ -626,7 +626,6 @@ public class PublisherCommonUtils {
      */
     public static void validateScopes(API api) throws APIManagementException {
 
-        APIIdentifier apiId = api.getId();
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -641,7 +640,7 @@ public class PublisherCommonUtils {
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
                 // already defined values for the existing shared scope.
-                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, tenantId)) {
+                if (apiProvider.isScopeKeyAssignedLocally(api.getUuid(), scopeName, tenantId)) {
                     throw new APIManagementException(
                             "Scope " + scopeName + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);

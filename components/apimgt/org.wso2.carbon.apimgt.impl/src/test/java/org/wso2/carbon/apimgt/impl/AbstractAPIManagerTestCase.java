@@ -999,12 +999,12 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsScopeKeyAssigned() throws APIManagementException {
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally((APIIdentifier) Mockito.any(), Mockito.anyString(), Mockito.anyInt()))
+        String uuid = UUID.randomUUID().toString();
+        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally(uuid, Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(identifier, "sample", -1234));
-        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(identifier, "sample1", -1234));
+        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample", -1234));
+        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample1", -1234));
     }
 
     @Test
