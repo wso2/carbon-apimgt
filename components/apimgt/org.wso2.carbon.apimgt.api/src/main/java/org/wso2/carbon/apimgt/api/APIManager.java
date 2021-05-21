@@ -533,14 +533,13 @@ public interface APIManager {
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      * This will return false if those APIs are different versions of the same API.
      *
-     * @param apiIdentifier API Identifier
+     * @param uuid API uuid
      * @param scopeKey   candidate scope key
      * @param tenantId   tenant Id
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
-            throws APIManagementException;
+    boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, int tenantId) throws APIManagementException;
 
     /**
      * Check if a given context template already exists
