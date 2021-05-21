@@ -801,7 +801,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
      */
 
-    public API addAPI(API api, String organization) throws APIManagementException {
+    public API addAPI(API api) throws APIManagementException {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -865,7 +865,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(
                     "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
         }
-        addAPI(api, tenantId, organization);
+        addAPI(api, tenantId);
 
         JSONObject apiLogObject = new JSONObject();
         apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
@@ -904,10 +904,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    private void addAPI(API api, int tenantId) throws APIManagementException {
-        // TODO remove usages and this
-    }
-
     /**
      * Add API metadata, local scopes and URI templates to the database and KeyManager.
      *
@@ -915,8 +911,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param tenantId Tenant Id
      * @throws APIManagementException if an error occurs while adding the API
      */
-    private void addAPI(API api, int tenantId, String organization) throws APIManagementException {
-        int apiId = apiMgtDAO.addAPI(api, tenantId, organization);
+    private void addAPI(API api, int tenantId) throws APIManagementException {
+        int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
@@ -2993,7 +2989,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
 
 
-        API newAPI = addAPI(existingAPI, organization);
+        API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
 
         // copy docs

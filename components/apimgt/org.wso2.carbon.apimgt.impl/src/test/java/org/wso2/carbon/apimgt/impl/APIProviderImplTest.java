@@ -1188,7 +1188,7 @@ public class APIProviderImplTest {
                 .thenReturn(publisherAPI);
         
         try {
-            apiProvider.addAPI(api, "testOrg");
+            apiProvider.addAPI(api);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
@@ -1207,7 +1207,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
 
         try {
-            apiProvider.addAPI(api, "testOrg");
+            apiProvider.addAPI(api);
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("API Name contains one or more illegal characters"));
@@ -1227,7 +1227,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
 
         try {
-            apiProvider.addAPI(api, "testOrg");
+            apiProvider.addAPI(api);
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("API Version contains one or more illegal characters"));
@@ -1401,7 +1401,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
         PowerMockito.when(APIUtil.replaceEmailDomainBack(api.getId().getProviderName())).thenReturn("admin");
@@ -1507,7 +1507,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
         
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
@@ -1700,7 +1700,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
@@ -1847,7 +1847,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
@@ -1899,7 +1899,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
@@ -2038,7 +2038,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
         
-        apiProvider.addAPI(oldApi, "testOrg");
+        apiProvider.addAPI(oldApi);
 
         //mock has permission
         Resource apiSourceArtifact = Mockito.mock(Resource.class);
@@ -2140,7 +2140,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
         
-        apiProvider.addAPI(oldApi, "testOrg");
+        apiProvider.addAPI(oldApi);
 
         //mock has permission
         Resource apiSourceArtifact = Mockito.mock(Resource.class);
@@ -2305,7 +2305,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(oldApi, "testOrg");
+        apiProvider.addAPI(oldApi);
 
         RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
         PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
@@ -2501,7 +2501,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         //Mock Updating API
         Resource apiSourceArtifact = Mockito.mock(Resource.class);
@@ -2556,7 +2556,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         //Mock Updating API
         Resource apiSourceArtifact = Mockito.mock(Resource.class);
@@ -2615,7 +2615,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         //Mock Updating API
         Resource apiSourceArtifact = Mockito.mock(Resource.class);
@@ -2675,7 +2675,7 @@ public class APIProviderImplTest {
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         //Mock Updating API
         Resource apiSourceArtifact = Mockito.mock(Resource.class);
@@ -3684,7 +3684,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
  
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         String fileName = "test.txt";
         String contentType = "application/force-download";
@@ -3759,7 +3759,7 @@ public class APIProviderImplTest {
 
         Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
-        apiProvider.addAPI(api, "testOrg");
+        apiProvider.addAPI(api);
 
         String fileName = "test.txt";
         String contentType = "application/force-download";

@@ -3457,7 +3457,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //adding the api
-            apiProvider.addAPI(apiToAdd, organization);
+            apiProvider.addAPI(apiToAdd);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             if (StringUtils.isNotBlank(url)) {
@@ -3520,7 +3520,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //adding the api
-            API createdApi = apiProvider.addAPI(apiToAdd, organization);
+            API createdApi = apiProvider.addAPI(apiToAdd);
 
             String swaggerStr = "";
             if (StringUtils.isNotBlank(url)) {
@@ -3730,7 +3730,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             null, service, organization);
                 }
             } else {
-                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
+                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             }
             //This URI used to set the location header of the POST response
@@ -3844,7 +3844,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
             //adding the api
-            API createdApi = apiProvider.addAPI(apiToAdd, organization);
+            API createdApi = apiProvider.addAPI(apiToAdd);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema, tenantDomain);
@@ -4912,7 +4912,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            API addedAPI = apiProvider.addAPI(apiToAdd, organization);
+            API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
@@ -4975,7 +4975,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
                     definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
 
-            apiProvider.addAPI(apiToAdd, organization);
+            apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain));
         } catch (APIManagementException e) {
