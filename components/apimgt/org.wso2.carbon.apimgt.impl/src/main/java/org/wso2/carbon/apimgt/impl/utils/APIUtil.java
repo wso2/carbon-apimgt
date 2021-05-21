@@ -5332,8 +5332,8 @@ public final class APIUtil {
         }
 
         try {
-            return realmService.getTenantManager().getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+            return getInternalOrganizationId(tenantDomain);
+        } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
         }
 

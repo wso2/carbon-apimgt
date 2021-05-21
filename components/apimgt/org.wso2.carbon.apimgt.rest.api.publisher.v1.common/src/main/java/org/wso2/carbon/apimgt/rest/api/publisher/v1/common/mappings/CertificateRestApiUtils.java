@@ -265,11 +265,10 @@ public class CertificateRestApiUtils {
      * @return Client certificate
      * @throws APIManagementException API Management Exception.
      */
-    public static ClientCertificateDTO preValidateClientCertificate(String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException {
+    public static ClientCertificateDTO preValidateClientCertificate(String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException {
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
         if (StringUtils.isEmpty(alias)) {
             throw new APIManagementException("The alias cannot be empty", ExceptionCodes.ALIAS_CANNOT_BE_EMPTY);
         }
