@@ -1879,8 +1879,8 @@ public class SQLConstants {
     public static final String GET_API_TYPE_BY_UUID =
             "SELECT API_TYPE FROM AM_API WHERE API_UUID = ?";
 
-    public static final String GET_API_CONTEXT_BY_API_NAME_SQL =
-            "SELECT CONTEXT FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION  = ?";
+    public static final String GET_API_CONTEXT_BY_API_UUID_SQL =
+            "SELECT CONTEXT FROM AM_API WHERE API_UUID = ?";
 
     public static final String GET_ALL_CONTEXT_SQL = "SELECT CONTEXT FROM AM_API ";
 
