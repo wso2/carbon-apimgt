@@ -159,7 +159,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws JSONException for errors in parsing the OAuthApplicationInfo json string
      */
     private ClientInfo createClientInfo(OAuthApplicationInfo info, String applicationName, boolean isUpdate)
-            throws JSONException {
+            throws JSONException, APIManagementException {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
@@ -227,6 +227,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
+                        if (expiry < 0) {
+                            throw new APIManagementException("Invalid application access token expiry time.");
+                        }
                         clientInfo.setApplicationAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
@@ -241,6 +244,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
+                        if (expiry < 0) {
+                            throw new APIManagementException("Invalid user access token expiry time.");
+                        }
                         clientInfo.setUserAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
