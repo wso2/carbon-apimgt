@@ -110,6 +110,7 @@ function View(props) {
 
     const [code, setCode] = useState('');
     const [doc, setDoc] = useState(null);
+    const [isFileAvailable, setIsFileAvailable] = useState(true);
     const restAPI = isAPIProduct ? new APIProduct() : new API();
 
     useEffect(() => {
@@ -119,6 +120,20 @@ function View(props) {
                 const { body } = doc;
                 setDoc(body);
                 if (body.sourceType === 'MARKDOWN' || body.sourceType === 'INLINE') loadContentForDoc();
+
+                if (body.sourceType === 'FILE') {
+                     const promised_get_content = restAPI.getFileForDocument(api.id, documentId);
+                     promised_get_content
+                         .then((done) => {
+                            setIsFileAvailable(true);
+                         })
+                         .catch((error) => {
+                             if (process.env.NODE_ENV !== 'production') {
+                                 console.log(error);
+                             }
+                             setIsFileAvailable(false);
+                         });
+                }
             })
             .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -253,6 +268,7 @@ function View(props) {
                                 color="default"
                                 className={classes.button}
                                 onClick={handleDownload}
+                                disabled={!isFileAvailable}
                             >
                                 <FormattedMessage
                                     id="Apis.Details.Documents.View.btn.download"
