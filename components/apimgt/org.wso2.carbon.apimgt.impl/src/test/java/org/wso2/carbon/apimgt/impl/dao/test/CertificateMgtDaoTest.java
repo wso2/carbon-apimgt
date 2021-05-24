@@ -318,6 +318,21 @@ public class CertificateMgtDaoTest {
         Assert.assertEquals("The number of deleted certificates retrieved was wrong", 1, aliasList.size());
     }
 
+    @Test
+    public void getCertificate() throws CertificateManagementException, CertificateAliasExistsException {
+        certificateMgtDAO.addCertificate("AliasOne", "http://localhost", -1234);
+        certificateMgtDAO.addCertificate("AliasTwo", "http://localhost/abc/123", -1234);
+        certificateMgtDAO.addCertificate("AliasThree", "testing string", -1234);
+        List<CertificateMetadataDTO> certs = certificateMgtDAO.getCertificates("AliasOne", "http://localhost", -1234);
+        CertificateMetadataDTO certOne = certs.get(0);
+        CertificateMetadataDTO certTwo = certs.get(1);
+        Assert.assertEquals("Endpoint one does not retrieved", "http://localhost", certOne.getEndpoint());
+        Assert.assertEquals("Endpoint two does not retrieved", "http://localhost/abc/123", certTwo.getEndpoint());
+        List<CertificateMetadataDTO> certs2 = certificateMgtDAO.getCertificates(null, "testing string", -1234);
+        CertificateMetadataDTO certThree = certs2.get(0);
+        Assert.assertEquals("Endpoint three does not retrieved", "testing string", certThree.getEndpoint());
+    }
+
     /**
      * To add the client certificate.
      *
