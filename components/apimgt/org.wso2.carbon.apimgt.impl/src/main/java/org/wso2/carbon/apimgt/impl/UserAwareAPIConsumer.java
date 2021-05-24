@@ -64,14 +64,14 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void removeSubscription(Identifier identifier, String userId,
-                                   int applicationId) throws APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId);
+    public void removeSubscription(Identifier identifier, String userId, int applicationId,
+                                   String organization) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, organization);
     }
 
     @Override
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        super.removeSubscription(subscription);
+    public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
+        super.removeSubscription(subscription, organization);
     }
 
     @Override
@@ -89,9 +89,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.removeApplication(application, username);
     }
      @Override
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId) throws
-             APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId, groupId);
+    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
+                                   String organization) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, groupId, organization);
     }
 
     /**
@@ -121,9 +121,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
     
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
-            throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, requestedTenantDomain);
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization);
         Identifier identifier;
         if (apiTypeWrapper.isAPIProduct()) {
             identifier = apiTypeWrapper.getApiProduct().getId();

@@ -974,6 +974,7 @@ public class PublisherCommonUtils {
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
+        apiToAdd.setOrganization(organization);
         return apiToAdd;
     }
 

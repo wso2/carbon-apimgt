@@ -96,8 +96,8 @@ public interface APIManager {
     /**
      * Get API or APIProduct by registry artifact id
      *
-     * @param uuid          Registry artifact id
-     * @param organization  Identifier of an organization
+     * @param uuid   Registry artifact id
+     * @param organization  Organization
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
@@ -378,11 +378,12 @@ public interface APIManager {
     /**
      * Returns a set of APIs purchased by the given Subscriber
      *
-     * @param subscriber Subscriber
+     * @param subscriber   Subscriber
+     * @param organization Organization
      * @return Set<API>
      * @throws APIManagementException if failed to get API for subscriber
      */
-    Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
+    Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException;
 
     /**
      * Associates the given icon image with the specified path.
