@@ -1247,7 +1247,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
@@ -1333,12 +1333,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String fileName;
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId(), organization);
