@@ -1,6 +1,0 @@
-site/public/dist/
-# index.jag is now ignored because it's generated from webpack at the build time
-site/public/pages/index.jag
-.vscode
-coverage
-node_modules
