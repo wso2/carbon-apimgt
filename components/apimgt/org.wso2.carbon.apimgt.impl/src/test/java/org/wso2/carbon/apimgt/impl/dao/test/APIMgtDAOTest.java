@@ -1160,6 +1160,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi",
                 "testAddAndGetApi", "1.0.0");
         API api = new API(apiIdentifier);
+        api.setOrganization("testOrg");
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         api.setUriTemplates(getUriTemplateSet());
