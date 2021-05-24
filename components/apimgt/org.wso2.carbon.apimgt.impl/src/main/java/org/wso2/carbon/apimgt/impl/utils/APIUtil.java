@@ -502,7 +502,8 @@ public final class APIUtil {
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
+                    api.getOrganization());
 
             for (URITemplate uriTemplate : uriTemplates) {
                 List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
@@ -750,7 +751,8 @@ public final class APIUtil {
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
+                    api.getOrganization());
 
             // AWS Lambda: get paths
             OASParserUtil oasParserUtil = new OASParserUtil();
@@ -5332,8 +5334,8 @@ public final class APIUtil {
         }
 
         try {
-            return realmService.getTenantManager().getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+            return getInternalOrganizationId(tenantDomain);
+        } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
         }
 

@@ -940,7 +940,7 @@ public class APIMgtDAOTest {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);
         Mockito.when(keyManager.retrieveApplication(clientIdSandbox)).thenReturn(oAuthApplicationInfo);
-        assertTrue(apiMgtDAO.getSubscribedAPIs(subscriber, null).size() > 0);
+        assertTrue(apiMgtDAO.getSubscribedAPIs("testOrg", subscriber, null).size() > 0);
         assertEquals(subscribedAPI.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         assertEquals(subscribedAPI.getApiId(), apiId);
         assertEquals(subscribedAPI.getApplication().getId(), application.getId());
@@ -954,7 +954,7 @@ public class APIMgtDAOTest {
         assertEquals(status, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         boolean applicationExist = apiMgtDAO.isApplicationExist(application.getName(), subscriber.getName(), null, "testOrg");
         assertTrue(applicationExist);
-        assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null));
+        assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null, "testorg"));
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);
         assertEquals(subscribedAPIS.size(), 1);
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId());

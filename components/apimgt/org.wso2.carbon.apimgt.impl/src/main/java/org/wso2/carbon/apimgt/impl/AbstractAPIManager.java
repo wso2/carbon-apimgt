@@ -1247,9 +1247,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
 
-        String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
         String id;
         if (apiId.getUUID() != null) {
@@ -1258,7 +1257,7 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(orgId), id);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1266,11 +1265,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+    public String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1278,11 +1277,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+    public String getAsyncAPIDefinition(String apiId, String organization) throws APIManagementException {
 
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(tenantDomain), apiId);
+            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(organization), apiId);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
         }
@@ -1920,10 +1919,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException {
+    public Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException {
 
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, null);
+        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, null);
         for (SubscribedAPI subscribedApi : subscribedAPIs) {
             Application application = subscribedApi.getApplication();
             if (application != null) {
@@ -3865,6 +3864,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getUuid() == null) {
             api.setUuid(uuid);
         }
+        api.setOrganization(organization);
         // environment
         String environmentString = null;
         if (api.getEnvironments() != null) {
@@ -3933,7 +3933,7 @@ public abstract class AbstractAPIManager implements APIManager {
             JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
             paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
         }
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getId());
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getId(), organization);
         for (URITemplate uriTemplate : uriTemplates) {
             String uTemplate = uriTemplate.getUriTemplate();
             String method = uriTemplate.getHTTPVerb();
@@ -4010,6 +4010,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void populateAPIProductInformation(String uuid, String organization, APIProduct apiProduct)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
+        apiProduct.setOrganization(organization);
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
 

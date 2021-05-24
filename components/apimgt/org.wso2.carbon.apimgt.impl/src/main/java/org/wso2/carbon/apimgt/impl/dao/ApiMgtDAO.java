@@ -1545,12 +1545,13 @@ public class ApiMgtDAO {
      * @param startSubIndex   the start index for pagination
      * @param endSubIndex     end index for pagination
      * @param groupingId      the group id of the application
+     * @param organization    the organization
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
-                                                         int startSubIndex, int endSubIndex, String groupingId)
-            throws APIManagementException {
+                                                         int startSubIndex, int endSubIndex, String groupingId,
+                                                         String organization) throws APIManagementException {
 
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
         String sqlQuery =
@@ -1558,7 +1559,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(sqlQuery);
-             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, applicationName, ps)) {
+             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, applicationName, organization, ps)) {
             int index = 0;
             while (result.next()) {
                 if (index >= startSubIndex && index < endSubIndex) {
@@ -1634,7 +1635,7 @@ public class ApiMgtDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber, String applicationName,
-                                               PreparedStatement statement) throws SQLException {
+                                               String organization, PreparedStatement statement) throws SQLException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
@@ -1647,6 +1648,7 @@ public class ApiMgtDAO {
 
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, organization);
                 for (String groupId : groupIDArray) {
                     statement.setString(++paramIndex, groupId);
                 }
@@ -1655,12 +1657,14 @@ public class ApiMgtDAO {
             } else {
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, groupingId);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
             statement.setInt(++paramIndex, tenantId);
             statement.setString(++paramIndex, applicationName);
+            statement.setString(++paramIndex, organization);
             statement.setString(++paramIndex, subscriber.getName());
         }
 
@@ -1789,7 +1793,7 @@ public class ApiMgtDAO {
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get SubscribedAPIs
      */
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId)
+    public Set<SubscribedAPI> getSubscribedAPIs(String organization, Subscriber subscriber, String groupingId)
             throws APIManagementException {
 
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
@@ -1804,7 +1808,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(sqlQuery);
-             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, ps)) {
+             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, ps, organization)) {
             while (result.next()) {
                 String apiType = result.getString("TYPE");
 
@@ -1835,7 +1839,7 @@ public class ApiMgtDAO {
     }
 
     private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber,
-                                               PreparedStatement statement) throws SQLException {
+                                               PreparedStatement statement, String organization) throws SQLException {
 
         int tenantId = APIUtil.getTenantId(subscriber.getName());
         int paramIndex = 0;
@@ -1850,15 +1854,18 @@ public class ApiMgtDAO {
                     statement.setString(++paramIndex, groupId);
                 }
                 statement.setString(++paramIndex, tenantDomain);
+                statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, subscriber.getName());
 
             } else {
                 statement.setInt(++paramIndex, tenantId);
                 statement.setString(++paramIndex, groupingId);
+                statement.setString(++paramIndex, organization);
                 statement.setString(++paramIndex, subscriber.getName());
             }
         } else {
             statement.setInt(++paramIndex, tenantId);
+            statement.setString(++paramIndex, organization);
             statement.setString(++paramIndex, subscriber.getName());
         }
 
@@ -6884,6 +6891,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(9, api.getId().getApiName());
             prepStmt.setString(10, api.getId().getVersion());
+            prepStmt.setString(11, api.getOrganization());
             prepStmt.execute();
             //}
 
@@ -7202,7 +7210,7 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier)
+    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier, String organization)
             throws APIManagementException {
 
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
@@ -7214,7 +7222,8 @@ public class ApiMgtDAO {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
-                ps.setString(4, identifier.getUUID());
+                ps.setString(4, organization);
+                ps.setString(5, identifier.getUUID());
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7273,6 +7282,7 @@ public class ApiMgtDAO {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
+                ps.setString(4, organization);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -14430,7 +14440,7 @@ public class ApiMgtDAO {
         List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
 
-        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier);
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier, api.getOrganization());
 
         for (URITemplate uriTemplate : uriTemplatesOfAPI) {
             Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();
