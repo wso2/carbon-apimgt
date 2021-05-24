@@ -518,11 +518,11 @@ public interface APIManager {
      *
      * @param uuid API uuid
      * @param scopeKey   candidate scope key
-     * @param tenantId   tenant Id
+     * @param organization   organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, int tenantId) throws APIManagementException;
+    boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, String organization) throws APIManagementException;
 
     /**
      * Check if a given context template already exists
