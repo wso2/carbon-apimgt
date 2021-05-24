@@ -6891,6 +6891,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(9, api.getId().getApiName());
             prepStmt.setString(10, api.getId().getVersion());
+            prepStmt.setString(11, api.getOrganization());
             prepStmt.execute();
             //}
 
@@ -7209,7 +7210,7 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier)
+    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier, String organization)
             throws APIManagementException {
 
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
@@ -7221,7 +7222,8 @@ public class ApiMgtDAO {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
-                ps.setString(4, identifier.getUUID());
+                ps.setString(4, organization);
+                ps.setString(5, identifier.getUUID());
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7280,6 +7282,7 @@ public class ApiMgtDAO {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
+                ps.setString(4, organization);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -14437,7 +14440,7 @@ public class ApiMgtDAO {
         List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
 
-        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier);
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier, api.getOrganization());
 
         for (URITemplate uriTemplate : uriTemplatesOfAPI) {
             Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();

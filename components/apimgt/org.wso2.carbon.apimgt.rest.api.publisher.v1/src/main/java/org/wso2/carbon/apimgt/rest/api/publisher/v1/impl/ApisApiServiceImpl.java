@@ -4488,7 +4488,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         apiProvider.restoreAPIRevision(apiId, revisionId, organization);
-        APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);  
+        APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
     }
