@@ -1637,7 +1637,7 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? " +
-            "   AND ORGANIZATION_ID = ? ";
+            "   AND ORGANIZATION = ? ";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
