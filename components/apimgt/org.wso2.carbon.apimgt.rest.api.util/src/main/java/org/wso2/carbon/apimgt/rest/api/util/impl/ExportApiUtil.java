@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
@@ -153,8 +154,7 @@ public class ExportApiUtil {
             file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                            + file.getName() + "\"")
-                    .build();
+                            + file.getName() + "\"").type(APIConstants.APPLICATION_ZIP).build();
         } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
