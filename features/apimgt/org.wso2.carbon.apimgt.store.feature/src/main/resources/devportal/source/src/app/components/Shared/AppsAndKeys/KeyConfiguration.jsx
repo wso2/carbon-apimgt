@@ -134,6 +134,17 @@ const KeyConfiguration = (props) => {
         });
         return modifiedGrantTypes;
     };
+
+    const residentKeyManagerName = 'Resident Key Manager';
+
+    const isResidentIDP = () => {
+        if (keyManagerConfig.name === residentKeyManagerName) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     const callBackHasErrors = () => {
         if (callbackUrl === '') {
             updateHasError(true);
@@ -141,7 +152,7 @@ const KeyConfiguration = (props) => {
                 defaultMessage: 'Call back URL can not be empty when Implicit or Authorization Code grants are selected.',
                 id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.empty.error.text',
             }));
-        } else if (Validation.url.validate(callbackUrl).error) {
+        } else if (Validation.url.validate(callbackUrl).error && !isResidentIDP()) {
             updateHasError(true);
             setCallbackHelper(intl.formatMessage({
                 defaultMessage: 'Invalid URL. Please enter a valid URL.',
