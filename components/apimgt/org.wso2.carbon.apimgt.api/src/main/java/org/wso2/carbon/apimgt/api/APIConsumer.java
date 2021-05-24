@@ -880,18 +880,6 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
      *
-     * @param apiIdentifier API Identifier object
-     * @param environmentName environment name
-     * @param environmentType environment type
-     * @return WSDL of the API
-     * @throws APIManagementException when error occurred while getting the WSDL
-     */
-    ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
-            throws APIManagementException;
-
-    /**
-     * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
-     *
      * @param api API  
      * @param environmentName environment name
      * @param environmentType environment type

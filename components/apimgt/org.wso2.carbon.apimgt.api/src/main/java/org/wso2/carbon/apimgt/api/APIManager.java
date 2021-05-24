@@ -66,15 +66,6 @@ public interface APIManager {
 
     /**
      * Returns details of an API
-     *
-     * @param apiPath APIIdentifier
-     * @return An API object related to the given identifier or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPI(String apiPath) throws APIManagementException;
-
-    /**
-     * Returns details of an API
      * @param uuid   UUID of the API's registry artifact
      * @param orgId  Identifier of an organization
      * @return An API object related to the given artifact id or null
@@ -121,15 +112,6 @@ public interface APIManager {
      * @throws APIManagementException
      */
     API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
-
-    /**
-     * Returns details of an API
-     *
-     * @param identifier APIIdentifier
-     * @return An API object related to the given identifier or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Checks the Availability of given APIIdentifier

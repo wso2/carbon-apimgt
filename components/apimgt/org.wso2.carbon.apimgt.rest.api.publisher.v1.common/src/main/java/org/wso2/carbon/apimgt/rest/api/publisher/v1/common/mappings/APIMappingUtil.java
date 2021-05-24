@@ -441,15 +441,15 @@ public class APIMappingUtil {
     /**
      * This method creates the API monetization information DTO.
      *
-     * @param apiIdentifier API identifier
+     * @param apiId API apiid
      * @return monetization information DTO
      * @throws APIManagementException if failed to construct the DTO
      */
-    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIIdentifier apiIdentifier)
+    public static APIMonetizationInfoDTO getMonetizationInfoDTO(String apiId, String organization)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API api = apiProvider.getAPI(apiIdentifier);
+        API api = apiProvider.getLightweightAPIByUUID(apiId, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         //set the information relatated to monetization to the DTO
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
@@ -489,17 +489,18 @@ public class APIMappingUtil {
     /**
      * Get map of monetized policies to plan mapping.
      *
-     * @param apiIdentifier                  API identifier
+     * @param uuid apiuuid
+     * @param organization organization
      * @param monetizedPoliciesToPlanMapping map of monetized policies to plan mapping
      * @return DTO of map of monetized policies to plan mapping
      * @throws APIManagementException if failed to construct the DTO
      */
-    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIIdentifier apiIdentifier,
+    public static APIMonetizationInfoDTO getMonetizedTiersDTO(String uuid, String organization,
                                                               Map<String, String> monetizedPoliciesToPlanMapping)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API api = apiProvider.getAPI(apiIdentifier);
+        API api = apiProvider.getLightweightAPIByUUID(uuid, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
         apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
@@ -2772,14 +2773,7 @@ public class APIMappingUtil {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        if (RestApiCommonUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
-        } else {
-            APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
-            //Checks whether the logged in user's tenant and the API's tenant is equal
-            RestApiCommonUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
-            api = apiProvider.getAPI(apiIdentifier);
-        }
+        api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
         return api;
     }
 

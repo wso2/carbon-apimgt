@@ -5071,28 +5071,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
-            throws APIManagementException {
-        WSDLValidationResponse validationResponse;
-        ResourceFile resourceFile = getWSDL(apiIdentifier);
-        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
-            validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
-        } else {
-            validationResponse = APIMWSDLReader.validateWSDLFile(resourceFile.getContent());
-        }
-        if (validationResponse.isValid()) {
-            API api = getAPI(apiIdentifier);
-            WSDLProcessor wsdlProcessor = validationResponse.getWsdlProcessor();
-            wsdlProcessor.updateEndpoints(api, environmentName, environmentType);
-            InputStream wsdlDataStream = wsdlProcessor.getWSDL();
-            return new ResourceFile(wsdlDataStream, resourceFile.getContentType());
-        } else {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CORRUPTED_STORED_WSDL,
-                    apiIdentifier.toString()));
-        }
-    }
-
-    @Override
     public ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
             throws APIManagementException {
         WSDLValidationResponse validationResponse;
