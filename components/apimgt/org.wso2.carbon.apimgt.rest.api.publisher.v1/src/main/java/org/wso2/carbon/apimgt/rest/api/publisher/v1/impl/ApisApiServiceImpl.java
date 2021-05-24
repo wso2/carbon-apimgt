@@ -123,7 +123,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+    import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -283,7 +283,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response createAPI(APIDTO body, String organizationId, String oasVersion, MessageContext messageContext) {
+    public Response createAPI(APIDTO body, String organizationId, String oasVersion, MessageContext messageContext)
+            throws APIManagementException {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -299,10 +300,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
             String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
-                    body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while creating the API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
