@@ -1521,11 +1521,11 @@ public interface APIProvider extends APIManager {
      * Check whether the given scope name exists as a shared scope in the tenant domain.
      *
      * @param scopeName    Shared Scope name
-     * @param tenantDomain Tenant Domain
+     * @param tenantId Tenant Id
      * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
-    boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
+    boolean isSharedScopeNameExists(String scopeName, int tenantId) throws APIManagementException;
 
     /**
      * Add a shared scope.

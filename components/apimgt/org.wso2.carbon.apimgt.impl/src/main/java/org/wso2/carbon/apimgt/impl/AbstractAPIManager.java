@@ -1751,18 +1751,19 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param apiIdentifier API Identifier
      * @param scopeKey      candidate scope key
-     * @param tenantId      tenant id
+     * @param organization   organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
+    public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, String organization)
             throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug("Checking whether scope: " + scopeKey + " is assigned to another API as a local scope"
-                    + " in tenant: " + tenantId);
+                    + " in organization: " + organization);
         }
-        return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId);
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId, organization);
     }
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {

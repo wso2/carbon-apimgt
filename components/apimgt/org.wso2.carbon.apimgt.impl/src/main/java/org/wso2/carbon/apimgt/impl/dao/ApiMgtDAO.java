@@ -10064,22 +10064,23 @@ public class ApiMgtDAO {
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
-    public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
-            throws APIManagementException {
+    public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId,
+            String organization) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_SCOPE_ATTACHED_LOCALLY)) {
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_SCOPE_ATTACHED_LOCALLY)) {
             statement.setString(1, scopeKey);
-            statement.setInt(2, tenantId);
+            statement.setString(2, organization);
             statement.setInt(3, tenantId);
+            statement.setInt(4, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     String provider = rs.getString("API_PROVIDER");
                     String apiName = rs.getString("API_NAME");
                     // Check if the provider name and api name is same.
                     // Return false if we're attaching the scope to another version of the API.
-                    return !(provider.equals(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()))
-                            && apiName.equals(apiIdentifier.getApiName()));
+                    return !(provider.equals(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName())) && apiName
+                            .equals(apiIdentifier.getApiName()));
                 }
             }
         } catch (SQLException e) {

@@ -350,6 +350,7 @@ public class PublisherCommonUtils {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
         }
         apiToUpdate.setUUID(originalAPI.getUUID());
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
         validateScopes(apiToUpdate);
         apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
         if (apiDtoToUpdate.getKeyManagers() instanceof List) {
@@ -390,6 +391,7 @@ public class PublisherCommonUtils {
             }
         }
 
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
 
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -626,8 +628,8 @@ public class PublisherCommonUtils {
 
         APIIdentifier apiId = api.getId();
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = APIUtil.getInternalOrganizationId(api.getOrganization());
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         Set<org.wso2.carbon.apimgt.api.model.Scope> sharedAPIScopes = new HashSet<>();
 
@@ -639,11 +641,11 @@ public class PublisherCommonUtils {
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
                 // already defined values for the existing shared scope.
-                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, tenantId)) {
+                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, api.getOrganization())) {
                     throw new APIManagementException(
                             "Scope " + scopeName + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
-                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantDomain)) {
+                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantId)) {
                     sharedAPIScopes.add(scope);
                     continue;
                 }
@@ -965,6 +967,7 @@ public class PublisherCommonUtils {
             //assigning the owner as a different user
             apiToAdd.setApiOwner(provider);
         }
+        apiToAdd.setOrganization(organization);
 
         if (body.getKeyManagers() instanceof List) {
             apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
@@ -1086,6 +1089,7 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        existingAPI.setOrganization(organization);
         PublisherCommonUtils.validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
