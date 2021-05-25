@@ -203,7 +203,7 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain)
+                public API getLightweightAPIByUUID(String uuid, String organization)
                         throws APIManagementException {
                     return null;
                 }

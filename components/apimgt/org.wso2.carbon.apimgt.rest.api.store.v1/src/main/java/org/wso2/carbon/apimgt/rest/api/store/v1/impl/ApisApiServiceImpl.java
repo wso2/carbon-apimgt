@@ -678,11 +678,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String environmentName,
             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (api.getUuid() == null) {
                 api.setUuid(apiId);
             }
@@ -690,7 +690,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (api.getSwaggerDefinition() != null) {
                 api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
             } else {
-                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, requestedTenantDomain));
+                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organization));
             }
 
             // gets the first available environment if environment is not provided
@@ -716,11 +716,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         environmentName = existingEnvironments.keySet().iterator().next();
                     }
                 }
-            }
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
             String apiSwagger = null;
@@ -751,9 +746,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
