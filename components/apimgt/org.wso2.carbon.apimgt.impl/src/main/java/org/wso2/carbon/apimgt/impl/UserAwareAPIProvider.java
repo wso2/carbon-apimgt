@@ -322,7 +322,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
-        checkPublishPermission();
         super.updateSubscription(subscribedAPI);
     }
 
