@@ -1707,6 +1707,7 @@ public class SQLConstants {
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
             "  API.API_VERSION = ?  AND " +
+            "  API.ORGANIZATION = ?  AND " +
                     "AUM.REVISION_UUID IS NULL " +
             " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
@@ -1746,6 +1747,7 @@ public class SQLConstants {
                     "  API.API_PROVIDER = ? AND " +
                     "  API.API_NAME = ? AND " +
                     "  API.API_VERSION = ?  AND " +
+                    "  API.ORGANIZATION = ?  AND " +
                     "AUM.REVISION_UUID = ? " +
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
