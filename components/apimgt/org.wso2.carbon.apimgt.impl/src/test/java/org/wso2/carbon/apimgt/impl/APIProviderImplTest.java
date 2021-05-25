@@ -1439,7 +1439,7 @@ public class APIProviderImplTest {
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
 
-        apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api);
+        apiProvider.propergateAPIStatusChangeToGateways(APIConstants.PUBLISHED, api);
         //Mockito.verify(notificationExecutor).sendAsyncNotifications(notificationDTO); Not valid. notification logic moved outside
     }
 

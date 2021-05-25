@@ -99,6 +99,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -999,10 +1000,13 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsScopeKeyAssigned() throws APIManagementException {
+        String organization = "carbon.super";
         String uuid = UUID.randomUUID().toString();
         Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally(uuid, Mockito.anyString(), Mockito.anyInt(), Mockito.anyString()))
                 .thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(-1234);
         Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample", "carbon.super"));
         Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample1", "carbon.super"));
     }
