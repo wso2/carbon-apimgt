@@ -750,13 +750,8 @@ public final class APIUtil {
 
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-
-<<<<<<< HEAD
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getOrganization());
-=======
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getUuid());
->>>>>>> a2c76e0ecd8... Add APIIdentifier and orgId changes in Publisher
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance()
+                    .getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
 
             // AWS Lambda: get paths
             OASParserUtil oasParserUtil = new OASParserUtil();

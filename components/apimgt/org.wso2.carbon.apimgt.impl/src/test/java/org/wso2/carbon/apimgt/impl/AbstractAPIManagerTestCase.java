@@ -1002,8 +1002,8 @@ public class AbstractAPIManagerTestCase {
     public void testIsScopeKeyAssigned() throws APIManagementException {
         String organization = "carbon.super";
         String uuid = UUID.randomUUID().toString();
-        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally(uuid, Mockito.anyString(), Mockito.anyInt(), Mockito.anyString()))
-                .thenReturn(false, true);
+        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(),
+                Mockito.anyString())).thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(-1234);

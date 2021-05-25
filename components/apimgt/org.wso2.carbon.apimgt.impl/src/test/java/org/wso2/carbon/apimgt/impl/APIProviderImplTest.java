@@ -1262,6 +1262,7 @@ public class APIProviderImplTest {
 
         Mockito.when(apimgtDAO.getAllAPIUsageByProviderAndApiId(uuid, "org1"))
                 .thenReturn(apiResults);
+        Mockito.when(apimgtDAO.getAPIIdentifierFromUUID(uuid)).thenReturn(new APIIdentifier("admin", "API1", "1.0.0"));
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
 
