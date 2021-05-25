@@ -182,10 +182,10 @@ public class ImportUtils {
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiOrApiProductUuid = apiConsumer.getAPIProduct(apiProduct.getId()).getUuid();
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(apiProduct.getId());
                     } else {
                         API api = (API) apiSet.iterator().next();
-                        apiOrApiProductUuid = apiConsumer.getAPI(api.getId()).getUuid();
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(api.getId());
                     }
                     apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, tenantDomain);
                     // Tier of the imported subscription

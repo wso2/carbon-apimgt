@@ -421,68 +421,6 @@ public abstract class AbstractAPIManager implements APIManager {
         // Implementation different based on invocation come from publisher or store
     }
 
-    protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
-
-        return APIUtil.getAPI(artifact);
-    }
-
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-
-        String apiPath = APIUtil.getAPIPath(identifier);
-        Registry registry;
-        try {
-            String apiTenantDomain = getTenantDomain(identifier);
-            int apiTenantId = getTenantManager()
-                    .getTenantId(apiTenantDomain);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                APIUtil.loadTenantRegistry(apiTenantId);
-            }
-
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = getRegistryService().getGovernanceUserRegistry(
-                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
-            } else {
-                registry = this.registry;
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-
-            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
-            APIUtil.updateAPIProductDependencies(api, registry);
-            if (api.isAsync()) {
-                api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
-            } else {
-                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
-            }
-            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
-            }
-            //check for API visibility
-            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
-                return api;
-            }
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                throw new APIManagementException("User " + username + " does not have permission to view API : "
-                        + api.getId().getApiName());
-            }
-
-            return api;
-
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
-    }
-
     protected String getTenantAwareUsername(String username) {
 
         return MultitenantUtils.getTenantAwareUsername(username);
@@ -771,25 +709,6 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return passRegistry;
-    }
-
-    public API getAPI(String apiPath) throws APIManagementException {
-
-        try {
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return getApi(apiArtifact);
-
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
@@ -2084,27 +2003,6 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException {
 
         return Collections.emptySet();
-    }
-
-    public API getAPI(APIIdentifier identifier, APIIdentifier oldIdentifier, String oldContext) throws
-            APIManagementException {
-
-        String apiPath = APIUtil.getAPIPath(identifier);
-        try {
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPI(apiArtifact, registry, oldIdentifier, oldContext);
-
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
     }
 
     @Override
@@ -3759,53 +3657,6 @@ public abstract class AbstractAPIManager implements APIManager {
                                          ResourceFile resourceFile) throws APIManagementException {
         //todo : implement access control checks here and move to userawareAPIProvider
         return addResourceFile(identifier, resourcePath, resourceFile);
-    }
-
-    /**
-     * Get an api product documentation by artifact Id
-     *
-     * @param docId                 artifact id of the document
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
-     * @return Document object which represents the artifact id
-     * @throws APIManagementException
-     */
-    public Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
-
-        Documentation documentation = null;
-        try {
-            Registry registryType;
-            boolean isTenantMode = (requestedTenantDomain != null);
-            //Tenant store anonymous mode if current tenant and the required tenant is not matching
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
-                    requestedTenantDomain))) {
-                int tenantId = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                registryType = getRegistryService()
-                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
-                    .DOCUMENTATION_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
-            APIProductIdentifier productIdentifier = APIUtil.getProductIdentifier(artifact.getPath());
-            checkAccessControlPermission(productIdentifier);
-            if (null != artifact) {
-                documentation = APIUtil.getDocumentation(artifact);
-                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
-                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
-                if (lastModified != null) {
-                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
-        }
-        return documentation;
     }
 
     public APIProduct getAPIProduct(String productPath) throws APIManagementException {

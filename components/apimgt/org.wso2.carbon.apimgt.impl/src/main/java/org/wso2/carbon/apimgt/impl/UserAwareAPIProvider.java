@@ -81,12 +81,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException {
-        checkAccessControlPermission(api.getId());
-        super.createNewAPIVersion(api, newVersion);
-    }
-
-    @Override
     public List<String> getCustomInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.getCustomInSequences(apiIdentifier);
@@ -102,12 +96,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getWSDL(apiId);
-    }
-
-    @Override
-    public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
-        checkAccessControlPermission(api.getId());
-        super.updateAPI(api);
     }
 
     @Override
@@ -133,50 +121,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public List<String> getCustomFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.getCustomFaultSequences(apiIdentifier);
-    }
-
-    @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
-            throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.propergateAPIStatusChangeToGateways(identifier, newStatus);
-    }
-
-    @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
-            throws APIManagementException {
-        return propergateAPIStatusChangeToGateways(identifier, newStatus.getStatus());
-    }
-
-    @Override
-    public boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
-            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
-        checkAccessControlPermission(identifier);
-        return super.updateAPIforStateChange(identifier, newStatus, failedGatewaysMap);
-    }
-
-    @Override
-    public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
-            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
-        return updateAPIforStateChange(identifier, newStatus.getStatus(), failedGatewaysMap);
-    }
-
-    @Override
-    public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
-            InputStream content, String contentType) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        super.addFileToDocumentation(apiId, documentation, filename, content, contentType);
-    }
-
-    @Override
-    public void addDocumentation(Identifier id,
-                                 Documentation documentation) throws APIManagementException {
-
-        //todo : implement access control check for api products too
-        if (id instanceof APIIdentifier) {
-            checkAccessControlPermission(id);
-        }
-        super.addDocumentation(id, documentation);
     }
 
     @Override
@@ -281,12 +225,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getAPILifeCycleData(apiId);
-    }
-
-    @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
     }
 
     @Override

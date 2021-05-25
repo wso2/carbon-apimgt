@@ -81,15 +81,6 @@ public interface APIConsumer extends APIManager {
     Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns a list of all published APIs. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     *
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
-    /**
      * Returns a paginated list of all published APIs. If a given API has multiple APIs,
      * only the latest version will be included
      * in this list.
@@ -876,18 +867,6 @@ public interface APIConsumer extends APIManager {
      */
     String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
                            Map apiDetails) throws APIManagementException;
-
-    /**
-     * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
-     *
-     * @param apiIdentifier API Identifier object
-     * @param environmentName environment name
-     * @param environmentType environment type
-     * @return WSDL of the API
-     * @throws APIManagementException when error occurred while getting the WSDL
-     */
-    ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
-            throws APIManagementException;
 
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details

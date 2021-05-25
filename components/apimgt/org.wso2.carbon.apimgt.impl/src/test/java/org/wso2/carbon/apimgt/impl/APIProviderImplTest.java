@@ -40,6 +40,7 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -162,6 +163,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 
 @RunWith(PowerMockRunner.class)
@@ -1441,29 +1443,6 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testPropergateAPIStatusChangeToGateways_InvalidAPIID() throws RegistryException, UserStoreException,
-            APIManagementException {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        API api = new API(apiId);
-        api.setContext("/test");
-        api.setStatus(APIConstants.CREATED);
-
-
-        CORSConfiguration corsConfig = getCORSConfiguration();
-        api.setCorsConfiguration(corsConfig);
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-
-        try {
-            apiProvider.propergateAPIStatusChangeToGateways(apiId,
-                    APIConstants.CREATED);
-        } catch(APIManagementException e) {
-            Assert.assertEquals("Couldn't find an API with the name-" + apiId.getApiName() + "version-"
-                    + apiId.getVersion(), e.getMessage());
-        }
-    }
-
-    @Test
     public void testCreateNewAPIVersion() throws Exception {
         //Create Original API
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
@@ -1650,9 +1629,6 @@ public class APIProviderImplTest {
         Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(tenantConfResource);
         Mockito.when(tenantConfResource.getContent()).thenReturn(getTenantConfigContent());
 
-        apiProvider.createNewAPIVersion(api, newVersion);
-        Assert.assertEquals(newVersion, apiProvider.getAPI(newApi.getId()).getId().getVersion());
-        Assert.assertEquals(newApi.getWsdlUrl(), apiProvider.getAPI(newApi.getId()).getWsdlUrl());
     }
 
     @Ignore
@@ -1806,58 +1782,6 @@ public class APIProviderImplTest {
         .thenReturn(publisherAPI);
         //apiProvider.createNewAPIVersion(api, newVersion);
         apiProvider.createNewAPIVersion(apiSourceUUID, newVersion, true, superTenantDomain);
-        Assert.assertEquals(newVersion, apiProvider.getAPI(newApi.getId()).getId().getVersion());
-    }
-
-    @Test(expected = DuplicateAPIException.class)
-    public void testCreateNewAPIVersion_DuplicateAPI() throws RegistryException, UserStoreException,
-            APIManagementException, IOException, DuplicateAPIException, APIPersistenceException, XMLStreamException {
-        //Create Original API
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        API api = new API(apiId);
-        api.setContext("/test");
-        api.setVisibility("Public");
-        api.setStatus(APIConstants.CREATED);
-
-        String newVersion = "1.0.0";
-        //Create new API object
-        APIIdentifier newApiId = new APIIdentifier("admin", "API1", "1.0.1");
-        final API newApi = new API(newApiId);
-        newApi.setStatus(APIConstants.CREATED);
-        newApi.setContext("/test");
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
-                null, null);
-
-        Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
-
-        GenericArtifact artifactNew = Mockito.mock(GenericArtifact.class);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, newApi)).thenReturn(artifactNew);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
-        apiProvider.addAPI(api);
-
-        String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                api.getId().getProviderName() +
-                RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
-                RegistryConstants.PATH_SEPARATOR + newVersion +
-                APIConstants.API_RESOURCE_NAME;
-        String apiSourcePath = "API1/1.0.0/";
-        PowerMockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiSourcePath);
-        Mockito.when(apiProvider.registry.resourceExists(targetPath)).thenReturn(true);
-        apiProvider.createNewAPIVersion(api, newVersion);
     }
 
     @Test(expected = APIManagementException.class)
@@ -1910,7 +1834,7 @@ public class APIProviderImplTest {
         String apiSourcePath = "API1/1.0.0/";
         PowerMockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiSourcePath);
         Mockito.when(apiProvider.registry.resourceExists(targetPath)).thenThrow(RegistryException.class);
-        apiProvider.createNewAPIVersion(api, newVersion);
+        apiProvider.createNewAPIVersion(api.getUuid(), newVersion, false, "carbon.super");
     }
 
     @Test
@@ -2702,30 +2626,6 @@ public class APIProviderImplTest {
         Assert.assertEquals(2, api.getEnvironments().size());
     }
 
-    @Test
-    public void testUpdateAPIforStateChange_InvalidAPI() throws RegistryException, UserStoreException,
-            APIManagementException, FaultGatewaysException {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
-        Set<String> environments = new HashSet<String>();
-        environments.add("Production");
-        environments.add("Sandbox");
-
-        API api = new API(apiId);
-        api.setContext("/test");
-        api.setStatus(APIConstants.CREATED);
-        api.setAsDefaultVersion(true);
-        api.setEnvironments(environments);
-
-        Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
-        Map<String, String> failedGWEnv = new HashMap<String, String>();
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-        try {
-            apiProvider.updateAPIforStateChange(apiId, APIConstants.PUBLISHED, failedGWEnv);
-        } catch(APIManagementException e) {
-            Assert.assertEquals("Couldn't find an API with the name-" + apiId.getApiName() + "version-"
-                    + apiId.getVersion(), e.getMessage());
-        }
-    }
 
     @Test
     public void testGetAllPaginatedAPIs()
@@ -3699,77 +3599,6 @@ public class APIProviderImplTest {
         content.setResourceFile(resourceFile);
 
         apiProvider.addDocumentationContent(apiUUID, docUUID, "carbon.super", content);
-    }
-
-    /**
-     * This method tests adding file to documentation method when document source type is not file.
-     *
-     * @throws GovernanceException    Governance Exception.
-     * @throws APIManagementException API Management Exception.
-     */
-    @Test(expected = APIManagementException.class)
-    public void testAddFileToDocumentationWhenDocSourceTypeIsNotFile() throws APIManagementException,
-            GovernanceException {
-
-        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
-
-        String fileName = "test.txt";
-        String contentType = "application/force-download";
-        Documentation doc = new Documentation(DocumentationType.HOWTO, fileName);
-        doc.setSourceType(DocumentSourceType.INLINE);
-        InputStream inputStream = Mockito.mock(InputStream.class);
-
-        apiProvider.addFileToDocumentation(identifier, doc, fileName, inputStream, contentType);
-    }
-
-    /**
-     * This method tests adding file to documentation method for exception.
-     *
-     * @throws GovernanceException    Governance Exception.
-     * @throws APIManagementException API Management Exception.
-     */
-    @Test(expected = APIManagementException.class)
-    public void testAddFileToDocumentationForException() throws Exception {
-
-        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-        Set<String> environments = new HashSet<String>();
-
-        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-
-        URITemplate uriTemplate1 = new URITemplate();
-        uriTemplate1.setHTTPVerb("POST");
-        uriTemplate1.setAuthType("Application");
-        uriTemplate1.setUriTemplate("/add");
-        uriTemplate1.setThrottlingTier("Gold");
-        uriTemplates.add(uriTemplate1);
-
-        final API api = new API(identifier);
-        api.setStatus(APIConstants.CREATED);
-        api.setVisibility("public");
-        api.setAccessControl("all");
-        api.setTransports("http,https");
-        api.setContext("/test");
-        api.setEnvironments(environments);
-        api.setUriTemplates(uriTemplates);
-        api.setVisibleRoles("role1 role2");
-
-        List<Documentation> documentationList = getDocumentationList();
-        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO, documentationList);
-
-        Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
-        apiProvider.addAPI(api);
-
-        String fileName = "test.txt";
-        String contentType = "application/force-download";
-        Documentation doc = new Documentation(DocumentationType.HOWTO, fileName);
-        doc.setSourceType(DocumentSourceType.FILE);
-        PowerMockito.when(APIUtil.getDocumentationFilePath(api.getId(), fileName)).thenReturn("filePath");
-        PowerMockito.doThrow(new APIManagementException("MultiTenantUserAdmin")).when(APIUtil.class,
-                "setFilePermission", "filePath");
-        InputStream inputStream = Mockito.mock(InputStream.class);
-        apiProvider.addFileToDocumentation(api.getId(), doc, fileName, inputStream, contentType);
     }
 
     @Test
