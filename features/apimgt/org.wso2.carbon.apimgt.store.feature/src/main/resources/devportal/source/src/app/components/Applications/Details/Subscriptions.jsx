@@ -340,6 +340,7 @@ class Subscriptions extends React.Component {
                         }));
                     }
                     this.updateSubscriptions(applicationId);
+                    this.props.getApplication();
                 }
             })
             .catch((error) => {
