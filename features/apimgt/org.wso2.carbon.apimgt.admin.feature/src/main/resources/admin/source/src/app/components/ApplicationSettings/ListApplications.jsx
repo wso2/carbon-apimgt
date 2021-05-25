@@ -42,15 +42,24 @@ export default function ListApplications() {
     const itemsPerPage = Configurations.app.applicationCount;
     const intl = useIntl();
     const [applicationList, setApplicationList] = useState([]);
-    const [loadNextActive, setLoadNextActive] = useState(false);
+    const [loadNextActive, setLoadNextActive] = useState(true);
+
     /**
     * API call to get application list
     * @returns {Promise}.
+    * @param {string} name search query from the ListBase component
+    * @param {boolean} loadingNext weather to load the next set of data or just call the api
     */
-    function apiCall() {
+    function apiCall(name, loadingNext) {
+        if ((name && name !== '') && !loadingNext) {
+            limit = itemsPerPage;
+        }
+        if ((name && name !== '') && loadingNext) {
+            limit += itemsPerPage;
+        }
         const restApi = new API();
         return restApi
-            .getApplicationList(limit, 0)
+            .getApplicationList(limit, 0, name)
             .then((result) => {
                 const { count, list } = result.body;
                 if (count === limit && !loadNextActive) {
@@ -59,7 +68,9 @@ export default function ListApplications() {
                 if (count < limit && loadNextActive) {
                     setLoadNextActive(false);
                 }
-                limit += itemsPerPage;
+                if (!name || (name && name === '')) {
+                    limit += itemsPerPage;
+                }
                 setApplicationList(list);
                 return list;
             })
@@ -99,6 +110,7 @@ export default function ListApplications() {
             defaultMessage: 'Search by Application Name or Owner',
         }),
         active: true,
+        doBackendSearch: true,
     };
     const pageProps = {
         help: (

@@ -76,7 +76,7 @@ function ListBase(props) {
     const {
         EditComponent, editComponentProps, DeleteComponent, showActionColumn,
         columProps, pageProps, addButtonProps, addButtonOverride,
-        searchProps: { active: searchActive, searchPlaceholder }, apiCall, emptyBoxProps: {
+        searchProps: { active: searchActive, searchPlaceholder, doBackendSearch }, apiCall, emptyBoxProps: {
             title: emptyBoxTitle,
             content: emptyBoxContent,
         },
@@ -92,11 +92,6 @@ function ListBase(props) {
     const [error, setError] = useState(null);
     const [nextOneLoading, setNextOneLoading] = useState(false);
     const intl = useIntl();
-
-
-    const filterData = (event) => {
-        setSearchText(event.target.value);
-    };
 
     const sortBy = (field, reverse, primer) => {
         const key = primer
@@ -121,13 +116,13 @@ function ListBase(props) {
         setData(sorted);
     };
 
-    const fetchData = () => {
+    const fetchData = (backendSearchText = null, loadingNext = false) => {
         // Fetch data from backend when an apiCall is provided
         if (!loadNextFeatureActive) {
             setData(null);
         }
         if (apiCall) {
-            const promiseAPICall = apiCall();
+            const promiseAPICall = doBackendSearch ? apiCall(backendSearchText, loadingNext) : apiCall();
             promiseAPICall.then((LocalData) => {
                 if (LocalData) {
                     setData(LocalData);
@@ -150,6 +145,12 @@ function ListBase(props) {
                 });
         }
     };
+    const filterData = (event) => {
+        setSearchText(event.target.value);
+        if (doBackendSearch) {
+            fetchData(event.target.value);
+        }
+    };
 
     useEffect(() => {
         fetchData();
@@ -157,7 +158,7 @@ function ListBase(props) {
 
     const loadNext = () => {
         setNextOneLoading(true);
-        fetchData();
+        fetchData(searchText, true);
     };
 
     let columns = [];
@@ -242,14 +243,16 @@ function ListBase(props) {
         viewColumns: false,
         customToolbar: null,
         responsive: 'stacked',
-        searchText,
+        searchText: doBackendSearch ? '' : searchText,
         onColumnSortChange,
         ...muiDataTableOptions,
     };
 
     // If no apiCall is provided OR,
     // retrieved data is empty, display an information card.
-    if (!apiCall || (data && data.length === 0)) {
+    if (!apiCall
+        || (data && data.length === 0 && !doBackendSearch)
+        || (doBackendSearch && searchText === '' && data && data.length === 0)) {
         return (
             <ContentBase
                 {...pageProps}
@@ -321,17 +324,20 @@ function ListBase(props) {
                                             />
                                         )
                                     )}
-                                    <Tooltip title={(
-                                        <FormattedMessage
-                                            id='AdminPages.Addons.ListBase.reload'
-                                            defaultMessage='Reload'
-                                        />
+                                    {!doBackendSearch && (
+                                        <Tooltip title={(
+                                            <FormattedMessage
+                                                id='AdminPages.Addons.ListBase.reload'
+                                                defaultMessage='Reload'
+                                            />
+                                        )}
+                                        >
+                                            <IconButton onClick={fetchData}>
+                                                <RefreshIcon className={classes.block} color='inherit' />
+                                            </IconButton>
+
+                                        </Tooltip>
                                     )}
-                                    >
-                                        <IconButton onClick={fetchData}>
-                                            <RefreshIcon className={classes.block} color='inherit' />
-                                        </IconButton>
-                                    </Tooltip>
                                 </Grid>
                             </Grid>
                         </Toolbar>
@@ -378,6 +384,7 @@ ListBase.defaultProps = {
     searchProps: {
         searchPlaceholder: '',
         active: true,
+        doBackendSearch: null,
     },
     actionColumnProps: {
         editIconShow: true,
@@ -388,7 +395,7 @@ ListBase.defaultProps = {
     noDataMessage: (
         <FormattedMessage
             id='AdminPages.Addons.ListBase.nodata.message'
-            defaultMessage='No items yet'
+            defaultMessage='Sorry, no matching records found'
         />
     ),
     showActionColumn: true,
@@ -411,6 +418,7 @@ ListBase.propTypes = {
     searchProps: PropTypes.shape({
         searchPlaceholder: PropTypes.string.isRequired,
         active: PropTypes.bool.isRequired,
+        doBackendSearch: PropTypes.bool,
     }),
     apiCall: PropTypes.func,
     emptyBoxProps: PropTypes.shape({
