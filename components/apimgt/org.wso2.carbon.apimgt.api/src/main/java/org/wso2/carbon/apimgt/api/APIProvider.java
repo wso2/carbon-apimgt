@@ -381,18 +381,6 @@ public interface APIProvider extends APIManager {
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
-
-    /**
-     * Updates manage of an existing API. This method must not be used to change API status. Implementations
-     * should throw an exceptions when such attempts are made. All life cycle state changes
-     * should be carried out using the changeAPIStatus method of this interface.
-     *
-     * @param api API
-     * @return failed environments during gateway operation
-     * @throws APIManagementException failed environments during gateway operation
-     */
-    void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
-
     /**
      * Update the WSDL of an API from a ResourceFile set to the API object
      *
@@ -418,17 +406,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException on error
      */
     void makeAPIKeysForwardCompatible(API api) throws APIManagementException;
-
-    /**
-     * Create a new version of the <code>api</code>, with version <code>newVersion</code>
-     *
-     * @param api        The API to be copied
-     * @param newVersion The version of the new API
-     * @throws DuplicateAPIException  If the API trying to be created already exists
-     * @throws APIManagementException If an error occurs while trying to create
-     *                                the new version of the API
-     */
-    void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException;
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
@@ -481,14 +458,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to remove documentation
      */
     void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException;
-    /**
-     * Adds Documentation to an API/Product
-     *
-     * @param id                  API/Product Identifier
-     * @param documentation       Documentation
-     * @throws APIManagementException if failed to add documentation
-     */
-    void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
 
     /**
      * Adds Documentation to an API/Product
@@ -513,19 +482,6 @@ public interface APIProvider extends APIManager {
      */
     void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException;
-
-    /**
-     * Add a file to a document of source type FILE
-     *
-     * @param apiId API identifier the document belongs to
-     * @param documentation document
-     * @param filename name of the file
-     * @param content content of the file as an Input Stream
-     * @param contentType content type of the file
-     * @throws APIManagementException if failed to add the file
-     */
-    void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename, InputStream content,
-                                String contentType) throws APIManagementException;
 
     /**
      * Checks if a given API exists in the registry
@@ -1003,53 +959,6 @@ public interface APIProvider extends APIManager {
      */
     Map<String, Object> getAPILifeCycleData(String apiId, String orgId) throws APIManagementException;
 
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     * @param identifier Api identifier
-     * @param newStatus new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
-            throws APIManagementException;
-
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     * @param identifier Api identifier
-     * @param newStatus new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
-            throws APIManagementException;
-
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     * @param identifier
-     * @param newStatus
-     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
-     * accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
-     */
-    boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
-                                    Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     * @param identifier
-     * @param newStatus
-     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
-     * accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
-     */
-    boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
-                                    Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
 
     /**
      * Get the current lifecycle status of the api
@@ -1494,18 +1403,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException;
-
-    /**
-     * Find the resources that should be removed from API Products,
-     * because those have been already removed from the swagger definition of the updating API.
-     *
-     * @param apiId         API Identifier
-     * @param apiDefinition swagger definition
-     * @return  List of resources to be removed that are reused among API Products
-     * @throws APIManagementException when error updating resources
-     */
-    List<APIResource> getResourcesToBeRemovedFromAPIProducts(APIIdentifier apiId, String apiDefinition)
-            throws APIManagementException;
 
     /**
      * Finds resources that have been removed in the updated API URITemplates,

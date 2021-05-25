@@ -115,12 +115,6 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
-    }
-    
-    @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization);
         Identifier identifier;

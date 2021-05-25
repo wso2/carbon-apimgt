@@ -262,6 +262,7 @@ public class ImportUtils {
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
+                importedApi.setOrganization(organization);
                 PublisherCommonUtils.addGraphQLSchema(importedApi, graphQLSchema, apiProvider);
                 graphqlComplexityInfo = retrieveGraphqlComplexityInfoFromArchive(extractedFolderPath, graphQLSchema);
                 if (graphqlComplexityInfo != null && graphqlComplexityInfo.getList().size() != 0) {
@@ -271,7 +272,7 @@ public class ImportUtils {
             // Add/update Async API definition for streaming APIs
             if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
                 // Add the validated Async API definition separately since the UI does the same procedure
-                PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse);
+                PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse, organization);
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
@@ -527,7 +528,9 @@ public class ImportUtils {
                             + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found", ExceptionCodes
                     .from(ExceptionCodes.API_NOT_FOUND, apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion()));
         }
-        return apiProvider.getAPI(apiIdentifier);
+        
+        String uuid = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+        return apiProvider.getAPIbyUUID(uuid, currentTenantDomain);
     }
 
     /**

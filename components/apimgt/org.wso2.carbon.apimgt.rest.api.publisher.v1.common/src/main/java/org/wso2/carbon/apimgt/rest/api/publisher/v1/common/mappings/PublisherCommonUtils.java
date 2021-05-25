@@ -986,7 +986,7 @@ public class PublisherCommonUtils {
                 ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
             return updateSwagger(apiId, response, true, organization);
         } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
-            return updateAsyncAPIDefinition(apiId, response);
+            return updateAsyncAPIDefinition(apiId, response, organization);
         }
         return null;
     }
@@ -1000,13 +1000,12 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred updating AsyncAPI definition
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
-            throws APIManagementException, FaultGatewaysException {
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+            String organization) throws APIManagementException, FaultGatewaysException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fall if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         String apiDefinition = response.getJsonContent();
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();

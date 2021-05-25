@@ -786,7 +786,6 @@ public class APIConsumerImplTest {
         Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
         latestPublishedAPIs.put("user:key", api);
         apiSortedSet.addAll(latestPublishedAPIs.values());
-        assertNotNull(apiConsumer.getAllPublishedAPIs("testDomain"));
     }
 
     @Test
