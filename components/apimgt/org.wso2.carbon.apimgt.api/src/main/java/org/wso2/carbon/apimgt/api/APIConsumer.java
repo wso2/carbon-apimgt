@@ -81,15 +81,6 @@ public interface APIConsumer extends APIManager {
     Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns a list of all published APIs. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     *
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
-    /**
      * Returns a paginated list of all published APIs. If a given API has multiple APIs,
      * only the latest version will be included
      * in this list.

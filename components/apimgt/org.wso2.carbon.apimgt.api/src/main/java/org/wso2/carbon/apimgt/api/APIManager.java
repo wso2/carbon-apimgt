@@ -897,16 +897,6 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
-     * Get an api product documentation by artifact Id
-     *
-     * @param docId   DocumentID
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
-     * @return Documentation
-     * @throws APIManagementException if failed to get Documentation
-     */
-    Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
-
-    /**
      * Get open api definition for the product
      * @param  product
      * @return openapidoc

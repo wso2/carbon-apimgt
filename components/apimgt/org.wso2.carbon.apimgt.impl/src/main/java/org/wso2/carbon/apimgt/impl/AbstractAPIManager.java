@@ -3659,53 +3659,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return addResourceFile(identifier, resourcePath, resourceFile);
     }
 
-    /**
-     * Get an api product documentation by artifact Id
-     *
-     * @param docId                 artifact id of the document
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
-     * @return Document object which represents the artifact id
-     * @throws APIManagementException
-     */
-    public Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
-
-        Documentation documentation = null;
-        try {
-            Registry registryType;
-            boolean isTenantMode = (requestedTenantDomain != null);
-            //Tenant store anonymous mode if current tenant and the required tenant is not matching
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
-                    requestedTenantDomain))) {
-                int tenantId = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                registryType = getRegistryService()
-                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
-                    .DOCUMENTATION_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
-            APIProductIdentifier productIdentifier = APIUtil.getProductIdentifier(artifact.getPath());
-            checkAccessControlPermission(productIdentifier);
-            if (null != artifact) {
-                documentation = APIUtil.getDocumentation(artifact);
-                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
-                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
-                if (lastModified != null) {
-                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
-        }
-        return documentation;
-    }
-
     public APIProduct getAPIProduct(String productPath) throws APIManagementException {
 
         try {
