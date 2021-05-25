@@ -3989,11 +3989,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * So host object should only pass required 9 parameters.
      */
     @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
                                                                          String tokenType, String callbackUrl,
                                                                          String[] allowedDomains, String validityTime,
-                                                                         String tokenScope, String groupingId,
-                                                                         String jsonString,
+                                                                         String tokenScope,String jsonString,
                                                                          String keyManagerName, String tenantDomain)
             throws APIManagementException {
 
@@ -4044,9 +4043,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             ApplicationRegistrationWorkflowDTO appRegWFDto = null;
 
             ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
-
-            // get APIM application by Application Name and userId.
-            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
 
             boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                     getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
@@ -4099,11 +4095,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
                     ApplicationUtils
-                            .createOauthAppRequest(applicationName, null, callbackUrl, tokenScope, jsonString,
+                            .createOauthAppRequest(application.getName(), null, callbackUrl, tokenScope, jsonString,
                                     applicationTokenType, tenantDomain, keyManagerName);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
+            request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
 
             // Setting request values in WorkflowDTO - In future we should keep
             // Application/OAuthApplication related
@@ -4572,7 +4569,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * @param userId          Subscriber name.
-     * @param applicationName of the Application.
+     * @param application     The Oauth Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     callback URL
      * @param allowedDomains  allowedDomains for token.
@@ -4585,7 +4582,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
+    public OAuthApplicationInfo updateAuthClient(String userId, Application application,
                                                  String tokenType,
                                                  String callbackUrl, String[] allowedDomains,
                                                  String validityTime,
@@ -4599,8 +4596,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 tenantFlowStarted = true;
             }
-
-            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
 
             final String subscriberName = application.getSubscriber().getName();
 
@@ -4644,7 +4639,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
             }
             //Create OauthAppRequest object by passing json String.
-            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
+            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(application.getName(), null, callbackUrl,
                     tokenScope, jsonString, application.getTokenType(), keyManagerTenant, keyManagerName);
 
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
@@ -4652,6 +4647,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     .getConsumerKeyByApplicationIdKeyTypeKeyManager(application.getId(), tokenType, keyManagerID);
 
             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+            oauthAppRequest.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
             //get key manager instance.
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
             if (keyManager == null) {
