@@ -7202,19 +7202,20 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier)
+    public Set<URITemplate> getURITemplatesOfAPI(String uuid)
             throws APIManagementException {
 
+        APIIdentifier identifier = getAPIIdentifierFromUUID(uuid);
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
-        if (checkAPIUUIDIsARevisionUUID(identifier.getUUID()) != null) {
+        if (checkAPIUUIDIsARevisionUUID(uuid) != null) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
-                ps.setString(4, identifier.getUUID());
+                ps.setString(4, uuid);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7263,7 +7264,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAssociatedAPIProducts(identifier, uriTemplates);
+                setAssociatedAPIProducts(uuid, uriTemplates);
             } catch (SQLException e) {
                 handleException("Failed to get URI Templates of API" + identifier, e);
             }
@@ -7321,7 +7322,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAssociatedAPIProducts(identifier, uriTemplates);
+                setAssociatedAPIProducts(uuid, uriTemplates);
             } catch (SQLException e) {
                 handleException("Failed to get URI Templates of API" + identifier, e);
             }
@@ -7395,14 +7396,12 @@ public class ApiMgtDAO {
         return uriTemplates;
     }
 
-    private void setAssociatedAPIProducts(APIIdentifier identifier, Map<Integer, URITemplate> uriTemplates)
+    private void setAssociatedAPIProducts(String uuid, Map<Integer, URITemplate> uriTemplates)
             throws SQLException {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL)) {
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getName());
-            ps.setString(3, identifier.getVersion());
+            ps.setString(1, uuid);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String productName = rs.getString("API_NAME");
@@ -8599,11 +8598,11 @@ public class ApiMgtDAO {
     /**
      * Retrieves the IDs of pending subscriptions of a given API
      *
-     * @param apiId API Identifier
+     * @param uuid API uuid
      * @return set of subscriptions ids
      * @throws APIManagementException
      */
-    public Set<Integer> getPendingSubscriptionsByAPIId(APIIdentifier apiId) throws APIManagementException {
+    public Set<Integer> getPendingSubscriptionsByAPIId(String uuid) throws APIManagementException {
 
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
         Connection conn = null;
@@ -8613,17 +8612,15 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, apiId.getApiName());
-            ps.setString(2, apiId.getVersion());
-            ps.setString(3, apiId.getProviderName());
-            ps.setString(4, APIConstants.SubscriptionStatus.ON_HOLD);
+            ps.setString(1, uuid);
+            ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
             rs = ps.executeQuery();
 
             while (rs.next()) {
                 pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
         } catch (SQLException e) {
-            handleException("Error occurred while retrieving subscription entries for API : " + apiId, e);
+            handleException("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -14431,7 +14428,7 @@ public class ApiMgtDAO {
         List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
 
-        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier);
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(api.getUuid());
 
         for (URITemplate uriTemplate : uriTemplatesOfAPI) {
             Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();
@@ -16813,9 +16810,7 @@ public class ApiMgtDAO {
             try {
                 connection.setAutoCommit(false);
                 // Retrieve API ID
-                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
-                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
 
                 // Removing related revision entries from AM_REVISION table
                 PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants

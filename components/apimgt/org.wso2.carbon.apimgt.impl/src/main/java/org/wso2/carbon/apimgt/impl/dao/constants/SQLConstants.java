@@ -1759,8 +1759,8 @@ public class SQLConstants {
             "   (SELECT AUM.URL_MAPPING_ID " +
             "   FROM AM_API_URL_MAPPING AUM " +
             "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-            "   WHERE API.API_PROVIDER = ? AND " +
-            "   API.API_NAME = ? AND API.API_VERSION = ? AND AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
+            "   WHERE API.UUID = ? AND " +
+            "   AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
 
     public static final String GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL =
             " SELECT " +
@@ -2009,9 +2009,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_API API " +
                     " WHERE " +
-                    "   API.API_NAME = ? " +
-                    "   AND API.API_VERSION = ? " +
-                    "   AND API.API_PROVIDER = ? " +
+                    "   AND API.API_UUID = ? " +
                     "   AND API.API_ID = SUBS.API_ID " +
                     "   AND SUB_STATUS = ?";
 
