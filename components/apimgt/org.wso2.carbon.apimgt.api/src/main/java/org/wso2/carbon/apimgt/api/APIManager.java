@@ -76,11 +76,11 @@ public interface APIManager {
     /**
      * Returns details of an API
      * @param uuid   UUID of the API's registry artifact
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
+    API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
 
     /**
@@ -106,12 +106,12 @@ public interface APIManager {
     /**
      * Get minimal details of API by registry artifact id
      *
-     * @param uuid Registry artifact id
-     * @param orgId  Identifier of an organization
+     * @param uuid          Registry artifact id
+     * @param organization  Identifier of an organization
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException;
 
     /**
      * Get minimal details of API by API identifier
@@ -211,12 +211,12 @@ public interface APIManager {
     /**
      * Returns the OpenAPI definition as a string
      *
-     * @param apiId  ID of the API
-     * @param orgId  Identifier of an organization
+     * @param apiId         ID of the API
+     * @param organization  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
+    String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the async-api v2.0 definition as a string
