@@ -173,6 +173,7 @@ class Details extends Component {
             open: true,
             error: '',
         };
+        this.getApplication = this.getApplication.bind(this);
     }
 
     /**
@@ -182,8 +183,14 @@ class Details extends Component {
      */
     componentDidMount() {
         const { match } = this.props;
+        this.getApplication();
+    }
+
+    getApplication = () => {
         const client = new API();
-        const promisedApplication = client.getApplication(match.params.application_uuid);
+        const  applicationId  = this.props.match.params.application_uuid;
+        console.log('applicationId', applicationId);
+        const promisedApplication = client.getApplication(applicationId);
         promisedApplication
             .then((response) => {
                 this.setState({ application: response.obj });
@@ -334,7 +341,11 @@ class Details extends Component {
                     <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />} iconText='subscriptions' route='subscriptions' to={pathPrefix + '/subscriptions'} open={open} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar 
+                        application={application} 
+                        applicationId={match.params.application_uuid} 
+                        innerRef={node => (this.infoBar = node)} 
+                    />
                     <div
                         className={classNames(
                             { [classes.contentLoader]: position === 'horizontal' },
@@ -363,7 +374,10 @@ class Details extends Component {
                                 path='/applications/:applicationId/sandboxkeys/apikey'
                                 component={() => (this.renderManager(application, 'SANDBOX', 'apikey'))}
                             />
-                            <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
+                            <Route 
+                                path='/applications/:applicationId/subscriptions' 
+                                render={() => (<Subscriptions application={ application } getApplication={ this.getApplication } 
+                            />)} />
                             <Route component={ResourceNotFound} />
                         </Switch>
                     </div>
