@@ -364,13 +364,6 @@ class TokenManager extends React.Component {
         this.setState({ keyRequest });
     }
 
-    isResidentIDP = (name) => {
-        if (name === 'Resident Key Manager') {
-            return true;
-        } else {
-            return false;
-        }
-    }
     /**
      * Generate keys for application,
      *
@@ -388,13 +381,6 @@ class TokenManager extends React.Component {
                 Alert.error(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.callbackempty',
                     defaultMessage: 'Callback URL can not be empty when the Implicit or Application Code grant types selected',
-                }));
-                return;
-            } else if (Validation.url.validate(keyRequest.callbackUrl).error
-                && !this.isResidentIDP(keyRequest.keyManager)) {
-                Alert.error(intl.formatMessage({
-                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.text',
-                    defaultMessage: 'Invalid URL. Please enter a valid URL.',
                 }));
                 return;
             }
@@ -463,13 +449,6 @@ class TokenManager extends React.Component {
                 Alert.error(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.callbackempty',
                     defaultMessage: 'Callback URL can not be empty when the Implicit or Application Code grant types selected',
-                }));
-                return;
-            } else if (Validation.url.validate(keyRequest.callbackUrl).error
-                && !this.isResidentIDP(keyRequest.keyManager)) {
-                Alert.error(intl.formatMessage({
-                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.text',
-                    defaultMessage: 'Invalid URL. Please enter a valid URL.',
                 }));
                 return;
             }
