@@ -189,7 +189,6 @@ class Details extends Component {
     getApplication = () => {
         const client = new API();
         const  applicationId  = this.props.match.params.application_uuid;
-        console.log('applicationId', applicationId);
         const promisedApplication = client.getApplication(applicationId);
         promisedApplication
             .then((response) => {
