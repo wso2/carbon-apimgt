@@ -8114,15 +8114,17 @@ public class ApiMgtDAO {
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
-    public String getUUIDFromIdentifier(String provider, String apiName, String version) throws APIManagementException {
+    public String getUUIDFromIdentifier(String provider, String apiName, String version, String organization)
+            throws APIManagementException {
 
         String uuid = null;
-        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
             prepStmt.setString(2, apiName);
             prepStmt.setString(3, version);
+            prepStmt.setString(4, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);

@@ -1173,7 +1173,8 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiId.getUUID() != null) {
             id = apiId.getUUID();
         } else {
-            id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
+            id = apiMgtDAO
+                    .getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion(), organization);
         }
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(organization), id);

@@ -965,7 +965,6 @@ public class PublisherCommonUtils {
             //assigning the owner as a different user
             apiToAdd.setApiOwner(provider);
         }
-        apiToAdd.setOrganization(organization);
 
         if (body.getKeyManagers() instanceof List) {
             apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());

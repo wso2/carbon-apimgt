@@ -320,7 +320,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);

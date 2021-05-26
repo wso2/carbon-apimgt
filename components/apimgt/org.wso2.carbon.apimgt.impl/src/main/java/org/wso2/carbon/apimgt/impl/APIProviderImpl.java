@@ -2929,7 +2929,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (id.getUUID() == null) {
             uuid = id.getUUID();
         } else {
-            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion());
+            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion(), orgId);
         }
         removeDocumentation(uuid, docId, orgId);
     }
