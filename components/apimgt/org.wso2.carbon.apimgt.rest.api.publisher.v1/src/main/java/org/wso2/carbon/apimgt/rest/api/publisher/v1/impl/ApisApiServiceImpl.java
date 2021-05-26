@@ -674,7 +674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         existingAPI.setUriTemplates(uriTemplates);
 
         // TODO: Add scopes
-
+        existingAPI.setOrganization(organization);
         try {
             apiProvider.updateAPI(existingAPI);
         } catch (FaultGatewaysException e) {
@@ -747,6 +747,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
+            originalAPI.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
@@ -1250,6 +1251,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
@@ -1267,6 +1269,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
                                     apiIdentifier.getVersion());
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProduct.setOrganization(organization);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
                     apiProvider.updateAPI(api);
@@ -1337,6 +1340,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
@@ -1366,6 +1370,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
                                     apiIdentifier.getVersion());
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProduct.setOrganization(organization);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
                     apiProvider.updateAPI(api);
@@ -1412,7 +1417,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION); 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId", apiId);
 
         try {
@@ -1463,6 +1468,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
 
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
@@ -1480,6 +1486,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
                                     apiIdentifier.getVersion());
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProduct.setOrganization(organization);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
                     apiProvider.updateAPI(api);
@@ -4655,7 +4662,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url,
+            InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String updatedAsyncAPIDefinition;
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);

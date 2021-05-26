@@ -1332,9 +1332,11 @@ public interface APIProvider extends APIManager {
      *
      * @param identifier APIProductIdentifier
      * @param apiProductUUID
+     * @param organization
      * @throws APIManagementException if failed to remove the API Product
      */
-    void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException;
+    void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID, String organization)
+            throws APIManagementException;
 
     /**
      * Update API Product

@@ -401,13 +401,14 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testIsAPIProductAvailable() throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = getAPIProductIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        String organization = "carbon.super";
         String path =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion();
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, null)).thenReturn("xxxxx");
-        Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier));
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, organization, null)).thenReturn("xxxxx");
+        Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier, organization));
     }
 
     @Test

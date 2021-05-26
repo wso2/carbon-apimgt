@@ -1004,6 +1004,7 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fall if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
+        existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
@@ -1050,8 +1051,7 @@ public class PublisherCommonUtils {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
-            List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition,
-                    existingAPI.getId());
+            List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
             existingAPI.setSoapToRestSequences(sequenceList);
         }
         Set<URITemplate> uriTemplates = null;
@@ -1398,6 +1398,7 @@ public class PublisherCommonUtils {
         APIProductIdentifier productIdentifier = originalAPIProduct.getId();
         product.setID(productIdentifier);
         product.setUuid(originalAPIProduct.getUuid());
+        product.setOrganization(orgId);
 
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
         apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
@@ -1416,11 +1417,10 @@ public class PublisherCommonUtils {
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
-    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username)
-            throws APIManagementException, FaultGatewaysException {
+    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username,
+            String organization) throws APIManagementException, FaultGatewaysException {
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         // if not add product
         String provider = apiProductDTO.getProvider();
@@ -1482,13 +1482,14 @@ public class PublisherCommonUtils {
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
+        productToBeAdded.setOrganization(organization);
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct,
-                tenantDomain);
+                organization);
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
@@ -1537,7 +1538,7 @@ public class PublisherCommonUtils {
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
                                                                      APIProvider apiProvider, String tenantDomain)
             throws APIManagementException, FaultGatewaysException {
-        List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
+        List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
         updatedAPI.setSoapToRestSequences(list);
         return apiProvider.updateAPI(updatedAPI, api);

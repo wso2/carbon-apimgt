@@ -633,6 +633,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                      String format, Boolean preserveStatus, Boolean exportLatestRevision,
                                      MessageContext messageContext) throws APIManagementException {
 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
 
@@ -641,9 +642,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 ExportFormat.YAML;
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
-            File file =
-                    importExportAPI.exportAPIProduct(null, name, version, providerName, revisionNumber, exportFormat,
-                            preserveStatus, true, true, exportLatestRevision);
+            File file = importExportAPI
+                    .exportAPIProduct(null, name, version, providerName, revisionNumber, exportFormat, preserveStatus,
+                            true, true, exportLatestRevision, organization);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
@@ -757,9 +758,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     @Override public Response createAPIProduct(APIProductDTO body, MessageContext messageContext) {
         String provider = body.getProvider();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
-                    RestApiCommonUtil.getLoggedInUsername());
+                    RestApiCommonUtil.getLoggedInUsername(), organization);
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(
                     RestApiConstants.RESOURCE_PATH_API_PRODUCTS + "/" + createdApiProductDTO.getId());

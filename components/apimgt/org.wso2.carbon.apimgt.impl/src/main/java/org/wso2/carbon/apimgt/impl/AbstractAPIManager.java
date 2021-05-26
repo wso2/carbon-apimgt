@@ -721,9 +721,10 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException {
+    public boolean isAPIProductAvailable(APIProductIdentifier identifier, String organization)
+            throws APIManagementException {
 
-        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier, null);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier, organization, null);
         if (uuid == null) {
             return false;
         } else {

@@ -1904,7 +1904,7 @@ public class ImportUtils {
             }
 
             APIProduct targetApiProduct = retrieveApiProductToOverwrite(importedApiProductDTO.getName(),
-                    currentTenantDomain, apiProvider, Boolean.TRUE);
+                    currentTenantDomain, apiProvider, Boolean.TRUE, organization);
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
@@ -1917,7 +1917,7 @@ public class ImportUtils {
                 }
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
-                                importedApiProductDTO.getProvider());
+                                importedApiProductDTO.getProvider(), organization);
             }
 
             // Add/update swagger of API Product
@@ -2274,8 +2274,7 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs when retrieving the API to overwrite
      */
     private static APIProduct retrieveApiProductToOverwrite(String apiProductName, String currentTenantDomain,
-                                                            APIProvider apiProvider, Boolean ignoreAndImport)
-            throws APIManagementException {
+            APIProvider apiProvider, Boolean ignoreAndImport, String organization) throws APIManagementException {
 
         String provider = APIUtil.getAPIProviderFromAPINameVersionTenant(apiProductName,
                 ImportExportConstants.DEFAULT_API_PRODUCT_VERSION, currentTenantDomain);
@@ -2283,7 +2282,7 @@ public class ImportUtils {
                 apiProductName, ImportExportConstants.DEFAULT_API_PRODUCT_VERSION);
 
         // Checking whether the API exists
-        if (!apiProvider.isAPIProductAvailable(apiProductIdentifier)) {
+        if (!apiProvider.isAPIProductAvailable(apiProductIdentifier, organization)) {
             if (ignoreAndImport) {
                 return null;
             }
@@ -2315,6 +2314,7 @@ public class ImportUtils {
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
         Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
         importedApiProduct.setScopes(scopes);
+        importedApiProduct.setOrganization(orgId);
 
         // This is required to make scopes get effected
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider

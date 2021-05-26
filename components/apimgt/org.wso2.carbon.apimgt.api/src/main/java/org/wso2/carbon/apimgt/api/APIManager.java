@@ -126,10 +126,11 @@ public interface APIManager {
      * Checks the Availability of given APIProductIdentifier
      *
      * @param identifier APIProductIdentifier
+     * @param organization API Product organization
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API Product availability
      */
-    boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException;
+    boolean isAPIProductAvailable(APIProductIdentifier identifier, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system

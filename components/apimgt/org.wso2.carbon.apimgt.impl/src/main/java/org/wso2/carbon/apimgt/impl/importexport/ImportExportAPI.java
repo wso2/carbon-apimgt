@@ -99,13 +99,14 @@ public interface ImportExportAPI {
      * @param preserveStatus        Preserve API status on export
      * @param preserveDocs          Preserve documentation on Export.
      * @param exportLatestRevision  Export the most recent revision.
+     * @param organization          Organization
      * @return APIProduct Artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
                                  ExportFormat format,boolean preserveStatus, boolean preserveDocs,
-                                 boolean preserveCredentials, boolean exportLatestRevision)
+                                 boolean preserveCredentials, boolean exportLatestRevision, String organization)
             throws APIManagementException, APIImportExportException;
 
     /**

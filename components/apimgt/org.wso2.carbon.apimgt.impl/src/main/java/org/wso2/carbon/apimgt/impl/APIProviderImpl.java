@@ -1338,6 +1338,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(" User doesn't have permission for update");
         }
         API oldApi = getAPIbyUUID(api.getUuid(), api.getOrganization());
+        String organization = api.getOrganization();
         if (!oldApi.getStatus().equals(api.getStatus())) {
             // We don't allow API status updates via this method.
             // Use changeAPIStatus for that kind of updates.
@@ -1418,7 +1419,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
         updateAPI(api, tenantId, userNameWithoutChange);
-        updateProductResourceMappings(api, productResources);
+        updateProductResourceMappings(api, organization, productResources);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -1530,7 +1531,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
         updateAPI(api, tenantId, userNameWithoutChange);
-        updateProductResourceMappings(api, productResources);
+        updateProductResourceMappings(api, organization, productResources);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -4687,12 +4688,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String organization) throws APIManagementException {
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String organization)
+            throws APIManagementException {
         String uuid;
         if (apiId.getUUID() != null) {
             uuid = apiId.getUUID();
         } else {
-            uuid = apiMgtDAO.getUUIDFromIdentifier(apiId);
+            uuid = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(),
+                    organization);
         }
         saveSwaggerDefinition(uuid, jsonText, organization);
     }
@@ -4706,7 +4709,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if (api.getId().getUUID() != null) {
             apiId = api.getId().getUUID();
         } else {
-            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
+            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                    api.getId().getVersion(), organization);
         }
         saveSwaggerDefinition(apiId, jsonText, organization);
     }
@@ -6962,7 +6966,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<API, List<APIProductResource>> addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
+    public Map<API, List<APIProductResource>> addAPIProductWithoutPublishingToGateway(APIProduct product)
+            throws APIManagementException {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
 
         validateApiProductInfo(product);
@@ -7105,12 +7110,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
+    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID, String organization)
+            throws APIManagementException {
         if (StringUtils.isEmpty(apiProductUUID)) {
             if (identifier.getUUID() != null) {
                 apiProductUUID = identifier.getUUID();
             } else {
-                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, null);
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization, null);
             }
         }
         deleteAPIProduct(
@@ -7118,7 +7124,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product)
+            throws APIManagementException, FaultGatewaysException {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
@@ -7333,7 +7340,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public void updateProductResourceMappings(API api, List<APIProductResource> productResources) throws APIManagementException {
+    public void updateProductResourceMappings(API api, String organization, List<APIProductResource> productResources)
+            throws APIManagementException {
         //get uri templates of API again
         Map<String, URITemplate> apiResources = apiMgtDAO.getURITemplatesForAPI(api);
 
@@ -7346,7 +7354,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             uriTemplate.setId(updatedURITemplateId);
         }
 
-        apiMgtDAO.addAPIProductResourceMappings(productResources, null);
+        apiMgtDAO.addAPIProductResourceMappings(productResources, organization, null);
     }
 
     /**

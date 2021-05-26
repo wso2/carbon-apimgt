@@ -133,7 +133,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
                                  ExportFormat format, boolean preserveStatus, boolean preserveDocs,
-                                 boolean preserveCredentials, boolean exportLatestRevision)
+                                 boolean preserveCredentials, boolean exportLatestRevision, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;
@@ -150,7 +150,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiId = APIUtil.getUUIDFromIdentifier(apiProductIdentifier);
+            apiId = APIUtil.getUUIDFromIdentifier(apiProductIdentifier, organization);
         }
 
         if (exportLatestRevision) {

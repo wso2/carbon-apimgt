@@ -11730,11 +11730,13 @@ public final class APIUtil {
      * Get UUID by the API Identifier.
      *
      * @param identifier
+     * @param organization
      * @return String uuid string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, null);
+    public static String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization, null);
     }
 
     /**

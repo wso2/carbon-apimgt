@@ -8137,17 +8137,19 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get API Product UUID by the API Product Identifier.
+     * Get API Product UUID by the API Product Identifier and organization.
      *
      * @param identifier API Product Identifier
+     * @param organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
-    public String getUUIDFromIdentifier(APIProductIdentifier identifier, Connection connection) throws APIManagementException {
+    public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization, Connection connection)
+            throws APIManagementException {
         boolean isNewConnection = false;
         String uuid = null;
         PreparedStatement prepStmt = null;
-        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try {
             if (connection == null) {
                 connection = APIMgtDBUtil.getConnection();
@@ -8157,6 +8159,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getName());
             prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(4, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -14085,12 +14088,10 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            String query = SQLConstants.GET_URL_TEMPLATES_FOR_API;
+            String query = SQLConstants.GET_URL_TEMPLATES_FOR_API_WITH_UUID;
 
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, api.getId().getApiName());
-            prepStmt.setString(2, api.getId().getVersion());
-            prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            prepStmt.setString(1, api.getUuid());
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 URITemplate template = new URITemplate();
@@ -14182,7 +14183,7 @@ public class ApiMgtDAO {
                 throw new APIManagementException("Error while adding API product " + apiProduct.getUuid());
             }
 
-            addAPIProductResourceMappings(apiProduct.getProductResources(), connection);
+            addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + identifier.getName() + " of provider "
@@ -14200,8 +14201,8 @@ public class ApiMgtDAO {
      * @param productResources
      * @throws APIManagementException
      */
-    public void addAPIProductResourceMappings(List<APIProductResource> productResources, Connection connection)
-            throws APIManagementException {
+    public void addAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
+            Connection connection) throws APIManagementException {
         //add product-api resource mappings
         PreparedStatement prepStmtAddResourceMapping = null;
 
@@ -14220,7 +14221,7 @@ public class ApiMgtDAO {
                 if (productIdentifier.getUUID() != null) {
                     uuid = productIdentifier.getUUID();
                 } else {
-                    uuid = getUUIDFromIdentifier(productIdentifier, connection);
+                    uuid = getUUIDFromIdentifier(productIdentifier, organization, connection);
                 }
                 int productId = getAPIID(uuid, connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
@@ -14354,7 +14355,8 @@ public class ApiMgtDAO {
      * @param productId
      * @throws APIManagementException
      */
-    public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection) throws APIManagementException {
+    public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection)
+            throws APIManagementException {
 
         PreparedStatement removeURLMappingsStatement = null;
         try {
@@ -14378,7 +14380,7 @@ public class ApiMgtDAO {
             }
             removeURLMappingsStatement.executeBatch();
             //Add new resources
-            addAPIProductResourceMappings(apiProduct.getProductResources(), connection);
+            addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
         } catch (SQLException e) {
             handleException("Error while updating API-Product Resources.", e);
         } finally {
@@ -14426,7 +14428,6 @@ public class ApiMgtDAO {
     public List<APIProductResource> getProductMappingsForAPI(API api) throws APIManagementException {
 
         List<APIProductResource> productMappings = new ArrayList<>();
-        APIIdentifier apiIdentifier = api.getId();
 
         Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
 
