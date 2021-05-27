@@ -1453,7 +1453,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
                         api.getId().getApiName(), publishedDefaultVersion);
-                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
+                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
             }
         }
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -1472,8 +1472,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier) throws APIManagementException {
-        API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier);
+    private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
+        API api = apiMgtDAO.getLightWeightAPIInfoByAPIIdentifier(apiIdentifier, organization);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -1571,7 +1571,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
                         api.getId().getApiName(), publishedDefaultVersion);
-                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
+                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
             }
         }
 
@@ -8747,7 +8747,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
                         api.getId().getApiName(), publishedDefaultVersion);
-                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
+                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
             }
         }
     }

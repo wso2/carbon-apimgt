@@ -9362,7 +9362,8 @@ public class ApiMgtDAO {
         }
     }
 
-    public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier) throws APIManagementException {
+    public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier, String organization)
+            throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =
@@ -9370,6 +9371,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                 preparedStatement.setString(2, apiIdentifier.getName());
                 preparedStatement.setString(3, apiIdentifier.getVersion());
+                preparedStatement.setString(4, organization);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         apiIdentifier.setId(resultSet.getInt("API_ID"));
