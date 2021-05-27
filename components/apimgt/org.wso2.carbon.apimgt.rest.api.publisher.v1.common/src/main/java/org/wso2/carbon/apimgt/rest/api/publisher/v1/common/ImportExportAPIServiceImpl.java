@@ -95,12 +95,12 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, originalDevPortalUrl);
+                preserveDocs, originalDevPortalUrl, organization);
     }
 
     @Override
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                          boolean preserveDocs, boolean preserveCredentials)
+                          boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -111,13 +111,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         api.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, StringUtils.EMPTY);
+                preserveDocs, StringUtils.EMPTY, organization);
 
     }
 
     @Override
     public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                                 boolean preserveDocs, boolean preserveCredentials)
+                                 boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -127,7 +127,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, tenantDomain);
         APIProductDTO apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(product);
         return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName,
-                format, preserveStatus, preserveDocs, preserveCredentials);
+                format, preserveStatus, preserveDocs, preserveCredentials, organization);
     }
 
     @Override
@@ -171,7 +171,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return ExportUtils
                     .exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, format,
-                            preserveStatus, preserveDocs, preserveCredentials);
+                            preserveStatus, preserveDocs, preserveCredentials, organization);
         }
         return null;
 

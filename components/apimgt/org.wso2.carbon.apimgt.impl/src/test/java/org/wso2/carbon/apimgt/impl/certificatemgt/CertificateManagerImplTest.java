@@ -487,12 +487,13 @@ public class CertificateManagerImplTest {
     @Test
     public void testSearchClientCertificate() throws APIManagementException {
 
+        String organization = "org1";
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getClientCertificates"))
                 .toReturn(new ArrayList<ClientCertificateDTO>());
-        Assert.assertNotNull("Client certificate retrieval failed",
-                certificateManager.searchClientCertificates(MultitenantConstants.SUPER_TENANT_ID, ALIAS, null));
-        Assert.assertNotNull("Client certificate retrieval failed",
-                certificateManager.searchClientCertificates(MultitenantConstants.SUPER_TENANT_ID, null, null));
+        Assert.assertNotNull("Client certificate retrieval failed", certificateManager
+                .searchClientCertificates(MultitenantConstants.SUPER_TENANT_ID, ALIAS, null, organization));
+        Assert.assertNotNull("Client certificate retrieval failed", certificateManager
+                .searchClientCertificates(MultitenantConstants.SUPER_TENANT_ID, null, null, organization));
     }
 
     /**

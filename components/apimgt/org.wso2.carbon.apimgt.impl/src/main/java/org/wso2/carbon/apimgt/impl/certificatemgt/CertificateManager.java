@@ -205,11 +205,12 @@ public interface CertificateManager {
      * @param tenantId      : ID of the tenant.
      * @param alias         : Alias of the certificate.
      * @param apiIdentifier : Identifier of the API.
+     * @param organization  : Organization
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
     /**
      * Method to update an existing client certificate.
@@ -218,10 +219,11 @@ public interface CertificateManager {
      * @param alias       : The alias of the certificate that should be updated.
      * @param tenantId    : Id of the tenant.
      * @param tier        : Name of the tier
+     * @param organization : Organization
      * @return : true if update succeeds, false if fails
      */
-    ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId)
-            throws APIManagementException;
+    ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
+            String organization) throws APIManagementException;
 
     /**
      * To get the count of the client certificates updated for the particular tenant.

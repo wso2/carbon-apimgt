@@ -96,13 +96,15 @@ public class CertificateMgtDAO {
      * @param alias       : Alias of the certificate.
      * @param tier        : Name of tier related with the certificate.
      * @param tenantId    : ID of the tenant.
+     * @param organization : Organization
      * @return true if the update succeeds, unless false.
      * @throws CertificateManagementException Certificate Management Exception.
      */
-    public boolean updateClientCertificate(String certificate, String alias, String tier, int tenantId)
-            throws CertificateManagementException {
+    public boolean updateClientCertificate(String certificate, String alias, String tier, int tenantId,
+            String organization) throws CertificateManagementException {
 
-        List<ClientCertificateDTO> clientCertificateDTOList = getClientCertificates(tenantId, alias, null);
+        List<ClientCertificateDTO> clientCertificateDTOList = getClientCertificates(tenantId, alias, null,
+                organization);
         ClientCertificateDTO clientCertificateDTO;
 
         if (clientCertificateDTOList.size() == 0) {
@@ -238,10 +240,11 @@ public class CertificateMgtDAO {
      * @param tenantId      : The id of the tenant which the certificate belongs to.
      * @param alias         : Alias for the certificate. (Optional)
      * @param apiIdentifier : The API which the certificate is mapped to. (Optional)
+     * @param organization  : Organization
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
-    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws CertificateManagementException {
+    public List<ClientCertificateDTO> getClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws CertificateManagementException {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -265,7 +268,7 @@ public class CertificateMgtDAO {
                 if (apiIdentifier.getUUID() != null) {
                     apiUuid = apiIdentifier.getUUID();
                 } else {
-                    apiUuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
+                    apiUuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, organization);
                 }
                 apiId = ApiMgtDAO.getInstance().getAPIID(apiUuid, connection);
             }

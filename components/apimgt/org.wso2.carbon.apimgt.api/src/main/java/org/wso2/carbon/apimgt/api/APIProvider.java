@@ -1189,11 +1189,12 @@ public interface APIProvider extends APIManager {
      * @param tenantId      : ID of the tenant.
      * @param alias         : Alias of the certificate.
      * @param apiIdentifier : Identifier of the API.
+     * @param organization  : Organization
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
     /**
      * Method to search the client certificates for the provided tenant id, alias and api product identifier.
@@ -1201,11 +1202,12 @@ public interface APIProvider extends APIManager {
      * @param tenantId      : ID of the tenant.
      * @param alias         : Alias of the certificate.
      * @param apiProductIdentifier : Identifier of the API Product.
+     * @param organization  : Organization
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIProductIdentifier apiProductIdentifier)
-            throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+            APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException;
 
     /**
      * Retrieve the total number of certificates which a specified tenant has.
@@ -1239,11 +1241,12 @@ public interface APIProvider extends APIManager {
      *
      * @param tenantId : Id of the tenant.
      * @param alias    : Relevant alias.
+     * @param organization : organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException;
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, String organization) throws APIManagementException;
 
     /**
      * Method to check whether a client certificate for the given alias is present in trust store and whether it can
@@ -1252,12 +1255,13 @@ public interface APIProvider extends APIManager {
      * @param tenantId : Id of the tenant.
      * @param alias    : Relevant alias.
      * @param apiIdentifier : The identifier of the api.
+     * @param organization : Organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
 
     /**
@@ -1288,6 +1292,7 @@ public interface APIProvider extends APIManager {
      * @param APIIdentifier : API Identifier of the certificate.
      * @param tier          : tier name.
      * @param tenantId      : Id of tenant.
+     * @param organization  : organization
      * @return : 1 : If client certificate update is successful,
      * 2 : If update failed due to internal error,
      * 4 : If provided certificate is empty,
@@ -1295,7 +1300,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int updateClientCertificate(String certificate, String alias, APIIdentifier APIIdentifier, String tier,
-                                int tenantId) throws APIManagementException;
+                                int tenantId, String organization) throws APIManagementException;
 
     /**
      * Retrieve the certificate which matches the given alias.
@@ -1768,9 +1773,10 @@ public interface APIProvider extends APIManager {
     * Adds a new APIRevision to an existing API Product
      *
      * @param apiRevision APIRevision
+     * @param organization Organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    String addAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+    String addAPIProductRevision(APIRevision apiRevision, String organization) throws APIManagementException;
 
     /**
      * Adds a new APIRevisionDeployment to an existing API Product

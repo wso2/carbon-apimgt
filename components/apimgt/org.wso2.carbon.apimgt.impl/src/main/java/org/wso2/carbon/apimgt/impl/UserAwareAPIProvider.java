@@ -403,8 +403,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
-        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, String organization) throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias, organization);
         if (clientCertificateDTO != null) {
             checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
         }
@@ -412,9 +412,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
-        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias, organization);
         if (clientCertificateDTO != null) {
             checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
         }
@@ -433,9 +433,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
-            String tier, int tenantId) throws APIManagementException {
+            String tier, int tenantId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
-        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId);
+        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId, organization);
     }
 
     @Override

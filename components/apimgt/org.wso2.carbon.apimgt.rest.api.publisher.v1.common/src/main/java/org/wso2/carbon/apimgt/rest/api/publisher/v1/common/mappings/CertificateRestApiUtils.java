@@ -273,7 +273,8 @@ public class CertificateRestApiUtils {
             throw new APIManagementException("The alias cannot be empty", ExceptionCodes.ALIAS_CANNOT_BE_EMPTY);
         }
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        ClientCertificateDTO clientCertificate = apiProvider.getClientCertificate(tenantId, alias, apiIdentifier);
+        ClientCertificateDTO clientCertificate = apiProvider
+                .getClientCertificate(tenantId, alias, apiIdentifier, organization);
         if (clientCertificate == null) {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Could not find a client certificate in truststore which belongs to "

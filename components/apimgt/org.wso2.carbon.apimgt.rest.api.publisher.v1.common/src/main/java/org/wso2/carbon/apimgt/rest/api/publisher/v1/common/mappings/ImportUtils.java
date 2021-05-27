@@ -1950,7 +1950,7 @@ public class ImportUtils {
                 apiProductRevision.setApiUUID(importedAPIUuid);
                 apiProductRevision.setDescription("Revision created after importing the API Product");
                 try {
-                    revisionId = apiProvider.addAPIProductRevision(apiProductRevision);
+                    revisionId = apiProvider.addAPIProductRevision(apiProductRevision, organization);
                     if (log.isDebugEnabled()) {
                         log.debug("A new revision has been created for API Product " +
                                 importedApiProduct.getId().getName() + "_"
@@ -1971,7 +1971,7 @@ public class ImportUtils {
                                 .undeployAPIProductRevisionDeployment(importedAPIUuid, earliestRevisionUuid,
                                         deploymentsList);
                         apiProvider.deleteAPIProductRevision(importedAPIUuid, earliestRevisionUuid);
-                        revisionId = apiProvider.addAPIProductRevision(apiProductRevision);
+                        revisionId = apiProvider.addAPIProductRevision(apiProductRevision, organization);
                         if (log.isDebugEnabled()) {
                             log.debug("Revision ID: " + earliestRevisionUuid + " has been undeployed from " +
                                     deploymentsList.size() + " gateway environments and created a new revision ID: " +

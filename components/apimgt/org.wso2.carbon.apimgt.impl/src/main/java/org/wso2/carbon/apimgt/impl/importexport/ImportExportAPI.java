@@ -64,12 +64,13 @@ public interface ImportExportAPI {
      * @param preserveStatus Preserve API status on export
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveDocs   Preserve documentation on Export.
+     * @param organization   Organization
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                          boolean preserveDocs, boolean preserveCredentials)
+                          boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
 
     /**
@@ -80,12 +81,13 @@ public interface ImportExportAPI {
      * @param preserveStatus Preserve API status on export
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveDocs   Preserve documentation on Export.
+     * @param organization   Organization
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                          boolean preserveDocs, boolean preserveCredentials)
+                          boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
 
     /**

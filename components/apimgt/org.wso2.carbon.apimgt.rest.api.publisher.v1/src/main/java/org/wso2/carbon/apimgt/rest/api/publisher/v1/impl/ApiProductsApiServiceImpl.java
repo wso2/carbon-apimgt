@@ -794,12 +794,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response createAPIProductRevision(String apiProductId, APIRevisionDTO apIRevisionDTO,
                                              MessageContext messageContext) throws APIManagementException {
         try {
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiProductId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
             //adding the api revision
-            String revisionId = apiProvider.addAPIProductRevision(apiRevision);
+            String revisionId = apiProvider.addAPIProductRevision(apiRevision, organization);
 
             //Retrieve the newly added APIRevision to send in the response payload
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);

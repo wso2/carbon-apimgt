@@ -1361,7 +1361,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             int responseCode = apiProvider
                     .updateClientCertificate(base64EncodedCert, alias, clientCertificateDTO.getApiIdentifier(), tier,
-                            tenantId);
+                            tenantId, organization);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 //Handle api product case.
@@ -1431,7 +1431,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     API api = apiProvider.getAPIbyUUID(apiId, organization);
                     apiIdentifier = api.getId();
                 }
-                certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier);
+                certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
             }
 
             ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils

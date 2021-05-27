@@ -144,12 +144,13 @@ public class ExportUtils {
      * @param preserveDocs         Preserve documentation on Export.
      * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
      *                             (This is used for advertise only APIs).
+     * @param organization          Organization
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
                                  String userName, ExportFormat exportFormat, boolean preserveStatus,
-                                 boolean preserveDocs, String originalDevPortalUrl)
+                                 boolean preserveDocs, String originalDevPortalUrl, String organization)
             throws APIManagementException, APIImportExportException {
 
         int tenantId;
@@ -202,7 +203,8 @@ public class ExportUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
-            addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
+            addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
+                    organization);
         }
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
         CommonUtil.archiveDirectory(exportAPIBasePath);
@@ -241,9 +243,8 @@ public class ExportUtils {
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
-                                        APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat,
-                                        Boolean preserveStatus,
-                                        boolean preserveDocs, boolean preserveCredentials)
+            APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat, Boolean preserveStatus,
+            boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
@@ -265,13 +266,14 @@ public class ExportUtils {
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                preserveStatus, preserveDocs, preserveCredentials);
+                preserveStatus, preserveDocs, preserveCredentials, organization);
 
         // Export mTLS authentication related certificates
         if (log.isDebugEnabled()) {
             log.debug("Mutual SSL enabled. Exporting client certificates.");
         }
-        addClientCertificatesToArchive(archivePath, apiProductIdentifier, tenantId, apiProvider, exportFormat);
+        addClientCertificatesToArchive(archivePath, apiProductIdentifier, tenantId, apiProvider, exportFormat,
+                organization);
 
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
@@ -912,19 +914,21 @@ public class ExportUtils {
      * @param tenantId     Tenant id of the user
      * @param provider     Api Provider
      * @param exportFormat Export format of file
+     * @param organization Organization
      * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
      */
     public static void addClientCertificatesToArchive(String archivePath, Identifier identifier, int tenantId,
-                                                      APIProvider provider, ExportFormat exportFormat)
+            APIProvider provider, ExportFormat exportFormat, String organization)
             throws APIImportExportException {
 
         List<ClientCertificateDTO> certificateMetadataDTOs;
         try {
             if (identifier instanceof APIProductIdentifier) {
                 certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier);
+                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier, organization);
             } else {
-                certificateMetadataDTOs = provider.searchClientCertificates(tenantId, null, (APIIdentifier) identifier);
+                certificateMetadataDTOs = provider
+                        .searchClientCertificates(tenantId, null, (APIIdentifier) identifier, organization);
             }
             if (!certificateMetadataDTOs.isEmpty()) {
                 String clientCertsDirectoryPath =
@@ -1025,13 +1029,14 @@ public class ExportUtils {
      * @param provider              API Product Provider
      * @param exportFormat          Export format of the API meta data, could be yaml or json
      * @param isStatusPreserved     Whether API status is preserved while export
+     * @param organization          Organization
      * @throws APIImportExportException If an error occurs while creating the directory or extracting the archive
      * @throws APIManagementException   If an error occurs while retrieving API related resources
      */
     public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
                                                  ExportFormat exportFormat, APIProvider provider, String userName,
                                                  Boolean isStatusPreserved, boolean preserveDocs,
-                                                 boolean preserveCredentials)
+                                                 boolean preserveCredentials, String organization)
             throws APIImportExportException, APIManagementException {
 
         String apisDirectoryPath = archivePath + File.separator + ImportExportConstants.APIS_DIRECTORY;
@@ -1043,7 +1048,7 @@ public class ExportUtils {
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
-                    isStatusPreserved, preserveDocs, StringUtils.EMPTY);
+                    isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }
