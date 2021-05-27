@@ -732,10 +732,10 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public Set<String> getAPIVersions(String providerName, String apiName)
+    public Set<String> getAPIVersions(String providerName, String apiName, String organization)
             throws APIManagementException {
 
-        return apiMgtDAO.getAPIVersions(apiName, providerName);
+        return apiMgtDAO.getAPIVersions(apiName, providerName, organization);
     }
 
     /**

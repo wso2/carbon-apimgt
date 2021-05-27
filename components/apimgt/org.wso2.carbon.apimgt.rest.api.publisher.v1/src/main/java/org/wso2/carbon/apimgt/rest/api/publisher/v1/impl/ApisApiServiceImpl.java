@@ -2103,7 +2103,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             // check whether other versions of the current API exists
             APIVersionStringComparator comparator = new APIVersionStringComparator();
             Set<String> versions = apiProvider.getAPIVersions(
-                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName());
+                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName(), organization);
 
             for (String tempVersion : versions) {
                 if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {

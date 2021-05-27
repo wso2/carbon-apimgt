@@ -166,10 +166,11 @@ public interface APIManager {
      *
      * @param providerName name of the provider (common)
      * @param apiName      name of the api
+     * @param organization organization
      * @return Set of version strings (possibly empty)
      * @throws APIManagementException if failed to get version for api
      */
-    Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
+    Set<String> getAPIVersions(String providerName, String apiName, String organization) throws APIManagementException;
 
     String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 

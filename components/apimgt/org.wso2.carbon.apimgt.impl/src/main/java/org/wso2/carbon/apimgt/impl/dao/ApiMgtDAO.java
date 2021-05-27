@@ -15834,7 +15834,7 @@ public class ApiMgtDAO {
      * @return set version
      * @throws APIManagementException
      */
-    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+    public Set<String> getAPIVersions(String apiName, String apiProvider, String organization) throws APIManagementException {
 
         Set<String> versions = new HashSet<String>();
 
@@ -15842,6 +15842,7 @@ public class ApiMgtDAO {
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS)) {
             statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
             statement.setString(2, apiName);
+            statement.setString(3, organization);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 versions.add(resultSet.getString("API_VERSION"));

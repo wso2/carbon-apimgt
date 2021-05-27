@@ -2435,7 +2435,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
         String provider = api.getId().getProviderName();
         String apiName = api.getId().getApiName();
-        Set<String> versions = getAPIVersions(provider, apiName);
+        Set<String> versions = getAPIVersions(provider, apiName, api.getOrganization());
         APIVersionComparator comparator = new APIVersionComparator();
         List<API> sortedAPIs = new ArrayList<API>();
         for (String version : versions) {
@@ -3773,7 +3773,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         Set<String> versions = getAPIVersions(apiIdentifier.getProviderName(),
-                apiIdentifier.getName());
+                apiIdentifier.getName(), api.getOrganization());
         APIVersionStringComparator comparator = new APIVersionStringComparator();
         for (String tempVersion : versions) {
             if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
@@ -5115,7 +5115,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIConstants.PUBLISHED.equals(newStatus) || !oldStatus.equals(newStatus)) { //TODO has registry access
                 //if the API is websocket and if default version is selected, update the other versions
                 if (APIConstants.APITransportType.WS.toString().equals(api.getType()) && api.isDefaultVersion()) {
-                    Set<String> versions = getAPIVersions(api.getId().getProviderName(), api.getId().getName());
+                    Set<String> versions = getAPIVersions(api.getId().getProviderName(), api.getId().getName(),
+                            api.getOrganization());
                     for (String version : versions) {
                         if (version.equals(api.getId().getVersion())) {
                             continue;

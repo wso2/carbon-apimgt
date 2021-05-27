@@ -375,14 +375,14 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
       
         Set<String> set = new HashSet<String>();
-        Mockito.when(apiMgtDAO.getAPIVersions(apiName, providerName)).thenReturn(set);
+        Mockito.when(apiMgtDAO.getAPIVersions(apiName, providerName, "org1")).thenReturn(set);
         try {
-            abstractAPIManager.getAPIVersions(providerName, apiName);
+            abstractAPIManager.getAPIVersions(providerName, apiName, "org1");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("API version must be a collection"));
         }
 
-        Assert.assertEquals(abstractAPIManager.getAPIVersions(providerName, apiName).size(), 0);
+        Assert.assertEquals(abstractAPIManager.getAPIVersions(providerName, apiName, "org1").size(), 0);
         
     }
 
