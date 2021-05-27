@@ -443,12 +443,13 @@ public class CertificateManagerImplTest {
      */
     @Test
     public void testUpdateClientCertificate() throws APIManagementException {
-
+        String organization = "org1";
         PowerMockito
                 .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
         ResponseCode responseCode = certificateManager
-                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID,
+                        organization);
         Assert.assertEquals("Response code was wrong while trying add a expired client certificate",
                 ResponseCode.CERTIFICATE_EXPIRED.getResponseCode(), responseCode.getResponseCode());
         PowerMockito
@@ -456,7 +457,8 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "updateClientCertificate")).toReturn(false);
         responseCode = certificateManager
-                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID,
+                        organization);
         Assert.assertEquals("Response code was wrong, for a failure in update",
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());
     }
