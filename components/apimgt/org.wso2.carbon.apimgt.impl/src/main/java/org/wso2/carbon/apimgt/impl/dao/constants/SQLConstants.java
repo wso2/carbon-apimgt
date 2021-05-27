@@ -2683,10 +2683,13 @@ public class SQLConstants {
     /** API Categories related constants **/
 
     public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
-            + "(UUID, NAME, DESCRIPTION, TENANT_ID) VALUES (?,?,?,?)";
+            + "(UUID, NAME, DESCRIPTION, TENANT_ID, ORGANIZATION) VALUES (?,?,?,?,?)";
 
     public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT UUID, NAME, DESCRIPTION FROM AM_API_CATEGORIES "
             + "WHERE TENANT_ID = ? ORDER BY NAME";
+
+    public static final String GET_CATEGORIES_BY_ORGANIZATION_SQL = "SELECT UUID, NAME, DESCRIPTION, TENANT_ID FROM AM_API_CATEGORIES "
+            + "WHERE ORGANIZATION = ? ORDER BY NAME";
 
     public static final String IS_API_CATEGORY_NAME_EXISTS = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
             + "AM_API_CATEGORIES WHERE LOWER(NAME) = LOWER(?) AND TENANT_ID = ?";
@@ -2698,7 +2701,7 @@ public class SQLConstants {
 
     public static final String GET_API_CATEGORY_BY_NAME = "SELECT * FROM AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
 
-    public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ? WHERE UUID = ?";
+    public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ?, ORGANIZATION = ? WHERE UUID = ?";
 
     public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";
 
