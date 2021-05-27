@@ -711,9 +711,9 @@ public abstract class AbstractAPIManager implements APIManager {
         return passRegistry;
     }
 
-    public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
+    public boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException {
 
-        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier, organization);
         if (uuid == null) {
             return false;
         } else {

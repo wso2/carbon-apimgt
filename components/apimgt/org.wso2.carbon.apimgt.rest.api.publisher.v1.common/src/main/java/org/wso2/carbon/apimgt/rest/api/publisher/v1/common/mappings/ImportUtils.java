@@ -216,7 +216,7 @@ public class ImportUtils {
             targetStatus = importedApiDTO.getLifeCycleStatus();
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
-                    currentTenantDomain, apiProvider, Boolean.TRUE);
+                    currentTenantDomain, apiProvider, Boolean.TRUE, organization);
 
             if (isAdvertiseOnlyAPI(importedApiDTO)) {
                 processAdvertiseOnlyPropertiesInDTO(importedApiDTO, tokenScopes);
@@ -308,7 +308,7 @@ public class ImportUtils {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
                             ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 }
-                apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
+                apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction, organization);
             }
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -509,17 +509,18 @@ public class ImportUtils {
      * @param currentTenantDomain Current tenant domain
      * @param apiProvider         API Provider
      * @param ignoreAndImport     This should be true if the exception should be ignored
+     * @param organization        Organization
      * @throws APIManagementException If an error occurs when retrieving the API to overwrite
      */
     private static API retrieveApiToOverwrite(String apiName, String apiVersion, String currentTenantDomain,
-                                              APIProvider apiProvider, Boolean ignoreAndImport)
+                                              APIProvider apiProvider, Boolean ignoreAndImport, String organization)
             throws APIManagementException {
 
         String provider = APIUtil.getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
         APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
 
         // Checking whether the API exists
-        if (!apiProvider.isAPIAvailable(apiIdentifier)) {
+        if (!apiProvider.isAPIAvailable(apiIdentifier, organization)) {
             if (ignoreAndImport) {
                 return null;
             }
@@ -1889,7 +1890,7 @@ public class ImportUtils {
 
             // Check whether the API resources are valid
             checkAPIProductResourcesValid(extractedFolderPath, userName, apiProvider, importedApiProductDTO,
-                    preserveProvider);
+                    preserveProvider, organization);
 
             if (importAPIs) {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
@@ -1900,7 +1901,7 @@ public class ImportUtils {
                 // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are
                 // already in the APIM
                 importedApiProductDTO = updateDependentApiUuids(importedApiProductDTO, apiProvider,
-                        currentTenantDomain);
+                        currentTenantDomain, organization);
             }
 
             APIProduct targetApiProduct = retrieveApiProductToOverwrite(importedApiProductDTO.getName(),
@@ -2017,12 +2018,14 @@ public class ImportUtils {
      * @param currentUser   The current logged in user
      * @param apiProvider   API provider
      * @param apiProductDto API Product DTO
+     * @param preserveProvider
+     * @param organization
      * @throws IOException            If there is an error while reading an API file
      * @throws APIManagementException If failed to get the API Provider of an API,
      *                                or failed when checking the existence of an API
      */
     private static void checkAPIProductResourcesValid(String path, String currentUser, APIProvider apiProvider,
-                                                      APIProductDTO apiProductDto, Boolean preserveProvider)
+            APIProductDTO apiProductDto, Boolean preserveProvider, String organization)
             throws IOException, APIManagementException {
 
         // Get dependent APIs in the API Product
@@ -2059,7 +2062,7 @@ public class ImportUtils {
                             // Get the provider of the API if the API is in current user's tenant domain.
                             API api = retrieveApiToOverwrite(apiName, apiVersion,
                                     MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser)),
-                                    apiProvider, Boolean.FALSE);
+                                    apiProvider, Boolean.FALSE, organization);
                             invalidApiOperations = filterInvalidProductResources(invalidApiOperations,
                                     api.getUriTemplates());
                         }
@@ -2166,7 +2169,7 @@ public class ImportUtils {
                             APIUtil.replaceEmailDomain(apiDtoToImport.getProvider()), apiName, apiVersion);
 
                     // Checking whether the API exists
-                    if (apiProvider.isAPIAvailable(apiIdentifier)) {
+                    if (apiProvider.isAPIAvailable(apiIdentifier, organization)) {
                         // If the API is already imported, update it if the overWriteAPIs flag is specified,
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
@@ -2211,7 +2214,7 @@ public class ImportUtils {
                     // the overwrite flag, so that we should retrieve the API from inside)
                     importedApi = retrieveApiToOverwrite(apiDtoToImport.getName(), apiDtoToImport.getVersion(),
                             MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser)), apiProvider,
-                            Boolean.FALSE);
+                            Boolean.FALSE, organization);
                 }
                 updateApiUuidInApiProduct(apiProductDto, importedApi);
             }
@@ -2248,15 +2251,16 @@ public class ImportUtils {
      * @param importedApiProductDtO API Product DTO
      * @param apiProvider           API Provider
      * @param currentTenantDomain   Current tenant domain
+     * @param organization organization
      * @throws APIManagementException If failed failed when checking the existence of an API
      */
     private static APIProductDTO updateDependentApiUuids(APIProductDTO importedApiProductDtO, APIProvider apiProvider,
-                                                         String currentTenantDomain) throws APIManagementException {
+            String currentTenantDomain, String organization) throws APIManagementException {
 
         List<ProductAPIDTO> apis = importedApiProductDtO.getApis();
         for (ProductAPIDTO api : apis) {
             API targetApi = retrieveApiToOverwrite(api.getName(), api.getVersion(), currentTenantDomain, apiProvider,
-                    Boolean.FALSE);
+                    Boolean.FALSE, organization);
             if (targetApi != null) {
                 api.setApiId(targetApi.getUuid());
             }

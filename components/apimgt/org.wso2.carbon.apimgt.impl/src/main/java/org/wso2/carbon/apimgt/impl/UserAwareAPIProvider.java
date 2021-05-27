@@ -188,8 +188,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
-        apiMgtDAO.updateSubscription(apiId, subStatus, appId);
+    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
+            throws APIManagementException {
+        apiMgtDAO.updateSubscription(apiId, subStatus, appId, organization);
     }
 
     @Override
@@ -202,10 +203,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getSubscriptionByUUID(uuid);
     }
 
-    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
-            throws APIManagementException, FaultGatewaysException {
+    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus,
+            String organization) throws APIManagementException, FaultGatewaysException {
         checkAccessControlPermission(apiIdentifier);
-        return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
+        return super.changeLifeCycleStatus(apiIdentifier, targetStatus, organization);
     }
 
     @Override
@@ -265,9 +266,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getDefaultVersion(apiid);
     }
 
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
+    public String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
-        return super.getConsumerKeys(apiIdentifier);
+        return super.getConsumerKeys(apiIdentifier, organization);
     }
 
     @Override

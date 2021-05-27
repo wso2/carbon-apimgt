@@ -55,7 +55,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-            boolean exportLatestRevision, String originalDevPortalUrl)
+            boolean exportLatestRevision, String originalDevPortalUrl, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -71,7 +71,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
             if (apiId == null) {
                 throw new APIImportExportException("API Id not found for the provided details");
             }

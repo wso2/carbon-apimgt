@@ -1009,7 +1009,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 updateAuditApi(apiDefinition, apiToken, auditUuid, baseUrl, isDebugEnabled);
             } else {
                 auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, baseUrl,
-                        isDebugEnabled);
+                        isDebugEnabled, organization);
             }
             // Logic for the HTTP request
             String getUrl = baseUrl + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
@@ -1119,13 +1119,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiDefinition API Definition of API
      * @param baseUrl Base URL to communicate with Security Audit
      * @param isDebugEnabled Boolean whether debug is enabled
+     * @param organization Organization
      * @return String UUID of API in Security Audit
      * @throws IOException In the event of any problems in the request
      * @throws APIManagementException In the event of unexpected response
      * @throws ParseException In the event of any parse errors from the response
      */
     private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
-                                  String apiDefinition, String baseUrl, boolean isDebugEnabled)
+            String apiDefinition, String baseUrl, boolean isDebugEnabled, String organization)
             throws IOException, APIManagementException, ParseException {
         HttpURLConnection httpConn;
         OutputStream outputStream;
@@ -1184,7 +1185,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             httpConn.disconnect();
             JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
             auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
-            ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
+            ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid, organization);
         } else {
             if (httpConn.getErrorStream() != null) {
                 BufferedReader reader =
@@ -2650,6 +2651,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiId));
             }
             api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -3769,6 +3771,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
 
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
@@ -3778,7 +3781,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             File file = importExportAPI
                     .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                            Boolean.TRUE, Boolean.TRUE, exportLatestRevision, StringUtils.EMPTY);
+                            Boolean.TRUE, Boolean.TRUE, exportLatestRevision, StringUtils.EMPTY, organization);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {

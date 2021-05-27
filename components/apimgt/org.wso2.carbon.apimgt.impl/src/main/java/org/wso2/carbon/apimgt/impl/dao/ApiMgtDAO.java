@@ -2346,9 +2346,10 @@ public class ApiMgtDAO {
      * @param identifier    APIIdentifier
      * @param subStatus     Subscription Status[BLOCKED/UNBLOCKED]
      * @param applicationId Application id
+     * @param organization  Organization
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
      */
-    public void updateSubscription(APIIdentifier identifier, String subStatus, int applicationId)
+    public void updateSubscription(APIIdentifier identifier, String subStatus, int applicationId, String organization)
             throws APIManagementException {
 
         Connection conn = null;
@@ -2377,7 +2378,7 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
 
-            String subsCreateStatus = getSubscriptionCreaeteStatus(identifier, applicationId, conn);
+            String subsCreateStatus = getSubscriptionCreaeteStatus(identifier, applicationId, organization, conn);
 
             if (APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subsCreateStatus)) {
                 deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
@@ -4659,10 +4660,11 @@ public class ApiMgtDAO {
      * Returns all the consumerkeys of application which are subscribed for the given api
      *
      * @param identifier APIIdentifier
+     * @param organization Organization
      * @return Consumerkeys
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
      */
-    public String[] getConsumerKeys(APIIdentifier identifier) throws APIManagementException {
+    public String[] getConsumerKeys(APIIdentifier identifier, String organization) throws APIManagementException {
 
         Set<String> consumerKeys = new HashSet<String>();
 
@@ -4674,7 +4676,7 @@ public class ApiMgtDAO {
         if (identifier.getUUID() != null) {
             uuid = identifier.getUUID();
         } else {
-            uuid = getUUIDFromIdentifier(identifier);
+            uuid = getUUIDFromIdentifier(identifier, organization);
         }
         int apiId;
         String sqlQuery = SQLConstants.GET_CONSUMER_KEYS_SQL;
@@ -8106,6 +8108,35 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    public String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(4, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
+                    + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    /**
      * Get API UUID by passed parameters.
      *
      * @param provider Provider of the API
@@ -8445,10 +8476,11 @@ public class ApiMgtDAO {
      *
      * @param identifier Identifier to find the subscribed api
      * @param appID      ID of the application which has the subscription
+     * @param organization organization
      * @return External workflow reference for the subscription identified
      * @throws APIManagementException
      */
-    public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID)
+    public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID, String organization)
             throws APIManagementException {
 
         String workflowExtRef = null;
@@ -8463,7 +8495,7 @@ public class ApiMgtDAO {
                 if (identifier.getUUID() != null) {
                     apiUuid = identifier.getUUID();
                 } else {
-                    apiUuid = getUUIDFromIdentifier((APIIdentifier) identifier);
+                    apiUuid = getUUIDFromIdentifier((APIIdentifier) identifier, organization);
                 }
                 id = getAPIID(apiUuid, conn);
 
@@ -8715,8 +8747,8 @@ public class ApiMgtDAO {
      * @return subscription create status
      * @throws APIManagementException
      */
-    public String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, Connection connection)
-            throws APIManagementException {
+    public String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, String organization,
+            Connection connection) throws APIManagementException {
 
         String status = null;
         PreparedStatement ps = null;
@@ -8728,7 +8760,7 @@ public class ApiMgtDAO {
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
             } else {
-                uuid = getUUIDFromIdentifier(identifier);
+                uuid = getUUIDFromIdentifier(identifier, organization);
             }
             int apiId = getAPIID(uuid, connection);
             ps = connection.prepareStatement(sqlQuery);
@@ -14143,14 +14175,14 @@ public class ApiMgtDAO {
         return resourcePathList;
     }
 
-    public void addAPIProduct(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+    public void addAPIProduct(APIProduct apiProduct, String organization) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmtAddAPIProduct = null;
         PreparedStatement prepStmtAddScopeEntry = null;
 
         if (log.isDebugEnabled()) {
-            log.debug("addAPIProduct() : " + apiProduct.toString() + " for tenant " + tenantDomain);
+            log.debug("addAPIProduct() : " + apiProduct.toString() + " for organization " + organization);
         }
         APIProductIdentifier identifier = apiProduct.getId();
         ResultSet rs = null;
@@ -14630,16 +14662,18 @@ public class ApiMgtDAO {
      *
      * @param apiIdentifier APIIdentifier object to retrieve API ID
      * @param uuid          Audit API ID
+     * @param organization  Organization
      * @throws APIManagementException
      */
-    public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid) throws APIManagementException {
+    public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid, String organization)
+            throws APIManagementException {
 
         String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
         String apiUuid;
         if (apiIdentifier.getUUID() != null) {
             apiUuid = apiIdentifier.getUUID();
         } else {
-            apiUuid = getUUIDFromIdentifier(apiIdentifier);
+            apiUuid = getUUIDFromIdentifier(apiIdentifier, organization);
         }
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             int apiId = getAPIID(apiUuid, conn);

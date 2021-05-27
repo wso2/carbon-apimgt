@@ -603,10 +603,11 @@ public class APIProviderImplTest {
     @Test
     public void testGetConsumerKeys() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        String organization = "org1";
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
         String[] test = new String[]{};
-        Mockito.when(apimgtDAO.getConsumerKeys(apiId)).thenReturn(test);
-        assertNotNull(apiProvider.getConsumerKeys(apiId));
+        Mockito.when(apimgtDAO.getConsumerKeys(apiId, organization)).thenReturn(test);
+        assertNotNull(apiProvider.getConsumerKeys(apiId, organization));
     }
 
     @Test
@@ -1879,7 +1880,7 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
 
-        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId)).thenReturn(apiUUID);
+        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId, "org1")).thenReturn(apiUUID);
         Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
 
         //Workflow has started already
@@ -1888,7 +1889,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference("1",
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(wfDTO);
         APIStateChangeResponse response = apiProvider.
-                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
         Assert.assertNotNull(response);
     }
 
@@ -1902,7 +1903,7 @@ public class APIProviderImplTest {
 
         prepareForChangeLifeCycleStatus(apiProvider, apimgtDAO, apiId, artifact);
         APIStateChangeResponse response1 = apiProvider.
-                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
         Assert.assertEquals("APPROVED", response1.getStateChangeStatus());
     }
 
@@ -1915,7 +1916,7 @@ public class APIProviderImplTest {
         GovernanceException exception = new GovernanceException(new APIManagementException("APIManagementException:"
                 + "Error while retrieving Life cycle state"));
         Mockito.when(artifact.getLifecycleState()).thenThrow(exception);
-        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
     }
 
     @Test(expected = FaultGatewaysException.class)
@@ -1927,7 +1928,7 @@ public class APIProviderImplTest {
         GovernanceException exception = new GovernanceException(new APIManagementException("FaultGatewaysException:"
                 + "{\"PUBLISHED\":{\"PROD\":\"Error\"}}"));
         Mockito.when(artifact.getLifecycleState()).thenThrow(exception);
-        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
     }
 
     @Test(expected = APIManagementException.class)

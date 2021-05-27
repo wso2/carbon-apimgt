@@ -3375,11 +3375,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param apiId     API Identifier
      * @param subStatus Subscription Status
-     * @param appId     Application Id              *
+     * @param appId     Application Id
+     * @param organization Organization
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
-    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
-        apiMgtDAO.updateSubscription(apiId, subStatus, appId);
+    public void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
+            throws APIManagementException {
+        apiMgtDAO.updateSubscription(apiId, subStatus, appId, organization);
     }
 
     /**
@@ -4614,12 +4616,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Returns the all the Consumer keys of applications which are subscribed to the given API
      *
      * @param apiIdentifier APIIdentifier
+     * @param organization organization
      * @return a String array of ConsumerKeys
      * @throws APIManagementException
      */
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
+    public String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
 
-        return apiMgtDAO.getConsumerKeys(apiIdentifier);
+        return apiMgtDAO.getConsumerKeys(apiIdentifier, organization);
     }
 
     @Override
@@ -4817,7 +4820,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProduct.setDefinition(updatedProductSwagger);
     }
 
-    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action, String organization)
             throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
@@ -4835,7 +4838,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
-                String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
+                String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization);
                 int apiId = apiMgtDAO.getAPIID(uuid);
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -6993,17 +6996,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier);
-                api = getAPIbyUUID(apiUUID, tenantDomain);
+                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier, product.getOrganization());
+                api = getAPIbyUUID(apiUUID, product.getOrganization());
             } else {
                 apiUUID = apiProductResource.getApiId();
-                api = getAPIbyUUID(apiUUID, tenantDomain);
+                api = getAPIbyUUID(apiUUID, product.getOrganization());
                 // if API does not exist, getLightweightAPIByUUID() method throws exception.
             }
             if (api != null) {
                 validateApiLifeCycleForApiProducts(api);
                 if (api.getSwaggerDefinition() != null) {
-                    api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, tenantDomain));
+                    api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, product.getOrganization()));
                 }
 
                 if (!apiToProductResourceMapping.containsKey(api)) {
@@ -7050,7 +7053,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setUuid(apiProductUUID);
 
         // Add to database
-        apiMgtDAO.addAPIProduct(product, tenantDomain);
+        apiMgtDAO.addAPIProduct(product, product.getOrganization());
 
         return apiToProductResourceMapping;
     }
@@ -7138,7 +7141,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier);
+                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier, product.getOrganization());
                 api = getAPIbyUUID(apiUUID, tenantDomain);
             } else {
                 apiUUID = apiProductResource.getApiId();

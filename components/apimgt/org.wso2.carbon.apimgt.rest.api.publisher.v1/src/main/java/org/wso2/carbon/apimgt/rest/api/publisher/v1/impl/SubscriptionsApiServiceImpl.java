@@ -67,6 +67,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response blockSubscription(String subscriptionId, String blockState, String ifMatch,
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
@@ -93,7 +94,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 String apiVersion = "";
 
                 if (apiId instanceof APIIdentifier) {
-                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId);
+                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId, organization);
                     apiContext = apiProvider.getAPIContext(uuid);
                     apiVersion = apiId.getVersion();
                 } else if (apiId instanceof APIProductIdentifier) {
@@ -255,6 +256,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response unBlockSubscription(String subscriptionId, String ifMatch,
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -280,7 +282,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 String apiContext = "";
                 String apiVersion = "";
                 if (apiId instanceof APIIdentifier) {
-                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId);
+                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId, organization);
                     apiContext = apiProvider.getAPIContext(uuid);
                     apiVersion = apiId.getVersion();
                 } else if (apiId instanceof  APIProductIdentifier) {

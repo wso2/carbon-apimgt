@@ -544,12 +544,14 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId API Identifier
      * @param subStatus Subscription Status
-     * @param appId Application Id              *
+     * @param appId Application Id
+     * @param organization organization
      * @return int value with subscription id
      * @throws APIManagementException
      *          If failed to update subscription status
      */
-    void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException;
+    void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
+            throws APIManagementException;
 
 
     /**
@@ -766,10 +768,11 @@ public interface APIProvider extends APIManager {
      * Returns all the Consumer keys of applications which are subscribed to given API
      *
      * @param apiIdentifier APIIdentifier
+     * @param organization Organization
      * @return a String array of ConsumerKeys
      * @throws APIManagementException
      */
-    String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
+    String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException;
 
 
     /**
@@ -900,9 +903,10 @@ public interface APIProvider extends APIManager {
      *
      * @param  apiIdentifier apiIdentifier
      * @param  action  Action which need to execute from registry lifecycle
+     * @param organization organization
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-    APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+    APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action, String organization)
             throws APIManagementException, FaultGatewaysException;
 
     /**

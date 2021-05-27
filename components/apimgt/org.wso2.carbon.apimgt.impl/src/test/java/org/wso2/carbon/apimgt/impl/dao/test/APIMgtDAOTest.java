@@ -251,7 +251,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiIdentifier = new APIIdentifier("SUMEDHA", "API1", "V1.0.0");
         apiIdentifier.setApplicationId("APPLICATION99");
         apiIdentifier.setTier("T1");
-        String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, "org1");
         apiIdentifier.setId(apiMgtDAO.getAPIID(uuid));
         API api = new API(apiIdentifier);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -409,6 +409,7 @@ public class APIMgtDAOTest {
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         apiMgtDAO.addSubscriber(subscriber, null);
+        String organization = "org1";
 
         Application application = new Application("SUB_FORWARD_APP", subscriber);
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "org1");
@@ -448,7 +449,8 @@ public class APIMgtDAOTest {
         assertEquals(APIConstants.SubscriptionStatus.BLOCKED, blockedSubscription.getSubStatus());
 
         // update the BLOCKED subscription of the second API version to PROD_ONLY_BLOCKED
-        apiMgtDAO.updateSubscription(apiId2, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, applicationId);
+        apiMgtDAO.updateSubscription(apiId2, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, applicationId,
+                organization);
 
         // Add the third version of the API
         APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
@@ -896,6 +898,7 @@ public class APIMgtDAOTest {
     public void testDeleteSubscriptionsForapiId() throws Exception {
 
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
+        String organization = "org1";
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
         subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
@@ -957,7 +960,7 @@ public class APIMgtDAOTest {
         assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null, "testorg"));
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);
         assertEquals(subscribedAPIS.size(), 1);
-        apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId());
+        apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId(), organization);
         subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.REJECTED);
         apiMgtDAO.updateSubscription(subscribedAPI);
         assertTrue(apiMgtDAO.hasSubscription(subscriptionPolicy.getPolicyName(), subscriber.getName(),
@@ -970,7 +973,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.recordAPILifeCycleEvent(api.getUuid(), "CREATED", "PUBLISHED",
                 "testCreateApplicationRegistrationEntry", -1234);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiId);
-        assertTrue(apiMgtDAO.getConsumerKeys(apiId).length > 0);
+        assertTrue(apiMgtDAO.getConsumerKeys(apiId, organization).length > 0);
         apiMgtDAO.removeAllSubscriptions(api.getUuid());
         assertTrue(apiMgtDAO.getAPINamesMatchingContext(api.getContext()).size() > 0);
         apiMgtDAO.deleteAPI(api.getUuid());
@@ -1432,7 +1435,7 @@ public class APIMgtDAOTest {
     @Test
     public void testGetGraphQLComplexityDetails() throws APIManagementException {
         APIIdentifier apiIdentifier = new APIIdentifier("RASIKA", "API1", "1.0.0");
-        String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, "org1");
         apiMgtDAO.addOrUpdateComplexityDetails(uuid, getGraphqlComplexityInfoDetails());
         GraphqlComplexityInfo graphqlComplexityInfo = apiMgtDAO.getComplexityDetails(uuid);
         assertEquals(2,graphqlComplexityInfo.getList().size());
