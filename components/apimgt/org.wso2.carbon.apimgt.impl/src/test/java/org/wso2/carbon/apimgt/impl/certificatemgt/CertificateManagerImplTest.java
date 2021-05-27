@@ -417,7 +417,7 @@ public class CertificateManagerImplTest {
                 .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         ResponseCode responseCode = certificateManager
-                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID, "org1");
         Assert.assertEquals("Response code was wrong while trying add a client certificate with an existing alias",
                 ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode(), responseCode.getResponseCode());
         PowerMockito
@@ -425,15 +425,15 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         Mockito.when(certificateMgtDAO.checkWhetherAliasExist(ALIAS, TENANT_ID)).thenReturn(true);
         responseCode = certificateManager
-                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID, "org1");
         Assert.assertEquals("Response code was wrong while trying add a client certificate with an existing alias",
                 ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode(), responseCode.getResponseCode());
         Mockito.when(certificateMgtDAO.checkWhetherAliasExist(ALIAS, TENANT_ID)).thenReturn(false);
         Mockito.when(certificateMgtDAO
                 .addClientCertificate(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyInt())).thenReturn(true);
+                        Mockito.anyInt(), Mockito.anyString())).thenReturn(true);
         responseCode = certificateManager
-                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID);
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID, "org1");
         Assert.assertEquals("Response code was wrong while trying add a client certificate",
                 ResponseCode.SUCCESS.getResponseCode(), responseCode.getResponseCode());
     }

@@ -1475,7 +1475,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
-            int responseCode = apiProvider.addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier);
+            int responseCode = apiProvider
+                    .addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier, organization);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }

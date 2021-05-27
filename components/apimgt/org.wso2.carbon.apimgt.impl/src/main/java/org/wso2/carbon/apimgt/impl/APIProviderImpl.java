@@ -6328,7 +6328,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-            String tierName) throws APIManagementException {
+            String tierName, String organization) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
@@ -6337,7 +6337,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             responseCode = certificateManager
-                    .addClientCertificate(apiIdentifier, certificate, alias, tierName, tenantId);
+                    .addClientCertificate(apiIdentifier, certificate, alias, tierName, tenantId, organization);
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information, client certificate addition failed for the API "
                     + apiIdentifier.toString(), e);

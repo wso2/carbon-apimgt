@@ -230,9 +230,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-            String tierName) throws APIManagementException {
+            String tierName, String organization) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
-        return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
+        return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName, organization);
     }
 
     @Override

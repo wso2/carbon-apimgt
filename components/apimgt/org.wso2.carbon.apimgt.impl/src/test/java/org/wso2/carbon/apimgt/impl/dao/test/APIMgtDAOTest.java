@@ -409,7 +409,6 @@ public class APIMgtDAOTest {
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         apiMgtDAO.addSubscriber(subscriber, null);
-        String organization = "org1";
 
         Application application = new Application("SUB_FORWARD_APP", subscriber);
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "org1");
@@ -450,7 +449,7 @@ public class APIMgtDAOTest {
 
         // update the BLOCKED subscription of the second API version to PROD_ONLY_BLOCKED
         apiMgtDAO.updateSubscription(apiId2, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, applicationId,
-                organization);
+                "testOrg");
 
         // Add the third version of the API
         APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
@@ -898,7 +897,7 @@ public class APIMgtDAOTest {
     public void testDeleteSubscriptionsForapiId() throws Exception {
 
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
-        String organization = "org1";
+        String organization = "testOrg";
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
         subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
@@ -912,7 +911,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
         Application application = new Application("testCreateApplicationRegistrationEntry", subscriber);
         application.setTier("testCreateApplicationRegistrationEntry");
-        application.setId(apiMgtDAO.addApplication(application, "testCreateApplicationRegistrationEntry", "testOrg"));
+        application.setId(apiMgtDAO.addApplication(application, "testCreateApplicationRegistrationEntry", organization));
         application.setDescription("updated description");
         apiMgtDAO.updateApplication(application);
         assertEquals(apiMgtDAO.getApplicationById(application.getId()).getDescription(), "updated description");
@@ -924,7 +923,7 @@ public class APIMgtDAOTest {
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
         api.setUUID(UUID.randomUUID().toString());
-        api.getId().setId(apiMgtDAO.addAPI(api, -1234, "testOrg"));
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234, organization));
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
@@ -943,7 +942,7 @@ public class APIMgtDAOTest {
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);
         Mockito.when(keyManager.retrieveApplication(clientIdSandbox)).thenReturn(oAuthApplicationInfo);
-        assertTrue(apiMgtDAO.getSubscribedAPIs("testOrg", subscriber, null).size() > 0);
+        assertTrue(apiMgtDAO.getSubscribedAPIs(organization, subscriber, null).size() > 0);
         assertEquals(subscribedAPI.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         assertEquals(subscribedAPI.getApiId(), apiId);
         assertEquals(subscribedAPI.getApplication().getId(), application.getId());
@@ -955,9 +954,9 @@ public class APIMgtDAOTest {
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry");
         assertEquals(status, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
-        boolean applicationExist = apiMgtDAO.isApplicationExist(application.getName(), subscriber.getName(), null, "testOrg");
+        boolean applicationExist = apiMgtDAO.isApplicationExist(application.getName(), subscriber.getName(), null, organization);
         assertTrue(applicationExist);
-        assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null, "testorg"));
+        assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null, organization));
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);
         assertEquals(subscribedAPIS.size(), 1);
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId(), organization);

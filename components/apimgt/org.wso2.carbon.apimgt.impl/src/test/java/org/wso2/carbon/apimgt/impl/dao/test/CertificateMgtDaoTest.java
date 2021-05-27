@@ -324,7 +324,7 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean addClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID);
+        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID, "org1");
     }
 
     /**

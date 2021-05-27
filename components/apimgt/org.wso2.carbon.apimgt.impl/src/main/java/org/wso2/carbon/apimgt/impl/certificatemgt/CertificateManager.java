@@ -163,12 +163,13 @@ public interface CertificateManager {
      * @param certificate   : Base64 encoded certificate string.
      * @param alias         : Alias of the certificate.
      * @param tenantId      : The tenant which the client certificate is added against
+     * @param organization  : Organization
      * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
      * certificate is expired.
      */
     ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias, String tierName,
-            int tenantId);
+            int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.

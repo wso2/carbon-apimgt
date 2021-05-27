@@ -297,7 +297,7 @@ public class ImportUtils {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
                 }
                 addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                        importedApi.getId().getProviderName());
+                        importedApi.getId().getProviderName(), organization);
             }
 
             // Change API lifecycle if state transition is required
@@ -1645,7 +1645,7 @@ public class ImportUtils {
      * @throws APIImportExportException
      */
     private static void addClientCertificates(String pathToArchive, APIProvider apiProvider, Boolean preserveProvider,
-                                              String provider) throws APIManagementException {
+                                              String provider, String organization) throws APIManagementException {
 
         try {
             List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive);
@@ -1655,7 +1655,7 @@ public class ImportUtils {
                                 certDTO.getApiIdentifier().getVersion()) :
                         certDTO.getApiIdentifier();
                 apiProvider.addClientCertificate(APIUtil.replaceEmailDomainBack(provider), apiIdentifier,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName());
+                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), organization);
             }
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while importing client certificate", e);
@@ -1935,7 +1935,7 @@ public class ImportUtils {
                 log.debug("Mutual SSL enabled. Importing client certificates.");
             }
             addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                    importedApiProduct.getId().getProviderName());
+                    importedApiProduct.getId().getProviderName(), organization);
 
             if (deploymentInfoArray == null) {
                 // If the params have not overwritten the deployment environments, yaml file will be read

@@ -1123,6 +1123,7 @@ public interface APIProvider extends APIManager {
      * @param apiIdentifier : Relevant API identifier which the certificate is added against.
      * @param certificate   : Relevant public certificate.
      * @param alias         : Alias of the certificate.
+     * @param organization  : Organization
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
      * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
@@ -1130,7 +1131,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-                             String tierName) throws APIManagementException;
+                             String tierName, String organization) throws APIManagementException;
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.

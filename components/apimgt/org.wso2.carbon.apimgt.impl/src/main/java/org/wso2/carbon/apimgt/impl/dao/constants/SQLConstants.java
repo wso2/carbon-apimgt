@@ -3023,7 +3023,7 @@ public class SQLConstants {
     public static class ClientCertificateConstants{
         public static final String INSERT_CERTIFICATE = "INSERT INTO AM_API_CLIENT_CERTIFICATE " +
                 "(CERTIFICATE, TENANT_ID, ALIAS, API_ID, TIER_NAME) VALUES(?, ?, ?, (SELECT API_ID FROM AM_API WHERE " +
-                "API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? ), ?)";
+                "API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND ORGANIZATION = ? ), ?)";
 
         public static final String GET_CERTIFICATES_FOR_API = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE WHERE "
                 + "TENANT_ID=? and API_ID=(SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +

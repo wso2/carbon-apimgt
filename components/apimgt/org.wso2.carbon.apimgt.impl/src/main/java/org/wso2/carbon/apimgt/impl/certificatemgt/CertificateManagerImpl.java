@@ -114,7 +114,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias,
-                                             String tierName, int tenantId) {
+                                             String tierName, int tenantId, String organization) {
 
         ResponseCode responseCode;
         try {
@@ -123,7 +123,8 @@ public class CertificateManagerImpl implements CertificateManager {
                 if (certificateMgtDAO.checkWhetherAliasExist(alias, tenantId)) {
                     responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
                 } else {
-                    certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId);
+                    certificateMgtDAO
+                            .addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId, organization);
                 }
             }
         } catch (CertificateManagementException e) {
