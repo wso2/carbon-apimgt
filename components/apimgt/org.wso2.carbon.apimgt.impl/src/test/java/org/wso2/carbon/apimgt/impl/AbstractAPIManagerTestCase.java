@@ -99,6 +99,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -374,39 +375,41 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
       
         Set<String> set = new HashSet<String>();
-        Mockito.when(apiMgtDAO.getAPIVersions(apiName, providerName)).thenReturn(set);
+        Mockito.when(apiMgtDAO.getAPIVersions(apiName, providerName, "org1")).thenReturn(set);
         try {
-            abstractAPIManager.getAPIVersions(providerName, apiName);
+            abstractAPIManager.getAPIVersions(providerName, apiName, "org1");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("API version must be a collection"));
         }
 
-        Assert.assertEquals(abstractAPIManager.getAPIVersions(providerName, apiName).size(), 0);
+        Assert.assertEquals(abstractAPIManager.getAPIVersions(providerName, apiName, "org1").size(), 0);
         
     }
 
     @Test
     public void testIsAPIAvailable() throws APIManagementException {
         APIIdentifier apiIdentifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        String organization = "org1";
         String path =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getApiName()
                         + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiIdentifier)).thenReturn("xxxxx");
-        Assert.assertTrue(abstractAPIManager.isAPIAvailable(apiIdentifier));
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization)).thenReturn("xxxxx");
+        Assert.assertTrue(abstractAPIManager.isAPIAvailable(apiIdentifier, organization));
     }
 
     @Test
     public void testIsAPIProductAvailable() throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = getAPIProductIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        String organization = "carbon.super";
         String path =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion();
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, null)).thenReturn("xxxxx");
-        Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier));
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, organization, null)).thenReturn("xxxxx");
+        Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier, organization));
     }
 
     @Test
@@ -999,12 +1002,15 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsScopeKeyAssigned() throws APIManagementException {
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally((APIIdentifier) Mockito.any(), Mockito.anyString(), Mockito.anyInt()))
-                .thenReturn(false, true);
+        String organization = "carbon.super";
+        String uuid = UUID.randomUUID().toString();
+        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(),
+                Mockito.anyString())).thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(identifier, "sample", -1234));
-        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(identifier, "sample1", -1234));
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(-1234);
+        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample", "carbon.super"));
+        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample1", "carbon.super"));
     }
 
     @Test

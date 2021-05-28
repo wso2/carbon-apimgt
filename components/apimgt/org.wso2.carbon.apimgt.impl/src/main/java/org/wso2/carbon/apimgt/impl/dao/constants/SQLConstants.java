@@ -856,7 +856,7 @@ public class SQLConstants {
             " ORDER BY " +
             "   APP.NAME";
 
-    public static final String GET_APP_API_USAGE_BY_PROVIDER_AND_ID_SQL =
+    public static final String GET_APP_API_USAGE_BY_UUID_SQL =
             " SELECT " +
             "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
@@ -879,10 +879,8 @@ public class SQLConstants {
             " WHERE " +
             "   SUBS.APPLICATION_ID = APP.APPLICATION_ID " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
-            "   AND API.API_PROVIDER = ? " +
             "   AND API.API_ID = SUBS.API_ID " +
-            "   AND API.API_NAME = ? " +
-            "   AND API.API_VERSION = ? " +
+            "   AND API.API_UUID = ? " +
             "   AND API.ORGANIZATION= ? " +
             "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             " ORDER BY " +
@@ -1326,7 +1324,7 @@ public class SQLConstants {
             "SELECT API.API_ID FROM AM_API API WHERE API.API_UUID = ?";
     public static final String GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER = "SELECT API_ID,API_UUID,API_PROVIDER," +
             "API_NAME,API_VERSION,CONTEXT,API_TYPE,STATUS FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
-            "API_VERSION = ? ";
+            "API_VERSION = ? AND ORGANIZATION = ?";
 
     public static final String GET_API_PRODUCT_ID_SQL =
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
@@ -1389,6 +1387,7 @@ public class SQLConstants {
             "   API.API_PROVIDER = ?" +
             "   AND API.API_NAME = ?" +
             "   AND API.API_VERSION = ?" +
+            "   AND API.ORGANIZATION = ?" +
             "   AND API.API_ID = LC.API_ID";
 
     public static final String GET_SUBSCRIPTION_DATA_SQL =
@@ -1725,9 +1724,7 @@ public class SQLConstants {
                     " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
                     " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
                     " WHERE " +
-                    "  API.API_PROVIDER = ? AND " +
-                    "  API.API_NAME = ? AND " +
-                    "  API.API_VERSION = ? " +
+                    "  API.API_UUID = ? " +
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_URL_TEMPLATES_OF_API_REVISION_SQL =
@@ -1764,8 +1761,8 @@ public class SQLConstants {
             "   (SELECT AUM.URL_MAPPING_ID " +
             "   FROM AM_API_URL_MAPPING AUM " +
             "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-            "   WHERE API.API_PROVIDER = ? AND " +
-            "   API.API_NAME = ? AND API.API_VERSION = ? AND AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
+            "   WHERE API.UUID = ? AND " +
+            "   AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
 
     public static final String GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL =
             " SELECT " +
@@ -1780,8 +1777,7 @@ public class SQLConstants {
                     "   (SELECT AUM.URL_MAPPING_ID " +
                     "   FROM AM_API_URL_MAPPING AUM " +
                     "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                    "   WHERE API.API_PROVIDER = ? AND " +
-                    "   API.API_NAME = ? AND API.API_VERSION = ? AND APM.REVISION_UUID = 'Current API')";
+                    "   WHERE API.API_UUID = ? AND APM.REVISION_UUID = 'Current API')";
 
     public static final String ADD_COMMENT_SQL =
             " INSERT INTO " +
@@ -1878,11 +1874,13 @@ public class SQLConstants {
             "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
     public static final String GET_UUID_BY_IDENTIFIER_SQL =
             "SELECT API_UUID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ?";
+    public static final String GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL = "SELECT API_UUID FROM AM_API"
+            + " WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND ORGANIZATION = ?";
     public static final String GET_API_TYPE_BY_UUID =
             "SELECT API_TYPE FROM AM_API WHERE API_UUID = ?";
 
-    public static final String GET_API_CONTEXT_BY_API_NAME_SQL =
-            "SELECT CONTEXT FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION  = ?";
+    public static final String GET_API_CONTEXT_BY_API_UUID_SQL =
+            "SELECT CONTEXT FROM AM_API WHERE API_UUID = ?";
 
     public static final String GET_ALL_CONTEXT_SQL = "SELECT CONTEXT FROM AM_API ";
 
@@ -2014,9 +2012,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_API API " +
                     " WHERE " +
-                    "   API.API_NAME = ? " +
-                    "   AND API.API_VERSION = ? " +
-                    "   AND API.API_PROVIDER = ? " +
+                    "   AND API.API_UUID = ? " +
                     "   AND API.API_ID = SUBS.API_ID " +
                     "   AND SUB_STATUS = ?";
 
@@ -2638,6 +2634,10 @@ public class SQLConstants {
             + "WHERE API.API_ID = URL.API_ID AND API.API_NAME =? "
             + "AND API.API_VERSION=? AND API.API_PROVIDER=? AND URL.REVISION_UUID IS NULL";
 
+    public static final String GET_URL_TEMPLATES_FOR_API_WITH_UUID =
+            "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
+                    + "WHERE API.API_ID = URL.API_ID AND API.API_UUID =? AND URL.REVISION_UUID IS NULL";
+
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
@@ -2686,10 +2686,13 @@ public class SQLConstants {
     /** API Categories related constants **/
 
     public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
-            + "(UUID, NAME, DESCRIPTION, TENANT_ID) VALUES (?,?,?,?)";
+            + "(UUID, NAME, DESCRIPTION, TENANT_ID, ORGANIZATION) VALUES (?,?,?,?,?)";
 
     public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT UUID, NAME, DESCRIPTION FROM AM_API_CATEGORIES "
             + "WHERE TENANT_ID = ? ORDER BY NAME";
+
+    public static final String GET_CATEGORIES_BY_ORGANIZATION_SQL = "SELECT UUID, NAME, DESCRIPTION, TENANT_ID FROM AM_API_CATEGORIES "
+            + "WHERE ORGANIZATION = ? ORDER BY NAME";
 
     public static final String IS_API_CATEGORY_NAME_EXISTS = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
             + "AM_API_CATEGORIES WHERE LOWER(NAME) = LOWER(?) AND TENANT_ID = ?";
@@ -2701,7 +2704,7 @@ public class SQLConstants {
 
     public static final String GET_API_CATEGORY_BY_NAME = "SELECT * FROM AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
 
-    public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ? WHERE UUID = ?";
+    public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ?, ORGANIZATION = ? WHERE UUID = ?";
 
     public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";
 
@@ -3024,7 +3027,7 @@ public class SQLConstants {
     public static class ClientCertificateConstants{
         public static final String INSERT_CERTIFICATE = "INSERT INTO AM_API_CLIENT_CERTIFICATE " +
                 "(CERTIFICATE, TENANT_ID, ALIAS, API_ID, TIER_NAME) VALUES(?, ?, ?, (SELECT API_ID FROM AM_API WHERE " +
-                "API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? ), ?)";
+                "API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND ORGANIZATION = ? ), ?)";
 
         public static final String GET_CERTIFICATES_FOR_API = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE WHERE "
                 + "TENANT_ID=? and API_ID=(SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
@@ -3170,6 +3173,7 @@ public class SQLConstants {
             "SELECT AM_API.API_NAME, AM_API.API_PROVIDER "
                     + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API "
                     + "WHERE ARSM.SCOPE_NAME = ? AND "
+                    + "AM_API.ORGANIZATION_ID = ? AND "
                     + "ARSM.TENANT_ID = ? AND "
                     + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
                     + "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
@@ -3355,7 +3359,7 @@ public class SQLConstants {
     }
 
     public static final String GET_API_VERSIONS =
-            "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
+            "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND ORGANIZATION = ?";
     public static final String GET_API_VERSIONS_UUID =
             "SELECT API.API_UUID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
 

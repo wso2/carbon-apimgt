@@ -1155,9 +1155,9 @@ public class APIConsumerImplTest {
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationNameFromId(Mockito.anyInt());
         String workflowExtRef = "test_wf_ref";
         String workflowExtRef1 = "complete_wf_ref";
-        Mockito.when(
-                apiMgtDAO.getExternalWorkflowReferenceForSubscription((APIIdentifier) Mockito.any(), Mockito.anyInt()))
-                .thenReturn(workflowExtRef, workflowExtRef1);
+        Mockito.when(apiMgtDAO
+                .getExternalWorkflowReferenceForSubscription((APIIdentifier) Mockito.any(), Mockito.anyInt(),
+                        Mockito.anyString())).thenReturn(workflowExtRef, workflowExtRef1);
         SubscriptionWorkflowDTO subscriptionWorkflowDTO = new SubscriptionWorkflowDTO();
         subscriptionWorkflowDTO.setWorkflowReference("1");
         Mockito.when(apiMgtDAO.retrieveWorkflow(workflowExtRef)).thenReturn(subscriptionWorkflowDTO);
