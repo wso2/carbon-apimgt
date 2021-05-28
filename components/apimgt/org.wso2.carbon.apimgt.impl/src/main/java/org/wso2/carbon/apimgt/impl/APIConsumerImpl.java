@@ -3116,9 +3116,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
             SubscriptionWorkflowDTO workflowDTO;
-            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
+            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            String workflowExtRef = apiMgtDAO
+                    .getExternalWorkflowReferenceForSubscription(identifier, applicationId, organization);
 
             // in a normal flow workflowExtRef is null when workflows are not enabled
             if (workflowExtRef == null) {
@@ -5782,7 +5785,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
             } else {
-                uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+                uuid = apiMgtDAO.getUUIDFromIdentifier(identifier.getProviderName(), identifier.getApiName(),
+                        identifier.getVersion(), orgId);
             }
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid );
             if (devPortalApi != null) {

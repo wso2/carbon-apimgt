@@ -117,19 +117,21 @@ public interface APIManager {
      * Checks the Availability of given APIIdentifier
      *
      * @param identifier APIIdentifier
+     * @param organization Organization
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API availability
      */
-    boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
+    boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException;
 
     /**
      * Checks the Availability of given APIProductIdentifier
      *
      * @param identifier APIProductIdentifier
+     * @param organization API Product organization
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API Product availability
      */
-    boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException;
+    boolean isAPIProductAvailable(APIProductIdentifier identifier, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system
@@ -164,10 +166,11 @@ public interface APIManager {
      *
      * @param providerName name of the provider (common)
      * @param apiName      name of the api
+     * @param organization organization
      * @return Set of version strings (possibly empty)
      * @throws APIManagementException if failed to get version for api
      */
-    Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
+    Set<String> getAPIVersions(String providerName, String apiName, String organization) throws APIManagementException;
 
     String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
@@ -516,14 +519,13 @@ public interface APIManager {
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      * This will return false if those APIs are different versions of the same API.
      *
-     * @param apiIdentifier API Identifier
+     * @param uuid API uuid
      * @param scopeKey   candidate scope key
-     * @param tenantId   tenant Id
+     * @param organization   organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
-            throws APIManagementException;
+    boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, String organization) throws APIManagementException;
 
     /**
      * Check if a given context template already exists

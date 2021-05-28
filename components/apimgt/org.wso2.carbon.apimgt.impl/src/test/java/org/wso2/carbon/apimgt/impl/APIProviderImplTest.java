@@ -603,10 +603,11 @@ public class APIProviderImplTest {
     @Test
     public void testGetConsumerKeys() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        String organization = "org1";
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
         String[] test = new String[]{};
-        Mockito.when(apimgtDAO.getConsumerKeys(apiId)).thenReturn(test);
-        assertNotNull(apiProvider.getConsumerKeys(apiId));
+        Mockito.when(apimgtDAO.getConsumerKeys(apiId, organization)).thenReturn(test);
+        assertNotNull(apiProvider.getConsumerKeys(apiId, organization));
     }
 
     @Test
@@ -1239,7 +1240,7 @@ public class APIProviderImplTest {
 
     @Test
     public void testGetAPIUsageByAPIId() throws APIManagementException, RegistryException, UserStoreException {
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
+        String uuid = UUID.randomUUID().toString();
         SubscribedAPI subscribedAPI1 = new SubscribedAPI(new Subscriber("user1"),
                 new APIIdentifier("admin", "API1", "1.0.0"));
         SubscribedAPI subscribedAPI2 = new SubscribedAPI(new Subscriber("user1"),
@@ -1260,11 +1261,13 @@ public class APIProviderImplTest {
 
         UserApplicationAPIUsage[] apiResults = {apiResult1, apiResult2};
 
-        Mockito.when(apimgtDAO.getAllAPIUsageByProviderAndApiId(apiId.getProviderName(), apiId, "org1")).thenReturn(apiResults);
+        Mockito.when(apimgtDAO.getAllAPIUsageByProviderAndApiId(uuid, "org1"))
+                .thenReturn(apiResults);
+        Mockito.when(apimgtDAO.getAPIIdentifierFromUUID(uuid)).thenReturn(new APIIdentifier("admin", "API1", "1.0.0"));
 
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
 
-        List<SubscribedAPI> subscribedAPIs = apiProvider.getAPIUsageByAPIId(apiId, "org1");
+        List<SubscribedAPI> subscribedAPIs = apiProvider.getAPIUsageByAPIId(uuid, "org1");
 
         Assert.assertEquals(2, subscribedAPIs.size());
         Assert.assertEquals("user1", subscribedAPIs.get(0).getSubscriber().getName());
@@ -1438,7 +1441,7 @@ public class APIProviderImplTest {
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
 
-        apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api);
+        apiProvider.propergateAPIStatusChangeToGateways(APIConstants.PUBLISHED, api);
         //Mockito.verify(notificationExecutor).sendAsyncNotifications(notificationDTO); Not valid. notification logic moved outside
     }
 
@@ -1877,7 +1880,7 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
 
-        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId)).thenReturn(apiUUID);
+        Mockito.when(apimgtDAO.getUUIDFromIdentifier(apiId, "org1")).thenReturn(apiUUID);
         Mockito.when(apimgtDAO.getAPIID(apiUUID)).thenReturn(1);
 
         //Workflow has started already
@@ -1886,7 +1889,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.retrieveWorkflowFromInternalReference("1",
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(wfDTO);
         APIStateChangeResponse response = apiProvider.
-                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
         Assert.assertNotNull(response);
     }
 
@@ -1900,7 +1903,7 @@ public class APIProviderImplTest {
 
         prepareForChangeLifeCycleStatus(apiProvider, apimgtDAO, apiId, artifact);
         APIStateChangeResponse response1 = apiProvider.
-                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+                changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
         Assert.assertEquals("APPROVED", response1.getStateChangeStatus());
     }
 
@@ -1913,7 +1916,7 @@ public class APIProviderImplTest {
         GovernanceException exception = new GovernanceException(new APIManagementException("APIManagementException:"
                 + "Error while retrieving Life cycle state"));
         Mockito.when(artifact.getLifecycleState()).thenThrow(exception);
-        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
     }
 
     @Test(expected = FaultGatewaysException.class)
@@ -1925,7 +1928,7 @@ public class APIProviderImplTest {
         GovernanceException exception = new GovernanceException(new APIManagementException("FaultGatewaysException:"
                 + "{\"PUBLISHED\":{\"PROD\":\"Error\"}}"));
         Mockito.when(artifact.getLifecycleState()).thenThrow(exception);
-        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE);
+        apiProvider.changeLifeCycleStatus(apiId, APIConstants.API_LC_ACTION_DEPRECATE, "org1");
     }
 
     @Test(expected = APIManagementException.class)

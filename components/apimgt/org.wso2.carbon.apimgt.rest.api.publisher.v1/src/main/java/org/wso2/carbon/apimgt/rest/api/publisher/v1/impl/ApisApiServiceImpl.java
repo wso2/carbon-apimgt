@@ -320,7 +320,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
@@ -673,7 +674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         existingAPI.setUriTemplates(uriTemplates);
 
         // TODO: Add scopes
-
+        existingAPI.setOrganization(organization);
         try {
             apiProvider.updateAPI(existingAPI);
         } catch (FaultGatewaysException e) {
@@ -746,6 +747,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             validateAPIExistence(apiId);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
+            originalAPI.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
@@ -780,6 +782,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
+            originalAPI.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
@@ -1006,7 +1009,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 updateAuditApi(apiDefinition, apiToken, auditUuid, baseUrl, isDebugEnabled);
             } else {
                 auditUuid = createAuditApi(collectionId, apiToken, apiIdentifier, apiDefinition, baseUrl,
-                        isDebugEnabled);
+                        isDebugEnabled, organization);
             }
             // Logic for the HTTP request
             String getUrl = baseUrl + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
@@ -1116,13 +1119,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiDefinition API Definition of API
      * @param baseUrl Base URL to communicate with Security Audit
      * @param isDebugEnabled Boolean whether debug is enabled
+     * @param organization Organization
      * @return String UUID of API in Security Audit
      * @throws IOException In the event of any problems in the request
      * @throws APIManagementException In the event of unexpected response
      * @throws ParseException In the event of any parse errors from the response
      */
     private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
-                                  String apiDefinition, String baseUrl, boolean isDebugEnabled)
+            String apiDefinition, String baseUrl, boolean isDebugEnabled, String organization)
             throws IOException, APIManagementException, ParseException {
         HttpURLConnection httpConn;
         OutputStream outputStream;
@@ -1181,7 +1185,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             httpConn.disconnect();
             JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
             auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
-            ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
+            ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid, organization);
         } else {
             if (httpConn.getErrorStream() != null) {
                 BufferedReader reader =
@@ -1248,6 +1252,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
@@ -1265,6 +1270,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
                                     apiIdentifier.getVersion());
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProduct.setOrganization(organization);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
                     apiProvider.updateAPI(api);
@@ -1335,6 +1341,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
@@ -1354,7 +1361,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             int responseCode = apiProvider
                     .updateClientCertificate(base64EncodedCert, alias, clientCertificateDTO.getApiIdentifier(), tier,
-                            tenantId);
+                            tenantId, organization);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 //Handle api product case.
@@ -1364,6 +1371,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
                                     apiIdentifier.getVersion());
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProduct.setOrganization(organization);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
                     apiProvider.updateAPI(api);
@@ -1410,7 +1418,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION); 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId", apiId);
 
         try {
@@ -1423,7 +1431,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     API api = apiProvider.getAPIbyUUID(apiId, organization);
                     apiIdentifier = api.getId();
                 }
-                certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier);
+                certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
             }
 
             ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
@@ -1461,12 +1469,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
 
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(api.getStatus());
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
-            int responseCode = apiProvider.addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier);
+            int responseCode = apiProvider
+                    .addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier, organization);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
@@ -1478,6 +1488,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             new APIProductIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(),
                                     apiIdentifier.getVersion());
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
+                    apiProduct.setOrganization(organization);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
                     apiProvider.updateAPI(api);
@@ -1536,12 +1547,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             //check if the API has subscriptions
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId(), organization);
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
             if (apiUsages != null && apiUsages.size() > 0) {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
             }
 
-            List<APIResource> usedProductResources = apiProvider.getUsedProductResources(api.getId());
+            List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
 
             if (!usedProductResources.isEmpty()) {
                 RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
@@ -2028,6 +2039,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPILifecycleHistory(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIIdentifier apiIdentifier;
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
@@ -2035,7 +2047,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier);
+            List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier, organization);
             LifecycleHistoryDTO historyDTO = APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
             return Response.ok().entity(historyDTO).build();
         } catch (APIManagementException e) {
@@ -2070,24 +2082,17 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves API Lifecycle state information
      *
      * @param apiId API Id
+     * @param organization organization
      * @return API Lifecycle state information
      */
     private LifecycleStateDTO getLifecycleState(String apiId, String organization) {
-        return getLifecycleState(null, apiId, organization);
-    }
-
-    private LifecycleStateDTO getLifecycleState(APIIdentifier identifier, String apiId, String organization) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier;
-            if (identifier == null) {
-                if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
-                    apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
-                } else {
-                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-                }
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
+                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
             } else {
-                apiIdentifier = identifier;
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, organization);
             if (apiLCData == null) {
@@ -2099,7 +2104,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             // check whether other versions of the current API exists
             APIVersionStringComparator comparator = new APIVersionStringComparator();
             Set<String> versions = apiProvider.getAPIVersions(
-                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName());
+                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName(), organization);
 
             for (String tempVersion : versions) {
                 if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
@@ -2648,6 +2653,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiId));
             }
             api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -3207,19 +3213,19 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream,
-                                              Attachment fileDetail, String inlineApiDefinition,
-                                              MessageContext messageContext) {
+            Attachment fileDetail, String inlineApiDefinition, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, inlineApiDefinition, returnContent, false);
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, inlineApiDefinition,
+                    returnContent, false);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
 
-        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
-                (OpenAPIDefinitionValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        OpenAPIDefinitionValidationResponseDTO validationResponseDTO = (OpenAPIDefinitionValidationResponseDTO) validationResponseMap
+                .get(RestApiConstants.RETURN_DTO);
         return Response.ok().entity(validationResponseDTO).build();
     }
 
@@ -3659,8 +3665,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .changeLifeCycleStatus(organization, apiId, action.toString(), lcMap);
 
             //returns the current lifecycle state
-            LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId,
-                    organization); // todo try to prevent this call
+            LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
 
             WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
                     .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
@@ -3697,8 +3702,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            int tenantId = APIUtil.getTenantId(username);
+            int tenantId = APIUtil.getInternalOrganizationId(organization);
             API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
             if (existingAPI == null) {
                 throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
@@ -3768,6 +3772,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
 
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
@@ -3777,7 +3782,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             File file = importExportAPI
                     .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                            Boolean.TRUE, Boolean.TRUE, exportLatestRevision, StringUtils.EMPTY);
+                            Boolean.TRUE, Boolean.TRUE, exportLatestRevision, StringUtils.EMPTY, organization);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
@@ -4013,7 +4018,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *  validation response of type APIDefinitionValidationResponse coming from the impl level.
      */
     private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-                                          String apiDefinition, Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
+            String apiDefinition, Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
 
@@ -4661,7 +4666,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url,
+            InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String updatedAsyncAPIDefinition;
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
@@ -4955,7 +4962,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String definitionToAdd = validationResponse.getJsonContent();
             String protocol = validationResponse.getProtocol();
             if (isServiceAPI) {
@@ -4978,7 +4984,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
-            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain));
+            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
