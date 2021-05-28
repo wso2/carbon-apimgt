@@ -94,10 +94,12 @@ public class APIClientGenerationManager {
                                            String swaggerAPIDefinition)
             throws APIClientGenerationException {
 
+        if (StringUtils.isBlank(sdkLanguage) || StringUtils.isBlank(apiName) || StringUtils.isBlank(apiVersion)) {
+            handleSDKGenException("SDK Language, API Name or API Version should not be null.");
+        }
         if (StringUtils.isEmpty(swaggerAPIDefinition)) {
             handleSDKGenException("Error loading the Swagger definition. Swagger file is empty.");
         }
-
         //create a temporary directory with a random name to store files created during generating the SDK
         String tempDirectoryLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator + UUID.randomUUID().toString();
         File tempDirectory = new File(tempDirectoryLocation);
