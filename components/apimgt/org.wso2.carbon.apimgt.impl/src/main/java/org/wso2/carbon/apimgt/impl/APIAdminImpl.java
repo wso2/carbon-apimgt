@@ -622,13 +622,13 @@ public class APIAdminImpl implements APIAdmin {
         return content;
     }
 
-    public APICategory addCategory(APICategory category, String userName) throws APIManagementException {
+    public APICategory addCategory(APICategory category, String userName, String organization) throws APIManagementException {
 
-        int tenantID = APIUtil.getTenantId(userName);
+        int tenantID = APIUtil.getInternalOrganizationId(organization);
         if (isCategoryNameExists(category.getName(), null, tenantID)) {
             APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
         }
-        return apiMgtDAO.addCategory(tenantID, category);
+        return apiMgtDAO.addCategory(tenantID, category, organization);
     }
 
     public void updateCategory(APICategory apiCategory) throws APIManagementException {
@@ -646,14 +646,19 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteCategory(categoryID);
     }
 
+    public List<APICategory> getAllAPICategoriesOfOrganization(String organization) throws APIManagementException {
+        return apiMgtDAO.getAllCategories(organization);
+    }
+
     public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
 
         return apiMgtDAO.getAllCategories(tenantId);
     }
+
     @Override
-    public List<APICategory> getAPICategoriesOfTenant(int tenantId) throws APIManagementException {
+    public List<APICategory> getAPICategoriesOfOrganization(String organization) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        List<APICategory> categories = getAllAPICategoriesOfTenant(tenantId);
+        List<APICategory> categories = getAllAPICategoriesOfOrganization(organization);
         if (categories.size() > 0) {
             for (APICategory category : categories) {
                 int length = isCategoryAttached(category, username);

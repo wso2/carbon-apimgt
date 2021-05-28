@@ -14993,11 +14993,12 @@ public class ApiMgtDAO {
     /**
      * Adds an API category
      *
-     * @param tenantID Logged in user's tenant ID
-     * @param category Category
+     * @param tenantID      Logged in user's tenant ID
+     * @param category      Category
+     * @param organization  Organization
      * @return Category
      */
-    public APICategory addCategory(int tenantID, APICategory category) throws APIManagementException {
+    public APICategory addCategory(int tenantID, APICategory category, String organization) throws APIManagementException {
 
         String uuid = UUID.randomUUID().toString();
         category.setId(uuid);
@@ -15007,6 +15008,7 @@ public class ApiMgtDAO {
             statement.setString(2, category.getName());
             statement.setString(3, category.getDescription());
             statement.setInt(4, tenantID);
+            statement.setString(5, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to add Category: " + uuid, e);
@@ -15026,7 +15028,8 @@ public class ApiMgtDAO {
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_CATEGORY)) {
             statement.setString(1, apiCategory.getDescription());
             statement.setString(2, apiCategory.getName());
-            statement.setString(3, apiCategory.getId());
+            statement.setString(3, apiCategory.getOrganization());
+            statement.setString(4, apiCategory.getId());
             statement.execute();
         } catch (SQLException e) {
             handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
@@ -15063,6 +15066,41 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve API categories for tenant " + tenantID, e);
+        }
+        return categoriesList;
+    }
+
+    /**
+     * Get all available API categories of the organization
+     * @param organization
+     * @return
+     * @throws APIManagementException
+     */
+    public List<APICategory> getAllCategories(String organization) throws APIManagementException {
+
+        List<APICategory> categoriesList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_CATEGORIES_BY_ORGANIZATION_SQL)) {
+            statement.setString(1, organization);
+
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                String id = rs.getString("UUID");
+                String name = rs.getString("NAME");
+                String description = rs.getString("DESCRIPTION");
+                int tenantID = rs.getInt("TENANT_ID");
+
+                APICategory category = new APICategory();
+                category.setId(id);
+                category.setName(name);
+                category.setDescription(description);
+                category.setTenantID(tenantID);
+
+                categoriesList.add(category);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API categories for organization " + organization, e);
         }
         return categoriesList;
     }
