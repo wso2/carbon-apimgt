@@ -5123,7 +5123,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             continue;
                         }
                         String uuid = APIUtil.getUUIDFromIdentifier(
-                                new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version));
+                                new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version),
+                                api.getOrganization());
                         API otherApi = getLightweightAPIByUUID(uuid, api.getOrganization());
                         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain,
