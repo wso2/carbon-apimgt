@@ -82,16 +82,6 @@ public interface APIConsumer extends APIManager {
     Map<String, Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns a list of all published APIs. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     *
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
-
-    /**
      * Returns a paginated list of all published APIs. If a given API has multiple APIs,
      * only the latest version will be included
      * in this list.
@@ -188,7 +178,15 @@ public interface APIConsumer extends APIManager {
     void removeAPIRating(String id, String user) throws APIManagementException;
 
     /**
-     * returns the SubscribedAPI object which is related to the subscriptionId
+     * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
+     *
+     * @param apiId         The api identifier
+     * @param organization  Identifier of an organization
+     * @throws APIManagementException If an error occurs while rating the API
+     */
+    void checkAPIVisibility(String apiId, String organization) throws APIManagementException;
+
+    /** returns the SubscribedAPI object which is related to the subscriptionId
      *
      * @param subscriptionId subscription id
      * @return
@@ -256,7 +254,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-                                                  int endSubIndex, String groupingId) throws APIManagementException;
+                                                  int endSubIndex, String groupingId, String organization) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -342,35 +340,35 @@ public interface APIConsumer extends APIManager {
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
-     * @param identifier     Identifier
-     * @param userId         id of the user
-     * @param applicationId  Application Id
-     * @param organizationId Identifier of an organization
+     * @param identifier    Identifier
+     * @param userId        id of the user
+     * @param applicationId Application Id
+     * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(Identifier identifier, String userId, int applicationId, String organizationId) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId, String organization) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId
      *
-     * @param identifier     APIIdentifier
-     * @param userId         id of the user
-     * @param applicationId  Application Id
-     * @param groupId        groupId of user
-     * @param organizationId Identifier of an organization
+     * @param identifier    APIIdentifier
+     * @param userId        id of the user
+     * @param applicationId Application Id
+     * @param groupId       groupId of user
+     * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
-                            String organizationId) throws APIManagementException;
+    void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId, String organization) throws
+            APIManagementException;
 
     /**
      * Removes a subscription specified by SubscribedAPI object
      *
-     * @param subscription   SubscribedAPI object which contains the subscription information
-     * @param organizationId Identifier of an organization
+     * @param subscription SubscribedAPI object which contains the subscription information
+     * @param organization Organization
      * @throws APIManagementException
      */
-    void removeSubscription(SubscribedAPI subscription, String organizationId) throws APIManagementException;
+    void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException;
 
     /**
      * Remove a Subscriber
@@ -662,7 +660,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                Identifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId, String organization) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain) throws APIManagementException;
 
@@ -899,26 +897,14 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
      *
-     * @param apiIdentifier   API Identifier object
-     * @param environmentName environment name
-     * @param environmentType environment type
+     * @param api               API
+     * @param environmentName   environment name
+     * @param environmentType   environment type
+     * @param organization      Identifier of an organization
      * @return WSDL of the API
      * @throws APIManagementException when error occurred while getting the WSDL
      */
-    ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
-            throws APIManagementException;
-
-    /**
-     * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
-     *
-     * @param api             API
-     * @param environmentName environment name
-     * @param environmentType environment type
-     * @param orgId           Identifier of an organization
-     * @return WSDL of the API
-     * @throws APIManagementException when error occurred while getting the WSDL
-     */
-    ResourceFile getWSDL(API api, String environmentName, String environmentType, String orgId)
+    ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException;
 
     /**
@@ -930,7 +916,7 @@ public interface APIConsumer extends APIManager {
      */
     JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException;
 
-    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
+    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(String organization, Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 

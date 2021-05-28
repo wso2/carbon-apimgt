@@ -349,6 +349,7 @@ public class PublisherCommonUtils {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
         }
         apiToUpdate.setUUID(originalAPI.getUUID());
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
         validateScopes(apiToUpdate);
         apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
         if (apiDtoToUpdate.getKeyManagers() instanceof List) {
@@ -357,23 +358,23 @@ public class PublisherCommonUtils {
             apiToUpdate.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         }
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, originalAPI.getOrganization());
+            String oldDefinition = apiProvider
+                    .getOpenAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, tenantDomain);
+            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-            String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
+            String oldDefinition = apiProvider
+                    .getAsyncAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -388,6 +389,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
+
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
 
@@ -624,10 +626,9 @@ public class PublisherCommonUtils {
      */
     public static void validateScopes(API api) throws APIManagementException {
 
-        APIIdentifier apiId = api.getId();
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = APIUtil.getInternalOrganizationId(api.getOrganization());
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         Set<org.wso2.carbon.apimgt.api.model.Scope> sharedAPIScopes = new HashSet<>();
 
@@ -639,11 +640,11 @@ public class PublisherCommonUtils {
                 // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
                 // already defined values for the existing shared scope.
-                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, api.getOrganization())) {
+                if (apiProvider.isScopeKeyAssignedLocally(api.getUuid(), scopeName, api.getOrganization())) {
                     throw new APIManagementException(
                             "Scope " + scopeName + " is already assigned locally by another API",
                             ExceptionCodes.SCOPE_ALREADY_ASSIGNED);
-                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantDomain)) {
+                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantId)) {
                     sharedAPIScopes.add(scope);
                     continue;
                 }
@@ -981,6 +982,7 @@ public class PublisherCommonUtils {
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
+        apiToAdd.setOrganization(organization);
         return apiToAdd;
     }
 
@@ -991,7 +993,7 @@ public class PublisherCommonUtils {
                 ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
             return updateSwagger(apiId, response, true, organization);
         } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
-            return updateAsyncAPIDefinition(apiId, response);
+            return updateAsyncAPIDefinition(apiId, response, organization);
         }
         return null;
     }
@@ -1005,13 +1007,13 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred updating AsyncAPI definition
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
-            throws APIManagementException, FaultGatewaysException {
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+            String organization) throws APIManagementException, FaultGatewaysException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fall if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
+        existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
@@ -1058,8 +1060,7 @@ public class PublisherCommonUtils {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
-            List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition,
-                    existingAPI.getId());
+            List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
             existingAPI.setSoapToRestSequences(sequenceList);
         }
         Set<URITemplate> uriTemplates = null;
@@ -1094,6 +1095,7 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        existingAPI.setOrganization(organization);
         PublisherCommonUtils.validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
@@ -1405,6 +1407,7 @@ public class PublisherCommonUtils {
         APIProductIdentifier productIdentifier = originalAPIProduct.getId();
         product.setID(productIdentifier);
         product.setUuid(originalAPIProduct.getUuid());
+        product.setOrganization(orgId);
 
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
         apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
@@ -1423,11 +1426,10 @@ public class PublisherCommonUtils {
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
-    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username)
-            throws APIManagementException, FaultGatewaysException {
+    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username,
+            String organization) throws APIManagementException, FaultGatewaysException {
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         // if not add product
         String provider = apiProductDTO.getProvider();
@@ -1489,13 +1491,14 @@ public class PublisherCommonUtils {
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
+        productToBeAdded.setOrganization(organization);
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct,
-                tenantDomain);
+                organization);
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
@@ -1544,7 +1547,7 @@ public class PublisherCommonUtils {
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
                                                                      APIProvider apiProvider, String tenantDomain)
             throws APIManagementException, FaultGatewaysException {
-        List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
+        List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
         updatedAPI.setSoapToRestSequences(list);
         return apiProvider.updateAPI(updatedAPI, api);

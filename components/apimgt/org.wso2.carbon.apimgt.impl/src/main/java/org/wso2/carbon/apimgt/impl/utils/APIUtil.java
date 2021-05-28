@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
@@ -500,8 +501,8 @@ public final class APIUtil {
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getOrganization());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance()
+                    .getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
 
             for (URITemplate uriTemplate : uriTemplates) {
                 List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
@@ -748,9 +749,8 @@ public final class APIUtil {
 
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getUuid(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
-                    api.getOrganization());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance()
+                    .getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
 
             // AWS Lambda: get paths
             OASParserUtil oasParserUtil = new OASParserUtil();
@@ -5058,6 +5058,26 @@ public final class APIUtil {
                 .isTenantActive(tenantId);
     }
 
+    public static OrganizationResolver getOrganizationResolver() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String className = config.getFirstProperty(APIConstants.ORG_RESOLVER);
+        if (StringUtils.isEmpty(className)) {
+            className = APIConstants.DEFAULT_ORG_RESOLVER;
+        }
+        OrganizationResolver resolver;
+        try {
+            resolver = (OrganizationResolver) Class.forName(className).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new APIManagementException("Error while resolving the organization resolver", e);
+        }
+        return resolver;
+    }
+    
+    public static int getInternalOrganizationId(String organization) throws APIManagementException {
+        return getOrganizationResolver().getInternalId(organization);
+    }
     /**
      * Retrieves the role list of system
      *
@@ -5312,11 +5332,30 @@ public final class APIUtil {
         }
 
         try {
-            return realmService.getTenantManager().getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
+            return getInternalOrganizationId(tenantDomain);
+        } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
         }
 
+        return -1;
+    }
+
+    /**
+     * Helper method to get tenantId from organization
+     *
+     * @param organization Organization
+     * @return tenantId
+     */
+    public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        if (realmService == null || organization == null) {
+            return MultitenantConstants.SUPER_TENANT_ID;
+        }
+        try {
+            return getInternalOrganizationId(organization);
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
+        }
         return -1;
     }
 
@@ -10629,14 +10668,14 @@ public final class APIUtil {
     /**
      * This method is used to get the categories in a given tenant space
      *
-     * @param tenantDomain tenant domain name
+     * @param organization organization name
      * @return categories in a given tenant space
      * @throws APIManagementException if failed to fetch categories
      */
-    public static List<APICategory> getAllAPICategoriesOfTenant(String tenantDomain) throws APIManagementException {
+    public static List<APICategory> getAllAPICategoriesOfTenant(String organization) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = getInternalIdFromTenantDomainOrOrganization(organization);
         return apiMgtDAO.getAllCategories(tenantId);
     }
 
@@ -11284,11 +11323,11 @@ public final class APIUtil {
      * Get scopes attached to the API.
      *
      * @param id   API uuid
-     * @param tenantDomain Tenant Domain
+     * @param organization Organization
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scope attached to API
      */
-    public static Map<String, Scope> getAPIScopes(String id, String tenantDomain)
+    public static Map<String, Scope> getAPIScopes(String id, String organization)
             throws APIManagementException {
         String currentApiUuid;
         APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(id);
@@ -11298,31 +11337,31 @@ public final class APIUtil {
             currentApiUuid = id;
         }
         Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(currentApiUuid);
-        return getScopes(scopeKeys, tenantDomain);
+        return getScopes(scopeKeys, organization);
     }
 
     /**
      * Get scopes for the given scope keys from authorization server.
      *
      * @param scopeKeys    Scope Keys
-     * @param tenantDomain Tenant Domain
+     * @param organization organization
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scopes using scope keys
      */
-    public static Map<String, Scope> getScopes(Set<String> scopeKeys, String tenantDomain)
+    public static Map<String, Scope> getScopes(Set<String> scopeKeys, String organization)
             throws APIManagementException {
 
         Map<String, Scope> scopeToKeyMap = new HashMap<>();
         for (String scopeKey : scopeKeys) {
-            Scope scope = getScopeByName(scopeKey, tenantDomain);
+            Scope scope = getScopeByName(scopeKey, organization);
             scopeToKeyMap.put(scopeKey, scope);
         }
         return scopeToKeyMap;
     }
 
-    public static Scope getScopeByName(String scopeKey, String tenantDomain) throws APIManagementException {
+    public static Scope getScopeByName(String scopeKey, String organization) throws APIManagementException {
 
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
     }
 
@@ -11683,19 +11722,21 @@ public final class APIUtil {
      * @return String uuid string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String getUUIDFromIdentifier(APIIdentifier identifier, String organizationId) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifierMatchingOrganization(identifier, organizationId);
+    public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException{
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
     }
 
     /**
      * Get UUID by the API Identifier.
      *
      * @param identifier
+     * @param organization
      * @return String uuid string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException{
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, null);
+    public static String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization, null);
     }
 
     /**

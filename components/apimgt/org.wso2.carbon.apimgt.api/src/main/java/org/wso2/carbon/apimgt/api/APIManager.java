@@ -66,21 +66,12 @@ public interface APIManager {
 
     /**
      * Returns details of an API
-     *
-     * @param apiPath APIIdentifier
-     * @return An API object related to the given identifier or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPI(String apiPath) throws APIManagementException;
-
-    /**
-     * Returns details of an API
      * @param uuid   UUID of the API's registry artifact
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
+    API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
 
     /**
@@ -97,21 +88,21 @@ public interface APIManager {
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid   Registry artifact id
-     * @param orgId  Identifier of an organization
+     * @param organization  Organization
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
-    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId) throws APIManagementException;
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException;
 
     /**
      * Get minimal details of API by registry artifact id
      *
-     * @param uuid Registry artifact id
-     * @param orgId  Identifier of an organization
+     * @param uuid          Registry artifact id
+     * @param organization  Identifier of an organization
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException;
 
     /**
      * Get minimal details of API by API identifier
@@ -123,31 +114,24 @@ public interface APIManager {
     API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
-     * Returns details of an API
-     *
-     * @param identifier APIIdentifier
-     * @return An API object related to the given identifier or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPI(APIIdentifier identifier) throws APIManagementException;
-
-    /**
      * Checks the Availability of given APIIdentifier
      *
      * @param identifier APIIdentifier
+     * @param organization Organization
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API availability
      */
-    boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
+    boolean isAPIAvailable(APIIdentifier identifier, String organization) throws APIManagementException;
 
     /**
      * Checks the Availability of given APIProductIdentifier
      *
      * @param identifier APIProductIdentifier
+     * @param organization API Product organization
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API Product availability
      */
-    boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException;
+    boolean isAPIProductAvailable(APIProductIdentifier identifier, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system
@@ -182,10 +166,11 @@ public interface APIManager {
      *
      * @param providerName name of the provider (common)
      * @param apiName      name of the api
+     * @param organization organization
      * @return Set of version strings (possibly empty)
      * @throws APIManagementException if failed to get version for api
      */
-    Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
+    Set<String> getAPIVersions(String providerName, String apiName, String organization) throws APIManagementException;
 
     String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
@@ -211,12 +196,12 @@ public interface APIManager {
     /**
      * Returns the OpenAPI definition as a string
      *
-     * @param apiId  ID of the API
-     * @param orgId  Identifier of an organization
+     * @param apiId         ID of the API
+     * @param organization  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
+    String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the async-api v2.0 definition as a string
@@ -378,11 +363,12 @@ public interface APIManager {
     /**
      * Returns a set of APIs purchased by the given Subscriber
      *
-     * @param subscriber Subscriber
+     * @param subscriber   Subscriber
+     * @param organization Organization
      * @return Set<API>
      * @throws APIManagementException if failed to get API for subscriber
      */
-    Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
+    Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException;
 
     /**
      * Associates the given icon image with the specified path.
@@ -533,14 +519,13 @@ public interface APIManager {
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      * This will return false if those APIs are different versions of the same API.
      *
-     * @param apiIdentifier API Identifier
+     * @param uuid API uuid
      * @param scopeKey   candidate scope key
-     * @param organizationId Identifier of an organization
+     * @param organization   organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, String organizationId)
-            throws APIManagementException;
+    boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, String organization) throws APIManagementException;
 
     /**
      * Check if a given context template already exists
@@ -912,16 +897,6 @@ public interface APIManager {
      */
     String addProductResourceFile(APIProductIdentifier identifier, String resourcePath, ResourceFile resourceFile)
             throws APIManagementException;
-
-    /**
-     * Get an api product documentation by artifact Id
-     *
-     * @param docId   DocumentID
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
-     * @return Documentation
-     * @throws APIManagementException if failed to get Documentation
-     */
-    Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
 
     /**
      * Get open api definition for the product

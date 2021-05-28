@@ -160,13 +160,13 @@ public interface APIProvider extends APIManager {
     /**
      * Returns usage details of a particular published by a provider
      *
-     * @param apiId API identifier
+     * @param uuid API uuid
      * @param organization
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
-    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organization) throws APIManagementException;
+    List<SubscribedAPI> getAPIUsageByAPIId(String uuid, String organization) throws APIManagementException;
 
     /**
      * Returns usage details of a particular api product published by a provider
@@ -250,11 +250,11 @@ public interface APIProvider extends APIManager {
     /**
      * Get the context of API identified by the given APIIdentifier
      *
-     * @param apiId api identifier
+     * @param uuid api uuid
      * @return apiContext
      * @throws APIManagementException if failed to fetch the context for apiID
      */
-    String getAPIContext(APIIdentifier apiId) throws APIManagementException;
+    String getAPIContext(String uuid) throws APIManagementException;
 
 
     /**
@@ -381,18 +381,6 @@ public interface APIProvider extends APIManager {
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
-
-    /**
-     * Updates manage of an existing API. This method must not be used to change API status. Implementations
-     * should throw an exceptions when such attempts are made. All life cycle state changes
-     * should be carried out using the changeAPIStatus method of this interface.
-     *
-     * @param api API
-     * @return failed environments during gateway operation
-     * @throws APIManagementException failed environments during gateway operation
-     */
-    void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
-
     /**
      * Update the WSDL of an API from a ResourceFile set to the API object
      *
@@ -422,26 +410,15 @@ public interface APIProvider extends APIManager {
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param api        The API to be copied
-     * @param newVersion The version of the new API
-     * @throws DuplicateAPIException  If the API trying to be created already exists
-     * @throws APIManagementException If an error occurs while trying to create
-     *                                the new version of the API
-     */
-    void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException;
-
-    /**
-     * Create a new version of the <code>api</code>, with version <code>newVersion</code>
-     *
      * @param apiId          The id of the API to be copied
      * @param newVersion     The version of the new API
      * @param defaultVersion whether this version is default or not
-     * @param orgId          Identifier of an organization
+     * @param organization          Identifier of an organization
      * @return api created api
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String organization)
             throws APIManagementException;
 
     /**
@@ -481,14 +458,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to remove documentation
      */
     void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException;
-    /**
-     * Adds Documentation to an API/Product
-     *
-     * @param id                  API/Product Identifier
-     * @param documentation       Documentation
-     * @throws APIManagementException if failed to add documentation
-     */
-    void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
 
     /**
      * Adds Documentation to an API/Product
@@ -513,19 +482,6 @@ public interface APIProvider extends APIManager {
      */
     void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException;
-
-    /**
-     * Add a file to a document of source type FILE
-     *
-     * @param apiId API identifier the document belongs to
-     * @param documentation document
-     * @param filename name of the file
-     * @param content content of the file as an Input Stream
-     * @param contentType content type of the file
-     * @throws APIManagementException if failed to add the file
-     */
-    void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename, InputStream content,
-                                String contentType) throws APIManagementException;
 
     /**
      * Checks if a given API exists in the registry
@@ -569,10 +525,11 @@ public interface APIProvider extends APIManager {
      * Returns the details of all the life-cycle changes done per API.
      *
      * @param apiId     id of the APIIdentifier
+     * @param organization Organization
      * @return List of life-cycle events per given API
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException;
 
     /**
      * Search API
@@ -588,12 +545,14 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId API Identifier
      * @param subStatus Subscription Status
-     * @param appId Application Id              *
+     * @param appId Application Id
+     * @param organization organization
      * @return int value with subscription id
      * @throws APIManagementException
      *          If failed to update subscription status
      */
-    void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException;
+    void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
+            throws APIManagementException;
 
 
     /**
@@ -810,10 +769,11 @@ public interface APIProvider extends APIManager {
      * Returns all the Consumer keys of applications which are subscribed to given API
      *
      * @param apiIdentifier APIIdentifier
+     * @param organization Organization
      * @return a String array of ConsumerKeys
      * @throws APIManagementException
      */
-    String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
+    String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException;
 
 
     /**
@@ -944,9 +904,10 @@ public interface APIProvider extends APIManager {
      *
      * @param  apiIdentifier apiIdentifier
      * @param  action  Action which need to execute from registry lifecycle
+     * @param organization organization
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-    APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action, String organizationId)
+    APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action, String organization)
             throws APIManagementException, FaultGatewaysException;
 
     /**
@@ -1003,53 +964,6 @@ public interface APIProvider extends APIManager {
      */
     Map<String, Object> getAPILifeCycleData(String apiId, String orgId) throws APIManagementException;
 
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     * @param identifier Api identifier
-     * @param newStatus new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
-            throws APIManagementException;
-
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     * @param identifier Api identifier
-     * @param newStatus new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
-            throws APIManagementException;
-
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     * @param identifier
-     * @param newStatus
-     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
-     * accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
-     */
-    boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
-                                    Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     * @param identifier
-     * @param newStatus
-     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
-     * accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
-     */
-    boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
-                                    Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
 
     /**
      * Get the current lifecycle status of the api
@@ -1210,6 +1124,7 @@ public interface APIProvider extends APIManager {
      * @param apiIdentifier : Relevant API identifier which the certificate is added against.
      * @param certificate   : Relevant public certificate.
      * @param alias         : Alias of the certificate.
+     * @param organization  : Organization
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
      * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
@@ -1217,7 +1132,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
-                             String tierName) throws APIManagementException;
+                             String tierName, String organization) throws APIManagementException;
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
@@ -1276,11 +1191,12 @@ public interface APIProvider extends APIManager {
      * @param tenantId      : ID of the tenant.
      * @param alias         : Alias of the certificate.
      * @param apiIdentifier : Identifier of the API.
+     * @param organization  : Organization
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
     /**
      * Method to search the client certificates for the provided tenant id, alias and api product identifier.
@@ -1288,11 +1204,12 @@ public interface APIProvider extends APIManager {
      * @param tenantId      : ID of the tenant.
      * @param alias         : Alias of the certificate.
      * @param apiProductIdentifier : Identifier of the API Product.
+     * @param organization  : Organization
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIProductIdentifier apiProductIdentifier)
-            throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+            APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException;
 
     /**
      * Retrieve the total number of certificates which a specified tenant has.
@@ -1326,11 +1243,12 @@ public interface APIProvider extends APIManager {
      *
      * @param tenantId : Id of the tenant.
      * @param alias    : Relevant alias.
+     * @param organization : organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException;
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, String organization) throws APIManagementException;
 
     /**
      * Method to check whether a client certificate for the given alias is present in trust store and whether it can
@@ -1339,12 +1257,13 @@ public interface APIProvider extends APIManager {
      * @param tenantId : Id of the tenant.
      * @param alias    : Relevant alias.
      * @param apiIdentifier : The identifier of the api.
+     * @param organization : Organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
 
     /**
@@ -1375,6 +1294,7 @@ public interface APIProvider extends APIManager {
      * @param APIIdentifier : API Identifier of the certificate.
      * @param tier          : tier name.
      * @param tenantId      : Id of tenant.
+     * @param organization  : organization
      * @return : 1 : If client certificate update is successful,
      * 2 : If update failed due to internal error,
      * 4 : If provided certificate is empty,
@@ -1382,7 +1302,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int updateClientCertificate(String certificate, String alias, APIIdentifier APIIdentifier, String tier,
-                                int tenantId) throws APIManagementException;
+                                int tenantId, String organization) throws APIManagementException;
 
     /**
      * Retrieve the certificate which matches the given alias.
@@ -1423,9 +1343,11 @@ public interface APIProvider extends APIManager {
      *
      * @param identifier APIProductIdentifier
      * @param apiProductUUID
+     * @param organization
      * @throws APIManagementException if failed to remove the API Product
      */
-    void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException;
+    void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID, String organization)
+            throws APIManagementException;
 
     /**
      * Update API Product
@@ -1496,18 +1418,6 @@ public interface APIProvider extends APIManager {
     JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException;
 
     /**
-     * Find the resources that should be removed from API Products,
-     * because those have been already removed from the swagger definition of the updating API.
-     *
-     * @param apiId         API Identifier
-     * @param apiDefinition swagger definition
-     * @return  List of resources to be removed that are reused among API Products
-     * @throws APIManagementException when error updating resources
-     */
-    List<APIResource> getResourcesToBeRemovedFromAPIProducts(APIIdentifier apiId, String apiDefinition)
-            throws APIManagementException;
-
-    /**
      * Finds resources that have been removed in the updated API URITemplates,
      * that are currently reused by API Products.
      *
@@ -1521,11 +1431,11 @@ public interface APIProvider extends APIManager {
      * Check whether the given scope name exists as a shared scope in the tenant domain.
      *
      * @param scopeName    Shared Scope name
-     * @param tenantDomain Tenant Domain
+     * @param tenantId Tenant Id
      * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
-    boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
+    boolean isSharedScopeNameExists(String scopeName, int tenantId) throws APIManagementException;
 
     /**
      * Add a shared scope.
@@ -1603,11 +1513,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Retrieve list of resources of the provided api that are used in other API products
-     * @param apiId ID of the API
+     * @param uuid UUID of the API
      * @return APIResource list of resources
      * @throws APIManagementException
      */
-    List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException ;
+    List<APIResource> getUsedProductResources(String uuid) throws APIManagementException ;
 
     /**
      * Delete API
@@ -1774,10 +1684,10 @@ public interface APIProvider extends APIManager {
     /**
      * Adds a new APIRevisionDeployment to an existing API
      *
-     * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
-     * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization
+     * @param apiId                     API UUID
+     * @param apiRevisionId             API Revision UUID
+     * @param apiRevisionDeployments    List of APIRevisionDeployment objects
+     * @param organization              Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
@@ -1865,9 +1775,10 @@ public interface APIProvider extends APIManager {
     * Adds a new APIRevision to an existing API Product
      *
      * @param apiRevision APIRevision
+     * @param organization Organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    String addAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+    String addAPIProductRevision(APIRevision apiRevision, String organization) throws APIManagementException;
 
     /**
      * Adds a new APIRevisionDeployment to an existing API Product

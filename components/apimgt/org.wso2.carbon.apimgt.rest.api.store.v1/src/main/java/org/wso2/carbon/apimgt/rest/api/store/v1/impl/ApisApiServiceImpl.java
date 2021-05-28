@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -141,9 +140,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response apisApiIdGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch,
-                                 MessageContext messageContext) {
-        return Response.ok().entity(getAPIByAPIId(apiId, organizationId, xWSO2Tenant)).build();
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
     }
 
     /**
@@ -158,8 +157,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                           MessageContext messageContext) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiId);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -190,8 +189,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organizationId);
-            API api = apiConsumer.getAPIbyUUID(apiId, organizationId);
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -219,12 +219,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
 
     @Override
-    public Response apisApiIdGraphqlSchemaGet(String apiId, String organizationId,  String ifNoneMatch,
-                                              String xWSO2Tenant, MessageContext messageContext) {
-
+    public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String graphQLSchema = apiConsumer.getGraphqlSchemaDefinition(apiId, organizationId);
+            // keep this line to check the existence of the api
+            apiConsumer.getLightweightAPIByUUID(apiId, organization);
+            String graphQLSchema = apiConsumer.getGraphqlSchemaDefinition(apiId, organization);
             return Response.ok().entity(graphQLSchema).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -243,10 +244,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String organizationId,
                                     String replyTo, MessageContext messageContext) throws APIManagementException{
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -275,11 +276,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAllCommentsOfAPI(String apiId, String organizationId, String xWSO2Tenant, Integer limit, Integer offset,
-                                        Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException {
+    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
+                                        Boolean includeCommenterInfo, MessageContext messageContext)
+            throws APIManagementException {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationId);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String parentCommentID = null;
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
@@ -303,13 +306,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getCommentOfAPI(String commentId, String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, Integer limit, Integer offset,
-                                    MessageContext messageContext) throws APIManagementException{
+    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
+                                    Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
+                                    MessageContext messageContext) throws APIManagementException {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationId);
-            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, limit, offset);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
                 CommentDTO commentDTO;
@@ -429,10 +433,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteComment(String commentId, String apiId, String organizationId, String ifMatch, MessageContext messageContext)
             throws APIManagementException {
 
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationId);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -468,12 +473,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String organizationId,
-                                                           String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-
+    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
+            String ifNoneMatch, MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId, organizationId);
+
+            DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId, organization);
             if (docContent == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
@@ -516,14 +522,16 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String organizationId,
                                                     String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organizationId)) {
+
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
-            documentation = apiConsumer.getDocumentation(apiId, documentId, organizationId);
+            documentation = apiConsumer.getDocumentation(apiId, documentId, organization);
             if (null != documentation) {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
@@ -547,17 +555,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
             //this will fail if user doesn't have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
 
             //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, organizationId);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, organization);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 
@@ -573,7 +580,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
-        }
+        } /*catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }*/
         return null;
     }
 
@@ -584,10 +594,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            apiConsumer.checkAPIVisibility(id, organization);
             float avgRating = apiConsumer.getAverageAPIRating(id);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
@@ -630,19 +641,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdSdksLanguageGet(String apiId, String language, String organizationId, String xWSO2Tenant,
                                              MessageContext messageContext) {
 
-        try {
-            if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
-                String message = "Error generating the SDK. API id or language should not be empty";
-                RestApiUtil.handleBadRequest(message, log);
-            }
-            APIDTO api = getAPIByAPIId(apiId, organizationId, xWSO2Tenant);
-            String swaggerDefinition = api.getApiDefinition();
-            APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
-            Map<String, String> sdkArtifacts;
-            if (api != null) {
-                String apiProvider = api.getProvider();
-                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
-                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername(), swaggerDefinition);
+        if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
+            String message = "Error generating the SDK. API id or language should not be empty";
+            RestApiUtil.handleBadRequest(message, log);
+        }
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        APIDTO api = getAPIByAPIId(apiId, organization);
+        APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
+        Map<String, String> sdkArtifacts;
+        String swaggerDefinition = api.getApiDefinition();
+        if (api != null) {
+            String apiProvider = api.getProvider();
+            try {
+                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
+                        swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
@@ -670,12 +682,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Swagger document of the API for the given cluster or gateway environment
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String organizationId, String environmentName, String ifNoneMatch,
-                                        String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdSwaggerGet(String apiId, String environmentName,
+            String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, organizationId);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (api.getUuid() == null) {
                 api.setUuid(apiId);
             }
@@ -683,7 +696,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (api.getSwaggerDefinition() != null) {
                 api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
             } else {
-                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organizationId));
+                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organization));
             }
 
             // gets the first available environment if environment is not provided
@@ -804,21 +817,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingPut(String id, RatingDTO body, String organizationId, String xWSO2Tenant,
-                                           MessageContext messageContext) {
+    public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
+            MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             int rating = 0;
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, organizationId);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
+            apiConsumer.checkAPIVisibility(id, organization);
 
             if (body != null) {
                 rating = body.getRating();
@@ -876,11 +883,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingGet(String id, String organizationId, String xWSO2Tenant, String ifNoneMatch,
-                                           MessageContext messageContext) {
+    public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            //this will fail if user doesn't have access to the API or the API does not exist
+            apiConsumer.checkAPIVisibility(id, organization);
             JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
@@ -903,20 +913,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingDelete(String apiId, String organizationId, String xWSO2Tenant, String ifMatch,
-                                              MessageContext messageContext) {
-
+    public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch,
+            MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationId);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
+            //this will fail if user doesn't have access to the API or the API does not exist
+            apiConsumer.checkAPIVisibility(apiId, organization);
             apiConsumer.removeAPIRating(apiId, username);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -934,10 +938,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getWSDLOfAPI(String apiId, String organizationId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
-
+    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
+                                 String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, organizationId);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
         APIIdentifier apiIdentifier = api.getId();
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
@@ -959,7 +964,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         environmentName));
             }
             ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
-                    organizationId);
+                    organization);
 
             return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
         } else {
@@ -969,10 +974,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String organizationId, String xWSO2Tenant,
-                                                     String ifNoneMatch, MessageContext messageContext) {
-
-        APIDTO apiInfo = getAPIByAPIId(apiId, organizationId, xWSO2Tenant);
+    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
+                                                     MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        APIDTO apiInfo = getAPIByAPIId(apiId, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
 
@@ -994,13 +999,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByAPIId(String apiId, String organizationId, String tenantDomain) {
+    private APIDTO getAPIByAPIId(String apiId, String organization) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            if (tenantDomain != null) {
-                tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            }
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationId);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
 
             // Extracting clicked API name by the user, for the recommendation system
@@ -1010,7 +1012,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                return APIMappingUtil.fromAPItoDTO(api, organizationId);
+                return APIMappingUtil.fromAPItoDTO(api, organization);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }

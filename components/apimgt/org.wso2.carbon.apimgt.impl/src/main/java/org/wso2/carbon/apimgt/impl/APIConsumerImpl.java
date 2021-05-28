@@ -449,108 +449,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * The method to get APIs to Store view
-     *
-     * @return Set<API>  Set of APIs
-     * @throws APIManagementException
-     */
-    @Override
-    public Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException {
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        try {
-            Registry userRegistry;
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = getTenantId(tenantDomain);
-                userRegistry = getGovernanceUserRegistry(tenantId);
-            } else {
-                userRegistry = registry;
-            }
-            this.isTenantModeStoreView = isTenantMode;
-            this.requestedTenant = tenantDomain;
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return apiSortedSet;
-                }
-
-                Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-                List<API> multiVersionedAPIs = new ArrayList<API>();
-                Comparator<API> versionComparator = new APIVersionComparator();
-                Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-                Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-                for (GenericArtifact artifact : genericArtifacts) {
-                    // adding the API provider can mark the latest API .
-                    String status = APIUtil.getLcStateFromArtifact(artifact);
-
-                    API api = null;
-                    //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-                    if (!displayAPIsWithMultipleStatus) {
-                        // then we are only interested in published APIs here...
-                        if (APIConstants.PUBLISHED.equals(status)) {
-                            api = APIUtil.getAPI(artifact);
-                        }
-                    } else {   // else we are interested in both deprecated/published APIs here...
-                        if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                            api = APIUtil.getAPI(artifact);
-                        }
-                    }
-                    if (api != null) {
-                        try {
-                            checkAccessControlPermission(api.getId());
-                        } catch (APIManagementException e) {
-                            // This is a second level of filter to get apis based on access control and visibility.
-                            // Hence log is set as debug and continued.
-                            if (log.isDebugEnabled()) {
-                                log.debug("User is not authorized to view the api " + api.getId().getApiName(), e);
-                            }
-                            continue;
-                        }
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
-                                    latestPublishedAPIs.put(key, api);
-                                }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else { //If allow showing multiple versions of an API
-                            multiVersionedAPIs.add(api);
-                        }
-                    }
-                }
-                if (!displayMultipleVersions) {
-                    apiSortedSet.addAll(latestPublishedAPIs.values());
-                    return apiSortedSet;
-                } else {
-                    apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                    return apiVersionsSortedSet;
-                }
-            } else {
-                String errorMessage = "Artifact manager is null for tenant domain " + tenantDomain
-                        + " when retrieving APIs for store. User : " + PrivilegedCarbonContext
-                        .getThreadLocalCarbonContext().getUsername();
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all published APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all published APIs", e);
-        }
-        return apiSortedSet;
-    }
-
-    /**
      * The method to get APIs to Store view      *
      *
      * @return Set<API>  Set of APIs
@@ -2646,11 +2544,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getSubscriptionById(subscriptionId);
     }
 
-    public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId) throws APIManagementException {
+    public Set<SubscribedAPI> getSubscribedAPIs(String organization, Subscriber subscriber, String groupingId)
+            throws APIManagementException {
         Set<SubscribedAPI> originalSubscribedAPIs;
         Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
         try {
-            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, groupingId);
+            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
@@ -2665,12 +2564,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    private Set<SubscribedAPI> getLightWeightSubscribedAPIs(Subscriber subscriber, String groupingId) throws
+    private Set<SubscribedAPI> getLightWeightSubscribedAPIs(String organization, Subscriber subscriber, String groupingId) throws
             APIManagementException {
         Set<SubscribedAPI> originalSubscribedAPIs;
         Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
         try {
-            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber, groupingId);
+            originalSubscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, groupingId);
             if (originalSubscribedAPIs != null && !originalSubscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : originalSubscribedAPIs) {
@@ -2721,12 +2620,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
-                                                         int startSubIndex, int endSubIndex, String groupingId)
-            throws APIManagementException {
+                                                         int startSubIndex, int endSubIndex, String groupingId,
+                                                         String organization) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
             subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,
-                    endSubIndex, groupingId);
+                                                                  endSubIndex, groupingId, organization);
             if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
                 Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
                 for (SubscribedAPI subscribedApi : subscribedAPIs) {
@@ -3206,7 +3105,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void removeSubscription(Identifier identifier, String userId, int applicationId, String organizationId)
+    public void removeSubscription(Identifier identifier, String userId, int applicationId, String organization)
             throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
@@ -3222,9 +3121,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         try {
             SubscriptionWorkflowDTO workflowDTO;
-            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
+            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            String workflowExtRef = apiMgtDAO
+                    .getExternalWorkflowReferenceForSubscription(identifier, applicationId, organization);
 
             // in a normal flow workflowExtRef is null when workflows are not enabled
             if (workflowExtRef == null) {
@@ -3245,15 +3147,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (apiIdentifier != null) {
                 //The API is retrieved without visibility permission check, since the subscribers should be allowed
                 //to delete already existing subscriptions made for restricted APIs
-                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiIdentifier.getUUID(),
-                        organizationId);
+                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiIdentifier.getUUID(), organization);
                 api = wrapper.getApi();
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
                 //The API Product is retrieved without visibility permission check, since the subscribers should be
                 // allowe to delete already existing subscriptions made for restricted API Products
-                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiProdIdentifier.getUUID(),
-                        organizationId);
+                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiProdIdentifier.getUUID(), organization);
                 product = wrapper.getApiProduct();
                 context = product.getContext();
             }
@@ -3352,32 +3252,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
-                                   String organizationId) throws
-            APIManagementException {
+                                            String organization) throws APIManagementException {
         //check application is viewable to logged user
         boolean isValid = validateApplication(userId, applicationId, groupId);
         if (!isValid) {
             log.error("Application " + applicationId + " is not accessible to user " + userId);
             throw new APIManagementException("Application is not accessible to user " + userId);
         }
-        removeSubscription(identifier, userId, applicationId, organizationId);
+        removeSubscription(identifier, userId, applicationId, organization);
     }
 
     /**
      * Removes a subscription specified by SubscribedAPI object
      *
      * @param subscription SubscribedAPI object
+     * @param organization Organization
      * @throws APIManagementException
      */
     @Override
-    public void removeSubscription(SubscribedAPI subscription, String organizationId) throws APIManagementException {
+    public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
         String uuid = subscription.getUUID();
         if (subscription != null) {
             Application application = subscription.getApplication();
             Identifier identifier = subscription.getApiId() != null ? subscription.getApiId()
                     : subscription.getProductId();
             String userId = application.getSubscriber().getName();
-            removeSubscription(identifier, userId, application.getId(), organizationId);
+            removeSubscription(identifier, userId, application.getId(), organization);
             if (log.isDebugEnabled()) {
                 String appName = application.getName();
                 String logMessage = "Identifier:  " + identifier.toString() + " subscription (uuid : " + uuid
@@ -4399,10 +4299,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId)
-            throws APIManagementException {
+    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId,
+                                                       String organization) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
-        Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, groupingId);
+        Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
             if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
@@ -5070,32 +4970,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
+    public ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException {
         WSDLValidationResponse validationResponse;
-        ResourceFile resourceFile = getWSDL(apiIdentifier);
-        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
-            validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
-        } else {
-            validationResponse = APIMWSDLReader.validateWSDLFile(resourceFile.getContent());
-        }
-        if (validationResponse.isValid()) {
-            API api = getAPI(apiIdentifier);
-            WSDLProcessor wsdlProcessor = validationResponse.getWsdlProcessor();
-            wsdlProcessor.updateEndpoints(api, environmentName, environmentType);
-            InputStream wsdlDataStream = wsdlProcessor.getWSDL();
-            return new ResourceFile(wsdlDataStream, resourceFile.getContentType());
-        } else {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CORRUPTED_STORED_WSDL,
-                    apiIdentifier.toString()));
-        }
-    }
-
-    @Override
-    public ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
-            throws APIManagementException {
-        WSDLValidationResponse validationResponse;
-        ResourceFile resourceFile = getWSDL(api.getUuid(), tenantDomain);
+        ResourceFile resourceFile = getWSDL(api.getUuid(), organization);
         if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
             validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
         } else {
@@ -5113,10 +4991,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier,
-                                                                  String groupingId) throws APIManagementException {
+    public Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(String organization, Subscriber subscriber,
+                            APIIdentifier apiIdentifier, String groupingId) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<SubscribedAPI>();
-        Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(subscriber, groupingId);
+        Set<SubscribedAPI> subscribedAPIs = getLightWeightSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
             if (api.getApiId().equals(apiIdentifier)) {
                 subscribedAPISet.add(api);
@@ -5133,66 +5011,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant)
             throws APIManagementException {
         return getApplicationKeys(applicationId, xWso2Tenant);
-    }
-
-
-    /**
-     * To check authorization of the API against current logged in user. If the user is not authorized an exception
-     * will be thrown.
-     *
-     * @param identifier API identifier
-     * @throws APIManagementException APIManagementException
-     */
-    protected void checkAccessControlPermission(Identifier identifier) throws APIManagementException {
-        try {
-            if (identifier == null || !isAccessControlRestrictionEnabled) {
-                if (!isAccessControlRestrictionEnabled && log.isDebugEnabled() && identifier != null) {
-                    log.debug("Publisher access control restriction is not enabled. Hence the API/Product " +
-                            identifier.getName() + " should not be checked for further permission. Registry permission " +
-                            "check is sufficient");
-                }
-                return;
-            }
-            String uuid = identifier.getUUID();
-            String orgId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(uuid);
-            Organization org = new Organization(orgId);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
-            if (APIConstants.NO_ACCESS_CONTROL.equals(devPortalApi.getAccessControl())) {
-                if (log.isDebugEnabled()) {
-                    log.debug(identifier + " does not have any access control restriction");
-                }
-                return;
-            }
-            String visibleRoles = devPortalApi.getVisibleRoles();
-            String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            if (visibleRoles != null) {
-                String[] storeVisibilityRoleList = visibleRoles.split(",");
-                if (log.isDebugEnabled()) {
-                    log.debug(identifier + " has restricted access to users with the roles : " + Arrays
-                            .toString(storeVisibilityRoleList));
-                }
-                String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
-                if (log.isDebugEnabled()) {
-                    log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
-                }
-                for (String role : storeVisibilityRoleList) {
-                    role = role.trim();
-                    if (role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST) || APIUtil
-                            .compareRoleList(userRoleList, role)) {
-                        return;
-                    }
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug(identifier + " " + identifier + " cannot be accessed by user '" + username + "'. It "
-                            + "has a store visibility  restriction");
-                }
-                throw new APIMgtAuthorizationFailedException(
-                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the " + identifier);
-            }
-        } catch (APIPersistenceException e) {
-            String msg = "Failed to get API";
-            throw new APIManagementException(msg, e);
-        }
     }
 
     /**
@@ -5374,8 +5192,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
+    public String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, organization);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 
@@ -5779,11 +5597,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organizationId)
-            throws APIManagementException {
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         try {
-            Organization org = new Organization(organizationId);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org,
+            Organization org = new Organization(organization);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
                     uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
@@ -5792,15 +5609,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, APIConstants.SUPER_TENANT_DOMAIN, org, apiProduct);
+                    populateAPIProductInformation(uuid, organization, apiProduct);
                     populateAPIStatus(apiProduct);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, APIConstants.SUPER_TENANT_DOMAIN, org, api);
+                    populateAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     api = addTiersToAPI(api, APIConstants.SUPER_TENANT_DOMAIN);
                     populateAPIStatus(api);
+                    api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -5858,14 +5676,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
-    private API addTiersToAPI(API api, String requestedTenantDomain) throws APIManagementException {
-        int tenantId = 0;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(requestedTenantDomain);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Error when getting tiers");
-        }
+    private API addTiersToAPI(API api, String organization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
 
@@ -5891,9 +5703,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public API getLightweightAPIByUUID(String uuid, String organizationId) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String organization) throws APIManagementException {
         try {
-            Organization org = new Organization(organizationId);
+            Organization org = new Organization(organization);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
@@ -5925,28 +5737,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Used to retrieve API/API Products without performing the visibility permission checks
      * @param uuid
-     * @param requestedTenantDomain
+     * @param organization
      * @return
      * @throws APIManagementException
      */
-    private ApiTypeWrapper getAPIorAPIProductByUUIDWithoutPermissionCheck(String uuid, String requestedTenantDomain)
+    private ApiTypeWrapper getAPIorAPIProductByUUIDWithoutPermissionCheck(String uuid, String organization)
             throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organization);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(), devPortalApi.getApiName(),
                             devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
+                    populateAPIProductInformation(uuid, organization, apiProduct);
 
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
-                    api = addTiersToAPI(api, requestedTenantDomain);
+                    api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -5975,7 +5787,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
             } else {
-                uuid = apiMgtDAO.getUUIDFromIdentifierMatchingOrganization(identifier, organizationId);
+                uuid = apiMgtDAO.getUUIDFromIdentifier(identifier.getProviderName(), identifier.getApiName(),
+                        identifier.getVersion(), orgId);
             }
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
@@ -6072,6 +5885,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while accessing dev portal API", e);
         }
+    }
+
+    @Override
+    public void checkAPIVisibility(String uuid, String organization) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organization);
     }
 
     @Override
