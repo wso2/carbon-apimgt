@@ -2768,8 +2768,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         API existingAPI = getAPIbyUUID(existingApiId, organization);
         existingAPI.setOrganization(organization);
 
-        API existingAPI = getAPIbyUUID(existingApiId, organizationId);
-        existingAPI.setOrganization(organizationId);
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
                     ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, existingApiId));
@@ -2942,7 +2940,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (id.getUUID() == null) {
             uuid = id.getUUID();
         } else {
-            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion(), orgId);
+            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion(), organizationId);
         }
         removeDocumentation(uuid, docId, organizationId);
     }

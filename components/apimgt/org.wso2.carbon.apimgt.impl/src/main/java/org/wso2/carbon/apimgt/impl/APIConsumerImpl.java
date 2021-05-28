@@ -1735,19 +1735,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<APICategory> getAllCategories(String organizationId) throws APIManagementException {
-        Organization org = new Organization(organizationId);
-        List<APICategory> categoriesList;
-        try {
-            categoriesList = apiPersistenceInstance.getAllCategories(org);
-        } catch (APIPersistenceException e) {
-            String msg = "Failed to get API categories";
-            throw new APIManagementException(msg, e);
-        }
-        return categoriesList;
-    }
-
-    @Override
     public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
         // Fetch the all the tags first.
         Set<Tag> tags = getAllTags(tenantDomain);
@@ -5788,7 +5775,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 uuid = identifier.getUUID();
             } else {
                 uuid = apiMgtDAO.getUUIDFromIdentifier(identifier.getProviderName(), identifier.getApiName(),
-                        identifier.getVersion(), orgId);
+                        identifier.getVersion(), organizationId);
             }
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {

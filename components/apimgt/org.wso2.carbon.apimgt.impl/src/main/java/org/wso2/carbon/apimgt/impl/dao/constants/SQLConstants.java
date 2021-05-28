@@ -1637,6 +1637,8 @@ public class SQLConstants {
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? " +
             "   AND ORGANIZATION = ? ";
+    
+    public static final String GET_ORGANIZATION_ID_BY_API_ID = "SELECT ORGANIZATION_ID FROM AM_API WHERE API_UUID = ?";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +

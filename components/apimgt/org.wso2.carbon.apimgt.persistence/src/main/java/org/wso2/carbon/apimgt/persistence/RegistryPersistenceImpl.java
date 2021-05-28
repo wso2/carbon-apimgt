@@ -3512,12 +3512,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     
     }
-
-    @Override
-    public List<APICategory> getAllCategories(Organization org) throws APIPersistenceException {
-        return null;
-    }
-
+    
     protected GenericArtifact getAPIArtifact(String apiId, Registry registry)
             throws APIPersistenceException, GovernanceException {
         GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,

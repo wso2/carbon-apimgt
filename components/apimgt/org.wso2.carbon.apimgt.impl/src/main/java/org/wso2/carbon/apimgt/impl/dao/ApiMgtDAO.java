@@ -5464,40 +5464,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param organizationID UUID of the organization
-     * @return All APIs of a given Organization
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     */
-    public List<API> getAPIsOfOrganization(String organizationID) throws APIManagementException {
-        List<API> apis = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_ID)) {
-            boolean initialAutoCommit = connection.getAutoCommit();
-            ResultSet result = null;
-            try {
-                connection.setAutoCommit(false);
-                ps.setString(1, organizationID);
-                result = ps.executeQuery();
-                while (result.next()) {
-                    APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
-                            result.getString("API_NAME"),
-                            result.getString("API_VERSION"));
-                    API api = new API(apiId);
-                    apis.add(api);
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching APIS", e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while fetching APIS", e);
-        }
-        return apis;
-    }
-
-    /**
      * @param apiId UUID of the API
      * @return organization of the API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
@@ -8146,66 +8112,6 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
         }
         return identifier;
-    }
-
-    /**
-     * Get API ID by the API Identifier.
-     *
-     * @param identifier     API Identifier
-     * @param organizationId Identifier of an Organization
-     * @return String ID
-     * @throws APIManagementException if an error occurs
-     */
-    public int getAPIIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
-            throws APIManagementException {
-        int apiId = 0;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                     .GET_API_ID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getApiName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, organizationId);
-            try (ResultSet resultSet = prepStmt.executeQuery()) {
-                while (resultSet.next()) {
-                    apiId = resultSet.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
-                    + identifier.getVersion(), e);
-        }
-        return apiId;
-    }
-
-    /**
-     * Get API UUID by the API Identifier.
-     *
-     * @param identifier     API Identifier
-     * @param organizationId Identifier of an Organization
-     * @return String UUID
-     * @throws APIManagementException if an error occurs
-     */
-    public String getUUIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
-            throws APIManagementException {
-        String uuid = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                     .GET_UUID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getApiName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, organizationId);
-            try (ResultSet resultSet = prepStmt.executeQuery()) {
-                while (resultSet.next()) {
-                    uuid = resultSet.getString(1);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
-                    + identifier.getVersion(), e);
-        }
-        return uuid;
     }
 
     /**

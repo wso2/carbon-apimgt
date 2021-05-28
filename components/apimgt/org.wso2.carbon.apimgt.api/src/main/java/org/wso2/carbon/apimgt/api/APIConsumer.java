@@ -134,15 +134,6 @@ public interface APIConsumer extends APIManager {
      */
     Set<Tag> getAllTags(String organizationId) throws APIManagementException;
 
-
-    /**
-     * Get all categories of published APIs
-     *
-     * @return a list of all categories applied to all APIs published.
-     * @throws APIManagementException if failed to get All the categories
-     */
-    List<APICategory> getAllCategories(String organizationId) throws APIManagementException;
-
     /**
      * Returns all tags with their descriptions.
      * <p>

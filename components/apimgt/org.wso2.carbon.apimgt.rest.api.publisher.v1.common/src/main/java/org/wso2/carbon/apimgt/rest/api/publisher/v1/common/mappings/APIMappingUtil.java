@@ -2754,7 +2754,7 @@ public class APIMappingUtil {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+        api = apiProvider.getAPIbyUUID(apiId, organizationId);
         return api;
     }
 

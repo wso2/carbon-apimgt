@@ -518,11 +518,4 @@ public interface APIPersistence {
      */
     Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
-    /**
-     * Get a list of all the categories of an organization
-     *
-     * @param org   Organization the categories are owned by
-     * @return list of all the API categories of an organization
-     */
-    List<APICategory>getAllCategories(Organization org) throws APIPersistenceException;
 }

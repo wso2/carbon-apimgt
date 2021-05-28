@@ -140,7 +140,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+    public Response apisApiIdGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch,
+            MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
     }
@@ -219,7 +220,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
 
     @Override
-    public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+    public Response apisApiIdGraphqlSchemaGet(String apiId, String organizationId, String ifNoneMatch,
+            String xWSO2Tenant, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -276,9 +278,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
-                                        Boolean includeCommenterInfo, MessageContext messageContext)
-            throws APIManagementException {
+    public Response getAllCommentsOfAPI(String apiId, String organizationId, String xWSO2Tenant, Integer limit,
+            Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -306,9 +307,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
-                                    MessageContext messageContext) throws APIManagementException {
+    public Response getCommentOfAPI(String commentId, String apiId, String organizationId, String xWSO2Tenant,
+            String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
+            MessageContext messageContext) throws APIManagementException {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -474,7 +475,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
-            String ifNoneMatch, MessageContext messageContext) {
+            String organizationId, String ifNoneMatch, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -659,15 +660,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
                         "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
-            } else {
-                String message = "Could not find an API for ID " + apiId;
-                RestApiUtil.handleResourceNotFoundError(message, log);
-                return null;
+            } catch (APIClientGenerationException e) {
+                String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
+                RestApiUtil.handleInternalServerError(message, e, log);
             }
-        } catch (APIClientGenerationException e) {
-            String message = "Error generating client sdk for api: " + apiId + " for language: " + language;
-            RestApiUtil.handleInternalServerError(message, e, log);
         }
+        String message = "Could not find an API for ID " + apiId;
+        RestApiUtil.handleResourceNotFoundError(message, log);
         return null;
     }
 
@@ -682,7 +681,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Swagger document of the API for the given cluster or gateway environment
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String environmentName,
+    public Response apisApiIdSwaggerGet(String apiId, String organizationId, String environmentName,
             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
@@ -817,7 +816,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
+    public Response apisApiIdUserRatingPut(String id, RatingDTO body, String organizationId, String xWSO2Tenant,
             MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
@@ -883,7 +882,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
+    public Response apisApiIdUserRatingGet(String id, String organizationId, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
@@ -913,7 +912,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch,
+    public Response apisApiIdUserRatingDelete(String apiId, String organizationId, String xWSO2Tenant, String ifMatch,
             MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
@@ -938,7 +937,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
+    public Response getWSDLOfAPI(String apiId, String organizationId, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -974,8 +973,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                                     MessageContext messageContext) {
+    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String organizationId, String xWSO2Tenant,
+            String ifNoneMatch, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         APIDTO apiInfo = getAPIByAPIId(apiId, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()

@@ -322,7 +322,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch,
+    public Response getAPI(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
@@ -1221,7 +1221,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIClientCertificateContentByAlias(String apiId, String alias,
+    public Response getAPIClientCertificateContentByAlias(String apiId, String alias, String organizationId,
                                                                MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         String certFileName = alias + ".crt";
@@ -1248,7 +1248,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteAPIClientCertificateByAlias(String alias, String apiId,
+    public Response deleteAPIClientCertificateByAlias(String alias, String apiId, String organizationId,
                                                            MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
@@ -1305,7 +1305,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIClientCertificateByAlias(String alias, String apiId,
+    public Response getAPIClientCertificateByAlias(String alias, String apiId, String organizationId,
                                                         MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
@@ -1537,7 +1537,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Status of API Deletion
      */
     @Override
-    public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) {
+    public Response deleteAPI(String apiId, String organizationId, String ifMatch, MessageContext messageContext) {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
@@ -1673,7 +1673,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document as DTO
      */
     @Override
-    public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch,
+    public Response addAPIDocumentContent(String apiId, String documentId, String organizationId, String ifMatch,
             InputStream inputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) {
         try {
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
@@ -2190,7 +2190,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId,
+    public Response deleteAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String organizationId,
             String ifMatch, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
@@ -4660,8 +4660,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url,
-            InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+    public Response apisApiIdAsyncapiPut(String apiId, String organizationId, String ifMatch, String apiDefinition,
+            String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
             throws APIManagementException {
         try {
             String updatedAsyncAPIDefinition;
