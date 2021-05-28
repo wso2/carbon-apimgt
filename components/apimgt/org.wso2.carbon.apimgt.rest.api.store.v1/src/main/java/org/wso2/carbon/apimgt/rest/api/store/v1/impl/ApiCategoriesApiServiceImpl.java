@@ -46,19 +46,11 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     public Response apiCategoriesGet(String xWSO2Tenant, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
-            if (!APIUtil.isOrganizationTenantAvailable(organization)) {
-                RestApiUtil.handleBadRequest("Tenant for the provided organization '" + organization + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
             List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(organization);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API categories";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant for organization " + organization;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

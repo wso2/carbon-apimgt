@@ -5058,16 +5058,6 @@ public final class APIUtil {
                 .isTenantActive(tenantId);
     }
 
-    public static boolean isOrganizationTenantAvailable(String organization) throws UserStoreException {
-
-        int tenantId = getInternalIdFromTenantDomainOrOrganization(organization);
-        if (tenantId == -1) {
-            return false;
-        }
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .isTenantActive(tenantId);
-    }
-
     public static OrganizationResolver getOrganizationResolver() throws APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
