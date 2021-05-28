@@ -10680,16 +10680,32 @@ public final class APIUtil {
     }
 
     /**
+     * Returns categories of the given organization
+     *
+     * @param organization Organization
+     * @return
+     * @throws APIManagementException
+     */
+    public static List<APICategory> getAllAPICategoriesOfOrganization(String organization)
+            throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        if (organization != null) {
+            return apiMgtDAO.getAllCategories(organization);
+        }
+        return apiMgtDAO.getAllCategories(APIConstants.SUPER_TENANT_DOMAIN);
+    }
+
+    /**
      * Validates the API category names to be attached to an API
      *
      * @param categories
-     * @param tenantDomain
+     * @param organization
      * @return
      */
-    public static boolean validateAPICategories(List<APICategory> categories, String tenantDomain)
+    public static boolean validateAPICategories(List<APICategory> categories, String organization)
             throws APIManagementException {
 
-        List<APICategory> availableCategories = getAllAPICategoriesOfTenant(tenantDomain);
+        List<APICategory> availableCategories = getAllAPICategoriesOfOrganization(organization);
         for (APICategory category : categories) {
             if (!availableCategories.contains(category)) {
                 return false;

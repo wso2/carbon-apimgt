@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -39,9 +40,9 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     private static final Log log = LogFactory.getLog(ApiCategoriesApiServiceImpl.class);
     
     public Response getAllAPICategories(MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
           try {
-              String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-              List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(tenantDomain);
+              List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfOrganization(organization);
               APICategoryListDTO categoryListDTO =
                       APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
               return Response.ok().entity(categoryListDTO).build();
