@@ -8738,6 +8738,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
+            // TODO remove this to organization once the microgateway can build gateway based on organization.
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
         }
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
