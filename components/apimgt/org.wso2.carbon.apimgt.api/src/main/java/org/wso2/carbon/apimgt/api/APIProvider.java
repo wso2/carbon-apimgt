@@ -525,10 +525,11 @@ public interface APIProvider extends APIManager {
      * Returns the details of all the life-cycle changes done per API.
      *
      * @param apiId     id of the APIIdentifier
+     * @param organization Organization
      * @return List of life-cycle events per given API
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException;
 
     /**
      * Search API

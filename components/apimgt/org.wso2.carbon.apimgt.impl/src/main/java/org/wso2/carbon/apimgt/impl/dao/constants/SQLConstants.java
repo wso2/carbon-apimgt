@@ -1387,6 +1387,7 @@ public class SQLConstants {
             "   API.API_PROVIDER = ?" +
             "   AND API.API_NAME = ?" +
             "   AND API.API_VERSION = ?" +
+            "   AND API.ORGANIZATION = ?" +
             "   AND API.API_ID = LC.API_ID";
 
     public static final String GET_SUBSCRIPTION_DATA_SQL =

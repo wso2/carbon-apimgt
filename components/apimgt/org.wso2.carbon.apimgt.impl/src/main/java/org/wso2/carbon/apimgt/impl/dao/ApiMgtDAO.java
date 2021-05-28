@@ -5178,7 +5178,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -5192,6 +5192,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             prepStmt.setString(2, apiId.getApiName());
             prepStmt.setString(3, apiId.getVersion());
+            prepStmt.setString(4, organization);
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {

@@ -2039,6 +2039,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPILifecycleHistory(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIIdentifier apiIdentifier;
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
@@ -2046,7 +2047,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier);
+            List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier, organization);
             LifecycleHistoryDTO historyDTO = APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
             return Response.ok().entity(historyDTO).build();
         } catch (APIManagementException e) {
@@ -3701,8 +3702,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            int tenantId = APIUtil.getTenantId(username);
+            int tenantId = APIUtil.getInternalOrganizationId(organization);
             API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
             if (existingAPI == null) {
                 throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
@@ -4962,7 +4962,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String definitionToAdd = validationResponse.getJsonContent();
             String protocol = validationResponse.getProtocol();
             if (isServiceAPI) {
@@ -4985,7 +4984,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
-            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain));
+            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
