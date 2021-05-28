@@ -1059,11 +1059,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException {
+    public ResourceFile getWSDL(String apiId, String organization) throws APIManagementException {
 
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
-                    apiPersistenceInstance.getWSDL(new Organization(tenantDomain), apiId);
+                    apiPersistenceInstance.getWSDL(new Organization(organization), apiId);
             if (resource != null) {
                 ResourceFile resourceFile = new ResourceFile(resource.getContent(), resource.getContentType());
                 resourceFile.setName(resource.getName());
