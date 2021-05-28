@@ -289,6 +289,44 @@ paths:
             source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
+  /subscriptions:
+
+    #-----------------------------------------------------
+    # Get Subscriptions.
+    #-----------------------------------------------------
+    get:
+      summary: Get Subscriptions stored in in-memory
+      description: |
+        This operation is used to get the Subscriptions from the storage. If the Tenant domain is not provided
+        carbon.super will be picked as the Tenant domain.
+      operationId: getSubscriptions
+      parameters:
+        - $ref: '#/parameters/apiUUID'
+        - $ref: '#/parameters/applicationUUID'
+        - $ref: '#/parameters/tenantDomain'
+      responses:
+        200:
+          description: |
+            OK.
+            Subscriptions successfully Retrieved From the Storage.
+          schema:
+            $ref: '#/definitions/SubscriptionList'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        x-code-samples:
+          - lang: Curl
+            source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/subscriptions?apiUUID=c43a325c-260b-4302-81cb-768eafaa3aed&applicationUUID=c43a325c-260b-4302-81cb-768eafaa3aed&tenantDomain=registry.com"
+            -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -302,6 +340,26 @@ parameters:
     in: query
     description: |
       Name of the API
+    type: string
+    required: true
+
+  # API UUID
+  # Specified as part of the query string
+  apiUUID:
+    name: apiUUID
+    in: query
+    description: |
+      UUID of the API
+    type: string
+    required: true
+
+  # Application UUID
+  # Specified as part of the query string
+  applicationUUID:
+    name: applicationUUID
+    in: query
+    description: |
+      UUID of the Application
     type: string
     required: true
 
@@ -452,6 +510,44 @@ definitions:
         type: string
         description: |
           Description about individual errors occurred
+
+  #-----------------------------------------------------
+  # The Subscription List resource
+  #-----------------------------------------------------
+  SubscriptionList:
+    title: Application List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Subscriptions returned.
+        example: 1
+        default: 0
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Subscription'
+  #-----------------------------------------------------
+  # The Subscription resource
+  #-----------------------------------------------------
+  Subscription:
+    properties:
+      subscriptionUUID:
+        type: string
+      subscriptionId:
+        type: integer
+      policyId:
+        type: string
+      apiUUID:
+        type: string
+      apiId:
+        type: integer
+      applicationUUID:
+        type: string
+      appId:
+        type: integer
+      subscriptionState:
+        type: string
 
 #-----------------------------------------------------
 # END-OF-FILE

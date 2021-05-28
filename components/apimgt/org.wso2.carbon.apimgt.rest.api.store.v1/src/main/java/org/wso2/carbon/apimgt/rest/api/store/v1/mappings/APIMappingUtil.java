@@ -569,30 +569,31 @@ public class APIMappingUtil {
     /**
      * Returns an API with minimal info given the uuid.
      *
-     * @param apiUUID               API uuid
-     * @param organizationId                 Identifier of an Organization
+     * @param apiUUID       API uuid
+     * @param organization  Organization
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String organizationId)
+    public static API getAPIInfoFromUUID(String apiUUID, String organization)
             throws APIManagementException {
+        API api;
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        API api = apiConsumer.getLightweightAPIByUUID(apiUUID, organizationId);
+        api = apiConsumer.getLightweightAPIByUUID(apiUUID, organization);
         return api;
     }
 
     /**
      * Returns the APIIdentifier given the uuid
      *
-     * @param apiId           API uuid
-     * @param organizationId  tenant domain of the API
+     * @param apiId         API uuid
+     * @param organization  Organization
      * @return APIIdentifier which represents the given id
      * @throws APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String organizationId)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String organization)
             throws APIManagementException {
-        return getAPIInfoFromUUID(apiId, organizationId).getId();
+        return getAPIInfoFromUUID(apiId, organization).getId();
     }
 
     /**

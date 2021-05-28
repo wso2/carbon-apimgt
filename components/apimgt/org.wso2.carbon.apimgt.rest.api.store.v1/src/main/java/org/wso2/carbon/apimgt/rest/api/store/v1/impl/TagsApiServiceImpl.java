@@ -49,12 +49,15 @@ public class TagsApiServiceImpl implements TagsApiService {
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION); 
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {
+
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            tagSet = apiConsumer.getAllTags(organizationId);
+            tagSet = apiConsumer.getAllTags(organization);
             if (tagSet != null) {
                 tagList.addAll(tagSet);
             }
@@ -63,7 +66,7 @@ public class TagsApiServiceImpl implements TagsApiService {
             return Response.ok().entity(tagListDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving tags", e, log);
-        }
+        } 
         return null;
     }
 

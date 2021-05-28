@@ -63,8 +63,7 @@ export default function Runtime(props) {
             && value
             && value.length > 0) {
             const { url } = api.endpointConfig.production_endpoints;
-            const seperator = url.substr(url.length - 1, 1) !== '/' ? '/' : '';
-            fqPath = url + seperator + value;
+            fqPath = ((url.substr(-1) === '/') ? url.substr(0, url.length - 1) : url) + value;
         }
         return fqPath ? 'Production URL will be ' + fqPath : '';
     };

@@ -112,13 +112,6 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-
-        return api;
-
-    }
-
-    @Override
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
         //do nothing
     }

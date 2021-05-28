@@ -543,7 +543,7 @@ function Overview() {
                             <a
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                href={api.advertiseInfo.originalStoreUrl}
+                                href={api.advertiseInfo.originalDevPortalUrl}
                                 className={classes.viewInPubStoreLauncher}
                             >
                                 <div>

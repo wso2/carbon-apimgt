@@ -209,7 +209,6 @@ class Utils {
      */
     static getServiceCatalogSwaggerURL() {
         return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
-        // return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
     }
 
     /**

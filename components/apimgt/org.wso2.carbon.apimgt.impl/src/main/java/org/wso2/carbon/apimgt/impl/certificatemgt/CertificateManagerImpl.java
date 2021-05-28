@@ -114,7 +114,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias,
-                                             String tierName, int tenantId) {
+                                             String tierName, int tenantId, String organization) {
 
         ResponseCode responseCode;
         try {
@@ -123,7 +123,8 @@ public class CertificateManagerImpl implements CertificateManager {
                 if (certificateMgtDAO.checkWhetherAliasExist(alias, tenantId)) {
                     responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
                 } else {
-                    certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId);
+                    certificateMgtDAO
+                            .addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId, organization);
                 }
             }
         } catch (CertificateManagementException e) {
@@ -381,11 +382,11 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
-                                                               APIIdentifier apiIdentifier)
+            APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
 
         try {
-            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier);
+            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier, organization);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
                     "Error while retrieving client certificate information for the tenant : " + tenantId, e);
@@ -432,8 +433,8 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId)
-            throws APIManagementException {
+    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
+            String organization) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.SUCCESS;
         if (StringUtils.isNotEmpty(certificate)) {
@@ -441,7 +442,8 @@ public class CertificateManagerImpl implements CertificateManager {
         }
         try {
             if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
-                boolean isSuccess = certificateMgtDAO.updateClientCertificate(certificate, alias, tier, tenantId);
+                boolean isSuccess = certificateMgtDAO
+                        .updateClientCertificate(certificate, alias, tier, tenantId, organization);
                 if (isSuccess) {
                     responseCode = ResponseCode.SUCCESS;
                 } else {

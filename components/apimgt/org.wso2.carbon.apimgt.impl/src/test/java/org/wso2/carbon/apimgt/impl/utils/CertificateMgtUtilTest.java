@@ -43,7 +43,7 @@ public class CertificateMgtUtilTest {
             ("security/client-truststore.jks");
     private static final String ALIAS_NOT_EXIST = "TEST_ALIAS_NOT";
     private static final String ALIAS_EXPIRED = "TEST_ALIAS_EXPIRED";
-    private static final String TRUST_STORE_FIELD = "TRUST_STORE";
+    private static final String TRUST_STORE_FIELD = "trustStoreLocation";
     private static final String INVALID_TRUST_STORE_FILE = "/abc.jks";
     private static final String BASE64_ENCODED_CERT_STRING =
             "MIIDPTCCAiWgAwIBAgIETWBSTzANBgkqhkiG9w0BAQsFADBOMQswCQYDVQQGEwJsazELMAkGA1UECBMCbGsxCz" +

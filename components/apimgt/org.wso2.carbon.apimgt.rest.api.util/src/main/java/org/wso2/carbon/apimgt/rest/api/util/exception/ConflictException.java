@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ConflictException extends WebApplicationException {
@@ -29,13 +30,9 @@ public class ConflictException extends WebApplicationException {
     public ConflictException(ErrorDTO errorDTO){
         super(Response.status(Response.Status.CONFLICT)
                 .entity(errorDTO)
-                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
         message = errorDTO.getDescription();
-    }
-
-    public ConflictException(){
-        super(Response.Status.CONFLICT);
     }
 
     @Override

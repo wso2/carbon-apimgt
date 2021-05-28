@@ -21,20 +21,17 @@
 /* eslint no-unused-expressions: 0 */
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import deburr from 'lodash/deburr';
 import Downshift from 'downshift';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import { FormattedMessage } from 'react-intl';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import suggestions from './RouteMappings';
+import { FormattedMessage, useIntl } from 'react-intl';
+import Backdrop from '@material-ui/core/Backdrop';
+import SearchIcon from '@material-ui/icons/Search';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import GoToSuggestions from 'AppComponents/Apis/Details/GoTo/Components/GoToSuggestions';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,7 +45,8 @@ const useStyles = makeStyles((theme) => ({
     paper: {
         position: 'absolute',
         zIndex: theme.zIndex.goToSearch,
-        marginTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(1),
         left: 0,
         right: 0,
     },
@@ -61,6 +59,7 @@ const useStyles = makeStyles((theme) => ({
     inputInput: {
         width: 'auto',
         flexGrow: 1,
+        fontSize: '20px',
     },
     divider: {
         height: theme.spacing(2),
@@ -77,14 +76,17 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
     },
     downshiftWrapper: {
-        position: 'absolute',
         padding: theme.spacing(1),
-        right: 60,
-        top: 0,
-        width: 300,
         background: theme.palette.background.paper,
-        border: 'solid 1px #ccc',
-        borderRadius: 5,
+        borderRadius: 10,
+        width: '70vw',
+        marginBottom: '20%',
+        boxShadow: '0px 0px 20px 3px rgb(0 0 0 / 56%)',
+    },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+        backdropFilter: 'blur(1px)',
     },
 }));
 
@@ -100,13 +102,20 @@ function renderInput(inputProps) {
 
     return (
         <TextField
+            variant='outlined'
             autoFocus
             InputProps={{
                 inputRef: ref,
+                autoFocus: true,
                 classes: {
                     root: classes.inputRoot,
                     input: classes.inputInput,
                 },
+                startAdornment: (
+                    <InputAdornment position='start'>
+                        <SearchIcon color='disabled' fontSize='large' />
+                    </InputAdornment>
+                ),
                 ...InputProps,
             }}
             {...other}
@@ -123,84 +132,6 @@ renderInput.propTypes = {
 };
 
 /**
- * Method to render the suggestions
- * @param {*} suggestionProps suggestionProps
- * @returns {*} ListItem list of suggestions
- */
-function renderSuggestion(suggestionProps) {
-    const {
-        suggestion, index, itemProps, highlightedIndex, api, isAPIProduct, handleClickAway,
-    } = suggestionProps;
-    const isHighlighted = highlightedIndex === index;
-
-    const route = (isAPIProduct
-        ? (`/api-products/${api.id}/${suggestion.route}`)
-        : (`/apis/${api.id}/${suggestion.route}`));
-    return (
-        <Link
-            to={route}
-            onClick={handleClickAway}
-        >
-            <ListItem
-                key={suggestion.label}
-                {...itemProps}
-                selected={isHighlighted}
-                button
-                aria-haspopup='true'
-                aria-controls='lock-menu'
-                aria-label='when device is locked'
-            >
-                <ListItemText primary={suggestion.label} secondary={suggestion.route} />
-            </ListItem>
-        </Link>
-    );
-}
-
-renderSuggestion.propTypes = {
-    highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
-    index: PropTypes.number.isRequired,
-    itemProps: PropTypes.shape({}).isRequired,
-    selectedItem: PropTypes.string.isRequired,
-    suggestion: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-    }).isRequired,
-};
-
-/**
- * Method to retrieve suggestions
- * @param {*} value Value of suggestion
- * @param {*} isAPIProduct Boolean to check if it is an APIProduct
- * @param {*} param2 showEmpty
- * @returns {*} filter
- */
-function getSuggestions(value, isAPIProduct, isGraphQL, { showEmpty = false } = {}) {
-    const inputValue = deburr(value.trim()).toLowerCase();
-    const inputLength = inputValue.length;
-    let count = 0;
-    const newSuggestions = [...suggestions.common];
-
-    if (isAPIProduct) {
-        newSuggestions.push(...suggestions.productOnly);
-    } else if (isGraphQL) {
-        newSuggestions.push(...suggestions.graphqlOnly);
-    } else {
-        newSuggestions.push(...suggestions.apiOnly);
-    }
-
-    return inputLength === 0 && !showEmpty
-        ? []
-        : newSuggestions.filter((suggestion) => {
-            const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
-
-            if (keep) {
-                count += 1;
-            }
-
-            return keep;
-        });
-}
-
-/**
  * Method to render the GoTo search feature
  * @param {*} props props param
  * @returns {*} Downshift element
@@ -209,6 +140,8 @@ function GoTo(props) {
     const { isAPIProduct, api } = props;
     const classes = useStyles();
     const [showSearch, setShowSearch] = useState(false);
+    const intl = useIntl();
+
     let isGraphQL = false;
 
     if (api.type === 'GRAPHQL') {
@@ -222,16 +155,16 @@ function GoTo(props) {
     };
 
     return (
-        <ClickAwayListener onClickAway={handleClickAway}>
-            <div className={classes.goToWrapper}>
-                <a className={classes.linkButton} onClick={toggleSearch}>
-                    <Icon>find_in_page</Icon>
-                    <Typography variant='caption'>
-                        <FormattedMessage id='Apis.Details.GoTo.GoTo.btn' defaultMessage='Go To' />
-                    </Typography>
-                </a>
-                {showSearch && (
-                    <div className={classes.downshiftWrapper}>
+        <div className={classes.goToWrapper}>
+            <a className={classes.linkButton} onClick={toggleSearch}>
+                <Icon>find_in_page</Icon>
+                <Typography variant='caption'>
+                    <FormattedMessage id='Apis.Details.GoTo.GoTo.btn' defaultMessage='Go To' />
+                </Typography>
+            </a>
+            <Backdrop className={classes.backdrop} open={showSearch} onClick={handleClickAway}>
+                <div onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} className={classes.downshiftWrapper}>
+                    {showSearch && (
                         <Downshift id='downshift-simple'>
                             {({
                                 getInputProps,
@@ -244,7 +177,10 @@ function GoTo(props) {
                                 selectedItem,
                             }) => {
                                 const { onBlur, onFocus, ...inputProps } = getInputProps({
-                                    placeholder: 'Type what you want to do..',
+                                    placeholder: intl.formatMessage({
+                                        id: 'Apis.Details.GoTo.button.placeholder',
+                                        defaultMessage: 'Page Search',
+                                    }),
                                 });
 
                                 return (
@@ -252,7 +188,6 @@ function GoTo(props) {
                                         {renderInput({
                                             fullWidth: true,
                                             classes,
-                                            label: 'Go to menu item',
                                             InputLabelProps: getLabelProps({ shrink: true }),
                                             InputProps: { onBlur, onFocus },
                                             inputProps,
@@ -260,28 +195,26 @@ function GoTo(props) {
 
                                         <div {...getMenuProps()}>
                                             {isOpen ? (
-                                                <Paper className={classes.paper} square>
-                                                    {getSuggestions(inputValue, isAPIProduct, isGraphQL)
-                                                        .map((suggestion, index) => renderSuggestion({
-                                                            suggestion,
-                                                            index,
-                                                            itemProps: getItemProps({ item: suggestion.label }),
-                                                            highlightedIndex,
-                                                            selectedItem,
-                                                            handleClickAway: handleClickAway,
-                                                            ...props,
-                                                        }))}
-                                                </Paper>
+                                                <GoToSuggestions
+                                                    inputValue={inputValue}
+                                                    isAPIProduct={isAPIProduct}
+                                                    isGraphQL={isGraphQL}
+                                                    getItemProps={getItemProps}
+                                                    highlightedIndex={highlightedIndex}
+                                                    selectedItem={selectedItem}
+                                                    handleClickAway={handleClickAway}
+                                                    apiId={api.id}
+                                                />
                                             ) : null}
                                         </div>
                                     </div>
                                 );
                             }}
                         </Downshift>
-                    </div>
-                )}
-            </div>
-        </ClickAwayListener>
+                    )}
+                </div>
+            </Backdrop>
+        </div>
     );
 }
 

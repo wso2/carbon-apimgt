@@ -208,7 +208,7 @@ public class CertificateMgtDaoTest {
     @Test
     public void testUpdateClientCertificateOfNonExistingAlias() throws CertificateManagementException {
         Assert.assertFalse("Update of client certificate for a non existing alias succeeded",
-                certificateMgtDAO.updateClientCertificate(certificate, "test1", "test", TENANT_ID));
+                certificateMgtDAO.updateClientCertificate(certificate, "test1", "test", TENANT_ID, "org1"));
     }
 
     /**
@@ -221,7 +221,7 @@ public class CertificateMgtDaoTest {
         try {
             addClientCertificate();
             Assert.assertTrue("Update of client certificate for an existing alias failed",
-                    certificateMgtDAO.updateClientCertificate(null, "test", "test", TENANT_ID));
+                    certificateMgtDAO.updateClientCertificate(null, "test", "test", TENANT_ID, "org1"));
         } finally {
             deleteClientCertificate();
         }
@@ -274,25 +274,26 @@ public class CertificateMgtDaoTest {
      */
     @Test
     public void testGetClientCertificates() throws CertificateManagementException {
+        String organization = "org1";
         List<ClientCertificateDTO> clientCertificateDTOS = certificateMgtDAO
-                .getClientCertificates(TENANT_ID, null, null);
+                .getClientCertificates(TENANT_ID, null, null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 0,
                 clientCertificateDTOS.size());
         addClientCertificate();
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, null);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", null);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test1", null);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test1", null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 0,
                 clientCertificateDTOS.size());
 
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", apiIdentifier);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", apiIdentifier, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, apiIdentifier);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, apiIdentifier, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
         deleteClientCertificate();
@@ -323,7 +324,7 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean addClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID);
+        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID, "org1");
     }
 
     /**

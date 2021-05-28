@@ -26,44 +26,44 @@ import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
  */
 public class Subscription implements CacheableEntity<String> {
 
-    private String subscriptionUUId;
+    private String subscriptionUUID;
     private String subscriptionId = null;
     private String policyId = null;
     private Integer apiId = null;
-    private String apiUUId;
+    private String apiUUID;
     private Integer appId = null;
-    private String appUUID;
+    private String applicationUUID;
     private String subscriptionState = null;
     private long timeStamp;
 
     public String getSubscriptionUUId() {
 
-        return subscriptionUUId;
+        return subscriptionUUID;
     }
 
     public void setSubscriptionUUId(String subscriptionUUId) {
 
-        this.subscriptionUUId = subscriptionUUId;
+        this.subscriptionUUID = subscriptionUUId;
     }
 
-    public String getApiUUId() {
+    public String getApiUUID() {
 
-        return apiUUId;
+        return apiUUID;
     }
 
-    public void setApiUUId(String apiUUId) {
+    public void setApiUUID(String apiUUID) {
 
-        this.apiUUId = apiUUId;
+        this.apiUUID = apiUUID;
     }
 
-    public String getAppUUID() {
+    public String getApplicationUUID() {
 
-        return appUUID;
+        return applicationUUID;
     }
 
-    public void setAppUUID(String appUUID) {
+    public void setApplicationUUID(String applicationUUID) {
 
-        this.appUUID = appUUID;
+        this.applicationUUID = applicationUUID;
     }
 
     public String getSubscriptionId() {
@@ -136,13 +136,13 @@ public class Subscription implements CacheableEntity<String> {
     public String toString() {
 
         return "Subscription{" +
-                "subscriptionUUId='" + subscriptionUUId + '\'' +
+                "subscriptionUUID='" + subscriptionUUID + '\'' +
                 ", subscriptionId='" + subscriptionId + '\'' +
                 ", policyId='" + policyId + '\'' +
                 ", apiId=" + apiId +
-                ", apiUUId='" + apiUUId + '\'' +
+                ", apiUUId='" + apiUUID + '\'' +
                 ", appId=" + appId +
-                ", appUUID='" + appUUID + '\'' +
+                ", appUUID='" + applicationUUID + '\'' +
                 ", subscriptionState='" + subscriptionState + '\'' +
                 ", timeStamp=" + timeStamp +
                 '}';

@@ -52,7 +52,7 @@ public class CertificateReLoader implements Runnable {
                     localTrustStoreStream = new FileInputStream(trustStoreFile);
                     KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
                     trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
-                    ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+                    ServiceReferenceHolder.getInstance().setListenerTrustStore(trustStore);
                 }
             } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
                 log.error("Unable to find the certificate", e);

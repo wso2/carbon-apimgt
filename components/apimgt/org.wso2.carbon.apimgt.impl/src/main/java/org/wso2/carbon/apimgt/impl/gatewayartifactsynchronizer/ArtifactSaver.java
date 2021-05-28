@@ -41,11 +41,11 @@ public interface ArtifactSaver {
      * @param name
      * @param version
      * @param revision
-     * @param tenantDomain
+     * @param organization
      * @param artifact
      * @throws ArtifactSynchronizerException
      */
-    void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain, File artifact)
+    void saveArtifact(String apiId, String name, String version, String revision, String organization, File artifact)
             throws ArtifactSynchronizerException;
 
 
@@ -54,7 +54,7 @@ public interface ArtifactSaver {
      *
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    void removeArtifact(String apiId, String name, String version, String revision, String tenantDomain)
+    void removeArtifact(String apiId, String name, String version, String revision, String organization)
             throws ArtifactSynchronizerException;
 
     /**

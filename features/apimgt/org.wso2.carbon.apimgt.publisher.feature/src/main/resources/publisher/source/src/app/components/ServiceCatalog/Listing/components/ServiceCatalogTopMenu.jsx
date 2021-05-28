@@ -56,7 +56,7 @@ function ServiceCatalogTopMenu(props) {
                     <Typography variant='h4'>
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Listing.heading'
-                            defaultMessage='Service Catalog'
+                            defaultMessage='Services'
                         />
                     </Typography>
                     {totalServices > 0 && (

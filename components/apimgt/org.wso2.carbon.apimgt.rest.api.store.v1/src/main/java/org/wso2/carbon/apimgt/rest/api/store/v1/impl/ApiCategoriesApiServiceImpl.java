@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -44,11 +44,10 @@ import javax.ws.rs.core.Response;
 public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     private static final Log log = LogFactory.getLog(ApiCategoriesApiServiceImpl.class);
 
-    public Response apiCategoriesGet(String organizationId, MessageContext messageContext) {
+    public Response apiCategoriesGet(String xWSO2Tenant, MessageContext messageContext) {
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            List<APICategory> categoryList = apiConsumer.getAllCategories(organizationId);
+            List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(organization);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {

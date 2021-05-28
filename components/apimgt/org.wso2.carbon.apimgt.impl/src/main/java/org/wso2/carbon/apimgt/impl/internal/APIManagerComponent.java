@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -46,7 +47,6 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -57,7 +57,6 @@ import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
-import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -117,15 +116,19 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.cache.Cache;
 
 @Component(
@@ -291,7 +294,7 @@ public class APIManagerComponent {
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
-
+            retrieveAndSetParentTrustStore();
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -953,6 +956,20 @@ public class APIManagerComponent {
 
     protected void removeGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
         ServiceReferenceHolder.getInstance().removeGatewayArtifactGenerator(gatewayArtifactGenerator);
+    }
+
+    private void retrieveAndSetParentTrustStore() throws APIManagementException {
+
+        char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
+        String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
+        File trustStoreFile = new File(trustStoreLocation);
+        try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(localTrustStoreStream, trustStorePassword);
+            ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error while Reading and set truststore", e);
+        }
     }
 }
 

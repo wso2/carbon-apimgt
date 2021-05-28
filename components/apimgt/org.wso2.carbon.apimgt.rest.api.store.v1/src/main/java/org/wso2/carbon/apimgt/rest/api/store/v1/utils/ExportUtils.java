@@ -95,7 +95,8 @@ public class ExportUtils {
             // Creates a temporary directory to store the exported application artifact
             File exportFolder = createTempApplicationDirectory(appName, appOwner);
             exportApplicationBasePath = exportFolder.toString();
-            archivePath = exportApplicationBasePath.concat(File.separator + appOwner + "-" + appName);
+            archivePath = exportApplicationBasePath
+                    .concat(File.separator + appOwner.replace(File.separator, "#") + "-" + appName);
         } catch (APIImportExportException e) {
             throw new APIManagementException("Unable to create the temporary directory to export the Application", e);
         }

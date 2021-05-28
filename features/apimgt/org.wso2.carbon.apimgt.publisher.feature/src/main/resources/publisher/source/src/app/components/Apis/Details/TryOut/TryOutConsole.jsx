@@ -184,7 +184,7 @@ const TryOutConsole = () => {
                             value={apiKey}
                             helperText={decodedJWT ? (
                                 <Box color='success.main'>
-                                    {`Expire ${dayjs.unix(decodedJWT.payload.exp).fromNow()}`}
+                                    {`Expires ${dayjs.unix(decodedJWT.payload.exp).fromNow()}`}
                                 </Box>
                             ) : 'Generate or provide an internal API Key'}
                             margin='normal'

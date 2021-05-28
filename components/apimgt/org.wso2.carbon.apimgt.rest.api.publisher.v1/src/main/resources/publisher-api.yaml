@@ -4197,7 +4197,6 @@ paths:
           in: query
           description: External Store Ids of stores which the API needs to be published
             or updated.
-          required: true
           schema:
             type: string
         - $ref: '#/components/parameters/If-Match'

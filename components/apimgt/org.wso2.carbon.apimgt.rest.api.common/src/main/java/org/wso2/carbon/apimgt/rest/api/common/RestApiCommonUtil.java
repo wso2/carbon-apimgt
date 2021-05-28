@@ -407,12 +407,10 @@ public class RestApiCommonUtil {
             throws APIManagementException {
 
         String apiSwagger = null;
-        String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
         if (api.getUuid() != null) {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), api.getOrganizationId());
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), api.getOrganization());
         } else {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), api.getOrganizationId());
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), api.getOrganization());
         }
 
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);

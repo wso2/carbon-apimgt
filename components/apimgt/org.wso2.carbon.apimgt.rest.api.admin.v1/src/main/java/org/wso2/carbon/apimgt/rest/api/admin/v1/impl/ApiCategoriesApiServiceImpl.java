@@ -43,13 +43,16 @@ import javax.ws.rs.core.Response;
 public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     private static final Log log = LogFactory.getLog(ApiCategoriesApiServiceImpl.class);
 
+    private String getOrganization(MessageContext messageContext) {
+        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
+    }
+
     @Override
     public Response apiCategoriesGet(MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            List<APICategory> categoryList = apiAdmin.getAPICategoriesOfTenant(tenantID);
+            String organization = getOrganization(messageContext);
+            List<APICategory> categoryList = apiAdmin.getAPICategoriesOfOrganization(organization);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {
@@ -82,8 +85,9 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                 RestApiUtil.handleBadRequest("API Category name is empty.", log);
             }
 
+            String organization = getOrganization(messageContext);
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
-                    fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName));
+                    fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName, organization));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_CATEGORY + "/" + categoryDTO.getId());
             return Response.created(location).entity(categoryDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
@@ -98,9 +102,8 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                                                   MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-            int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+            String organization = getOrganization(messageContext);
+            int tenantID = APIUtil.getInternalOrganizationId(organization);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategory apiCategoryOriginal = apiAdmin.getAPICategoryByID(apiCategoryId);
             if (apiCategoryOriginal == null) {
@@ -112,6 +115,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             apiCategoryToUpdate.setName(apiCategoryOriginal.getName());
             apiCategoryToUpdate.setId(apiCategoryOriginal.getId());
             apiCategoryToUpdate.setTenantID(apiCategoryOriginal.getTenantID());
+            apiCategoryToUpdate.setOrganization(organization);
 
             //We allow to update API Category name given that the new category name is not taken yet
             String oldName = apiCategoryOriginal.getName();

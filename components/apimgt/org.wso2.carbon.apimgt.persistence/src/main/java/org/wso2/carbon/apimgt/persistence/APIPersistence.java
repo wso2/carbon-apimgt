@@ -508,20 +508,14 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
-
+    
     /**
      * Get a list of all the tagscategories of an organization
      *
      * @param org   Organization the tags are owned by
+     * @param ctx   UserContext the tags are visible to
      * @return list of all the tags of an organization
      */
-    Set<Tag> getAllTags(Organization org) throws APIPersistenceException;
+    Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
-    /**
-     * Get a list of all the categories of an organization
-     *
-     * @param org   Organization the categories are owned by
-     * @return list of all the API categories of an organization
-     */
-    List<APICategory>getAllCategories(Organization org) throws APIPersistenceException;
 }

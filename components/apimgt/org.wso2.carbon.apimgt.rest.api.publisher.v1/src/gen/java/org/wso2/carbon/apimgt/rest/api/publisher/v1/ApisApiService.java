@@ -129,7 +129,7 @@ public interface ApisApiService {
       public Response importOpenAPIDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String inlineAPIDefinition, MessageContext messageContext) throws APIManagementException;
       public Response importServiceFromCatalog(String serviceKey, String organizationId, APIDTO APIDTO, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
-      public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response publishAPIToExternalStores(String apiId, String organizationId, String externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response reimportServiceFromCatalog(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response restoreAPIRevision(String apiId, String organizationId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response undeployAPIRevision(String apiId, String revisionId, String revisionNumber, String organizationId, Boolean allEnvironments, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;

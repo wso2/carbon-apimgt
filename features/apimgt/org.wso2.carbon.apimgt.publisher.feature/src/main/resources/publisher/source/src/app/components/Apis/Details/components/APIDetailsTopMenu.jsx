@@ -51,6 +51,11 @@ const styles = (theme) => ({
         display: 'flex',
         alignItems: 'center',
     },
+    alertMessage: {
+        height: 20,
+        borderRadius: '20px',
+        alignItems: 'center',
+    },
     backLink: {
         alignItems: 'center',
         textDecoration: 'none',
@@ -228,9 +233,10 @@ const APIDetailsTopMenu = (props) => {
             <div className={classes.dateWrapper} />
             {api.isRevision && (
                 <MUIAlert
-                    variant='outlined'
+                    variant='standard'
                     severity='warning'
                     icon={false}
+                    className={classes.alertMessage}
                 >
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.read.only.label'

@@ -163,12 +163,13 @@ public interface CertificateManager {
      * @param certificate   : Base64 encoded certificate string.
      * @param alias         : Alias of the certificate.
      * @param tenantId      : The tenant which the client certificate is added against
+     * @param organization  : Organization
      * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
      * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store,CERTIFICATE_EXPIRED : If the
      * certificate is expired.
      */
     ResponseCode addClientCertificate(APIIdentifier apiIdentifier, String certificate, String alias, String tierName,
-            int tenantId);
+            int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.
@@ -205,11 +206,12 @@ public interface CertificateManager {
      * @param tenantId      : ID of the tenant.
      * @param alias         : Alias of the certificate.
      * @param apiIdentifier : Identifier of the API.
+     * @param organization  : Organization
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
     /**
      * Method to update an existing client certificate.
@@ -218,10 +220,11 @@ public interface CertificateManager {
      * @param alias       : The alias of the certificate that should be updated.
      * @param tenantId    : Id of the tenant.
      * @param tier        : Name of the tier
+     * @param organization : Organization
      * @return : true if update succeeds, false if fails
      */
-    ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId)
-            throws APIManagementException;
+    ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
+            String organization) throws APIManagementException;
 
     /**
      * To get the count of the client certificates updated for the particular tenant.

@@ -4055,10 +4055,22 @@
       "value": "* You are not authorized to publish the API to external developer portals due to insufficient permissions"
     }
   ],
+  "Apis.Details.GoTo.Components.GoToSuggestions.no.result": [
+    {
+      "type": 0,
+      "value": "There are no results for this query"
+    }
+  ],
   "Apis.Details.GoTo.GoTo.btn": [
     {
       "type": 0,
       "value": "Go To"
+    }
+  ],
+  "Apis.Details.GoTo.button.placeholder": [
+    {
+      "type": 0,
+      "value": "Page Search"
     }
   ],
   "Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected": [
@@ -4223,16 +4235,16 @@
       "value": "Select a plan for the API product."
     }
   ],
-  "Apis.Details.LifeCycle.components": [
-    {
-      "type": 0,
-      "value": "Publish API without deployments"
-    }
-  ],
-  "Apis.Details.LifeCycle.publish.content": [
+  "Apis.Details.LifeCycle.components.confirm.publish.message": [
     {
       "type": 0,
       "value": "The API will not be available for consumption unless it is deployed."
+    }
+  ],
+  "Apis.Details.LifeCycle.components.confirm.publish.title": [
+    {
+      "type": 0,
+      "value": "Publish API without deployments"
     }
   ],
   "Apis.Details.LifeCycle.publish.content.info.deployments": [
@@ -6701,6 +6713,24 @@
       "value": "Version"
     }
   ],
+  "Apis.Listing.Landing.index.no.apis.description": [
+    {
+      "type": 0,
+      "value": "If you think this is by mistake, please contact your administrator"
+    }
+  ],
+  "Apis.Listing.Landing.index.no.apis.icon.alt.text": [
+    {
+      "type": 0,
+      "value": "No APIs yet"
+    }
+  ],
+  "Apis.Listing.Landing.index.no.apis.title": [
+    {
+      "type": 0,
+      "value": "No APIs yet"
+    }
+  ],
   "Apis.Listing.SampleAPI.SampleAPI.create.new": [
     {
       "type": 0,
@@ -7797,6 +7827,12 @@
       "value": "Create API"
     }
   ],
+  "ServiceCatalog.CreateApi.update.btn.in.progress": [
+    {
+      "type": 0,
+      "value": "Creating API ..."
+    }
+  ],
   "ServiceCatalog.Listing.Delete.cancel": [
     {
       "type": 0,
@@ -7844,7 +7880,7 @@
   "ServiceCatalog.Listing.Listing.heading": [
     {
       "type": 0,
-      "value": "Service Catalog"
+      "value": "Services"
     }
   ],
   "ServiceCatalog.Listing.Listing.heading.displaying.service": [
@@ -7907,6 +7943,24 @@
       "value": "Get Started"
     }
   ],
+  "ServiceCatalog.Listing.Onboarding.no.services.yet.description": [
+    {
+      "type": 0,
+      "value": "If you think this is by mistake, please contact your administrator"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.no.services.yet.icon.alt.text": [
+    {
+      "type": 0,
+      "value": "No Services yet"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.no.services.yet.title": [
+    {
+      "type": 0,
+      "value": "No Services yet"
+    }
+  ],
   "ServiceCatalog.Listing.Onboarding.sample.add": [
     {
       "type": 0,
@@ -7928,7 +7982,7 @@
   "ServiceCatalog.Listing.Onboarding.sample.heading.text": [
     {
       "type": 0,
-      "value": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
+      "value": "Deploy the Sample Integration Service already available and get started in one click"
     }
   ],
   "ServiceCatalog.Listing.Overview.back.btn": [

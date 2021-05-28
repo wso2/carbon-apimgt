@@ -179,12 +179,12 @@ public class RestAPIStoreUtils {
      * @param apiId API UUID
      * @throws APIManagementException
      */
-    public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String organizationId) throws APIManagementException {
+    public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String organization) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer consumer = RestApiCommonUtil.getLoggedInUserConsumer();
         //this is just to check whether the user has access to the api or the api exists. 
         try {
-            consumer.getLightweightAPIByUUID(apiId, organizationId);
+            consumer.getLightweightAPIByUUID(apiId, organization);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =

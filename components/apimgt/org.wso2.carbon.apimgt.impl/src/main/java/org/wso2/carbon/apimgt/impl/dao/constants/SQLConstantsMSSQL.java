@@ -50,7 +50,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " AND " +
             "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID COLLATE Latin1_General_CS_AS =?))" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
             " And " +
             "    NAME like ?" +
             " ) a " +
@@ -83,6 +83,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))"+
+            " AND " +
+            "   APP.ORGANIZATION = ? " +
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
@@ -119,7 +121,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ? ) a " +
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
@@ -151,14 +153,14 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND (" +
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
-                    " IN ($params) AND TENANT = ? ))" +
+                    " COLLATE Latin1_General_CS_AS IN ($params) AND TENANT = ? ))" +
                     "           OR " +
                     "    (LOWER (SUB.USER_ID) = LOWER(?))" +
                     "           OR " +
-                    "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
+                    "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ? COLLATE Latin1_General_CS_AS))" +
                     " )" +
                     " AND " +
-                    "   APP.ORGANIZATION_ID = ? " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?"+
                     " ) a " +
@@ -190,7 +192,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " AND " +
             "    SUB.USER_ID COLLATE Latin1_General_CS_AS =?"+
             " AND " +
-            "   APP.ORGANIZATION_ID = ? " +
+            "   APP.ORGANIZATION = ? " +
             " And "+
             "    NAME like ?"+
             " )a " +
@@ -222,7 +224,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " AND " +
             "    LOWER(SUB.USER_ID) = LOWER(?)" +
             " AND " +
-            "    APP.ORGANIZATION_ID = ? " +
+            "    APP.ORGANIZATION = ? " +
             " And "+
             "    NAME like ?"+
             " ) a " +
@@ -271,9 +273,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ? " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -293,9 +293,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";

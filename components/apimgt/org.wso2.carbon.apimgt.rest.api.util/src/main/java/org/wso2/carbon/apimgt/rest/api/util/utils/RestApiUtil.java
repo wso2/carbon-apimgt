@@ -1347,7 +1347,7 @@ public class RestApiUtil {
     public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
         Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml"};
+        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml", "/service-catalog-api.yaml"};
         for (String fileName : fileNameArray) {
             String definition = null;
             try {

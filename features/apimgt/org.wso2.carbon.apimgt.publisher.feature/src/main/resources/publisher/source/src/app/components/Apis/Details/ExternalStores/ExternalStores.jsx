@@ -121,7 +121,7 @@ export default function ExternalStores() {
         setUpdating(true);
         API.publishAPIToExternalStores(api.id, publishedExternalStores)
             .then((response) => {
-                const successfulStores = response.body.list.map((store) => store.id);
+                const successfulStores = response.body.list.map((store) => store.id).join(',');
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
                     defaultMessage: 'Successfully Published to external developer portals: {successfulStores}',

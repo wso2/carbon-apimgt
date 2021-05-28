@@ -676,7 +676,7 @@ class Details extends Component {
                                     className={classes.customIcon}
                                     width={leftMenuIconMainSize}
                                     height={leftMenuIconMainSize}
-                                    icon={isAPIProduct ? 'api-products' : 'apis'}
+                                    icon={isAPIProduct ? 'api-product' : 'apis'}
                                 />
                             </div>
                         </Link>
