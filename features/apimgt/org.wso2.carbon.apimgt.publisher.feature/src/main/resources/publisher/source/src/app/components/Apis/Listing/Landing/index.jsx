@@ -29,15 +29,24 @@ import RestAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/RestAPIMenu';
 import SoapAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/SoapAPIMenu';
 import GraphqlAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/GraphqlAPIMenu';
 import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/StreamingAPIMenu';
+import { isRestricted } from 'AppData/AuthManager';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
     },
-});
+    cardIcons: {
+        width: 190,
+        paddingRight: theme.spacing(2),
+    },
+    titleSpacing: {
+        marginTop: theme.spacing(3),
+    },
+}));
 
 const APILanding = () => {
     const theme = useTheme();
+    const classes = useStyles();
     const isXsOrBelow = useMediaQuery(theme.breakpoints.down('xs'));
     const { root } = useStyles();
     const {
@@ -45,52 +54,110 @@ const APILanding = () => {
         restApiIcon,
         soapApiIcon,
         streamingApiIcon,
+        noApisIcon,
     } = theme.custom.landingPage.icons;
 
     return (
         <div className={root}>
-            <Grid
-                container
-                direction='column'
-                justify='center'
-            >
-                <Grid item xs={12}>
-                    <Box pt={isXsOrBelow ? 2 : 7} />
-                </Grid>
-                <Grid item md={12}>
-                    <Typography id='itest-apis-welcome-msg' display='block' gutterBottom align='center' variant='h4'>
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPI.SampleAPI.create.new'
-                            defaultMessage='Let’s get started !'
-                        />
-                        <Box color='text.secondary' pt={2}>
-                            <Typography display='block' gutterBottom align='center' variant='body1'>
-                                <FormattedMessage
-                                    id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
-                                    defaultMessage='Choose your option to create an API '
-                                />
-                            </Typography>
-                        </Box>
-                    </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Box pt={isXsOrBelow ? 2 : 7} pb={5} mx={isXsOrBelow ? 12 : 3}>
-                        <Grid
-                            container
-                            direction='row'
-                            justify='center'
-                            alignItems='flex-start'
-                            spacing={3}
+            {!isRestricted(['apim:api_create']) ? (
+                <Grid
+                    container
+                    direction='column'
+                    justify='center'
+                >
+                    <Grid item xs={12}>
+                        <Box pt={isXsOrBelow ? 2 : 7} />
+                    </Grid>
+                    <Grid item md={12}>
+                        <Typography
+                            id='itest-apis-welcome-msg'
+                            display='block'
+                            gutterBottom
+                            align='center'
+                            variant='h4'
                         >
-                            <RestAPIMenu icon={restApiIcon} />
-                            <SoapAPIMenu icon={soapApiIcon} />
-                            <GraphqlAPIMenu icon={graphqlIcon} />
-                            <StreamingAPIMenu icon={streamingApiIcon} />
-                        </Grid>
-                    </Box>
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPI.SampleAPI.create.new'
+                                defaultMessage='Let’s get started !'
+                            />
+                            <Box color='text.secondary' pt={2}>
+                                <Typography display='block' gutterBottom align='center' variant='body1'>
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
+                                        defaultMessage='Choose your option to create an API '
+                                    />
+                                </Typography>
+                            </Box>
+                        </Typography>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Box pt={isXsOrBelow ? 2 : 7} pb={5} mx={isXsOrBelow ? 12 : 3}>
+                            <Grid
+                                container
+                                direction='row'
+                                justify='center'
+                                alignItems='flex-start'
+                                spacing={3}
+                            >
+                                <RestAPIMenu icon={restApiIcon} />
+                                <SoapAPIMenu icon={soapApiIcon} />
+                                <GraphqlAPIMenu icon={graphqlIcon} />
+                                <StreamingAPIMenu icon={streamingApiIcon} />
+                            </Grid>
+                        </Box>
+                    </Grid>
                 </Grid>
-            </Grid>
+            ) : (
+                <Grid
+                    container
+                    direction='column'
+                    justify='center'
+                    alignItems='center'
+                >
+                    <Grid item xs={12}>
+                        <Box pt={isXsOrBelow ? 8 : 28} />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box textAlign='center' pb={2}>
+                            <img
+                                className={classes.cardIcons}
+                                src={noApisIcon}
+                                alt={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.Landing.index.no.apis.icon.alt.text'
+                                        defaultMessage='No APIs yet'
+                                    />
+                                )}
+                                aria-hidden='true'
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid item md={12} className={classes.titleSpacing}>
+                        <Typography
+                            id='itest-apis-welcome-msg'
+                            display='block'
+                            gutterBottom
+                            align='center'
+                            variant='h4'
+                        >
+                            <FormattedMessage
+                                id='Apis.Listing.Landing.index.no.apis.title'
+                                defaultMessage='No APIs yet'
+                            />
+                            <Box color='text.secondary' pt={2}>
+                                <Typography display='block' gutterBottom align='center' variant='body1'>
+                                    <FormattedMessage
+                                        id='Apis.Listing.Landing.index.no.apis.description'
+                                        defaultMessage={'If you think this is by mistake, '
+                                        + 'please contact your administrator'}
+                                    />
+                                </Typography>
+                            </Box>
+                        </Typography>
+                    </Grid>
+                </Grid>
+            )}
         </div>
 
     );

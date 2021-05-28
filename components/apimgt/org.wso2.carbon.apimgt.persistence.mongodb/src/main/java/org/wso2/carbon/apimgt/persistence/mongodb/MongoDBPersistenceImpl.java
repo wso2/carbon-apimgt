@@ -1060,7 +1060,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Set<Tag> getAllTags(Organization org) {
+    public Set<Tag> getAllTags(Organization org, UserContext ctx) {
         Set<Tag> tagSet = new HashSet<>();
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
         Bson statusFilter = Filters.or(
@@ -1112,24 +1112,4 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return mongoDBAPIDocument;
     }
 
-    @Override
-    public List<APICategory> getAllCategories(Organization org) {
-        List<APICategory> categoriesList = new ArrayList<>();
-        MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
-        Bson statusFilter = Filters.or(
-                Filters.eq("status", "PUBLISHED"),
-                Filters.eq("status", "PROTOTYPED")
-        );
-        Bson revisionFilter = Filters.exists("revision", false);
-        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(Aggregates.match(Filters.and(
-                statusFilter, revisionFilter)), project(include("_id", "apiCategories")))).cursor();
-        while (cursor.hasNext()) {
-            MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
-            DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
-            API mappedAPI = APIMapper.INSTANCE.toApi(api);
-            List<APICategory> mappedAPIApiCategories = mappedAPI.getApiCategories();
-            categoriesList.addAll(mappedAPIApiCategories);
-        }
-        return categoriesList;
-    }
 }

@@ -125,8 +125,9 @@ public class ImportUtils {
         apiKey.setConsumerSecret(new String(Base64.decodeBase64(applicationKeyDto.getConsumerSecret())));
         apiKey.setKeyManager(applicationKeyDto.getKeyManager());
         apiKey.setGrantTypes(StringUtils.join(applicationKeyDto.getSupportedGrantTypes(), ", "));
-        if (apiKey.getGrantTypes() != null && apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey
-                .getGrantTypes().contains(GRANT_TYPE_CODE)) {
+
+        if (apiKey.getGrantTypes() != null && (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT)
+                || apiKey.getGrantTypes().contains(GRANT_TYPE_CODE))) {
             apiKey.setCallbackUrl(applicationKeyDto.getCallbackUrl());
         }
         apiKey.setValidityPeriod(applicationKeyDto.getToken().getValidityTime());
@@ -139,16 +140,17 @@ public class ImportUtils {
      *
      * @param subscribedAPIs Subscribed APIs
      * @param userId         Username of the subscriber
-     * @param appId          Application Id
+     * @param application    Application
      * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
+     * @param organization   Organization
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update,
-                                                          APIConsumer apiConsumer) throws APIManagementException,
+            Application application, Boolean update, APIConsumer apiConsumer, String organization)
+            throws APIManagementException,
             UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -177,14 +179,16 @@ public class ImportUtils {
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
                     ApiTypeWrapper apiTypeWrapper = null;
+                    String apiOrApiProductUuid;
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(apiProduct.getId(), organization);
                     } else {
                         API api = (API) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(api);
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(api.getId(), organization);
                     }
+                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, organization);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -290,10 +294,13 @@ public class ImportUtils {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, apiKey.getConsumerSecret());
             }
         }
+        if (!StringUtils.isEmpty(apiKey.getCallbackUrl())) {
+            jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, apiKey.getCallbackUrl());
+        }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
-        apiConsumer.requestApprovalForApplicationRegistration(username, application, apiKey.getType(),
+        apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, jsonParams, apiKey.getKeyManager(), null);
+                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null, true);
     }
 }

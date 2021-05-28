@@ -64,19 +64,19 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void removeSubscription(Identifier identifier, String userId,
-                                   int applicationId, String organizationId) throws APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId, organizationId);
+    public void removeSubscription(Identifier identifier, String userId, int applicationId,
+                                   String organization) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, organization);
     }
 
     @Override
-    public void removeSubscription(SubscribedAPI subscription, String organizationId) throws APIManagementException {
-        super.removeSubscription(subscription, organizationId);
+    public void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException {
+        super.removeSubscription(subscription, organization);
     }
 
     @Override
-    public int addApplication(Application application, String userId, String organizationId) throws APIManagementException {
-        return super.addApplication(application, userId, organizationId);
+    public int addApplication(Application application, String userId, String organization) throws APIManagementException {
+        return super.addApplication(application, userId, organization);
     }
 
     @Override
@@ -88,12 +88,10 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     public void removeApplication(Application application, String username) throws APIManagementException {
         super.removeApplication(application, username);
     }
-
-    @Override
+     @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
-                                   String organizationId) throws
-            APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId, groupId, organizationId);
+                                   String organization) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, groupId, organization);
     }
 
     /**
@@ -105,25 +103,26 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return super.addComment(identifier, comment, user);
+    public String addComment(String uuid, Comment comment, String user) throws APIManagementException {
+        return super.addComment(uuid, comment, user);
     }
 
     @Override
-    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-        super.deleteComment(identifier, commentId);
+    public void deleteComment(String uuid, String commentId) throws APIManagementException {
+        super.deleteComment(uuid, commentId);
     }
 
     @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
-    }
-
-    @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organizationId)
-            throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organizationId);
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization);
+        Identifier identifier;
+        if (apiTypeWrapper.isAPIProduct()) {
+            identifier = apiTypeWrapper.getApiProduct().getId();
+        } else {
+            identifier = apiTypeWrapper.getApi().getId();
+        }
+        //TO-DO Commented to since need to work for monodb should be move to registry persistent impl
+//        checkAccessControlPermission(identifier);
         return apiTypeWrapper;
     }
 

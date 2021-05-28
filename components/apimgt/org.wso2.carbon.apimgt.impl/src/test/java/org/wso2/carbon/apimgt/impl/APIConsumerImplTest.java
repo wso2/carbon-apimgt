@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -120,10 +119,11 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
-        KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class, APIPersistence.class})
-@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
+@PrepareForTest({ WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class,
+        ApplicationUtils.class, KeyManagerHolder.class, WorkflowExecutorFactory.class,
+        AbstractApplicationRegistrationWorkflowExecutor.class, ServiceReferenceHolder.class, MultitenantUtils.class,
+        RegistryUtils.class, Caching.class, APIPersistence.class, ApiMgtDAO.class })
+@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
@@ -539,6 +539,29 @@ public class APIConsumerImplTest {
     }
 
     @Test
+    public void testGetTagsWithAttributes() throws Exception {
+        Registry userRegistry = Mockito.mock(Registry.class);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
+        System.setProperty(CARBON_HOME, "");
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        UserRegistry userRegistry1 = Mockito.mock(UserRegistry.class);
+        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).
+                thenReturn(userRegistry1);
+        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry1);
+        List<TermData> list = new ArrayList<TermData>();
+        TermData termData = new TermData("testTerm", 10);
+        list.add(termData);
+        Mockito.when(GovernanceUtils.getTermDataList(Mockito.anyMap(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyBoolean())).thenReturn(list);
+        ResourceDO resourceDO = Mockito.mock(ResourceDO.class);
+        Resource resource = new ResourceImpl("dw", resourceDO);
+        resource.setContent("testContent");
+        Mockito.when(userRegistry1.resourceExists(Mockito.anyString())).thenReturn(true);
+        Mockito.when(userRegistry1.get(Mockito.anyString())).thenReturn(resource);
+        assertNotNull(apiConsumer.getTagsWithAttributes("testDomain"));
+    }
+
+    @Test
     public void testGetTopRatedAPIs() throws APIManagementException, RegistryException {
         Registry userRegistry = Mockito.mock(Registry.class);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
@@ -588,10 +611,10 @@ public class APIConsumerImplTest {
     @Test
     public void testGetUserRating() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        when(apiMgtDAO.getUserRating(apiIdentifier, "admin")).thenReturn(2);
+        String uuid = UUID.randomUUID().toString();
+        when(apiMgtDAO.getUserRating(uuid, "admin")).thenReturn(2);
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        assertEquals(2, apiConsumer.getUserRating(apiIdentifier, "admin"));
+        assertEquals(2, apiConsumer.getUserRating(uuid, "admin"));
     }
 
 
@@ -763,7 +786,6 @@ public class APIConsumerImplTest {
         Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
         latestPublishedAPIs.put("user:key", api);
         apiSortedSet.addAll(latestPublishedAPIs.values());
-        assertNotNull(apiConsumer.getAllPublishedAPIs("testDomain"));
     }
 
     @Test
@@ -795,7 +817,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        List<APIIdentifier> identifiers = new ArrayList<>();
+        List<String> identifiers = new ArrayList<>();
         Set<String> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesBySubscribedAPIs(identifiers)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesBySubscribedAPIs(identifiers));
@@ -892,7 +914,7 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertEquals(apiConsumer
-                .updateAuthClient("1", application, "access", "www.host.com", new String[0], null, null, null, null,
+                .updateAuthClient("1", "app1", "access", "www.host.com", new String[0], null, null, null, null,
                         "default")
                 .getClientName(), clientName);
     }
@@ -1016,8 +1038,8 @@ public class APIConsumerImplTest {
 
         try {
             apiConsumer
-                    .requestApprovalForApplicationRegistration("1", app, "access", "identity.com/auth", null, "3600",
-                            "api_view", null, "default", null);
+                    .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
+                            "api_view", "2", null, "default", null, false);
             Assert.fail("User store exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Unable to retrieve the tenant information of the current user"));
@@ -1035,8 +1057,8 @@ public class APIConsumerImplTest {
 
         try {
             apiConsumer
-                    .requestApprovalForApplicationRegistration("1", app, "access", "identity.com/auth", null, "3600",
-                            "api_view", null, "default", null);
+                    .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
+                            "api_view", "2", null, "default", null, false);
             Assert.fail("API management exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Token Type"));
@@ -1055,14 +1077,14 @@ public class APIConsumerImplTest {
                 .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(application);
         Map<String, Object> result = apiConsumer
-                .requestApprovalForApplicationRegistration("1", app, APIConstants.API_KEY_TYPE_PRODUCTION,
-                        "identity.com/auth", null, "3600", "api_view", null, "default", null);
-        Assert.assertEquals(result.size(), 10);
+                .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
+                        "identity.com/auth", null, "3600", "api_view", "2", null, "default", null, false);
+        Assert.assertEquals(result.size(),10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
-                .requestApprovalForApplicationRegistration("1", app, APIConstants.API_KEY_TYPE_SANDBOX, "", null,
-                        "3600", "api_view", null, "default", null);
+                .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
+                        "3600", "api_view", "2", null, "default", null, false);
         Assert.assertEquals(result.size(), 10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
@@ -1087,13 +1109,23 @@ public class APIConsumerImplTest {
     @Test
     public void testGetComments() throws APIManagementException {
         Comment comment = new Comment();
-        Comment[] comments = new Comment[]{comment};
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.getComments(identifier, null)).thenReturn(comments);
-        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier, null).length, 1);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier, null);
+        Comment[] comments = new Comment[] { comment };
+        String uuid = UUID.randomUUID().toString();
+        Mockito.when(apiMgtDAO.getComments(uuid, null)).thenReturn(comments);
+        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(uuid, null).length, 1);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(uuid, null);
     }
 
+    @Test
+    public void testRemoveSubscriber() throws APIManagementException {
+        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        try {
+            new APIConsumerImplWrapper(apiMgtDAO).removeSubscriber(identifier, "1");
+            // no need of assert fail here since the method is not implemented yet.
+        } catch (UnsupportedOperationException e) {
+            Assert.assertTrue(e.getMessage().contains("Unsubscribe operation is not yet implemented"));
+        }
+    }
 
     @Test
     public void testRemoveSubscription() throws APIManagementException, WorkflowException, APIPersistenceException {
@@ -1115,6 +1147,9 @@ public class APIConsumerImplTest {
         subscribedAPIOld.setApplication(application);
         Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
         DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
         Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
                 .thenReturn(devPortalAPI);
@@ -1126,16 +1161,16 @@ public class APIConsumerImplTest {
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationNameFromId(Mockito.anyInt());
         String workflowExtRef = "test_wf_ref";
         String workflowExtRef1 = "complete_wf_ref";
-        Mockito.when(
-                apiMgtDAO.getExternalWorkflowReferenceForSubscription((APIIdentifier) Mockito.any(), Mockito.anyInt()))
-                .thenReturn(workflowExtRef, workflowExtRef1);
+        Mockito.when(apiMgtDAO
+                .getExternalWorkflowReferenceForSubscription((APIIdentifier) Mockito.any(), Mockito.anyInt(),
+                        Mockito.anyString())).thenReturn(workflowExtRef, workflowExtRef1);
         SubscriptionWorkflowDTO subscriptionWorkflowDTO = new SubscriptionWorkflowDTO();
         subscriptionWorkflowDTO.setWorkflowReference("1");
         Mockito.when(apiMgtDAO.retrieveWorkflow(workflowExtRef)).thenReturn(subscriptionWorkflowDTO);
         SubscribedAPI subscribedAPI = new SubscribedAPI("api1");
         subscribedAPI.setTier(new Tier("Gold"));
         Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
-        Mockito.when(apiMgtDAO.getSubscriptionStatus(identifier, 1))
+        Mockito.when(apiMgtDAO.getSubscriptionStatus(uuid, 1))
                 .thenReturn(APIConstants.SubscriptionStatus.ON_HOLD);
         apiConsumer.removeSubscription(subscribedAPINew, "org1");
         Mockito.when(apiMgtDAO.retrieveWorkflow(workflowExtRef1)).thenReturn(subscriptionWorkflowDTO);
@@ -1380,24 +1415,24 @@ public class APIConsumerImplTest {
 
     @Test
     public void testRemoveAPIRating() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        String uuid = UUID.randomUUID().toString();
         String user = "Tom";
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).removeAPIRating(identifier, user);
-        apiConsumer.removeAPIRating(identifier, user);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeAPIRating(identifier, user);
+        Mockito.doNothing().when(apiMgtDAO).removeAPIRating(uuid, user);
+        apiConsumer.removeAPIRating(uuid, user);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeAPIRating(uuid, user);
 
     }
 
     @Test
     public void testRateAPI() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        String uuid = UUID.randomUUID().toString();
         APIRating apiRating = APIRating.RATING_FOUR;
         String user = "Tom";
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).addRating(identifier, apiRating.getRating(), user);
-        apiConsumer.rateAPI(identifier, apiRating, user);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(identifier, apiRating.getRating(), user);
+        Mockito.doNothing().when(apiMgtDAO).addRating(uuid, apiRating.getRating(), user);
+        apiConsumer.rateAPI(uuid, apiRating, user);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(uuid, apiRating.getRating(), user);
     }
 
     @Test
