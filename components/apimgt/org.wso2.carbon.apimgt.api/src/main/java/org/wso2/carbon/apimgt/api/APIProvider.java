@@ -794,12 +794,12 @@ public interface APIProvider extends APIManager {
     /**
      * This method updates the swagger definition in registry
      *
-     * @param api   API
-     * @param jsonText    openAPI definition
-     * @param orgId  Identifier of an organization
+     * @param api           API
+     * @param jsonText      openAPI definition
+     * @param organization  Identifier of an organization
      * @throws APIManagementException
      */
-    void saveSwaggerDefinition(API api, String jsonText, String orgId) throws APIManagementException;
+    void saveSwaggerDefinition(API api, String jsonText, String organization) throws APIManagementException;
 
     /**
      * This method updates the swagger definition in registry
@@ -1524,13 +1524,13 @@ public interface APIProvider extends APIManager {
 
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
-     * @param apiId    ID of the API
-     * @param resource Resource
-     * @param orgId    Identifier of an organization
-     * @param url      wsdl url
+     * @param apiId         ID of the API
+     * @param resource      Resource
+     * @param organization  Identifier of an organization
+     * @param url           wsdl url
      * @throws APIManagementException
      */
-    void addWSDLResource(String apiId, ResourceFile resource, String url, String orgId) throws APIManagementException;
+    void addWSDLResource(String apiId, ResourceFile resource, String url, String organization) throws APIManagementException;
 
     /**
      * Add or update thumbnail image of an api
