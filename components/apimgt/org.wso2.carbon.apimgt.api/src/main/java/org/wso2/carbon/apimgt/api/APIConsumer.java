@@ -871,14 +871,14 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
      *
-     * @param api API  
-     * @param environmentName environment name
-     * @param environmentType environment type
-     * @param orgId Identifier of an organization
+     * @param api               API
+     * @param environmentName   environment name
+     * @param environmentType   environment type
+     * @param organization      Identifier of an organization
      * @return WSDL of the API
      * @throws APIManagementException when error occurred while getting the WSDL
      */
-    ResourceFile getWSDL(API api, String environmentName, String environmentType, String orgId)
+    ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException;
     /**
      * Returns application attributes defined in configuration
