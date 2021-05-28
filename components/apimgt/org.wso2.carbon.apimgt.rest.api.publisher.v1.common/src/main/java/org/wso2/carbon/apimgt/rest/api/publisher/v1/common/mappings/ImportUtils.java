@@ -530,7 +530,7 @@ public class ImportUtils {
                     .from(ExceptionCodes.API_NOT_FOUND, apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion()));
         }
         
-        String uuid = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+        String uuid = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
         return apiProvider.getAPIbyUUID(uuid, currentTenantDomain);
     }
 
