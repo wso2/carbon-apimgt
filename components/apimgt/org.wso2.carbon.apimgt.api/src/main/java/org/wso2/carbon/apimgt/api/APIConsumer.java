@@ -825,10 +825,11 @@ public interface APIConsumer extends APIManager {
      *
      * @param username    subscriber of the application
      * @param applicationId applicationId of the application
+     * @param organization Organization
      * @return set of scopes.
      * @throws APIManagementException
      */
-    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
+    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId, String organization)
             throws APIManagementException;
 
     /**
