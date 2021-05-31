@@ -68,10 +68,11 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
@@ -305,9 +306,9 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
-        List<APIAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
+        List<APIInfoAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
-            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+            for (APIInfoAdditionalPropertiesDTO property : additionalProperties) {
                 if (property.isDisplay()) {
                     model.addProperty(property.getName() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, property
                             .getValue());
@@ -663,6 +664,34 @@ public class APIMappingUtil {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
+        }
+        if (api.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = api.getAdditionalProperties();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
+                        new APIInfoAdditionalPropertiesMapDTO();
+                String key = (String) propertyKey;
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                } else {
+                    additionalPropertiesDTO.setName(key);
+                    apiInfoAdditionalPropertiesMapDTO.setName(key);
+                    additionalPropertiesDTO.setDisplay(false);
+                }
+                apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
+                additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
+                additionalPropertiesList.add(additionalPropertiesDTO);
+            }
+            apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
+            apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
         return apiInfoDTO;
     }
@@ -1139,22 +1168,31 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
             for (Object propertyKey : additionalProperties.keySet()) {
-                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
+                        new APIInfoAdditionalPropertiesMapDTO();
                 String key = (String) propertyKey;
                 int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
                 additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
                 if (index > 0) {
                     additionalPropertiesDTO.setName(key.substring(0, index));
+                    apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
                     additionalPropertiesDTO.setDisplay(true);
                 } else {
                     additionalPropertiesDTO.setName(key);
+                    apiInfoAdditionalPropertiesMapDTO.setName(key);
                     additionalPropertiesDTO.setDisplay(false);
                 }
+                apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
+                additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
                 additionalPropertiesList.add(additionalPropertiesDTO);
             }
             dto.setAdditionalProperties(additionalPropertiesList);
+            dto.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
 
         if (model.getImplementation() != null) {
@@ -2203,21 +2241,30 @@ public class APIMappingUtil {
 
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
-            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
+            Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
             for (Object propertyKey : additionalProperties.keySet()) {
-                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
+                APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
+                        new APIInfoAdditionalPropertiesMapDTO();
                 String key = (String) propertyKey;
                 int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
                 additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
                 if (index > 0) {
                     additionalPropertiesDTO.setName(key.substring(0, index));
+                    apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
                     additionalPropertiesDTO.setDisplay(true);
                 } else {
                     additionalPropertiesDTO.setName(key);
+                    apiInfoAdditionalPropertiesMapDTO.setName(key);
                     additionalPropertiesDTO.setDisplay(false);
                 }
+                apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
+                additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
                 additionalPropertiesList.add(additionalPropertiesDTO);
             }
+            productDto.setAdditionalPropertiesMap(additionalPropertiesMap);
             productDto.setAdditionalProperties(additionalPropertiesList);
         }
         if (product.getApiSecurity() != null) {
@@ -2369,9 +2416,9 @@ public class APIMappingUtil {
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
         }
 
-        List<APIAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
+        List<APIInfoAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
-            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+            for (APIInfoAdditionalPropertiesDTO property : additionalProperties) {
                 if (property.isDisplay()) {
                     product.addProperty(property.getName() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, property
                             .getValue());

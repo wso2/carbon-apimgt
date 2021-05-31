@@ -18,15 +18,15 @@ import javax.validation.Valid;
 
 
 
-public class APIAdditionalPropertiesDTO   {
+public class APIInfoAdditionalPropertiesMapDTO   {
   
     private String name = null;
     private String value = null;
-    private Boolean display = null;
+    private Boolean display = false;
 
   /**
    **/
-  public APIAdditionalPropertiesDTO name(String name) {
+  public APIInfoAdditionalPropertiesMapDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -43,7 +43,7 @@ public class APIAdditionalPropertiesDTO   {
 
   /**
    **/
-  public APIAdditionalPropertiesDTO value(String value) {
+  public APIInfoAdditionalPropertiesMapDTO value(String value) {
     this.value = value;
     return this;
   }
@@ -60,7 +60,7 @@ public class APIAdditionalPropertiesDTO   {
 
   /**
    **/
-  public APIAdditionalPropertiesDTO display(Boolean display) {
+  public APIInfoAdditionalPropertiesMapDTO display(Boolean display) {
     this.display = display;
     return this;
   }
@@ -84,10 +84,10 @@ public class APIAdditionalPropertiesDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIAdditionalPropertiesDTO apIAdditionalProperties = (APIAdditionalPropertiesDTO) o;
-    return Objects.equals(name, apIAdditionalProperties.name) &&
-        Objects.equals(value, apIAdditionalProperties.value) &&
-        Objects.equals(display, apIAdditionalProperties.display);
+    APIInfoAdditionalPropertiesMapDTO apIInfoAdditionalPropertiesMap = (APIInfoAdditionalPropertiesMapDTO) o;
+    return Objects.equals(name, apIInfoAdditionalPropertiesMap.name) &&
+        Objects.equals(value, apIInfoAdditionalPropertiesMap.value) &&
+        Objects.equals(display, apIInfoAdditionalPropertiesMap.display);
   }
 
   @Override
@@ -98,7 +98,7 @@ public class APIAdditionalPropertiesDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIAdditionalPropertiesDTO {\n");
+    sb.append("class APIInfoAdditionalPropertiesMapDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
