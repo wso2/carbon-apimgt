@@ -39,6 +39,7 @@ public class SubscribedAPI {
     private String subCreatedStatus;
     private List<APIKey> keys = new ArrayList<APIKey>();
     private String uuid;
+    private String organization;
 
     private String createdTime;
     private String updatedTime;
@@ -146,6 +147,14 @@ public class SubscribedAPI {
 
     public void setProductId(APIProductIdentifier productId) {
         this.productId = productId;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     @Override

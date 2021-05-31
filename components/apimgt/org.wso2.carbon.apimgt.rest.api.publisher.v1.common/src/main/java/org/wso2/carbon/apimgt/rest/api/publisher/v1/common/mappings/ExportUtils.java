@@ -206,7 +206,8 @@ public class ExportUtils {
             addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                     organization);
         }
-        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
+        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
+                organization);
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -239,6 +240,7 @@ public class ExportUtils {
      * @param userName              Username
      * @param exportFormat          Format of output documents. Can be YAML or JSON
      * @param preserveStatus        Preserve API Product status on export
+     * @param organization          Organization Identifier
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
@@ -847,11 +849,11 @@ public class ExportUtils {
      * @param exportFormat   Export format of file
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
+     * @param organization   Organization Identifier
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-                                                      ExportFormat exportFormat, APIProvider apiProvider,
-                                                      APIIdentifier apiIdentifier)
+            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization)
             throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
@@ -860,6 +862,8 @@ public class ExportUtils {
             // If a streaming API is exported, it does not contain a swagger file.
             // Therefore swagger export is only required for REST or SOAP based APIs
             String apiType = apiDtoToReturn.getType().toString();
+            API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
+            api.setOrganization(organization);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
@@ -877,8 +881,7 @@ public class ExportUtils {
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
-                            APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
+                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
                             exportFormat,
                             formattedSwaggerJson);
@@ -888,8 +891,7 @@ public class ExportUtils {
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
                 }
             } else {
-                String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(
-                        APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
+                String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
                 CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
                         exportFormat, asyncApiJson);
             }
