@@ -7211,11 +7211,18 @@ public class ApiMgtDAO {
     public Set<URITemplate> getURITemplatesOfAPI(String uuid, String organization)
             throws APIManagementException {
 
-        APIIdentifier identifier = getAPIIdentifierFromUUID(uuid);
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        APIIdentifier identifier = getAPIIdentifierFromUUID(currentApiUuid);
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
-        if (checkAPIUUIDIsARevisionUUID(uuid) != null) {
+        if (apiRevision != null) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
