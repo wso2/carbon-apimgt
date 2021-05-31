@@ -903,7 +903,8 @@ public class PublisherCommonUtils {
                     if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
                         throw new APIManagementException(
                                 "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context + " in the organization : " + organization , ExceptionCodes.API_ALREADY_EXISTS);
+                                        + context + " in the organization : " + organization,
+                                ExceptionCodes.API_ALREADY_EXISTS);
                     } else {
                         throw new APIManagementException(
                                 "Error occurred while adding API. API with name " + body.getName()

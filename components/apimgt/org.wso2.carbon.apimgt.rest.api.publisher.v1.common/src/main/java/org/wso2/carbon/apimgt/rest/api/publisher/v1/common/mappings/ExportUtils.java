@@ -206,7 +206,8 @@ public class ExportUtils {
             addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                     organization);
         }
-        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier, organization);
+        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
+                organization);
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
