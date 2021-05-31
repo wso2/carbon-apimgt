@@ -30,6 +30,7 @@ public abstract class Event implements Serializable {
     public String type;
     public int tenantId;
     public String tenantDomain;
+    public String organizationId;
 
     public Event(String eventId, long timeStamp, String type, int tenantId, String tenantDomain) {
 
@@ -82,5 +83,13 @@ public abstract class Event implements Serializable {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 }

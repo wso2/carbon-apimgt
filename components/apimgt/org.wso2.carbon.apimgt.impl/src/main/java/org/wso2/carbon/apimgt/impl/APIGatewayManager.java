@@ -76,8 +76,8 @@ public class APIGatewayManager {
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
-                api.getId().getId(), api.getUuid(), publishedGateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
-                apiIdentifier.getProviderName(),api.getType(),api.getContext());
+                api.getOrganizationId(), api.getId().getId(), api.getUuid(), publishedGateways, apiIdentifier.getName(),
+                apiIdentifier.getVersion(), apiIdentifier.getProviderName(),api.getType(),api.getContext());
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
@@ -90,7 +90,7 @@ public class APIGatewayManager {
         APIProductIdentifier apiIdentifier = api.getId();
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain, null,
                 api.getProductId(),api.getUuid(), publishedGateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
                 PRODUCT_PREFIX, api.getType(),api.getContext());
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
@@ -106,8 +106,8 @@ public class APIGatewayManager {
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                api.getId().getId(),api.getUuid(), removedGateways,apiIdentifier.getName(),apiIdentifier.getVersion(),
-                apiIdentifier.getProviderName(), api.getType(),api.getContext());
+                api.getOrganizationId(), api.getId().getId(),api.getUuid(), removedGateways,apiIdentifier.getName(),
+                apiIdentifier.getVersion(), apiIdentifier.getProviderName(), api.getType(),api.getContext());
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
 
