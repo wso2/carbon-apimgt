@@ -5321,8 +5321,13 @@ public class ApiMgtDAO {
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
-            id = identifier.getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
+            if (apiUUID != null) {
+                id = getAPIID(apiUUID);
+            }
+            if (id == -1){
+                id = identifier.getId();
+            }
         } else {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
@@ -8078,6 +8083,38 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
         }
         return identifier;
+    }
+
+    /**
+     * @param apiId UUID of the API
+     * @return organization of the API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String getOrganizationByAPIUUID(String apiId) throws APIManagementException {
+        String organization = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_ORGANIZATION_BY_API_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiId);
+                result = ps.executeQuery();
+
+                while (result.next()) {
+                    organization = result.getString("ORGANIZATION");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching organization", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching organization", e);
+        }
+        return organization;
     }
 
     /**
