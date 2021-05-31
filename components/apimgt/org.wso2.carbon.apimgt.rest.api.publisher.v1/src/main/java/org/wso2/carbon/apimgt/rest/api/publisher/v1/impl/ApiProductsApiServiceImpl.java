@@ -938,7 +938,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response restoreAPIProductRevision(String apiProductId, String revisionId,
                                               MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.restoreAPIProductRevision(apiProductId, revisionId);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        apiProvider.restoreAPIProductRevision(apiProductId, revisionId, organization);
         APIProductDTO apiToReturn = getAPIProductByID(apiProductId, apiProvider);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
