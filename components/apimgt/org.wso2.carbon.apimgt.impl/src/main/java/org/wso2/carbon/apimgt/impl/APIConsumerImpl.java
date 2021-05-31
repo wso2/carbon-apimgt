@@ -3092,7 +3092,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void removeSubscription(Identifier identifier, String userId, int applicationId, String organization)
             throws APIManagementException {
 
-        boolean isTenantFlowStarted = false;
         APIIdentifier apiIdentifier = null;
         APIProductIdentifier apiProdIdentifier = null;
         if (identifier instanceof APIIdentifier) {
@@ -5170,8 +5169,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, orgId);
+    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, organization);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 
