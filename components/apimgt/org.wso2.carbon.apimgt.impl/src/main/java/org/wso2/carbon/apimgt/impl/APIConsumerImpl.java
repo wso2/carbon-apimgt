@@ -3101,20 +3101,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
         }
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
-                replaceEmailDomainBack(identifier.getProviderName()));
-
         String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
         try {
-            if (providerTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equals(providerTenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(providerTenantDomain, true);
-                isTenantFlowStarted = true;
-            }
-
-
             SubscriptionWorkflowDTO workflowDTO;
             WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
                     WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -3235,12 +3224,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION
                     + " for resource " + identifier.toString();
             handleException(errorMsg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
         }
-
 
         if (log.isDebugEnabled()) {
             String logMessage = "Subscription removed from app " + applicationName + " by " + userId + " For Id: "
