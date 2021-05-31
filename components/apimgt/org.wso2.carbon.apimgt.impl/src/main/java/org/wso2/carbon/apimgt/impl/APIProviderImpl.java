@@ -8862,8 +8862,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance
-                    .restoreAPIRevision(new Organization(organization), apiIdentifier.getUUID(), apiRevision.getId());
+            apiPersistenceInstance.restoreAPIRevision(new Organization(organization), apiIdentifier.getUUID(),
+                    apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
