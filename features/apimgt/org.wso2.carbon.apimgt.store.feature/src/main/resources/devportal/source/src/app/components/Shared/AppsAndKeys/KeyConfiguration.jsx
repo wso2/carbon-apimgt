@@ -134,18 +134,13 @@ const KeyConfiguration = (props) => {
         });
         return modifiedGrantTypes;
     };
+
     const callBackHasErrors = () => {
         if (callbackUrl === '') {
             updateHasError(true);
             setCallbackHelper(intl.formatMessage({
                 defaultMessage: 'Call back URL can not be empty when Implicit or Authorization Code grants are selected.',
                 id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.empty.error.text',
-            }));
-        } else if (Validation.url.validate(callbackUrl).error) {
-            updateHasError(true);
-            setCallbackHelper(intl.formatMessage({
-                defaultMessage: 'Invalid URL. Please enter a valid URL.',
-                id: 'Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.url.error.text',
             }));
         } else {
             setCallbackHelper(false);

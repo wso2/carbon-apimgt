@@ -383,12 +383,6 @@ class TokenManager extends React.Component {
                     defaultMessage: 'Callback URL can not be empty when the Implicit or Application Code grant types selected',
                 }));
                 return;
-            } else if (Validation.url.validate(keyRequest.callbackUrl).error) {
-                Alert.error(intl.formatMessage({
-                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.text',
-                    defaultMessage: 'Invalid URL. Please enter a valid URL.',
-                }));
-                return;
             }
         }
         this.setState({ isLoading: true });
@@ -455,12 +449,6 @@ class TokenManager extends React.Component {
                 Alert.error(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.callbackempty',
                     defaultMessage: 'Callback URL can not be empty when the Implicit or Application Code grant types selected',
-                }));
-                return;
-            } else if (Validation.url.validate(keyRequest.callbackUrl).error) {
-                Alert.error(intl.formatMessage({
-                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.error.text',
-                    defaultMessage: 'Invalid URL. Please enter a valid URL.',
                 }));
                 return;
             }
