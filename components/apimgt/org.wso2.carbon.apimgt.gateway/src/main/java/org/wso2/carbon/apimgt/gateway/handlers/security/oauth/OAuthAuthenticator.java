@@ -209,7 +209,7 @@ public class OAuthAuthenticator implements Authenticator {
             String clientIP = null;
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
                     getAxis2MessageContext();
-            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
+            Map<String, String> transportHeaderMap = (Map<String, String>)
                                                          axis2MessageContext.getProperty
                                                                  (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 

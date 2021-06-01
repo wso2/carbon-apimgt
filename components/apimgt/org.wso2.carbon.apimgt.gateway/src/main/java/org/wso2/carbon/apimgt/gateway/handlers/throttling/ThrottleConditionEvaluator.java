@@ -164,7 +164,7 @@ public class ThrottleConditionEvaluator {
 
     private boolean isHeaderPresent(MessageContext messageContext, ConditionDTO condition) {
 
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
+        Map<String, String> transportHeaderMap = (Map<String, String>) messageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (transportHeaderMap != null) {
             String value = transportHeaderMap.get(condition.getConditionName());
@@ -180,7 +180,7 @@ public class ThrottleConditionEvaluator {
 
     private boolean isHeaderPresent(MessageContext messageContext, ConditionDto.HeaderConditions condition) {
 
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
+        Map<String, String> transportHeaderMap = (Map<String, String>) messageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         boolean status = true;
         for (Map.Entry<String, String> headerEntry : condition.getValues().entrySet()) {

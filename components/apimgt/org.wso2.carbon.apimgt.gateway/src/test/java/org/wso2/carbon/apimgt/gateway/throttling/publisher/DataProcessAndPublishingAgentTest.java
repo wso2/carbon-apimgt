@@ -90,7 +90,10 @@ public class DataProcessAndPublishingAgentTest {
         DataProcessAndPublishingAgent dataProcessAndPublishingAgent = new DataProcessAndPublishingAgentWrapper
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
-        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
+                .class);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
