@@ -177,6 +177,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.proxy.ExtendedProxyRoutePlanner;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -5061,17 +5062,9 @@ public final class APIUtil {
 
     public static OrganizationResolver getOrganizationResolver() throws APIManagementException {
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        String className = config.getFirstProperty(APIConstants.ORG_RESOLVER);
-        if (StringUtils.isEmpty(className)) {
-            className = APIConstants.DEFAULT_ORG_RESOLVER;
-        }
-        OrganizationResolver resolver;
-        try {
-            resolver = (OrganizationResolver) Class.forName(className).newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            throw new APIManagementException("Error while resolving the organization resolver", e);
+        OrganizationResolver resolver = ServiceReferenceHolder.getInstance().getOrganizationResolver();
+        if (resolver == null) {
+            resolver = new OnPremResolver();
         }
         return resolver;
     }
