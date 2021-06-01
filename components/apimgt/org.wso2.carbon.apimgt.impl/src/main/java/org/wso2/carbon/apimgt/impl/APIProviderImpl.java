@@ -8232,7 +8232,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     resource.getContent(), resource.getContentType());
             try {
                 apiPersistenceInstance.saveWSDL(
-                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                        new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
