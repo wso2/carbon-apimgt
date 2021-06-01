@@ -726,8 +726,9 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         if (prevNode.hasChildNodes()) {
             NodeList childNodes = prevNode.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
-                if (childNodes.item(i).getAttributes() != null && current.getAttributes()
-                        .getNamedItem(NAME_ATTRIBUTE).getNodeValue().equals(childNodes.item(i)
+                if (childNodes.item(i).getAttributes() != null &&
+                        childNodes.item(i).getAttributes().getNamedItem(NAME_ATTRIBUTE) != null &&
+                        current.getAttributes().getNamedItem(NAME_ATTRIBUTE).getNodeValue().equals(childNodes.item(i)
                                 .getAttributes().getNamedItem(NAME_ATTRIBUTE).getNodeValue())) {
                     return true;
                 }
