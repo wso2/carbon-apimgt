@@ -207,6 +207,25 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
+    public String retrieveOrganization(String uuid) throws APIManagementException {
+
+        String query = SQLConstants.RETRIEVE_ORGANIZATION;
+        String organization = null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    organization = resultSet.getString("ORGANIZATION");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve organization", e);
+        }
+
+        return organization;
+    }
+
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
                                                    Map<String, String> gatewayVhosts,
                                                    Set<APIRevisionDeployment> gatewayLabelsToRemove)

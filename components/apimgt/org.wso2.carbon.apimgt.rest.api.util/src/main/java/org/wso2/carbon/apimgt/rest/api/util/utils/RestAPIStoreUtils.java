@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -213,9 +214,8 @@ public class RestAPIStoreUtils {
         //this is just to check whether the user has access to the api or the api exists. 
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            apiConsumer.getLightweightAPIByUUID(apiId.getUUID(), tenantDomain);
+            String organization = ApiMgtDAO.getInstance().getOrganizationByAPIUUID(apiId.getUUID());
+            apiConsumer.getLightweightAPIByUUID(apiId.getUUID(), organization);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =

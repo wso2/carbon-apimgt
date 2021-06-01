@@ -1637,6 +1637,8 @@ public class SQLConstants {
             "   AND" + " API_VERSION = ? " +
             "   AND ORGANIZATION = ? ";
 
+    public static final String GET_ORGANIZATION_BY_API_ID = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?";
+
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
                      " THROTTLING_TIER IS NULL";
@@ -2762,6 +2764,7 @@ public class SQLConstants {
             "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ?";
     public static final String DELETE_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
             "API_ID = ?";
+    public static final String RETRIEVE_ORGANIZATION = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID =?";
     public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
             "SELECT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
                     ".TENANT_DOMAIN AS TENANT_DOMAIN," +
@@ -3170,7 +3173,7 @@ public class SQLConstants {
             "SELECT AM_API.API_NAME, AM_API.API_PROVIDER "
                     + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API "
                     + "WHERE ARSM.SCOPE_NAME = ? AND "
-                    + "AM_API.ORGANIZATION_ID = ? AND "
+                    + "AM_API.ORGANIZATION = ? AND "
                     + "ARSM.TENANT_ID = ? AND "
                     + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
                     + "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
