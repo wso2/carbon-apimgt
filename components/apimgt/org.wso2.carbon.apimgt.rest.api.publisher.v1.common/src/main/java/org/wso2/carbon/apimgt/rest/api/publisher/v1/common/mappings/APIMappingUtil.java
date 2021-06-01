@@ -870,6 +870,7 @@ public class APIMappingUtil {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
         APIDTO dto = new APIDTO();
+        dto.setOrganization(model.getOrganization());
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
