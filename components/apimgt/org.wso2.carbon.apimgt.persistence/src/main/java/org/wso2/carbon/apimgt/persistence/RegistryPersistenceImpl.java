@@ -356,7 +356,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void restoreAPIRevision(Organization org, String apiUUID, int revisionId)
+    public void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
             throws APIPersistenceException {
 
         boolean transactionCommitted = false;
@@ -1071,6 +1071,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                 }
                 apiInfo.setAvailableTierNames(availableTiers);
+                apiInfo.setSubscriptionAvailability(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+                apiInfo.setSubscriptionAvailableOrgs(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1179,6 +1183,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                                apiInfo.setSubscriptionAvailability(
+                                        artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+                                apiInfo.setSubscriptionAvailableOrgs(artifact
+                                        .getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
                                 devPortalAPIInfoList.add(apiInfo);
                             }
 
@@ -3693,10 +3701,5 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.endTenantFlow();
             }
         }
-    }
-
-    @Override
-    public List<APICategory> getAllCategories(Organization org) throws APIPersistenceException {
-        return null;
     }
 }

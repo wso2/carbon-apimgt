@@ -21,7 +21,26 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
@@ -111,14 +130,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get All the tags
      */
     Set<Tag> getAllTags(String organization) throws APIManagementException;
-
-    /**
-     * Get all categories of published APIs
-     *
-     * @return a list of all categories applied to all APIs published.
-     * @throws APIManagementException if failed to get All the categories
-     */
-    List<APICategory> getAllCategories(String organization) throws APIManagementException;
 
     /**
      * Returns all tags with their descriptions.
@@ -814,10 +825,11 @@ public interface APIConsumer extends APIManager {
      *
      * @param username    subscriber of the application
      * @param applicationId applicationId of the application
+     * @param organization Organization
      * @return set of scopes.
      * @throws APIManagementException
      */
-    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
+    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId, String organization)
             throws APIManagementException;
 
     /**

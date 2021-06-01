@@ -900,10 +900,17 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    throw new APIManagementException(
-                            "Error occurred while adding the API. The version already exists: " + version
-                                    + " in the organization : " + organization, ExceptionCodes
-                            .from(ExceptionCodes.API_VERSION_ALREADY_EXISTS, version, body.getName()));
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
+                        throw new APIManagementException(
+                                "Error occurred while " + "adding the API. A duplicate API already exists for "
+                                        + context + " in the organization : " + organization,
+                                ExceptionCodes.API_ALREADY_EXISTS);
+                    } else {
+                        throw new APIManagementException(
+                                "Error occurred while adding API. API with name " + body.getName()
+                                        + " already exists with different context" + context  + " in the organization" +
+                                        " : " + organization,  ExceptionCodes.API_ALREADY_EXISTS);
+                    }
                 }
             }
         } else {

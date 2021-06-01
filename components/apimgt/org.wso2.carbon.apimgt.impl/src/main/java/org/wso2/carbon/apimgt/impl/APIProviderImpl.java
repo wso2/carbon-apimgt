@@ -7968,7 +7968,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
-                api.setOrganization(organization);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateAPIInformation(uuid, organization, api);
@@ -8204,7 +8203,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addWSDLResource(String apiId, ResourceFile resource, String url, String organizationId) throws APIManagementException {
+    public void addWSDLResource(String apiId, ResourceFile resource, String url, String organization) throws APIManagementException {
         if (!StringUtils.isEmpty(url)) {
             URL wsdlUrl;
             try {
@@ -8222,7 +8221,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     wsdlContent, null);
             try {
                 apiPersistenceInstance.saveWSDL(
-                        new Organization(organizationId), apiId,
+                        new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
@@ -8863,8 +8862,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance
-                    .restoreAPIRevision(new Organization(organization), apiIdentifier.getUUID(), apiRevision.getId());
+            apiPersistenceInstance.restoreAPIRevision(new Organization(organization), apiIdentifier.getUUID(),
+                    apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
@@ -9082,7 +9081,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void restoreAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException {
+    public void restoreAPIProductRevision(String apiProductId, String apiRevisionId, String organization)
+            throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
         if (apiProductIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
@@ -9096,7 +9096,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProductIdentifier.setUUID(apiProductId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
-                    apiProductIdentifier.getUUID(), apiRevision.getId());
+                    apiProductIdentifier.getUUID(), apiRevision.getApiUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.

@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -88,10 +87,12 @@ public interface APIPersistence {
      *
      * @param org          Organization the API is owned by
      * @param apiUUID API UUID
+     * @param revisionId uuid
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
-    void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+    void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
+            throws APIPersistenceException;
 
     /**
      * Add API Revision to the persistence layer
@@ -520,11 +521,4 @@ public interface APIPersistence {
      */
     Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
-    /**
-     * Get a list of all the categories of an organization
-     *
-     * @param org   Organization the categories are owned by
-     * @return list of all the API categories of an organization
-     */
-    List<APICategory>getAllCategories(Organization org) throws APIPersistenceException;
 }

@@ -42,9 +42,42 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -1697,19 +1730,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<APICategory> getAllCategories(String organization) throws APIManagementException {
-        Organization org = new Organization(organization);
-        List<APICategory> categoriesList;
-        try {
-            categoriesList = apiPersistenceInstance.getAllCategories(org);
-        } catch (APIPersistenceException e) {
-            String msg = "Failed to get API categories";
-            throw new APIManagementException(msg, e);
-        }
-        return categoriesList;
-    }
-
-    @Override
     public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
         // Fetch the all the tags first.
         Set<Tag> tags = getAllTags(tenantDomain);
@@ -2573,12 +2593,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
+    public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId, String organization)
             throws APIManagementException {
 
         Subscriber subscriber = new Subscriber(username);
         Set<String> scopeKeySet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
-        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
+        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, organization).values());
     }
 
     @Override
@@ -3080,12 +3100,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
         }
-
         String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
         try {
-
-
             SubscriptionWorkflowDTO workflowDTO;
             WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
                     WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -3207,7 +3224,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     + " for resource " + identifier.toString();
             handleException(errorMsg, e);
         }
-
 
         if (log.isDebugEnabled()) {
             String logMessage = "Subscription removed from app " + applicationName + " by " + userId + " For Id: "

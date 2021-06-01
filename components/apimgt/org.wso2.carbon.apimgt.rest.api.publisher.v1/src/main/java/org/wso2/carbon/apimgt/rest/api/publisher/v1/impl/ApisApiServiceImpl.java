@@ -2885,6 +2885,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
@@ -3464,25 +3465,24 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
-                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, tenantDomain);
+                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, organization);
             } else if (fileDetail != null && fileInputStream != null) {
                 PublisherCommonUtils
                         .addWsdl(fileDetail.getContentType().toString(), fileInputStream, apiToAdd, apiProvider,
-                                tenantDomain);
+                                organization);
             }
 
             //add the generated swagger definition to SOAP
             APIDefinition oasParser = new OAS2Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
-            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, tenantDomain);
+            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, organization);
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPIbyUUID(apiToAdd.getUuid(), tenantDomain);
+            API createdApi = apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
             return createdApi;
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
