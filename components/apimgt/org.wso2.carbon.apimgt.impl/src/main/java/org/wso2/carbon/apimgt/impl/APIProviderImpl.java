@@ -7968,6 +7968,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
+                api.setOrganization(organization);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateAPIInformation(uuid, organization, api);
