@@ -846,16 +846,18 @@ public class APIMgtDAOTest {
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        int internalAPIID2 = apiMgtDAO.addAPI(api, -1234, "testOrg");
+        int internalAPIID2 = apiMgtDAO.addAPI(api, -1234, "org1");
         api.getId().setId(internalAPIID2);
+        api.setOrganization("org1");
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
         api1.setUUID(UUID.randomUUID().toString());
-        int apiInternalId = apiMgtDAO.addAPI(api1, -1234, "testOrg");
+        int apiInternalId = apiMgtDAO.addAPI(api1, -1234, "org2");
         api1.getId().setId(apiInternalId);
+        api1.setOrganization("org2");
         apiMgtDAO.createApplicationRegistrationEntry(applicationRegistrationWorkflowDTO, false);
         ApplicationRegistrationWorkflowDTO retrievedApplicationRegistrationWorkflowDTO = new
                 ApplicationRegistrationWorkflowDTO();
