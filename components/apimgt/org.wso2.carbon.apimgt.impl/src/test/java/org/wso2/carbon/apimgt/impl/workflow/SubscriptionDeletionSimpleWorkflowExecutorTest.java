@@ -50,6 +50,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutorTest {
         subscriptionWorkflowDTO.setApiProvider("testUser");
         subscriptionWorkflowDTO.setApiName("weatherAPI");
         subscriptionWorkflowDTO.setApiVersion("v1");
+        subscriptionWorkflowDTO.setMetadata("apiId", String.valueOf(1));
         subscriptionDeletionSimpleWorkflowExecutor = new SubscriptionDeletionSimpleWorkflowExecutor();
     }
 
