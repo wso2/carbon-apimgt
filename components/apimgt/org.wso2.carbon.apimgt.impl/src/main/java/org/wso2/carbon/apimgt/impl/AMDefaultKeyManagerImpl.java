@@ -107,7 +107,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         String applicationName = oAuthApplicationInfo.getClientName();
-        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
+        String oauthClientName = oauthAppRequest.getOAuthApplicationInfo().getApplicationUUID();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
@@ -296,7 +296,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
-        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
+        String oauthClientName = oAuthApplicationInfo.getApplicationUUID();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
