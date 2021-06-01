@@ -23,7 +23,17 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -252,11 +262,15 @@ public class ApplicationImportExportManager {
         if (!StringUtils.isEmpty(apiKey.getCallbackUrl())) {
             jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, apiKey.getCallbackUrl());
         }
+        if (apiKey.getAdditionalProperties() != null) {
+            jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, apiKey.getAdditionalProperties());
+        }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(
                 username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
                 accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
-                jsonParams,apiKey.getKeyManager(), null, true); // TODO: 2020-12-23 get the store domain and pass it as the tenant domain );
+                jsonParams, apiKey.getKeyManager(), null, true);
+        // TODO: 2020-12-23 get the store domain and pass it as the tenant domain );
     }
 }
