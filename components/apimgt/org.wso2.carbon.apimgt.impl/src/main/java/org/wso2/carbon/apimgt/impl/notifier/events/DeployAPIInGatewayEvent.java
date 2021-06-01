@@ -50,8 +50,8 @@ public class DeployAPIInGatewayEvent extends Event {
      * @param context
      */
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain,
-                                   int apiId,String uuid, Set<String> gatewayLabels, String name, String version,
-                                   String provider,String apiType, String context) {
+                                   int apiId, String uuid, Set<String> gatewayLabels, String name, String version,
+                                   String provider, String apiType, String context) {
         this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
