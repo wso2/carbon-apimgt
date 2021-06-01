@@ -436,7 +436,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 
         if (StringUtils.isNotEmpty(permittedRefererList)) {
             // Validate http referer against the permitted referrers
-            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
+            Map<String, String> transportHeaderMap = (Map<String, String>)
                     axis2MessageContext.getProperty
                             (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (transportHeaderMap != null) {

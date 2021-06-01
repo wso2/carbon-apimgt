@@ -146,7 +146,7 @@ public class GatewayUtils {
     public static String getIp(MessageContext messageContext) {
 
         //Set transport headers of the message
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
+        Map<String, String> transportHeaderMap = (Map<String, String>) messageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         // Assigning an Empty String so that when doing comparisons, .equals method can be used without explicitly
         // checking for nullity.
