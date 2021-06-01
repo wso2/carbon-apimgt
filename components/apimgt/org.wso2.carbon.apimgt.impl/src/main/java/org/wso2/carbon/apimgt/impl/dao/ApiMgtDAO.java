@@ -6971,9 +6971,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_SQL)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
-            prepStmt.setString(2, apiProductIdentifier.getName());
-            prepStmt.setString(3, apiProductIdentifier.getVersion());
+            prepStmt.setString(1, product.getUuid());
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     product.setProductId(rs.getInt("API_ID"));
@@ -7213,11 +7211,18 @@ public class ApiMgtDAO {
     public Set<URITemplate> getURITemplatesOfAPI(String uuid, String organization)
             throws APIManagementException {
 
-        APIIdentifier identifier = getAPIIdentifierFromUUID(uuid);
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        APIIdentifier identifier = getAPIIdentifierFromUUID(currentApiUuid);
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
-        if (checkAPIUUIDIsARevisionUUID(uuid) != null) {
+        if (apiRevision != null) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -7591,10 +7596,8 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
-                prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                prepStmt.setString(2, identifier.getName());
-                prepStmt.setString(3, identifier.getVersion());
-                prepStmt.setString(4, commentId);
+                prepStmt.setString(1, uuid);
+                prepStmt.setString(2, commentId);
                 try (ResultSet resultSet = prepStmt.executeQuery()) {
                     if (resultSet.next()) {
                         comment.setId(resultSet.getString("COMMENT_ID"));
