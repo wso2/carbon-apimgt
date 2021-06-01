@@ -17,8 +17,17 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -29,13 +38,25 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -169,7 +190,9 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         applicationDetailsString = new String(Files.readAllBytes(Paths.get(applicationDetailsFilePath)),
                 StandardCharsets.UTF_8);
         //convert to bean
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(new TypeToken<Map<String, Object>>() {
+        }.getType(), getMapDeserializer()).create();
+
         //returns an application object from a json string
         return gson.fromJson(applicationDetailsString, Application.class);
     }
@@ -383,5 +406,54 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             }
             return archiveName;
         }
+    }
+
+    private JsonDeserializer<Map<String, Object>> getMapDeserializer() {
+
+        return new JsonDeserializer<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> deserialize(JsonElement jsonElement, Type type,
+                                                   JsonDeserializationContext jsonDeserializationContext)
+                    throws JsonParseException {
+
+                return (Map<String, Object>) read(jsonElement);
+            }
+
+            public Object read(JsonElement in) {
+
+                if (in.isJsonArray()) {
+                    List<Object> list = new ArrayList<Object>();
+                    JsonArray arr = in.getAsJsonArray();
+                    for (JsonElement anArr : arr) {
+                        list.add(read(anArr));
+                    }
+                    return list;
+                } else if (in.isJsonObject()) {
+                    Map<String, Object> map = new LinkedTreeMap<String, Object>();
+                    JsonObject obj = in.getAsJsonObject();
+                    Set<Map.Entry<String, JsonElement>> entitySet = obj.entrySet();
+                    for (Map.Entry<String, JsonElement> entry : entitySet) {
+                        map.put(entry.getKey(), read(entry.getValue()));
+                    }
+                    return map;
+                } else if (in.isJsonPrimitive()) {
+                    JsonPrimitive prim = in.getAsJsonPrimitive();
+                    if (prim.isBoolean()) {
+                        return prim.getAsBoolean();
+                    } else if (prim.isString()) {
+                        return prim.getAsString();
+                    } else if (prim.isNumber()) {
+
+                        Number num = prim.getAsNumber();
+                        if (Math.ceil(num.doubleValue()) == num.longValue())
+                            return num.longValue();
+                        else {
+                            return num.doubleValue();
+                        }
+                    }
+                }
+                return null;
+            }
+        };
     }
 }

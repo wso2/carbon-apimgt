@@ -209,6 +209,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         Map<String, Object> additionalProperties = new HashMap<>();
         if (parameter instanceof String) {
             additionalProperties = new Gson().fromJson((String) parameter, Map.class);
+        } else if (parameter instanceof Map) {
+            additionalProperties = (Map<String, Object>) parameter;
         }
         if (additionalProperties != null) {
             if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
@@ -223,6 +225,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                             // No need to throw as its due to not a number sent.
                         }
                     }
+                } else if (expiryTimeObject instanceof Long) {
+                    clientInfo.setApplicationAccessTokenLifeTime((Long) expiryTimeObject);
                 }
             }
             if (additionalProperties.containsKey(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME)) {
@@ -237,6 +241,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                             // No need to throw as its due to not a number sent.
                         }
                     }
+                } else if (expiryTimeObject instanceof Long) {
+                    clientInfo.setUserAccessTokenLifeTime((Long) expiryTimeObject);
                 }
             }
             if (additionalProperties.containsKey(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME)) {
@@ -251,6 +257,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                             // No need to throw as its due to not a number sent.
                         }
                     }
+                } else if (expiryTimeObject instanceof Long) {
+                    clientInfo.setRefreshTokenLifeTime((Long) expiryTimeObject);
                 }
             }
             if (additionalProperties.containsKey(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME)) {
@@ -265,6 +273,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                             // No need to throw as its due to not a number sent.
                         }
                     }
+                } else if (expiryTimeObject instanceof Long) {
+                    clientInfo.setIdTokenLifeTime((Long) expiryTimeObject);
                 }
             }
         }
