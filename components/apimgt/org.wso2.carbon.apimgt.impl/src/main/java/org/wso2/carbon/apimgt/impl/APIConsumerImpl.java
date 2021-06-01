@@ -5772,7 +5772,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
             }
-        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+        } catch (APIPersistenceException e) {
+            String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+            throw new APIManagementException(msg, ExceptionCodes.from(e.getErrorHandler(), uuid));
+        } catch (OASPersistenceException | ParseException e) {
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
