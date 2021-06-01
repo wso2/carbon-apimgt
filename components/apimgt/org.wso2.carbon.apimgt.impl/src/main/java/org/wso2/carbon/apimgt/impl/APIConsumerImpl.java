@@ -3092,7 +3092,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void removeSubscription(Identifier identifier, String userId, int applicationId, String organization)
             throws APIManagementException {
 
-        boolean isTenantFlowStarted = false;
         APIIdentifier apiIdentifier = null;
         APIProductIdentifier apiProdIdentifier = null;
         if (identifier instanceof APIIdentifier) {
