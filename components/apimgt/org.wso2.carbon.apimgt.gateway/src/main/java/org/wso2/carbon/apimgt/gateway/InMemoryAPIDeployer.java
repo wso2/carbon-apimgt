@@ -332,7 +332,7 @@ public class InMemoryAPIDeployer {
             if (retrievedAPI != null) {
                 DeployAPIInGatewayEvent deployAPIInGatewayEvent =
                         new DeployAPIInGatewayEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain, "",
+                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(),
                                 retrievedAPI.getApiType(), retrievedAPI.getContext());
@@ -352,7 +352,7 @@ public class InMemoryAPIDeployer {
             if (retrievedAPI != null) {
                 DeployAPIInGatewayEvent deployAPIInGatewayEvent =
                         new DeployAPIInGatewayEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain, "",
+                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);

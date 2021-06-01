@@ -49,7 +49,7 @@ public class DeployAPIInGatewayEvent extends Event {
      * @param apiType
      * @param context
      */
-    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, String organizationId,
+    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain,
                                    int apiId,String uuid, Set<String> gatewayLabels, String name, String version,
                                    String provider,String apiType, String context) {
         this.uuid = uuid;
@@ -68,7 +68,6 @@ public class DeployAPIInGatewayEvent extends Event {
         this.apiType = apiType;
         this.context = context;
         this.associatedApis = new HashSet<>();
-        this.organizationId = organizationId;
     }
 
     public Set<String> getGatewayLabels() {
