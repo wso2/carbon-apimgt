@@ -369,6 +369,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant,
                                                  MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId, xWSO2Tenant);
@@ -397,7 +398,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                     applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
-                    Set<Scope> scopes = apiConsumer.getScopesForApplicationSubscription(username, application.getId());
+                    Set<Scope> scopes = apiConsumer
+                            .getScopesForApplicationSubscription(username, application.getId(), organization);
                     List<ScopeInfoDTO> scopeInfoList = ApplicationMappingUtil.getScopeInfoDTO(scopes);
                     applicationDTO.setSubscriptionScopes(scopeInfoList);
                     return Response.ok().entity(applicationDTO).build();

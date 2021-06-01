@@ -5321,8 +5321,13 @@ public class ApiMgtDAO {
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
         if (!isProduct) {
             identifier = apiTypeWrapper.getApi().getId();
-            id = identifier.getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
+            if (apiUUID != null) {
+                id = getAPIID(apiUUID);
+            }
+            if (id == -1){
+                id = identifier.getId();
+            }
         } else {
             identifier = apiTypeWrapper.getApiProduct().getId();
             id = apiTypeWrapper.getApiProduct().getProductId();
@@ -6971,9 +6976,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_SQL)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
-            prepStmt.setString(2, apiProductIdentifier.getName());
-            prepStmt.setString(3, apiProductIdentifier.getVersion());
+            prepStmt.setString(1, product.getUuid());
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     product.setProductId(rs.getInt("API_ID"));
@@ -7213,11 +7216,18 @@ public class ApiMgtDAO {
     public Set<URITemplate> getURITemplatesOfAPI(String uuid, String organization)
             throws APIManagementException {
 
-        APIIdentifier identifier = getAPIIdentifierFromUUID(uuid);
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        APIIdentifier identifier = getAPIIdentifierFromUUID(currentApiUuid);
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
-        if (checkAPIUUIDIsARevisionUUID(uuid) != null) {
+        if (apiRevision != null) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -7591,10 +7601,8 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
-                prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                prepStmt.setString(2, identifier.getName());
-                prepStmt.setString(3, identifier.getVersion());
-                prepStmt.setString(4, commentId);
+                prepStmt.setString(1, uuid);
+                prepStmt.setString(2, commentId);
                 try (ResultSet resultSet = prepStmt.executeQuery()) {
                     if (resultSet.next()) {
                         comment.setId(resultSet.getString("COMMENT_ID"));
@@ -8078,6 +8086,38 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
         }
         return identifier;
+    }
+
+    /**
+     * @param apiId UUID of the API
+     * @return organization of the API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String getOrganizationByAPIUUID(String apiId) throws APIManagementException {
+        String organization = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_ORGANIZATION_BY_API_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiId);
+                result = ps.executeQuery();
+
+                while (result.next()) {
+                    organization = result.getString("ORGANIZATION");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching organization", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching organization", e);
+        }
+        return organization;
     }
 
     /**

@@ -356,7 +356,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void restoreAPIRevision(Organization org, String apiUUID, int revisionId)
+    public void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
             throws APIPersistenceException {
 
         boolean transactionCommitted = false;

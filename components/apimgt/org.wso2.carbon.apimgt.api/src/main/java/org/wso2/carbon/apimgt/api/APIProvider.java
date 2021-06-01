@@ -1807,9 +1807,11 @@ public interface APIProvider extends APIManager {
      *
      * @param apiProductId API Product UUID
      * @param apiRevisionId API Revision UUID
+     * @param organization organization of the API
      * @throws APIManagementException if failed to restore APIRevision
      */
-    void restoreAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
+    void restoreAPIProductRevision(String apiProductId, String apiRevisionId, String organization)
+            throws APIManagementException;
 
     /**
      * Delete an API Product Revision

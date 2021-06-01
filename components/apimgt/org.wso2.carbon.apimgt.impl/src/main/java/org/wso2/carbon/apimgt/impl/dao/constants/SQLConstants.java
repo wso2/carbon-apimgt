@@ -1331,8 +1331,7 @@ public class SQLConstants {
                     + "AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
     public static final String GET_API_PRODUCT_SQL =
-            "SELECT API_ID, API_TIER FROM AM_API WHERE API_PROVIDER = ? " +
-                    "AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
+            "SELECT API_ID, API_TIER FROM AM_API WHERE API_UUID = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
 
     public static final String GET_AUDIT_UUID_SQL =
             "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE MAP.API_ID = ?";
@@ -1638,6 +1637,8 @@ public class SQLConstants {
             "   AND" + " API_VERSION = ? " +
             "   AND ORGANIZATION = ? ";
 
+    public static final String GET_ORGANIZATION_BY_API_ID = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?";
+
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
                      " THROTTLING_TIER IS NULL";
@@ -1807,9 +1808,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
@@ -2765,6 +2764,7 @@ public class SQLConstants {
             "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ?";
     public static final String DELETE_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
             "API_ID = ?";
+    public static final String RETRIEVE_ORGANIZATION = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID =?";
     public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
             "SELECT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
                     ".TENANT_DOMAIN AS TENANT_DOMAIN," +
@@ -3173,7 +3173,7 @@ public class SQLConstants {
             "SELECT AM_API.API_NAME, AM_API.API_PROVIDER "
                     + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API "
                     + "WHERE ARSM.SCOPE_NAME = ? AND "
-                    + "AM_API.ORGANIZATION_ID = ? AND "
+                    + "AM_API.ORGANIZATION = ? AND "
                     + "ARSM.TENANT_ID = ? AND "
                     + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
                     + "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
