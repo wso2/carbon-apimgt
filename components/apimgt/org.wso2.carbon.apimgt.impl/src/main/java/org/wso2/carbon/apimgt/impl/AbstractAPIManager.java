@@ -490,8 +490,7 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registry;
             if (organization != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (organization)) {
-                int id = getTenantManager()
-                        .getTenantId(organization);
+                int id = APIUtil.getInternalOrganizationId(organization);
                 startTenantFlow(organization);
                 tenantFlowStarted = true;
                 registry = getRegistryService().getGovernanceSystemRegistry(id);
@@ -522,9 +521,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
-            String msg = "Failed to get API";
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         } finally {
