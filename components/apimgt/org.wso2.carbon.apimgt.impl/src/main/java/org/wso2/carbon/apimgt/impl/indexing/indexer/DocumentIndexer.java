@@ -96,7 +96,7 @@ public class DocumentIndexer extends RXTIndexer {
                 StringBuilder stringBuilder = new StringBuilder();
                 String documentContent = fetchDocumentContent(registry, documentResource);
                 if (documentContent != null) {
-                    stringBuilder.append(fetchDocumentContent(registry, documentResource));
+                    stringBuilder.append(documentContent);
                 }
                 if (fields.get(APIConstants.DOC_NAME) != null) {
                     stringBuilder.append(APIConstants.DOC_NAME + "=" + StringUtils
