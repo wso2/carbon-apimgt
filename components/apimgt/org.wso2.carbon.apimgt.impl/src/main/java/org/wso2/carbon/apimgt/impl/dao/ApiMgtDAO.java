@@ -774,7 +774,7 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
             if (identifier instanceof APIIdentifier) {
-                id = getAPIID((APIIdentifier) identifier, conn);
+                id = identifier.getId();
             } else if (identifier instanceof APIProductIdentifier) {
                 id = ((APIProductIdentifier) identifier).getProductId();
             }
@@ -8815,7 +8815,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             if (identifier instanceof APIIdentifier) {
-                id = getAPIID((APIIdentifier) identifier, conn);
+                id = identifier.getId();
             } else if (identifier instanceof APIProductIdentifier) {
                 id = ((APIProductIdentifier) identifier).getProductId();
             }
