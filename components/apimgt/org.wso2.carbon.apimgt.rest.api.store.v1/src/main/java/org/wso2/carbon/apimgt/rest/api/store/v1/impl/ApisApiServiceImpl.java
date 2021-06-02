@@ -343,10 +343,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
                                         Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
                                         MessageContext messageContext) throws APIManagementException {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
@@ -639,7 +639,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
-            String apiProvider = api.getProvider();
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
                         swaggerDefinition);
