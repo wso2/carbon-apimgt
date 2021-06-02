@@ -17,10 +17,24 @@
  */
 
 import SwaggerClient from 'swagger-client';
+// Configurations.app.proxy_context_path
+// import Configurations from 'Config';
 // Parse the swagger definition in the worker thread and
 // pass the parsed plain JS object to main thread via postMessage
+// eslint-disable-next-line no-restricted-globals
+const { location } = self;
+const contextParts = location.pathname.split('site/public/dist')[0].split('/');
+let proxyContextPath = '';
+if (contextParts.length > 0) {
+    contextParts.forEach((path, i) => {
+        if (i !== 0 && i < (contextParts.length - 2)) {
+            proxyContextPath += '/' + path;
+        }
+    });
+}
+
 SwaggerClient.resolve({
-    url: '/api/am/publisher/v1/swagger.yaml',
+    url: proxyContextPath + '/api/am/publisher/v1/swagger.yaml',
     requestInterceptor: (request) => {
         request.headers.Accept = 'text/yaml';
     },
