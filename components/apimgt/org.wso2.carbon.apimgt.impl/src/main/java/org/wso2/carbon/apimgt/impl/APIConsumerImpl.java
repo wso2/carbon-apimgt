@@ -5797,7 +5797,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
     @Override
-    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String organization, int start, int end)
             throws APIManagementException {
 
         ArrayList<Object> compoundResult = new ArrayList<Object>();
@@ -5807,7 +5807,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int totalLength = 0;
 
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organization);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
         String[] roles = APIUtil.getFilteredUserRoles(userame);;
         UserContext ctx = new UserContext(userame, org, properties, roles);

@@ -322,14 +322,14 @@ public class RestAPIStoreUtils {
      * Retrieves the API Identifier object from given API UUID and tenant domain
      *
      * @param apiId API Identifier UUID
-     * @param requestedTenantDomain tenant which API resides
+     * @param organization Organization of the API
      * @return API Identifier object 
      * @throws APIManagementException if the retrieval fails
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String organization)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
         return  api.getId();
     }
 
