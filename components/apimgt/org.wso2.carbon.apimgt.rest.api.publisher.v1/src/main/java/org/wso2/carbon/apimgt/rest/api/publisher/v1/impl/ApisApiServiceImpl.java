@@ -1436,7 +1436,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
                     .getPaginatedClientCertificates(certificates, limit, offset, query);
-            APIListDTO apiListDTO = new APIListDTO();
             PaginationDTO paginationDTO = new PaginationDTO();
             paginationDTO.setLimit(limit);
             paginationDTO.setOffset(offset);
@@ -2686,9 +2685,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIResourcePolicies(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API api = provider.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
                         || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
@@ -2849,9 +2848,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
                 String errorMessage = "API " + api.getId().getName() +
                         " should be in published state to get total revenue.";
@@ -3524,7 +3523,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                     String wsdlArchiveExtractedPath, API apiToAdd, String organization) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
 
