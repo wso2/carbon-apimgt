@@ -168,7 +168,7 @@ public class APIMappingUtil {
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
         int tenantId = 0;
         if (!StringUtils.isBlank(organization)) {
-            tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
+            tenantId = APIUtil.getInternalOrganizationId(organization);
         }
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
@@ -321,7 +321,7 @@ public class APIMappingUtil {
 
         int tenantId = 0;
         if (!StringUtils.isBlank(organization)) {
-            tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
+            tenantId = APIUtil.getInternalOrganizationId(organization);
         }
 
         //set the monetization status of this API (enabled or disabled)
