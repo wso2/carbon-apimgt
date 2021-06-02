@@ -6973,10 +6973,17 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         APIProductIdentifier apiProductIdentifier = product.getId();
+        String currentApiUuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(product.getUuid());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = product.getUuid();
+        }
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_SQL)) {
-            prepStmt.setString(1, product.getUuid());
+            prepStmt.setString(1, currentApiUuid);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     product.setProductId(rs.getInt("API_ID"));
@@ -14246,6 +14253,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(8, APIConstants.API_PRODUCT);
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.setString(10, apiProduct.getState());
+            prepStmtAddAPIProduct.setString(11, organization);
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();

@@ -120,9 +120,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiId);
-        APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, tenantDomain);
+        APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, organization);
         APIProductDTO apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(product);
         return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName,
                 format, preserveStatus, preserveDocs, preserveCredentials, organization);
