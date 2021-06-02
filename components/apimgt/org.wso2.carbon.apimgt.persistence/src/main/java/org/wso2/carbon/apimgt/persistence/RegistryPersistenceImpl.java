@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -351,7 +352,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void restoreAPIRevision(Organization org, String apiUUID, int revisionId)
+    public void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
             throws APIPersistenceException {
 
         boolean transactionCommitted = false;
@@ -3609,5 +3610,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         }
 
+    }
+
+    @Override
+    public Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException {
+        // Not implemented. 
+        return null;
     }
 }
