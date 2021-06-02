@@ -2009,7 +2009,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_API API " +
                     " WHERE " +
-                    "   AND API.API_UUID = ? " +
+                    "   API.API_UUID = ? " +
                     "   AND API.API_ID = SUBS.API_ID " +
                     "   AND SUB_STATUS = ?";
 
