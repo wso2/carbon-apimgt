@@ -2895,6 +2895,17 @@ paths:
       summary: Add a new API Key Manager
       description: |
         Add a new API Key Manager
+      parameters:
+      - name: tokenType
+        in: query
+        description: |
+          The type of the tokens to be used (exchanged or without exchanged)
+        schema:
+          type: string
+          enum:
+            - EXCHANGED
+            - ORIGINAL
+          default: ORIGINAL
       requestBody:
         description: |
           Key Manager object that should to be added
@@ -2971,6 +2982,16 @@ paths:
         Update a Key Manager by keyManager id
       parameters:
       - $ref: '#/components/parameters/keyManagerId'
+      - name: tokenType
+        in: query
+        description: |
+          The type of the tokens to be used (exchanged or without exchanged)
+        schema:
+          type: string
+          enum:
+            - EXCHANGED
+            - ORIGINAL
+          default: ORIGINAL
       requestBody:
         description: |
           Key Manager object with updated information
