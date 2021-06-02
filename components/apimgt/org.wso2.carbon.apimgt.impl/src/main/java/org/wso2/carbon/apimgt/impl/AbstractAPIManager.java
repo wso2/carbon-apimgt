@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.PersistenceConstants;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
@@ -246,9 +247,34 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
         }
+        Map<String, String> configMap = new HashMap<>();
+        APIManagerConfigurationService apiManagerConfigurationService = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService();
+
+        if (apiManagerConfigurationService != null) {
+            APIManagerConfiguration apiManagerConfig = apiManagerConfigurationService.getAPIManagerConfiguration();
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_TYPE,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_TYPE));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_API_URI,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_API_URI));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT));
+        }
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(properties);
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
 
     }
 
@@ -3219,6 +3245,14 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Set<APIKey> getApplicationKeys(int applicationId, String xWso2Tenant) throws APIManagementException {
 
         Set<APIKey> apiKeyList = apiMgtDAO.getKeyMappingsFromApplicationId(applicationId);
+        
+        if (StringUtils.isNotEmpty(xWso2Tenant)) {
+            int tenantId = APIUtil.getInternalOrganizationId(xWso2Tenant);
+            // To handle choreo scenario. due to keymanagers are not per organization atm. using ST
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                xWso2Tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+        }
         Set<APIKey> resultantApiKeyList = new HashSet<>();
         for (APIKey apiKey : apiKeyList) {
             String keyManagerName = apiKey.getKeyManager();

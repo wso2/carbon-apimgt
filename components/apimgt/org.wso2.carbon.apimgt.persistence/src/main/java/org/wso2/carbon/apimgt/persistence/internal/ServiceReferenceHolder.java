@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.apimgt.persistence.internal;
 
+import java.util.Map;
+
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
@@ -29,6 +32,9 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
 
     private RegistryService registryService;
+    
+    private APIPersistence apiPersistence;
+    private Map<String, String> persistenceConfigs;
 
     private static ConfigurationContextService contextService;
 
@@ -76,5 +82,21 @@ public class ServiceReferenceHolder {
     }
     public static void setContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.contextService = contextService;
+    }
+
+    public APIPersistence getApiPersistence() {
+        return apiPersistence;
+    }
+
+    public void setApiPersistence(APIPersistence apiPersistence) {
+        this.apiPersistence = apiPersistence;
+    }
+
+    public Map<String, String> getPersistenceConfigs() {
+        return persistenceConfigs;
+    }
+
+    public void setPersistenceConfigs(Map<String, String> persistenceConfigs) {
+        this.persistenceConfigs = persistenceConfigs;
     }
 }

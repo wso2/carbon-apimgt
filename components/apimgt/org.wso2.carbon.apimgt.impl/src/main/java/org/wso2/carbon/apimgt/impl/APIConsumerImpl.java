@@ -3912,13 +3912,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isTenantFlowStarted = false;
         if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        }
-        int tenantId = MultitenantConstants.INVALID_TENANT_ID;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            handleException("Unable to retrieve the tenant information of the current user.", e);
+        } else {
+            int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
+            
+            // To handle choreo scenario. 
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
         }
 
         String keyManagerId = null;

@@ -5467,6 +5467,40 @@ public class ApiMgtDAO {
     }
 
     /**
+     * @param organizationID UUID of the organization
+     * @return All APIs of a given Organization
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public List<API> getAPIsOfOrganization(String organizationID) throws APIManagementException {
+        List<API> apis = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, organizationID);
+                result = ps.executeQuery();
+                while (result.next()) {
+                    APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
+                            result.getString("API_NAME"),
+                            result.getString("API_VERSION"));
+                    API api = new API(apiId);
+                    apis.add(api);
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching APIS", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching APIS", e);
+        }
+        return apis;
+    }
+
+    /**
      * Returns whether a given API Context already exists
      *
      * @param contextTemplate Requested context template
@@ -6973,10 +7007,17 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         APIProductIdentifier apiProductIdentifier = product.getId();
+        String currentApiUuid;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(product.getUuid());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = product.getUuid();
+        }
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_SQL)) {
-            prepStmt.setString(1, product.getUuid());
+            prepStmt.setString(1, currentApiUuid);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     product.setProductId(rs.getInt("API_ID"));
@@ -14246,6 +14287,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(8, APIConstants.API_PRODUCT);
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.setString(10, apiProduct.getState());
+            prepStmtAddAPIProduct.setString(11, organization);
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();

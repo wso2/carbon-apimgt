@@ -1037,14 +1037,7 @@ public class APIConsumerImplTest {
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
                 .thenReturn(-1234, 1);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        try {
-            apiConsumer
-                    .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default", null, false);
-            Assert.fail("User store exception not thrown for invalid token type");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Unable to retrieve the tenant information of the current user"));
-        }
+
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
                 thenReturn(new String[] { "role1", "role2" });
 
