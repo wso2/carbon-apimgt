@@ -5467,6 +5467,40 @@ public class ApiMgtDAO {
     }
 
     /**
+     * @param organizationID UUID of the organization
+     * @return All APIs of a given Organization
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public List<API> getAPIsOfOrganization(String organizationID) throws APIManagementException {
+        List<API> apis = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, organizationID);
+                result = ps.executeQuery();
+                while (result.next()) {
+                    APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
+                            result.getString("API_NAME"),
+                            result.getString("API_VERSION"));
+                    API api = new API(apiId);
+                    apis.add(api);
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching APIS", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching APIS", e);
+        }
+        return apis;
+    }
+
+    /**
      * Returns whether a given API Context already exists
      *
      * @param contextTemplate Requested context template

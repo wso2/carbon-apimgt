@@ -30,6 +30,15 @@ import java.util.Set;
 public class ApiProjectDto {
     private String apiFile;
     private Set<EnvironmentDto> environments = new HashSet<>();
+    private String organization;
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
 
     public String getApiFile() {
         return apiFile;
