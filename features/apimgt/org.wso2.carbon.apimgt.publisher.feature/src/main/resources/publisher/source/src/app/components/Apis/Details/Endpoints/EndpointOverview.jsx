@@ -273,7 +273,42 @@ function EndpointOverview(props) {
         setEpConfig(endpointConfig);
         setEndpointType(epType);
         if (endpointConfig.endpoint_security) {
-            setEndpointSecurityInfo(endpointConfig.endpoint_security);
+            if (
+                endpointConfig.endpoint_security.username
+                && endpointConfig.endpoint_security.password
+                && endpointConfig.endpoint_security.type
+            ) {
+                const newEndpointSecurity = {
+                    production: {
+                        type: endpointConfig.endpoint_security.type,
+                        username: endpointConfig.endpoint_security.username,
+                        password: endpointConfig.endpoint_security.password,
+                        grantType: '',
+                        tokenUrl: '',
+                        clientId: '',
+                        clientSecret: '',
+                        customParameters: {},
+                    },
+                    sandbox: {
+                        type: endpointConfig.endpoint_security.type,
+                        username: endpointConfig.endpoint_security.username,
+                        password: endpointConfig.endpoint_security.password,
+                        grantType: '',
+                        tokenUrl: '',
+                        clientId: '',
+                        clientSecret: '',
+                        customParameters: {},
+                    },
+                };
+                if (!endpointConfig.production_endpoints) {
+                    delete newEndpointSecurity.production;
+                } else if (!endpointConfig.sandbox_endpoints) {
+                    delete newEndpointSecurity.sandbox;
+                }
+                setEndpointSecurityInfo(newEndpointSecurity);
+            } else {
+                setEndpointSecurityInfo(endpointConfig.endpoint_security);
+            }
         } else {
             setEndpointSecurityInfo(endpointSecurity);
         }
