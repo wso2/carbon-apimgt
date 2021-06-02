@@ -2411,7 +2411,6 @@ public final class APIConstants {
         public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
-        public static final String IS_EXTERNAL_IDP = "is_external_idp";
         public static final String TOKEN_TYPE_EXCHANGED = "EXCHANGED";
         public static final String TOKEN_TYPE_ORIGINAL = "ORIGINAL";
 
