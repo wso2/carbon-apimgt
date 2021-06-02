@@ -1577,11 +1577,11 @@ public interface APIProvider extends APIManager {
      * upload mediation policy to api
      * @param apiId           ID of the API
      * @param mediationPolicy Mediation Policy
-     * @param orgId           Identifier of an organization
+     * @param organization    Identifier of an organization
      * @return added policy
      * @throws APIManagementException
      */
-    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy, String orgId) throws APIManagementException;
+    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy, String organization) throws APIManagementException;
 
     /**
      * update mediation policy content

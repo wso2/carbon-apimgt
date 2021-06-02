@@ -339,10 +339,10 @@ public interface APIPersistence {
     /**
      * Add the content (Inline text/Markdown content text/ Resource file) of API documentation
      *
-     * @param org   Organization the documentation is owned by
-     * @param apiId API ID
-     * @param docId Documentation ID
-     * @param Documentation Content
+     * @param org       Organization the documentation is owned by
+     * @param apiId     API ID
+     * @param docId     Documentation ID
+     * @param content   Content
      * @return Documentation Content
      * @throws DocumentationPersistenceException
      */

@@ -210,7 +210,7 @@ public interface APIManager {
      * @return async specification string
      * @throws APIManagementException
      */
-    String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
+    String getAsyncAPIDefinition(String apiId, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api/product
@@ -493,7 +493,7 @@ public interface APIManager {
      * @return Set<Tier>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    Map<String, String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
+    Map<String, String> getTenantDomainMappings(String organization, String appType) throws APIManagementException;
 
     /**
      * Check whether the given scope key is already available under given tenant
@@ -812,11 +812,11 @@ public interface APIManager {
      * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
      * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
      *
-     * @param apiId ID of the API
-     * @param tenantDomain tenant
+     * @param apiId         ID of the API
+     * @param organization  Organization of the API
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
-    ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException;
+    ResourceFile getWSDL(String apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the graphql schema content in registry specified by the schema name

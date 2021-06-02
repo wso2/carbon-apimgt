@@ -2664,13 +2664,13 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getTiers(int tierType, String tenantDomain) throws APIManagementException {
+    public static Map<String, Tier> getTiers(int tierType, String organization) throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
         try {
             PrivilegedCarbonContext.startTenantFlow();
             isTenantFlowStarted = true;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             if (tierType == APIConstants.TIER_API_TYPE) {
                 return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
@@ -6470,7 +6470,7 @@ public final class APIUtil {
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMappings(String tenantDomain, String appType)
+    public static Map<String, String> getDomainMappings(String organization, String appType)
             throws APIManagementException {
 
         Map<String, String> domains = new HashMap<String, String>();
@@ -6478,7 +6478,7 @@ public final class APIUtil {
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, tenantDomain);
+            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace(APIConstants.API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER, organization);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());

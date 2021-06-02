@@ -1307,19 +1307,19 @@ public class PublisherCommonUtils {
      * @param apiProvider  API Provider
      * @param apiId        API/API Product UUID
      * @param documentId   Document ID
-     * @param tenantDomain Tenant domain of the API/API Product
+     * @param organization Tenant domain of the API/API Product
      * @throws APIManagementException If an error occurs while adding the documentation file
      */
     public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
                                                       APIProvider apiProvider, String apiId,
-                                                      String documentId, String tenantDomain)
+                                                      String documentId, String organization)
             throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
         resourceFile.setName(filename);
         content.setResourceFile(resourceFile);
         content.setSourceType(DocumentationContent.ContentSourceType.FILE);
-        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+        apiProvider.addDocumentationContent(apiId, documentId, organization, content);
     }
 
     /**
@@ -1537,16 +1537,16 @@ public class PublisherCommonUtils {
      * @param swaggerContent Swagger content
      * @param api            API to update
      * @param apiProvider    API Provider
-     * @param tenantDomain   Tenant domain of the API
+     * @param organization   Tenant domain of the API
      * @return Updated API Object
      * @throws APIManagementException If an error occurs while generating the sequences or updating the API
      * @throws FaultGatewaysException If an error occurs while updating the API
      */
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
-                                                                     APIProvider apiProvider, String tenantDomain)
+                                                                     APIProvider apiProvider, String organization)
             throws APIManagementException, FaultGatewaysException {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
-        API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
+        API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
         return apiProvider.updateAPI(updatedAPI, api);
     }
@@ -1558,14 +1558,14 @@ public class PublisherCommonUtils {
      * @param type               Type (in/out/fault) of the mediation policy to be added
      * @param apiProvider        API Provider
      * @param apiId              API ID of the mediation policy
-     * @param tenantDomain       Tenant domain of the API
+     * @param organization       Organization of the API
      * @param existingMediations Existing mediation sequences
      *                           (This can be null when adding an API specific sequence)
      * @return Added mediation
      * @throws Exception If an error occurs while adding the mediation sequence
      */
     public static Mediation addMediationPolicyFromFile(String content, String type, APIProvider apiProvider,
-            String apiId, String tenantDomain, List<Mediation> existingMediations, boolean isAPISpecific)
+            String apiId, String organization, List<Mediation> existingMediations, boolean isAPISpecific)
             throws Exception {
         if (StringUtils.isNotEmpty(content)) {
             OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(content.getBytes()));
@@ -1581,15 +1581,15 @@ public class PublisherCommonUtils {
                     log.debug("Sequence" + fileName + " already exists");
                 } else {
                     return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
-                            tenantDomain);
+                            organization);
                 }
             } else {
                 if (existingMediation != null) {
                     // This will happen only when updating an API specific sequence using apictl
-                    apiProvider.deleteApiSpecificMediationPolicy(apiId, existingMediation.getUuid(), tenantDomain);
+                    apiProvider.deleteApiSpecificMediationPolicy(apiId, existingMediation.getUuid(), organization);
                 }
                 return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
-                        tenantDomain);
+                        organization);
             }
         }
         return null;
@@ -1604,19 +1604,19 @@ public class PublisherCommonUtils {
      * @param type         Type (in/out/fault) of the mediation policy to be added
      * @param apiProvider  API Provider
      * @param apiId        API ID of the mediation policy
-     * @param tenantDomain Tenant domain of the API
+     * @param organization Organization of the API
      * @return
      * @throws APIManagementException If the sequence is malformed.
      */
     private static Mediation addApiSpecificMediationPolicyFromFile(String localName, String content, String fileName,
-            String type, APIProvider apiProvider, String apiId, String tenantDomain) throws APIManagementException {
+            String type, APIProvider apiProvider, String apiId, String organization) throws APIManagementException {
         if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
             Mediation mediationPolicy = new Mediation();
             mediationPolicy.setConfig(content);
             mediationPolicy.setName(fileName);
             mediationPolicy.setType(type);
             // Adding API specific mediation policy
-            return apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, tenantDomain);
+            return apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, organization);
         } else {
             throw new APIManagementException("Sequence is malformed");
         }
