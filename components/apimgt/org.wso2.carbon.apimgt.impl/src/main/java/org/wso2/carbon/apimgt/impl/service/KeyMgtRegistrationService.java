@@ -59,6 +59,7 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
                 keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
                 keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
+                keyManagerConfigurationDTO.setTokenType(APIConstants.KeyManager.TOKEN_TYPE_ORIGINAL);
                 if (apiManagerConfigurationService != null &&
                         apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
                     String defaultKeyManagerType =

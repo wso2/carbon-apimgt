@@ -38,6 +38,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private Map<String,Object> additionalProperties = new HashMap();
     private String type;
     private boolean enabled;
+    private String tokenType;
 
     public KeyManagerConfigurationDTO() {
 
@@ -53,6 +54,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.additionalProperties = new HashMap<>(keyManagerConfigurationDTO.getAdditionalProperties());
         this.type = keyManagerConfigurationDTO.getType();
         this.enabled = keyManagerConfigurationDTO.isEnabled();
+        this.tokenType = keyManagerConfigurationDTO.getTokenType();
     }
     public String getName() {
 
@@ -133,6 +135,15 @@ public class KeyManagerConfigurationDTO implements Serializable {
 
         this.enabled = enabled;
     }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
     public void addProperty(String key,Object value){
         additionalProperties.put(key,value);
     }
