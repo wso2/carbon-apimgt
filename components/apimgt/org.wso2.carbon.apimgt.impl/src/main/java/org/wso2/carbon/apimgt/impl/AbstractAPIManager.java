@@ -3245,6 +3245,14 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Set<APIKey> getApplicationKeys(int applicationId, String xWso2Tenant) throws APIManagementException {
 
         Set<APIKey> apiKeyList = apiMgtDAO.getKeyMappingsFromApplicationId(applicationId);
+        
+        if (StringUtils.isNotEmpty(xWso2Tenant)) {
+            int tenantId = APIUtil.getInternalOrganizationId(xWso2Tenant);
+            // To handle choreo scenario. due to keymanagers are not per organization atm. using ST
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                xWso2Tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+        }
         Set<APIKey> resultantApiKeyList = new HashSet<>();
         for (APIKey apiKey : apiKeyList) {
             String keyManagerName = apiKey.getKeyManager();
