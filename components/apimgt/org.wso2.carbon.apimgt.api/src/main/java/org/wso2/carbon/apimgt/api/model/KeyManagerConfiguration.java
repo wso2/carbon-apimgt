@@ -33,6 +33,7 @@ public class KeyManagerConfiguration {
     private String type;
     private boolean enabled;
     private String tenantDomain;
+    private String tokenType;
 
     private Map<String, Object> configuration = new HashMap<>();
 
@@ -94,5 +95,13 @@ public class KeyManagerConfiguration {
     public Map<String, Object> getConfiguration() {
 
         return configuration;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

@@ -180,7 +180,7 @@ public class KeyManagerMappingUtil {
     }
 
     public static KeyManagerConfigurationDTO toKeyManagerConfigurationDTO(String tenantDomain,
-                                                                          KeyManagerDTO keyManagerDTO) {
+            KeyManagerDTO keyManagerDTO, String tokenType) {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
         keyManagerConfigurationDTO.setName(keyManagerDTO.getName());
@@ -189,6 +189,7 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setEnabled(keyManagerDTO.isEnabled());
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
         keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+        keyManagerConfigurationDTO.setTokenType(tokenType);
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());

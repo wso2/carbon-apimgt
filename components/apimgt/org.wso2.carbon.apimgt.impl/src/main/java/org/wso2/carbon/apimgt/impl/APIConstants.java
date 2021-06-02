@@ -2411,6 +2411,9 @@ public final class APIConstants {
         public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
+        public static final String IS_EXTERNAL_IDP = "is_external_idp";
+        public static final String TOKEN_TYPE_EXCHANGED = "EXCHANGED";
+        public static final String TOKEN_TYPE_ORIGINAL = "ORIGINAL";
 
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
@@ -2475,6 +2478,7 @@ public final class APIConstants {
             public static final String ACTION_UPDATE = "update";
             public static final String ACTION_DELETE = "delete";
             public static final String TYPE = "type";
+            public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
     }

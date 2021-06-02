@@ -382,9 +382,8 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.isKeyManagerConfigurationExistById(tenantDomain, id);
     }
 
-    @Override
-    public KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-            throws APIManagementException {
+    @Override public KeyManagerConfigurationDTO addKeyManagerConfiguration(
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
         if (apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
                 keyManagerConfigurationDTO.getTenantDomain())) {
@@ -392,7 +391,10 @@ public class APIAdminImpl implements APIAdmin {
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getTenantDomain(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
-        validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        if (!StringUtils
+                .equals(keyManagerConfigurationDTO.getTokenType(), APIConstants.KeyManager.TOKEN_TYPE_EXCHANGED)) {
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        }
         keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
         KeyManagerConfigurationDTO keyManagerConfigurationToStore =
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
@@ -497,7 +499,10 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        if (!StringUtils
+                .equals(keyManagerConfigurationDTO.getTokenType(), APIConstants.KeyManager.TOKEN_TYPE_EXCHANGED)) {
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getTenantDomain(),
                         keyManagerConfigurationDTO.getUuid());

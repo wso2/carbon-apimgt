@@ -96,13 +96,14 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return null;
     }
 
-    public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext) {
+    public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, String tokenType,
+            MessageContext messageContext) {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
+                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, tokenType);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
                     apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -125,13 +126,14 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return null;
     }
 
-    public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
+    public Response keyManagersPost(KeyManagerDTO body, String tokenType, MessageContext messageContext)
+            throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
+                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, tokenType);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
