@@ -4,8 +4,7 @@
  */
 const AppConfig = {
     app: {
-        context: '/apim/publisher', // Note the leading `/` and no trailing `/`
-        proxy_context_path: '/apim',
+        context: '/publisher', // Note the leading `/` and no trailing `/`
         /*
         If the proxy context path is configured, it's required to provide it here as well.
         for example, to serve https://company.com/products/publisher/ URL the context and proxy_context_path will be as follows.
