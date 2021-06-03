@@ -2154,9 +2154,9 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @return Map<String, String>
      */
-    public Map<String, String> getTenantDomainMappings(String organization, String apiType) throws APIManagementException {
+    public Map<String, String> getTenantDomainMappings(String tenantDomain, String apiType) throws APIManagementException {
 
-        return APIUtil.getDomainMappings(organization, apiType);
+        return APIUtil.getDomainMappings(tenantDomain, apiType);
     }
 
     public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {

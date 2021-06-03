@@ -493,7 +493,7 @@ public interface APIManager {
      * @return Set<Tier>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    Map<String, String> getTenantDomainMappings(String organization, String appType) throws APIManagementException;
+    Map<String, String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
 
     /**
      * Check whether the given scope key is already available under given tenant
