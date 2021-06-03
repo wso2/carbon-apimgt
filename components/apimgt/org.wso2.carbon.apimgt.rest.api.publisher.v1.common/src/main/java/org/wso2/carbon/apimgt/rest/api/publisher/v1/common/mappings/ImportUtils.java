@@ -1970,7 +1970,7 @@ public class ImportUtils {
                         apiProvider
                                 .undeployAPIProductRevisionDeployment(importedAPIUuid, earliestRevisionUuid,
                                         deploymentsList);
-                        apiProvider.deleteAPIProductRevision(importedAPIUuid, earliestRevisionUuid);
+                        apiProvider.deleteAPIProductRevision(importedAPIUuid, earliestRevisionUuid, organization);
                         revisionId = apiProvider.addAPIProductRevision(apiProductRevision, organization);
                         if (log.isDebugEnabled()) {
                             log.debug("Revision ID: " + earliestRevisionUuid + " has been undeployed from " +
