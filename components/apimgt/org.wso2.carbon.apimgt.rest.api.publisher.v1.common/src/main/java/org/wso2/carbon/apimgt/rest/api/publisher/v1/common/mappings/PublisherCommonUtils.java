@@ -70,8 +70,8 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
@@ -588,10 +588,10 @@ public class PublisherCommonUtils {
      * @param additionalProperties Map<String, String>  properties to validate
      * @return error message if there is an validation error with additional properties.
      */
-    public static String validateAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+    public static String validateAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
 
         if (additionalProperties != null) {
-            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+            for (APIInfoAdditionalPropertiesDTO property : additionalProperties) {
                 String propertyKey = property.getName();
                 String propertyValue = property.getValue();
                 if (propertyKey.contains(" ")) {

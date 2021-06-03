@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.api;
+ package org.wso2.carbon.apimgt.api;
 
-import java.util.Map;
-
-public interface OrganizationResolver {
-
-    /**
-     * Resolve the organization 
-     * @param properties input properties to use for resolving
-     * @return String organization 
-     * @throws APIManagementException
-     */
-    public String resolve(Map<String, Object> properties) throws APIManagementException;
-    
-    /**
-     * Get the internal ID for the provided organization
-     * @param organization
-     * @return id representing the organization
-     * @throws APIManagementException 
-     */
-    public int getInternalId(String organization) throws APIManagementException;
-
-}
+ import java.util.Map;
+ 
+ public interface OrganizationResolver {
+ 
+     /**
+      * Resolve the organization 
+      * @param properties input properties to use for resolving
+      * @return String organization 
+      * @throws APIManagementException
+      */
+     public String resolve(Map<String, Object> properties) throws APIManagementException;
+     
+     /**
+      * Get the internal ID for the provided organization
+      * @param organization
+      * @return id representing the organization
+      * @throws APIManagementException 
+      */
+     public int getInternalId(String organization) throws APIManagementException;
+ 
+ }
+ 

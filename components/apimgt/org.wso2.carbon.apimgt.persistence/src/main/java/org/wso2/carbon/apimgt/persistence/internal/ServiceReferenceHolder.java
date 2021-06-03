@@ -32,11 +32,12 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
 
     private RegistryService registryService;
-    
-    private APIPersistence apiPersistence;
-    private Map<String, String> persistenceConfigs;
 
     private static ConfigurationContextService contextService;
+    
+    private Map<String, String> persistenceConfigs;
+
+    private APIPersistence apiPersistence;
 
     private ServiceReferenceHolder() {
     }
@@ -83,13 +84,8 @@ public class ServiceReferenceHolder {
     public static void setContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.contextService = contextService;
     }
-
     public APIPersistence getApiPersistence() {
         return apiPersistence;
-    }
-
-    public void setApiPersistence(APIPersistence apiPersistence) {
-        this.apiPersistence = apiPersistence;
     }
 
     public Map<String, String> getPersistenceConfigs() {
@@ -98,5 +94,9 @@ public class ServiceReferenceHolder {
 
     public void setPersistenceConfigs(Map<String, String> persistenceConfigs) {
         this.persistenceConfigs = persistenceConfigs;
+    }
+
+    public void setApiPersistence(APIPersistence apiPersistence) {
+        this.apiPersistence = apiPersistence;
     }
 }
