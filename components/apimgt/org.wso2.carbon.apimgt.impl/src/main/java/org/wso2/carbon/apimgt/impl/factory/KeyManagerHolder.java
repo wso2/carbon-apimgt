@@ -71,9 +71,7 @@ public class KeyManagerHolder {
             log.error("Key Manager " + name + " already initialized in tenant " + tenantDomain);
         }
         if (keyManagerConfiguration.isEnabled()) {
-            if (!StringUtils
-                    .equals(keyManagerConfiguration.getTokenType(), APIConstants.KeyManager.TOKEN_TYPE_EXCHANGED)
-                    || StringUtils.equals(keyManagerConfiguration.getTokenType(), StringUtils.EMPTY)) {
+            if (!KeyManagerConfiguration.TokenType.EXCHANGED.equals(keyManagerConfiguration.getTokenType())) {
                 KeyManager keyManager = null;
                 JWTValidator jwtValidator = null;
                 APIManagerConfiguration apiManagerConfiguration =

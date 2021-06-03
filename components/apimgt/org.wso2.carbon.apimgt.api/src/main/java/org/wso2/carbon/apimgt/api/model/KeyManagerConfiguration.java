@@ -33,7 +33,12 @@ public class KeyManagerConfiguration {
     private String type;
     private boolean enabled;
     private String tenantDomain;
-    private String tokenType;
+
+    public enum TokenType {
+        EXCHANGED, ORIGINAL
+    }
+
+    private TokenType tokenType = TokenType.ORIGINAL;
 
     private Map<String, Object> configuration = new HashMap<>();
 
@@ -97,11 +102,11 @@ public class KeyManagerConfiguration {
         return configuration;
     }
 
-    public String getTokenType() {
+    public TokenType getTokenType() {
         return tokenType;
     }
 
-    public void setTokenType(String tokenType) {
+    public void setTokenType(TokenType tokenType) {
         this.tokenType = tokenType;
     }
 }

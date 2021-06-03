@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -59,7 +60,7 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
                 keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
                 keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
-                keyManagerConfigurationDTO.setTokenType(APIConstants.KeyManager.TOKEN_TYPE_ORIGINAL);
+                keyManagerConfigurationDTO.setTokenType(KeyManagerConfiguration.TokenType.ORIGINAL.toString());
                 if (apiManagerConfigurationService != null &&
                         apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
                     String defaultKeyManagerType =

@@ -12,6 +12,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
@@ -99,12 +100,15 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, String tokenType,
             MessageContext messageContext) {
+        KeyManagerConfiguration.TokenType idpTokenType = StringUtils.isNotEmpty(tokenType) ?
+                KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()) :
+                KeyManagerConfiguration.TokenType.ORIGINAL;
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, tokenType);
+                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, idpTokenType);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
                     apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -130,11 +134,15 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersPost(KeyManagerDTO body, String tokenType, MessageContext messageContext)
             throws APIManagementException {
 
+        KeyManagerConfiguration.TokenType idpTokenType = StringUtils.isNotEmpty(tokenType) ?
+                KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()) :
+                KeyManagerConfiguration.TokenType.ORIGINAL;
+
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, tokenType);
+                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, idpTokenType);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
