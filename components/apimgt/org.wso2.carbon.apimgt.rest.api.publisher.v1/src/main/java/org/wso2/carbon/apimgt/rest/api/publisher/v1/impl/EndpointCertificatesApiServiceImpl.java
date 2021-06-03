@@ -243,7 +243,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 URI uri = new URI(endpoint);
                 endpoint = uri.getHost();
                 if (endpoint == null) {
-                    return null;
+                    Response.status(Response.Status.OK).entity(new CertificatesDTO());
                 }
             } catch (Exception ignored) {
                 // Parsing the value of the endpoint as is, if the endpoint is not in the format of an URL.
