@@ -66,7 +66,8 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                             if (StringUtils.isNotEmpty(value)) {
                                 KeyManagerConfiguration keyManagerConfiguration =
                                         APIUtil.toKeyManagerConfiguration(value);
-                                keyManagerConfiguration.setTokenType(tokenType);
+                                keyManagerConfiguration.setTokenType(
+                                        KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()));
                                 keyManagerConfiguration.setEnabled(enabled);
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()

@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
@@ -180,7 +181,7 @@ public class KeyManagerMappingUtil {
     }
 
     public static KeyManagerConfigurationDTO toKeyManagerConfigurationDTO(String tenantDomain,
-            KeyManagerDTO keyManagerDTO, String tokenType) {
+            KeyManagerDTO keyManagerDTO, KeyManagerConfiguration.TokenType tokenType) {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
         keyManagerConfigurationDTO.setName(keyManagerDTO.getName());
@@ -189,7 +190,7 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setEnabled(keyManagerDTO.isEnabled());
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
         keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-        keyManagerConfigurationDTO.setTokenType(tokenType);
+        keyManagerConfigurationDTO.setTokenType(tokenType.toString());
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());

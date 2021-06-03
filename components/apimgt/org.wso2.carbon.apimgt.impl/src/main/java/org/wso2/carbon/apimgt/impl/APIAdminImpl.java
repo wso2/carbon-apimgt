@@ -34,13 +34,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -391,8 +390,8 @@ public class APIAdminImpl implements APIAdmin {
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getTenantDomain(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
-        if (!StringUtils
-                .equals(keyManagerConfigurationDTO.getTokenType(), APIConstants.KeyManager.TOKEN_TYPE_EXCHANGED)) {
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
         keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
@@ -499,8 +498,8 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (!StringUtils
-                .equals(keyManagerConfigurationDTO.getTokenType(), APIConstants.KeyManager.TOKEN_TYPE_EXCHANGED)) {
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
