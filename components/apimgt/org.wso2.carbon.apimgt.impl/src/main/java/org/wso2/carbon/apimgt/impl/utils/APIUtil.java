@@ -6457,6 +6457,13 @@ public final class APIUtil {
 
         Map<String, String> domains = new HashMap<String, String>();
         String resourcePath;
+        if (StringUtils.isNotEmpty(tenantDomain)) {
+            int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
+            // To handle choreo scenario. due to keymanagers are not per organization atm. using ST
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+        }
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
