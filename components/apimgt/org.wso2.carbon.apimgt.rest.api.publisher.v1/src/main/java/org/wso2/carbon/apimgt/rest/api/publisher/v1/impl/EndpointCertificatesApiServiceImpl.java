@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.google.gdata.util.common.base.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -241,6 +242,9 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             try {
                 URI uri = new URI(endpoint);
                 endpoint = uri.getHost();
+                if (endpoint == null) {
+                    Response.status(Response.Status.OK).entity(new CertificatesDTO());
+                }
             } catch (Exception ignored) {
                 // Parsing the value of the endpoint as is, if the endpoint is not in the format of an URL.
             }
