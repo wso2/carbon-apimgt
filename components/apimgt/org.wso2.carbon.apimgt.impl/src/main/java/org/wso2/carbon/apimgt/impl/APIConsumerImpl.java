@@ -3349,6 +3349,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setSubscriber(userId);
             workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
             workflowDTO.setApplicationId(applicationId);
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_ID, String.valueOf(apiIdentifier.getId()));
 
             String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
