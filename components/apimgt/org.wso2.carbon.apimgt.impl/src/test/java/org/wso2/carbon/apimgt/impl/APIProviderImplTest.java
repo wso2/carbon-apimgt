@@ -3993,7 +3993,8 @@ public class APIProviderImplTest {
             Assert.fail(e.getMessage());
         }
         Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
-        PowerMockito.doNothing().when(apiPersistenceInstance).deleteAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt());
+        PowerMockito.doNothing().when(apiPersistenceInstance)
+                .deleteAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyInt());
         try {
             apiProvider.deleteAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
                     "b55e0fc3-9829-4432-b99e-02056dc91838", superTenantDomain);

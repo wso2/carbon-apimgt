@@ -99,10 +99,12 @@ public interface APIPersistence {
      *
      * @param org          Organization the API is owned by
      * @param apiUUID API UUID
+     * @param revisionUUID API revisionUUID
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
-    void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+    void deleteAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
+            throws APIPersistenceException;
 
     /**
      * Update API in the persistence layer
