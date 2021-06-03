@@ -1094,7 +1094,6 @@ public class PublisherCommonUtils {
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
         PublisherCommonUtils.validateScopes(existingAPI);
-
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
@@ -1102,7 +1101,6 @@ public class PublisherCommonUtils {
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        existingAPI.setOrganization(organization);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
@@ -1536,16 +1534,16 @@ public class PublisherCommonUtils {
      * @param swaggerContent Swagger content
      * @param api            API to update
      * @param apiProvider    API Provider
-     * @param tenantDomain   Tenant domain of the API
+     * @param organization  Organization Identifier
      * @return Updated API Object
      * @throws APIManagementException If an error occurs while generating the sequences or updating the API
      * @throws FaultGatewaysException If an error occurs while updating the API
      */
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
-                                                                     APIProvider apiProvider, String tenantDomain)
+                                                                     APIProvider apiProvider, String organization)
             throws APIManagementException, FaultGatewaysException {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
-        API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
+        API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
         return apiProvider.updateAPI(updatedAPI, api);
     }

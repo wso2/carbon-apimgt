@@ -343,10 +343,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
                                         Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
                                         MessageContext messageContext) throws APIManagementException {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
@@ -776,11 +776,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         if (org.apache.commons.lang.StringUtils.isNotEmpty(apiId)) {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             Set<Topic> topics;
             try {
                 APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
                 TopicListDTO topicListDTO;
                 if (apiTypeWrapper.isAPIProduct()) {
                     topics = apiConsumer.getTopics(apiTypeWrapper.getApiProduct().getUuid());

@@ -1436,7 +1436,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
                     .getPaginatedClientCertificates(certificates, limit, offset, query);
-            APIListDTO apiListDTO = new APIListDTO();
             PaginationDTO paginationDTO = new PaginationDTO();
             paginationDTO.setLimit(limit);
             paginationDTO.setOffset(offset);
@@ -3530,7 +3529,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                     String wsdlArchiveExtractedPath, API apiToAdd, String organization) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
 
