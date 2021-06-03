@@ -131,8 +131,8 @@ public class JWTGenerator extends AbstractJWTGenerator {
     public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
             throws APIManagementException {
 
-        Map<String, String> customClaims = new HashMap<String, String>();
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, String> customClaims = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
 
         String accessToken = validationContext.getAccessToken();
         if (accessToken != null) {
@@ -142,19 +142,6 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String username = validationContext.getValidationInfoDTO().getEndUserName();
         int tenantId = APIUtil.getTenantId(username);
 
-        String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getJwtConfigurationDto().getConsumerDialectUri();
-        if (!StringUtils.isEmpty(dialectURI)) {
-            properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
-            String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
-            KeyManager keymanager = KeyManagerHolder.getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId),
-                    keymanagerName);
-            customClaims = keymanager.getUserClaims(username, properties);
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieved claims :" + customClaims);
-            }
-        }
-
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration();
@@ -163,7 +150,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
             if (accessToken != null) {
                 properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
             }
-            dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+            String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
             if (!StringUtils.isEmpty(dialectURI)) {
                 properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
