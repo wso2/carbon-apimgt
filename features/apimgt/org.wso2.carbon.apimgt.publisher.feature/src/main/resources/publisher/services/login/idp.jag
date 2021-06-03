@@ -18,7 +18,7 @@
  */
 
     var log = new Log();
-    log.error("Services login DCR request");
+    log.debug("Services login DCR request");
     var app = require("/site/public/conf/settings.js").AppConfig.app;
     var appUtils = require("/services/utils.js");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -125,11 +125,11 @@
     } else {
         var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
     }  
-
+    log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {
         'name': 'CLIENT_ID',
         'value': clientId,
-        'path': appContext + "/",
+        'path': app.context + "/",
         "secure": true,
         "maxAge": -1
     };

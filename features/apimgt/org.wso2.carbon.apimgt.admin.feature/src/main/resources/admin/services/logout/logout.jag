@@ -20,8 +20,10 @@
     var log = new Log();
     log.debug("Logout Request Function");
     include("/services/constants.jag");
+    var appUtils = require("/services/utils.js");
     var app = require("/site/public/conf/settings.js").AppConfig.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var appContext = appUtils.getAppContextForServerUrl();
 
     var idTokenP1 = request.getCookie("AM_ID_TOKEN_DEFAULT_P1").value;
     var idTokenP2 = request.getCookie("AM_ID_TOKEN_DEFAULT_P2").value;
@@ -42,7 +44,7 @@
         logoutEndpoint = idpConfig.getOidcLogoutEndpoint();
     }
 
-    var postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    var postLogoutRedirectURI = serverUrl + appContext + LOGOUT_CALLBACK_URL_SUFFIX;
     var url = logoutEndpoint + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogoutRedirectURI;
     log.debug("Redirecting to = " + url);
     response.sendRedirect(url);

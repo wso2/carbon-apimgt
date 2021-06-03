@@ -26,6 +26,7 @@
     var log = new Log();
     log.debug("Login Callback Endpoint");
 
+    var appContext = appUtils.getAppContextForServerUrl();
     var serverUrl = '';
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
     if (app.customUrl.enabled && forwarded_for) {
@@ -34,12 +35,12 @@
         serverUrl = utils.getServerURL();
     }
     if(request.getParameter("error") == "login_required") {
-       response.sendRedirect(serverUrl + app.context + "/services/logout");
+       response.sendRedirect(serverUrl + appContext + "/services/logout");
     } else if (request.getParameter("code") != null) {
         var tokenRequestData = {
             "grant_type": "authorization_code",
             "code": request.getParameter("code", "UTF-8"),
-            "redirect_uri": serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX
+            "redirect_uri": serverUrl + appContext + LOGIN_CALLBACK_URL_SUFFIX
         };
 
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
@@ -55,7 +56,7 @@
         var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
         var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
-        var erroLogin = serverUrl + app.context +"/error-pages?code=";
+        var erroLogin = serverUrl + appContext +"/error-pages?code=";
         var responseFailed = false;
         if (JSON.parse(result.data).error != null) {
             responseFailed = true; 
@@ -96,7 +97,7 @@
             cookie = {
                 'name': 'AM_ACC_TOKEN_DEFAULT_P2',
                 'value': accessTokenPart2,
-                'path': "/api/am/admin/",
+                'path': app.proxy_context_path ? app.proxy_context_path + "/api/am/admin/": "/api/am/admin/",
                 "httpOnly": true,
                 "secure": true,
                 "maxAge": Integer(tokenResponse.expires_in)
@@ -167,10 +168,10 @@
                 if ( state !== '/') {
                     response.sendRedirect(app.context + state);
                 } else {
-                    response.sendRedirect(app.context);
+                    response.sendRedirect(app.context + '/');
                 }
             } else {
-                response.sendRedirect(app.context);
+                response.sendRedirect(app.context + '/');
             }
         }
 }());
