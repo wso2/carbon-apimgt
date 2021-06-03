@@ -248,7 +248,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
-            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
+//            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
                 if (!StringUtils.isEmpty(targetTenantDomain)) {
@@ -1436,7 +1436,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
                     .getPaginatedClientCertificates(certificates, limit, offset, query);
-            APIListDTO apiListDTO = new APIListDTO();
             PaginationDTO paginationDTO = new PaginationDTO();
             paginationDTO.setLimit(limit);
             paginationDTO.setOffset(offset);
@@ -1694,7 +1693,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
-                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, organization);
+                String filename = fileDetail.getContentDisposition().getFilename();
+                if (filename.endsWith(".pdf") || filename.endsWith(".txt") || filename.endsWith(".doc")
+                        || filename.endsWith(".docx")) {
+                    RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, organization);
+                } else {
+                    RestApiUtil.handleBadRequest("Unsupported extension type of document file: " + filename, log);
+                }
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) &&
                         !documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
@@ -2686,9 +2691,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIResourcePolicies(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API api = provider.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
                         || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
@@ -2784,9 +2789,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API api = provider.getLightweightAPIByUUID(apiId, organization);
             if (api == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
@@ -2809,7 +2814,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             break;
                         }
                     }
-                    API originalAPI = provider.getAPIbyUUID(apiId, tenantDomain);
+                    API originalAPI = provider.getAPIbyUUID(apiId, organization);
                     provider.updateAPI(api, originalAPI);
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
@@ -2849,9 +2854,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
                 String errorMessage = "API " + api.getId().getName() +
                         " should be in published state to get total revenue.";

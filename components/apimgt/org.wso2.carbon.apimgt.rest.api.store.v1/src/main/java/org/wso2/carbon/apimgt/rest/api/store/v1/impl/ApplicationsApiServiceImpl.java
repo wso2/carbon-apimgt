@@ -750,9 +750,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                     String organization = getOrganization(messageContext);
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-                            username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
-                            accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName, organization);
+                            username, application, body.getKeyType().toString(), body.getCallbackUrl(),
+                            accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
+                            jsonParams, keyManagerName, organization, false);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1006,7 +1006,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     }
                     String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
-                    OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
+                    OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application,
                             keyType, body.getCallbackUrl(), null, null, null, body.getGroupId(),
                             new Gson().toJson(jsonParams),keyManagerName);
                     ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
@@ -1253,7 +1253,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             jsonParams.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonContent);
                         }
                     }
-                    OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
+                    OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application,
                             appKey.getKeyType().value(), body.getCallbackUrl(), null, null, null,
                             body.getGroupId(),new Gson().toJson(jsonParams),appKey.getKeyManager());
                     ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();

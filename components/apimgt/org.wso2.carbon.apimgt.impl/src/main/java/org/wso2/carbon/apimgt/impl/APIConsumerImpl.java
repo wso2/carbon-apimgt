@@ -3882,15 +3882,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     @Deprecated
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
                                                                          String tokenType, String callbackUrl,
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString,
                                                                          String keyManagerName, String tenantDomain)
             throws APIManagementException {
-        return requestApprovalForApplicationRegistration(userId, applicationName, tokenType, callbackUrl,
-                allowedDomains, validityTime, tokenScope, groupingId, jsonString, keyManagerName, tenantDomain, false);
+        return requestApprovalForApplicationRegistration(userId, application, tokenType, callbackUrl,
+                allowedDomains, validityTime, tokenScope, jsonString, keyManagerName, tenantDomain, false);
     }
 
     /**
@@ -3900,10 +3900,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * So host object should only pass required 9 parameters.
      * */
     @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
                                                                          String tokenType, String callbackUrl,
                                                                          String[] allowedDomains, String validityTime,
-                                                                         String tokenScope, String groupingId,
+                                                                         String tokenScope,
                                                                          String jsonString,
                                                                          String keyManagerName, String tenantDomain,
                                                                          boolean isImportMode)
@@ -3946,7 +3946,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     log.debug("Importing application when KM OAuth App creation is disabled. Trying to map keys");
                     // passing null `clientId` is ok here since the id/secret pair is included
                     // in the `jsonString` and ApplicationUtils#createOauthAppRequest logic handles it.
-                    return mapExistingOAuthClient(jsonString, userId, null, applicationName, tokenType,
+                    return mapExistingOAuthClient(jsonString, userId, null, application.getName(), tokenType,
                             APIConstants.DEFAULT_TOKEN_TYPE, keyManagerName, tenantDomain);
                 } else {
                     throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
@@ -3964,9 +3964,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             ApplicationRegistrationWorkflowDTO appRegWFDto = null;
 
             ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
-
-            // get APIM application by Application Name and userId.
-            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
 
             boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                     getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
@@ -4019,11 +4016,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
                     ApplicationUtils
-                            .createOauthAppRequest(applicationName, null, callbackUrl, tokenScope, jsonString,
+                            .createOauthAppRequest(application.getName(), null, callbackUrl, tokenScope, jsonString,
                                     applicationTokenType, tenantDomain, keyManagerName);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
+            request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
 
             // Setting request values in WorkflowDTO - In future we should keep
             // Application/OAuthApplication related
@@ -4490,7 +4488,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * @param userId Subscriber name.
-     * @param applicationName of the Application.
+     * @param application The Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
@@ -4503,7 +4501,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
+    public OAuthApplicationInfo updateAuthClient(String userId, Application application,
                                                  String tokenType,
                                                  String callbackUrl, String[] allowedDomains,
                                                  String validityTime,
@@ -4517,8 +4515,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 tenantFlowStarted = true;
             }
-
-            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
 
             final String subscriberName = application.getSubscriber().getName();
 
@@ -4562,8 +4558,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
             }
             //Create OauthAppRequest object by passing json String.
-            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                    tokenScope, jsonString, application.getTokenType(), keyManagerTenant, keyManagerName);
+            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                    callbackUrl, tokenScope, jsonString, application.getTokenType(), keyManagerTenant, keyManagerName);
 
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             String consumerKey = apiMgtDAO
@@ -4579,6 +4575,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             // set application attributes
             oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
+            oauthAppRequest.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
             //call update method.
             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
             apiMgtDAO.updateApplicationKeyTypeMetaData(application.getId(), tokenType, keyManagerID, updatedAppInfo);

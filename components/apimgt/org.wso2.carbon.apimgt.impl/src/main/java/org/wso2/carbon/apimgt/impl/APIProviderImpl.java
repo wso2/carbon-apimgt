@@ -8096,7 +8096,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);
-                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("length", searchAPIs.getReturnedAPIsCount());
                 result.put("isMore", true);
             } else {
                 result.put("apis", apiSet);
