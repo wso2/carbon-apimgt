@@ -200,7 +200,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     RestApiUtil.handleBadRequest("Source type of product document " + documentId + " is not FILE", log);
                 }
                 RestApiPublisherUtils
-                        .attachFileToProductDocument(apiProductId, documentation, fileInputStream, fileDetail);
+                        .attachFileToProductDocument(apiProductId, documentation, fileInputStream, fileDetail,
+                                organization);
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) && !documentation
                         .getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {

@@ -248,7 +248,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
-            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
+//            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
 
             /*if (migrationMode) { // migration flow
                 if (!StringUtils.isEmpty(targetTenantDomain)) {
@@ -2686,9 +2686,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIResourcePolicies(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API api = provider.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
                         || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
@@ -2784,9 +2784,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API api = provider.getLightweightAPIByUUID(apiId, organization);
             if (api == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
@@ -2809,7 +2809,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             break;
                         }
                     }
-                    API originalAPI = provider.getAPIbyUUID(apiId, tenantDomain);
+                    API originalAPI = provider.getAPIbyUUID(apiId, organization);
                     provider.updateAPI(api, originalAPI);
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
@@ -2849,9 +2849,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
                 String errorMessage = "API " + api.getId().getName() +
                         " should be in published state to get total revenue.";
@@ -3564,10 +3564,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            ResourceFile resource = apiProvider.getWSDL(apiId, tenantDomain);
+            ResourceFile resource = apiProvider.getWSDL(apiId, organization);
             return RestApiUtil.getResponseFromResourceFile(resource.getName(), resource);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need

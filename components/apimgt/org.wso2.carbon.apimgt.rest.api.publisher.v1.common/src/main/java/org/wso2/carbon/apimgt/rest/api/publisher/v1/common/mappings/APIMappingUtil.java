@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -2704,26 +2703,6 @@ public class APIMappingUtil {
         return apiScopeDTOS;
     }
 
-    /**
-     * This method is used to retrieve APIIdentifier from the apiId or UUID.
-     *
-     * @param apiId
-     * @param requestedTenantDomain
-     */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
-            throws APIManagementException {
-
-        APIIdentifier apiIdentifier;
-        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        if (RestApiCommonUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
-        } else {
-            apiIdentifier =
-                    apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), requestedTenantDomain).getId();
-        }
-        return apiIdentifier;
-    }
-
     public static APIIdentifier getAPIIdentifierFromApiId(String apiId) throws APIManagementException {
         //if apiId contains -AT-, that need to be replaced before splitting
         apiId = APIUtil.replaceEmailDomainBack(apiId);
@@ -2764,16 +2743,16 @@ public class APIMappingUtil {
      * Returns the API given the uuid or the id in {provider}-{api}-{version} format.
      *
      * @param apiId                 uuid or the id in {provider}-{api}-{version} format
-     * @param requestedTenantDomain tenant domain of the API
+     * @param organization organization of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static API getAPIFromApiIdOrUUID(String apiId, String organization)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+        api = apiProvider.getAPIbyUUID(apiId, organization);
         return api;
     }
 

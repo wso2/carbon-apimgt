@@ -1093,7 +1093,6 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
-        existingAPI.setOrganization(organization);
         PublisherCommonUtils.validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
@@ -1307,19 +1306,19 @@ public class PublisherCommonUtils {
      * @param apiProvider  API Provider
      * @param apiId        API/API Product UUID
      * @param documentId   Document ID
-     * @param tenantDomain Tenant domain of the API/API Product
+     * @param organization organization of the API
      * @throws APIManagementException If an error occurs while adding the documentation file
      */
     public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
                                                       APIProvider apiProvider, String apiId,
-                                                      String documentId, String tenantDomain)
+                                                      String documentId, String organization)
             throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
         resourceFile.setName(filename);
         content.setResourceFile(resourceFile);
         content.setSourceType(DocumentationContent.ContentSourceType.FILE);
-        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+        apiProvider.addDocumentationContent(apiId, documentId, organization, content);
     }
 
     /**
