@@ -1,7 +1,0 @@
-{
-  "packages": [
-    "org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher",
-    "org.wso2.carbon.apimgt.store.feature/src/main/resources/devportal"
-  ],
-  "version": "0.0.0"
-}

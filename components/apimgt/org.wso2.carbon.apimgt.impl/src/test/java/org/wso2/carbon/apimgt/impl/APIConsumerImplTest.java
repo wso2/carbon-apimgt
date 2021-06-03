@@ -909,6 +909,7 @@ public class APIConsumerImplTest {
                 thenReturn("http://localhost");
 
         Application application = Mockito.mock(Application.class);
+        application.setUUID(UUID.nameUUIDFromBytes("app1".getBytes()).toString());
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.when(ApplicationUtils
                 .retrieveApplication("app1", "1", null))
@@ -919,7 +920,7 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertEquals(apiConsumer
-                .updateAuthClient("1", "app1", "access", "www.host.com", new String[0], null, null, null, null,
+                .updateAuthClient("1", application, "access", "www.host.com", new String[0], null, null, null, null,
                         "default")
                 .getClientName(), clientName);
     }
@@ -1037,6 +1038,9 @@ public class APIConsumerImplTest {
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
                 .thenReturn(-1234, 1);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        Application app = new Application("app1", new Subscriber("1"));
+        app.setGroupId("2");
+        app.setUUID(UUID.randomUUID().toString());
 
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
                 thenReturn(new String[] { "role1", "role2" });
@@ -1051,8 +1055,8 @@ public class APIConsumerImplTest {
 
         try {
             apiConsumer
-                    .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default", null, false);
+                    .requestApprovalForApplicationRegistration("1", app, "access", "identity.com/auth", null, "3600",
+                            "api_view", null, "default", null, false);
             Assert.fail("API management exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Token Type"));
@@ -1071,14 +1075,14 @@ public class APIConsumerImplTest {
                 .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(application);
         Map<String, Object> result = apiConsumer
-                .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
-                        "identity.com/auth", null, "3600", "api_view", "2", null, "default", null, false);
+                .requestApprovalForApplicationRegistration("1", app, APIConstants.API_KEY_TYPE_PRODUCTION,
+                        "identity.com/auth", null, "3600", "api_view", null, "default", null, false);
         Assert.assertEquals(result.size(),10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
-                .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
-                        "3600", "api_view", "2", null, "default", null, false);
+                .requestApprovalForApplicationRegistration("1", app, APIConstants.API_KEY_TYPE_SANDBOX, "", null,
+                        "3600", "api_view", null, "default", null, false);
         Assert.assertEquals(result.size(), 10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 

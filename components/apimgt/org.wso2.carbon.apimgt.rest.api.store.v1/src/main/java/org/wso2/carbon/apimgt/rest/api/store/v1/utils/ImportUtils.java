@@ -299,8 +299,8 @@ public class ImportUtils {
         }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
-        apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
+        apiConsumer.requestApprovalForApplicationRegistration(username, application, apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null, true);
+                tokenScopes, jsonParams, apiKey.getKeyManager(), null, true);
     }
 }
