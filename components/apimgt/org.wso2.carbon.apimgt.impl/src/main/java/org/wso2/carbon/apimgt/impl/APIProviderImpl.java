@@ -2756,8 +2756,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
                                    String organization) throws APIManagementException {
         API existingAPI = getAPIbyUUID(existingApiId, organization);
-        existingAPI.setOrganization(organization);
-
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
                     ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, existingApiId));
@@ -2766,7 +2764,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceAlreadyExistsException(
                     "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName());
         }
+        existingAPI.setOrganization(organization);
         APIIdentifier existingAPIId = existingAPI.getId();
+        String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
         String existingContext = existingAPI.getContext();
@@ -2834,6 +2834,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setStatus(existingAPIStatus);
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
+        existingAPI.setCreatedTime(existingAPICreatedTime);
         // update existing api with setLatest to false
         existingAPI.setLatest(false);
         if (isDefaultVersion) {
