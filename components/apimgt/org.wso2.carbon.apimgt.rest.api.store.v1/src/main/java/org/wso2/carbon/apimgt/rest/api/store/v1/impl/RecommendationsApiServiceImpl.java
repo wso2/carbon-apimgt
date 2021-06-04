@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
     private static final Log log = LogFactory.getLog(RecommendationsApiService.class);
 
     public Response recommendationsGet(MessageContext messageContext) {
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        String organization = RestApiUtil.getOrganization(messageContext);
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();

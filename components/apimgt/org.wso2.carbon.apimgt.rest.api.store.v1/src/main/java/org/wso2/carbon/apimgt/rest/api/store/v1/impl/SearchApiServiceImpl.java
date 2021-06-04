@@ -58,7 +58,7 @@ public class SearchApiServiceImpl implements SearchApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "*" : query;
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        String organization = RestApiUtil.getOrganization(messageContext);
 
         try {
             if (!query.contains(":")) {

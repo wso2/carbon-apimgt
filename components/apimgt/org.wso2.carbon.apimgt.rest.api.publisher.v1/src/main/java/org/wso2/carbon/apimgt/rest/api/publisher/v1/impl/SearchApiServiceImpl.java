@@ -63,7 +63,7 @@ public class SearchApiServiceImpl implements SearchApiService {
         }
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        String organization = RestApiUtil.getOrganization(messageContext);
         Map<String, Object> result = null;
         if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
             result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
