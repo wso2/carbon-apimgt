@@ -3538,13 +3538,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void deleteAPIProductRevisions(String apiProductUUID) throws APIManagementException {
+    private void deleteAPIProductRevisions(String apiProductUUID, String organization) throws APIManagementException {
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiProductUUID);
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
                 undeployAPIProductRevisionDeployment(apiProductUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
             }
-            deleteAPIProductRevision(apiProductUUID, apiRevision.getRevisionUUID());
+            deleteAPIProductRevision(apiProductUUID, apiRevision.getRevisionUUID(), organization);
         }
     }
 
@@ -7091,11 +7091,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
-            deleteAPIProductRevisions(apiProduct.getUuid());
+            deleteAPIProductRevisions(apiProduct.getUuid(), apiProduct.getOrganization());
 
-            apiPersistenceInstance.deleteAPIProduct(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
-                    apiProduct.getUuid());
+            apiPersistenceInstance.deleteAPIProduct(new Organization(apiProduct.getOrganization()), apiProduct.getUuid());
             apiMgtDAO.deleteAPIProduct(identifier);
             if (log.isDebugEnabled()) {
                 String logMessage =
@@ -7130,8 +7128,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization, null);
             }
         }
-        deleteAPIProduct(
-                getAPIProductbyUUID(apiProductUUID, CarbonContext.getThreadLocalCarbonContext().getTenantDomain()));
+        APIProduct apiProduct = getAPIProductbyUUID(apiProductUUID, organization);
+        apiProduct.setOrganization(organization);
+        deleteAPIProduct(apiProduct);
     }
 
     @Override
@@ -9115,7 +9114,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException {
+    public void deleteAPIProductRevision(String apiProductId, String apiRevisionId, String organization)
+            throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
         if (apiProductIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
@@ -9136,7 +9136,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiProductIdentifier.setUUID(apiProductId);
         try {
-            apiPersistenceInstance.deleteAPIRevision(new Organization(tenantDomain),
+            apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
                     apiProductIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to delete registry artifacts";

@@ -94,12 +94,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-            APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+            APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (log.isDebugEnabled()) {
                 log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
             }
-            APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
+            APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -109,6 +109,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiProductIdentifier + " as active subscriptions exist", log);
             }
 
+            apiProduct.setOrganization(organization);
             apiProvider.deleteAPIProduct(apiProduct);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -826,7 +827,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response deleteAPIProductRevision(String apiProductId, String revisionId,
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.deleteAPIProductRevision(apiProductId, revisionId);
+        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        apiProvider.deleteAPIProductRevision(apiProductId, revisionId, organization);
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
         return Response.ok().entity(apiRevisionListDTO).build();
