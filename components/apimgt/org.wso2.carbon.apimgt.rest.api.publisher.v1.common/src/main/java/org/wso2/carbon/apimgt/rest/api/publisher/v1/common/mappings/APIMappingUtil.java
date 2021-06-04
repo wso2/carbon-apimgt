@@ -658,12 +658,12 @@ public class APIMappingUtil {
         if (api.getCreatedTime() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
-            apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
+            apiInfoDTO.setCreatedTime(String.valueOf(createdTime.getTime()));
         }
         if (api.getLastUpdated() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date lastUpdatedTime = api.getLastUpdated();
-            apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
+            apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
