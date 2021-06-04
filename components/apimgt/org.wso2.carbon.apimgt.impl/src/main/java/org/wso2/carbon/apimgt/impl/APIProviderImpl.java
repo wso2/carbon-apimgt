@@ -8243,7 +8243,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String organization, int start, int end) throws APIManagementException {
         ArrayList<Object> compoundResult = new ArrayList<Object>();
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<Documentation, APIProduct> productDocMap = new HashMap<Documentation, APIProduct>();
@@ -8252,7 +8252,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
 
         String userame = userNameWithoutChange;
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organization);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
         String[] roles = APIUtil.getFilteredUserRoles(userame);
         UserContext ctx = new UserContext(userame, org, properties, roles);

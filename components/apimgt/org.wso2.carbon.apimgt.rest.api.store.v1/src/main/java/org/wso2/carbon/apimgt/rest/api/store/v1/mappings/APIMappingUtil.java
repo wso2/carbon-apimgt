@@ -582,10 +582,9 @@ public class APIMappingUtil {
      */
     public static API getAPIInfoFromUUID(String apiUUID, String organization)
             throws APIManagementException {
-        API api;
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        api = apiConsumer.getLightweightAPIByUUID(apiUUID, organization);
+        API api = apiConsumer.getLightweightAPIByUUID(apiUUID, organization);
         return api;
     }
 
