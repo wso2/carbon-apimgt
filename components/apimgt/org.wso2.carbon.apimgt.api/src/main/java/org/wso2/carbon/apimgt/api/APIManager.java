@@ -187,11 +187,11 @@ public interface APIManager {
      * Returns the swagger v2.0 definition as a string
      *
      * @param apiId  ID of the APIIdentifier
-     * @param orgId  Identifier of an organization
+     * @param organization  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException;
+    String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the OpenAPI definition as a string
@@ -210,7 +210,7 @@ public interface APIManager {
      * @return async specification string
      * @throws APIManagementException
      */
-    String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
+    String getAsyncAPIDefinition(String apiId, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api/product
@@ -812,11 +812,11 @@ public interface APIManager {
      * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
      * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
      *
-     * @param apiId ID of the API
-     * @param tenantDomain tenant
+     * @param apiId         ID of the API
+     * @param organization  Organization of the API
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
-    ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException;
+    ResourceFile getWSDL(String apiId, String organization) throws APIManagementException;
 
     /**
      * Returns the graphql schema content in registry specified by the schema name

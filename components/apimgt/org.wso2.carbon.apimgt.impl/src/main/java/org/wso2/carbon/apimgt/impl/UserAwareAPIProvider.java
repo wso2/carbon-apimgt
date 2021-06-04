@@ -139,9 +139,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getOpenAPIDefinition(apiId, orgId);
+        return super.getOpenAPIDefinition(apiId, organization);
     }
 
     @Override

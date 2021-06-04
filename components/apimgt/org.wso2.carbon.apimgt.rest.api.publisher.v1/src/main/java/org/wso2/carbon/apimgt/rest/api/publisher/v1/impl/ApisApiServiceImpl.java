@@ -2753,9 +2753,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
             String ifNoneMatch, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API api = provider.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(resourcePolicyId)) {
                     String errorMessage = "Resource id should not be empty to update a resource policy.";
@@ -3179,7 +3179,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIResourcePaths(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifier == null) {
@@ -3538,7 +3537,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileInputStream != null) {
                 String filename = fileDetail.getContentDisposition().getFilename();
                 if (filename.endsWith(".zip")) {
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);
                 } else if (filename.endsWith(".wsdl")) {
                     byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
                     swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
@@ -3570,7 +3569,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             //this will fail if user does not have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
             ResourceFile resource = apiProvider.getWSDL(apiId, organization);
             return RestApiUtil.getResponseFromResourceFile(resource.getName(), resource);
         } catch (APIManagementException e) {

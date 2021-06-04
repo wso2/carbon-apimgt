@@ -8098,7 +8098,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);
-                result.put("length", searchAPIs.getReturnedAPIsCount());
+                result.put("length", searchAPIs.getTotalAPIsCount());
                 result.put("isMore", true);
             } else {
                 result.put("apis", apiSet);
@@ -8234,7 +8234,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     resource.getContent(), resource.getContentType());
             try {
                 apiPersistenceInstance.saveWSDL(
-                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                        new Organization(organization), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);

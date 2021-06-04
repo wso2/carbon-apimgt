@@ -2665,27 +2665,16 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getTiers(int tierType, String tenantDomain) throws APIManagementException {
-
-        boolean isTenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (tierType == APIConstants.TIER_API_TYPE) {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
-            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
-            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
-            } else {
-                throw new APIManagementException("No such a tier type : " + tierType);
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+    public static Map<String, Tier> getTiers(int tierType, String organization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalOrganizationId(organization);
+        if (tierType == APIConstants.TIER_API_TYPE) {
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
+        } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
+        } else {
+            throw new APIManagementException("No such a tier type : " + tierType);
         }
     }
 

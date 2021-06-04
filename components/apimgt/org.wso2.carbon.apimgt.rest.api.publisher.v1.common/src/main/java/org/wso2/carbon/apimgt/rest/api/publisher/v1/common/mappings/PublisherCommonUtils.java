@@ -1555,14 +1555,14 @@ public class PublisherCommonUtils {
      * @param type               Type (in/out/fault) of the mediation policy to be added
      * @param apiProvider        API Provider
      * @param apiId              API ID of the mediation policy
-     * @param tenantDomain       Tenant domain of the API
+     * @param organization       Organization of the API
      * @param existingMediations Existing mediation sequences
      *                           (This can be null when adding an API specific sequence)
      * @return Added mediation
      * @throws Exception If an error occurs while adding the mediation sequence
      */
     public static Mediation addMediationPolicyFromFile(String content, String type, APIProvider apiProvider,
-            String apiId, String tenantDomain, List<Mediation> existingMediations, boolean isAPISpecific)
+            String apiId, String organization, List<Mediation> existingMediations, boolean isAPISpecific)
             throws Exception {
         if (StringUtils.isNotEmpty(content)) {
             OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(content.getBytes()));
@@ -1578,15 +1578,15 @@ public class PublisherCommonUtils {
                     log.debug("Sequence" + fileName + " already exists");
                 } else {
                     return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
-                            tenantDomain);
+                            organization);
                 }
             } else {
                 if (existingMediation != null) {
                     // This will happen only when updating an API specific sequence using apictl
-                    apiProvider.deleteApiSpecificMediationPolicy(apiId, existingMediation.getUuid(), tenantDomain);
+                    apiProvider.deleteApiSpecificMediationPolicy(apiId, existingMediation.getUuid(), organization);
                 }
                 return addApiSpecificMediationPolicyFromFile(localName, content, fileName, type, apiProvider, apiId,
-                        tenantDomain);
+                        organization);
             }
         }
         return null;
@@ -1601,19 +1601,19 @@ public class PublisherCommonUtils {
      * @param type         Type (in/out/fault) of the mediation policy to be added
      * @param apiProvider  API Provider
      * @param apiId        API ID of the mediation policy
-     * @param tenantDomain Tenant domain of the API
+     * @param organization Organization of the API
      * @return
      * @throws APIManagementException If the sequence is malformed.
      */
     private static Mediation addApiSpecificMediationPolicyFromFile(String localName, String content, String fileName,
-            String type, APIProvider apiProvider, String apiId, String tenantDomain) throws APIManagementException {
+            String type, APIProvider apiProvider, String apiId, String organization) throws APIManagementException {
         if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
             Mediation mediationPolicy = new Mediation();
             mediationPolicy.setConfig(content);
             mediationPolicy.setName(fileName);
             mediationPolicy.setType(type);
             // Adding API specific mediation policy
-            return apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, tenantDomain);
+            return apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, organization);
         } else {
             throw new APIManagementException("Sequence is malformed");
         }

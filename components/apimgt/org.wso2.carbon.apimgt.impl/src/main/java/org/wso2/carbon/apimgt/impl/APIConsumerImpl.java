@@ -5166,8 +5166,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, orgId);
+    public String getOpenAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, organization);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 

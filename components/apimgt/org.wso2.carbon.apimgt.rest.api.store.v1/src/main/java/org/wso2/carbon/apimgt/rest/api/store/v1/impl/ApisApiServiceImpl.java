@@ -639,7 +639,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
-            String apiProvider = api.getProvider();
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
                         swaggerDefinition);

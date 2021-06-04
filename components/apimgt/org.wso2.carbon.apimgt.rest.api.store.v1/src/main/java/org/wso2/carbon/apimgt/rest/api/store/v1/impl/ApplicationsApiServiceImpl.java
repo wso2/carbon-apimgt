@@ -325,7 +325,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto, String organization)
             throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         //validate the tier specified for the application
         String tierName = applicationDto.getThrottlingPolicy();
@@ -333,7 +332,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
         }
 
-        Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+        Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, organization);
         if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
             RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
         }
@@ -372,7 +371,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId, xWSO2Tenant);
+            Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
             if (application != null) {
                 // Remove hidden attributes and set the rest of the attributes from config
                 JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
