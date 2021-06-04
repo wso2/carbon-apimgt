@@ -2248,6 +2248,7 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantID).when(APIUtil.class, "getInternalOrganizationId", tenantDomain);
         PowerMockito.doReturn(tierMap)
                 .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_SUB, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
@@ -2271,6 +2272,7 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantID).when(APIUtil.class, "getInternalOrganizationId", tenantDomain);
         PowerMockito.doReturn(tierMap)
                 .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_API, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
@@ -2295,6 +2297,7 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantID).when(APIUtil.class, "getInternalOrganizationId", tenantDomain);
         PowerMockito.doReturn(tierMap)
                 .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_APP, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
