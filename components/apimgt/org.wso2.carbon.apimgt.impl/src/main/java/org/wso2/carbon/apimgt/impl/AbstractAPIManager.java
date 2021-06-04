@@ -248,30 +248,13 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         Map<String, String> configMap = new HashMap<>();
-        APIManagerConfigurationService apiManagerConfigurationService = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService();
-
-        if (apiManagerConfigurationService != null) {
-            APIManagerConfiguration apiManagerConfig = apiManagerConfigurationService.getAPIManagerConfiguration();
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_TYPE,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_TYPE));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_API_URI,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_API_URI));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT));
-            configMap.put(PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT,
-                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT));
+        Map<String, String> configs = APIManagerConfiguration.getPersistenceProperties();
+        if (configs != null && !configs.isEmpty()) {
+            configMap.putAll(configs);
         }
+        configMap.put(APIConstants.ALLOW_MULTIPLE_STATUS,
+                Boolean.toString(APIUtil.isAllowDisplayAPIsWithMultipleStatus()));
+        
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
