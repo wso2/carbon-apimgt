@@ -120,7 +120,8 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             //We allow to update API Category name given that the new category name is not taken yet
             String oldName = apiCategoryOriginal.getName();
             String updatedName = apiCategoryToUpdate.getName();
-            if (!oldName.equals(updatedName) && apiAdmin.isCategoryNameExists(updatedName, apiCategoryId, tenantID)) {
+            if (!oldName.equals(updatedName) && apiAdmin.isCategoryNameExists(updatedName, apiCategoryId,
+                    organization)) {
                 String errorMsg = "An API category already exists by the new API category name :" + updatedName;
                 throw new APIManagementException(errorMsg);
             }

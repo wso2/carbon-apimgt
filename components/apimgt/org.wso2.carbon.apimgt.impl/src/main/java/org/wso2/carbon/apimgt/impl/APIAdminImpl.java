@@ -624,11 +624,10 @@ public class APIAdminImpl implements APIAdmin {
 
     public APICategory addCategory(APICategory category, String userName, String organization) throws APIManagementException {
 
-        int tenantID = APIUtil.getInternalOrganizationId(organization);
-        if (isCategoryNameExists(category.getName(), null, tenantID)) {
+        if (isCategoryNameExists(category.getName(), null, organization)) {
             APIUtil.handleException("Category with name '" + category.getName() + "' already exists");
         }
-        return apiMgtDAO.addCategory(tenantID, category, organization);
+        return apiMgtDAO.addCategory(category, organization);
     }
 
     public void updateCategory(APICategory apiCategory) throws APIManagementException {
@@ -650,11 +649,6 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.getAllCategories(organization);
     }
 
-    public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
-
-        return apiMgtDAO.getAllCategories(tenantId);
-    }
-
     @Override
     public List<APICategory> getAPICategoriesOfOrganization(String organization) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -668,21 +662,9 @@ public class APIAdminImpl implements APIAdmin {
         return categories;
     }
 
-    public List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException {
-        int tenantID = APIUtil.getTenantId(username);
-        List<APICategory> categories = getAllAPICategoriesOfTenant(tenantID);
-        if (categories.size() > 0) {
-            for (APICategory category : categories) {
-                int length = isCategoryAttached(category, username);
-                category.setNumberOfAPIs(length);
-            }
-        }
-        return categories;
-    }
+    public boolean isCategoryNameExists(String categoryName, String uuid, String organization) throws APIManagementException {
 
-    public boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
-
-        return apiMgtDAO.isAPICategoryNameExists(categoryName, uuid, tenantID);
+        return apiMgtDAO.isAPICategoryNameExists(categoryName, uuid, organization);
     }
 
     public APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException {
