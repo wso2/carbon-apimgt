@@ -2662,6 +2662,8 @@ public final class APIUtil {
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
+     * @param tierType type of the tiers
+     * @param organization identifier of the organization
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
@@ -6729,6 +6731,7 @@ public final class APIUtil {
      * @param subscriber      subscriber name
      * @param applicationName application name
      * @param groupId         group of the subscriber
+     * @param organization    identifier of the organization
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
@@ -11701,6 +11704,7 @@ public final class APIUtil {
      * Get UUID by the API Identifier.
      *
      * @param identifier
+     * @param organization identifier of the organization
      * @return String uuid string
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */

@@ -1530,6 +1530,7 @@ public interface APIProvider extends APIManager {
      *
      * @param uuid       API/Product id
      * @param docName    Name of the document
+     * @param organization  Identifier of the organization
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
@@ -1737,7 +1738,7 @@ public interface APIProvider extends APIManager {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization
+     * @param organization identifier of the organization
      * @throws APIManagementException if failed to add APIRevision
      */
     void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;

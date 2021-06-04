@@ -262,6 +262,8 @@ public class CertificateRestApiUtils {
      * To pre validate client certificate given for an alias
      *
      * @param alias Alias of the certificate.
+     * @param apiIdentifier Identifier of the API.
+     * @param organization Identifier of the organization.
      * @return Client certificate
      * @throws APIManagementException API Management Exception.
      */

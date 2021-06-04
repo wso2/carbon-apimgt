@@ -1642,6 +1642,9 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param apiProvider   API Provider
+     * @param preserveProvider Decision to keep or replace the provider
+     * @param provider     Provider Id
+     * @param organization Identifier of the organization
      * @throws APIImportExportException
      */
     private static void addClientCertificates(String pathToArchive, APIProvider apiProvider, Boolean preserveProvider,
@@ -2275,6 +2278,7 @@ public class ImportUtils {
      * @param currentTenantDomain Current tenant domain
      * @param apiProvider         API Provider
      * @param ignoreAndImport     This should be true if the exception should be ignored
+     * @param organization        Identifier of the organization
      * @throws APIManagementException If an error occurs when retrieving the API to overwrite
      */
     private static APIProduct retrieveApiProductToOverwrite(String apiProductName, String currentTenantDomain,

@@ -126,6 +126,7 @@ public interface APIConsumer extends APIManager {
     /**
      * Get all tags of published APIs
      *
+     * @param organization organization of the API
      * @return a list of all Tags applied to all APIs published.
      * @throws APIManagementException if failed to get All the tags
      */
@@ -237,6 +238,7 @@ public interface APIConsumer extends APIManager {
      * @param startSubIndex Starting index of subscriptions to be listed
      * @param endSubIndex Ending index of Subscriptions to be listed
      * @param groupingId the group id of the application
+     * @param organization organization of the API
      * @return
      * @throws APIManagementException
      */
@@ -635,6 +637,7 @@ public interface APIConsumer extends APIManager {
      * @param subscriber the subscriber in relation to the identifiers
      * @param identifier the identifiers of the API's the subscriber is subscribed to
      * @param groupingId the grouping Id the subscriber.
+     * @param organization  organization of the API
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */

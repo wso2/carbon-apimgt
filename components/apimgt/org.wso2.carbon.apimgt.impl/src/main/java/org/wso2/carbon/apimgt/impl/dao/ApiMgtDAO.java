@@ -1789,6 +1789,7 @@ public class ApiMgtDAO {
     /**
      * This method returns the set of APIs for given subscriber
      *
+     * @param organization identifier of the organization
      * @param subscriber subscriber
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get SubscribedAPIs
@@ -3855,6 +3856,7 @@ public class ApiMgtDAO {
      * @param appName  application name
      * @param username subscriber
      * @param groupId  group of the subscriber
+     * @param organization identifier of the organization
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
@@ -5543,6 +5545,7 @@ public class ApiMgtDAO {
      *
      * @param api      API to add
      * @param tenantId tenant id
+     * @param organization identifier of the organization
      * @return API Id of the successfully added API
      * @throws APIManagementException if fails to add API
      */
@@ -7718,7 +7721,10 @@ public class ApiMgtDAO {
     /****************************************
      * Returns all the Comments on an API
      *
+     * @param uuid API UUID
      * @param parentCommentID Parent Comment ID
+     * @param limit           The limit
+     * @param offset          The offset
      * @param connection Database connection
      * @return Comment Array
      * @throws APIManagementException
@@ -8193,6 +8199,7 @@ public class ApiMgtDAO {
      * Get API UUID by the API Identifier.
      *
      * @param identifier API Identifier
+     * @param organization identifier of the organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
@@ -8224,6 +8231,7 @@ public class ApiMgtDAO {
      * @param provider Provider of the API
      * @param apiName  Name of the API
      * @param version  Version of the API
+     * @param organization identifier of the organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
@@ -8825,6 +8833,7 @@ public class ApiMgtDAO {
      *
      * @param identifier    - api identifier which is subscribed
      * @param applicationId - application used to subscribed
+     * @param organization identifier of the organization
      * @param connection
      * @return subscription create status
      * @throws APIManagementException
@@ -10177,6 +10186,7 @@ public class ApiMgtDAO {
      * @param uuid API uuid
      * @param scopeKey      candidate scope key
      * @param tenantId      tenant id
+     * @param organization identifier of the organization
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
@@ -14316,6 +14326,8 @@ public class ApiMgtDAO {
      * - url templeates to product mappings (resource bundling) - AM_API_PRODUCT_MAPPING
      *
      * @param productResources
+     * @param organization
+     * @param connection
      * @throws APIManagementException
      */
     public void addAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
@@ -14470,6 +14482,7 @@ public class ApiMgtDAO {
      *
      * @param apiProduct
      * @param productId
+     * @param connection
      * @throws APIManagementException
      */
     public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection)
@@ -15952,6 +15965,7 @@ public class ApiMgtDAO {
      *
      * @param apiName     api name
      * @param apiProvider provider
+     * @param organization identifier of the organization
      * @return set version
      * @throws APIManagementException
      */

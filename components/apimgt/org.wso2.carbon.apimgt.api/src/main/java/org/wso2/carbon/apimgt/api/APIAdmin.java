@@ -247,7 +247,7 @@ public interface APIAdmin  {
     /**
      * Returns all api categories of the organization with number of APIs for each category
      *
-     * @param organization
+     * @param organization organization of the API
      * @return
      * @throws APIManagementException
      */

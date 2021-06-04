@@ -470,7 +470,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Returns usage details of a particular API
      *
      * @param uuid API uuid
-     * @param organization
+     * @param organization identifier of the organization
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
      */
@@ -3087,6 +3087,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param apiId         id of the document
      * @param documentation Documentation
+     * @param organization identifier of the organization
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
@@ -8143,6 +8144,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Get minimal details of API by registry artifact id
      *
      * @param uuid Registry artifact id
+     * @param organization identifier of the organization
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
@@ -8701,7 +8703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization
+     * @param organization identifier of the organization
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
@@ -8883,6 +8885,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
+     * @param organization identifier of the organization
      * @throws APIManagementException if failed to delete APIRevision
      */
     @Override
