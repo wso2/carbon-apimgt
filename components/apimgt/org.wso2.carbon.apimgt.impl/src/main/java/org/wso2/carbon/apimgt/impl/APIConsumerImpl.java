@@ -3358,6 +3358,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Add a new Application from the store.
      * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}
      * @param userId - {@link String}
+     * @param organization
      * @return {@link String}
      */
     @Override
@@ -5677,6 +5678,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Get minimal details of API by registry artifact id
      *
      * @param uuid Registry artifact id
+     * @param organization identifier of the organization
      * @return API of the provided artifact id
      * @throws APIManagementException
      */

@@ -52,6 +52,7 @@ public class SubscriptionMappingUtil {
     /** Converts a SubscribedAPI object into SubscriptionDTO
      *
      * @param subscription SubscribedAPI object
+     * @param organization Identifier of the organization
      * @return SubscriptionDTO corresponds to SubscribedAPI object
      */
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String organization)
@@ -147,6 +148,7 @@ public class SubscriptionMappingUtil {
      * @param subscriptions a list of SubscribedAPI objects
      * @param limit max number of objects returned
      * @param offset starting index
+     * @param organization identifier of the organization
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,

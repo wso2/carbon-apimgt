@@ -207,6 +207,7 @@ public interface APIManager {
      * Returns the async-api v2.0 definition as a string
      *
      * @param apiId id of the APIIdentifier
+     * @param organization  identifier of the organization
      * @return async specification string
      * @throws APIManagementException
      */
@@ -546,6 +547,7 @@ public interface APIManager {
      *                        <p>
      *                        Ex: /foo/{version}/bar
      *                        </p>
+     * @param orgId  identifier of the organization
      * @return boolean - true if the template exists, false otherwise.
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */

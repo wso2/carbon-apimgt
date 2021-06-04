@@ -1001,6 +1001,7 @@ public class PublisherCommonUtils {
      *
      * @param apiId    API Id
      * @param response response of the AsyncAPI definition validation call
+     * @param organization identifier of the organization
      * @return updated AsyncAPI definition
      * @throws APIManagementException when error occurred updating AsyncAPI definition
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
@@ -1282,7 +1283,7 @@ public class PublisherCommonUtils {
      * @param apiProvider   API Provider
      * @param apiId         API/API Product UUID
      * @param documentId    Document ID
-     * @param organization  Tenant domain of the API/API Product
+     * @param organization  Identifier of the organization
      * @param inlineContent Inline content string
      * @throws APIManagementException If an error occurs while adding the documentation content
      */
@@ -1417,6 +1418,7 @@ public class PublisherCommonUtils {
      *
      * @param apiProductDTO API Product DTO
      * @param username      Username
+     * @param organization Identifier of the organization
      * @return Created API Product object
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway

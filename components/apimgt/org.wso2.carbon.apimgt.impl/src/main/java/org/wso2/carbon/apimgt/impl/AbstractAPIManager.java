@@ -1172,6 +1172,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * Returns the swagger 2.0 definition of the given API
      *
      * @param apiId id of the APIIdentifier
+     * @param organization identifier of the organization
      * @return An String containing the swagger 2.0 definition
      * @throws APIManagementException
      */
@@ -1503,7 +1504,7 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param apiId                 artifact id of the api
      * @param docId                 artifact id of the document
-     * @param organization tenant domain of the registry where the artifact is located
+     * @param organization          identifier of the organization
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */

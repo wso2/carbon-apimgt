@@ -121,7 +121,7 @@ public interface ImportExportAPI {
      * @param rotateRevision   If the maximum revision number reached, undeploy the earliest revision and create
      *                         a new revision
      * @param overwrite        Whether to update the API or not
-     * @param organization
+     * @param organization     Identifier of the organization
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */

@@ -54,7 +54,7 @@ public class GatewayArtifactsMgtDAO {
      * @param apiId        - UUID of the API
      * @param name         - Name of the API
      * @param version      - Version of the API
-     * @param organization - Tenant domain of the API
+     * @param organization - Identifier of the organization
      */
     private boolean addGatewayPublishedAPIDetails(Connection connection, String apiId, String name, String version,
                                                  String organization, String type)

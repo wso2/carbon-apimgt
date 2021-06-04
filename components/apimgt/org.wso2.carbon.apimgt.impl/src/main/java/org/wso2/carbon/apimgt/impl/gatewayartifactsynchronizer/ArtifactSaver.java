@@ -52,6 +52,11 @@ public interface ArtifactSaver {
     /**
      * This method is used to remove deployable artifact of an API to the storage
      *
+     * @param apiId
+     * @param name
+     * @param version
+     * @param revision
+     * @param organization
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
     void removeArtifact(String apiId, String name, String version, String revision, String organization)

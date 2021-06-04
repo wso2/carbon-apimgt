@@ -442,6 +442,7 @@ public class APIMappingUtil {
      * This method creates the API monetization information DTO.
      *
      * @param apiId API apiid
+     * @param organization identifier of the organization
      * @return monetization information DTO
      * @throws APIManagementException if failed to construct the DTO
      */

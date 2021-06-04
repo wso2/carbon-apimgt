@@ -176,6 +176,7 @@ public class RestAPIStoreUtils {
      * does not have enough privileges. If the API does not exist, this will throw a APIMgtResourceNotFoundException
      *
      * @param apiId API UUID
+     * @param organization Identifier of the organization
      * @throws APIManagementException
      */
     public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String organization) throws APIManagementException {
