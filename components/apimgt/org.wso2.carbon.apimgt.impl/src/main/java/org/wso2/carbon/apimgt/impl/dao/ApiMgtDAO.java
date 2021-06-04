@@ -8842,7 +8842,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-                    keyManagerConfigurationDTO.setTokenType("TOKEN_TYPE");
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -8880,7 +8880,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
                     keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    keyManagerConfigurationDTO.setTokenType("TOKEN_TYPE");
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -8928,7 +8928,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-                    keyManagerConfigurationDTO.setTokenType("TOKEN_TYPE");
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -8968,7 +8968,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-                    keyManagerConfigurationDTO.setTokenType("TOKEN_TYPE");
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -9109,7 +9109,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-                    keyManagerConfigurationDTO.setTokenType("TOKEN_TYPE");
+                    keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
