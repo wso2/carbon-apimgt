@@ -824,6 +824,7 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
+        apiInfoDTO.setCreatedTime(api.getCreatedTime());
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }
