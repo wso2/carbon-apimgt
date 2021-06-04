@@ -97,17 +97,13 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return null;
     }
 
-    public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, String tokenType,
-            MessageContext messageContext) {
-        KeyManagerConfiguration.TokenType idpTokenType = StringUtils.isNotEmpty(tokenType) ?
-                KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()) :
-                KeyManagerConfiguration.TokenType.ORIGINAL;
+    public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext) {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, idpTokenType);
+                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
                     apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -130,18 +126,13 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return null;
     }
 
-    public Response keyManagersPost(KeyManagerDTO body, String tokenType, MessageContext messageContext)
-            throws APIManagementException {
-
-        KeyManagerConfiguration.TokenType idpTokenType = StringUtils.isNotEmpty(tokenType) ?
-                KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()) :
-                KeyManagerConfiguration.TokenType.ORIGINAL;
+    public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body, idpTokenType);
+                    KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
