@@ -10661,8 +10661,7 @@ public final class APIUtil {
     public static List<APICategory> getAllAPICategoriesOfTenant(String organization) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int tenantId = getInternalIdFromTenantDomainOrOrganization(organization);
-        return apiMgtDAO.getAllCategories(tenantId);
+        return apiMgtDAO.getAllCategories(organization);
     }
 
     /**

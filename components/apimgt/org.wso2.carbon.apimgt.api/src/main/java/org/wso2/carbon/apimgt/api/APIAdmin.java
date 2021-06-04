@@ -221,11 +221,11 @@ public interface APIAdmin  {
      *                              defined by the passed uuid in the given tenant
      *
      * @param categoryName
-     * @param tenantID
+     * @param organization
      * @return true if an api category exists by the given category name
      * @throws APIManagementException
      */
-    boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException;
+    boolean isCategoryNameExists(String categoryName, String uuid, String organization) throws APIManagementException;
 
     /**
      * Returns all api categories of the organization
@@ -236,15 +236,6 @@ public interface APIAdmin  {
     List<APICategory> getAllAPICategoriesOfOrganization(String organization) throws APIManagementException;
 
     /**
-     * Returns all api categories of the tenant
-     *
-     * @param tenantID
-     * @return
-     * @throws APIManagementException
-     */
-    List<APICategory> getAllAPICategoriesOfTenant(int tenantID) throws APIManagementException;
-
-    /**
      * Returns all api categories of the organization with number of APIs for each category
      *
      * @param organization organization of the API
@@ -252,15 +243,6 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     List<APICategory> getAPICategoriesOfOrganization(String organization) throws APIManagementException;
-
-    /**
-     * Returns all api categories of the tenant along with the count of attached APIs
-     *
-     * @param username
-     * @return
-     * @throws APIManagementException
-     */
-    List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException;
 
     /**
      * Get API Category identified by the given uuid

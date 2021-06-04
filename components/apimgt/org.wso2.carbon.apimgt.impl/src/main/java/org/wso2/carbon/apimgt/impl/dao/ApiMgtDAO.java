@@ -15114,12 +15114,11 @@ public class ApiMgtDAO {
     /**
      * Adds an API category
      *
-     * @param tenantID      Logged in user's tenant ID
      * @param category      Category
      * @param organization  Organization
      * @return Category
      */
-    public APICategory addCategory(int tenantID, APICategory category, String organization) throws APIManagementException {
+    public APICategory addCategory(APICategory category, String organization) throws APIManagementException {
 
         String uuid = UUID.randomUUID().toString();
         category.setId(uuid);
@@ -15128,8 +15127,7 @@ public class ApiMgtDAO {
             statement.setString(1, uuid);
             statement.setString(2, category.getName());
             statement.setString(3, category.getDescription());
-            statement.setInt(4, tenantID);
-            statement.setString(5, organization);
+            statement.setString(4, organization);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to add Category: " + uuid, e);
@@ -15159,39 +15157,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get all available API categories of the tenant
-     *
-     * @param tenantID
-     * @return API Categories List
-     */
-    public List<APICategory> getAllCategories(int tenantID) throws APIManagementException {
-
-        List<APICategory> categoriesList = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_CATEGORIES_BY_TENANT_ID_SQL)) {
-            statement.setInt(1, tenantID);
-
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                String id = rs.getString("UUID");
-                String name = rs.getString("NAME");
-                String description = rs.getString("DESCRIPTION");
-
-                APICategory category = new APICategory();
-                category.setId(id);
-                category.setName(name);
-                category.setDescription(description);
-                category.setTenantID(tenantID);
-
-                categoriesList.add(category);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve API categories for tenant " + tenantID, e);
-        }
-        return categoriesList;
-    }
-
-    /**
      * Get all available API categories of the organization
      * @param organization
      * @return
@@ -15210,13 +15175,11 @@ public class ApiMgtDAO {
                 String id = rs.getString("UUID");
                 String name = rs.getString("NAME");
                 String description = rs.getString("DESCRIPTION");
-                int tenantID = rs.getInt("TENANT_ID");
 
                 APICategory category = new APICategory();
                 category.setId(id);
                 category.setName(name);
                 category.setDescription(description);
-                category.setTenantID(tenantID);
 
                 categoriesList.add(category);
             }
@@ -15232,10 +15195,10 @@ public class ApiMgtDAO {
      *
      * @param categoryName
      * @param uuid
-     * @param tenantID
+     * @param organization
      * @return
      */
-    public boolean isAPICategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
+    public boolean isAPICategoryNameExists(String categoryName, String uuid, String organization) throws APIManagementException {
 
         String sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS;
         if (uuid != null) {
@@ -15244,7 +15207,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, categoryName);
-            statement.setInt(2, tenantID);
+            statement.setString(2, organization);
             if (uuid != null) {
                 statement.setString(3, uuid);
             }
@@ -15274,34 +15237,10 @@ public class ApiMgtDAO {
                 apiCategory = new APICategory();
                 apiCategory.setName(rs.getString("NAME"));
                 apiCategory.setDescription(rs.getString("DESCRIPTION"));
-                apiCategory.setTenantID(rs.getInt("TENANT_ID"));
                 apiCategory.setId(apiCategoryID);
             }
         } catch (SQLException e) {
             handleException("Failed to fetch API category : " + apiCategoryID, e);
-        }
-        return apiCategory;
-    }
-
-    public APICategory getAPICategoryByName(String apiCategoryName, String tenantDomain) throws APIManagementException {
-
-        APICategory apiCategory = null;
-        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_CATEGORY_BY_NAME)) {
-            statement.setString(1, apiCategoryName);
-            statement.setInt(2, tenantID);
-
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                apiCategory = new APICategory();
-                apiCategory.setName(rs.getString("NAME"));
-                apiCategory.setDescription(rs.getString("DESCRIPTION"));
-                apiCategory.setTenantID(rs.getInt("TENANT_ID"));
-                apiCategory.setId(rs.getString("UUID"));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to fetch API category : " + apiCategoryName + " of tenant " + tenantDomain, e);
         }
         return apiCategory;
     }
