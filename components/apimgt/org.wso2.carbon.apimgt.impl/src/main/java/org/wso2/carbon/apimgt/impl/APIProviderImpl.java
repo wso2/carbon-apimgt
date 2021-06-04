@@ -9446,7 +9446,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiIdentifier.setUuid(apiId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
-                    apiIdentifier.getUUID(), apiRevision.getId());
+                    apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
@@ -9678,7 +9678,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProductIdentifier.setUUID(apiProductId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
-                    apiProductIdentifier.getUUID(), apiRevision.getId());
+                    apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.

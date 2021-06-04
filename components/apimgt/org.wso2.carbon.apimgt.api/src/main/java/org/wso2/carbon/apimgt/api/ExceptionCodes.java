@@ -392,6 +392,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required application properties are missing"),
     KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
+    INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
+            "Invalid additional properties given for application"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),

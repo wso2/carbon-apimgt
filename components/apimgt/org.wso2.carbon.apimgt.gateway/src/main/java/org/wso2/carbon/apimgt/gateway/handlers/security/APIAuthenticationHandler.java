@@ -89,6 +89,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
     protected ArrayList<Authenticator> authenticators = new ArrayList<>();
+    protected boolean isAuthenticatorsInitialized = false;
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
@@ -241,7 +242,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "LEST_LOST_EXCEPTION_STACK_TRACE", justification = "The exception needs to thrown for fault sequence invocation")
     protected void initializeAuthenticators() {
-        authenticators = new ArrayList<>();
+        isAuthenticatorsInitialized = true;
 
         boolean isOAuthProtected = false;
         boolean isMutualSSLProtected = false;
@@ -346,7 +347,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
 
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
-                if (authenticators.isEmpty()) {
+                if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
                 }
                 try {
