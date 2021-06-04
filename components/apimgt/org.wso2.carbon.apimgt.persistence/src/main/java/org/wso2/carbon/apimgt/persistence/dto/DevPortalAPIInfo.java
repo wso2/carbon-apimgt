@@ -34,9 +34,26 @@ public class DevPortalAPIInfo {
     private String status;
     private Set<String> availableTierNames;
     private String subscriptionAvailability; 
-    private String subscriptionAvailableOrgs; 
+    private String subscriptionAvailableOrgs;
+    private String createdTime;
+    private String description;
 
-    
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
     //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
     // attached tiers.
     public String getId() {
