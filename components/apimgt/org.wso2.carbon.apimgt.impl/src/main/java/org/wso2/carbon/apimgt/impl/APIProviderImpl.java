@@ -2767,12 +2767,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName());
         }
         APIIdentifier existingAPIId = existingAPI.getId();
+        String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
         String existingContext = existingAPI.getContext();
 
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
+        existingAPI.setUuid(null);
         existingAPI.setId(newApiId);
         existingAPI.setStatus(APIConstants.CREATED);
         existingAPI.setDefaultVersion(isDefaultVersion);
@@ -2831,9 +2833,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // update old api
         // revert back to old values before update.
+        existingAPI.setUuid(existingApiId);
         existingAPI.setStatus(existingAPIStatus);
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
+        existingAPI.setCreatedTime(existingAPICreatedTime);
         // update existing api with setLatest to false
         existingAPI.setLatest(false);
         if (isDefaultVersion) {
@@ -2848,8 +2852,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-
-        return newAPI;
+        return getAPIbyUUID(newAPIId, organization);
     }
 
     public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
@@ -3456,7 +3459,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(api.getUuid());
-            apiPersistenceInstance.deleteAPI(new Organization(tenantDomain), api.getUuid());
+            apiPersistenceInstance.deleteAPI(new Organization(api.getOrganization()), api.getUuid());
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
