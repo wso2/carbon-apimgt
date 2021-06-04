@@ -43,15 +43,12 @@ import javax.ws.rs.core.Response;
 public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     private static final Log log = LogFactory.getLog(ApiCategoriesApiServiceImpl.class);
 
-    private String getOrganization(MessageContext messageContext) {
-        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
-    }
 
     @Override
     public Response apiCategoriesGet(MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String organization = getOrganization(messageContext);
+            String organization = RestApiUtil.getOrganization(messageContext);
             List<APICategory> categoryList = apiAdmin.getAPICategoriesOfOrganization(organization);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
@@ -85,7 +82,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                 RestApiUtil.handleBadRequest("API Category name is empty.", log);
             }
 
-            String organization = getOrganization(messageContext);
+            String organization = RestApiUtil.getOrganization(messageContext);
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
                     fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName, organization));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_CATEGORY + "/" + categoryDTO.getId());
@@ -102,7 +99,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                                                   MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String organization = getOrganization(messageContext);
+            String organization = RestApiUtil.getOrganization(messageContext);
             int tenantID = APIUtil.getInternalOrganizationId(organization);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategory apiCategoryOriginal = apiAdmin.getAPICategoryByID(apiCategoryId);

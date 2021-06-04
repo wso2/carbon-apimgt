@@ -50,7 +50,7 @@ public class TagsApiServiceImpl implements TagsApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION); 
+        String organization = RestApiUtil.getOrganization(messageContext);
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {

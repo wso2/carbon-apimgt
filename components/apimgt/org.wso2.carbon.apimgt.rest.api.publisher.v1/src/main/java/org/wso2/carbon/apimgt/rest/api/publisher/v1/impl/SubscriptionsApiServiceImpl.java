@@ -67,7 +67,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response blockSubscription(String subscriptionId, String blockState, String ifMatch,
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
@@ -256,7 +256,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response unBlockSubscription(String subscriptionId, String ifMatch,
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 

@@ -68,10 +68,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
     private static final Log log = LogFactory.getLog(SubscriptionsApiServiceImpl.class);
 
-    private String getOrganization(MessageContext messageContext) {
-        return (String) messageContext.get(RestApiConstants.ORGANIZATION);
-    }
-
     /**
      * Get all subscriptions that are of user or shared subscriptions of the user's group.
      * <p/>
@@ -90,7 +86,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                                      String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
                                      MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
         List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
@@ -181,7 +177,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer;
 
         try {
@@ -274,7 +270,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String xWSO2Tenant,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer;
 
         try {
@@ -381,7 +377,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String xWSO2Tenant,
                                               MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
             try {
@@ -462,7 +458,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -520,7 +516,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-            String organization = getOrganization(messageContext);
+            String organization = RestApiUtil.getOrganization(messageContext);
             apiConsumer.removeSubscription(subscribedAPI, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
