@@ -25,20 +25,15 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersGet(String xWSO2Tenant, MessageContext messageContext) {
 
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-
-        if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            tenantDomain = xWSO2Tenant;
-        }
-
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                    apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
+                    apiAdmin.getKeyManagerConfigurationsByTenant(organization);
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
         } catch (APIManagementException e) {
             RestApiUtil
-                    .handleInternalServerError("Error while retrieving keyManager Details for Tenant " + tenantDomain,
+                    .handleInternalServerError("Error while retrieving keyManager Details for Tenant " + organization,
                             log);
         }
         return null;
