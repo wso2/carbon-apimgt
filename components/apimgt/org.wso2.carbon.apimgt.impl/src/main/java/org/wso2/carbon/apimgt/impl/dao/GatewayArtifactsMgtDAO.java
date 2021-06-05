@@ -207,6 +207,13 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
+    /**
+     * This method retrieves the Organization given the API UUID
+     *
+     * @param uuid API UUID
+     * @return Organization
+     * @throws APIManagementException If failed to retrieve organization
+     */
     public String retrieveOrganization(String uuid) throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ORGANIZATION;
