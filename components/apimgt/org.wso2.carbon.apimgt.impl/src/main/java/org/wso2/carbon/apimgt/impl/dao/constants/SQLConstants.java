@@ -1637,9 +1637,6 @@ public class SQLConstants {
             "   AND" + " API_VERSION = ? " +
             "   AND ORGANIZATION = ? ";
 
-    public static final String GET_API_CONTEXT_BY_ORGANIZATION_ID =
-            "SELECT API_PROVIDER,API_NAME,API_VERSION FROM AM_API WHERE ORGANIZATION_ID = ?";
-
     public static final String GET_ORGANIZATION_BY_API_ID = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
