@@ -2143,18 +2143,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return APIUtil.getDomainMappings(tenantDomain, apiType);
     }
 
-    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
-
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            if (contextTemplate != null && contextTemplate.startsWith("/t/")) {
-                contextTemplate =
-                        contextTemplate.replace("/t/" + getTenantDomainFromUrl(contextTemplate), "");
-            }
-            contextTemplate = "/t/" + tenantDomain + contextTemplate;
-        }
-        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
-    }
-
     public boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String organization) throws APIManagementException {
         return apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(contextTemplate, organization);
     }
@@ -2669,7 +2657,6 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public boolean checkIfResourceExists(String mediationPolicyPath) throws APIManagementException {
-
         boolean value = false;
         try {
             if (registry.resourceExists(mediationPolicyPath)) {
@@ -2683,14 +2670,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public List<String> getApiVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
-
-        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName, username);
-    }
-
-    @Override
-    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organization) throws APIManagementException {
-        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, organization);
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String username,
+            String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, username, organization);
     }
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
