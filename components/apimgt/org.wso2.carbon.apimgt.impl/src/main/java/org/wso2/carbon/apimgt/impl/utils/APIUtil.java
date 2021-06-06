@@ -11721,7 +11721,7 @@ public final class APIUtil {
      */
     public static String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
             throws APIManagementException {
-        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization, null);
+        return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
     }
 
     /**
