@@ -529,18 +529,6 @@ public interface APIManager {
     boolean isScopeKeyAssignedLocally(String uuid, String scopeKey, String organization) throws APIManagementException;
 
     /**
-     * Check if a given context template already exists
-     *
-     * @param contextTemplate - The contextTemplate to be checked for
-     *                        <p>
-     *                        Ex: /foo/{version}/bar
-     *                        </p>
-     * @return boolean - true if the template exists, false otherwise.
-     * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
-     */
-    boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
-
-    /**
      * Check if a given context template already exists in an organization
      *
      * @param contextTemplate - The contextTemplate to be checked for
@@ -724,23 +712,13 @@ public interface APIManager {
     /**
      * Returns a list of api versions that matches the given context template
      *
-     * @param apiName             API name in the payload
+     * @param apiName           API name in the payload
+     * @param username          User Name
      * @param organization      Organization Identifier
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organization)
-            throws APIManagementException;
-
-    /**
-     * Returns a list of api versions that matches the given context template
-     *
-     * @param apiName        API name in the payload
-     * @param username       logged in user name of the user
-     * @return api versions that matches context template
-     * @throws APIManagementException If failed to get the list of api versions
-     */
-    List<String> getApiVersionsMatchingApiName(String apiName,String username)
+    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String username, String organization)
             throws APIManagementException;
 
     /**
