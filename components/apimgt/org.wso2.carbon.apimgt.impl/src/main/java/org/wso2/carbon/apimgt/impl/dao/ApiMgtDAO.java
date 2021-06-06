@@ -8193,6 +8193,7 @@ public class ApiMgtDAO {
         return uuid;
     }
 
+
     /**
      * Get API Product UUID by the API Product Identifier and organization.
      *
@@ -8201,7 +8202,21 @@ public class ApiMgtDAO {
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
-    public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization, Connection connection)
+    public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
+            throws APIManagementException {
+        return getUUIDFromIdentifier(identifier, organization, null);
+    }
+
+    /**
+     * Get API Product UUID by the API Product Identifier and organization.
+     *
+     * @param identifier API Product Identifier
+     * @param organization
+     * @param connection
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    private String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization, Connection connection)
             throws APIManagementException {
         boolean isNewConnection = false;
         String uuid = null;

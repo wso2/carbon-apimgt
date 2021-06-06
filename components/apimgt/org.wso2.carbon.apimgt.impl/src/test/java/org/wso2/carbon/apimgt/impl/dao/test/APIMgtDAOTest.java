@@ -785,7 +785,7 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void getAPIVersionsMatchingApiNameAndOrganization() throws Exception {
+    public void testGetAPIVersionsMatchingApiNameAndOrganization() throws Exception {
         APIIdentifier apiId = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
                 "getAPIVersionsMatchingApiNameAndOrganization", "1.0.0");
         API api = new API(apiId);

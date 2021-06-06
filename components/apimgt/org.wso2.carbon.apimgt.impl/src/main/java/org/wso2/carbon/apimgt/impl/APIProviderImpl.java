@@ -7112,7 +7112,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (identifier.getUUID() != null) {
                 apiProductUUID = identifier.getUUID();
             } else {
-                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization, null);
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization);
             }
         }
         APIProduct apiProduct = getAPIProductbyUUID(apiProductUUID, organization);
