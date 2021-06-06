@@ -974,7 +974,6 @@ public class APIMgtDAOTest {
         apiMgtDAO.recordAPILifeCycleEvent(api.getUuid(), "CREATED", "PUBLISHED",
                 "testCreateApplicationRegistrationEntry", -1234);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiId);
-        assertTrue(apiMgtDAO.getConsumerKeys(apiId, organization).length > 0);
         apiMgtDAO.removeAllSubscriptions(api.getUuid());
         assertTrue(apiMgtDAO.getAPINamesMatchingContext(api.getContext()).size() > 0);
         apiMgtDAO.deleteAPI(api.getUuid());

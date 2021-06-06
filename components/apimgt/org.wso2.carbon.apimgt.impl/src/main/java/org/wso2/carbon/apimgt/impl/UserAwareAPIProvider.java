@@ -266,11 +266,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getDefaultVersion(apiid);
     }
 
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
-        checkAccessControlPermission(apiIdentifier);
-        return super.getConsumerKeys(apiIdentifier, organization);
-    }
-
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
