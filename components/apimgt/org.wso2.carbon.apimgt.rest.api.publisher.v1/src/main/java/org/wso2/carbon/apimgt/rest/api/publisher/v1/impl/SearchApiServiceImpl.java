@@ -63,14 +63,12 @@ public class SearchApiServiceImpl implements SearchApiService {
         }
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        String organization = RestApiUtil.getOrganization(messageContext);
         Map<String, Object> result = null;
         if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-            result = apiProvider.searchPaginatedContent(query, tenantDomain, offset, limit);
+            result = apiProvider.searchPaginatedContent(query, organization, offset, limit);
         } else {
-            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
         }
         ArrayList<Object> apis;
         /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs

@@ -45,13 +45,14 @@ public interface ImportExportAPI {
      * @param exportLatestRevision Export the latest revision.
      * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
      *                             (This is used for advertise only APIs).
+     * @param organization          Organization
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-            boolean exportLatestRevision, String originalDevPortalUrl)
+            boolean exportLatestRevision, String originalDevPortalUrl, String organization)
             throws APIManagementException, APIImportExportException;
 
 
@@ -63,12 +64,13 @@ public interface ImportExportAPI {
      * @param preserveStatus Preserve API status on export
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveDocs   Preserve documentation on Export.
+     * @param organization   Organization
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                          boolean preserveDocs, boolean preserveCredentials)
+                          boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
 
     /**
@@ -79,12 +81,13 @@ public interface ImportExportAPI {
      * @param preserveStatus Preserve API status on export
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveDocs   Preserve documentation on Export.
+     * @param organization   Organization
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                          boolean preserveDocs, boolean preserveCredentials)
+                          boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException;
 
     /**
@@ -99,13 +102,14 @@ public interface ImportExportAPI {
      * @param preserveStatus        Preserve API status on export
      * @param preserveDocs          Preserve documentation on Export.
      * @param exportLatestRevision  Export the most recent revision.
+     * @param organization          Organization
      * @return APIProduct Artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
                                  ExportFormat format,boolean preserveStatus, boolean preserveDocs,
-                                 boolean preserveCredentials, boolean exportLatestRevision)
+                                 boolean preserveCredentials, boolean exportLatestRevision, String organization)
             throws APIManagementException, APIImportExportException;
 
     /**
@@ -117,11 +121,12 @@ public interface ImportExportAPI {
      * @param rotateRevision   If the maximum revision number reached, undeploy the earliest revision and create
      *                         a new revision
      * @param overwrite        Whether to update the API or not
+     * @param organization     Identifier of the organization
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, String[] tokenScopes)
+                         Boolean overwrite, String[] tokenScopes, String organization)
             throws APIManagementException;
 
     /**
@@ -138,11 +143,12 @@ public interface ImportExportAPI {
      *                            existing dependent APIs of an API Product.
      * @param importAPIs          Whether to import the dependent APIs or not.
      * @param tokenScopes         Scopes in the passed token from the REST API call.
+     * @param organization  Organization Identifier
      * @return Imported API Product
      * @throws APIManagementException If there is an error in importing an API Product
      */
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
                                        Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
-                                       String[] tokenScopes)
+                                       String[] tokenScopes, String organization)
             throws APIManagementException;
 }

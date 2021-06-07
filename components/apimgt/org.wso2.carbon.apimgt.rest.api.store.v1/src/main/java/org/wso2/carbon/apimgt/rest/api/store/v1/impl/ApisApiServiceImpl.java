@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -86,16 +85,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
@@ -103,7 +97,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset,
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
                     limit);
             
 
@@ -133,16 +127,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving APIs";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
+        } 
         return null;
     }
 
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-        return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
+        String organization = RestApiUtil.getOrganization(messageContext);
+        return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
     }
 
 
@@ -157,11 +149,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
+            String organization = RestApiUtil.getOrganization(messageContext);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
+                GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiId);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                         GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                 return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
@@ -189,9 +180,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
+            String organization = RestApiUtil.getOrganization(messageContext);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -220,12 +211,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
-                    requestedTenantDomain);
-            String graphQLSchema = apiConsumer.getGraphqlSchemaDefinition(apiId, requestedTenantDomain);
+            // keep this line to check the existence of the api
+            apiConsumer.getLightweightAPIByUUID(apiId, organization);
+            String graphQLSchema = apiConsumer.getGraphqlSchemaDefinition(apiId, organization);
             return Response.ok().entity(graphQLSchema).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -244,16 +235,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
                                     MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -261,7 +246,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setEntryPoint("DEVPORTAL");
             comment.setUser(username);
             comment.setApiId(apiId);
-            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            String createdCommentId = apiConsumer.addComment(apiId, comment, username);
             Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
@@ -285,10 +270,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
                                         Boolean includeCommenterInfo, MessageContext messageContext)
             throws APIManagementException {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String parentCommentID = null;
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
@@ -315,10 +300,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
                                     Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
                                     MessageContext messageContext) throws APIManagementException {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
@@ -358,10 +343,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
                                         Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
                                         MessageContext messageContext) throws APIManagementException {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
@@ -387,10 +372,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
                                      MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 if (comment.getUser().equals(username)) {
@@ -437,11 +422,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext)
             throws APIManagementException {
 
-        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = RestApiUtil.getOrganization(messageContext);
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -479,18 +464,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
-
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
-            DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId,
-                    requestedTenantDomain);
+            DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId, organization);
             if (docContent == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
@@ -525,9 +503,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving source URI location of " + documentId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -536,21 +511,16 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
             String ifModifiedSince, MessageContext messageContext) {
         Documentation documentation;
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, requestedTenantDomain)) {
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
-            documentation = apiConsumer.getDocumentation(apiId, documentId, requestedTenantDomain);
+            documentation = apiConsumer.getDocumentation(apiId, documentId, organization);
             if (null != documentation) {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
@@ -563,9 +533,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -577,22 +544,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
             //this will fail if user doesn't have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
 
             //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, requestedTenantDomain);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, organization);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 
@@ -608,9 +569,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } /*catch (UnsupportedEncodingException e) {
             String errorMessage = "Error while Decoding apiId" + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -625,30 +583,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-
-            float avgRating = apiConsumer.getAverageAPIRating(identifier);
+            apiConsumer.checkAPIVisibility(id, organization);
+            float avgRating = apiConsumer.getAverageAPIRating(id);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
-                userRating = apiConsumer.getUserRating(identifier, username);
+                userRating = apiConsumer.getUserRating(id, username);
             }
             List<RatingDTO> ratingDTOList = new ArrayList<>();
-            JSONArray array = apiConsumer.getAPIRatings(identifier);
+            JSONArray array = apiConsumer.getAPIRatings(id);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -667,9 +613,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while retrieving ratings for API " + id, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -690,13 +633,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String message = "Error generating the SDK. API id or language should not be empty";
             RestApiUtil.handleBadRequest(message, log);
         }
-        String tenant = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
-        APIDTO api = getAPIByAPIId(apiId, tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        APIDTO api = getAPIByAPIId(apiId, organization);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
-            String apiProvider = api.getProvider();
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
                         swaggerDefinition);
@@ -727,11 +669,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String environmentName,
             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
             if (api.getUuid() == null) {
                 api.setUuid(apiId);
             }
@@ -739,7 +681,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (api.getSwaggerDefinition() != null) {
                 api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
             } else {
-                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, requestedTenantDomain));
+                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, organization));
             }
 
             // gets the first available environment if environment is not provided
@@ -765,11 +707,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         environmentName = existingEnvironments.keySet().iterator().next();
                     }
                 }
-            }
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
             String apiSwagger = null;
@@ -800,25 +737,19 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
+
             //this will fail if user does not have access to the API or the API does not exist
-            apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, requestedTenantDomain);
+            apiConsumer.getLightweightAPIByUUID(apiId, organization);
+            ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, organization);
 
             if (thumbnailResource != null) {
                 return Response
@@ -836,10 +767,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
+        } 
         return null;
     }
 
@@ -847,11 +775,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         if (org.apache.commons.lang.StringUtils.isNotEmpty(apiId)) {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+            String organization = RestApiUtil.getOrganization(messageContext);
             Set<Topic> topics;
             try {
                 APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
                 TopicListDTO topicListDTO;
                 if (apiTypeWrapper.isAPIProduct()) {
                     topics = apiConsumer.getTopics(apiTypeWrapper.getApiProduct().getUuid());
@@ -876,24 +804,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdUserRatingPut(String id, RatingDTO body, String xWSO2Tenant,
             MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             int rating = 0;
             String username = RestApiCommonUtil.getLoggedInUsername();
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
+            apiConsumer.checkAPIVisibility(id, organization);
 
             if (body != null) {
                 rating = body.getRating();
@@ -901,34 +818,34 @@ public class ApisApiServiceImpl implements ApisApiService {
             switch (rating) {
                 //Below case 0[Rate 0] - is to remove ratings from a user
                 case 0: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_ZERO, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_ZERO, username);
                     break;
                 }
                 case 1: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_ONE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_ONE, username);
                     break;
                 }
                 case 2: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_TWO, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_TWO, username);
                     break;
                 }
                 case 3: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_THREE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_THREE, username);
                     break;
                 }
                 case 4: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_FOUR, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_FOUR, username);
                     break;
                 }
                 case 5: {
-                    apiConsumer.rateAPI(identifier, APIRating.RATING_FIVE, username);
+                    apiConsumer.rateAPI(id, APIRating.RATING_FIVE, username);
                     break;
                 }
                 default: {
                     RestApiUtil.handleBadRequest("Provided API Rating is not in the range from 1 to 5", log);
                 }
             }
-            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
+            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -946,9 +863,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil
                         .handleInternalServerError("Error while adding/updating user rating for API " + id, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -956,23 +870,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdUserRatingGet(String id, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(id, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            JSONObject obj = apiConsumer.getUserRatingInfo(identifier, username);
+            apiConsumer.checkAPIVisibility(id, organization);
+            JSONObject obj = apiConsumer.getUserRatingInfo(id, username);
             RatingDTO ratingDTO = new RatingDTO();
             if (obj != null && !obj.isEmpty()) {
                 ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -989,9 +893,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while retrieving user rating for API " + id, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -999,24 +900,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdUserRatingDelete(String apiId, String xWSO2Tenant, String ifMatch,
             MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             //this will fail if user doesn't have access to the API or the API does not exist
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            apiConsumer.removeAPIRating(identifier, username);
+            apiConsumer.checkAPIVisibility(apiId, organization);
+            apiConsumer.removeAPIRating(apiId, username);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -1028,9 +918,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while deleting user rating for API " + apiId, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -1038,9 +925,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
         APIIdentifier apiIdentifier = api.getId();
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
@@ -1062,7 +949,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         environmentName));
             }
             ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
-                    requestedTenantDomain);
+                    organization);
 
             return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
         } else {
@@ -1074,7 +961,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
                                                      MessageContext messageContext) {
-        APIDTO apiInfo = getAPIByAPIId(apiId, xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
+        APIDTO apiInfo = getAPIByAPIId(apiId, organization);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
 
@@ -1095,17 +983,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByAPIId(String apiId, String xWSO2Tenant) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+    private APIDTO getAPIByAPIId(String apiId, String organization) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
-
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
 
             // Extracting clicked API name by the user, for the recommendation system
@@ -1115,7 +996,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+                return APIMappingUtil.fromAPItoDTO(api, organization);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
@@ -1128,9 +1009,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

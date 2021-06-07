@@ -10,6 +10,7 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String label;
     private String vhost;
     private String type;
+    private String organization;
 
     public String getType() {
 
@@ -25,6 +26,17 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
 
         return name;
     }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
 
     public void setName(String name) {
 

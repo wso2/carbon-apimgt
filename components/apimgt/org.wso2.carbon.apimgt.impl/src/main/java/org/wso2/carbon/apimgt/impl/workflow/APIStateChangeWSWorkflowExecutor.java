@@ -261,7 +261,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                 targetStatus = apiArtifact.getLifecycleState();
                 if (!currentStatus.equals(targetStatus)) {
-                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
+                    apiMgtDAO.recordAPILifeCycleEvent(apiArtifact.getId(), currentStatus.toUpperCase(),
                             targetStatus.toUpperCase(), invoker, tenantId);
                 }
                 if (log.isDebugEnabled()) {

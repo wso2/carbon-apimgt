@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -442,15 +441,16 @@ public class APIMappingUtil {
     /**
      * This method creates the API monetization information DTO.
      *
-     * @param apiIdentifier API identifier
+     * @param apiId API apiid
+     * @param organization identifier of the organization
      * @return monetization information DTO
      * @throws APIManagementException if failed to construct the DTO
      */
-    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIIdentifier apiIdentifier)
+    public static APIMonetizationInfoDTO getMonetizationInfoDTO(String apiId, String organization)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API api = apiProvider.getAPI(apiIdentifier);
+        API api = apiProvider.getLightweightAPIByUUID(apiId, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         //set the information relatated to monetization to the DTO
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
@@ -490,17 +490,18 @@ public class APIMappingUtil {
     /**
      * Get map of monetized policies to plan mapping.
      *
-     * @param apiIdentifier                  API identifier
+     * @param uuid apiuuid
+     * @param organization organization
      * @param monetizedPoliciesToPlanMapping map of monetized policies to plan mapping
      * @return DTO of map of monetized policies to plan mapping
      * @throws APIManagementException if failed to construct the DTO
      */
-    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIIdentifier apiIdentifier,
+    public static APIMonetizationInfoDTO getMonetizedTiersDTO(String uuid, String organization,
                                                               Map<String, String> monetizedPoliciesToPlanMapping)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API api = apiProvider.getAPI(apiIdentifier);
+        API api = apiProvider.getLightweightAPIByUUID(uuid, organization);
         APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
         apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
         apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
@@ -536,16 +537,16 @@ public class APIMappingUtil {
      * Returns an API with minimal info given the uuid.
      *
      * @param apiUUID               API uuid
-     * @param requestedTenantDomain tenant domain of the API
+     * @param organization organization of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+    public static API getAPIInfoFromUUID(String apiUUID, String organization)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, organization);
         return api;
     }
 
@@ -658,12 +659,12 @@ public class APIMappingUtil {
         if (api.getCreatedTime() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
-            apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
+            apiInfoDTO.setCreatedTime(String.valueOf(createdTime.getTime()));
         }
         if (api.getLastUpdated() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date lastUpdatedTime = api.getLastUpdated();
-            apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
+            apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
@@ -2750,26 +2751,6 @@ public class APIMappingUtil {
         return apiScopeDTOS;
     }
 
-    /**
-     * This method is used to retrieve APIIdentifier from the apiId or UUID.
-     *
-     * @param apiId
-     * @param requestedTenantDomain
-     */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
-            throws APIManagementException {
-
-        APIIdentifier apiIdentifier;
-        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        if (RestApiCommonUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
-        } else {
-            apiIdentifier =
-                    apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), requestedTenantDomain).getId();
-        }
-        return apiIdentifier;
-    }
-
     public static APIIdentifier getAPIIdentifierFromApiId(String apiId) throws APIManagementException {
         //if apiId contains -AT-, that need to be replaced before splitting
         apiId = APIUtil.replaceEmailDomainBack(apiId);
@@ -2810,23 +2791,16 @@ public class APIMappingUtil {
      * Returns the API given the uuid or the id in {provider}-{api}-{version} format.
      *
      * @param apiId                 uuid or the id in {provider}-{api}-{version} format
-     * @param requestedTenantDomain tenant domain of the API
+     * @param organization organization of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static API getAPIFromApiIdOrUUID(String apiId, String organization)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        if (RestApiCommonUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
-        } else {
-            APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
-            //Checks whether the logged in user's tenant and the API's tenant is equal
-            RestApiCommonUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
-            api = apiProvider.getAPI(apiIdentifier);
-        }
+        api = apiProvider.getAPIbyUUID(apiId, organization);
         return api;
     }
 
