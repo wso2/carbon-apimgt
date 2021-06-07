@@ -4795,8 +4795,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
 
             // Get the stored OAuth Application Info
-            APIKey apiKey = apiMgtDAO
-                    .getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId(), keyManagerID, tokenType);
+            APIKey apiKey = apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId(),
+                    keyManagerName, keyManagerID, tokenType);
             OAuthApplicationInfo storedOAuthApplicationInfo = null;
             if (apiKey != null) {
                 String appMetaData = apiKey.getAppMetaData();
