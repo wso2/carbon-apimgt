@@ -42,6 +42,13 @@ var getTenantDomain = function() {
     return tenantDomain;
 };
 
+function getIDPOrigin() {
+    return utils.getExternalIDPOrigin();
+}
+function getIDPCheckSessionEndpoint() {
+    return utils.getExternalIDPCheckSessionEndpoint();
+}
+
 var getTenantBasedLoginCallBack = function() {
     var tenantDomain = getTenantDomain();
     var publisherDomainMapping = utils.getTenantBasedPublisherDomainMapping(tenantDomain);

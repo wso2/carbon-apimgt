@@ -84,11 +84,6 @@
                     "grantType": "authorization_code refresh_token",
                     "saasApp": true
                 };
-                log.error('*******');
-                log.error('dcrRequestData = ' + dcrRequestData);
-                log.error('dcrUrl = ' + dcrRequestData);
-                log.error('*******');
-
                 var result = post(dcrUrl, JSON.stringify(dcrRequestData), {
                     "Authorization": authorizationHeader,
                     "Content-Type": "application/json"

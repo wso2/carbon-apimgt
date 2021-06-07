@@ -32,10 +32,6 @@ const AppConfig = {
         docUrl: 'https://apim.docs.wso2.com/en/3.2.0/',
         applicationCount: 50,
     },
-    idp: {
-        origin: 'https://localhost:9443',
-        checkSessionEndpoint: 'https://localhost:9443/oidc/checksession',
-    },
 };
 
 if (typeof module !== 'undefined') {
