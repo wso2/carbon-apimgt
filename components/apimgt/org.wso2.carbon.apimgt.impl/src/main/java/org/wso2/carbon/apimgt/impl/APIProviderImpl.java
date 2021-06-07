@@ -1733,7 +1733,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the existing local scope keys attached for the API
         Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the existing URI templates for the API
-        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
+        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
         // Get the new local scope keys from URI templates
         Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getUuid(), api.getOrganization(), uriTemplates);
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
@@ -3495,7 +3495,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get local scopes for the given API which are not already assigned for different versions of the same API
         Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
         // Detach all the resource scopes from the API resources in KM
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -4951,7 +4951,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
             //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
-            API api = getAPIbyUUID(uuid, orgId);
+            API api = getLightweightAPIByUUID(uuid, orgId);
             String targetStatus;
             if (api != null) {
 
@@ -5415,7 +5415,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Map<String, Object> getAPILifeCycleData(String uuid, String orgId) throws APIManagementException {
 
         Map<String, Object> lcData = new HashMap<String, Object>();
-        API api = getAPIbyUUID(uuid, orgId);
+        API api = getLightweightAPIByUUID(uuid, orgId);
 
         List<String> actionsList;
         try {
@@ -7959,10 +7959,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
+                populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 loadMediationPoliciesToAPI(api, organization);
-                populateRevisionInformation(api, uuid);
-                populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
                 return api;
@@ -7979,13 +7978,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void populateAPITier(API api) throws APIManagementException {
-
-        if (api.isRevision()) {
-            String apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
-            api.setApiLevelPolicy(apiLevelTier);
-        }
-    }
     private void populateAPITier(APIProduct apiProduct) throws APIManagementException {
 
         if (apiProduct.isRevision()) {
@@ -8709,7 +8701,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        API api = getAPIbyUUID(apiId, apiRevision, organization);
+        API api = getLightweightAPIByUUID(apiId, organization);
+        api.setRevisionedApiId(apiRevision.getRevisionUUID());
+        api.setRevisionId(apiRevision.getId());
+        api.setUuid(apiId);
+        api.getId().setUuid(apiId);
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();

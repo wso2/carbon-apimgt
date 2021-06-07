@@ -7196,7 +7196,7 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public Set<URITemplate> getURITemplatesOfAPI(String uuid, String organization)
+    public Set<URITemplate> getURITemplatesOfAPI(String uuid)
             throws APIManagementException {
 
         String currentApiUuid;
@@ -7206,18 +7206,14 @@ public class ApiMgtDAO {
         } else {
             currentApiUuid = uuid;
         }
-        APIIdentifier identifier = getAPIIdentifierFromUUID(currentApiUuid);
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
         if (apiRevision != null) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
-                ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                ps.setString(2, identifier.getName());
-                ps.setString(3, identifier.getVersion());
-                ps.setString(4, organization);
-                ps.setString(5, uuid);
+                ps.setString(1, currentApiUuid);
+                ps.setString(2, uuid);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7266,17 +7262,14 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAssociatedAPIProducts(uuid, uriTemplates);
+                setAssociatedAPIProducts(currentApiUuid, uriTemplates);
             } catch (SQLException e) {
-                handleException("Failed to get URI Templates of API" + identifier, e);
+                handleException("Failed to get URI Templates of API with UUID " + uuid, e);
             }
         } else {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
-                ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                ps.setString(2, identifier.getName());
-                ps.setString(3, identifier.getVersion());
-                ps.setString(4, organization);
+                ps.setString(1, currentApiUuid);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7325,9 +7318,9 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAssociatedAPIProducts(uuid, uriTemplates);
+                setAssociatedAPIProducts(currentApiUuid, uriTemplates);
             } catch (SQLException e) {
-                handleException("Failed to get URI Templates of API" + identifier, e);
+                handleException("Failed to get URI Templates of API with UUID " + currentApiUuid, e);
             }
         }
         return new LinkedHashSet<>(uriTemplates.values());
@@ -14485,7 +14478,7 @@ public class ApiMgtDAO {
 
         List<APIProductResource> productMappings = new ArrayList<>();
 
-        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(api.getUuid(), api.getOrganization());
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(api.getUuid());
 
         for (URITemplate uriTemplate : uriTemplatesOfAPI) {
             Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();
