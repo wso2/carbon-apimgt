@@ -11561,10 +11561,21 @@ public final class APIUtil {
 
     private static String getTenantAwareContext(String tenantDomain) {
 
-        if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            return "/t/".concat(tenantDomain);
+        if (isTenantPresent(tenantDomain)) {
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return "/t/".concat(tenantDomain);
+            }
         }
         return "";
+    }
+
+    public static boolean isTenantPresent(String tenantDomain) {
+        try {
+            return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain) != -1;
+        } catch (UserStoreException e) {
+            return false;
+        }
     }
 
     /**
