@@ -1701,11 +1701,8 @@ public class SQLConstants {
             " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
             " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
             " WHERE " +
-            "  API.API_PROVIDER = ? AND " +
-            "  API.API_NAME = ? AND " +
-            "  API.API_VERSION = ?  AND " +
-            "  API.ORGANIZATION = ?  AND " +
-                    "AUM.REVISION_UUID IS NULL " +
+            "  API.API_UUID = ? AND " +
+            "  AUM.REVISION_UUID IS NULL " +
             " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_URL_TEMPLATES_OF_API_WITH_PRODUCT_MAPPINGS_SQL =
@@ -1739,11 +1736,8 @@ public class SQLConstants {
                     " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
                     " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
                     " WHERE " +
-                    "  API.API_PROVIDER = ? AND " +
-                    "  API.API_NAME = ? AND " +
-                    "  API.API_VERSION = ?  AND " +
-                    "  API.ORGANIZATION = ?  AND " +
-                    "AUM.REVISION_UUID = ? " +
+                    "  API.API_UUID = ? AND " +
+                    "  AUM.REVISION_UUID = ? " +
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL =
