@@ -87,11 +87,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         initializeStore();
     }
 
-    public SubscriptionDataStoreImpl() {
-
-        initializeStore();
-    }
-
     private void initializeStore() {
 
         this.applicationKeyMappingMap = new ConcurrentHashMap<>();
@@ -102,6 +97,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
         this.scopesMap = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void init() {
         initializeLoadingTasks();
     }
 

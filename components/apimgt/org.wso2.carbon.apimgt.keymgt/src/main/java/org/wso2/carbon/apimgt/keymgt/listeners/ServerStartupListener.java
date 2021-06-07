@@ -33,27 +33,38 @@ public class ServerStartupListener extends AbstractAxis2ConfigurationContextObse
 
     @Override
     public void completingServerStartup() {
+        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
     }
 
     @Override
     public void completedServerStartup() {
-        //load subscription data to memory
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        //initialize subscription data to memory
+        log.debug("Initializing ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Initialized ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     @Override
     public void createdConfigurationContext(ConfigurationContext configContext) {
         //load subscription data to memory
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        log.info("Initializing ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
+        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
+        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
+        log.debug("Initializing ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
+        SubscriptionDataHolder.getInstance().initializeSubscriptionStore(tenantDomain);
+        log.debug("Initialized ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
     }
 
     @Override
     public void terminatedConfigurationContext(ConfigurationContext configCtx) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        log.debug("UNRegistering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
+        log.debug("UNRegistered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
     }
 
     /**
