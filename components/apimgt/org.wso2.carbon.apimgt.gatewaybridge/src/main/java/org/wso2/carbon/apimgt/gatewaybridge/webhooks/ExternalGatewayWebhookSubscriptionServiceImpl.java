@@ -3,13 +3,17 @@ package org.wso2.carbon.apimgt.gatewaybridge.webhooks;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.gatewaybridge.dao.WebhooksDAO;
 import org.wso2.carbon.apimgt.gatewaybridge.deployers.APIDeployer;
 import org.wso2.carbon.apimgt.gatewaybridge.deployers.APIDeployerImpl;
 import org.wso2.carbon.apimgt.gatewaybridge.dto.WebhookSubscriptionDTO;
-
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
 
 /**
@@ -38,6 +42,20 @@ public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGa
         } else {
             log.debug("Unexpected error while inserting the subscription ");
         }
+
+        //creating an environment for the external gateway subscriber
+        APIAdmin apiAdmin = new APIAdminImpl();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Environment env = new Environment();
+        env.setName(webhookSubscriptionDTO.getSubscriberName());
+
+        //creating a VHost for the new env
+        VHost vHost = new VHost();
+        vHost.setHost(webhookSubscriptionDTO.getvHost()); // eg:-aws.com
+        //set vHost ports
+        env.getVhosts().add(vHost);
+
+        apiAdmin.addEnvironment(tenantDomain, env);
 
         /* The following section is for the testing the
              webhook because of the version incompatibility.

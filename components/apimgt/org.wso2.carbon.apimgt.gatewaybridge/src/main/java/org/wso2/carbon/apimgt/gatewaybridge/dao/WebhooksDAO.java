@@ -75,7 +75,7 @@ public class WebhooksDAO {
                 .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.FIND_SUBSCRIPTION)) {
             preparedStatement.setString(1, webhookSubscription.getSubscriberName());
             preparedStatement.setString(2, webhookSubscription.getCallback());
-            preparedStatement.setString(3, webhookSubscription.getTopic());
+            preparedStatement.setString(3, webhookSubscription.getvHost());
 
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
@@ -103,7 +103,7 @@ public class WebhooksDAO {
                 .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.ADD_SUBSCRIPTION)) {
             prepareStmt.setString(1, webhookSubscription.getSubscriberName());
             prepareStmt.setString(2, webhookSubscription.getCallback());
-            prepareStmt.setString(3, webhookSubscription.getTopic());
+            prepareStmt.setString(3, webhookSubscription.getvHost());
             prepareStmt.setLong(4, webhookSubscription.getExpiryTime());
             prepareStmt.executeUpdate();
         } catch (SQLException e) {
@@ -126,7 +126,7 @@ public class WebhooksDAO {
         try (PreparedStatement prepareStmt = conn
                 .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.UPDATE_EXISTING_SUBSCRIPTION)) {
             prepareStmt.setString(1, webhookSubscription.getCallback());
-            prepareStmt.setString(2, webhookSubscription.getTopic());
+            prepareStmt.setString(2, webhookSubscription.getvHost());
             prepareStmt.setLong(3, webhookSubscription.getExpiryTime());
             prepareStmt.setInt(4, id);
             prepareStmt.executeUpdate();

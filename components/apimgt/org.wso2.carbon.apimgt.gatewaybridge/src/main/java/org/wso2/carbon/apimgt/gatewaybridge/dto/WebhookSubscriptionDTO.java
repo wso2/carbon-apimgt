@@ -10,25 +10,33 @@ public class WebhookSubscriptionDTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private String subscriberName;
     private String callback;
-    private String topic;
+    private String vHost;
     private long updatedTime;
     private long expiryTime;
 
     public WebhookSubscriptionDTO() {
     }
 
-    public WebhookSubscriptionDTO(String subscriberName, String callback, String topic) {
+    public WebhookSubscriptionDTO(String subscriberName, String callback, String vHost) {
         this.subscriberName = subscriberName;
         this.callback = callback;
-        this.topic = topic;
+        this.vHost = vHost;
         this.expiryTime = 10;
     }
 
-    public WebhookSubscriptionDTO(String subscriberName, String callback, String topic, long expiryTime) {
+    public WebhookSubscriptionDTO(String subscriberName, String callback, String vHost, long expiryTime) {
         this.subscriberName = subscriberName;
         this.callback = callback;
-        this.topic = topic;
+        this.vHost = vHost;
         this.expiryTime = expiryTime;
+    }
+
+    public String getvHost() {
+        return vHost;
+    }
+
+    public void setvHost(String vHost) {
+        this.vHost = vHost;
     }
 
     public String getSubscriberName() {
@@ -45,14 +53,6 @@ public class WebhookSubscriptionDTO implements Serializable {
 
     public void setCallback(String callback) {
         this.callback = callback;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
     }
 
     public long getUpdatedTime() {

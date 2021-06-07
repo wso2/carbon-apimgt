@@ -654,7 +654,7 @@ definitions:
         type: string
       callback_url:
         type: string
-      topic:
+      vHost:
         type: string
       expiry_at:
         type: integer

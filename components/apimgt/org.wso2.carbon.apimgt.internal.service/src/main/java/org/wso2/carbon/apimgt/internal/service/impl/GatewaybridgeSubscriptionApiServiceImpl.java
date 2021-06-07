@@ -36,7 +36,7 @@ public class GatewaybridgeSubscriptionApiServiceImpl implements GatewaybridgeSub
         try {
             externalGatewayWebhookSubscription.addExternalGatewaySubscription(
                     new WebhookSubscriptionDTO(subscription.getSubscriberName(),
-                            subscription.getCallbackUrl(), subscription.getTopic()));
+                            subscription.getCallbackUrl(), subscription.getVHost()));
 
             return Response.ok().build();
         } catch (APIManagementException e) {
