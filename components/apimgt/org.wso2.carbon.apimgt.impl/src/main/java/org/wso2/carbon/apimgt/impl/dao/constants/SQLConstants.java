@@ -3328,7 +3328,7 @@ public class SQLConstants {
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +
-                        "DISPLAY_NAME,TOKEN_TYPE) VALUES (?,?,?,?,?,?,?,?,?)";
+                        "DISPLAY_NAME,TOKEN_TYPE,EXTERNAL_REFERENCE_ID) VALUES (?,?,?,?,?,?,?,?,?,?)";
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
                         "ENABLED = ?,DISPLAY_NAME = ?,TOKEN_TYPE = ? WHERE UUID = ?";

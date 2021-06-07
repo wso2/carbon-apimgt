@@ -39,6 +39,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String type;
     private boolean enabled;
     private String tokenType;
+    private String externalReferenceId = null;
 
     public KeyManagerConfigurationDTO() {
 
@@ -55,6 +56,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.type = keyManagerConfigurationDTO.getType();
         this.enabled = keyManagerConfigurationDTO.isEnabled();
         this.tokenType = keyManagerConfigurationDTO.getTokenType();
+        this.externalReferenceId = keyManagerConfigurationDTO.getExternalReferenceId();
     }
     public String getName() {
 
@@ -138,6 +140,14 @@ public class KeyManagerConfigurationDTO implements Serializable {
 
     public String getTokenType() {
         return tokenType;
+    }
+
+    public String getExternalReferenceId() {
+        return externalReferenceId;
+    }
+
+    public void setExternalReferenceId(String externalReferenceId) {
+        this.externalReferenceId = externalReferenceId;
     }
 
     public void setTokenType(String tokenType) {

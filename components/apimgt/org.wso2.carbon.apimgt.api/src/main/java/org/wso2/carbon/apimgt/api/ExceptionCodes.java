@@ -192,6 +192,11 @@ public enum ExceptionCodes implements ErrorHandler {
     MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
             "users with the same username exist in the system"),
     INVALID_USER_ROLES(900610, "Invalid user roles found", 400, "Invalid user roles found"),
+    IDP_ADDING_FAILED(900611, "Unable to add identity provider", 400, "Error while adding the identity provider"),
+    IDP_RETRIEVAL_FAILED(900612, "Unable to retrieve the identity provider", 400, "Error while retrieving the "
+            + "identity provider details"),
+    IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
+            + "identity provider"),
 
 
     // Labels related codes

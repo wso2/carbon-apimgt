@@ -394,7 +394,9 @@ public class APIAdminImpl implements APIAdmin {
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
-        keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
+        if (StringUtils.isBlank(keyManagerConfigurationDTO.getUuid())) {
+            keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
+        }
         KeyManagerConfigurationDTO keyManagerConfigurationToStore =
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
         encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
