@@ -1830,6 +1830,11 @@
                     <artifactId>handy-uri-templates</artifactId>
                     <version>${damnhandy.version}</version>
                 </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annotation.verion}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2101,5 +2106,6 @@
         <javax.jms.version>2.0.1</javax.jms.version>
         <com.damnhandy.version>2.1.6</com.damnhandy.version>
         <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
+        <javax.annotation.verion>1.3.2</javax.annotation.verion>
     </properties>
 </project>
