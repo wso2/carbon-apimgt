@@ -785,23 +785,24 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void testGetAPIVersionsMatchingApiName() throws Exception {
-        APIIdentifier apiId = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
-                "1.0.0");
+    public void testGetAPIVersionsMatchingApiNameAndOrganization() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
+                "getAPIVersionsMatchingApiNameAndOrganization", "1.0.0");
         API api = new API(apiId);
-        api.setContext("/getAPIVersionsMatchingApiName");
-        api.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
+        api.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
+        api.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
         api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234, "testOrg");
-        APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
-                "2.0.0");
+        APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
+                "getAPIVersionsMatchingApiNameAndOrganization", "2.0.0");
         API api2 = new API(apiId2);
-        api2.setContext("/getAPIVersionsMatchingApiName");
-        api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
+        api2.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
+        api2.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
         api2.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api2, -1234, "testOrg");
-        List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiName("getAPIVersionsMatchingApiName",
-                "getAPIVersionsMatchingApiName");
+        List<String> versionList = apiMgtDAO
+                .getAPIVersionsMatchingApiNameAndOrganization("getAPIVersionsMatchingApiNameAndOrganization",
+                        "getAPIVersionsMatchingApiNameAndOrganization", "testOrg");
         assertNotNull(versionList);
         assertTrue(versionList.contains("1.0.0"));
         assertTrue(versionList.contains("2.0.0"));
@@ -974,7 +975,6 @@ public class APIMgtDAOTest {
         apiMgtDAO.recordAPILifeCycleEvent(api.getUuid(), "CREATED", "PUBLISHED",
                 "testCreateApplicationRegistrationEntry", -1234);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiId);
-        assertTrue(apiMgtDAO.getConsumerKeys(apiId, organization).length > 0);
         apiMgtDAO.removeAllSubscriptions(api.getUuid());
         assertTrue(apiMgtDAO.getAPINamesMatchingContext(api.getContext()).size() > 0);
         apiMgtDAO.deleteAPI(api.getUuid());

@@ -191,31 +191,6 @@ public class ApiMgtDAO {
         return INSTANCE;
     }
 
-    public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        List<String> versionList = new ArrayList<String>();
-        ResultSet resultSet = null;
-
-        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, apiName);
-            ps.setString(2, username);
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                versionList.add(resultSet.getString("API_VERSION"));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get API versions matches API name" + apiName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-        return versionList;
-    }
-
     /**
      * Persist the details of the token generation request (allowed domains & validity period) to be used back
      * when approval has been granted.
@@ -5433,30 +5408,32 @@ public class ApiMgtDAO {
     /**
      * Returns whether a given API Name already exists
      *
-     * @param apiName        Name of the API
+     * @param apiName      Name of the API
+     * @param username     Username
      * @param organization Identifier of an Organization
      * @return true/false
      * @throws APIManagementException if failed to get API Names
      */
-    public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String organization)
-            throws APIManagementException {
+    public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String username,
+            String organization) throws APIManagementException {
 
         List<String> versionList = new ArrayList<String>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection
-                     .prepareStatement(SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
+                PreparedStatement ps = connection
+                        .prepareStatement(SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
             boolean initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             ps.setString(1, apiName);
-            ps.setString(2, organization);
-            try (ResultSet resultSet = ps.executeQuery()){
+            ps.setString(2, username);
+            ps.setString(3, organization);
+            try (ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
                     versionList.add(resultSet.getString("API_VERSION"));
                 }
                 connection.commit();
             } catch (SQLException e) {
-                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback get API versions matches " +
-                        "API name " + apiName, e);
+                APIMgtDBUtil.rollbackConnection(connection,
+                        "Failed to rollback get API versions matches API name " + apiName, e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
@@ -8216,6 +8193,7 @@ public class ApiMgtDAO {
         return uuid;
     }
 
+
     /**
      * Get API Product UUID by the API Product Identifier and organization.
      *
@@ -8224,7 +8202,21 @@ public class ApiMgtDAO {
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
-    public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization, Connection connection)
+    public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
+            throws APIManagementException {
+        return getUUIDFromIdentifier(identifier, organization, null);
+    }
+
+    /**
+     * Get API Product UUID by the API Product Identifier and organization.
+     *
+     * @param identifier API Product Identifier
+     * @param organization
+     * @param connection
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    private String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization, Connection connection)
             throws APIManagementException {
         boolean isNewConnection = false;
         String uuid = null;
@@ -10195,31 +10187,6 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to check scope key to API assignment for scope: " + scopeKey, e);
-        }
-        return false;
-    }
-
-    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
-
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-
-        String sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, contextTemplate.toLowerCase());
-
-            resultSet = ps.executeQuery();
-            if (resultSet.next()) {
-                int count = resultSet.getInt("CTX_COUNT");
-                return count > 0;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to count contexts which match " + contextTemplate, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return false;
     }

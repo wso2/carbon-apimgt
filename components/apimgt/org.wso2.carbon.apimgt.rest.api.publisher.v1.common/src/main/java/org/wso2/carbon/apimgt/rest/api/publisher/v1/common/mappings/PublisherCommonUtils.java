@@ -894,7 +894,7 @@ public class PublisherCommonUtils {
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),
-                organization);
+                username, organization);
         if (apiVersions.size() > 0) {
             //If any previous version exists
             for (String version : apiVersions) {

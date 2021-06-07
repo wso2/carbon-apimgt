@@ -408,7 +408,7 @@ public class AbstractAPIManagerTestCase {
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion();
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, organization, null)).thenReturn("xxxxx");
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier, organization)).thenReturn("xxxxx");
         Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier, organization));
     }
 
@@ -1405,18 +1405,23 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test
-    public void testIsDuplicateContextTemplate() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isDuplicateContextTemplate(Mockito.anyString())).thenReturn(true, false, true, false);
+    public void testIsDuplicateContextTemplateMatchingOrganization() throws APIManagementException {
+        Mockito.when(apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true, false, true, false);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context"));
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context"));
+        Assert.assertTrue(abstractAPIManager
+                .isDuplicateContextTemplateMatchingOrganization("/t/context", SAMPLE_TENANT_DOMAIN_1));
+        Assert.assertFalse(
+                abstractAPIManager.isDuplicateContextTemplateMatchingOrganization("context", SAMPLE_TENANT_DOMAIN_1));
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context"));
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context"));
+        Assert.assertTrue(
+                abstractAPIManager.isDuplicateContextTemplateMatchingOrganization("/t/context", SAMPLE_TENANT_DOMAIN));
+        Assert.assertFalse(
+                abstractAPIManager.isDuplicateContextTemplateMatchingOrganization("context", SAMPLE_TENANT_DOMAIN));
         abstractAPIManager.tenantDomain = null;
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate(null));
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context"));
+        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplateMatchingOrganization(null, null));
+        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplateMatchingOrganization("context", null));
     }
 
     @Test

@@ -601,16 +601,6 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testGetConsumerKeys() throws APIManagementException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        String organization = "org1";
-        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
-        String[] test = new String[]{};
-        Mockito.when(apimgtDAO.getConsumerKeys(apiId, organization)).thenReturn(test);
-        assertNotNull(apiProvider.getConsumerKeys(apiId, organization));
-    }
-
-    @Test
     public void testChangeAPILCCheckListItems() throws APIManagementException, GovernanceException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");

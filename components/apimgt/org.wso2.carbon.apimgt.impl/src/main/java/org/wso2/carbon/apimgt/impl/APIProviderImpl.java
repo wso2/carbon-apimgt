@@ -4616,19 +4616,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType);
     }
 
-    /**
-     * Returns the all the Consumer keys of applications which are subscribed to the given API
-     *
-     * @param apiIdentifier APIIdentifier
-     * @param organization organization
-     * @return a String array of ConsumerKeys
-     * @throws APIManagementException
-     */
-    public String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException {
-
-        return apiMgtDAO.getConsumerKeys(apiIdentifier, organization);
-    }
-
     @Override
     public void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException {
         if (log.isDebugEnabled()) {
@@ -7125,7 +7112,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (identifier.getUUID() != null) {
                 apiProductUUID = identifier.getUUID();
             } else {
-                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization, null);
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier, organization);
             }
         }
         APIProduct apiProduct = getAPIProductbyUUID(apiProductUUID, organization);

@@ -766,17 +766,6 @@ public interface APIProvider extends APIManager {
     Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException;
 
     /**
-     * Returns all the Consumer keys of applications which are subscribed to given API
-     *
-     * @param apiIdentifier APIIdentifier
-     * @param organization Organization
-     * @return a String array of ConsumerKeys
-     * @throws APIManagementException
-     */
-    String[] getConsumerKeys(APIIdentifier apiIdentifier, String organization) throws APIManagementException;
-
-
-    /**
      * This method updates Swagger 2.0 resources in the registry
      *
      * @param apiId    id of the APIIdentifier
