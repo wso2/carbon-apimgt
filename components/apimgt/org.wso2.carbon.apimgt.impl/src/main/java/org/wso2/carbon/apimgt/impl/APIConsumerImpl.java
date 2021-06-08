@@ -5610,6 +5610,37 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    @Override
+    public ApiTypeWrapper getLightweightAPIorAPIProductByUUID(String uuid, String organization)
+            throws APIManagementException {
+        try {
+            Organization org = new Organization(organization);
+            DevPortalAPI devPortalAPI = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            if (devPortalAPI != null) {
+                API api = APIMapper.INSTANCE.toApi(devPortalAPI);
+//                checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
+                /// populate relavant external info
+                // environment
+                String environmentString = null;
+                if (api.getEnvironments() != null) {
+                    environmentString = String.join(",", api.getEnvironments());
+                }
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+                //CORS . if null is returned, set default config from the configuration
+                if (api.getCorsConfiguration() == null) {
+                    api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+                }
+                return new ApiTypeWrapper(api);
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (APIPersistenceException e) {
+            String msg = "Failed to get API with uuid " + uuid;
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     private void populateAPIStatus(API api) throws APIManagementException {
         api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
     }

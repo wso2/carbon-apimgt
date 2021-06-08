@@ -95,6 +95,16 @@ public interface APIManager {
     ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException;
 
     /**
+     * Get minimal details of API or APIProduct by registry artifact id
+     *
+     * @param uuid          Registry artifact id
+     * @param organization  Organization
+     * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
+     * @throws APIManagementException
+     */
+    ApiTypeWrapper getLightweightAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException;
+
+    /**
      * Get minimal details of API by registry artifact id
      *
      * @param uuid          Registry artifact id
