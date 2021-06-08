@@ -39,6 +39,7 @@ public class KeyManagerDTO   {
     private String authorizeEndpoint = null;
     private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
+    private String alias = null;
     private String scopeManagementEndpoint = null;
     private List<String> availableGrantTypes = new ArrayList<String>();
     private Boolean enableTokenGeneration = null;
@@ -330,6 +331,24 @@ return null;
   }
 
   /**
+   * The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token 
+   **/
+  public KeyManagerDTO alias(String alias) {
+    this.alias = alias;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ZyxWExFdfe4fAZ7sc1W8bkX2r80a", value = "The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token ")
+  @JsonProperty("alias")
+  public String getAlias() {
+    return alias;
+  }
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+
+  /**
    **/
   public KeyManagerDTO scopeManagementEndpoint(String scopeManagementEndpoint) {
     this.scopeManagementEndpoint = scopeManagementEndpoint;
@@ -612,6 +631,7 @@ return null;
         Objects.equals(authorizeEndpoint, keyManager.authorizeEndpoint) &&
         Objects.equals(certificates, keyManager.certificates) &&
         Objects.equals(issuer, keyManager.issuer) &&
+        Objects.equals(alias, keyManager.alias) &&
         Objects.equals(scopeManagementEndpoint, keyManager.scopeManagementEndpoint) &&
         Objects.equals(availableGrantTypes, keyManager.availableGrantTypes) &&
         Objects.equals(enableTokenGeneration, keyManager.enableTokenGeneration) &&
@@ -631,7 +651,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
   }
 
   @Override
@@ -653,6 +673,7 @@ return null;
     sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
     sb.append("    certificates: ").append(toIndentedString(certificates)).append("\n");
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
+    sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    scopeManagementEndpoint: ").append(toIndentedString(scopeManagementEndpoint)).append("\n");
     sb.append("    availableGrantTypes: ").append(toIndentedString(availableGrantTypes)).append("\n");
     sb.append("    enableTokenGeneration: ").append(toIndentedString(enableTokenGeneration)).append("\n");

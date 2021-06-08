@@ -40,6 +40,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private boolean enabled;
     private String tokenType;
     private String externalReferenceId = null;
+    private String alias = null;
 
     public KeyManagerConfigurationDTO() {
 
@@ -152,6 +153,14 @@ public class KeyManagerConfigurationDTO implements Serializable {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public void addProperty(String key,Object value){

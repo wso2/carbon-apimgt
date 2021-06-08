@@ -4162,6 +4162,12 @@ components:
         issuer:
           type: string
           example: https://localhost:9444/services
+        alias:
+          type: string
+          description: |
+            The alias of Identity Provider.
+            If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token
+          example: ZyxWExFdfe4fAZ7sc1W8bkX2r80a
         scopeManagementEndpoint:
           type: string
           example: https://wso2is.com:9444/api/identity/oauth2/v1.0/scopes

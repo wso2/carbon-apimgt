@@ -237,6 +237,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         identityProvider.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         identityProvider.setPrimary(Boolean.FALSE);
         identityProvider.setIdentityProviderDescription(keyManagerConfigurationDTO.getDescription());
+        identityProvider.setAlias(keyManagerConfigurationDTO.getAlias());
         KeyManagerCertificatesDTO keyManagerCertificatesDTO = keyManagerDTO.getCertificates();
 
         if (keyManagerCertificatesDTO != null) {
@@ -313,6 +314,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         }
 
         keyManagerDTO.setEnabled(identityProvider.isEnable());
+        keyManagerDTO.setAlias(identityProvider.getAlias());
 
         ClaimConfig claimConfig = identityProvider.getClaimConfig();
         org.wso2.carbon.identity.application.common.model.Claim[] idpClaims = claimConfig.getIdpClaims();

@@ -61,6 +61,7 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.valueOf(keyManagerConfigurationDTO.getTokenType()));
+        keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
         JsonElement clientRegistrationElement = jsonObject.get(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         if (clientRegistrationElement != null) {
@@ -192,6 +193,7 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
         keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
         keyManagerConfigurationDTO.setTokenType(keyManagerDTO.getTokenType().toString());
+        keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());
