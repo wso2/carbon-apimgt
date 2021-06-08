@@ -31,36 +31,14 @@ var getLoopbackOrigin = function() {
     return origin; // Unless there is a port offset this is https://localhost:9443
 };
 
-var getTenantDomain = function() {
-    var tenantDomain = request.getParameter("tenant");
-    if (tenantDomain == null) {
-        tenantDomain = request.getHeader("X-WSO2-Tenant");
-        if (tenantDomain == null) {
-            tenantDomain = "carbon.super";
-        }
-    }
-    return tenantDomain;
-};
-
 function getIDPOrigin() {
     return utils.getExternalIDPOrigin();
 }
+
 function getIDPCheckSessionEndpoint() {
     return utils.getExternalIDPCheckSessionEndpoint();
 }
 
-var getTenantBasedLoginCallBack = function() {
-    var tenantDomain = getTenantDomain();
-    var publisherDomainMapping = utils.getTenantBasedPublisherDomainMapping(tenantDomain);
-    if (publisherDomainMapping != null) {
-        if (publisherDomainMapping.get('login') != null) {
-            return publisherDomainMapping.get('login');
-        }
-        return "https://"+publisherDomainMapping.get('customUrl') + LOGIN_CALLBACK_URL_SUFFIX;
-    }else{
-        return null;
-    }
-};
 /* 
 Deciding what to process as app context.
 If the setting.js has the following definition

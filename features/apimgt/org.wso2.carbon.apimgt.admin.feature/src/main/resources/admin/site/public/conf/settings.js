@@ -7,9 +7,9 @@ const AppConfig = {
         context: '/admin', // Note the leading `/` and no trailing `/`
         /*
         If the proxy context path is configured, it's required to provide it here as well.
-        for example, to serve https://company.com/products/admin/ URL the context and proxy_context_path will be as follows.
-        context: '/products/admin',
-        proxy_context_path: '/products/',
+        for example, to serve https://company.com/apim/admin/ URL the context and proxy_context_path will be as follows.
+        context: '/apim/admin',
+        proxy_context_path: '/apim',
         */
         customUrl: { // Dynamically set the redirect origin according to the forwardedHeader host|proxyPort combination
             enabled: false,
