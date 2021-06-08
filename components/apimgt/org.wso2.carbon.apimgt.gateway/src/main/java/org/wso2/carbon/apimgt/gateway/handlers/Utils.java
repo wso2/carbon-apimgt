@@ -70,6 +70,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.cache.Caching;
+import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
@@ -556,6 +557,17 @@ public class Utils {
             return (API) apiObject;
         } else {
             return messageContext.getConfiguration().getAPI(apiName);
+        }
+    }
+
+    public static String getEncodedClientCertificate(X509Certificate certificate) throws CertificateEncodingException {
+        byte[] encoded = Base64.encodeBase64(certificate.getEncoded());
+        if (isClientCertificateEncoded()) {
+            String base64EncodedString = APIConstants.BEGIN_CERTIFICATE_STRING.concat(new String(encoded)).concat("\n"
+            ).concat(APIConstants.END_CERTIFICATE_STRING);
+            return Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
+        } else {
+            return APIConstants.BEGIN_CERTIFICATE_STRING_SPACE.concat(new String(encoded)).concat(" ").concat(APIConstants.END_CERTIFICATE_STRING);
         }
     }
 }
