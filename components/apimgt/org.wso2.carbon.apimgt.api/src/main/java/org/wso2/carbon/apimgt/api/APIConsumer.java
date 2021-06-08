@@ -997,4 +997,14 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
+
+    /**
+     * Get minimal details of API or APIProduct by registry artifact id
+     *
+     * @param uuid          Registry artifact id
+     * @param organization  Organization
+     * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
+     * @throws APIManagementException
+     */
+    ApiTypeWrapper getLightweightAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException;
 }
