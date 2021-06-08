@@ -231,8 +231,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         IdentityProvider identityProvider = new IdentityProvider();
         String idpName = sanitizeName(
-                keyManagerConfigurationDTO.getName().substring(0, 5) + "_" + organization.substring(0, 5) + "_"
-                        + keyManagerConfigurationDTO.getUuid().substring(0, 5));
+                getSubstringOfFive(keyManagerConfigurationDTO.getName()) + "_" + getSubstringOfFive(organization) + "_"
+                        + getSubstringOfFive(keyManagerConfigurationDTO.getUuid()));
         identityProvider.setIdentityProviderName(idpName);
         identityProvider.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         identityProvider.setPrimary(Boolean.FALSE);
@@ -328,7 +328,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         keyManagerDTO.setClaimMapping(claimMappingEntryDTOList);
     }
 
-    public String sanitizeName(String inputName) {
+    private String sanitizeName(String inputName) {
         return inputName.replaceAll("[^a-zA-Z0-9-_\\.]", "");
+    }
+
+    private String getSubstringOfFive(String inputString) {
+        return inputString.length() < 5 ? inputString : inputString.substring(0, 5);
     }
 }
