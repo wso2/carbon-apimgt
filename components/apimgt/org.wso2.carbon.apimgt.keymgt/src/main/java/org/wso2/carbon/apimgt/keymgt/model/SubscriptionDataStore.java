@@ -34,6 +34,11 @@ import java.util.Map;
 public interface SubscriptionDataStore {
 
     /**
+     * Initialize SubscriptionDataStore.
+     */
+    void init();
+
+    /**
      * Gets an {@link Application} by Id
      *
      * @param appId Id of the Application
