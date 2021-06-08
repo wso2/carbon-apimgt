@@ -5623,27 +5623,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalAPI);
                     apiProduct.setID(new APIProductIdentifier(devPortalAPI.getProviderName(),
                             devPortalAPI.getApiName(), devPortalAPI.getVersion()));
+                    populateAPIProductInformation(uuid, organization, apiProduct);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalAPI);
-                    /// populate relavant external info
-                    // environment
-                    String environmentString = null;
-                    if (api.getEnvironments() != null) {
-                        environmentString = String.join(",", api.getEnvironments());
-                    }
-                    api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
-                    //CORS . if null is returned, set default config from the configuration
-                    if(api.getCorsConfiguration() == null) {
-                        api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
-                    }
                     return new ApiTypeWrapper(api);
                 }
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
             }
-        } catch (APIPersistenceException e) {
+        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
             String msg = "Failed to get API with uuid " + uuid;
             throw new APIManagementException(msg, e);
         }
