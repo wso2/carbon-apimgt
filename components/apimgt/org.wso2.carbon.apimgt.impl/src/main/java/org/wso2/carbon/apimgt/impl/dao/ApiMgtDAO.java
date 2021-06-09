@@ -2998,7 +2998,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName, String userName,
-                                                                String clientId, String keyManagerName,
+                                                                String clientId, String keyManagerId,
                                                                 String keyMappingId) throws APIManagementException {
         String consumerKey = null;
         if (clientId != null) {
@@ -3022,7 +3022,7 @@ public class ApiMgtDAO {
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5, APIConstants.OAuthAppMode.MAPPED.name());
-                ps.setString(6, keyManagerName);
+                ps.setString(6, keyManagerId);
                 ps.setString(7, keyMappingId);
                 ps.execute();
                 connection.commit();
