@@ -163,7 +163,7 @@ class Protected extends Component {
         );
         const { clientId, settings, isSuperTenant } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
-            + clientId + '&redirect_uri=https://' + window.location.host
+            + clientId + '&redirect_uri=' + Configurations.idp.origin
             + Configurations.app.context + '/services/auth/callback/login';
         if (!user) {
             return (
