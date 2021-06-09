@@ -77,71 +77,11 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         }
 
         if (gatewayAPIDTO != null) {
-            try {
-                JSONArray endPointArray = new JSONArray();
-                JSONArray unDeployedEndPointArray = new JSONArray();
-                if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-                    EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
-                            (gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                        if (endpointAdminServiceProxy.isEndpointExist(gatewayEndpoint.getName())) {
-                            endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
-                        } else {
-                            log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
-                            unDeployedEndPointArray.put(gatewayEndpoint.getContent());
-                        }
-                    }
-                }
-                responseObj.put("Deployed Endpoints", endPointArray);
-                responseObj.put("UnDeployed Endpoints", unDeployedEndPointArray);
-
-                JSONArray localEntryArray = new JSONArray();
-                JSONArray UnDeploeydLocalEntryArray = new JSONArray();
-                if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
-                    LocalEntryServiceProxy localEntryServiceProxy = new
-                            LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                        if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                            localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
-                        } else {
-                            log.error(localEntry.getName() + " was not deployed in the gateway");
-                            UnDeploeydLocalEntryArray.put(localEntry.getContent());
-                        }
-                    }
-                }
-                responseObj.put("Deployed Local Entries", localEntryArray);
-                responseObj.put("Undeployed Local Entries", UnDeploeydLocalEntryArray);
-
-                JSONArray sequencesArray = new JSONArray();
-                JSONArray undeployedsequencesArray = new JSONArray();
-                if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
-                    SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                            new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                        if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
-                            sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
-                        } else {
-                            log.error(sequence.getName() + " was not deployed in the gateway");
-                            undeployedsequencesArray.put(sequence.getContent());
-                        }
-                    }
-                }
-                responseObj.put("Deployed Sequences", sequencesArray);
-                responseObj.put("Undeployed Sequences", undeployedsequencesArray);
-            } catch (EndpointAdminException e) {
-                String errorMessage = "Error in fetching deployed Endpoints from Synapse Configuration";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            } catch (AxisFault e) {
-                String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            String apiVelocityDefinition = gatewayAPIDTO.getApiDefinition();
+            if (apiVelocityDefinition != null) {
+                return Response.ok().entity(apiVelocityDefinition).build();
             }
-
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.ok().entity(responseStringObj).build();
-        } else {
-            return Response.serverError().entity("Unexpected error occurred").build();
         }
+        return Response.serverError().entity("Unexpected error occurred").build();
     }
 }

@@ -158,7 +158,7 @@ paths:
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get API artifact from the storage
       description: |
-        This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain
+        This operation is used to get the API definition from the storage. If the Tenant domain
         is not provided carbon.super will be picked as the Tenant domain.
       parameters:
         - name: apiName
@@ -186,7 +186,7 @@ paths:
             OK.
             API artifact successfully retrieved from the storage.
           schema:
-            $ref: '#/definitions/APIArtifact'
+            $ref: '#/definitions/API'
         400:
           $ref: '#/responses/BadRequest'
         404:
@@ -386,6 +386,17 @@ definitions:
         type: string
 
   #-----------------------------------------------------
+  # The API definition response resource
+  #-----------------------------------------------------
+  API:
+    title: API Definition Response
+    properties:
+      api-defition:
+        description: |
+          The velocity definition of the API
+        type: string
+
+  #-----------------------------------------------------
   # The Endpoint response resource
   #-----------------------------------------------------
   Endpoints:
@@ -445,24 +456,6 @@ definitions:
         items:
           type : string
           example: "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
-
-  #-----------------------------------------------------
-  # The API Artifact response resource
-  #-----------------------------------------------------
-  APIArtifact:
-    title: API Artifact Response
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Artifacts Returned
-        example: 1
-      endpoints:
-        $ref: '#/definitions/Endpoints'
-      localEntries:
-        $ref: '#/definitions/LocalEntry'
-      sequences:
-        $ref: '#/definitions/Sequences'
 
   #-----------------------------------------------------
   # The Error resource
