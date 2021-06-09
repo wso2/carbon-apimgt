@@ -160,7 +160,7 @@
       "get" : {
         "tags" : [ "Get API Artifacts" ],
         "summary" : "Get API artifact from the storage",
-        "description" : "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
+        "description" : "This operation is used to get the API definition from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -184,7 +184,7 @@
           "200" : {
             "description" : "OK.\nAPI artifact successfully retrieved from the storage.\n",
             "schema" : {
-              "$ref" : "#/definitions/APIArtifact"
+              "$ref" : "#/definitions/API"
             }
           },
           "400" : {
@@ -446,6 +446,15 @@
       },
       "title" : "Deploy API Response"
     },
+    "API" : {
+      "properties" : {
+        "api-defition" : {
+          "type" : "string",
+          "description" : "The velocity definition of the API\n"
+        }
+      },
+      "title" : "API Definition Response"
+    },
     "Endpoints" : {
       "properties" : {
         "deployedEndpoints" : {
@@ -506,25 +515,6 @@
         }
       },
       "title" : "LocalEntry Response"
-    },
-    "APIArtifact" : {
-      "properties" : {
-        "count" : {
-          "type" : "integer",
-          "example" : 1,
-          "description" : "Number of Artifacts Returned\n"
-        },
-        "endpoints" : {
-          "$ref" : "#/definitions/Endpoints"
-        },
-        "localEntries" : {
-          "$ref" : "#/definitions/LocalEntry"
-        },
-        "sequences" : {
-          "$ref" : "#/definitions/Sequences"
-        }
-      },
-      "title" : "API Artifact Response"
     },
     "Error" : {
       "required" : [ "code", "message" ],
