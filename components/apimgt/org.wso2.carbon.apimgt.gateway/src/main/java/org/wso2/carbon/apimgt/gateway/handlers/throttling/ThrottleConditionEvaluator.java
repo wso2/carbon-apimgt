@@ -254,13 +254,12 @@ public class ThrottleConditionEvaluator {
         boolean status = true;
 
         for (Map.Entry<String, String> queryParam : condition.getValues().entrySet()) {
-            String value = queryParamMap.get(queryParam.getKey());
-            if (value == null) {
+            if (queryParamMap == null || queryParamMap.get(queryParam.getKey()) == null) {
                 status = false;
                 break;
             } else {
                 Pattern pattern = Pattern.compile(queryParam.getValue());
-                Matcher matcher = pattern.matcher(value);
+                Matcher matcher = pattern.matcher(queryParamMap.get(queryParam.getKey()));
                 status = status && matcher.find();
             }
         }
