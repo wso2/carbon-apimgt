@@ -1905,6 +1905,57 @@ paths:
   /applications/{applicationId}:
 
     #-----------------------------------------------------
+    # Get the information of a certain application
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/admin/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" GET \"https://localhost:9443/api/am/admin/v1/application/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n           \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n             \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n          \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
+      summary: |
+        Get the details of an Application
+      description: |
+        This operation can be used to get the details of an application by specifying its id.
+      parameters:
+        - $ref: '#/parameters/applicationId'
+      tags:
+        - Applications
+      responses:
+        200:
+          description: |
+            OK.
+            Application details returned.
+          schema:
+            - $ref: '#/definitions/Application'
+            - $ref: '#/parameters/requestedTenant'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+    #-----------------------------------------------------
     # Delete a certain application
     #-----------------------------------------------------
     delete:
@@ -4230,6 +4281,17 @@ parameters:
     type: string
     required: true
 
+  # Requested Tenant domain
+  # Specified as a header parameter
+  requestedTenant:
+    name: X-WSO2-Tenant
+    in: header
+    description: |
+      For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+      retirieved from.
+    required: false
+    type: string
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -5009,6 +5071,87 @@ definitions:
       groupId:
         type: string
         example: ""
+
+#-----------------------------------------------------
+# The Application resource
+#-----------------------------------------------------
+  Application:
+    title: Application
+    required:
+      - name
+      - throttlingPolicy
+    properties:
+      applicationId:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorApp
+      throttlingPolicy:
+        type: string
+        example: Unlimited
+      description:
+        type: string
+        example: Sample calculator application
+      tokenType:
+        type: string
+        enum:
+          - OAUTH
+          - JWT
+        description: |
+          Type of the access token generated for this application.
+          **OAUTH:** A UUID based access token which is issued by default.
+          **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
+        default: JWT
+        example: JWT
+      status:
+        type: string
+        example: APPROVED
+        default: ""
+      groups:
+        type: array
+        items:
+          type: string
+        example: ""
+      subscriptionCount:
+        type: integer
+      attributes:
+        type: object
+        additionalProperties:
+          type: string
+        example: External Reference ID, Billing Tier
+      subscriptionScopes:
+        type: array
+        items:
+          $ref: '#/definitions/ScopeInfo'
+        example: []
+      owner:
+        description: |
+          Application created user
+        type: string
+        example: admin
+
+  #-----------------------------------------------------
+  # Scope Info resource
+  #-----------------------------------------------------
+  ScopeInfo:
+    title: API Scope info object with scope details
+    properties:
+      key:
+        type: string
+        example: admin_scope
+      name:
+        type: string
+        example: admin scope
+      roles:
+        type: array
+        items:
+          type: string
+        description: Allowed roles for the scope
+        example: ["manager","developer"]
+      description:
+        type: string
+        description: Description of the scope
 
 #-----------------------------------------------------
 # The API Info List resource
