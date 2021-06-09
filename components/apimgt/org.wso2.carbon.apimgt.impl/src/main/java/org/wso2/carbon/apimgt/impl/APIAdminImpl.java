@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -314,7 +315,15 @@ public class APIAdminImpl implements APIAdmin {
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization)
             throws APIManagementException {
 
-        KeyMgtRegistrationService.registerDefaultKeyManager(organization);
+        // For Choreo scenario (Choreo organization uses the same super tenant Resident Key Manager
+        // Hence no need to register the default key manager per organization)
+        String givenOrganization = organization;
+        if (MultitenantConstants.SUPER_TENANT_ID != APIUtil.getInternalOrganizationId(givenOrganization)) {
+            KeyMgtRegistrationService.registerDefaultKeyManager(givenOrganization);
+        } else {
+            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
                 apiMgtDAO.getKeyManagerConfigurationsByTenant(organization);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
@@ -331,6 +340,15 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(defaultKeyManagerConfiguration);
             keyManagerConfigurationsByTenant.add(defaultKeyManagerConfiguration);
         }
+
+        // This is the Choreo scenario. Hence, need to retrieve the IdPs of the Choreo organization as well
+        // and append those to the previous list
+        if (!StringUtils.equals(givenOrganization, organization)) {
+            List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
+                    apiMgtDAO.getKeyManagerConfigurationsByTenant(givenOrganization);
+            keyManagerConfigurationsByTenant.addAll(keyManagerConfigurationsByOrganization);
+        }
+
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         }
