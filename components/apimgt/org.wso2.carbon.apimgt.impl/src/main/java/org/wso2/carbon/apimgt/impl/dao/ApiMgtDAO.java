@@ -15098,6 +15098,7 @@ public class ApiMgtDAO {
                     category.setId(id);
                     category.setName(name);
                     category.setDescription(description);
+                    category.setOrganization(organization);
 
                     categoriesList.add(category);
                 }

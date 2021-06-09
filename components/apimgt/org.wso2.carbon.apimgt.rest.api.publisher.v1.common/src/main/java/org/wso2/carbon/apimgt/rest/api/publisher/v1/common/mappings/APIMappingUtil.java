@@ -2863,14 +2863,10 @@ public class APIMappingUtil {
             APIProductDTO apiProductDTO = (APIProductDTO) dto;
             apiCategoryNames = apiProductDTO.getCategories();
         }
-        provider = APIUtil.replaceEmailDomainBack(provider);
-        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APICategory> apiCategories = new ArrayList<>();
         for (String categoryName : apiCategoryNames) {
             APICategory category = new APICategory();
             category.setName(categoryName);
-            category.setTenantID(tenantId);
             apiCategories.add(category);
         }
         if (model instanceof API) {
