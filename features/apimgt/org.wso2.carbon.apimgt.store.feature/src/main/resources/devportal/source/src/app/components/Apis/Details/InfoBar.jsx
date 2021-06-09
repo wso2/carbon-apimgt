@@ -447,7 +447,7 @@ class InfoBar extends React.Component {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{api.context}</TableCell>
+                                            <TableCell style={{ 'word-break' : 'break-all' }}>{api.context}</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
