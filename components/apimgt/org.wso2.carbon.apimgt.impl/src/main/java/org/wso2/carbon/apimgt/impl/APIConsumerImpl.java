@@ -5627,6 +5627,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalAPI);
+                    /// populate relavant external info
+                    // environment
+                    String environmentString = null;
+                    if (api.getEnvironments() != null) {
+                        environmentString = String.join(",", api.getEnvironments());
+                    }
+                    api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+                    //CORS . if null is returned, set default config from the configuration
+                    if (api.getCorsConfiguration() == null) {
+                        api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+                    }
                     return new ApiTypeWrapper(api);
                 }
             } else {
