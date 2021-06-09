@@ -29,12 +29,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                    apiAdmin.getKeyManagerConfigurationsByTenant(organization);
+                    apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while retrieving keyManager Details for Tenant " + organization,
-                            log);
+            RestApiUtil.handleInternalServerError(
+                    "Error while retrieving keyManager Details for organization " + organization, log);
         }
         return null;
     }

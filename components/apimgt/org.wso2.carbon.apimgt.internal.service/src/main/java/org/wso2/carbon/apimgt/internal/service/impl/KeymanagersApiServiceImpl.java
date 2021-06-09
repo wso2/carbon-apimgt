@@ -44,7 +44,7 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
 
             APIAdmin apiAdmin = new APIAdminImpl();
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                    apiAdmin.getKeyManagerConfigurationsByTenant(xWSO2Tenant);
+                    apiAdmin.getKeyManagerConfigurationsByOrganization(xWSO2Tenant);
             List<KeyManagerDTO> keyManagerDTOList = new ArrayList<>();
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
                 keyManagerDTOList.add(toKeyManagerDTO(xWSO2Tenant, keyManagerConfiguration));

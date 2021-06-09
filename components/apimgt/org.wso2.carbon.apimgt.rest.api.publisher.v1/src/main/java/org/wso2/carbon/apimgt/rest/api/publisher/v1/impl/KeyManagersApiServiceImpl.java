@@ -40,7 +40,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                apiAdmin.getKeyManagerConfigurationsByTenant(organization);
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
         return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
     }
 }

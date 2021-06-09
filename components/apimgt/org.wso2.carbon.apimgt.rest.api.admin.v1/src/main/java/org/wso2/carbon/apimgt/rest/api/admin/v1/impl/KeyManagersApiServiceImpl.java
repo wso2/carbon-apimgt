@@ -80,7 +80,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
-                apiAdmin.getKeyManagerConfigurationsByTenant(organization);
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO: keyManagerConfigurationsByOrganization) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                     keyManagerConfigurationDTO.getTokenType())) {
@@ -329,7 +329,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     }
 
     private String sanitizeName(String inputName) {
-        return inputName.replaceAll("[^a-zA-Z0-9-_\\.]", "");
+        return inputName.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
     }
 
     private String getSubstringOfFive(String inputString) {
