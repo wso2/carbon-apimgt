@@ -101,10 +101,12 @@ import java.util.concurrent.Executors;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Aggregates.match;
+import static com.mongodb.client.model.Aggregates.count;
 import static com.mongodb.client.model.Aggregates.project;
 import static com.mongodb.client.model.Aggregates.unwind;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.exists;
 import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.pull;
@@ -287,7 +289,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int skip = start;
         int limit = offset;
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(ctx.getOrganization().getName());
-        long totalCount = collection.countDocuments();
+        long totalCount = countTotalApi(org);
         MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getPublisherSearchAggregate(searchQuery, skip, limit))
                 .cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
@@ -310,7 +312,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int skip = start;
         int limit = offset;
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(ctx.getOrganization().getName());
-        long totalCount = collection.countDocuments();
+        long totalCount = countTotalApi(org);
         MongoCursor<MongoDBPublisherAPI> aggregate = collection
                 .aggregate(getPublisherSearchAggregate(searchQuery, skip, limit)).cursor();
         PublisherContentSearchResult contentSearchResult = new PublisherContentSearchResult();
@@ -333,7 +335,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int skip = start;
         int limit = offset;
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(ctx.getOrganization().getName());
-        long totalCount = collection.countDocuments();
+        long totalCount = countTotalApi(org);
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection
                 .aggregate(getDevportalSearchAggregate(searchQuery, skip, limit)).cursor();
         DevPortalContentSearchResult contentSearchResult = new DevPortalContentSearchResult();
@@ -348,6 +350,13 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         contentSearchResult.setReturnedCount(content.size());
         contentSearchResult.setTotalCount((int) totalCount);
         return contentSearchResult;
+    }
+
+    private long countTotalApi(Organization org){
+        MongoCollection<Document> genericCollection = MongoDBConnectionUtil.getGenericCollection(org.getName());
+        Document doc = genericCollection.aggregate(Arrays.asList(match(exists("revision", false)), count("totalApis"))).first();
+        long totCount = Long.parseLong(doc.get("totalApis").toString());
+        return totCount;
     }
 
     private Document buildSearchAggregate(String query) {
@@ -555,7 +564,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int skip = start;
         int limit = offset;
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(ctx.getOrganization().getName());
-        long totalCount = collection.countDocuments();
+        long totalCount = countTotalApi(org);
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getDevportalSearchAggregate(searchQuery, skip, limit))
                 .cursor();
         DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
