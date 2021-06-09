@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import Configurations from 'Config';
 /**
  * Utility class for Admin Portal application
  */
@@ -181,7 +181,16 @@ class Utils {
      * @memberof Utils
      */
     static getSwaggerURL() {
-        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_JSON;
+        if (Configurations.app.proxy_context_path) {
+            return 'https://'
+            + Utils.getCurrentEnvironment().host
+            + Configurations.app.proxy_context_path
+            + Utils.CONST.SWAGGER_JSON;
+        } else {
+            return 'https://'
+            + Utils.getCurrentEnvironment().host
+            + Utils.CONST.SWAGGER_JSON;
+        }
     }
 
     /**

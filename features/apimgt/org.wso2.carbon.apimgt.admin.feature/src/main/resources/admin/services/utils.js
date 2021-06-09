@@ -30,3 +30,29 @@ var getLoopbackOrigin = function() {
     var origin = 'https://' + app.origin.host + ":" + mgtTransportPort;
     return origin; // Unless there is a port offset this is https://localhost:9443
 };
+
+function getIDPOrigin() {
+    return utils.getExternalIDPOrigin();
+}
+
+function getIDPCheckSessionEndpoint() {
+    return utils.getExternalIDPCheckSessionEndpoint();
+}
+
+/* 
+Deciding what to process as app context.
+If the setting.js has the following definition
+( case 1 ) - appContext is '/publisher'
+context: '/publisher',
+( case 2 ) - appContext is still '/publisher'
+context: '/publisher'
+proxy_context_path: '/apim',
+*/
+var getAppContextForServerUrl = function () {
+    var appContext = app.context;
+    var proxyContextPath = app.proxy_context_path;
+    if (proxyContextPath !== null && proxyContextPath !== '') {
+        appContext = appContext.replace(proxyContextPath, '');
+    }
+    return appContext;
+}

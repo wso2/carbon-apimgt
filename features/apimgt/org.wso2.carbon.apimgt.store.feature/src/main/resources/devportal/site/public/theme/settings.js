@@ -1,6 +1,12 @@
 const Settings = {
     app: {
-        context: '/devportal',
+        context: '/devportal', // Note the leading `/` and no trailing `/`
+        /*
+        If the proxy context path is configured, it's required to provide it here as well.
+        for example, to serve https://company.com/apim/devportal/ URL the context and proxy_context_path will be as follows.
+        context: '/apim/devportal',
+        proxy_context_path: '/apim',
+        */
         customUrl: {
             enabled: false,
             forwardedHeader: 'X-Forwarded-For',

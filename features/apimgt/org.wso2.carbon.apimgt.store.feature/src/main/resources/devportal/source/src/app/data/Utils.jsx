@@ -218,7 +218,16 @@ class Utils {
     }
 
     static getSwaggerURL() {
-        return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
+        if (Settings.app.proxy_context_path) {
+            return 'https://'
+            + Utils.getCurrentEnvironment().host
+            + Settings.app.proxy_context_path
+            + Utils.CONST.SWAGGER_YAML;
+        } else {
+            return 'https://'
+            + Utils.getCurrentEnvironment().host
+            + Utils.CONST.SWAGGER_YAML;
+        }
     }
 
     static downloadFile = (response) => {

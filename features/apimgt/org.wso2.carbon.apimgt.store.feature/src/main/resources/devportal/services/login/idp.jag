@@ -22,7 +22,7 @@
     var app = require("/site/public/theme/settings.js").Settings.app;
     var appUtils = require("/services/utils.js");
     include("/services/constants.jag");
-
+    var appContext = appUtils.getAppContextForServerUrl();
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = utils.getServerURL();
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
@@ -46,11 +46,11 @@
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
     if(loginCallbackUrl == null){
-        loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+        loginCallbackUrl = serverUrl + appContext + LOGIN_CALLBACK_URL_SUFFIX;
     }
     var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
     if(logoutCallbackUrl == null){
-         logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+         logoutCallbackUrl = serverUrl + appContext + LOGOUT_CALLBACK_URL_SUFFIX;
      }
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
     var scopes = settingsResponse.data.scopes.join(" ");
@@ -58,7 +58,7 @@
     var state = "";
     // get the pathname excluding the 'devportal/publisher' segment
     if (referer !== null) {
-        var context = app.context.charAt(0) === '/' ? app.context.substring(1) : app.context;
+        var context = appContext.charAt(0) === '/' ? appContext.substring(1) : appContext;
         var hostnamePattern = "(https?:\/\/.*):?(\\d*)\/?(" + context + ")";
         var re = new RegExp(hostnamePattern);
         state = encodeURI(referer.replace(re, ''));
@@ -123,7 +123,7 @@
         authRequestParams += "&prompt=none";
     } 
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
-    var cookie = {'name': 'CLIENT_ID', 'value': clientId, 'path': app.context + "/", "secure": true, "maxAge": -1};
+    var cookie = {'name': 'CLIENT_ID', 'value': clientId, 'path': appContext + "/", "secure": true, "maxAge": -1};
 
     response.addCookie(cookie);
 
