@@ -31,7 +31,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
