@@ -112,7 +112,6 @@
         cookie = { 
             'name': 'AM_ACC_TOKEN_DEFAULT_P2', 
             'value': accessTokenPart2, 
-            'path': "", 
             'path': app.proxy_context_path ? app.proxy_context_path + "/api/am/store/": "/api/am/store/",
             "httpOnly": true, 
             "secure": true, 
