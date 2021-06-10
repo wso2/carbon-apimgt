@@ -4864,6 +4864,65 @@ public class ApiMgtDAO {
         return applicationList;
     }
 
+    /**
+     * Returns applications within a tenant domain with pagination
+     * @param tenantId   The tenantId.
+     * @param start      The start index.
+     * @param offset     The offset.
+     * @param searchOwner     The search string.
+     * @param searchApplication     The search string.
+     * @param sortOrder  The sort order.
+     * @param sortColumn The sort column.
+     * @return Application[] The array of applications.
+     * @throws APIManagementException
+     */
+    public List<Application> getApplicationsByNameWithPagination(int tenantId, int start, int offset,
+                                                                     String searchApplication,
+                                                                     String sortColumn, String sortOrder)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+        List<Application> applicationList = new ArrayList<>();
+        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_NAME");
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            if (connection.getMetaData().getDriverName().contains("Oracle")) {
+                offset = start + offset;
+            }
+            sqlQuery = sqlQuery.replace("$1", sortColumn);
+            sqlQuery = sqlQuery.replace("$2", sortOrder);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, "%" + searchApplication + "%");
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            rs = prepStmt.executeQuery();
+            Application application;
+            while (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberName = rs.getString("CREATED_BY");
+                Subscriber subscriber = new Subscriber(subscriberName);
+                application = new Application(applicationName, subscriber);
+                application.setName(applicationName);
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setOwner(subscriberName);
+                applicationList.add(application);
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application for tenant id : " + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applicationList;
+    }
+
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
             APIManagementException {
         Connection connection = null;

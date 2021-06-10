@@ -217,6 +217,25 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
+     * Get applications for the tenantId.
+     *
+     * @param tenantId             tenant Id
+     * @param start                content to start
+     * @param offset               content to limit number of pages
+     * @param searchApplication    content to search applications based on application
+     * @param sortColumn           content to sort column
+     * @param sortOrder            content to sort in a order
+     * @throws APIManagementException if failed to get application
+     */
+    public List<Application> getApplicationsByNameWithPagination(int tenantId, int start, int offset
+            , String searchApplication, String sortColumn, String sortOrder)
+            throws APIManagementException {
+
+        return apiMgtDAO.getApplicationsByNameWithPagination(tenantId, start, offset,
+                searchApplication, sortColumn, sortOrder);
+    }
+
+    /**
      * Get count of the applications for the tenantId.
      *
      * @param tenantId             content to get application count based on tenant_id

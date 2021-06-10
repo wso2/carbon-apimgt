@@ -43,6 +43,7 @@ export default function ListApplications() {
     const intl = useIntl();
     const [applicationList, setApplicationList] = useState([]);
     const [loadNextActive, setLoadNextActive] = useState(true);
+    const [totalItems, setTotalItems] = useState(0);
 
     /**
     * API call to get application list
@@ -61,7 +62,7 @@ export default function ListApplications() {
         return restApi
             .getApplicationList(limit, 0, name)
             .then((result) => {
-                const { count, list } = result.body;
+                const { total, count, list } = result.body;
                 if (count === limit && !loadNextActive) {
                     setLoadNextActive(true);
                 }
@@ -72,6 +73,7 @@ export default function ListApplications() {
                     limit += itemsPerPage;
                 }
                 setApplicationList(list);
+                setTotalItems(total);
                 return list;
             })
             .catch((error) => {
@@ -146,6 +148,7 @@ export default function ListApplications() {
             id: 'AdminPages.ApplicationSettings.List.title.application.settings',
             defaultMessage: 'Application Settings',
         }),
+        totalItems,
     };
 
     const emptyBoxProps = {
