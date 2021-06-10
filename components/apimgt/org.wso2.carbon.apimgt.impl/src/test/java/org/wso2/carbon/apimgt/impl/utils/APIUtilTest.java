@@ -2321,7 +2321,7 @@ public class APIUtilTest {
         availableApiCategories.add(apiCategory2);
         availableApiCategories.add(apiCategory3);
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfTenant", tenantDomain);
+        PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfOrganization", tenantDomain);
 
         Assert.assertTrue("Failed to Validate API categories",
                 APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
