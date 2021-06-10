@@ -116,6 +116,9 @@ class APIClient {
      */
     _fixSpec(spec) {
         spec.host = this.host;
+        spec.basePath = Settings.app.proxy_context_path
+            ? Settings.app.proxy_context_path + spec.basePath
+            : spec.basePath;
         spec.security = [{ OAuth2Security: ['apim:api_subscribe'] }];
         return spec;
     }

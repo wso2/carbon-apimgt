@@ -23,6 +23,7 @@
     var app = require("/site/public/theme/settings.js").Settings.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var appUtils = require("/services/utils.js");
+    var appContext = appUtils.getAppContextForServerUrl();
 
     var idTokenP1 = request.getCookie("AM_ID_TOKEN_DEFAULT_P1").value;
     var idTokenP2 = request.getCookie("AM_ID_TOKEN_DEFAULT_P2").value;
@@ -45,7 +46,7 @@
     }
     var postLogoutRedirectURI = appUtils.getTenantBasedLogoutCallBack();
     if (postLogoutRedirectURI == null) {
-         postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+         postLogoutRedirectURI = serverUrl + appContext + LOGOUT_CALLBACK_URL_SUFFIX;
     }
     var url = logoutEndpoint + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogoutRedirectURI;
 
