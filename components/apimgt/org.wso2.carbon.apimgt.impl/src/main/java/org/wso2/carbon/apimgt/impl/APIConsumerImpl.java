@@ -2649,7 +2649,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Object enableTokenGeneration =
                 keyManager.getKeyManagerConfiguration().getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
 
-        AccessTokenInfo tokenInfo;s
+        AccessTokenInfo tokenInfo;
         if (enableTokenGeneration != null && (Boolean) enableTokenGeneration &&
                 oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
             AccessTokenRequest tokenRequest =
