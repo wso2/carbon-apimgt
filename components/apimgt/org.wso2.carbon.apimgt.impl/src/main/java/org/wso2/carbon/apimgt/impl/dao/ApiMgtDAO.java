@@ -4734,14 +4734,14 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 String keyManagerName = rs.getString("NAME");
-                String keyManagerTenantDomain = rs.getString("TENANT_DOMAIN");
+                String keyManagerOrganization = rs.getString("ORGANIZATION");
                 // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
                     KeyManager keyManager =
-                            KeyManagerHolder.getKeyManagerInstance(keyManagerTenantDomain, keyManagerName);
+                            KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization, keyManagerName);
                     if (keyManager != null) {
                         try {
                             keyManager.deleteMappedApplication(consumerKey);
@@ -4850,8 +4850,8 @@ public class ApiMgtDAO {
                 while (resultSet.next()) {
                     String consumerKey = resultSet.getString("CONSUMER_KEY");
                     String keyManagerName = resultSet.getString("NAME");
-                    String keyManagerTenantDomain = resultSet.getString("TENANT_DOMAIN");
-                    consumerKeysOfApplication.put(consumerKey, Pair.of(keyManagerName, keyManagerTenantDomain));
+                    String keyManagerOrganization = resultSet.getString("ORGANIZATION");
+                    consumerKeysOfApplication.put(consumerKey, Pair.of(keyManagerName, keyManagerOrganization));
                 }
             }
         } catch (SQLException e) {
@@ -8816,14 +8816,14 @@ public class ApiMgtDAO {
         return status;
     }
 
-    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization)
             throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE TENANT_DOMAIN = ? ";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION = ? ";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
-            preparedStatement.setString(1, tenantDomain);
+            preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
@@ -8834,7 +8834,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    keyManagerConfigurationDTO.setTenantDomain(organization);
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -8849,20 +8849,20 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             throw new APIManagementException(
-                    "Error while retrieving key manager configurations for tenant " + tenantDomain, e);
+                    "Error while retrieving key manager configurations for organization " + organization, e);
         }
 
         return keyManagerConfigurationDTOS;
     }
 
-    public KeyManagerConfigurationDTO getKeyManagerConfigurationByID(String tenantDomain, String id)
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByID(String organization, String id)
             throws APIManagementException {
 
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
             preparedStatement.setString(1, id);
-            preparedStatement.setString(2, tenantDomain);
+            preparedStatement.setString(2, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
@@ -8872,7 +8872,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    keyManagerConfigurationDTO.setTenantDomain(organization);
                     keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
@@ -8886,32 +8886,34 @@ public class ApiMgtDAO {
             }
         } catch (SQLException | IOException e) {
             throw new APIManagementException(
-                    "Error while retrieving key manager configuration for " + id + " in tenant " + tenantDomain, e);
+                    "Error while retrieving key manager configuration for " + id + " in organization " + organization,
+                    e);
         }
         return null;
 
     }
 
-    public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
             throws APIManagementException {
 
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
         try (Connection conn = APIMgtDBUtil.getConnection()) {
-            return getKeyManagerConfigurationByName(conn, tenantDomain, name);
+            return getKeyManagerConfigurationByName(conn, organization, name);
         } catch (SQLException | IOException e) {
             throw new APIManagementException(
-                    "Error while retrieving key manager configuration for " + name + " in tenant " + tenantDomain, e);
+                    "Error while retrieving key manager configuration for " + name + " in organization " + organization,
+                    e);
         }
     }
 
-    private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection, String tenantDomain,
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection, String organization,
                                                                         String name)
             throws SQLException, IOException {
 
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, name);
-            preparedStatement.setString(2, tenantDomain);
+            preparedStatement.setString(2, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
@@ -8922,7 +8924,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    keyManagerConfigurationDTO.setTenantDomain(organization);
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -8963,7 +8965,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("ORGANIZATION"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -9019,13 +9021,13 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException {
+    public boolean isKeyManagerConfigurationExistById(String organization, String id) throws APIManagementException {
 
-        final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
             preparedStatement.setString(1, id);
-            preparedStatement.setString(2, tenantDomain);
+            preparedStatement.setString(2, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return true;
@@ -9033,7 +9035,8 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             throw new APIManagementException(
-                    "Error while retrieving key manager configuration for " + id + " in tenant " + tenantDomain, e);
+                    "Error while retrieving key manager configuration for " + id + " in organization " + organization,
+                    e);
         }
         return false;
 
@@ -9069,14 +9072,14 @@ public class ApiMgtDAO {
         }
     }
 
-    public void deleteKeyManagerConfigurationById(String id, String tenantDomain) throws APIManagementException {
+    public void deleteKeyManagerConfigurationById(String id, String organization) throws APIManagementException {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn
                     .prepareStatement(SQLConstants.KeyManagerSqlConstants.DELETE_KEY_MANAGER)) {
                 preparedStatement.setString(1, id);
-                preparedStatement.setString(2, tenantDomain);
+                preparedStatement.setString(2, organization);
                 preparedStatement.execute();
                 conn.commit();
             } catch (SQLException e) {
@@ -9085,7 +9088,8 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             throw new APIManagementException(
-                    "Error while deleting key manager configuration with id " + id + " in tenant " + tenantDomain, e);
+                    "Error while deleting key manager configuration with id " + id + " in organization " + organization,
+                    e);
         }
 
     }
@@ -9106,7 +9110,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("ORGANIZATION"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -9126,14 +9130,14 @@ public class ApiMgtDAO {
         return keyManagerConfigurationDTOS;
     }
 
-    public boolean isKeyManagerConfigurationExistByName(String name, String tenantDomain)
+    public boolean isKeyManagerConfigurationExistByName(String name, String organization)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
+            final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, name);
-                preparedStatement.setString(2, tenantDomain);
+                preparedStatement.setString(2, organization);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         return true;
@@ -9141,7 +9145,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error while retriving key manager existence", e);
+            throw new APIManagementException("Error while retrieving key manager existence", e);
         }
         return false;
     }
