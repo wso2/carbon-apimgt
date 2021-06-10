@@ -8,7 +8,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
@@ -191,7 +190,7 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setDescription(keyManagerDTO.getDescription());
         keyManagerConfigurationDTO.setEnabled(keyManagerDTO.isEnabled());
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
-        keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+        keyManagerConfigurationDTO.setOrganization(tenantDomain);
         keyManagerConfigurationDTO.setTokenType(keyManagerDTO.getTokenType().toString());
         keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
         Map<String,Object> additionalProperties = new HashMap();

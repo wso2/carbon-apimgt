@@ -34,7 +34,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String uuid;
     private String displayName;
     private String description;
-    private String tenantDomain;
+    private String organization;
     private Map<String,Object> additionalProperties = new HashMap();
     private String type;
     private boolean enabled;
@@ -52,7 +52,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.uuid = keyManagerConfigurationDTO.getUuid();
         this.displayName = keyManagerConfigurationDTO.getDisplayName();
         this.description = keyManagerConfigurationDTO.getDescription();
-        this.tenantDomain = keyManagerConfigurationDTO.getTenantDomain();
+        this.organization = keyManagerConfigurationDTO.getOrganization();
         this.additionalProperties = new HashMap<>(keyManagerConfigurationDTO.getAdditionalProperties());
         this.type = keyManagerConfigurationDTO.getType();
         this.enabled = keyManagerConfigurationDTO.isEnabled();
@@ -89,14 +89,14 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.description = description;
     }
 
-    public String getTenantDomain() {
+    public String getOrganization() {
 
-        return tenantDomain;
+        return organization;
     }
 
-    public void setTenantDomain(String tenantDomain) {
+    public void setOrganization(String organization) {
 
-        this.tenantDomain = tenantDomain;
+        this.organization = organization;
     }
 
     public Map<String,Object> getAdditionalProperties() {

@@ -8331,7 +8331,7 @@ public class ApiMgtDAO {
                             application.getCallbackUrl(), rs
                                     .getString("TOKEN_SCOPE"),
                             rs.getString("INPUTS"), application.getTokenType(),
-                            keyManagerConfigurationByUUID.getTenantDomain(), keyManagerConfigurationByUUID.getName());
+                            keyManagerConfigurationByUUID.getOrganization(), keyManagerConfigurationByUUID.getName());
                     workflowDTO.setAppInfoDTO(request);
                 } else {
                     throw new APIManagementException("Error occured while finding the KeyManager from uuid "
@@ -8834,7 +8834,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(organization);
+                    keyManagerConfigurationDTO.setOrganization(organization);
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -8872,7 +8872,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(organization);
+                    keyManagerConfigurationDTO.setOrganization(organization);
                     keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
@@ -8924,7 +8924,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(organization);
+                    keyManagerConfigurationDTO.setOrganization(organization);
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -8965,7 +8965,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("ORGANIZATION"));
+                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
@@ -8993,7 +8993,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(4, keyManagerConfigurationDTO.getType());
                 String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
                 preparedStatement.setBinaryStream(5, new ByteArrayInputStream(configurationJson.getBytes()));
-                preparedStatement.setString(6, keyManagerConfigurationDTO.getTenantDomain());
+                preparedStatement.setString(6, keyManagerConfigurationDTO.getOrganization());
                 preparedStatement.setBoolean(7, keyManagerConfigurationDTO.isEnabled());
                 preparedStatement.setString(8, keyManagerConfigurationDTO.getDisplayName());
                 preparedStatement.setString(9, keyManagerConfigurationDTO.getTokenType());
@@ -9003,21 +9003,21 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 conn.rollback();
                 if (e instanceof SQLIntegrityConstraintViolationException) {
-                    if (getKeyManagerConfigurationByName(conn, keyManagerConfigurationDTO.getTenantDomain(),
+                    if (getKeyManagerConfigurationByName(conn, keyManagerConfigurationDTO.getOrganization(),
                             keyManagerConfigurationDTO.getName()) != null) {
                         log.warn(keyManagerConfigurationDTO.getName() + " Key Manager Already Registered in tenant" +
-                                keyManagerConfigurationDTO.getTenantDomain());
+                                keyManagerConfigurationDTO.getOrganization());
                     } else {
                         throw new APIManagementException("Error while Storing key manager configuration with name " +
                                 keyManagerConfigurationDTO.getName() + " in tenant " +
-                                keyManagerConfigurationDTO.getTenantDomain(), e);
+                                keyManagerConfigurationDTO.getOrganization(), e);
                     }
                 }
             }
         } catch (SQLException | IOException e) {
             throw new APIManagementException(
                     "Error while Storing key manager configuration with name " + keyManagerConfigurationDTO.getName() +
-                            " in tenant " + keyManagerConfigurationDTO.getTenantDomain(), e);
+                            " in tenant " + keyManagerConfigurationDTO.getOrganization(), e);
         }
     }
 
@@ -9054,7 +9054,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(3, keyManagerConfigurationDTO.getType());
                 String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
                 preparedStatement.setBinaryStream(4, new ByteArrayInputStream(configurationJson.getBytes()));
-                preparedStatement.setString(5, keyManagerConfigurationDTO.getTenantDomain());
+                preparedStatement.setString(5, keyManagerConfigurationDTO.getOrganization());
                 preparedStatement.setBoolean(6, keyManagerConfigurationDTO.isEnabled());
                 preparedStatement.setString(7, keyManagerConfigurationDTO.getDisplayName());
                 preparedStatement.setString(8, keyManagerConfigurationDTO.getTokenType());
@@ -9068,7 +9068,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             throw new APIManagementException(
                     "Error while Updating key manager configuration with name " + keyManagerConfigurationDTO.getName() +
-                            " in tenant " + keyManagerConfigurationDTO.getTenantDomain(), e);
+                            " in tenant " + keyManagerConfigurationDTO.getOrganization(), e);
         }
     }
 
@@ -9110,7 +9110,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("ORGANIZATION"));
+                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {

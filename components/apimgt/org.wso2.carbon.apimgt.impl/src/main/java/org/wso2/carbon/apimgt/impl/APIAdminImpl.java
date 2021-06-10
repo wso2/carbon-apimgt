@@ -364,9 +364,9 @@ public class APIAdminImpl implements APIAdmin {
         Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByTenant = new HashMap<>();
         for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;
-            if (keyManagerConfigurationsByTenant.containsKey(keyManagerConfiguration.getTenantDomain())) {
+            if (keyManagerConfigurationsByTenant.containsKey(keyManagerConfiguration.getOrganization())) {
                 keyManagerConfigurationDTOS =
-                        keyManagerConfigurationsByTenant.get(keyManagerConfiguration.getTenantDomain());
+                        keyManagerConfigurationsByTenant.get(keyManagerConfiguration.getOrganization());
             } else {
                 keyManagerConfigurationDTOS = new ArrayList<>();
             }
@@ -375,7 +375,7 @@ public class APIAdminImpl implements APIAdmin {
             }
             keyManagerConfigurationDTOS.add(keyManagerConfiguration);
             keyManagerConfigurationsByTenant
-                    .put(keyManagerConfiguration.getTenantDomain(), keyManagerConfigurationDTOS);
+                    .put(keyManagerConfiguration.getOrganization(), keyManagerConfigurationDTOS);
         }
         return keyManagerConfigurationsByTenant;
     }
@@ -404,10 +404,10 @@ public class APIAdminImpl implements APIAdmin {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
         if (apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
-                keyManagerConfigurationDTO.getTenantDomain())) {
+                keyManagerConfigurationDTO.getOrganization())) {
             throw new APIManagementException(
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
-                            keyManagerConfigurationDTO.getTenantDomain(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
+                            keyManagerConfigurationDTO.getOrganization(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
@@ -524,7 +524,7 @@ public class APIAdminImpl implements APIAdmin {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
-                apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getTenantDomain(),
+                apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
         encryptKeyManagerConfigurationValues(oldKeyManagerConfiguration, keyManagerConfigurationDTO);
         apiMgtDAO.updateKeyManagerConfiguration(keyManagerConfigurationDTO);

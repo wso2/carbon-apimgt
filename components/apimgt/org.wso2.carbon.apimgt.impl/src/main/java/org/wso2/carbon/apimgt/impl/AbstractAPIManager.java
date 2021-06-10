@@ -94,7 +94,6 @@ import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.persistence.PersistenceConstants;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
@@ -3239,7 +3238,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
             if (tenantDomain != null && !tenantDomain.equalsIgnoreCase(
-                    keyManagerConfigurationDTO.getTenantDomain())) {
+                    keyManagerConfigurationDTO.getOrganization())) {
                 continue;
             }
             KeyManager keyManager = null;

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.checkerframework.checker.units.qual.K;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +70,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
         workflowDTO.setKeyManager("default");
 
         KeyManagerConfigurationDTO kmConfigDTO = new KeyManagerConfigurationDTO();
-        kmConfigDTO.setTenantDomain("carbon.super");
+        kmConfigDTO.setOrganization("carbon.super");
         kmConfigDTO.setName("default");
         PowerMockito.when(apiMgtDAO.getKeyManagerConfigurationByUUID("default")).thenReturn(kmConfigDTO);
 
