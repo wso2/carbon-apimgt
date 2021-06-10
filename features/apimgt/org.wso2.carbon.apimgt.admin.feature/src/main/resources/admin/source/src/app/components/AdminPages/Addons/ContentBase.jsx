@@ -79,7 +79,7 @@ function ContentBase(props) {
                                     {title}
                                 </Typography>
                                 {totalItems && (<Typography color='inherit' variant='caption' component='div'>
-                                    Total Items - {totalItems}
+                                    Application Count - {totalItems}
                                 </Typography>)}
                                 <Box pb={1}>
                                     {
