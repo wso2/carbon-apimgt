@@ -5638,6 +5638,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (api.getCorsConfiguration() == null) {
                         api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                     }
+                    api.setStatus(devPortalAPI.getStatus());
                     return new ApiTypeWrapper(api);
                 }
             } else {
