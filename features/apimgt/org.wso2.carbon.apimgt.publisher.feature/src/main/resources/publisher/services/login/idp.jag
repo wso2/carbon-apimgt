@@ -23,7 +23,7 @@
     var appUtils = require("/services/utils.js");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     include("/services/constants.jag");
-
+    var appContext = appUtils.getAppContextForServerUrl();
     var serverUrl = '';
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
     if (app.customUrl.enabled && forwarded_for) {
@@ -37,22 +37,22 @@
     if (idpConfig != null) {
         authorizeEndpoint = idpConfig.getAuthorizeEndpoint();
     }
-
+    
     var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
     var responseFailed = false;
-    var erroLogin = serverUrl + app.context +"/error-pages?code="
+    var erroLogin = serverUrl + appContext +"/error-pages?code="
 
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
     if (loginCallbackUrl == null) {
-	    loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+	    loginCallbackUrl = serverUrl + appContext + LOGIN_CALLBACK_URL_SUFFIX;
     }
 
     var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
     if (logoutCallbackUrl == null) {
-         logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+         logoutCallbackUrl = serverUrl + appContext + LOGOUT_CALLBACK_URL_SUFFIX;
     }
 
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
@@ -67,7 +67,7 @@
     var state = "";
     // get the pathname from query param 'referrer'
     if (referer !== null) {
-        var context = app.context.charAt(0) === '/' ? app.context.substring(1) : app.context;
+        var context = appContext.charAt(0) === '/' ? appContext.substring(1) : appContext;
         var hostnamePattern = "(https?:\/\/.*):?(\\d*)(\/" + context + ")";
         var re = new RegExp(hostnamePattern);
         state = encodeURI(referer.replace(re, ''));
@@ -120,13 +120,11 @@
             lock.release();
         }
     }
-
     if (request.getQueryString() == "not-Login") {
         var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl+"&prompt=none";
     } else {
         var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
     }  
-
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {
         'name': 'CLIENT_ID',
