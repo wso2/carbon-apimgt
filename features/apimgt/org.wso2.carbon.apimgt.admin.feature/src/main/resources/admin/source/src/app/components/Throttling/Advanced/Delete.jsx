@@ -44,8 +44,12 @@ function Delete({ updateList, dataRow }) {
                     defaultMessage: 'Policy Deleted Successfully',
                 })}`;
             })
-            .catch((e) => {
-                return (e);
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    throw (response.body.description);
+                }
+                return null;
             });
     };
 
