@@ -5594,7 +5594,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, organization, api);
+                    populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
                     api = addTiersToAPI(api, organization);
@@ -5736,7 +5736,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, organization, api);
+                    populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);

@@ -383,8 +383,14 @@ public class PublisherCommonUtils {
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
-        if (apiCategories != null && apiCategories.size() > 0) {
-            if (!APIUtil.validateAPICategories(apiCategories, RestApiCommonUtil.getLoggedInUserTenantDomain())) {
+        List<APICategory> apiCategoriesList = new ArrayList<>();
+        for (APICategory category : apiCategories) {
+            category.setOrganization(originalAPI.getOrganization());
+            apiCategoriesList.add(category);
+        }
+        apiToUpdate.setApiCategories(apiCategoriesList);
+        if (apiCategoriesList.size() > 0) {
+            if (!APIUtil.validateAPICategories(apiCategoriesList, originalAPI.getOrganization())) {
                 throw new APIManagementException("Invalid API Category name(s) defined",
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
@@ -724,8 +730,14 @@ public class PublisherCommonUtils {
         validateScopes(apiToAdd);
         //validate API categories
         List<APICategory> apiCategories = apiToAdd.getApiCategories();
-        if (apiCategories != null && apiCategories.size() > 0) {
-            if (!APIUtil.validateAPICategories(apiCategories, RestApiCommonUtil.getLoggedInUserTenantDomain())) {
+        List<APICategory> apiCategoriesList = new ArrayList<>();
+        for (APICategory category : apiCategories) {
+            category.setOrganization(organization);
+            apiCategoriesList.add(category);
+        }
+        apiToAdd.setApiCategories(apiCategoriesList);
+        if (apiCategoriesList.size() > 0) {
+            if (!APIUtil.validateAPICategories(apiCategoriesList, organization)) {
                 throw new APIManagementException("Invalid API Category name(s) defined",
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
