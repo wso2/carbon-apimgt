@@ -317,15 +317,16 @@ public class APIAdminImpl implements APIAdmin {
 
         // For Choreo scenario (Choreo organization uses the same super tenant Resident Key Manager
         // Hence no need to register the default key manager per organization)
-        String givenOrganization = organization;
-        if (MultitenantConstants.SUPER_TENANT_ID != APIUtil.getInternalOrganizationId(givenOrganization)) {
-            KeyMgtRegistrationService.registerDefaultKeyManager(givenOrganization);
+        String tenantDomain = organization;
+        if (MultitenantConstants.SUPER_TENANT_ID != APIUtil.getInternalOrganizationId(organization)
+                || StringUtils.equals(organization, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            KeyMgtRegistrationService.registerDefaultKeyManager(organization);
         } else {
-            organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
-                apiMgtDAO.getKeyManagerConfigurationsByTenant(organization);
+                apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
         KeyManagerConfigurationDTO defaultKeyManagerConfiguration = null;
         while (iterator.hasNext()) {
@@ -343,9 +344,9 @@ public class APIAdminImpl implements APIAdmin {
 
         // This is the Choreo scenario. Hence, need to retrieve the IdPs of the Choreo organization as well
         // and append those to the previous list
-        if (!StringUtils.equals(givenOrganization, organization)) {
+        if (!StringUtils.equals(organization, tenantDomain)) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
-                    apiMgtDAO.getKeyManagerConfigurationsByTenant(givenOrganization);
+                    apiMgtDAO.getKeyManagerConfigurationsByTenant(organization);
             keyManagerConfigurationsByTenant.addAll(keyManagerConfigurationsByOrganization);
         }
 
