@@ -8895,7 +8895,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiIdentifier.setUuid(apiId);
         try {
             apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
-                    apiIdentifier.getUUID(), apiRevision.getId());
+                    apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to delete registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
@@ -9120,7 +9120,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProductIdentifier.setUUID(apiProductId);
         try {
             apiPersistenceInstance.deleteAPIRevision(new Organization(organization),
-                    apiProductIdentifier.getUUID(), apiRevision.getId());
+                    apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to delete registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.

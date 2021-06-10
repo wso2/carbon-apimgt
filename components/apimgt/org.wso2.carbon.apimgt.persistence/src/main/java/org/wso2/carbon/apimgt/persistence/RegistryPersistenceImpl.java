@@ -416,7 +416,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void deleteAPIRevision(Organization org, String apiUUID, int revisionId)
+    public void deleteAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
             throws APIPersistenceException {
         String revisionTargetPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiUUID +
