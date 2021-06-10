@@ -101,3 +101,21 @@ var getServiceProviderTenantDomain = function() {
         return "carbon.super";
     }
 };
+/* 
+Deciding what to process as app context.
+If the setting.js has the following definition
+( case 1 ) - appContext is '/publisher'
+context: '/publisher',
+
+( case 2 ) - appContext is still '/publisher'
+context: '/publisher'
+proxy_context_path: '/apim',
+*/
+var getAppContextForServerUrl = function() {
+    var appContext = app.context;
+    var proxyContextPath = app.proxy_context_path;
+    if(proxyContextPath !== null && proxyContextPath !== ''){
+        appContext = appContext.replace(proxyContextPath, '');
+    }
+    return appContext;
+}

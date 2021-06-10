@@ -27,6 +27,8 @@
     var log = new Log();
     log.debug("Login Callback Endpoint");
 
+    var appContext = appUtils.getAppContextForServerUrl();
+
     var serverUrl = '';
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
     if (app.customUrl.enabled && forwarded_for) {
@@ -36,10 +38,10 @@
     }
     var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
     if (loginCallbackUrl == null) {
-        loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+        loginCallbackUrl = serverUrl + appContext + LOGIN_CALLBACK_URL_SUFFIX;
      }
     if(request.getParameter("error") == "login_required") {
-       response.sendRedirect(serverUrl + app.context + "/services/logout");
+       response.sendRedirect(serverUrl + appContext + "/services/logout");
     } else if (request.getParameter("code") != null) {
         var tokenRequestData = {
             "grant_type": "authorization_code",
@@ -66,7 +68,7 @@
         var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
         var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
-        var erroLogin = serverUrl + app.context +"/error-pages?code=";
+        var erroLogin = serverUrl + appContext +"/error-pages?code=";
         var responseFailed = false;
         if (JSON.parse(result.data).error != null) {
             responseFailed = true; 
@@ -103,11 +105,11 @@
                 "maxAge": Integer(tokenResponse.expires_in)
             };
             response.addCookie(cookie);
-    
+            
             cookie = {
                 'name': 'AM_ACC_TOKEN_DEFAULT_P2',
                 'value': accessTokenPart2,
-                'path': "/api/am/publisher/",
+                'path': app.proxy_context_path ? app.proxy_context_path + "/api/am/publisher/": "/api/am/publisher/",
                 "httpOnly": true,
                 "secure": true,
                 "maxAge": Integer(tokenResponse.expires_in)
@@ -169,7 +171,6 @@
             };
             response.addCookie(cookie);
         }
-    
             var state = request.getParameter("state");
             if (responseFailed === true) {
                 response.sendRedirect(erroLogin + "500");    
@@ -178,10 +179,10 @@
                 if ( state !== '/') {
                     response.sendRedirect(app.context + state);
                 } else {
-                    response.sendRedirect(app.context);
+                    response.sendRedirect(app.context + '/');
                 }
             } else {
-                response.sendRedirect(app.context);
+                response.sendRedirect(app.context + '/');
             }
 
         }

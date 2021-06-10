@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.proxy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
@@ -28,12 +29,16 @@ import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
+/**
+ * This class used to Extend Proxy RoutePlaner to support non proxy host.
+ */
 public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     private static final Log log = LogFactory.getLog(ExtendedProxyRoutePlanner.class);
     APIManagerConfiguration configuration;
     String nonProxyHosts;
     String proxyHost;
     String proxyPort;
+    String protocol;
 
     public ExtendedProxyRoutePlanner(HttpHost host, APIManagerConfiguration configuration) {
         super(host);
@@ -41,6 +46,7 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
         this.nonProxyHosts = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
         this.proxyHost = configuration.getFirstProperty(APIConstants.PROXY_HOST);
         this.proxyPort = configuration.getFirstProperty(APIConstants.PROXY_PORT);
+        this.protocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
     }
 
     private HttpHost getProxy(String scheme) {
@@ -71,18 +77,18 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
         return new HttpHost(protoProxyHost, protoProxyPort, scheme);
     }
 
-    private String[] getNonProxyHosts(String uriScheme) {
-        String nonproxyHost = nonProxyHosts;
-        if (nonproxyHost == null) {
+    private String[] getNonProxyHosts() {
+        String nonProxyHosts = this.nonProxyHosts;
+        if (nonProxyHosts == null) {
             return null;
         }
-        return nonproxyHost.split("\\|");
+        return nonProxyHosts.split("\\|");
     }
 
     private boolean doesTargetMatchNonProxy(HttpHost target) {
         String uriHost = target.getHostName();
         String uriScheme = target.getSchemeName();
-        String[] nonProxyHosts = getNonProxyHosts(uriScheme);
+        String[] nonProxyHosts = getNonProxyHosts();
         int nphLength = nonProxyHosts != null ? nonProxyHosts.length : 0;
         if (nonProxyHosts == null || nphLength < 1) {
             log.debug("sheme:'" + uriScheme + "', host:'" + uriHost + "' : DEFAULT (0 non proxy host)");
@@ -101,9 +107,14 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     @Override
     protected HttpHost determineProxy(HttpHost target, final HttpRequest request, final HttpContext context)
             throws HttpException {
+
         if (doesTargetMatchNonProxy(target)) {
             return null;
         }
-        return getProxy(target.getSchemeName());
+        if (StringUtils.isNotEmpty(protocol)) {
+            return getProxy(protocol);
+        } else {
+            return getProxy(target.getSchemeName());
+        }
     }
 }

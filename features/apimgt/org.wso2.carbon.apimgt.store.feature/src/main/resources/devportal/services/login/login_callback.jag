@@ -22,8 +22,11 @@
     var appUtils = require("/services/utils.js");
     var app = require("/site/public/theme/settings.js").Settings.app;
     var log = new Log();
+    log.debug("Login Callback Endpoint");
     app.context = appUtils.getTenantBaseStoreContext();
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var appContext = appUtils.getAppContextForServerUrl();
+
     var serverUrl = "";
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
     if (app.customUrl.enabled && forwarded_for) {
@@ -36,14 +39,14 @@
     }
     var postLogoutRedirectURI = appUtils.getTenantBasedLogoutCallBack();
     if (postLogoutRedirectURI == null) {
-         postLogoutRedirectURI = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+         postLogoutRedirectURI = serverUrl + appContext + LOGOUT_CALLBACK_URL_SUFFIX;
     }
     if (request.getParameter("error") === "login_required" ) {
             response.sendRedirect(postLogoutRedirectURI);
     } else if (request.getParameter("code") != null) {
         var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
         if (loginCallbackUrl == null) {
-            loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+            loginCallbackUrl = serverUrl + appContext + LOGIN_CALLBACK_URL_SUFFIX;
         }
         var tokenRequestData = {
             "grant_type": "authorization_code",
@@ -106,7 +109,14 @@
         var cookie = { 'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in) };
         response.addCookie(cookie);
 
-        cookie = { 'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in) };
+        cookie = { 
+            'name': 'AM_ACC_TOKEN_DEFAULT_P2', 
+            'value': accessTokenPart2, 
+            'path': app.proxy_context_path ? app.proxy_context_path + "/api/am/store/": "/api/am/store/",
+            "httpOnly": true, 
+            "secure": true, 
+            "maxAge": Integer(tokenResponse.expires_in) 
+        };
         response.addCookie(cookie);
 
         cookie = {

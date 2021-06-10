@@ -125,6 +125,10 @@ class APIClient {
     _fixSpec(spec) {
         const updatedSpec = spec;
         updatedSpec.host = this.environment.host;
+        updatedSpec.basePath = Configurations.app.proxy_context_path
+            ? Configurations.app.proxy_context_path + spec.basePath
+            : spec.basePath;
+
         return updatedSpec;
     }
 

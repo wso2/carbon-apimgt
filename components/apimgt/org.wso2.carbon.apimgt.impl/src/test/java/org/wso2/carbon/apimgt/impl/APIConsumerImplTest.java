@@ -100,7 +100,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -898,8 +897,8 @@ public class APIConsumerImplTest {
                 .getConsumerKeyByApplicationIdKeyTypeKeyManager(Mockito.anyInt(),Mockito.anyString(),
                         Mockito.anyString())).thenReturn(consumerKey);
         Mockito.when(apiMgtDAO
-                .getKeyMappingsFromApplicationIdKeyManagerAndKeyType(Mockito.anyInt(),Mockito.anyString(),
-                        Mockito.anyString())).thenReturn(null);
+                .getKeyMappingsFromApplicationIdKeyManagerAndKeyType(Mockito.anyInt(), Mockito.anyString(),
+                        Mockito.anyString(), Mockito.anyString())).thenReturn(null);
         OAuthApplicationInfo updatedAppInfo = new OAuthApplicationInfo();
         String clientName = "sample client";
         updatedAppInfo.setClientName(clientName);
@@ -934,7 +933,7 @@ public class APIConsumerImplTest {
 
         APIKey apiKey = Mockito.mock(APIKey.class);
         Mockito.when(apiKey.getCreateMode()).thenReturn(APIConstants.OAuthAppMode.CREATED.name());
-        Mockito.when(apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(appId, kmUUID, tokenType))
+        Mockito.when(apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(appId, kmName, kmUUID, tokenType))
                 .thenReturn(apiKey);
 
         KeyManagerConfigurationDTO testKeyManagerConfiguration = new KeyManagerConfigurationDTO();

@@ -105,7 +105,7 @@ function MetaData(props) {
                             />
                         </Typography>
                     </Grid>
-                    <Grid item xs={12} md={6} lg={8}>
+                    <Grid item xs={12} md={6} lg={8} style={{ 'word-break': 'break-all' }}>
                         <Typography component='p' variant='body1'>
                             {api.context && <>{api.context}</>}
                         </Typography>

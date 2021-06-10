@@ -90,7 +90,6 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -127,7 +126,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -4866,65 +4864,6 @@ public class ApiMgtDAO {
         return applicationList;
     }
 
-    /**
-     * Returns applications within a tenant domain with pagination
-     * @param tenantId   The tenantId.
-     * @param start      The start index.
-     * @param offset     The offset.
-     * @param searchOwner     The search string.
-     * @param searchApplication     The search string.
-     * @param sortOrder  The sort order.
-     * @param sortColumn The sort column.
-     * @return Application[] The array of applications.
-     * @throws APIManagementException
-     */
-    public List<Application> getApplicationsByNameWithPagination(int tenantId, int start, int offset,
-                                                                     String searchApplication,
-                                                                     String sortColumn, String sortOrder)
-            throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        String sqlQuery = null;
-        List<Application> applicationList = new ArrayList<>();
-        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_NAME");
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            if (connection.getMetaData().getDriverName().contains("Oracle")) {
-                offset = start + offset;
-            }
-            sqlQuery = sqlQuery.replace("$1", sortColumn);
-            sqlQuery = sqlQuery.replace("$2", sortOrder);
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, "%" + searchApplication + "%");
-            prepStmt.setInt(3, start);
-            prepStmt.setInt(4, offset);
-            rs = prepStmt.executeQuery();
-            Application application;
-            while (rs.next()) {
-                String applicationName = rs.getString("NAME");
-                String subscriberName = rs.getString("CREATED_BY");
-                Subscriber subscriber = new Subscriber(subscriberName);
-                application = new Application(applicationName, subscriber);
-                application.setName(applicationName);
-                application.setId(rs.getInt("APPLICATION_ID"));
-                application.setUUID(rs.getString("UUID"));
-                application.setGroupId(rs.getString("GROUP_ID"));
-                subscriber.setTenantId(rs.getInt("TENANT_ID"));
-                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                application.setStatus(rs.getString("APPLICATION_STATUS"));
-                application.setOwner(subscriberName);
-                applicationList.add(application);
-            }
-        } catch (SQLException e) {
-            handleException("Error while obtaining details of the Application for tenant id : " + tenantId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return applicationList;
-    }
-
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
             APIManagementException {
         Connection connection = null;
@@ -8819,14 +8758,16 @@ public class ApiMgtDAO {
         return apiKeyList;
     }
 
-    public APIKey getKeyMappingsFromApplicationIdKeyManagerAndKeyType(int applicationId, String keyManager,
-            String keyType) throws APIManagementException {
+    public APIKey getKeyMappingsFromApplicationIdKeyManagerAndKeyType(int applicationId, String keyManagerName,
+                                                                      String keyManagerId, String keyType)
+            throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection
                         .prepareStatement(SQLConstants.GET_KEY_MAPPING_INFO_FROM_APP_ID_KEY_MANAGER_KEY_TYPE)) {
             preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, keyManager);
-            preparedStatement.setString(3, keyType);
+            preparedStatement.setString(2, keyType);
+            preparedStatement.setString(3, keyManagerName);
+            preparedStatement.setString(4, keyManagerId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIKey apiKey = new APIKey();
