@@ -22,6 +22,7 @@ public class ApplicationListDTO   {
     private String next = null;
     private String previous = null;
     private List<ApplicationInfoDTO> list = new ArrayList<>();
+    private Integer total = null;
 
   /**
    * Number of applications returned. 
@@ -94,6 +95,24 @@ public class ApplicationListDTO   {
     this.list = list;
   }
 
+  /**
+   * Applications total. 
+   **/
+  public ApplicationListDTO total(Integer total) {
+    this.total = total;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "Applications total. ")
+  @JsonProperty("total")
+  public Integer getTotal() {
+    return total;
+  }
+  public void setTotal(Integer total) {
+    this.total = total;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -107,12 +126,13 @@ public class ApplicationListDTO   {
     return Objects.equals(count, applicationList.count) &&
         Objects.equals(next, applicationList.next) &&
         Objects.equals(previous, applicationList.previous) &&
-        Objects.equals(list, applicationList.list);
+        Objects.equals(list, applicationList.list) &&
+        Objects.equals(total, applicationList.total);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, next, previous, list);
+    return Objects.hash(count, next, previous, list, total);
   }
 
   @Override
@@ -124,6 +144,7 @@ public class ApplicationListDTO   {
     sb.append("    next: ").append(toIndentedString(next)).append("\n");
     sb.append("    previous: ").append(toIndentedString(previous)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    total: ").append(toIndentedString(total)).append("\n");
     sb.append("}");
     return sb.toString();
   }

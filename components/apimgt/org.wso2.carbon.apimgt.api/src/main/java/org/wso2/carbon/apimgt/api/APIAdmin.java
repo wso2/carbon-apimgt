@@ -87,6 +87,21 @@ public interface APIAdmin  {
             throws APIManagementException;
 
     /**
+     * Get applications for the tenantId.
+     *
+     * @param tenantId             tenant Id
+     * @param start                content to start
+     * @param offset               content to limit number of pages
+     * @param searchApplication    content to search applications based on application
+     * @param sortColumn           content to sort column
+     * @param sortOrder            content to sort in a order
+     * @throws APIManagementException if failed to get application
+     */
+    List<Application> getApplicationsByNameWithPagination(int tenantId, int start, int offset
+            , String searchApplication, String sortColumn, String sortOrder)
+            throws APIManagementException;
+
+    /**
      * Get count of the applications for the tenantId.
      *
      * @param tenantId             content to get application count based on tenant_id
