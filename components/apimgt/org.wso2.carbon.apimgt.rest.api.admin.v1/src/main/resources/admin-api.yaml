@@ -4982,11 +4982,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationInfo'
-      total:
-        type: integer
-        description: |
-          Applications total.
-        example: 1
 
 #-----------------------------------------------------
 # The Application Info resource
