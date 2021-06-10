@@ -2997,9 +2997,9 @@ public class ApiMgtDAO {
      * @param keyMappingId
      * @throws APIManagementException
      */
-    public void createApplicationKeyTypeMappingForManualClients(String keyType, int applicationId, String userName,
-                                                                String clientId, String keyManagerId,
-                                                                String keyMappingId) throws APIManagementException {
+    public void createApplicationKeyTypeMappingForManualClients(String keyType, int applicationId, String clientId,
+                                                                String keyManagerId, String keyMappingId)
+            throws APIManagementException {
         String consumerKey = null;
         if (clientId != null) {
             consumerKey = clientId;

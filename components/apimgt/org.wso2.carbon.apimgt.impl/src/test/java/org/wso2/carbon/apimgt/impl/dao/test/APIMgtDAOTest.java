@@ -909,9 +909,9 @@ public class APIMgtDAOTest {
         String clientIdProduction = UUID.randomUUID().toString();
         String clientIdSandbox = UUID.randomUUID().toString();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
-                .getId(), subscriber.getName(), clientIdProduction, "Default", UUID.randomUUID().toString());
+                .getId(), clientIdProduction, "Default", UUID.randomUUID().toString());
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
-                .getId(), subscriber.getName(), clientIdSandbox, "Default", UUID.randomUUID().toString());
+                .getId(), clientIdSandbox, "Default", UUID.randomUUID().toString());
         int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
         int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
         String tokenProduction = UUID.randomUUID().toString();

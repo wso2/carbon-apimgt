@@ -1303,8 +1303,7 @@ public class APIConsumerImplTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
-                Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
