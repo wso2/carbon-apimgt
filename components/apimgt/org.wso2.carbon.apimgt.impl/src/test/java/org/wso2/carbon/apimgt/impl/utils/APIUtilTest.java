@@ -2343,7 +2343,7 @@ public class APIUtilTest {
         availableApiCategories.add(apiCategory1);
         availableApiCategories.add(apiCategory2);
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getAllAPICategoriesOfTenant(tenantDomain)).thenReturn(availableApiCategories);
+        Mockito.when(APIUtil.getAllAPICategoriesOfOrganization(tenantDomain)).thenReturn(availableApiCategories);
         Mockito.when(APIUtil.validateAPICategories(inputApiCategories, tenantDomain)).thenCallRealMethod();
 
         Assert.assertFalse("Invalid API categories are validate!!!",

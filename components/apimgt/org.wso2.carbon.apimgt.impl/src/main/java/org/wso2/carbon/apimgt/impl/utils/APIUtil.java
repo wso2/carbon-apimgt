@@ -10634,7 +10634,7 @@ public final class APIUtil {
             //category array retrieved from artifact has only the category name, therefore we need to fetch categories
             //and fill out missing attributes before attaching the list to the api
             String tenantDomain = getTenantDomainFromTenantId(tenantID);
-            List<APICategory> allCategories = getAllAPICategoriesOfTenant(tenantDomain);
+            List<APICategory> allCategories = getAllAPICategoriesOfOrganization(tenantDomain);
 
             //todo-category: optimize this loop with breaks
             for (String categoryName : categoriesOfAPI) {
@@ -10656,7 +10656,8 @@ public final class APIUtil {
      * @return categories in a given tenant space
      * @throws APIManagementException if failed to fetch categories
      */
-    public static List<APICategory> getAllAPICategoriesOfTenant(String organization) throws APIManagementException {
+    public static List<APICategory> getAllAPICategoriesOfOrganization(String organization)
+            throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         return apiMgtDAO.getAllCategories(organization);
@@ -10666,13 +10667,13 @@ public final class APIUtil {
      * Validates the API category names to be attached to an API
      *
      * @param categories
-     * @param tenantDomain
+     * @param organization
      * @return
      */
-    public static boolean validateAPICategories(List<APICategory> categories, String tenantDomain)
+    public static boolean validateAPICategories(List<APICategory> categories, String organization)
             throws APIManagementException {
 
-        List<APICategory> availableCategories = getAllAPICategoriesOfTenant(tenantDomain);
+        List<APICategory> availableCategories = getAllAPICategoriesOfOrganization(organization);
         for (APICategory category : categories) {
             if (!availableCategories.contains(category)) {
                 return false;

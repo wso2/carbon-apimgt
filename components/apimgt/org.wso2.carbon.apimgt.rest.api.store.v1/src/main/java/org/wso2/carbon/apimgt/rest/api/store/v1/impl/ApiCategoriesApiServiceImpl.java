@@ -46,7 +46,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     public Response apiCategoriesGet(String xWSO2Tenant, MessageContext messageContext) {
         String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
         try {
-            List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(organization);
+            List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfOrganization(organization);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {
