@@ -242,5 +242,30 @@ public class SQLConstantOracle extends SQLConstants{
                     " )) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x "+
                     " ORDER BY $1 $2 ";
+
+    public static final String GET_APPLICATIONS_BY_NAME =
+            "select distinct x.* from (" +
+                    "SELECT * FROM (" +
+                    "   SELECT " +
+                    "   rownum r," +
+                    "   APP.APPLICATION_ID as APPLICATION_ID, " +
+                    "   SUB.CREATED_BY AS CREATED_BY, " +
+                    "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   SUB.TENANT_ID AS TENANT_ID, " +
+                    "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
+                    "   APP.UUID AS UUID," +
+                    "   APP.NAME AS NAME," +
+                    "   APP.APPLICATION_STATUS as APPLICATION_STATUS" +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND " +
+                    "    SUB.TENANT_ID = ? "+
+                    " And "+
+                    "    (APP.NAME like ?)) a WHERE r BETWEEN ?+1 AND ?"+
+                    " )x "+
+                    " ORDER BY $1 $2 ";
     
 }

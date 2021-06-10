@@ -55,7 +55,7 @@ const useStyles = makeStyles(() => {
 function ContentBase(props) {
     const classes = useStyles();
     const {
-        title, pageDescription, children, help, width, pageStyle, PaperProps, classes: classesProp, paperLess,
+        title, pageDescription, children, help, width, pageStyle, PaperProps, classes: classesProp, paperLess, totalItems,
     } = props;
     let size = 8;// default half/medium
     if ([width, pageStyle].includes('small')) {
@@ -78,6 +78,9 @@ function ContentBase(props) {
                                 <Typography color='inherit' variant='h5' component='h1'>
                                     {title}
                                 </Typography>
+                                {totalItems && (<Typography color='inherit' variant='caption' component='div'>
+                                    Total Items - {totalItems}
+                                </Typography>)}
                                 <Box pb={1}>
                                     {
                                         pageDescription !== null && (

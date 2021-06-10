@@ -100,6 +100,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         ApplicationListDTO applicationListDTO;
+        int allApplicationsCount = 0;
         try {
             Application[] allMatchedApps;
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
@@ -110,14 +111,19 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
                 }
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
-
+                APIAdmin apiAdmin = new APIAdminImpl();
                 // If no user is passed, get the applications for the tenant (not only for the user)
                 if ((givenUser == null || StringUtils.isEmpty(givenUser)) &&
                         (name == null || StringUtils.isEmpty(name))) {
-                    APIAdmin apiAdmin = new APIAdminImpl();
                     int tenantId = APIUtil.getTenantId(user);
                     allMatchedApps = apiAdmin.getApplicationsByTenantIdWithPagination(tenantId, 0, limit, "", "",
                             APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER).toArray(new Application[0]);
+                    allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, "", "");
+                } else if ((givenUser == null || StringUtils.isEmpty(givenUser)) && name != null) {
+                    int tenantId = APIUtil.getTenantId(user);
+                    allMatchedApps = apiAdmin.getApplicationsByNameWithPagination(tenantId, 0, limit, name,
+                            APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER).toArray(new Application[0]);
+                    allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, givenUser, name);
                 } else if (givenUser != null && (name == null || StringUtils.isEmpty(name))) {
                     allMatchedApps = apiConsumer.getApplicationsByOwner(user);
                 } else {
@@ -134,7 +140,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(appTenantDomain);
             }
             //allMatchedApps are already sorted to application name
-            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset, allApplicationsCount);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, limit, offset, allMatchedApps.length);
 
             return Response.ok().entity(applicationListDTO).build();
