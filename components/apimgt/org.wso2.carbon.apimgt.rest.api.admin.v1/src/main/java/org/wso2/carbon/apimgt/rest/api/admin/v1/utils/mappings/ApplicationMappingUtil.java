@@ -17,15 +17,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ApplicationMappingUtil {
 
@@ -93,5 +100,43 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;
+    }
+
+    public static ApplicationDTO fromApplicationtoDTO(Application application) {
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setApplicationId(application.getUUID());
+        applicationDTO.setThrottlingPolicy(application.getTier());
+        applicationDTO.setDescription(application.getDescription());
+        Map<String,String> applicationAttributes = application.getApplicationAttributes();
+        applicationDTO.setAttributes(applicationAttributes);
+        applicationDTO.setName(application.getName());
+        applicationDTO.setStatus(application.getStatus());
+        applicationDTO.setOwner(application.getOwner());
+
+        if (StringUtils.isNotEmpty(application.getGroupId())) {
+            applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
+        }
+        applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
+        applicationDTO.setSubscriptionCount(application.getSubscriptionCount());
+        if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
+                .equals(application.getTokenType())) {
+            applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.valueOf(application.getTokenType()));
+        }
+        return applicationDTO;
+    }
+
+    public static List<ScopeInfoDTO> getScopeInfoDTO(Set<Scope> scopes) {
+        List<ScopeInfoDTO> scopeDto = new ArrayList<ScopeInfoDTO>();
+        for (Scope scope : scopes) {
+            ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
+            scopeInfoDTO.setKey(scope.getKey());
+            scopeInfoDTO.setName(scope.getName());
+            scopeInfoDTO.setDescription(scope.getDescription());
+            if (StringUtils.isNotBlank(scope.getRoles())) {
+                scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().trim().split(",")));
+            }
+            scopeDto.add(scopeInfoDTO);
+        }
+        return scopeDto;
     }
 }
