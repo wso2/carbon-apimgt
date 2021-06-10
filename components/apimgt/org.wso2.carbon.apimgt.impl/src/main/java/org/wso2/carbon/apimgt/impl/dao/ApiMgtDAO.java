@@ -13040,12 +13040,9 @@ public class ApiMgtDAO {
 
             checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
             checkIsExistPreparedStatement.setString(1, tierId);
-            if (!PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-                checkIsExistPreparedStatement.setString(2, "%" + tenantDomainWithAt);
-            }
+
             if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                checkIsExistPreparedStatement.setString(3, tierId);
-                checkIsExistPreparedStatement.setString(4, "%" + tenantDomainWithAt);
+                checkIsExistPreparedStatement.setString(2, tierId);
             }
             checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
             if (checkIsResultSet != null && checkIsResultSet.next()) {

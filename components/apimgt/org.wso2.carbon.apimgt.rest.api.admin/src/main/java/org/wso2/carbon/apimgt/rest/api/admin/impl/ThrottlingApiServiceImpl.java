@@ -246,7 +246,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
             } else {
-                String errorMessage = "Error while deleting Advanced level policy : " + policyId;
+                String errorMessage = "Error while deleting Advanced level policy : " + policyId + "/n " +
+                        e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
