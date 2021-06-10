@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
+    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset, int total) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
         if (applicationInfoDTOs == null) {
@@ -45,6 +45,8 @@ public class ApplicationMappingUtil {
             applicationInfoDTOs.add(fromApplicationToInfoDTO(applications[i]));
         }
         applicationListDTO.setCount(applicationInfoDTOs.size());
+        applicationListDTO.setTotal(total);
+
         return applicationListDTO;
     }
 
@@ -58,7 +60,6 @@ public class ApplicationMappingUtil {
      */
     public static void setPaginationParams(ApplicationListDTO applicationListDTO, int limit, int offset,
             int size) {
-
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
 
         String paginatedPrevious = "";
