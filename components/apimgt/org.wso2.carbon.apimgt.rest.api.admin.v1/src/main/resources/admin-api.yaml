@@ -4281,17 +4281,6 @@ parameters:
     type: string
     required: true
 
-  # Requested Tenant domain
-  # Specified as a header parameter
-  requestedTenant:
-    name: X-WSO2-Tenant
-    in: header
-    description: |
-      For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-      retirieved from.
-    required: false
-    type: string
-
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
