@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.application.common.model.ClaimConfig;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
+import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.openidconnect.model.Constants;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
@@ -42,6 +43,7 @@ import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -88,7 +90,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                         IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                                 .getIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, Boolean.FALSE);
+                                        APIUtil.getTenantDomainFromTenantId(
+                                                APIUtil.getInternalOrganizationId(organization)), Boolean.FALSE);
                         // Only two parameters that are common to IdentityProvider object and the KeyManagerInfoDTO (that
                         // will be used in KeyManagerMappingUtil.toKeyManagerListDTO) are the description and the enabled.
                         keyManagerConfigurationDTO.setDescription(identityProvider.getIdentityProviderDescription());
@@ -118,7 +121,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                     IdentityProviderManager.getInstance()
                             .deleteIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                    APIUtil.getTenantDomainFromTenantId(
+                                            APIUtil.getInternalOrganizationId(organization)));
                 }
             } catch (IdentityProviderManagementException e) {
                 throw new APIManagementException("IdP deletion failed.", ExceptionCodes.IDP_DELETION_FAILED);
@@ -144,7 +148,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                         IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                                 .getIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, Boolean.FALSE);
+                                        APIUtil.getTenantDomainFromTenantId(
+                                                APIUtil.getInternalOrganizationId(organization)), Boolean.FALSE);
                         mergeIdpWithKeyManagerConfiguration(identityProvider, keyManagerDTO);
                     }
                 } catch (IdentityProviderManagementException e) {
@@ -179,7 +184,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                             .updateIdPByResourceId(oldKeyManagerConfigurationDTO.getExternalReferenceId(),
                                     createIdp(keyManagerConfigurationDTO, body, organization),
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                    APIUtil.getTenantDomainFromTenantId(
+                                            APIUtil.getInternalOrganizationId(organization)));
                     keyManagerConfigurationDTO.setExternalReferenceId(identityProvider.getResourceId());
                 }
                 KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO =
@@ -209,7 +215,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
                 IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                         .addIdPWithResourceId(createIdp(keyManagerConfigurationDTO, body, organization),
-                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                APIUtil.getTenantDomainFromTenantId(APIUtil.getInternalOrganizationId(organization)));
                 keyManagerConfigurationDTO.setExternalReferenceId(identityProvider.getResourceId());
             }
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
@@ -231,8 +237,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         IdentityProvider identityProvider = new IdentityProvider();
         String idpName = sanitizeName(
-                getSubstringOfFive(keyManagerConfigurationDTO.getName()) + "_" + getSubstringOfFive(organization) + "_"
-                        + getSubstringOfFive(keyManagerConfigurationDTO.getUuid()));
+                getSubstringOfTen(keyManagerConfigurationDTO.getName()) + "_" + organization + "_"
+                        + keyManagerConfigurationDTO.getUuid());
         identityProvider.setIdentityProviderName(idpName);
         identityProvider.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         identityProvider.setPrimary(Boolean.FALSE);
@@ -240,21 +246,33 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         identityProvider.setAlias(keyManagerConfigurationDTO.getAlias());
         KeyManagerCertificatesDTO keyManagerCertificatesDTO = keyManagerDTO.getCertificates();
 
+        List<IdentityProviderProperty> idpProperties = new ArrayList<IdentityProviderProperty>();
+
         if (keyManagerCertificatesDTO != null) {
             if (keyManagerCertificatesDTO.getType().equals(KeyManagerCertificatesDTO.TypeEnum.JWKS)) {
                 String idpJWKSUri = keyManagerCertificatesDTO.getValue();
-                List<IdentityProviderProperty> idpProperties = new ArrayList<>();
                 if (StringUtils.isNotBlank(idpJWKSUri)) {
                     IdentityProviderProperty jwksProperty = new IdentityProviderProperty();
                     jwksProperty.setName(Constants.JWKS_URI);
                     jwksProperty.setValue(idpJWKSUri);
                     idpProperties.add(jwksProperty);
                 }
-                identityProvider.setIdpProperties(idpProperties.toArray(new IdentityProviderProperty[0]));
             } else if (keyManagerCertificatesDTO.getType().equals(KeyManagerCertificatesDTO.TypeEnum.PEM)) {
                 identityProvider.setCertificate(StringUtils.join(keyManagerCertificatesDTO.getValue(), ""));
             }
         }
+
+        if (StringUtils.isNotBlank(keyManagerDTO.getIssuer())) {
+            IdentityProviderProperty identityProviderProperty = new IdentityProviderProperty();
+            identityProviderProperty.setName(IdentityApplicationConstants.IDP_ISSUER_NAME);
+            identityProviderProperty.setValue(keyManagerDTO.getIssuer());
+            idpProperties.add(identityProviderProperty);
+        }
+
+        if (idpProperties.size() > 0) {
+            identityProvider.setIdpProperties(idpProperties.toArray(new IdentityProviderProperty[0]));
+        }
+
         identityProvider.setEnable(keyManagerConfigurationDTO.isEnabled());
         updateClaims(identityProvider, keyManagerDTO.getClaimMapping());
         return identityProvider;
@@ -301,12 +319,21 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         keyManagerDTO.setDisplayName(identityProvider.getDisplayName());
         keyManagerDTO.setDescription(identityProvider.getIdentityProviderDescription());
 
-        IdentityProviderProperty identityProviderProperty[] = identityProvider.getIdpProperties();
+        IdentityProviderProperty identityProviderProperties[] = identityProvider.getIdpProperties();
         KeyManagerCertificatesDTO keyManagerCertificatesDTO = new KeyManagerCertificatesDTO();
-        if (identityProviderProperty.length > 0) {
-            keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.JWKS);
-            keyManagerCertificatesDTO.setValue(identityProviderProperty[0].getValue());
-            keyManagerDTO.setCertificates(keyManagerCertificatesDTO);
+        if (identityProviderProperties.length > 0) {
+            for (IdentityProviderProperty identityProviderProperty :identityProviderProperties) {
+                if (StringUtils.equals(identityProviderProperty.getName(), Constants.JWKS_URI)) {
+                    keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.JWKS);
+                    keyManagerCertificatesDTO.setValue(identityProviderProperty.getValue());
+                    keyManagerDTO.setCertificates(keyManagerCertificatesDTO);
+                }
+                if (StringUtils
+                        .equals(identityProviderProperty.getName(), IdentityApplicationConstants.IDP_ISSUER_NAME)) {
+                    keyManagerDTO.setIssuer(identityProviderProperty.getValue());
+                }
+            }
+
         } else if (StringUtils.isNotBlank(identityProvider.getCertificate())) {
             keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.PEM);
             keyManagerCertificatesDTO.setValue(identityProvider.getCertificate());
@@ -332,7 +359,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return inputName.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
     }
 
-    private String getSubstringOfFive(String inputString) {
-        return inputString.length() < 5 ? inputString : inputString.substring(0, 5);
+    private String getSubstringOfTen(String inputString) {
+        return inputString.length() < 10 ? inputString : inputString.substring(0, 10);
     }
 }
