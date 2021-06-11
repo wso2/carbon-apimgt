@@ -110,11 +110,11 @@ public class SubscriptionValidationDAOTest {
         app2.setUUID(APP2_UUID);
         APPLICATION2_ID = apiMgtDAO.addApplication(app2, APP_OWNER);
         //Add application key mapping for Application1
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(KEY_TYPE, APPLICATION1_NAME, APP_OWNER,
-                CONSUMER_KEY1, APIConstants.KeyManager.DEFAULT_KEY_MANAGER, APP1_UUID);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(KEY_TYPE, APPLICATION1_ID, CONSUMER_KEY1,
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER, APP1_UUID);
         //Add application key mapping for Application2
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(KEY_TYPE, APPLICATION2_NAME, APP_OWNER,
-                CONSUMER_KEY2, KM_UUID, APP2_UUID);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(KEY_TYPE, APPLICATION2_ID, CONSUMER_KEY2,
+                KM_UUID, APP2_UUID);
         //Add Key Manager
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
         keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);

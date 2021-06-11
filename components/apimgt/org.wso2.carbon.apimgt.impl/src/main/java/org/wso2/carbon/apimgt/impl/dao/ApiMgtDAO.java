@@ -246,8 +246,8 @@ public class ApiMgtDAO {
             resultSet = queryPs.executeQuery();
 
             if (resultSet.next()) {
-                throw new APIManagementException("Application '" + application.getName() + "' is already registered."
-                        , ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+                throw new APIManagementException("Application '" + application.getName() + "' is already registered.",
+                        ExceptionCodes.APPLICATION_ALREADY_REGISTERED);
             }
 
             if (!onlyKeyMappingEntry) {
@@ -2991,24 +2991,21 @@ public class ApiMgtDAO {
      * the AM_APPLICATION_KEY_MAPPING table
      *
      * @param keyType
-     * @param applicationName apim application name.
+     * @param applicationId   apim application ID.
      * @param userName        apim user name
      * @param clientId        this is the consumner key.
      * @param keyMappingId
      * @throws APIManagementException
      */
-    public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName, String userName,
-                                                                String clientId, String keyManagerName,
-                                                                String keyMappingId) throws APIManagementException {
+    public void createApplicationKeyTypeMappingForManualClients(String keyType, int applicationId, String clientId,
+                                                                String keyManagerId, String keyMappingId)
+            throws APIManagementException {
         String consumerKey = null;
         if (clientId != null) {
             consumerKey = clientId;
         }
         Connection connection = null;
         PreparedStatement ps = null;
-
-        //APIM application id.
-        int applicationId = getApplicationId(applicationName, userName);
 
         if (consumerKey != null) {
             String addApplicationKeyMapping = SQLConstants.ADD_APPLICATION_KEY_TYPE_MAPPING_SQL;
@@ -3022,7 +3019,7 @@ public class ApiMgtDAO {
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5, APIConstants.OAuthAppMode.MAPPED.name());
-                ps.setString(6, keyManagerName);
+                ps.setString(6, keyManagerId);
                 ps.setString(7, keyMappingId);
                 ps.execute();
                 connection.commit();
@@ -9978,30 +9975,62 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param consumerKey
-     * @return
+     * Check if key mappings already exists for app ID, key manager name or ID and key type.
+     *
+     * @param applicationId  app ID
+     * @param keyManagerName key manager name
+     * @param keyManagerId   key manager ID
+     * @param keyType        key type
+     * @return true if key mapping exists
+     * @throws APIManagementException if an error occurs
      */
-    public boolean isMappingExistsforConsumerKey(String keyManager, String consumerKey) throws APIManagementException {
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
+    public boolean isKeyMappingExistsForApplication(int applicationId, String keyManagerName,
+                                                    String keyManagerId, String keyType)
+            throws APIManagementException {
 
-        String sqlQuery = SQLConstants.GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
-            ps.setString(2,keyManager);
-            resultSet = ps.executeQuery();
-            // We only expect one result.
-            if (resultSet.next()) {
-                String applicationId = resultSet.getString("APPLICATION_ID");
-                return (applicationId != null && !applicationId.isEmpty());
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyType);
+            preparedStatement.setString(3, keyManagerName);
+            preparedStatement.setString(4, keyManagerId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
             }
         } catch (SQLException e) {
-            handleException("Failed to get Application ID by consumerKey ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            handleException("Error while checking Key Mapping existence", e);
+        }
+        return false;
+    }
+
+    /**
+     * Check if key mapping exists for (app ID, key type and key manager) or (consumer key and key manager) values.
+     *
+     * @param applicationId AppID
+     * @param keyManagerName KeyManager Name
+     * @param keyManagerId KeyManager Id
+     * @param keyType KeyType
+     * @param consumerKey   Consumer Key
+     * @return true if key mapping exists
+     * @throws APIManagementException if an error occurs.
+     */
+    public boolean isKeyMappingExistsForConsumerKeyOrApplication(int applicationId, String keyManagerName,
+                                                                 String keyManagerId, String keyType,
+                                                                 String consumerKey) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE_OR_CONSUMER_KEY)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyType);
+            preparedStatement.setString(3, consumerKey);
+            preparedStatement.setString(4, keyManagerName);
+            preparedStatement.setString(5, keyManagerId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking Key Mapping existence for AppId, KeyType or Consumer Key", e);
         }
         return false;
     }

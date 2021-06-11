@@ -2593,10 +2593,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                       String keyManagerName) throws APIManagementException {
 
         String callBackURL = null;
-        if (StringUtils.isNotEmpty(keyManagerName) &&
-                !apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerName, tenantDomain)) {
+        String keyManagerId = null;
+        KeyManagerConfigurationDTO keyManagerConfiguration =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfiguration == null) {
+            keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfiguration != null) {
+                keyManagerId = keyManagerName;
+                keyManagerName = keyManagerConfiguration.getName();
+            }
+        } else {
+            keyManagerId = keyManagerConfiguration.getUuid();
+        }
+        if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
             throw new APIManagementException(
-                    "Key Manager " + keyManagerName + "Couldn't find in tenant " + tenantDomain + ".",
+                    "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
@@ -2612,13 +2623,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
+
+        //Get application ID
+        int applicationId = apiMgtDAO.getApplicationId(applicationName, userName);
+
         // Checking if clientId is mapped with another application.
-        if (apiMgtDAO.isMappingExistsforConsumerKey(keyManagerName, clientId)) {
-            String message = "Consumer Key " + clientId + " is used for another Application.";
-            log.error(message);
-            throw new APIManagementException(message);
+        if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(applicationId, keyManagerName, keyManagerId,
+                keyType, clientId)) {
+            throw new APIManagementException("Key Mappings already exists for application " + applicationName
+                    + " or consumer key " + clientId, ExceptionCodes.KEY_MAPPING_ALREADY_EXISTS);
         }
-        log.debug("Client ID not mapped previously with another application.");
+        if (log.isDebugEnabled()) {
+            log.debug("Client ID " + clientId + " not mapped previously with another application. No existing "
+                    + "key mappings available for application " + applicationName);
+        }
 
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = isOauthAppValidationEnabled() ?
@@ -2626,8 +2644,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId,
-                keyManagerName, keyMappingId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
+                keyMappingId);
         Object enableTokenGeneration =
                 keyManager.getKeyManagerConfiguration().getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
 
@@ -4178,6 +4196,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             // get APIM application by Application Name and userId.
             Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
+
+            //check if there are any existing key mappings set for the application and the key manager.
+            if (apiMgtDAO.isKeyMappingExistsForApplication(application.getId(), keyManagerName, keyManagerId,
+                    tokenType)) {
+                throw new APIManagementException("Key Mappings already exists for application " + applicationName,
+                        ExceptionCodes.KEY_MAPPING_ALREADY_EXISTS);
+            }
 
             boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                     getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
