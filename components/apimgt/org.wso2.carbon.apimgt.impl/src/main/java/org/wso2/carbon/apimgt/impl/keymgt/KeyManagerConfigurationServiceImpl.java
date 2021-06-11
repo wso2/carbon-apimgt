@@ -25,25 +25,25 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 public class KeyManagerConfigurationServiceImpl implements KeyManagerConfigurationService {
 
     @Override
-    public void addKeyManagerConfiguration(String tenantDomain, String name, String type,
+    public void addKeyManagerConfiguration(String organization, String name, String type,
                                            KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException {
 
-        String internKey = this.getClass().getName().concat(tenantDomain).concat(name);
+        String internKey = this.getClass().getName().concat(organization).concat(name);
         synchronized (internKey.intern()) {
-            KeyManagerHolder.addKeyManagerConfiguration(tenantDomain, name, type, keyManagerConfiguration);
+            KeyManagerHolder.addKeyManagerConfiguration(organization, name, type, keyManagerConfiguration);
         }
 
     }
 
     @Override
-    public void updateKeyManagerConfiguration(String tenantDomain, String name, String type,
+    public void updateKeyManagerConfiguration(String organization, String name, String type,
                                               KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException {
 
-        String internKey = this.getClass().getName().concat(tenantDomain).concat(name);
+        String internKey = this.getClass().getName().concat(organization).concat(name);
         synchronized (internKey.intern()) {
-            KeyManagerHolder.updateKeyManagerConfiguration(tenantDomain, name, type, keyManagerConfiguration);
+            KeyManagerHolder.updateKeyManagerConfiguration(organization, name, type, keyManagerConfiguration);
         }
     }
 

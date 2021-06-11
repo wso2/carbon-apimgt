@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TenantKeyManagerDto {
+public class OrganizationKeyManagerDto {
 
     private Map<String, KeyManagerDto> keyManagerMap = new HashMap<>();
     private Map<String, String> issuerNameMap = new HashMap<>();

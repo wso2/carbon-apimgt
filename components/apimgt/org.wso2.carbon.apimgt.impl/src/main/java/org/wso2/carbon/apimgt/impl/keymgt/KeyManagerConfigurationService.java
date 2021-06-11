@@ -23,11 +23,11 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 
 public interface KeyManagerConfigurationService {
 
-    void addKeyManagerConfiguration(String tenantDomain, String name, String type,
+    void addKeyManagerConfiguration(String organization, String name, String type,
                                     KeyManagerConfiguration keyManagerConfiguration) throws
             APIManagementException;
 
-    void updateKeyManagerConfiguration(String tenantDomain, String name, String type,
+    void updateKeyManagerConfiguration(String organization, String name, String type,
                                        KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException;
 
