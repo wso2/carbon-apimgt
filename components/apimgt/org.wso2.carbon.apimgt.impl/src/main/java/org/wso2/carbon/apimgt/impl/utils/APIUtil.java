@@ -11558,9 +11558,9 @@ public final class APIUtil {
         return openIDConnectDiscoveryClient.getOpenIdConnectConfiguration();
     }
 
-    private static String getTenantAwareContext(String tenantDomain) {
-
-        if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+    private static String getTenantAwareContext(String tenantDomain) throws APIManagementException {
+        int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
+        if (MultitenantConstants.SUPER_TENANT_ID != tenantId) {
             return "/t/".concat(tenantDomain);
         }
         return "";

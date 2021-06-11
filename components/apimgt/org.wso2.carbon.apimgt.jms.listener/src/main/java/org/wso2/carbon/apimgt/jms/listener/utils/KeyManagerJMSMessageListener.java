@@ -58,12 +58,16 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                                     payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TENANT_DOMAIN).asText();
                             String action = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ACTION).asText();
                             String type = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TYPE).asText();
+                            String tokenType = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TOKEN_TYPE)
+                                    .asText();
                             boolean enabled =
                                     payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ENABLED).asBoolean();
                             String value = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.VALUE).asText();
                             if (StringUtils.isNotEmpty(value)) {
                                 KeyManagerConfiguration keyManagerConfiguration =
                                         APIUtil.toKeyManagerConfiguration(value);
+                                keyManagerConfiguration.setTokenType(
+                                        KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()));
                                 keyManagerConfiguration.setEnabled(enabled);
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()

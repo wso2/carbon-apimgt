@@ -34,13 +34,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -58,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -312,10 +312,19 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization)
             throws APIManagementException {
 
-        KeyMgtRegistrationService.registerDefaultKeyManager(tenantDomain);
+        // For Choreo scenario (Choreo organization uses the same super tenant Resident Key Manager
+        // Hence no need to register the default key manager per organization)
+        String tenantDomain = organization;
+        if (MultitenantConstants.SUPER_TENANT_ID != APIUtil.getInternalOrganizationId(organization)
+                || StringUtils.equals(organization, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            KeyMgtRegistrationService.registerDefaultKeyManager(organization);
+        } else {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
                 apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
@@ -332,6 +341,15 @@ public class APIAdminImpl implements APIAdmin {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(defaultKeyManagerConfiguration);
             keyManagerConfigurationsByTenant.add(defaultKeyManagerConfiguration);
         }
+
+        // This is the Choreo scenario. Hence, need to retrieve the IdPs of the Choreo organization as well
+        // and append those to the previous list
+        if (!StringUtils.equals(organization, tenantDomain)) {
+            List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
+                    apiMgtDAO.getKeyManagerConfigurationsByTenant(organization);
+            keyManagerConfigurationsByTenant.addAll(keyManagerConfigurationsByOrganization);
+        }
+
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         }
@@ -382,9 +400,8 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.isKeyManagerConfigurationExistById(tenantDomain, id);
     }
 
-    @Override
-    public KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-            throws APIManagementException {
+    @Override public KeyManagerConfigurationDTO addKeyManagerConfiguration(
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
         if (apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
                 keyManagerConfigurationDTO.getTenantDomain())) {
@@ -392,8 +409,13 @@ public class APIAdminImpl implements APIAdmin {
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
                             keyManagerConfigurationDTO.getTenantDomain(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
         }
-        validateKeyManagerConfiguration(keyManagerConfigurationDTO);
-        keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        }
+        if (StringUtils.isBlank(keyManagerConfigurationDTO.getUuid())) {
+            keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
+        }
         KeyManagerConfigurationDTO keyManagerConfigurationToStore =
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
         encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
@@ -497,7 +519,10 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getTenantDomain(),
                         keyManagerConfigurationDTO.getUuid());
