@@ -1915,7 +1915,7 @@ paths:
         GET https://localhost:9443/api/am/admin/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" GET \"https://localhost:9443/api/am/admin/v1/application/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n           \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n             \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n          \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n    \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\r\n    \"name\": \"DefaultApplication\",\r\n    \"throttlingPolicy\": \"Unlimited\",\r\n    \"description\": \"This is the default application\",\r\n    \"tokenType\": \"JWT\",\r\n    \"status\": \"APPROVED\",\r\n    \"groups\": [],\r\n    \"subscriptionCount\": 0,\r\n    \"attributes\": {\r\n        \"Org Name\": \"\"\r\n    },\r\n    \"subscriptionScopes\": [],\r\n    \"owner\": \"admin\"\r\n}"
       summary: |
         Get the details of an Application
       description: |
@@ -1931,7 +1931,6 @@ paths:
             Application details returned.
           schema:
             - $ref: '#/definitions/Application'
-            - $ref: '#/parameters/requestedTenant'
           headers:
             Content-Type:
               description: |
@@ -1946,7 +1945,7 @@ paths:
         404:
           description: |
             Not Found.
-            Resource to be deleted does not exist.
+            Requested application does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
