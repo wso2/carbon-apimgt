@@ -11855,5 +11855,81 @@ public final class APIUtil {
         }
         return false;
     }
+
+    public static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity)
+                                    throws APIManagementException {
+        String tenantDomain = MultitenantUtils
+                                        .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        if (APIUtil.isExposeEndpointPasswordEnabled(tenantDomain)) {
+            return endpointSecurity;
+        }
+        JSONObject endpointSecurityElement = new JSONObject();
+        endpointSecurityElement.putAll(endpointSecurity);
+        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+            JSONObject sandboxEndpointSecurity = (JSONObject) endpointSecurityElement
+                                            .get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
+                                                .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+                }
+            }
+        }
+        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+            JSONObject productionEndpointSecurity = (JSONObject) endpointSecurityElement
+                                            .get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
+                                                .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+                }
+            }
+        }
+        return endpointSecurityElement;
+    }
+
+    /**
+     * Check whether the config for exposing endpoint security password when getting API is enabled
+     * or not in tenant-conf.json in registry.
+     *
+     * @return boolean as config enabled or not
+     * @throws APIManagementException
+     */
+    public static boolean isExposeEndpointPasswordEnabled(String tenantDomainName)
+                                    throws APIManagementException {
+        org.json.simple.JSONObject apiTenantConfig;
+        try {
+            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
+                                            APIConstants.API_TENANT_CONF_LOCATION);
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (org.json.simple.JSONObject) parser.parse(content);
+                if (apiTenantConfig != null) {
+                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
+                    if (value != null) {
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
+                                            "ExposeEndpointPassword config";
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+            String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
+                                            "ExposeEndpointPassword config";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
+                                            "ExposeEndpointPassword config";
+            throw new APIManagementException(msg, e);
+        }
+        return false;
+    }
 }
 

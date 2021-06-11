@@ -911,7 +911,7 @@ public class APIMappingUtil {
                                 sandboxEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                     }
-                    JSONObject jsonObject = handleEndpointSecurity(model,
+                    JSONObject jsonObject = APIUtil.handleEndpointSecurity(model,
                             (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY));
                     endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, jsonObject);
                 }
@@ -2740,40 +2740,5 @@ public class APIMappingUtil {
         } else {
             ((APIProduct)model).setApiCategories(apiCategories);
         }
-    }
-
-    private static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity) throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
-                .getProviderName()));
-        if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
-            return endpointSecurity;
-        }
-        JSONObject endpointSecurityElement = new JSONObject();
-        endpointSecurityElement.putAll(endpointSecurity);
-        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)!= null){
-            JSONObject sandboxEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
-            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null){
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD,"");
-                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
-                        .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
-                }
-            }
-        }
-        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-            JSONObject productionEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
-                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
-                        .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
-                }
-            }
-        }
-        return endpointSecurityElement;
     }
 }

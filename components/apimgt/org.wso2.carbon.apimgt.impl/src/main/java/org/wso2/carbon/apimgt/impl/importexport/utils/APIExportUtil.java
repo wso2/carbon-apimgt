@@ -573,7 +573,7 @@ public class APIExportUtil {
      *
      * @param api API to be exported
      */
-    private static void cleanApiDataToExport(API api) throws APIManagementException {
+    private static void cleanApiDataToExport(API api) throws APIImportExportException, APIManagementException {
         // Thumbnail will be set according to the importing environment. Therefore current URL is removed
         api.setThumbnailUrl(null);
         // WSDL file path will be set according to the importing environment. Therefore current path is removed
@@ -582,9 +582,30 @@ public class APIExportUtil {
         // secure endpoint password is removed, as it causes security issues. Need to add it manually when importing.
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (api.isEndpointSecured() && api.getEndpointUTPassword() != null && !isExposeEndpointPasswordEnabled(
-                tenantDomain)) {
-            api.setEndpointUTPassword(StringUtils.EMPTY);
+        if (!APIUtil.isExposeEndpointPasswordEnabled(tenantDomain)) {
+            if (api.isEndpointSecured() && api.getEndpointUTPassword() != null) {
+                api.setEndpointUTPassword(StringUtils.EMPTY);
+            }
+            String endpointConfig = api.getEndpointConfig();
+            if (!StringUtils.isBlank(endpointConfig)) {
+                try {
+                    JSONParser parser = new JSONParser();
+                    org.json.simple.JSONObject endpointConfigJson = (org.json.simple.JSONObject) parser
+                                                    .parse(endpointConfig);
+                    if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
+                        org.json.simple.JSONObject endpointSecurity = (org.json.simple.JSONObject) endpointConfigJson
+                                                        .get(APIConstants.ENDPOINT_SECURITY);
+                        org.json.simple.JSONObject endpointSecurityJsonNew = APIUtil
+                                                        .handleEndpointSecurity(api, endpointSecurity);
+                        endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityJsonNew);
+                        api.setEndpointConfig(endpointConfigJson.toJSONString());
+                    }
+                } catch (ParseException e) {
+                    String errorMessage = "Cannot convert endpoint configurations when cleaning endpoint configs for API. "
+                                                    + "API ID = " + api.getId();
+                    throw new APIImportExportException(errorMessage, e);
+                }
+            }
         }
     }
 
