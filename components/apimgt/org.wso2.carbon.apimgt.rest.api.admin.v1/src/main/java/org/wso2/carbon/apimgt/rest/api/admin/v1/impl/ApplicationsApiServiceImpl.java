@@ -16,26 +16,38 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -147,6 +159,55 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving applications of the user " + user, e, log);
         }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdGet(String applicationId, MessageContext messageContext)
+            throws APIManagementException {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            Application application = apiConsumer.getApplicationByUUID(applicationId, tenantDomain);
+            if (application != null) {
+                String applicationTenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
+                //If we need to remove this validation due to cross tenant subscription feature, we have to further validate
+                //and verify that the invoking user's tenant domain has an API subscribed by this application
+                if (tenantDomain.equals(applicationTenantDomain)) {
+                    // Remove hidden attributes and set the rest of the attributes from config
+                    JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+                    Map<String, String> existingApplicationAttributes = application.getApplicationAttributes();
+                    Map<String, String> applicationAttributes = new HashMap<>();
+                    if (existingApplicationAttributes != null && applicationAttributesFromConfig != null) {
+                        for (Object object : applicationAttributesFromConfig) {
+                            JSONObject attribute = (JSONObject) object;
+                            Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                            String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+                            if (!BooleanUtils.isTrue(hidden)) {
+                                String attributeVal = existingApplicationAttributes.get(attributeName);
+                                if (attributeVal != null) {
+                                    applicationAttributes.put(attributeName, attributeVal);
+                                } else {
+                                    applicationAttributes.put(attributeName, "");
+                                }
+                            }
+                        }
+                    }
+                    application.setApplicationAttributes(applicationAttributes);
+                    ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                    Set<Scope> scopes = apiConsumer.getScopesForApplicationSubscription(username, application.getId(),
+                            tenantDomain);
+                    List<ScopeInfoDTO> scopeInfoList = ApplicationMappingUtil.getScopeInfoDTO(scopes);
+                    applicationDTO.setSubscriptionScopes(scopeInfoList);
+                    return Response.ok().entity(applicationDTO).build();
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+        }
+        RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
         return null;
     }
 }
