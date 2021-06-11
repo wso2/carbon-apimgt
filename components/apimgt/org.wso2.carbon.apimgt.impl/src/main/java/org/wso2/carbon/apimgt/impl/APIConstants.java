@@ -2470,7 +2470,7 @@ public final class APIConstants {
             public static final String NAME = "name";
             public static final String ENABLED = "enabled";
             public static final String VALUE = "value";
-            public static final String TENANT_DOMAIN = "tenantDomain";
+            public static final String ORGANIZATION = "organization";
             public static final String ACTION_ADD = "add";
             public static final String ACTION_UPDATE = "update";
             public static final String ACTION_DELETE = "delete";

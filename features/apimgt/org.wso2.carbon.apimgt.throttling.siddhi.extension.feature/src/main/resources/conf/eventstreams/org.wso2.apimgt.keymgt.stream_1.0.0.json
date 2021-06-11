@@ -29,7 +29,7 @@
       "type": "STRING"
     },
     {
-      "name": "tenantDomain",
+      "name": "organization",
       "type": "STRING"
     },
     {

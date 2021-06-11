@@ -54,8 +54,8 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                         if (APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_CONFIGURATION
                                 .equals(payloadData.get(APIConstants.KeyManager.KeyManagerEvent.EVENT_TYPE).asText())) {
                             String name = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.NAME).asText();
-                            String tenantDomain =
-                                    payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TENANT_DOMAIN).asText();
+                            String organization =
+                                    payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ORGANIZATION).asText();
                             String action = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ACTION).asText();
                             String type = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TYPE).asText();
                             String tokenType = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TOKEN_TYPE)
@@ -71,18 +71,18 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                                 keyManagerConfiguration.setEnabled(enabled);
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
-                                            .addKeyManagerConfiguration(tenantDomain, name, type,
+                                            .addKeyManagerConfiguration(organization, name, type,
                                                     keyManagerConfiguration);
                                 }
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
-                                            .updateKeyManagerConfiguration(tenantDomain, name, type,
+                                            .updateKeyManagerConfiguration(organization, name, type,
                                                     keyManagerConfiguration);
                                 }
                             }
                             if (APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE.equals(action)) {
                                 ServiceReferenceHolder.getInstance().getKeyManagerService()
-                                        .removeKeyManagerConfiguration(tenantDomain, name);
+                                        .removeKeyManagerConfiguration(organization, name);
                             }
                         }
                     }
