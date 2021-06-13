@@ -121,8 +121,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                     IdentityProviderManager.getInstance()
                             .deleteIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                    APIUtil.getTenantDomainFromTenantId(
-                                            APIUtil.getInternalOrganizationId(organization)));
+                                    APIUtil.getInternalOrganizationDomain(organization));
                 }
             } catch (IdentityProviderManagementException e) {
                 throw new APIManagementException("IdP deletion failed.", ExceptionCodes.IDP_DELETION_FAILED);
@@ -148,8 +147,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                         IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                                 .getIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                        APIUtil.getTenantDomainFromTenantId(
-                                                APIUtil.getInternalOrganizationId(organization)), Boolean.FALSE);
+                        APIUtil.getInternalOrganizationDomain(organization), Boolean.FALSE);
                         mergeIdpWithKeyManagerConfiguration(identityProvider, keyManagerDTO);
                     }
                 } catch (IdentityProviderManagementException e) {
@@ -184,8 +182,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                     IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                             .updateIdPByResourceId(oldKeyManagerConfigurationDTO.getExternalReferenceId(),
                                     createIdp(keyManagerConfigurationDTO, body, organization),
-                                    APIUtil.getTenantDomainFromTenantId(
-                                            APIUtil.getInternalOrganizationId(organization)));
+                                    APIUtil.getInternalOrganizationDomain(organization));
                     keyManagerConfigurationDTO.setExternalReferenceId(identityProvider.getResourceId());
                 }
                 KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO =
@@ -215,7 +212,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
                 IdentityProvider identityProvider = IdentityProviderManager.getInstance()
                         .addIdPWithResourceId(createIdp(keyManagerConfigurationDTO, body, organization),
-                                APIUtil.getTenantDomainFromTenantId(APIUtil.getInternalOrganizationId(organization)));
+                                APIUtil.getInternalOrganizationDomain(organization));
                 keyManagerConfigurationDTO.setExternalReferenceId(identityProvider.getResourceId());
             }
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =

@@ -5061,6 +5061,15 @@ public final class APIUtil {
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
+
+    public static String getInternalOrganizationDomain(String organization) throws APIManagementException {
+        return APIUtil.getTenantDomainFromTenantId(APIUtil.getInternalOrganizationId(organization));
+    }
+
+    public static boolean isInternalOrganization(String organization) throws UserStoreException {
+        return isTenantAvailable(organization);
+    }
+
     /**
      * Retrieves the role list of system
      *

@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
@@ -318,11 +319,15 @@ public class APIAdminImpl implements APIAdmin {
         // For Choreo scenario (Choreo organization uses the same super tenant Resident Key Manager
         // Hence no need to register the default key manager per organization)
         String tenantDomain = organization;
-        if (MultitenantConstants.SUPER_TENANT_ID != APIUtil.getInternalOrganizationId(organization)
-                || StringUtils.equals(organization, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-            KeyMgtRegistrationService.registerDefaultKeyManager(organization);
-        } else {
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        try {
+            if (APIUtil.isInternalOrganization(organization)) {
+                KeyMgtRegistrationService.registerDefaultKeyManager(organization);
+            } else {
+                tenantDomain = APIUtil.getInternalOrganizationDomain(organization);
+            }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving tenant id for organization "
+                    + organization, e);
         }
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
