@@ -1105,7 +1105,10 @@ public class APIMappingUtil {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
             }
 
-            apiOperationsDTO = getOperationsFromAPI(model);
+            //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
+            //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
+            //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
+            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1995,6 +1998,36 @@ public class APIMappingUtil {
                 }
             }
             operationsDTOList.add(operationsDTO);
+        }
+        return operationsDTOList;
+    }
+
+    /**
+     * Returns a set of operations from a API
+     * Returns a set of operations from a given swagger definition
+     *
+     * @param api               API object
+     * @param swaggerDefinition Swagger definition
+     * @return a set of operations from a given swagger definition
+     * @throws APIManagementException error while trying to retrieve URI templates of the given API
+     */
+
+    private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
+         throws APIManagementException {
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
+        Set<URITemplate> uriTemplates;
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            uriTemplates = api.getUriTemplates();
+        } else {
+            uriTemplates = apiDefinition.getURITemplates(swaggerDefinition);
+        }
+
+        List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
+        if (!StringUtils.isEmpty(swaggerDefinition)) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+                operationsDTOList.add(operationsDTO);
+            }
         }
         return operationsDTOList;
     }
