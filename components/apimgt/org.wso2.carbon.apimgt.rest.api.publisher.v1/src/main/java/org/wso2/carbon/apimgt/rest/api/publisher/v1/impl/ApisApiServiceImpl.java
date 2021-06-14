@@ -42,10 +42,7 @@ import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -56,13 +53,11 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
@@ -81,8 +76,6 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -104,6 +97,8 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -122,13 +117,46 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
@@ -170,8 +198,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
@@ -619,13 +645,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
                     tenantDomain);
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             List<APIOperationsDTO> operationListWithOldData =
                     APIMappingUtil.getOperationListWithOldData(originalAPI.getUriTemplates(),
-                            extractGraphQLOperationList(schemaDefinition));
+                            extractGraphQLOperationList(schemaDefinition), tenantId);
 
             Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
             originalAPI.setUriTemplates(uriTemplates);
@@ -843,6 +870,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (SubscribedAPI subscription : apiUsages) {
                 String tierName = subscription.getTier().getName();
                 if (!tiersFromDTO.contains(tierName)) {
+                    if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(tierName) && !APIUtil.isEnabledUnlimitedTier()) {
+                        continue;
+                    }
                     RestApiUtil.handleBadRequest("Subscriptions are available under " + tierName + " tier. " +
                             "Please unsubscribe before removing the tier.", log);
                 }
@@ -3243,10 +3273,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateScopes(existingAPI);
 
         //Update API is called to update URITemplates and scopes of the API
+        apiProvider.updateAPI(existingAPI);
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-        apiProvider.updateAPI(existingAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);

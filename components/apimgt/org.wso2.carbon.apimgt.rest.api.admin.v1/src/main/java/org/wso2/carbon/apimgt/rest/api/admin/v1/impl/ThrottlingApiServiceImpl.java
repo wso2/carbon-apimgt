@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -37,8 +36,20 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
@@ -55,7 +66,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.core.Response;
 
 /**
@@ -235,7 +245,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
-
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
@@ -244,6 +254,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
                     PolicyConstants.POLICY_LEVEL_API)) {
                 String message = "Policy " + policyId + " already attached to API/Resource";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
+            if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
+                    PolicyConstants.POLICY_LEVEL_API, tenantDomain)) {
+                String message = "Policy " + policyId + " configured as the Default Policy.";
                 log.error(message);
                 throw new APIManagementException(message);
             }
@@ -446,6 +462,13 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 log.error(message);
                 throw new APIManagementException(message);
             }
+            if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
+                    PolicyConstants.POLICY_LEVEL_APP, RestApiUtil.getLoggedInUserTenantDomain())) {
+                String message = "Policy " + policyId + " configured as the Default Policy.";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
+
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_APP, existingPolicy.getPolicyName());
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -723,6 +746,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
                     PolicyConstants.POLICY_LEVEL_SUB)) {
                 String message = "Policy " + policyId + " already has subscriptions";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
+            if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
+                    PolicyConstants.POLICY_LEVEL_SUB, RestApiUtil.getLoggedInUserTenantDomain())) {
+                String message = "Policy " + policyId + " configured as the Default Policy.";
                 log.error(message);
                 throw new APIManagementException(message);
             }

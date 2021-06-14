@@ -6131,15 +6131,7 @@ public class ApiMgtDAO {
                 uriMappingPrepStmt.setString(2, uriTemplate.getHTTPVerb());
                 uriMappingPrepStmt.setString(3, uriTemplate.getAuthType());
                 uriMappingPrepStmt.setString(4, uriTemplate.getUriTemplate());
-                //If API policy is available then set it for all the resources.
-                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    uriMappingPrepStmt.setString(5, (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) ?
-                            APIConstants.UNLIMITED_TIER :
-                            uriTemplate.getThrottlingTier());
-                } else {
-                    uriMappingPrepStmt.setString(5, (StringUtils.isEmpty(
-                            api.getApiLevelPolicy())) ? APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
-                }
+                uriMappingPrepStmt.setString(5, uriTemplate.getThrottlingTier());
                 InputStream is = null;
                 if (uriTemplate.getMediationScript() != null) {
                     is = new ByteArrayInputStream(
