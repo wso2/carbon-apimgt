@@ -1626,7 +1626,7 @@ public class SQLConstants {
             "   UPDATED_BY = ?," +
             "   UPDATED_TIME = ?, " +
             "   API_TIER = ?, " +
-            "   API_TYPE = ?, " +
+            "   API_TYPE = ? " +
             " WHERE " +
             "   API_UUID = ? ";
 
@@ -1639,7 +1639,7 @@ public class SQLConstants {
                     "   UPDATED_BY = ?," +
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
-                    "   API_TYPE = ?, " +
+                    "   API_TYPE = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
