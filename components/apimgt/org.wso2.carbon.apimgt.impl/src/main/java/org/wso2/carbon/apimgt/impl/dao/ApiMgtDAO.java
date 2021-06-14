@@ -26,12 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
-import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -108,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.resolver.ChoreoResolver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -6850,33 +6846,49 @@ public class ApiMgtDAO {
         String previousDefaultVersion = getDefaultVersion(api.getId());
 
         String query = SQLConstants.UPDATE_API_SQL;
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             //Header change check not required here as we update API level throttling tier
             //from same call.
             //TODO review and run tier update as separate query if need.
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, api.getContext());
-            String contextTemplate = api.getContextTemplate();
-            //If the context template ends with {version} this means that the version will be at the end of the
-            // context.
-            if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
-                //Remove the {version} part from the context template.
-                contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+            if (resolver instanceof ChoreoResolver) {
+                query = SQLConstants.UPDATE_API_SQL_CHOREO;
+                prepStmt = connection.prepareStatement(query);
+                prepStmt.setString(1, api.getContext());
+                String contextTemplate = api.getContextTemplate();
+                //If the context template ends with {version} this means that the version will be at the end of the
+                // context.
+                if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+                    //Remove the {version} part from the context template.
+                    contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+                }
+                prepStmt.setString(2, api.getId().getApiName());
+                prepStmt.setString(3, contextTemplate);
+                prepStmt.setString(4, username);
+                prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+                prepStmt.setString(6, api.getApiLevelPolicy());
+                prepStmt.setString(7, api.getType());
+                prepStmt.setString(8, api.getUuid());
+            } else {
+                prepStmt = connection.prepareStatement(query);
+                prepStmt.setString(1, api.getContext());
+                String contextTemplate = api.getContextTemplate();
+                //If the context template ends with {version} this means that the version will be at the end of the
+                // context.
+                if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+                    //Remove the {version} part from the context template.
+                    contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
+                }
+                prepStmt.setString(2, contextTemplate);
+                prepStmt.setString(3, username);
+                prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                prepStmt.setString(5, api.getApiLevelPolicy());
+                prepStmt.setString(6, api.getType());
+                prepStmt.setString(7, api.getUuid());
             }
-            prepStmt.setString(2, contextTemplate);
-            prepStmt.setString(3, username);
-            prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            prepStmt.setString(5, api.getApiLevelPolicy());
-            prepStmt.setString(6, api.getType());
-            prepStmt.setString(7, api.getUUID());
-            prepStmt.setString(8, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            prepStmt.setString(9, api.getId().getApiName());
-            prepStmt.setString(10, api.getId().getVersion());
-            prepStmt.setString(11, api.getOrganization());
             prepStmt.execute();
-            //}
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
                 // happen

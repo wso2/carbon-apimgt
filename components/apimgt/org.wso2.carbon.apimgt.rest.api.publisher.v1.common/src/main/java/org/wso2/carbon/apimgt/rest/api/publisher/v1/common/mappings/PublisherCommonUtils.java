@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -65,6 +66,7 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -278,7 +280,14 @@ public class PublisherCommonUtils {
             apiDtoToUpdate = getFieldOverriddenAPIDTO(apiDtoToUpdate, originalAPI, tokenScopes);
         }
         //Overriding some properties:
-        apiDtoToUpdate.setName(apiIdentifier.getApiName());
+        //API Name change not allowed if OnPrem
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        if (resolver instanceof OnPremResolver) {
+            apiDtoToUpdate.setName(apiIdentifier.getApiName());
+        } else if (StringUtils.isEmpty(apiDtoToUpdate.getName())) {
+                throw new APIManagementException(
+                        "Cannot update the API as API Name is empty");
+        }
         apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
         apiDtoToUpdate.setProvider(apiIdentifier.getProviderName());
         apiDtoToUpdate.setContext(originalAPI.getContextTemplate());
@@ -360,11 +369,10 @@ public class PublisherCommonUtils {
 
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
-        apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
             String oldDefinition = apiProvider
-                    .getOpenAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
+                    .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -374,7 +382,7 @@ public class PublisherCommonUtils {
             }
         } else {
             String oldDefinition = apiProvider
-                    .getAsyncAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
+                    .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
