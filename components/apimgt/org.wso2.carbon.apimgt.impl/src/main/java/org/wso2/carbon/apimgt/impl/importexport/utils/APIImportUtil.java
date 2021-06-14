@@ -230,6 +230,15 @@ public final class APIImportUtil {
             //set the status of imported API to CREATED (importing API) or current status of target API when updating
             importedApi.setStatus(currentStatus);
 
+
+            if (importedApi.isDefaultVersion()) {
+                if (!importedApi.getStatus().equalsIgnoreCase(APIStatus.PUBLISHED.toString())) {
+                    importedApi.setAsPublishedDefaultVersion(false);
+                } else {
+                    importedApi.setAsPublishedDefaultVersion(true);
+                }
+            }
+
             // check whether targetStatus is reachable from current status, if not throw an exception
             if (!currentStatus.equals(targetStatus)) {
                 lifecycleAction = APIAndAPIProductCommonUtil.getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);

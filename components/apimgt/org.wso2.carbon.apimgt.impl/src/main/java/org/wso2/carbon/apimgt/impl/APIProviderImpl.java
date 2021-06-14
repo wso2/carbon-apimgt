@@ -3905,6 +3905,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage);
         }
 
+        String previousDefaultVersion = getDefaultVersion(api.getId());
+
+        if (previousDefaultVersion != null) {
+
+            APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                    previousDefaultVersion);
+            if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
+                // happen
+                // Remove the previous default API entry from the Registry
+                updateDefaultAPIInRegistry(defaultAPIId, false);
+            }
+        }
+
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
