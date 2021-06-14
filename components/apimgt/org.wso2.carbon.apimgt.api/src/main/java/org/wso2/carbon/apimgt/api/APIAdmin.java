@@ -263,11 +263,11 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager configurations for tenant
-     * @param tenantDomain tenant Domain
+     * @param organization organization of the key manager
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain) throws APIManagementException;
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization) throws APIManagementException;
 
     /**
      * This method returns all the key managers registered in all the tenants

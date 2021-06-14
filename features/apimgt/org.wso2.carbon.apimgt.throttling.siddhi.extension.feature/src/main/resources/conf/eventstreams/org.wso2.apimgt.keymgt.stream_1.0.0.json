@@ -31,6 +31,10 @@
     {
       "name": "tenantDomain",
       "type": "STRING"
+    },
+    {
+      "name": "tokenType",
+      "type": "STRING"
     }
   ]
 }

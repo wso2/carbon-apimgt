@@ -2475,6 +2475,7 @@ public final class APIConstants {
             public static final String ACTION_UPDATE = "update";
             public static final String ACTION_DELETE = "delete";
             public static final String TYPE = "type";
+            public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
     }
