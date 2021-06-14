@@ -355,7 +355,10 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private long countTotalApi(Organization org){
         MongoCollection<Document> genericCollection = MongoDBConnectionUtil.getGenericCollection(org.getName());
         Document doc = genericCollection.aggregate(Arrays.asList(match(exists("revision", false)), count("totalApis"))).first();
-        long totCount = Long.parseLong(doc.get("totalApis").toString());
+        long totCount = 0;
+        if(doc != null){
+            totCount = Long.parseLong(doc.get("totalApis").toString());
+        }
         return totCount;
     }
 
