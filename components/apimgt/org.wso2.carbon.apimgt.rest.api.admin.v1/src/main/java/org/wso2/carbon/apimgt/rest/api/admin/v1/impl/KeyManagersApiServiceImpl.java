@@ -30,13 +30,11 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseD
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.application.common.model.ClaimConfig;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
-import org.wso2.carbon.identity.openidconnect.model.Constants;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 
@@ -98,7 +96,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         keyManagerConfigurationDTO.setEnabled(identityProvider.isEnable());
                     }
                 } catch (IdentityProviderManagementException e) {
-                    throw new APIManagementException("IdP retrieval failed.", ExceptionCodes.IDP_RETRIEVAL_FAILED);
+                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                            ExceptionCodes.IDP_RETRIEVAL_FAILED);
                 }
             }
         }
@@ -124,7 +123,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                                     APIUtil.getInternalOrganizationDomain(organization));
                 }
             } catch (IdentityProviderManagementException e) {
-                throw new APIManagementException("IdP deletion failed.", ExceptionCodes.IDP_DELETION_FAILED);
+                throw new APIManagementException("IdP deletion failed. " + e.getMessage(),
+                        ExceptionCodes.IDP_DELETION_FAILED);
             }
         }
         apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId);
@@ -151,7 +151,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         mergeIdpWithKeyManagerConfiguration(identityProvider, keyManagerDTO);
                     }
                 } catch (IdentityProviderManagementException e) {
-                    throw new APIManagementException("IdP retrieval failed.", ExceptionCodes.IDP_RETRIEVAL_FAILED);
+                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                            ExceptionCodes.IDP_RETRIEVAL_FAILED);
                 }
             }
             return Response.ok(keyManagerDTO).build();
@@ -195,7 +196,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                             organization;
             RestApiUtil.handleInternalServerError(error, e, log);
         } catch (IdentityProviderManagementException e) {
-            throw new APIManagementException("IdP adding failed.", ExceptionCodes.IDP_ADDING_FAILED);
+            throw new APIManagementException("IdP adding failed. " + e.getMessage(), ExceptionCodes.IDP_ADDING_FAILED);
         }
         return null;
     }
@@ -224,7 +225,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             String error = "Error while Creating Key Manager configuration in organization " + organization;
             RestApiUtil.handleInternalServerError(error, e, log);
         } catch (IdentityProviderManagementException e) {
-            throw new APIManagementException("IdP adding failed.", ExceptionCodes.IDP_ADDING_FAILED);
+            throw new APIManagementException("IdP adding failed. " + e.getMessage(), ExceptionCodes.IDP_ADDING_FAILED);
         }
         return null;
     }
@@ -250,7 +251,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 String idpJWKSUri = keyManagerCertificatesDTO.getValue();
                 if (StringUtils.isNotBlank(idpJWKSUri)) {
                     IdentityProviderProperty jwksProperty = new IdentityProviderProperty();
-                    jwksProperty.setName(Constants.JWKS_URI);
+                    jwksProperty.setName(RestApiConstants.JWKS_URI);
                     jwksProperty.setValue(idpJWKSUri);
                     idpProperties.add(jwksProperty);
                 }
@@ -320,7 +321,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         KeyManagerCertificatesDTO keyManagerCertificatesDTO = new KeyManagerCertificatesDTO();
         if (identityProviderProperties.length > 0) {
             for (IdentityProviderProperty identityProviderProperty :identityProviderProperties) {
-                if (StringUtils.equals(identityProviderProperty.getName(), Constants.JWKS_URI)) {
+                if (StringUtils.equals(identityProviderProperty.getName(), RestApiConstants.JWKS_URI)) {
                     keyManagerCertificatesDTO.setType(KeyManagerCertificatesDTO.TypeEnum.JWKS);
                     keyManagerCertificatesDTO.setValue(identityProviderProperty.getValue());
                     keyManagerDTO.setCertificates(keyManagerCertificatesDTO);
