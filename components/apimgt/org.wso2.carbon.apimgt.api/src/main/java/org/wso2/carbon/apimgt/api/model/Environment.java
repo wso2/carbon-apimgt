@@ -50,6 +50,8 @@ public class Environment implements Serializable {
     private boolean isReadOnly;
     private List<VHost> vhosts = new ArrayList<>();
 
+    private boolean externalGWEnv = false;
+
     public boolean isDefault() {
         return isDefault;
     }
@@ -180,6 +182,14 @@ public class Environment implements Serializable {
 
     public List<VHost> getVhosts() {
         return vhosts;
+    }
+
+    public boolean isExternalGWEnv() {
+        return externalGWEnv;
+    }
+
+    public void setExternalGWEnv(boolean externalGWEnv) {
+        this.externalGWEnv = externalGWEnv;
     }
 
     public void setVhosts(List<VHost> vhosts) {

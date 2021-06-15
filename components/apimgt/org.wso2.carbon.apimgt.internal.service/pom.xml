@@ -117,12 +117,6 @@
             <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gatewaybridge</artifactId>
-            <version>9.0.190-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
     <build>
         <pluginManagement>

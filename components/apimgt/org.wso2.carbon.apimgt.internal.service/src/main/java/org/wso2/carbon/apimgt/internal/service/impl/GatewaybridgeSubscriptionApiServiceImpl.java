@@ -12,9 +12,9 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.EventSubscriptionDTO;
-import org.wso2.carbon.apimgt.gatewaybridge.webhooks.ExternalGatewayWebhookSubscriptionService;
-import org.wso2.carbon.apimgt.gatewaybridge.webhooks.ExternalGatewayWebhookSubscriptionServiceImpl;
-import org.wso2.carbon.apimgt.gatewaybridge.dto.WebhookSubscriptionDTO;
+import org.wso2.carbon.apimgt.impl.gatewayBridge.webhooks.ExternalGatewayWebhookSubscriptionService;
+import org.wso2.carbon.apimgt.impl.gatewayBridge.webhooks.ExternalGatewayWebhookSubscriptionServiceImpl;
+import org.wso2.carbon.apimgt.impl.gatewayBridge.dto.WebhookSubscriptionDTO;
 import org.wso2.carbon.apimgt.internal.service.GatewaybridgeSubscriptionApiService;
 import java.util.List;
 
