@@ -144,7 +144,7 @@ class SampleAPI extends Component {
             : 'Unlimited';
         const defaultAdvancePolicy = settings.defaultAdvancePolicy
             ? settings.defaultAdvancePolicy
-            : '10KPerMin';
+            : 'Unlimited';
         const data = {
             name: 'PizzaShackAPI',
             description: 'This is a simple API for Pizza Shack online pizza delivery store.',
