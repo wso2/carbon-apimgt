@@ -28,7 +28,7 @@ import Create from '@material-ui/icons/Create';
 import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-
+import AppContext from 'AppComponents/Shared/AppContext';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
@@ -88,10 +88,15 @@ class SampleAPI extends Component {
      */
     handleDeploySample() {
         const { intl } = this.props;
+        const { settings } = this.context;
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
-            sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
+            sampleAPI.updateSwagger(getSampleSwagger(
+                settings.defaultSubscriptionPolicy
+                    ? settings.defaultSubscriptionPolicy
+                    : 'Unlimited',
+            ));
             return sampleAPI;
         });
         swaggerUpdatePromise.catch((error) => {
@@ -133,6 +138,13 @@ class SampleAPI extends Component {
      * @memberof SampleAPI
      */
     createSampleAPI() {
+        const { settings } = this.context;
+        const defaultSubscriptionPolicy = settings.defaultSubscriptionPolicy
+            ? settings.defaultSubscriptionPolicy
+            : 'Unlimited';
+        const defaultAdvancePolicy = settings.defaultAdvancePolicy
+            ? settings.defaultAdvancePolicy
+            : '10KPerMin';
         const data = {
             name: 'PizzaShackAPI',
             description: 'This is a simple API for Pizza Shack online pizza delivery store.',
@@ -140,7 +152,7 @@ class SampleAPI extends Component {
             version: '1.0.0',
             transport: ['http', 'https'],
             tags: ['pizza'],
-            policies: ['Unlimited'],
+            policies: [defaultSubscriptionPolicy],
             securityScheme: ['oauth2'],
             visibility: 'PUBLIC',
             gatewayEnvironments: ['Production and Sandbox'],
@@ -163,31 +175,31 @@ class SampleAPI extends Component {
                 {
                     target: '/order/{orderId}',
                     verb: 'GET',
-                    throttlingPolicy: 'Unlimited',
+                    throttlingPolicy: defaultAdvancePolicy,
                     authType: 'Application & Application User',
                 },
                 {
                     target: '/order/{orderId}',
                     verb: 'DELETE',
-                    throttlingPolicy: 'Unlimited',
+                    throttlingPolicy: defaultAdvancePolicy,
                     authType: 'Application & Application User',
                 },
                 {
                     target: '/order/{orderId}',
                     verb: 'PUT',
-                    throttlingPolicy: 'Unlimited',
+                    throttlingPolicy: defaultAdvancePolicy,
                     authType: 'Application & Application User',
                 },
                 {
                     target: '/menu',
                     verb: 'GET',
-                    throttlingPolicy: 'Unlimited',
+                    throttlingPolicy: defaultAdvancePolicy,
                     authType: 'Application & Application User',
                 },
                 {
                     target: '/order',
                     verb: 'POST',
-                    throttlingPolicy: 'Unlimited',
+                    throttlingPolicy: defaultAdvancePolicy,
                     authType: 'Application & Application User',
                 },
             ],
@@ -272,6 +284,7 @@ class SampleAPI extends Component {
         );
     }
 }
+SampleAPI.contextType = AppContext;
 
 SampleAPI.propTypes = {
     classes: PropTypes.shape({}).isRequired,
