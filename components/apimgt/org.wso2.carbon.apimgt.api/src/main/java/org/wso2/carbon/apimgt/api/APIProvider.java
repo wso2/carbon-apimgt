@@ -1782,6 +1782,17 @@ public interface APIProvider extends APIManager {
             apiRevisionDeployments, String organizationId) throws APIManagementException;
 
     /**
+     * Adds a new DeployedAPIRevision to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param deployedAPIRevisions List of DeployedAPIRevision objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void addDeployedAPIRevision(String apiId, String apiRevisionUUID, List<DeployedAPIRevision>
+            deployedAPIRevisions, String organizationId) throws APIManagementException;
+
+    /**
      * Update the displayOnDevportal field in an existing deployments of an API
      *
      * @param apiId API UUID

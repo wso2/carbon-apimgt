@@ -29,6 +29,7 @@ public class APIRevision implements Serializable {
     private String createdBy;
     private String createdTime;
     private List<APIRevisionDeployment>  apiRevisionDeploymentList;
+    private List<DeployedAPIRevision>  deployedAPIRevisions;
 
     public int getId() {
         return id;
@@ -84,5 +85,13 @@ public class APIRevision implements Serializable {
 
     public void setApiRevisionDeploymentList(List<APIRevisionDeployment> apiRevisionDeploymentList) {
         this.apiRevisionDeploymentList = apiRevisionDeploymentList;
+    }
+
+    public List<DeployedAPIRevision> getDeployedAPIRevisions() {
+        return deployedAPIRevisions;
+    }
+
+    public void setDeployedAPIRevisions(List<DeployedAPIRevision> deployedAPIRevisions) {
+        this.deployedAPIRevisions = deployedAPIRevisions;
     }
 }

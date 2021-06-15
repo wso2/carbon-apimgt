@@ -21,6 +21,40 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -73,6 +107,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -223,41 +258,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -9369,6 +9369,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
             }
         }
+    }
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId                   API UUID
+     * @param apiRevisionUUID         API Revision UUID
+     * @param deployedAPIRevisionList List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Override
+    public void addDeployedAPIRevision(String apiId, String apiRevisionUUID,
+                                       List<DeployedAPIRevision> deployedAPIRevisionList, String organizationId)
+            throws APIManagementException {
+
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionUUID);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionUUID, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
+        }
+        List<DeployedAPIRevision> currentDeployedApiRevisionList =
+                apiMgtDAO.getDeployedAPIRevisionByApiUUID(apiId);
+        Set<DeployedAPIRevision> environmentsToRemove = new HashSet<>();
+
+        // Remove old deployed-revision entries of same env and apiid
+        for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
+            for (DeployedAPIRevision currentapiRevisionDeployment : currentDeployedApiRevisionList) {
+                if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                        deployedAPIRevision.getDeployment())) {
+                    environmentsToRemove.add(currentapiRevisionDeployment);
+                }
+            }
+        }
+        if (environmentsToRemove.size() > 0) {
+            apiMgtDAO.removeDeployedAPIRevision(apiId, environmentsToRemove);
+        }
+        // Add new deployed revision update to db
+        apiMgtDAO.addDeployedAPIRevision(apiRevisionUUID, deployedAPIRevisionList);
     }
 
     @Override

@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -123,7 +124,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-    import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -155,6 +156,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
@@ -4315,6 +4317,56 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
+    }
+
+    /**
+     * Deployed revision
+     *
+     * @param apiUUID          UUID of the API
+     * @param revisionId     Revision ID of the API
+     * @param messageContext message context object
+     * @return response with 200 status code
+     */
+    @Override
+    public Response deployedAPIRevision(String apiUUID, String revisionId, String organizationId,
+                                        List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList,
+                                        MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        //validate if api exists
+        APIInfo apiInfo = validateAPIExistence(apiUUID);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
+        // get revision uuid
+        String revisionUUID = apiProvider.getAPIRevisionUUID(revisionId, apiUUID);
+        if (revisionUUID == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+        }
+
+        Map<String, Environment> environments = APIUtil.getEnvironments();
+        List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
+        for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
+            DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
+            deployedAPIRevision.setRevisionUUID(revisionUUID);
+            String environment = deployedAPIRevisionDTO.getName();
+            if (environments.get(environment) == null) {
+                RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+            }
+            deployedAPIRevision.setDeployment(environment);
+            deployedAPIRevision.setVhost(deployedAPIRevisionDTO.getVhost());
+            if (StringUtils.isEmpty(deployedAPIRevisionDTO.getVhost())) {
+                // vhost is only required when deploying an revision, not required when un-deploying a revision
+                // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
+                RestApiUtil.handleBadRequest(
+                        "Required field 'vhost' not found in deployment", log
+                );
+            }
+            deployedAPIRevisions.add(deployedAPIRevision);
+        }
+        apiProvider.addDeployedAPIRevision(apiUUID, revisionUUID, deployedAPIRevisions, organizationId);
+        Response.Status status = Response.Status.CREATED;
+        return Response.status(status).build();
     }
 
     /**

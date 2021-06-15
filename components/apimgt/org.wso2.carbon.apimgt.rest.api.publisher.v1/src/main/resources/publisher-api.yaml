@@ -1701,6 +1701,45 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
+  /apis/{apiId}/deployed-revision:
+    #--------------------------------------------
+    # Deploy a revision
+    #--------------------------------------------
+    post:
+      tags:
+        - API Revisions
+      summary: Deploy Revision
+      description: |
+        Deploy a revision
+      operationId: deployedAPIRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/organizationId'
+      requestBody:
+        description: Deployment object that needs to be added
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeployedAPIRevision'
+      responses:
+        200:
+          description: |
+            Created.
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
   /apis/{apiId}/undeploy-revision:
     #--------------------------------------------
     # Un-Deploy a revision from deployed gateway
@@ -8494,6 +8533,33 @@ components:
         displayOnDevportal:
           type: boolean
           example: true
+        deployedTime:
+          readOnly: true
+          type: string
+          format: date-time
+    #-----------------------------------------------------
+    # The Deployed API Revision resource
+    #-----------------------------------------------------
+    DeployedAPIRevision:
+      title: DeployedAPIRevision Info object with basic deployed API details
+      properties:
+        revisionID:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: default
+        vhost:
+          maxLength: 255
+          minLength: 1
+          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
+          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+          type: string
+          example: mg.wso2.com
         deployedTime:
           readOnly: true
           type: string

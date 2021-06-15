@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedAPIRevisionDTO;
 import javax.validation.constraints.*;
 
 
@@ -30,6 +31,7 @@ public class APIRevisionDTO   {
     private java.util.Date createdTime = null;
     private APIRevisionAPIInfoDTO apiInfo = null;
     private List<APIRevisionDeploymentDTO> deploymentInfo = new ArrayList<APIRevisionDeploymentDTO>();
+    private List<DeployedAPIRevisionDTO> successDeployementInfo = new ArrayList<DeployedAPIRevisionDTO>();
 
   /**
    **/
@@ -135,6 +137,24 @@ public class APIRevisionDTO   {
     this.deploymentInfo = deploymentInfo;
   }
 
+  /**
+   **/
+  public APIRevisionDTO successDeployementInfo(List<DeployedAPIRevisionDTO> successDeployementInfo) {
+    this.successDeployementInfo = successDeployementInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("successDeployementInfo")
+  public List<DeployedAPIRevisionDTO> getSuccessDeployementInfo() {
+    return successDeployementInfo;
+  }
+  public void setSuccessDeployementInfo(List<DeployedAPIRevisionDTO> successDeployementInfo) {
+    this.successDeployementInfo = successDeployementInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -150,12 +170,13 @@ public class APIRevisionDTO   {
         Objects.equals(description, apIRevision.description) &&
         Objects.equals(createdTime, apIRevision.createdTime) &&
         Objects.equals(apiInfo, apIRevision.apiInfo) &&
-        Objects.equals(deploymentInfo, apIRevision.deploymentInfo);
+        Objects.equals(deploymentInfo, apIRevision.deploymentInfo) &&
+        Objects.equals(successDeployementInfo, apIRevision.successDeployementInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(displayName, id, description, createdTime, apiInfo, deploymentInfo);
+    return Objects.hash(displayName, id, description, createdTime, apiInfo, deploymentInfo, successDeployementInfo);
   }
 
   @Override
@@ -169,6 +190,7 @@ public class APIRevisionDTO   {
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
     sb.append("    deploymentInfo: ").append(toIndentedString(deploymentInfo)).append("\n");
+    sb.append("    successDeployementInfo: ").append(toIndentedString(successDeployementInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
