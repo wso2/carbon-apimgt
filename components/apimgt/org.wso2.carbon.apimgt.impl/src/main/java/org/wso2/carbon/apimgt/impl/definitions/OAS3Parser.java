@@ -1964,4 +1964,9 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    @Override
+    public String removeScopesFromDefinition(String swaggerContent) throws APIManagementException {
+        return "";
+    }
+
 }

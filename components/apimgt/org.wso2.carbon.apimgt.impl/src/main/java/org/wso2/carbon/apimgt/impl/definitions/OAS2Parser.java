@@ -601,7 +601,7 @@ public class OAS2Parser extends APIDefinition {
 
         updateSwaggerSecurityDefinition(swaggerObj, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(swaggerObj, swaggerData);
-        
+
         if (StringUtils.isEmpty(swaggerObj.getInfo().getTitle())) {
             swaggerObj.getInfo().setTitle(swaggerData.getTitle());
         }
@@ -1720,4 +1720,41 @@ public class OAS2Parser extends APIDefinition {
         return getSwaggerJsonString(swagger);
     }
 
+    @Override
+    public String removeScopesFromDefinition(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        final String oauth2Type = new OAuth2Definition().getType();
+
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        if (securityDefinitions != null) {
+            // Removing the scopes from security definitions
+            for (Map.Entry<String, SecuritySchemeDefinition> definitionEntry : securityDefinitions.entrySet()) {
+                if (oauth2Type.equals(definitionEntry.getValue().getType())) {
+                    OAuth2Definition securityDef = (OAuth2Definition) definitionEntry.getValue();
+                    securityDef.setScopes(new LinkedHashMap<>());
+                }
+            }
+
+            // Removing the scopes from operations
+            Map<String, Path> paths = swagger.getPaths();
+            for (String pathKey : paths.keySet()) {
+                Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                    Operation operation = entry.getValue();
+                    List<Map<String, List<String>>> securityList = operation.getSecurity();
+                    if (securityList != null) {
+                        for (Map<String, List<String>> security : securityList) {
+                            for (String securityKey : security.keySet()) {
+                                if (security.get(securityKey) != null) {
+                                    security.put(securityKey, Collections.EMPTY_LIST);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        return getSwaggerJsonString(swagger);
+    }
 }

@@ -1377,6 +1377,15 @@ public class OASParserUtil {
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
     }
 
+    public static String preProcessScopes(String swaggerContent, Boolean includeScopes) throws APIManagementException {
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+
+        if (!includeScopes) {
+            return apiDefinition.removeScopesFromDefinition(swaggerContent);
+        }
+        return swaggerContent;
+    }
+
     /**
      * This method returns api that is attached with api extensions related to micro-gw
      *
