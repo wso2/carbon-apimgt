@@ -10144,6 +10144,12 @@ definitions:
           Is Cross Tenant Subscriptions Enabled
         example: false
         default: false
+      defaultAdvancePolicy:
+        type: string
+        description: Default Advance Policy.
+      defaultSubscriptionPolicy:
+        type: string
+        description: Default Subscription Policy.
       deployments:
         type: array
         items:

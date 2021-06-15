@@ -1763,15 +1763,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     private void addDefaultApplicationForSubscriber(Subscriber subscriber) throws APIManagementException {
         Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
-        if (APIUtil.isEnabledUnlimitedTier()) {
-            defaultApp.setTier(APIConstants.UNLIMITED_TIER);
-        } else {
-            Map<String, Tier> throttlingTiers = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE,
-                    getTenantDomain(subscriber.getName()));
-            Set<Tier> tierValueList = new HashSet<Tier>(throttlingTiers.values());
-            List<Tier> sortedTierList = APIUtil.sortTiers(tierValueList);
-            defaultApp.setTier(sortedTierList.get(0).getName());
-        }
+        defaultApp.setTier(APIUtil.getDefaultApplicationLevelPolicy(subscriber.getTenantId()));
         //application will not be shared within the group
         defaultApp.setGroupId("");
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);

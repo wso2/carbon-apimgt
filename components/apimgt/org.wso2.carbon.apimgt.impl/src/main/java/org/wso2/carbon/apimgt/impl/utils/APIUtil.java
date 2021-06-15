@@ -304,7 +304,6 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
@@ -4931,7 +4930,6 @@ public final class APIUtil {
             throw new APIManagementException("Error while creating role: " + roleName, e);
         }
     }
-
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
 
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -11930,6 +11928,88 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return false;
+    }
+
+    public static String getDefaultAPILevelPolicy(int tenantId) throws APIManagementException {
+
+        Map<String, Tier> apiPolicies = getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
+        if (apiPolicies.size() > 0) {
+            String defaultTier =
+                    getTenantConfigPropertyValue(APIConstants.API_TENANT_CONF_DEFAULT_API_TIER, tenantId);
+            if (StringUtils.isNotEmpty(defaultTier) && apiPolicies.containsKey(defaultTier)) {
+                return defaultTier;
+            }
+            if (isEnabledUnlimitedTier()) {
+                return APIConstants.UNLIMITED_TIER;
+            }
+            return apiPolicies.keySet().toArray()[0].toString();
+        }
+        return null;
+    }
+
+    public static String getDefaultApplicationLevelPolicy(int tenantId) throws APIManagementException {
+
+        Map<String, Tier> applicationLevelPolicies = getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP,
+                tenantId);
+        if (applicationLevelPolicies.size() > 0) {
+            String defaultTier =
+                    getTenantConfigPropertyValue(APIConstants.API_TENANT_CONF_DEFAULT_APPLICATION_TIER, tenantId);
+            if (StringUtils.isNotEmpty(defaultTier) && applicationLevelPolicies.containsKey(defaultTier)) {
+                return defaultTier;
+            }
+            if (isEnabledUnlimitedTier()) {
+                return APIConstants.UNLIMITED_TIER;
+            }
+            return applicationLevelPolicies.keySet().toArray()[0].toString();
+        }
+        return null;
+    }
+
+    public static String getDefaultSubscriptionPolicy(int tenantId) throws APIManagementException {
+
+        Map<String, Tier> subscriptionPolicies = getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+        if (subscriptionPolicies.size() > 0) {
+            String defaultTier =
+                    getTenantConfigPropertyValue(APIConstants.API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER, tenantId);
+            if (StringUtils.isNotEmpty(defaultTier) && subscriptionPolicies.containsKey(defaultTier)) {
+                return defaultTier;
+            }
+            if (isEnabledUnlimitedTier()) {
+                return APIConstants.UNLIMITED_TIER;
+            }
+            return subscriptionPolicies.keySet().toArray()[0].toString();
+        }
+        return null;
+    }
+
+    public static boolean checkPolicyConfiguredAsDefault(String policyName, String policyLevel, String tenantDomain)
+            throws APIManagementException {
+
+        String configKey = null;
+        if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
+            configKey = APIConstants.API_TENANT_CONF_DEFAULT_API_TIER;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            configKey = APIConstants.API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER;
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
+            configKey = APIConstants.API_TENANT_CONF_DEFAULT_APPLICATION_TIER;
+        }
+        if (StringUtils.isNotEmpty(configKey)) {
+            String defaultPolicyValue = getTenantConfigPropertyValue(configKey,
+                    getTenantIdFromTenantDomain(tenantDomain));
+            return StringUtils.equalsIgnoreCase(defaultPolicyValue, policyName);
+        }
+        return false;
+    }
+
+
+    private static String getTenantConfigPropertyValue(String propertyName, int tenantId)
+            throws APIManagementException {
+
+        JSONObject tenantConfig = getTenantConfig(tenantId);
+        if (tenantConfig.containsKey(propertyName)) {
+            return tenantConfig.get(propertyName).toString();
+        }
+        return null;
     }
 }
 

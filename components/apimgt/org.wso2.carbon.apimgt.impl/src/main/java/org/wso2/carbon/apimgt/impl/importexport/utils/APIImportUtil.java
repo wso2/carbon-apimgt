@@ -24,7 +24,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,15 +48,15 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -289,7 +288,6 @@ public final class APIImportUtil {
 
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
-
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
                     String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
@@ -297,6 +295,7 @@ public final class APIImportUtil {
                 } else {
                     //Load required properties from swagger to the API
                     Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
+                    String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
                         if (scope != null && !(APIUtil.isAllowedScope(scope.getKey())) &&
@@ -305,6 +304,9 @@ public final class APIImportUtil {
                                     "Error in adding API. Scope " + scope.getKey() +
                                             " is already assigned by another API.";
                             throw new APIImportExportException(errorMessage);
+                        }
+                        if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                            uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
                         }
                     }
                     importedApi.setUriTemplates(uriTemplates);
