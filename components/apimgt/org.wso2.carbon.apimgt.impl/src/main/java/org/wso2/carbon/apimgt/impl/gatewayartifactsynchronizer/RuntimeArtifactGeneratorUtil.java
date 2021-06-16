@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -31,8 +30,8 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDes
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +79,8 @@ public class RuntimeArtifactGeneratorUtil {
                 for (APIRuntimeArtifactDto apiRuntimeArtifactDto : gatewayArtifacts) {
                     if (apiRuntimeArtifactDto.isFile()) {
                         String fileName =
-                                apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision());
+                                apiRuntimeArtifactDto.getApiId().concat("-")
+                                        .concat(apiRuntimeArtifactDto.getRevision());
 
                         ApiProjectDto apiProjectDto = deploymentsMap.get(fileName);
                         if (apiProjectDto == null) {
