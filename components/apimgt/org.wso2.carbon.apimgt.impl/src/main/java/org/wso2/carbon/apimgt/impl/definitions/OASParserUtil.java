@@ -1367,23 +1367,18 @@ public class OASParserUtil {
      * @param swaggerContent String
      * @return swagger definition as String
      */
-    public static String preProcess(String swaggerContent) throws APIManagementException {
+    public static String preProcess(String swaggerContent, Boolean includeScopes) throws APIManagementException {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
+        //Remove scopes when importing or updating a swagger definition
+        if (!includeScopes) {
+            swaggerContent = apiDefinition.removeScopesFromDefinition(swaggerContent);
+        }
         //Inject and map mgw throttling extensions to default type
         swaggerContent = apiDefinition.injectMgwThrottlingExtensionsToDefault(swaggerContent);
         //Process mgw disable security extension
         swaggerContent = apiDefinition.processDisableSecurityExtension(swaggerContent);
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
-    }
-
-    public static String preProcessScopes(String swaggerContent, Boolean includeScopes) throws APIManagementException {
-        APIDefinition apiDefinition = getOASParser(swaggerContent);
-
-        if (!includeScopes) {
-            return apiDefinition.removeScopesFromDefinition(swaggerContent);
-        }
-        return swaggerContent;
     }
 
     /**

@@ -237,4 +237,13 @@ public abstract class APIDefinition {
      */
     public abstract String processDisableSecurityExtension(String swaggerContent)
             throws APIManagementException;
+
+    /**
+     * This method will remove the scopes from resources and security definition in the original definition
+     *
+     * @param swaggerContent String
+     * @return Updated swagger definition
+     * @throws APIManagementException
+     */
+    public abstract String removeScopesFromDefinition(String swaggerContent) throws APIManagementException;
 }
