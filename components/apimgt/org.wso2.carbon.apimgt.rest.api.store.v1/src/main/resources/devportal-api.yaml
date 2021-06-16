@@ -4546,6 +4546,12 @@ components:
           type: string
           description: Token to be revoked, if any
           example: ""
+        grantType:
+          type: string
+          default: CLIENT_CREDENTIALS
+          enum:
+            - CLIENT_CREDENTIALS
+            - TOKEN_EXCHANGE
         additionalProperties:
           type: object
           properties: {}

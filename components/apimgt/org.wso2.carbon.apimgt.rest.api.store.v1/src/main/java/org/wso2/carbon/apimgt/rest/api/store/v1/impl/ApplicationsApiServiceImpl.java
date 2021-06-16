@@ -105,7 +105,7 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
-    
+
 
     /**
      * Retrieves all the applications that the user has access to
@@ -425,11 +425,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
-            
+
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            
+
             if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
@@ -438,7 +438,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     applicationId);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
-                
+
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
@@ -854,8 +854,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId,
-            String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId, String keyType,
+                                                                          ApplicationTokenGenerateRequestDTO body,
+                                                                          String ifMatch,
+                                                                          MessageContext messageContext) {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -884,10 +886,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             appKey.setConsumerSecret(body.getConsumerSecret());
                         }
                         String[] scopes = body.getScopes().toArray(new String[0]);
+                        String grantType;
+                        if (ApplicationTokenGenerateRequestDTO.GrantTypeEnum.TOKEN_EXCHANGE
+                                .equals(body.getGrantType())) {
+                            grantType = APIConstants.OAuthConstants.TOKEN_EXCHANGE;
+                        } else {
+                            grantType = APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
+                        }
                         AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
                                 appKey.getConsumerKey(), appKey.getConsumerSecret(),
                                 body.getValidityPeriod().toString(), scopes, jsonInput,
-                                APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                                APIConstants.KeyManager.DEFAULT_KEY_MANAGER, grantType);
 
                         ApplicationTokenDTO appToken = new ApplicationTokenDTO();
                         appToken.setAccessToken(response.getAccessToken());
@@ -1189,9 +1198,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     String[] scopes = body.getScopes().toArray(new String[0]);
 
                     try {
+                        String grantType;
+                        if (ApplicationTokenGenerateRequestDTO.GrantTypeEnum.TOKEN_EXCHANGE
+                                .equals(body.getGrantType())) {
+                            grantType = APIConstants.OAuthConstants.TOKEN_EXCHANGE;
+                        } else {
+                            grantType = APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
+                        }
                         AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
                                 appKey.getConsumerKey(), appKey.getConsumerSecret(),
-                                body.getValidityPeriod().toString(), scopes, jsonInput, appKey.getKeyManager());
+                                body.getValidityPeriod().toString(), scopes, jsonInput, appKey.getKeyManager(),
+                                grantType);
                         ApplicationTokenDTO appToken = new ApplicationTokenDTO();
                         appToken.setAccessToken(response.getAccessToken());
                         if (response.getScopes() != null) {

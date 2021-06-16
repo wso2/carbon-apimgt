@@ -1243,7 +1243,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
                                             String validityTime, String[] requestedScopes, String jsonInput,
-                                            String keyManagerName) throws APIManagementException {
+                                            String keyManagerName, String grantType) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -1251,6 +1251,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         tokenRequest.setValidityPeriod(Long.parseLong(validityTime));
         tokenRequest.setTokenToRevoke(oldAccessToken);
         tokenRequest.setScope(requestedScopes);
+        tokenRequest.setGrantType(grantType);
 
         try {
             // Populating additional parameters.

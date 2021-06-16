@@ -785,8 +785,8 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] requestedScopes, String jsonInput,String keyManagerName) throws
-            APIManagementException;
+                                     String[] requestedScopes, String jsonInput, String keyManagerName,
+                                     String grantType) throws APIManagementException;
 
     /**
      * Generates a new api key
