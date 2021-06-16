@@ -1630,7 +1630,7 @@ public class SQLConstants {
             " WHERE " +
             "   API_UUID = ? ";
 
-    public static final String UPDATE_API_SQL_CHOREO =
+    public static final String UPDATE_API_SQL_WITH_API_RENAME =
             "UPDATE AM_API " +
                     "SET " +
                     "   CONTEXT = ?, " +

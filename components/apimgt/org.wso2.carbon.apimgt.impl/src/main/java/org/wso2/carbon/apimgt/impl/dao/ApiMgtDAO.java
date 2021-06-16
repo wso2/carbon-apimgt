@@ -6876,7 +6876,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(6, api.getType());
                 prepStmt.setString(7, api.getUuid());
             } else {
-                query = SQLConstants.UPDATE_API_SQL_CHOREO;
+                query = SQLConstants.UPDATE_API_SQL_WITH_API_RENAME;
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
                 String contextTemplate = api.getContextTemplate();
