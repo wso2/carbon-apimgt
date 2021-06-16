@@ -20,26 +20,26 @@ import javax.validation.Valid;
 
 public class DeployedAPIRevisionDTO   {
   
-    private String revisionID = null;
+    private String revisionUUID = null;
     private String name = null;
     private String vhost = null;
     private java.util.Date deployedTime = null;
 
   /**
    **/
-  public DeployedAPIRevisionDTO revisionID(String revisionID) {
-    this.revisionID = revisionID;
+  public DeployedAPIRevisionDTO revisionUUID(String revisionUUID) {
+    this.revisionUUID = revisionUUID;
     return this;
   }
 
   
   @ApiModelProperty(example = "c26b2b9b-4632-4ca4-b6f3-521c8863990c", value = "")
-  @JsonProperty("revisionID")
- @Size(min=0,max=255)  public String getRevisionID() {
-    return revisionID;
+  @JsonProperty("revisionUUID")
+ @Size(min=0,max=255)  public String getRevisionUUID() {
+    return revisionUUID;
   }
-  public void setRevisionID(String revisionID) {
-    this.revisionID = revisionID;
+  public void setRevisionUUID(String revisionUUID) {
+    this.revisionUUID = revisionUUID;
   }
 
   /**
@@ -103,7 +103,7 @@ public class DeployedAPIRevisionDTO   {
       return false;
     }
     DeployedAPIRevisionDTO deployedAPIRevision = (DeployedAPIRevisionDTO) o;
-    return Objects.equals(revisionID, deployedAPIRevision.revisionID) &&
+    return Objects.equals(revisionUUID, deployedAPIRevision.revisionUUID) &&
         Objects.equals(name, deployedAPIRevision.name) &&
         Objects.equals(vhost, deployedAPIRevision.vhost) &&
         Objects.equals(deployedTime, deployedAPIRevision.deployedTime);
@@ -111,7 +111,7 @@ public class DeployedAPIRevisionDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionID, name, vhost, deployedTime);
+    return Objects.hash(revisionUUID, name, vhost, deployedTime);
   }
 
   @Override
@@ -119,7 +119,7 @@ public class DeployedAPIRevisionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class DeployedAPIRevisionDTO {\n");
     
-    sb.append("    revisionID: ").append(toIndentedString(revisionID)).append("\n");
+    sb.append("    revisionUUID: ").append(toIndentedString(revisionUUID)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");

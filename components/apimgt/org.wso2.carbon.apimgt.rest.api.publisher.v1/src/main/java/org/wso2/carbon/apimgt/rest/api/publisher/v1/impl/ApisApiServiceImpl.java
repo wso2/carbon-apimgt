@@ -30,6 +30,34 @@ import com.amazonaws.services.lambda.model.ListFunctionsResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
@@ -189,34 +217,6 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
@@ -4164,10 +4164,23 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevisionListDTO apiRevisionListDTO;
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
-            if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
+
+            // Set results based on query params
+            boolean deployed = false;
+            boolean deployedSuccess = false;
+            if (query != null && !query.isEmpty()) {
+                deployed = StringUtils.contains(query.toLowerCase(), "deployed:true");
+                deployedSuccess = StringUtils.contains(query.toLowerCase(), "deployed-success:true");
+            }
+
+            if (deployed || deployedSuccess) {
                 List<APIRevision> apiDeployedRevisions = new ArrayList<>();
                 for (APIRevision apiRevision : apiRevisions) {
-                    if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                    if (deployed && apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                        apiDeployedRevisions.add(apiRevision);
+                        continue;
+                    }
+                    if (deployedSuccess && apiRevision.getDeployedAPIRevisions().size() != 0) {
                         apiDeployedRevisions.add(apiRevision);
                     }
                 }
@@ -4322,7 +4335,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Deployed revision
      *
-     * @param apiUUID          UUID of the API
+     * @param apiUUID        UUID of the API
      * @param revisionId     Revision ID of the API
      * @param messageContext message context object
      * @return response with 200 status code

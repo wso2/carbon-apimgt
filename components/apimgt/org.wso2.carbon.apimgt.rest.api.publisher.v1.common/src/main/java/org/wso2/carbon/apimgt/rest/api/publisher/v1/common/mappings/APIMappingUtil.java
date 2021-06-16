@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -93,6 +94,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
@@ -2927,12 +2929,19 @@ public class APIMappingUtil {
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
         apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
+        List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOS = new ArrayList<>();
         if (model.getApiRevisionDeploymentList() != null) {
             for (APIRevisionDeployment apiRevisionDeployment : model.getApiRevisionDeploymentList()) {
                 apiRevisionDeploymentDTOS.add(fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
             }
         }
+        if (model.getDeployedAPIRevisions() != null) {
+            for (DeployedAPIRevision deployedAPIRevision : model.getDeployedAPIRevisions()) {
+                deployedAPIRevisionDTOS.add(fromDeployedAPIRevisionToDTO(deployedAPIRevision));
+            }
+        }
         apiRevisionDTO.setDeploymentInfo(apiRevisionDeploymentDTOS);
+        apiRevisionDTO.setSuccessDeploymentInfo(deployedAPIRevisionDTOS);
         return apiRevisionDTO;
     }
 
@@ -2971,6 +2980,29 @@ public class APIMappingUtil {
             apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         }
         return apiRevisionDeploymentDTO;
+    }
+
+    public static DeployedAPIRevisionDTO fromDeployedAPIRevisionToDTO(DeployedAPIRevision model)
+            throws APIManagementException {
+
+        DeployedAPIRevisionDTO deployedAPIRevisionDTO = new DeployedAPIRevisionDTO();
+        deployedAPIRevisionDTO.setName(model.getDeployment());
+        deployedAPIRevisionDTO.setVhost(model.getVhost());
+        if (model.getRevisionUUID() != null) {
+            deployedAPIRevisionDTO.setRevisionUUID(model.getRevisionUUID());
+        }
+        if (model.getDeployedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getDeployedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the created time:" + model.getDeployedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            deployedAPIRevisionDTO.setDeployedTime(timestamp);
+        }
+        return deployedAPIRevisionDTO;
     }
 
     public static APIRevisionDeploymentListDTO fromListAPIRevisionDeploymentToDTO(

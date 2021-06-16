@@ -8470,6 +8470,11 @@ components:
           readOnly: true
           items:
             $ref: '#/components/schemas/APIRevisionDeployment'
+        successDeploymentInfo:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/DeployedAPIRevision'
 
     #-----------------------------------------------------
     # The API Revision - API Info resource
@@ -8543,7 +8548,7 @@ components:
     DeployedAPIRevision:
       title: DeployedAPIRevision Info object with basic deployed API details
       properties:
-        revisionID:
+        revisionUUID:
           maxLength: 255
           minLength: 0
           type: string
@@ -8564,7 +8569,6 @@ components:
           readOnly: true
           type: string
           format: date-time
-
     AuditReport:
       title: Resource for Audit Report
       type: object
