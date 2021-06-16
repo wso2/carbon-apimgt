@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -895,8 +896,13 @@ public class ExportUtils {
                 CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
                         exportFormat, asyncApiJson);
             }
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
+            JsonObject apiJson = (JsonObject) apiObj;
+            apiJson.addProperty("organizationId", organization);
+            
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
-                    ImportExportConstants.TYPE_API, apiDtoToReturn);
+                    ImportExportConstants.TYPE_API, apiJson);
         } catch (APIManagementException e) {
             throw new APIImportExportException(
                     "Error while retrieving Swagger definition for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
