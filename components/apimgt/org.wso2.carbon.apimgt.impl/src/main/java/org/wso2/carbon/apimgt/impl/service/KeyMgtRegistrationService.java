@@ -58,7 +58,7 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                 keyManagerConfigurationDTO.setEnabled(true);
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
-                keyManagerConfigurationDTO.setTenantDomain(organization);
+                keyManagerConfigurationDTO.setOrganization(organization);
                 keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
                 keyManagerConfigurationDTO.setTokenType(KeyManagerConfiguration.TokenType.ORIGINAL.toString());
                 if (apiManagerConfigurationService != null &&

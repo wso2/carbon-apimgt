@@ -5061,6 +5061,15 @@ public final class APIUtil {
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
+
+    public static String getInternalOrganizationDomain(String organization) throws APIManagementException {
+        return APIUtil.getTenantDomainFromTenantId(APIUtil.getInternalOrganizationId(organization));
+    }
+
+    public static boolean isInternalOrganization(String organization) throws UserStoreException {
+        return isTenantAvailable(organization);
+    }
+
     /**
      * Retrieves the role list of system
      *
@@ -11128,7 +11137,7 @@ public final class APIUtil {
                         Boolean.parseBoolean(enableTokenEncryption));
                 openIdConnectConfigurations = APIUtil.getOpenIdConnectConfigurations(
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
+                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
                                 .concat(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT));
 
                 if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
@@ -11214,7 +11223,7 @@ public final class APIUtil {
                     .containsKey(APIConstants.KeyManager.CERTIFICATE_VALUE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CERTIFICATE_VALUE,
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getTenantDomain()))
+                                .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
                                 .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
             }
             String defaultKeyManagerType =

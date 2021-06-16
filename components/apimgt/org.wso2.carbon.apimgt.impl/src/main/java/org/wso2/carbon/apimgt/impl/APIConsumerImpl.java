@@ -37,7 +37,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -1260,7 +1259,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String keyManagerTenant = tenantDomain;
             if (keyManagerConfiguration != null) {
                 keyManagerName = keyManagerConfiguration.getName();
-                keyManagerTenant = keyManagerConfiguration.getTenantDomain();
+                keyManagerTenant = keyManagerConfiguration.getOrganization();
             } else {
                 //keeping this just in case the name is sent by mistake.
                 keyManagerConfiguration =
@@ -4539,7 +4538,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String keyManagerTenant;
             if (keyManagerConfiguration != null) {
                 keyManagerName = keyManagerConfiguration.getName();
-                keyManagerTenant = keyManagerConfiguration.getTenantDomain();
+                keyManagerTenant = keyManagerConfiguration.getOrganization();
             } else {
                 //keeping this just in case the name is sent by mistake.
                 keyManagerConfiguration =
@@ -4550,7 +4549,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     keyManagerName = keyManagerID;
                     keyManagerID = keyManagerConfiguration.getUuid();
-                    keyManagerTenant = keyManagerConfiguration.getTenantDomain();
+                    keyManagerTenant = keyManagerConfiguration.getOrganization();
                 }
             }
 

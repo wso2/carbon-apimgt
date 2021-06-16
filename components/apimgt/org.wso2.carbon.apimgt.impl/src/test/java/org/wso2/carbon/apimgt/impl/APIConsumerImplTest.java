@@ -186,7 +186,7 @@ public class APIConsumerImplTest {
             return (String) args[0];
         });
 
-        PowerMockito.when(keyManagerConfigurationDTO.getTenantDomain()).thenReturn("carbon.super");
+        PowerMockito.when(keyManagerConfigurationDTO.getOrganization()).thenReturn("carbon.super");
     }
 
     @Test
