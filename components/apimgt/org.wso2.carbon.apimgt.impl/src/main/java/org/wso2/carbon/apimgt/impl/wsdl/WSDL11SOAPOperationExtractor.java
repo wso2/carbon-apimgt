@@ -659,10 +659,10 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         if (prevNode.hasChildNodes()) {
             NodeList childNodes = prevNode.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
-                if (childNodes.item(i).getAttributes() != null &&
-                        childNodes.item(i).getAttributes().getNamedItem(NAME_ATTRIBUTE) != null &&
-                        current.getAttributes().getNamedItem(NAME_ATTRIBUTE).getNodeValue().equals(childNodes.item(i)
-                                .getAttributes().getNamedItem(NAME_ATTRIBUTE).getNodeValue())) {
+                if (childNodes.item(i).getAttributes() != null
+                        && childNodes.item(i).getAttributes().getNamedItem(NAME_ATTRIBUTE) != null && current
+                        .getAttributes().getNamedItem(NAME_ATTRIBUTE).getNodeValue()
+                        .equals(childNodes.item(i).getAttributes().getNamedItem(NAME_ATTRIBUTE).getNodeValue())) {
                     return true;
                 }
             }
@@ -830,6 +830,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             return new DateTimeProperty();
         case "decimal":
             return new DecimalProperty();
+        case "anyType":
+            return new ObjectProperty();
         default:
             return new RefProperty();
         }
