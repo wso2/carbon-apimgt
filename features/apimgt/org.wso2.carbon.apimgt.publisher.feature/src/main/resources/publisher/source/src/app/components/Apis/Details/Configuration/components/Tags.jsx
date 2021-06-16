@@ -37,7 +37,36 @@ export default function Tags(props) {
     const [apiFromContext] = useAPI();
     const [isTagValid, setIsTagValid] = useState(true);
     const [invalidTags, setInvalidTags] = useState([]);
+    const [isTagWithinLimit, setIsTagWithinLimit] = useState(true);
     const regexPattern = /([~!@#;%^&*+=|\\<>"'/,])/;
+    const helperText = () => {
+        if (isTagValid && isTagWithinLimit) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Configuration.components.Tags.helper'
+                    defaultMessage='Press `Enter` after typing the tag name to add a new tag'
+                />
+            );
+        } else if (!isTagValid) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Configuration.components.Tags.error'
+                    defaultMessage={
+                        'The tag contains one or more illegal characters '
+                        + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
+                    }
+                />
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Configuration.components.Tags.limit.error'
+                    defaultMessage='The tag exceeds the maximum length of 30 characters'
+                />
+            );
+        }
+    };
+
     return (
         <React.Fragment style={{ marginTop: 10 }}>
             <ChipInput
@@ -51,30 +80,18 @@ export default function Tags(props) {
                 )}
                 disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                 value={api.tags}
-                error={!isTagValid}
-                helperText={isTagValid ? (
-                    <FormattedMessage
-                        id='Apis.Details.Configuration.components.Tags.helper'
-                        defaultMessage='Press `Enter` after typing the tag name to add a new tag'
-                    />
-                ) : (
-                    <FormattedMessage
-                        id='Apis.Details.Configuration.components.Tags.error'
-                        defaultMessage={
-                            'The tag contains one or more illegal characters '
-                            + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
-                        }
-                    />
-                )}
+                error={!(isTagValid && isTagWithinLimit)}
+                helperText={helperText()}
                 onAdd={(tag) => {
-                    if (regexPattern.test(tag)) {
-                        setIsTagValid(false);
+                    if (regexPattern.test(tag) || tag.length > 30) {
+                        if (regexPattern.test(tag)) {
+                            setIsTagValid(false);
+                        } else {
+                            setIsTagWithinLimit(false);
+                        }
                         setInvalidTags([...invalidTags, tag]);
                     }
-                    configDispatcher({
-                        action: 'tags',
-                        value: [...api.tags, tag.length > 30 ? tag.substring(0, 30) : tag],
-                    });
+                    configDispatcher({ action: 'tags', value: [...api.tags, tag] });
                 }}
                 chipRenderer={({ value }, key) => (
                     <Chip
@@ -87,12 +104,13 @@ export default function Tags(props) {
                                 setInvalidTags(currentInvalidTags);
                                 if (currentInvalidTags.length === 0) {
                                     setIsTagValid(true);
+                                    setIsTagWithinLimit(true);
                                 }
                             }
                             configDispatcher({ action: 'tags', value: api.tags.filter((oldTag) => oldTag !== value) });
                         }}
                         style={{
-                            backgroundColor: regexPattern.test(value) ? red[300] : null,
+                            backgroundColor: (regexPattern.test(value) || value.length > 30) ? red[300] : null,
                             margin: '0 8px 12px 0',
                             float: 'left',
                         }}

@@ -227,6 +227,7 @@
   "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": "",
   "Apis.Details.Configuration.components.Tags.error": "",
   "Apis.Details.Configuration.components.Tags.helper": "",
+  "Apis.Details.Configuration.components.Tags.limit.error": "",
   "Apis.Details.Configuration.components.Tags.title": "",
   "Apis.Details.Configuration.components.Transports.tooltip": "",
   "Apis.Details.Configuration.components.oauth.disabled": "",

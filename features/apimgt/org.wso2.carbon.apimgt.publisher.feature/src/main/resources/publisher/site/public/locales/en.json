@@ -227,6 +227,7 @@
   "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": "Public",
   "Apis.Details.Configuration.components.Tags.error": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = {} | < > , ' \" \\\\ / ) .",
   "Apis.Details.Configuration.components.Tags.helper": "Press `Enter` after typing the tag name to add a new tag",
+  "Apis.Details.Configuration.components.Tags.limit.error": "The tag exceeds the maximum length of 30 characters",
   "Apis.Details.Configuration.components.Tags.title": "Tags",
   "Apis.Details.Configuration.components.Transports.tooltip": "API will be exposed in selected transport(s) in the gateway(s) If Mutual SSL option is selected, a trusted client certificate should be presented to access the API",
   "Apis.Details.Configuration.components.oauth.disabled": "Key Manager configuration only valid when OAuth2 security is enabled.",
