@@ -439,6 +439,8 @@ const Alerts = (props) => {
                             alertName={openDialog.name}
                             api={API}
                             setIsWorkerNodeDown={setIsWorkerNodeDown}
+                            setSubscribedAlerts={setSubscribedAlerts}
+                            subscribedAlerts={subscribedAlerts}
                         />
                     </DialogContent>
                 )}

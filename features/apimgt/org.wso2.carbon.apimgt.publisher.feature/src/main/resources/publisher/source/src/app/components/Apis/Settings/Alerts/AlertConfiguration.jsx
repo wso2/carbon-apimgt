@@ -80,6 +80,8 @@ const AlertConfiguration = (props) => {
         classes,
         intl,
         setIsWorkerNodeDown,
+        setSubscribedAlerts,
+        subscribedAlerts,
     } = props;
     const [alertConfiguration, setAlertConfiguration] = useState([]);
     const [apis, setApis] = useState();
@@ -113,6 +115,11 @@ const AlertConfiguration = (props) => {
                 setIsWorkerNodeDown(true);
             });
     }, []);
+
+    useEffect(() => {
+        setSubscribedAlerts(subscribedAlerts.map((alert) => (alert.name === alertType
+            ? { ...alert, configuration: alertConfiguration } : alert)));
+    }, [alertConfiguration]);
 
     /**
      * Handles the API Name select event.
@@ -409,6 +416,9 @@ AlertConfiguration.propTypes = {
     alertName: PropTypes.string.isRequired,
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
+    setSubscribedAlerts: PropTypes.func.isRequired,
+    subscribedAlerts: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    setIsWorkerNodeDown: PropTypes.func.isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
