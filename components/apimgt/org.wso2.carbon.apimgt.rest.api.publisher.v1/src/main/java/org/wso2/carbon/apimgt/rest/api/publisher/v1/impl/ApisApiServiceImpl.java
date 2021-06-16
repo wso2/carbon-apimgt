@@ -2880,7 +2880,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response updateAPISwagger(String apiId, String organizationId, String ifMatch, Boolean includeScopes,
+    public Response updateAPISwagger(String apiId, String organizationId, String ifMatch, Boolean importScopes,
                                      String apiDefinition, String url, InputStream fileInputStream,
                                      Attachment fileDetail, MessageContext messageContext) {
         try {
@@ -2901,9 +2901,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
                 updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, validationResponse, false,
-                        organizationId, includeScopes);
+                        organizationId, importScopes);
             } else {
-                updatedSwagger = updateSwagger(apiId, apiDefinition, organizationId, includeScopes);
+                updatedSwagger = updateSwagger(apiId, apiDefinition, organizationId, importScopes);
             }
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
@@ -2935,14 +2935,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    private String updateSwagger(String apiId, String apiDefinition, String organizationId, Boolean includeScopes)
+    private String updateSwagger(String apiId, String apiDefinition, String organizationId, Boolean importScopes)
             throws APIManagementException, FaultGatewaysException {
         APIDefinitionValidationResponse response = OASParserUtil
                 .validateAPIDefinition(apiDefinition, true);
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
-        return PublisherCommonUtils.updateSwagger(apiId, response, false, organizationId, includeScopes);
+        return PublisherCommonUtils.updateSwagger(apiId, response, false, organizationId, importScopes);
     }
 
     /**
@@ -3198,7 +3198,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Import using OpenAPI definition response
      */
     @Override
-    public Response importOpenAPIDefinition(String organizationId, Boolean includeScopes, InputStream fileInputStream, Attachment fileDetail,
+    public Response importOpenAPIDefinition(String organizationId, Boolean importScopes, InputStream fileInputStream, Attachment fileDetail,
                                             String url, String additionalProperties, String inlineAPIDefinition,
                                             MessageContext messageContext) throws APIManagementException {
 
@@ -3219,7 +3219,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Import the API and Definition
         try {
             APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineAPIDefinition,
-                    apiDTOFromProperties, fileDetail, null, organizationId, includeScopes);
+                    apiDTOFromProperties, fileDetail, null, organizationId, importScopes);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -4757,7 +4757,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
                                            APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service
-            , String organizationId, Boolean includeScopes) {
+            , String organizationId, Boolean importScopes) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         boolean isServiceAPI = false;
@@ -4811,7 +4811,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
-            definitionToAdd = OASParserUtil.preProcess(definitionToAdd, includeScopes);
+            definitionToAdd = OASParserUtil.preProcess(definitionToAdd, importScopes);
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);

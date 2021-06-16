@@ -1041,7 +1041,7 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
-                                       String organizationId, Boolean includeScopes)
+                                       String organizationId, Boolean importScopes)
             throws APIManagementException, FaultGatewaysException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1051,7 +1051,7 @@ public class PublisherCommonUtils {
         if (isServiceAPI) {
             apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
         } else {
-            apiDefinition = OASParserUtil.preProcess(apiDefinition, includeScopes);
+            apiDefinition = OASParserUtil.preProcess(apiDefinition, importScopes);
         }
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition,
