@@ -41,6 +41,7 @@ import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import base64url from 'base64url';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
+import Configurations from 'Config';
 
 const alertPropertyMap = {
     AbnormalResponseTime: 'thresholdResponseTime',
@@ -95,8 +96,8 @@ const AlertConfiguration = (props) => {
 
     useEffect(() => {
         const alertConfigPromise = api.getAlertConfigurations(alertType);
-        const apisPromise = api.all();
-        const apiProductsPromise = api.allProducts();
+        const apisPromise = api.all({ limit: Configurations.app.alertMaxAPIGetLimit });
+        const apiProductsPromise = api.allProducts({ limit: Configurations.app.alertMaxAPIProductGetLimit });
         Promise.all([alertConfigPromise, apisPromise, apiProductsPromise])
             .then((response) => {
                 let apisList = response[1].body.list;
