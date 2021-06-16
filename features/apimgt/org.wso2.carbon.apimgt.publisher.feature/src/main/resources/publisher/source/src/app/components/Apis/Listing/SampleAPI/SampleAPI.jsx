@@ -93,8 +93,8 @@ class SampleAPI extends Component {
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
             sampleAPI.updateSwagger(getSampleSwagger(
-                settings.defaultSubscriptionPolicy
-                    ? settings.defaultSubscriptionPolicy
+                settings.defaultAdvancePolicy
+                    ? settings.defaultAdvancePolicy
                     : 'Unlimited',
             ));
             return sampleAPI;
