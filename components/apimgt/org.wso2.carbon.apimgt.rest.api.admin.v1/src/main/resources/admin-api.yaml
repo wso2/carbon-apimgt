@@ -1838,6 +1838,7 @@ paths:
             - apim:admin
             - apim:app_owner_change
             - apim:app_import_export
+            - apim:admin_application_view
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
