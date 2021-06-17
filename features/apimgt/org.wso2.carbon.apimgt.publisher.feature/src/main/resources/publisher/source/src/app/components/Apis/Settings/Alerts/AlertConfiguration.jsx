@@ -41,6 +41,7 @@ import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import base64url from 'base64url';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
+import Configurations from 'Config';
 
 const alertPropertyMap = {
     AbnormalResponseTime: 'thresholdResponseTime',
@@ -80,6 +81,8 @@ const AlertConfiguration = (props) => {
         classes,
         intl,
         setIsWorkerNodeDown,
+        setSubscribedAlerts,
+        subscribedAlerts,
     } = props;
     const [alertConfiguration, setAlertConfiguration] = useState([]);
     const [apis, setApis] = useState();
@@ -93,8 +96,8 @@ const AlertConfiguration = (props) => {
 
     useEffect(() => {
         const alertConfigPromise = api.getAlertConfigurations(alertType);
-        const apisPromise = api.all();
-        const apiProductsPromise = api.allProducts();
+        const apisPromise = api.all({ limit: Configurations.app.alertMaxAPIGetLimit });
+        const apiProductsPromise = api.allProducts({ limit: Configurations.app.alertMaxAPIProductGetLimit });
         Promise.all([alertConfigPromise, apisPromise, apiProductsPromise])
             .then((response) => {
                 let apisList = response[1].body.list;
@@ -113,6 +116,11 @@ const AlertConfiguration = (props) => {
                 setIsWorkerNodeDown(true);
             });
     }, []);
+
+    useEffect(() => {
+        setSubscribedAlerts(subscribedAlerts.map((alert) => (alert.name === alertType
+            ? { ...alert, configuration: alertConfiguration } : alert)));
+    }, [alertConfiguration]);
 
     /**
      * Handles the API Name select event.
@@ -409,6 +417,9 @@ AlertConfiguration.propTypes = {
     alertName: PropTypes.string.isRequired,
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
+    setSubscribedAlerts: PropTypes.func.isRequired,
+    subscribedAlerts: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    setIsWorkerNodeDown: PropTypes.func.isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 

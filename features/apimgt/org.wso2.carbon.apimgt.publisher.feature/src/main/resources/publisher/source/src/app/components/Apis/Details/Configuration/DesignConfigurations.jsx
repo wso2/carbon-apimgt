@@ -197,7 +197,7 @@ export default function DesignConfigurations() {
     const classes = useStyles();
 
     const invalidTagsExist = apiConfig.tags.find((tag) => {
-        return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag));
+        return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag)) || (tag.length > 30);
     });
 
     /**
