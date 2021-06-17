@@ -395,7 +395,10 @@ public class APIAdminImpl implements APIAdmin {
                 APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
-        maskValues(keyManagerConfigurationDTO);
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            maskValues(keyManagerConfigurationDTO);
+        }
         return keyManagerConfigurationDTO;
     }
 
