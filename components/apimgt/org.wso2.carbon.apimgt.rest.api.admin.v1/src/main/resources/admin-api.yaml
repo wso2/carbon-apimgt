@@ -95,7 +95,7 @@ securityDefinitions:
       apim:admin_alert_manage: Manage admin alerts
       apim:api_workflow_view: Retrive workflow requests
       apim:scope_manage: Manage scope
-      apim:admin_application_view
+      apim:admin_application_view: View Applications
 
 ######################################################
 # The "API Collection" resource APIs
