@@ -95,8 +95,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                     tokenRequest.setValidityPeriod(Long.parseLong((String) params.get(ApplicationConstants.VALIDITY_PERIOD)));
                 }
 
-                if (null != tokenRequest.getGrantType() && APIConstants.OAuthConstants.TOKEN_EXCHANGE
-                        .equals(tokenRequest.getGrantType())) {
+                if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(tokenRequest.getGrantType())) {
                     tokenRequest.addRequestParam(APIConstants.OAuthConstants.SUBJECT_TOKEN, params.get(APIConstants
                             .OAuthConstants.SUBJECT_TOKEN));
                 }
