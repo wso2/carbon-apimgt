@@ -105,7 +105,7 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
-    
+
 
     /**
      * Retrieves all the applications that the user has access to
@@ -425,11 +425,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
-            
+
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            
+
             if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
@@ -438,7 +438,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     applicationId);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
-                
+
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
@@ -854,8 +854,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId,
-            String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId, String keyType,
+                                                                          ApplicationTokenGenerateRequestDTO body,
+                                                                          String ifMatch,
+                                                                          MessageContext messageContext) {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -866,14 +868,18 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyType(applicationId, keyType);
                     if (appKey != null) {
                         String jsonInput = null;
+                        String grantType;
+                        if (ApplicationTokenGenerateRequestDTO.GrantTypeEnum.TOKEN_EXCHANGE
+                                .equals(body.getGrantType())) {
+                            grantType = APIConstants.OAuthConstants.TOKEN_EXCHANGE;
+                        } else {
+                            grantType = APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
+                        }
                         try {
                             // verify that the provided jsonInput is a valid json
                             if (body.getAdditionalProperties() != null
                                     && !body.getAdditionalProperties().toString().isEmpty()) {
-                                ObjectMapper mapper = new ObjectMapper();
-                                jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
-                                JSONParser parser = new JSONParser();
-                                JSONObject json = (JSONObject) parser.parse(jsonInput);
+                                jsonInput = validateAdditionalParameters(grantType, body);
                             }
                         } catch (JsonProcessingException | ParseException | ClassCastException e) {
                             RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
@@ -887,7 +893,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
                                 appKey.getConsumerKey(), appKey.getConsumerSecret(),
                                 body.getValidityPeriod().toString(), scopes, jsonInput,
-                                APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                                APIConstants.KeyManager.DEFAULT_KEY_MANAGER, grantType);
 
                         ApplicationTokenDTO appToken = new ApplicationTokenDTO();
                         appToken.setAccessToken(response.getAccessToken());
@@ -1171,14 +1177,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if (appKey != null) {
                     String jsonInput = null;
+                    String grantType;
+                    if (ApplicationTokenGenerateRequestDTO.GrantTypeEnum.TOKEN_EXCHANGE
+                            .equals(body.getGrantType())) {
+                        grantType = APIConstants.OAuthConstants.TOKEN_EXCHANGE;
+                    } else {
+                        grantType = APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
+                    }
                     try {
                         // verify that the provided jsonInput is a valid json
                         if (body.getAdditionalProperties() != null
                                 && !body.getAdditionalProperties().toString().isEmpty()) {
-                            ObjectMapper mapper = new ObjectMapper();
-                            jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
+                            jsonInput = validateAdditionalParameters(grantType, body);
                         }
-                    } catch (JsonProcessingException | ClassCastException e) {
+                    } catch (JsonProcessingException | ParseException | ClassCastException e) {
                         RestApiUtil.handleBadRequest("Error while generating " + appKey.getKeyType() + " token for " +
                                 "application " + applicationId + ". Invalid jsonInput '"
                                 + body.getAdditionalProperties() + "' provided.", log);
@@ -1191,7 +1203,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     try {
                         AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
                                 appKey.getConsumerKey(), appKey.getConsumerSecret(),
-                                body.getValidityPeriod().toString(), scopes, jsonInput, appKey.getKeyManager());
+                                body.getValidityPeriod().toString(), scopes, jsonInput, appKey.getKeyManager(),
+                                grantType);
                         ApplicationTokenDTO appToken = new ApplicationTokenDTO();
                         appToken.setAccessToken(response.getAccessToken());
                         if (response.getScopes() != null) {
@@ -1303,5 +1316,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 return Response.ok().entity(retrievedApplicationKey).build();
             }
         return null;
+    }
+
+    private String validateAdditionalParameters(String grantType, ApplicationTokenGenerateRequestDTO body) throws
+            ParseException, JsonProcessingException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(jsonInput);
+        if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(grantType) &&
+                json.get(APIConstants.OAuthConstants.SUBJECT_TOKEN) == null) {
+            RestApiUtil.handleBadRequest("Missing required parameter " + APIConstants.OAuthConstants.SUBJECT_TOKEN
+                    + " is not provided to generate token using Token Exchange grant", log);
+        }
+        return jsonInput;
     }
 }

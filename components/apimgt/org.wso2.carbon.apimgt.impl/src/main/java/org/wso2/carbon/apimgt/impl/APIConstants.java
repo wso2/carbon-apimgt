@@ -1337,6 +1337,10 @@ public final class APIConstants {
         public static final String OAUTH_CUSTOM_PARAMETERS = "customParameters";
         public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
         public static final String PASSWORD = "PASSWORD";
+        public static final String TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange";
+        public static final String SUBJECT_TOKEN = "subject_token";
+        public static final String SUBJECT_TOKEN_TYPE = "subject_token_type";
+        public static final String JWT_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
         public static final String AUTHORIZATION_HEADER = "Authorization";
         public static final String CONTENT_TYPE_HEADER = "Content-Type";
