@@ -177,13 +177,13 @@ class AuthManager {
         if (user) {
             const userScopes = user.scopes;
             const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-            let validity = []
             return validScope.then((scopes) => {
-                scopes.map(scope => {
-                    const isValid = userScopes.includes(scope);
-                    validity.push(isValid)
-                });
-                return validity.includes(false) ? false : true
+                for (const scope of scopes) {
+                    if (userScopes.includes(scope)) {
+                        return true;
+                    }
+                }
+                return false;
             });
         }
     }
