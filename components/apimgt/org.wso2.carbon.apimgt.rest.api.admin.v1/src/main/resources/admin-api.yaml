@@ -95,6 +95,7 @@ securityDefinitions:
       apim:admin_alert_manage: Manage admin alerts
       apim:api_workflow_view: Retrive workflow requests
       apim:scope_manage: Manage scope
+      apim:admin_application_view
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1911,6 +1912,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:admin_application_view
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
