@@ -109,7 +109,7 @@ export default function ListApplications() {
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
             id: 'AdminPages.ApplicationSettings.List.search.default',
-            defaultMessage: 'Search by Application Name or Owner',
+            defaultMessage: 'Search by Application Name',
         }),
         active: true,
         doBackendSearch: true,
