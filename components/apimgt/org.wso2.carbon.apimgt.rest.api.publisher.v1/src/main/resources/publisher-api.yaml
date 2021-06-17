@@ -584,6 +584,7 @@ paths:
         - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
+        - $ref: '#/components/parameters/importScopes'
       requestBody:
         content:
           multipart/form-data:
@@ -2174,6 +2175,7 @@ paths:
       summary: Import an OpenAPI Definition
       parameters:
         - $ref: '#/components/parameters/organizationId'
+        - $ref: '#/components/parameters/importScopes'
       description: |
         This operation can be used to create an API from an OpenAPI definition. Provide either `url` or `file`
         to specify the definition.
@@ -11325,6 +11327,14 @@ components:
       required: true
       schema:
         type: string
+    importScopes:
+      name: importScopes
+      in: query
+      description: |
+        Decides whether we need to include the scopes in the swagger deifnition.
+      schema:
+        type: boolean
+        default: true
 
     # API Revision Identifier
     # Specified as part of the path expression

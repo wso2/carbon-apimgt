@@ -1964,4 +1964,47 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    @Override
+    public String removeScopesFromDefinition(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        OAuthFlows oAuthFlows;
+        OAuthFlow oAuthFlow;
+        if (openAPI.getComponents() != null) {
+            Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+            if (securitySchemes != null) {
+                // Removing scopes from security schemes
+                for (String securityKey : securitySchemes.keySet()) {
+                    SecurityScheme securityScheme = securitySchemes.get(securityKey);
+                    if ((oAuthFlows = securityScheme.getFlows()) != null
+                            && (oAuthFlow = oAuthFlows.getImplicit()) != null) {
+                        if (oAuthFlow.getScopes() != null) {
+                            oAuthFlow.setScopes(new Scopes());
+                        }
+                    }
+                }
+
+                // Removing scopes from operations
+                Paths paths = openAPI.getPaths();
+                for (String pathKey : paths.keySet()) {
+                    PathItem pathItem = paths.get(pathKey);
+                    Map<PathItem.HttpMethod, Operation> operationsMap = pathItem.readOperationsMap();
+                    for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                        Operation operation = entry.getValue();
+                        List<SecurityRequirement> securityRequirements= operation.getSecurity();
+                        if (securityRequirements != null) {
+                            for (Map<String, List<String>> securityReq : securityRequirements) {
+                                for (String securityKey : securityReq.keySet()) {
+                                    if (securityReq.get(securityKey) != null) {
+                                        securityReq.put(securityKey, Collections.EMPTY_LIST);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return Json.pretty(openAPI);
+    }
+
 }

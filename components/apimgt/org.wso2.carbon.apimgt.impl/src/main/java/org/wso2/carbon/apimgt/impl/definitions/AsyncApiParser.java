@@ -1734,6 +1734,11 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
+    public String removeScopesFromDefinition(String swaggerContent) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException{
         return null;
     }
