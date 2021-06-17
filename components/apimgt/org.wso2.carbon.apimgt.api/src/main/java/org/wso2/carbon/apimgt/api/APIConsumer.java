@@ -776,13 +776,16 @@ public interface APIConsumer extends APIManager {
     /**
      * Revokes the oldAccessToken generating a new one.
      *
-     * @param oldAccessToken          Token to be revoked
-     * @param clientId                Consumer Key for the Application
-     * @param clientSecret            Consumer Secret for the Application
-     * @param validityTime            Desired Validity time for the token
-     * @param jsonInput               Additional parameters if Authorization server needs any.
-     * @return Details of the newly generated Access Token.
-     * @throws APIManagementException
+     * @param oldAccessToken  Token to be revoked
+     * @param clientId        Consumer Key for the Application
+     * @param clientSecret    Consumer Secret for the Application
+     * @param validityTime    Desired Validity time for the token
+     * @param requestedScopes Requested Scopes
+     * @param jsonInput       Additional parameters if Authorization server needs any.
+     * @param keyManagerName  Configured Key Manager
+     * @param grantType       Grant Type
+     * @return AccessTokenInfo
+     * @throws APIManagementException Error when renewing access token
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
                                      String[] requestedScopes, String jsonInput, String keyManagerName,

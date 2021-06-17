@@ -1232,12 +1232,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Re-generates the access token.
-     * @param oldAccessToken          Token to be revoked
-     * @param clientId                Consumer Key for the Application
-     * @param clientSecret            Consumer Secret for the Application
-     * @param validityTime            Desired Validity time for the token
-     * @param jsonInput               Additional parameters if Authorization server needs any.
-     * @return Renewed Access Token.
+     *
+     * @param oldAccessToken  Token to be revoked
+     * @param clientId        Consumer Key for the Application
+     * @param clientSecret    Consumer Secret for the Application
+     * @param validityTime    Desired Validity time for the token
+     * @param requestedScopes Requested Scopes
+     * @param jsonInput       Additional parameters if Authorization server needs any.
+     * @param keyManagerName  Configured Key Manager
+     * @param grantType       Grant Type
+     * @return
      * @throws APIManagementException
      */
     @Override
