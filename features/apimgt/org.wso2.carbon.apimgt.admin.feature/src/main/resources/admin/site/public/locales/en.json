@@ -66,7 +66,7 @@
   "AdminPages.ApplicationSettings.List.empty.content.application.settings": "If required, you can transfer the ownership of your application to another user in your organization. When transferring ownership, the new owner will have the required permission to delete or edit the respective application.{breakingLine}{breakingLine}Create an application with the Devportal to change ownership.",
   "AdminPages.ApplicationSettings.List.empty.title.change.application.ownership": "Application Ownership Change",
   "AdminPages.ApplicationSettings.List.help.link.one": "Changing the Owner of an Application",
-  "AdminPages.ApplicationSettings.List.search.default": "Search by Application Name or Owner",
+  "AdminPages.ApplicationSettings.List.search.default": "Search by Application Name",
   "AdminPages.ApplicationSettings.List.title.application.settings": "Application Settings",
   "AdminPages.ApplicationSettings.table.header.application.name": "Application Name",
   "AdminPages.ApplicationSettings.table.header.application.owner": "Owner",
