@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.Response;
 
@@ -238,15 +239,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String keyManagerType = keyManagerConfigurationDTO.getType();
         if (StringUtils.equals(tokenType.toLowerCase(),
                 KeyManagerConfiguration.TokenType.EXCHANGED.toString().toLowerCase())) {
-            boolean validIdp = Boolean.FALSE;
-            for (KeyManagerConfiguration.IdpTypeOfExchangedTokens idpType :
-                    KeyManagerConfiguration.IdpTypeOfExchangedTokens.values()) {
-                if (idpType.name().equals(keyManagerType)) {
-                    validIdp = Boolean.TRUE;
-                    break;
-                }
-            }
-            if (!validIdp) {
+            Stream<KeyManagerConfiguration.IdpTypeOfExchangedTokens> streamIdpType = Stream
+                    .of(KeyManagerConfiguration.IdpTypeOfExchangedTokens.values());
+            boolean isAllowedIdP = streamIdpType
+                    .anyMatch(idpType -> StringUtils.equalsIgnoreCase(idpType.toString(), keyManagerType));
+            if (!isAllowedIdP) {
                 String errMsg = "Identity Provider type: " + keyManagerType + " not allowed for the token type "
                         + KeyManagerConfiguration.TokenType.EXCHANGED + ". Should be a value from " + Arrays
                         .asList(KeyManagerConfiguration.IdpTypeOfExchangedTokens.values());
