@@ -9,7 +9,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.APIArtifactDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.ErrorDTO;
 
 import java.util.List;
