@@ -3302,9 +3302,9 @@ public class SQLConstants {
         public static final String ADD_SUBSCRIPTION =
                 "INSERT INTO GB_WEBHOOKS_SUBSCRIPTION (WH_SUBSCRIBER_NAME, WH_CALLBACK_URL, WH_TOPIC," +
                         "EXPIRY_AT ) VALUES (?,?,?,?)";
-        public static final String GET_SUBSCRIPTIONS_FOR_TOPIC =
+        public static final String GET_SUBSCRIPTIONS_BY_NAME =
                 "SELECT WH_CALLBACK_URL, WH_SUBSCRIBER_NAME " +
-                        "FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_TOPIC= ? ";
+                        "FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_SUBSCRIBER_NAME= ? ";
         public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE GB_WEBHOOKS_SUBSCRIPTION SET " +
                 "WH_CALLBACK_URL = ?, WH_TOPIC = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
 

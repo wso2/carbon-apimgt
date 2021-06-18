@@ -48,6 +48,7 @@ public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGa
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         Environment env = new Environment();
         env.setName(webhookSubscriptionDTO.getSubscriberName());
+        env.setExternalGWEnv(true);
 
         //creating a VHost for the new env
         VHost vHost = new VHost();
@@ -60,6 +61,7 @@ public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGa
         /* The following section is for the testing the
              webhook because of the version incompatibility.
          */
+        //why not API
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
         gatewayAPIDTO.setName("test1");
         gatewayAPIDTO.setVersion("1.0.0");
@@ -74,7 +76,5 @@ public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGa
             log.debug("Unexpected Error:" + e);
         }
 
-
     }
 }
-
