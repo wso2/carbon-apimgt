@@ -323,7 +323,7 @@ paths:
             OK.
             End-points successfully retrieved from the storage for the API.
           schema:
-            $ref: '#/definitions/DeployResponse'
+            $ref: '#/definitions/Endpoints'
         400:
           $ref: '#/responses/BadRequest'
         404:
