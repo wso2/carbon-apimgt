@@ -21,24 +21,22 @@ package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
-import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.LocalEntryApiService;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.LocalEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-
-import javax.ws.rs.core.Response;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 public class LocalEntryApiServiceImpl implements LocalEntryApiService {
 
