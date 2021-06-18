@@ -103,16 +103,16 @@ paths:
   /undeploy-api:
 
     #-----------------------------------------------------
-    # Undeploy the API in the Gateway
+    # Undeploy the API from the Gateway
     #-----------------------------------------------------
     post:
       x-code-samples:
         - lang: Curl
           source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
-      summary: Uneploy the API in the gateway
+      summary: Uneploy the API from the gateway
       description: |
-        This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will
+        This operation is used to undeploy an API from the gateway. If the Tenant domain is not provided carbon.super will
         be picked as the Tenant domain.
       parameters:
         - name: apiName
@@ -149,16 +149,16 @@ paths:
   /api-artifact:
 
     #-----------------------------------------------------
-    # Get API Artifacts
+    # Get API synapse definition artifacts
     #-----------------------------------------------------
     get:
       x-code-samples:
         - lang: Curl
           source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
-      summary: Get API artifact from the storage
+      summary: Get API synapse definition artifact from the storage
       description: |
-        This operation is used to get the API definition from the storage. If the Tenant domain
+        This operation is used to get the API synapse definition from the storage. If the Tenant domain
         is not provided carbon.super will be picked as the Tenant domain.
       parameters:
         - name: apiName
@@ -195,7 +195,7 @@ paths:
   /local-entry:
 
     #-----------------------------------------------------
-    # Get local entry for the API
+    # Get local entries for the API
     #-----------------------------------------------------
     get:
       x-code-samples:
@@ -240,7 +240,7 @@ paths:
 
   /sequence:
     #-----------------------------------------------------
-    # Get sequence for the API
+    # Get sequences of the API
     #-----------------------------------------------------
     get:
       x-code-samples:
@@ -286,7 +286,7 @@ paths:
   /end-points:
 
     #-----------------------------------------------------
-    # Get API Artifact
+    # Get end-points of the API
     #-----------------------------------------------------
     get:
       x-code-samples:
@@ -365,7 +365,7 @@ responses:
 ######################################################
 definitions:
   #-----------------------------------------------------
-  # The deploy response resource
+  # The deploy response
   #-----------------------------------------------------
   DeployResponse:
     title: Deploy API Response
@@ -378,26 +378,27 @@ definitions:
         type: string
         enum:
           - DEPLOYED
+          - UNDEPLOYED
           - ERROR
         example: DEPLOYED
-      jsonPayload:
+      message:
         description: |
           Attributes that returned after the API deployment
         type: string
 
   #-----------------------------------------------------
-  # The API definition response resource
+  # The API synapse definition response
   #-----------------------------------------------------
   API:
     title: API Definition Response
     properties:
-      api-defition:
+      api:
         description: |
-          The velocity definition of the API
+          The synapse definition of the API
         type: string
 
   #-----------------------------------------------------
-  # The Endpoint response resource
+  # The Endpoint response
   #-----------------------------------------------------
   Endpoints:
     title: Endpoints Response
@@ -408,7 +409,7 @@ definitions:
         type: array
         items:
           type: string
-      UnDeployedEndpoints:
+      notdeployedEndpoints:
         description: |
           The end points which has not been deployed in the gateway
         type: array
@@ -416,7 +417,7 @@ definitions:
           type: string
 
   #-----------------------------------------------------
-  # The Sequence response resource
+  # The Sequence response
   #-----------------------------------------------------
   Sequences:
     title: Sequences Response
@@ -428,7 +429,7 @@ definitions:
         items:
           type: string
           example: "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
-      UnDeployedSequences:
+      notdeployedSequences:
         description: |
           The sequences which has not been deployed in the gateway
         type: array
@@ -437,7 +438,7 @@ definitions:
           example: "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
 
   #-----------------------------------------------------
-  # The Local Entry response resource
+  # The Local Entry response
   #-----------------------------------------------------
   LocalEntry:
     title: LocalEntry Response
@@ -449,7 +450,7 @@ definitions:
         items:
           type : string
           example : "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
-      UnDeployedLocalEntries:
+      notdeployedLocalEntries:
         description: |
           The local entries which has not been deployed in the gateway
         type: array
@@ -458,7 +459,7 @@ definitions:
           example: "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
 
   #-----------------------------------------------------
-  # The Error resource
+  # The Error response
   #-----------------------------------------------------
   Error:
     title: Error object returned with 4XX HTTP status
@@ -490,7 +491,7 @@ definitions:
           $ref: '#/definitions/ErrorListItem'
 
   #-----------------------------------------------------
-  # The Error List Item resource
+  # The Error List Item response
   #-----------------------------------------------------
   ErrorListItem:
     title: Description of individual errors that may have occurred during a request.

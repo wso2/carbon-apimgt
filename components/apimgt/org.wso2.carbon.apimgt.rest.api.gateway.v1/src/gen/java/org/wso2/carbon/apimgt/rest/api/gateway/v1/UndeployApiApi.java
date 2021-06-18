@@ -40,7 +40,7 @@ UndeployApiApiService delegate = new UndeployApiApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Uneploy the API in the gateway", notes = "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, tags={ "Undeploy API" })
+    @ApiOperation(value = "Uneploy the API from the gateway", notes = "This operation is used to undeploy an API from the gateway. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = DeployResponseDTO.class, tags={ "Undeploy API" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API successfully undeployed from the Gateway. ", response = DeployResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

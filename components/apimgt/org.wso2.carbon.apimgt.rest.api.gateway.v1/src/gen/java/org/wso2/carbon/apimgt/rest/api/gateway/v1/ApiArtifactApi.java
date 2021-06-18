@@ -40,7 +40,7 @@ ApiArtifactApiService delegate = new ApiArtifactApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get API artifact from the storage", notes = "This operation is used to get the API definition from the storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = APIDTO.class, tags={ "Get API Artifacts" })
+    @ApiOperation(value = "Get API synapse definition artifact from the storage", notes = "This operation is used to get the API synapse definition from the storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = APIDTO.class, tags={ "Get API Artifacts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API artifact successfully retrieved from the storage. ", response = APIDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

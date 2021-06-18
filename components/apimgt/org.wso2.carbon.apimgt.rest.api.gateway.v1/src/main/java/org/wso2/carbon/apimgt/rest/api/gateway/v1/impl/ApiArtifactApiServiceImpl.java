@@ -18,23 +18,17 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
-import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
-import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
-import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.endpoint.EndpointAdminException;
 
 import java.util.Map;
 
@@ -54,7 +48,6 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         GatewayAPIDTO gatewayAPIDTO = null;
-        JSONObject responseObj = new JSONObject();
         try {
             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
                     tenantDomain);
@@ -79,9 +72,11 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
         if (gatewayAPIDTO != null) {
             String apiVelocityDefinition = gatewayAPIDTO.getApiDefinition();
             if (apiVelocityDefinition != null) {
-                return Response.ok().entity(apiVelocityDefinition).build();
+                APIDTO apidto = new APIDTO();
+                apidto.api(apiVelocityDefinition);
+                return Response.ok().entity(apidto).build();
             }
         }
-        return Response.serverError().entity("Unexpected error occurred").build();
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 }

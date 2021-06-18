@@ -31,10 +31,13 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.LocalEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class LocalEntryApiServiceImpl implements LocalEntryApiService {
@@ -49,7 +52,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         GatewayAPIDTO gatewayAPIDTO = null;
-        JSONObject responseObj = new JSONObject();
+        LocalEntryDTO localEntryDTO = new LocalEntryDTO();
         try {
             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
                     tenantDomain);
@@ -72,31 +75,32 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
 
         if (gatewayAPIDTO != null) {
             try {
-                JSONArray localEntryArray = new JSONArray();
-                JSONArray UnDeploeydLocalEntryArray = new JSONArray();
+                List<String> localEntryArray = new ArrayList();
+                List<String> notDeploeydLocalEntryArray = new ArrayList();
                 if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
                     LocalEntryServiceProxy localEntryServiceProxy = new
                             LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                         if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                            localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
+                            localEntryArray.add(localEntryServiceProxy.getEntry(localEntry.getName()).toString());
                         } else {
                             log.error(localEntry.getName() + " was not deployed in the gateway");
-                            UnDeploeydLocalEntryArray.put(localEntry.getContent());
+                            notDeploeydLocalEntryArray.add(localEntry.getContent());
                         }
                     }
                 }
-                responseObj.put("Deployed Local Entries", localEntryArray);
-                responseObj.put("Undeployed Local Entries", UnDeploeydLocalEntryArray);
+
+                localEntryDTO.deployedLocalEntries(localEntryArray);
+                localEntryDTO.notdeployedLocalEntries(notDeploeydLocalEntryArray);
+                return Response.ok().entity(localEntryDTO).build();
             } catch (AxisFault e) {
                 String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
                 log.error(errorMessage, e);
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.ok().entity(responseStringObj).build();
         } else {
-            return Response.serverError().entity("Unexpected error occurred").build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+        return null;
     }
 }

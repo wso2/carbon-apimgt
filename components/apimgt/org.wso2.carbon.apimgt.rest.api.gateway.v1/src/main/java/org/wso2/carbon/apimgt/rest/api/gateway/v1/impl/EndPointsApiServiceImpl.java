@@ -30,11 +30,14 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.EndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 
 import javax.ws.rs.core.Response;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class EndPointsApiServiceImpl implements EndPointsApiService {
@@ -49,7 +52,7 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         GatewayAPIDTO gatewayAPIDTO = null;
-        JSONObject responseObj = new JSONObject();
+        EndpointsDTO endpointsDTO = new EndpointsDTO();
         try {
             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
                     tenantDomain);
@@ -72,31 +75,32 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
 
         if (gatewayAPIDTO != null) {
             try {
-                JSONArray endPointArray = new JSONArray();
-                JSONArray unDeployedEndPointArray = new JSONArray();
+                List<String> endPointArray = new ArrayList<>();
+                List<String> unDeployedEndPointArray = new ArrayList<>();
                 if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
                     EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
                             (gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
                         if (endpointAdminServiceProxy.isEndpointExist(gatewayEndpoint.getName())) {
-                            endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
+                            endPointArray.add(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()).toString());
                         } else {
                             log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
-                            unDeployedEndPointArray.put(gatewayEndpoint.getContent());
+                            unDeployedEndPointArray.add(gatewayEndpoint.getContent());
                         }
                     }
                 }
-                responseObj.put("Deployed Endpoints", endPointArray);
-                responseObj.put("UnDeployed Endpoints", unDeployedEndPointArray);
+
+                endpointsDTO.deployedEndpoints(endPointArray);
+                endpointsDTO.notdeployedEndpoints(unDeployedEndPointArray);
+                return Response.ok().entity(endpointsDTO).build();
             } catch (EndpointAdminException e) {
                 String errorMessage = "Error in fetching deployed Endpoints from Synapse Configuration";
                 log.error(errorMessage, e);
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.ok().entity(responseStringObj).build();
         } else {
-            return Response.serverError().entity("Unexpected error occurred").build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+        return null;
     }
 }
