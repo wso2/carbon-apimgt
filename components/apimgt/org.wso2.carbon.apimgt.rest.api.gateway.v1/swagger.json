@@ -388,7 +388,7 @@
           "200" : {
             "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
             "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
+              "$ref" : "#/definitions/Endpoints"
             }
           },
           "400" : {
