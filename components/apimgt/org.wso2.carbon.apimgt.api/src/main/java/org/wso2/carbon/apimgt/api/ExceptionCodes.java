@@ -197,6 +197,7 @@ public enum ExceptionCodes implements ErrorHandler {
             + "identity provider details"),
     IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
             + "identity provider"),
+    INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
 
 
     // Labels related codes
