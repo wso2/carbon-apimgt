@@ -44,28 +44,28 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param apiUUID Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(String identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String apiUUID, Comment comment, String user) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
      *
-     * @param apiTypeWrapper Api Type Wrapper
+     * @param apiUUID Api uuid
      * @param commentId      Comment ID
      * @param replyLimit
      * @param replyOffset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(String apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
+    Comment getComment(String apiUUID, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
 
     /**
-     * @param apiUUID  Api type wrapper
+     * @param apiUUID  Api uuid
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
@@ -75,7 +75,7 @@ public interface APIProvider extends APIManager {
     CommentList getComments(String apiUUID, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
 
     /**
-     * @param apiUUID Api Type Wrapper
+     * @param apiUUID Api uuid
      * @param commentId      comment ID
      * @param comment        Comment object
      * @return Comments
@@ -86,7 +86,7 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to delete a comment.
      *
-     * @param apiUUID API Type Wrapper
+     * @param apiUUID API uuid
      * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
