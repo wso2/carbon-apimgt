@@ -52,9 +52,10 @@ public class SubscriptionMappingUtil {
     /** Converts a SubscribedAPI object into SubscriptionDTO
      *
      * @param subscription SubscribedAPI object
+     * @param organization Identifier of the organization
      * @return SubscriptionDTO corresponds to SubscribedAPI object
      */
-    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String tenantDomain)
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String organization)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -67,7 +68,7 @@ public class SubscriptionMappingUtil {
         if (apiId != null) {
             API api = null;
             try {
-                api = apiConsumer.getLightweightAPI(apiId, tenantDomain);
+                api = apiConsumer.getLightweightAPI(apiId, organization);
                 subscriptionDTO.setApiId(api.getUUID());
                 apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
                 subscriptionDTO.setApiInfo(apiInfo);
@@ -147,10 +148,11 @@ public class SubscriptionMappingUtil {
      * @param subscriptions a list of SubscribedAPI objects
      * @param limit max number of objects returned
      * @param offset starting index
+     * @param organization identifier of the organization
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
-    public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, String tenantDomain,
-            Integer limit, Integer offset) throws APIManagementException {
+    public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
+                                                                Integer offset, String organization) throws APIManagementException {
 
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
@@ -167,7 +169,7 @@ public class SubscriptionMappingUtil {
         for (int i = start; i <= end; i++) {
             try {
                 SubscribedAPI subscription = subscriptions.get(i);
-                subscriptionDTOs.add(fromSubscriptionToDTO(subscription, tenantDomain));
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription, organization));
             } catch (APIManagementException e) {
                 log.error("Error while obtaining api metadata", e);
             }

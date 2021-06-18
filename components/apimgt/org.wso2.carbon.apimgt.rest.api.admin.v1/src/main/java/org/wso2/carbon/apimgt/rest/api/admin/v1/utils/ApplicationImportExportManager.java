@@ -136,11 +136,14 @@ public class ApplicationImportExportManager {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, apiKey.getConsumerSecret());
             }
         }
+        if (!StringUtils.isEmpty(apiKey.getCallbackUrl())) {
+            jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, apiKey.getCallbackUrl());
+        }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(
-                username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
-                accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
-                jsonParams,apiKey.getKeyManager(), null);
+                username, application, apiKey.getType(), apiKey.getCallbackUrl(),
+                accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes,
+                jsonParams,apiKey.getKeyManager(), null, true);
     }
 }

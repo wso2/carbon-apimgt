@@ -16,15 +16,33 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+
 public class PersistenceManager {
+    private static final Log log = LogFactory.getLog(PersistenceManager.class);
     
     private static APIPersistence persistence = null;
 
-    public static APIPersistence getPersistenceInstance(Properties properties) {
+    public static APIPersistence getPersistenceInstance(Map<String, String> configs, Properties properties) {
+        if (log.isDebugEnabled()) {
+            log.debug("Persistence configs " + Arrays.asList(configs));
+        }
         if (persistence == null) {
-            persistence = new RegistryPersistenceImpl(properties);
+            ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
+            serviceReferenceHolder.setPersistenceConfigs(configs);
+            if (serviceReferenceHolder.getApiPersistence() != null) {
+                persistence = serviceReferenceHolder.getApiPersistence();
+            } else {
+                if (persistence == null) {
+                    persistence = new RegistryPersistenceImpl(properties);
+                }
+            }
         }
         return persistence;
     }

@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 
@@ -137,7 +136,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //Here the default flow is set expecting an ID as the keymanager as this flow only involves new applications
             String keyManagerId = workflowDTO.getKeyManager();
             KeyManagerConfigurationDTO km = dao.getKeyManagerConfigurationByUUID(keyManagerId);
-            String tenantDomain = km.getTenantDomain();
+            String tenantDomain = km.getOrganization();
             String keyManagerName = km.getName();
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
             if (keyManager == null){

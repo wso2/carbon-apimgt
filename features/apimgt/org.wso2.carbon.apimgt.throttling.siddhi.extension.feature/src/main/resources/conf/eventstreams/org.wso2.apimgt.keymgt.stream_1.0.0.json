@@ -29,7 +29,11 @@
       "type": "STRING"
     },
     {
-      "name": "tenantDomain",
+      "name": "organization",
+      "type": "STRING"
+    },
+    {
+      "name": "tokenType",
       "type": "STRING"
     }
   ]

@@ -349,8 +349,7 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
-    public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_RELATED_CUSTOM_PROPERTIES_SURFIX = "__display";
@@ -808,6 +807,7 @@ public final class APIConstants {
             "EnableCrossTenantSubscription";
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";
+    public static final String API_STORE_CREATE_DEFAULT_APPLICATION = API_STORE + "CreateDefaultApplication";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -861,6 +861,8 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
     public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
     public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
+    
+    public static final String ORG_RESOLVER = "OrganizationResolver";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
     public static final String OBSERVER = STATUS_OBSERVERS + "Observer";
@@ -1337,6 +1339,10 @@ public final class APIConstants {
         public static final String OAUTH_CUSTOM_PARAMETERS = "customParameters";
         public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
         public static final String PASSWORD = "PASSWORD";
+        public static final String TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange";
+        public static final String SUBJECT_TOKEN = "subject_token";
+        public static final String SUBJECT_TOKEN_TYPE = "subject_token_type";
+        public static final String JWT_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
         public static final String AUTHORIZATION_HEADER = "Authorization";
         public static final String CONTENT_TYPE_HEADER = "Content-Type";
@@ -1405,6 +1411,7 @@ public final class APIConstants {
     public static final String PROXY_PORT = "ProxyConfig.Port";
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
+    public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -2049,7 +2056,7 @@ public final class APIConstants {
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
-    public static final String[] WS_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
@@ -2057,6 +2064,7 @@ public final class APIConstants {
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
+    public static final String JSON_CALLBACK_URL = "callbackUrl";
 
     /**
      * Publisher Access Control related registry properties and values.
@@ -2468,11 +2476,12 @@ public final class APIConstants {
             public static final String NAME = "name";
             public static final String ENABLED = "enabled";
             public static final String VALUE = "value";
-            public static final String TENANT_DOMAIN = "tenantDomain";
+            public static final String ORGANIZATION = "organization";
             public static final String ACTION_ADD = "add";
             public static final String ACTION_UPDATE = "update";
             public static final String ACTION_DELETE = "delete";
             public static final String TYPE = "type";
+            public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
     }
@@ -2737,4 +2746,8 @@ public final class APIConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
+
+    public static final String  PROPERTY_QUERY_KEY = "query";
+    public static final String  PROPERTY_HEADERS_KEY = "headers";
+    public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 }

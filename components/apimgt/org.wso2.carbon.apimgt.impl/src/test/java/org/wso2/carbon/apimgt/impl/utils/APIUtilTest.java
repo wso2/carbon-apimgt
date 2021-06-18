@@ -1363,7 +1363,7 @@ public class APIUtilTest {
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class))).thenReturn(123);
+        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(String.class))).thenReturn(123);
         Mockito.when(artifact.getId()).thenReturn("");
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
         Mockito.when(MultitenantUtils.getTenantDomain(provider)).
@@ -1389,7 +1389,7 @@ public class APIUtilTest {
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
 
         HashMap<String, String> urlPatterns = getURLTemplatePattern(expectedAPI.getUriTemplates());
-        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(APIIdentifier.class))).thenReturn
+        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(String.class))).thenReturn
                 (urlPatterns);
 
         CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
@@ -1440,7 +1440,7 @@ public class APIUtilTest {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
 
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class) )).thenReturn(123);
+        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(String.class) )).thenReturn(123);
         Mockito.when(artifact.getId()).thenReturn("");
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
@@ -1466,7 +1466,7 @@ public class APIUtilTest {
         Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
 
         HashMap<String, String> urlPatterns = getURLTemplatePattern(expectedAPI.getUriTemplates());
-        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(APIIdentifier.class))).thenReturn
+        Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(String.class))).thenReturn
                 (urlPatterns);
 
         CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
@@ -1546,7 +1546,7 @@ public class APIUtilTest {
             PowerMockito.mockStatic(ServiceReferenceHolder.class);
 
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class))).thenReturn(123);
+            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(String.class))).thenReturn(123);
             Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
                     String[]{"Unlimited"});
             Mockito.when(artifact.getId()).thenReturn("");
@@ -1648,7 +1648,7 @@ public class APIUtilTest {
             PowerMockito.mockStatic(MultitenantUtils.class);
             PowerMockito.mockStatic(ServiceReferenceHolder.class);
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class))).thenReturn(123);
+            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(String.class))).thenReturn(123);
             Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
                     String[]{"Unlimited"});
             Mockito.when(artifact.getId()).thenReturn("");
@@ -2248,6 +2248,7 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantID).when(APIUtil.class, "getInternalOrganizationId", tenantDomain);
         PowerMockito.doReturn(tierMap)
                 .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_SUB, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
@@ -2271,6 +2272,7 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantID).when(APIUtil.class, "getInternalOrganizationId", tenantDomain);
         PowerMockito.doReturn(tierMap)
                 .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_API, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
@@ -2295,6 +2297,7 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tenantID).when(APIUtil.class, "getInternalOrganizationId", tenantDomain);
         PowerMockito.doReturn(tierMap)
                 .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_APP, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
@@ -2318,7 +2321,7 @@ public class APIUtilTest {
         availableApiCategories.add(apiCategory2);
         availableApiCategories.add(apiCategory3);
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfTenant", tenantDomain);
+        PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfOrganization", tenantDomain);
 
         Assert.assertTrue("Failed to Validate API categories",
                 APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
@@ -2340,7 +2343,7 @@ public class APIUtilTest {
         availableApiCategories.add(apiCategory1);
         availableApiCategories.add(apiCategory2);
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getAllAPICategoriesOfTenant(tenantDomain)).thenReturn(availableApiCategories);
+        Mockito.when(APIUtil.getAllAPICategoriesOfOrganization(tenantDomain)).thenReturn(availableApiCategories);
         Mockito.when(APIUtil.validateAPICategories(inputApiCategories, tenantDomain)).thenCallRealMethod();
 
         Assert.assertFalse("Invalid API categories are validate!!!",
