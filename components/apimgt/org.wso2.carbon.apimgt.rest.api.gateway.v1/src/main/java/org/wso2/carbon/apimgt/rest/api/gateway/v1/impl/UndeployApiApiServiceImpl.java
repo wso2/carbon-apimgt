@@ -20,16 +20,17 @@ package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
-import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.UndeployApiApiService;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.DeployResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import javax.ws.rs.core.Response;
-
 import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 public class UndeployApiApiServiceImpl implements UndeployApiApiService {
 
@@ -44,6 +45,7 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         boolean status = false;
+        DeployResponseDTO deployResponseDTO = new DeployResponseDTO();
         try {
             Map<String, String> apiAttributes =
                     inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
@@ -65,7 +67,9 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
             if (debugEnabled) {
                 log.debug("Successfully undeployed " + apiName + " in gateway");
             }
-            return Response.ok().entity(apiName + " Undeployed from the gateway").build();
+            deployResponseDTO.deployStatus(DeployResponseDTO.DeployStatusEnum.UNDEPLOYED);
+            deployResponseDTO.setMessage(apiName + " undeployed from the gateway");
+            return Response.ok().entity(deployResponseDTO).build();
         } else {
             return Response.serverError().entity("Unexpected error occurred").build();
         }

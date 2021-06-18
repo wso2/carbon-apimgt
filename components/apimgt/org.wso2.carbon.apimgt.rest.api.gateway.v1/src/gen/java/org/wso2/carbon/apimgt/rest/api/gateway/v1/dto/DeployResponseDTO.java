@@ -20,7 +20,7 @@ public class DeployResponseDTO   {
 @XmlEnum(String.class)
 public enum DeployStatusEnum {
 
-    @XmlEnumValue("DEPLOYED") DEPLOYED(String.valueOf("DEPLOYED")), @XmlEnumValue("ERROR") ERROR(String.valueOf("ERROR"));
+    @XmlEnumValue("DEPLOYED") DEPLOYED(String.valueOf("DEPLOYED")), @XmlEnumValue("UNDEPLOYED") UNDEPLOYED(String.valueOf("UNDEPLOYED")), @XmlEnumValue("ERROR") ERROR(String.valueOf("ERROR"));
 
 
     private String value;
@@ -49,7 +49,7 @@ public enum DeployStatusEnum {
 }
 
     private DeployStatusEnum deployStatus = null;
-    private String jsonPayload = null;
+    private String message = null;
 
   /**
    * This attribute declares whether deployment task is successful or failed. 
@@ -73,19 +73,19 @@ public enum DeployStatusEnum {
   /**
    * Attributes that returned after the API deployment 
    **/
-  public DeployResponseDTO jsonPayload(String jsonPayload) {
-    this.jsonPayload = jsonPayload;
+  public DeployResponseDTO message(String message) {
+    this.message = message;
     return this;
   }
 
   
   @ApiModelProperty(value = "Attributes that returned after the API deployment ")
-  @JsonProperty("jsonPayload")
-  public String getJsonPayload() {
-    return jsonPayload;
+  @JsonProperty("message")
+  public String getMessage() {
+    return message;
   }
-  public void setJsonPayload(String jsonPayload) {
-    this.jsonPayload = jsonPayload;
+  public void setMessage(String message) {
+    this.message = message;
   }
 
 
@@ -99,12 +99,12 @@ public enum DeployStatusEnum {
     }
     DeployResponseDTO deployResponse = (DeployResponseDTO) o;
     return Objects.equals(deployStatus, deployResponse.deployStatus) &&
-        Objects.equals(jsonPayload, deployResponse.jsonPayload);
+        Objects.equals(message, deployResponse.message);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployStatus, jsonPayload);
+    return Objects.hash(deployStatus, message);
   }
 
   @Override
@@ -113,7 +113,7 @@ public enum DeployStatusEnum {
     sb.append("class DeployResponseDTO {\n");
     
     sb.append("    deployStatus: ").append(toIndentedString(deployStatus)).append("\n");
-    sb.append("    jsonPayload: ").append(toIndentedString(jsonPayload)).append("\n");
+    sb.append("    message: ").append(toIndentedString(message)).append("\n");
     sb.append("}");
     return sb.toString();
   }

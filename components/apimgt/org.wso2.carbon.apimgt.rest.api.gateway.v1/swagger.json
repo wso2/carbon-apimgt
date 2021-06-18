@@ -91,8 +91,8 @@
     "/undeploy-api" : {
       "post" : {
         "tags" : [ "Undeploy API" ],
-        "summary" : "Uneploy the API in the gateway",
-        "description" : "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
+        "summary" : "Uneploy the API from the gateway",
+        "description" : "This operation is used to undeploy an API from the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -159,8 +159,8 @@
     "/api-artifact" : {
       "get" : {
         "tags" : [ "Get API Artifacts" ],
-        "summary" : "Get API artifact from the storage",
-        "description" : "This operation is used to get the API definition from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
+        "summary" : "Get API synapse definition artifact from the storage",
+        "description" : "This operation is used to get the API synapse definition from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -437,9 +437,9 @@
           "type" : "string",
           "example" : "DEPLOYED",
           "description" : "This attribute declares whether deployment task is successful or failed.\n",
-          "enum" : [ "DEPLOYED", "ERROR" ]
+          "enum" : [ "DEPLOYED", "UNDEPLOYED", "ERROR" ]
         },
-        "jsonPayload" : {
+        "message" : {
           "type" : "string",
           "description" : "Attributes that returned after the API deployment\n"
         }
@@ -448,9 +448,9 @@
     },
     "API" : {
       "properties" : {
-        "api-defition" : {
+        "api" : {
           "type" : "string",
-          "description" : "The velocity definition of the API\n"
+          "description" : "The synapse definition of the API\n"
         }
       },
       "title" : "API Definition Response"
@@ -464,7 +464,7 @@
             "type" : "string"
           }
         },
-        "UnDeployedEndpoints" : {
+        "notdeployedEndpoints" : {
           "type" : "array",
           "description" : "The end points which has not been deployed in the gateway\n",
           "items" : {
@@ -484,7 +484,7 @@
             "example" : "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
           }
         },
-        "UnDeployedSequences" : {
+        "notdeployedSequences" : {
           "type" : "array",
           "description" : "The sequences which has not been deployed in the gateway\n",
           "items" : {
@@ -505,7 +505,7 @@
             "example" : "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
           }
         },
-        "UnDeployedLocalEntries" : {
+        "notdeployedLocalEntries" : {
           "type" : "array",
           "description" : "The local entries which has not been deployed in the gateway\n",
           "items" : {

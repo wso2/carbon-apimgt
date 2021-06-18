@@ -15,24 +15,24 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class APIDTO   {
   
-    private String apiDefition = null;
+    private String api = null;
 
   /**
-   * The velocity definition of the API 
+   * The synapse definition of the API 
    **/
-  public APIDTO apiDefition(String apiDefition) {
-    this.apiDefition = apiDefition;
+  public APIDTO api(String api) {
+    this.api = api;
     return this;
   }
 
   
-  @ApiModelProperty(value = "The velocity definition of the API ")
-  @JsonProperty("api-defition")
-  public String getApiDefition() {
-    return apiDefition;
+  @ApiModelProperty(value = "The synapse definition of the API ")
+  @JsonProperty("api")
+  public String getApi() {
+    return api;
   }
-  public void setApiDefition(String apiDefition) {
-    this.apiDefition = apiDefition;
+  public void setApi(String api) {
+    this.api = api;
   }
 
 
@@ -45,12 +45,12 @@ public class APIDTO   {
       return false;
     }
     APIDTO API = (APIDTO) o;
-    return Objects.equals(apiDefition, API.apiDefition);
+    return Objects.equals(api, API.api);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiDefition);
+    return Objects.hash(api);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class APIDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
     
-    sb.append("    apiDefition: ").append(toIndentedString(apiDefition)).append("\n");
+    sb.append("    api: ").append(toIndentedString(api)).append("\n");
     sb.append("}");
     return sb.toString();
   }
