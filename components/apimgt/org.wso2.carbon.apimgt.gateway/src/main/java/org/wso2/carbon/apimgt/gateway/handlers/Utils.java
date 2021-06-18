@@ -65,6 +65,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -464,18 +465,17 @@ public class Utils {
         byte[] bytes;
         if (certificate != null) {
             if (!isClientCertificateEncoded()) {
-                certificate = certificate
-                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING_SPACE, "")
-                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
-                certificate = certificate.replaceAll(" ", "\n");
-                certificate = APIConstants.BEGIN_CERTIFICATE_STRING + certificate
-                        + APIConstants.END_CERTIFICATE_STRING;
+                certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = certificate.getBytes();
             } else {
-                certificate = URLDecoder.decode(certificate)
-                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                try {
+                    certificate = URLDecoder.decode(certificate, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    String msg = "Error while URL decoding certificate";
+                    throw new APIManagementException(msg, e);
+                }
+
+                certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = Base64.decodeBase64(certificate);
             }
 

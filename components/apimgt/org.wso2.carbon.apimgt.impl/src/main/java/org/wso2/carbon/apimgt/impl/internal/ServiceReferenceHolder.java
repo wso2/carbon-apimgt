@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -60,6 +61,7 @@ public class ServiceReferenceHolder {
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
     private ImportExportAPI importExportService;
     private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
+    private OrganizationResolver organizationResolver;
 
     private ServiceReferenceHolder() {
 
@@ -275,5 +277,13 @@ public class ServiceReferenceHolder {
     public void setListenerTrustStore(KeyStore listenerTrustStore) {
 
         this.listenerTrustStore = listenerTrustStore;
+    }
+
+    public OrganizationResolver getOrganizationResolver() {
+        return organizationResolver;
+    }
+
+    public void setOrganizationResolver(OrganizationResolver organizationResolver) {
+        this.organizationResolver = organizationResolver;
     }
 }

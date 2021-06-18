@@ -7820,6 +7820,30 @@ components:
         context:
           type: string
           example: CalculatorAPI
+        additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: Map of custom properties of API
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
         version:
           type: string
           example: 1.0.0
@@ -8102,6 +8126,20 @@ components:
                 type: string
               display:
                 type: boolean
+          x-otherScopes:
+            - apim:api_publish
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
           x-otherScopes:
             - apim:api_publish
         monetization:
@@ -8672,6 +8710,18 @@ components:
               display:
                 type: boolean
           description: Map of custom properties of API
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
         businessInformation:

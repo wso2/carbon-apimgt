@@ -47,6 +47,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
             " And " +
             "    NAME like ?" +
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -74,6 +76,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
+            " AND " +
+            "   APP.ORGANIZATION = ? " +
             " And "+
             "    NAME like ?"+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -106,6 +110,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "           OR " +
                     "     (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    NAME like ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -138,6 +144,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    NAME like ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -166,6 +174,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "    LOWER(SUB.USER_ID) = LOWER(?)"+
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
             " And "+
             "    NAME like ?"+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -192,6 +202,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "   LOWER (SUB.USER_ID) =LOWER (?)" +
+            " AND " +
+            "   APP.ORGANIZATION = ? " +
             " And "+
             "    NAME like ?"+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
@@ -263,9 +275,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ? " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME ASC LIMIT ?, ?";
@@ -285,9 +295,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC LIMIT ?, ?";

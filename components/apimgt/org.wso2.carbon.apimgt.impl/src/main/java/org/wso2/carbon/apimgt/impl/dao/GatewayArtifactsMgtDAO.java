@@ -54,10 +54,10 @@ public class GatewayArtifactsMgtDAO {
      * @param apiId        - UUID of the API
      * @param name         - Name of the API
      * @param version      - Version of the API
-     * @param tenantDomain - Tenant domain of the API
+     * @param organization - Identifier of the organization
      */
     private boolean addGatewayPublishedAPIDetails(Connection connection, String apiId, String name, String version,
-                                                 String tenantDomain, String type)
+                                                 String organization, String type)
             throws SQLException {
 
         boolean result = false;
@@ -73,7 +73,7 @@ public class GatewayArtifactsMgtDAO {
             statement.setString(1, apiId);
             statement.setString(2, name);
             statement.setString(3, version);
-            statement.setString(4, tenantDomain);
+            statement.setString(4, organization);
             statement.setString(5, type);
             result = statement.executeUpdate() == 1;
             connection.commit();
@@ -205,6 +205,32 @@ public class GatewayArtifactsMgtDAO {
             statement.setString(4, revision);
             statement.executeUpdate();
         }
+    }
+
+    /**
+     * This method retrieves the Organization given the API UUID
+     *
+     * @param uuid API UUID
+     * @return Organization
+     * @throws APIManagementException If failed to retrieve organization
+     */
+    public String retrieveOrganization(String uuid) throws APIManagementException {
+
+        String query = SQLConstants.RETRIEVE_ORGANIZATION;
+        String organization = null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    organization = resultSet.getString("ORGANIZATION");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve organization", e);
+        }
+
+        return organization;
     }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
@@ -527,12 +553,12 @@ public class GatewayArtifactsMgtDAO {
 
 
     public void addGatewayAPIArtifactAndMetaData(String apiUUID, String apiName, String version, String revisionUUID,
-                                                 String tenantDomain, String apiType, File artifact)
+                                                 String organization, String apiType, File artifact)
             throws APIManagementException {
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             try {
                 connection.setAutoCommit(false);
-                addGatewayPublishedAPIDetails(connection, apiUUID, apiName, version, tenantDomain, apiType);
+                addGatewayPublishedAPIDetails(connection, apiUUID, apiName, version, organization, apiType);
                 try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
                     addGatewayPublishedAPIArtifacts(connection, apiUUID, revisionUUID, fileInputStream);
                 }

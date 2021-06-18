@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -44,11 +45,11 @@ public final class KeyMgtRegistrationService {
         throw new IllegalStateException("Service class for key manager registration");
     }
 
-    public static void registerDefaultKeyManager(String tenantDomain) throws APIManagementException {
+    public static void registerDefaultKeyManager(String organization) throws APIManagementException {
 
-        synchronized (KeyMgtRegistrationService.class.getName().concat(tenantDomain)) {
+        synchronized (KeyMgtRegistrationService.class.getName().concat(organization)) {
             ApiMgtDAO instance = ApiMgtDAO.getInstance();
-            if (instance.getKeyManagerConfigurationByName(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
+            if (instance.getKeyManagerConfigurationByName(organization, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
                     null) {
                 APIManagerConfigurationService apiManagerConfigurationService =
                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
@@ -57,8 +58,9 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                 keyManagerConfigurationDTO.setEnabled(true);
                 keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
-                keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                keyManagerConfigurationDTO.setOrganization(organization);
                 keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
+                keyManagerConfigurationDTO.setTokenType(KeyManagerConfiguration.TokenType.ORIGINAL.toString());
                 if (apiManagerConfigurationService != null &&
                         apiManagerConfigurationService.getAPIManagerConfiguration() != null) {
                     String defaultKeyManagerType =

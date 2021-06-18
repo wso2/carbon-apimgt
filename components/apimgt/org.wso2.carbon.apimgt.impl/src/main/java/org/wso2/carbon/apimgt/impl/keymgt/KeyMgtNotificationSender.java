@@ -22,8 +22,8 @@ public class KeyMgtNotificationSender {
         Object[] objects = new Object[]{APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_CONFIGURATION, action,
                 keyManagerConfigurationDTO.getName(), keyManagerConfigurationDTO.getType(),
                 keyManagerConfigurationDTO.isEnabled(), encodedString,
-                keyManagerConfigurationDTO.getTenantDomain()};
-        Event keyManagerEvent = new Event(APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_STREAM_ID,
+                keyManagerConfigurationDTO.getOrganization(), keyManagerConfigurationDTO.getTokenType()};
+            Event keyManagerEvent = new Event(APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_STREAM_ID,
                 System.currentTimeMillis(),
                 null, null, objects);
         EventHubConfigurationDto eventHubConfigurationDto =

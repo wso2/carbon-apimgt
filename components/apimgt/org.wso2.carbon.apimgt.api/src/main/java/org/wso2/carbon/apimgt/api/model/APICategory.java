@@ -26,6 +26,7 @@ public class APICategory {
     private String description;
     private int numberOfAPIs;
     private int tenantID;
+    private String organization;
 
     public void setId(String id) {
         this.id = id;
@@ -59,6 +60,14 @@ public class APICategory {
         return tenantID;
     }
 
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
     public void setNumberOfAPIs(int numberOfAPIs) {
         this.numberOfAPIs = numberOfAPIs;
     }
@@ -75,6 +84,7 @@ public class APICategory {
      * @return
      */
     public boolean equals(Object obj) {
-        return this.tenantID == ((APICategory)obj).getTenantID() && this.getName().equals(((APICategory) obj).getName());
+        return this.organization == ((APICategory) obj).getOrganization() && this.getName()
+                .equals(((APICategory) obj).getName());
     }
 }

@@ -26,6 +26,38 @@ public class ApplicationTokenGenerateRequestDTO   {
     private Long validityPeriod = null;
     private List<String> scopes = new ArrayList<String>();
     private String revokeToken = null;
+
+    @XmlType(name="GrantTypeEnum")
+    @XmlEnum(String.class)
+    public enum GrantTypeEnum {
+        CLIENT_CREDENTIALS("CLIENT_CREDENTIALS"),
+        TOKEN_EXCHANGE("TOKEN_EXCHANGE");
+        private String value;
+
+        GrantTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static GrantTypeEnum fromValue(String v) {
+            for (GrantTypeEnum b : GrantTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private GrantTypeEnum grantType = GrantTypeEnum.CLIENT_CREDENTIALS;
     private Object additionalProperties = null;
 
   /**
@@ -101,6 +133,23 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   /**
+   **/
+  public ApplicationTokenGenerateRequestDTO grantType(GrantTypeEnum grantType) {
+    this.grantType = grantType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("grantType")
+  public GrantTypeEnum getGrantType() {
+    return grantType;
+  }
+  public void setGrantType(GrantTypeEnum grantType) {
+    this.grantType = grantType;
+  }
+
+  /**
    * Additional parameters if Authorization server needs any
    **/
   public ApplicationTokenGenerateRequestDTO additionalProperties(Object additionalProperties) {
@@ -133,12 +182,13 @@ public class ApplicationTokenGenerateRequestDTO   {
         Objects.equals(validityPeriod, applicationTokenGenerateRequest.validityPeriod) &&
         Objects.equals(scopes, applicationTokenGenerateRequest.scopes) &&
         Objects.equals(revokeToken, applicationTokenGenerateRequest.revokeToken) &&
+        Objects.equals(grantType, applicationTokenGenerateRequest.grantType) &&
         Objects.equals(additionalProperties, applicationTokenGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerSecret, validityPeriod, scopes, revokeToken, additionalProperties);
+    return Objects.hash(consumerSecret, validityPeriod, scopes, revokeToken, grantType, additionalProperties);
   }
 
   @Override
@@ -150,6 +200,7 @@ public class ApplicationTokenGenerateRequestDTO   {
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    revokeToken: ").append(toIndentedString(revokeToken)).append("\n");
+    sb.append("    grantType: ").append(toIndentedString(grantType)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();

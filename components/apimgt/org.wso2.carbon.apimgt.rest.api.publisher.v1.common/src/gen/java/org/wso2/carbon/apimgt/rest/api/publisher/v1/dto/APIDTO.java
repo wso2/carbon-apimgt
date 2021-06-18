@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -176,7 +179,9 @@ return null;
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
 
     @XmlType(name="AccessControlEnum")
@@ -808,7 +813,7 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public APIDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public APIDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -817,11 +822,29 @@ return null;
   @ApiModelProperty(value = "Map of custom properties of API")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIInfoAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
@@ -1188,6 +1211,7 @@ return null;
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, API.additionalPropertiesMap) &&
         Objects.equals(monetization, API.monetization) &&
         Objects.equals(accessControl, API.accessControl) &&
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
@@ -1210,7 +1234,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
   }
 
   @Override
@@ -1250,6 +1274,7 @@ return null;
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
