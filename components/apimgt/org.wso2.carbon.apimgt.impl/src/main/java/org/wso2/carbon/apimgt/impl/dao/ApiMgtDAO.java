@@ -792,6 +792,52 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Removes the subscription entry from AM_SUBSCRIPTION by api/product UUID.
+     *
+     * @param uuid          UUID of the API
+     * @param applicationId ID of the application which has the subscription
+     * @throws APIManagementException
+     */
+    public void removeSubscriptionByUUID(String uuid, int applicationId)
+            throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_BY_API_UUID_SQL;
+            ps = conn.prepareStatement(subscriptionUUIDQuery);
+            ps.setString(1, uuid);
+            ps.setInt(2, applicationId);
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                uuid = resultSet.getString("UUID");
+                SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
+                removeSubscription(subscribedAPI, conn);
+            } else {
+                throw new APIManagementException("UUID does not exist for the given apiUUID:" + uuid + " and " +
+                        "application id:" + applicationId);
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback the add subscription ", ex);
+                }
+            }
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+    }
+
+    /**
      * Removes a subscription specified by SubscribedAPI object
      *
      * @param subscription SubscribedAPI object

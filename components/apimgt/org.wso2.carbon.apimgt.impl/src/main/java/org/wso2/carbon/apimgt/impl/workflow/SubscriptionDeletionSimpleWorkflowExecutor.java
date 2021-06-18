@@ -84,7 +84,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
             APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
                     subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
             identifier.setId(Integer.parseInt(subWorkflowDTO.getMetadata(WorkflowConstants.PayloadConstants.API_ID)));
-            apiMgtDAO.removeSubscription(identifier, ((SubscriptionWorkflowDTO) workflowDTO).getApplicationId());
+            apiMgtDAO.removeSubscriptionByUUID(subWorkflowDTO.getApiUUID(), ((SubscriptionWorkflowDTO) workflowDTO).getApplicationId());
         } catch (APIManagementException e) {
             errorMsg = "Could not complete subscription deletion workflow for api: " + subWorkflowDTO.getApiName();
             throw new WorkflowException(errorMsg, e);

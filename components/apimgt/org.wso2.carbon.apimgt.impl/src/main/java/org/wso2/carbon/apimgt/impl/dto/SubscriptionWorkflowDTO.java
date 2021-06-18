@@ -30,6 +30,8 @@ public class SubscriptionWorkflowDTO extends WorkflowDTO{
 
     private String apiProvider;
 
+    private String apiUUID;
+
     private String subscriber;
 
     private String applicationName;
@@ -111,4 +113,8 @@ public class SubscriptionWorkflowDTO extends WorkflowDTO{
     public void setRequestedTierName(String requestedTierName) {
         this.requestedTierName = requestedTierName;
     }
+
+    public String getApiUUID() { return apiUUID; }
+
+    public void setApiUUID(String apiUUID) { this.apiUUID = apiUUID; }
 }
