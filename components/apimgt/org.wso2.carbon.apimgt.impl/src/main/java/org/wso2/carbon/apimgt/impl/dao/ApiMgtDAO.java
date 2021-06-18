@@ -749,7 +749,9 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
             String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
-            if (identifier instanceof APIIdentifier) {
+            if (identifier.getId() > 0) {
+                id = identifier.getId();
+            } else if (identifier instanceof APIIdentifier) {
                 String apiUuid;
                 if (identifier.getUUID() != null) {
                     apiUuid = identifier.getUUID();
