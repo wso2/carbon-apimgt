@@ -28,7 +28,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -84,7 +83,6 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -1921,25 +1919,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void rateAPI(Identifier id, APIRating rating, String user) throws APIManagementException {
+    public void rateAPI(String id, APIRating rating, String user) throws APIManagementException {
         apiMgtDAO.addRating(id, rating.getRating(), user);
     }
 
     @Override
-    public void removeAPIRating(Identifier id, String user) throws APIManagementException {
+    public void removeAPIRating(String id, String user) throws APIManagementException {
         apiMgtDAO.removeAPIRating(id, user);
     }
 
     @Override
-    public int getUserRating(Identifier apiId, String user) throws APIManagementException {
-        return apiMgtDAO.getUserRating(apiId, user);
+    public int getUserRating(String uuid, String user) throws APIManagementException {
+        return apiMgtDAO.getUserRating(uuid, user);
     }
 
     @Override
-    public JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException {
-        JSONObject obj = apiMgtDAO.getUserRatingInfo(id, user);
+    public JSONObject getUserRatingInfo(String uuid, String user) throws APIManagementException {
+        JSONObject obj = apiMgtDAO.getUserRatingInfo(uuid, user);
         if (obj == null || obj.isEmpty()) {
-            String msg = "Failed to get API ratings for API " + id.getName() + " for user " + user;
+            String msg = "Failed to get API ratings for API " + uuid + " for user " + user;
             log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }
@@ -1947,13 +1945,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
-        return apiMgtDAO.getAPIRatings(apiId);
+    public JSONArray getAPIRatings(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIRatings(uuid);
     }
 
     @Override
-    public float getAverageAPIRating(Identifier apiId) throws APIManagementException {
-        return apiMgtDAO.getAverageRating(apiId);
+    public float getAverageAPIRating(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAverageRating(uuid);
     }
 
     @Override
@@ -3421,32 +3419,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(String apiUUID, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(apiUUID, comment, user);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier, String parentCommentID)
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(String apiUUID, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(identifier, parentCommentID);
+        return apiMgtDAO.getComments(apiUUID, parentCommentID);
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
+    public Comment getComment(String apiUUID, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        return apiMgtDAO.getComment(apiUUID, commentId, replyLimit, replyOffset);
     }
 
     @Override
-    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset)
+    public CommentList getComments(String apiUUID, String parentCommentID, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
+        return apiMgtDAO.getComments(apiUUID, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override
-    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+    public boolean editComment(String uuid, String commentId, Comment comment) throws
             APIManagementException {
-        return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
+        return apiMgtDAO.editComment(uuid, commentId, comment);
     }
 
     @Override
@@ -3455,8 +3453,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
-        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+    public boolean deleteComment(String uuid, String commentId) throws APIManagementException {
+        return apiMgtDAO.deleteComment(uuid, commentId);
     }
 
     /**
@@ -5718,7 +5716,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getId()));
+                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);

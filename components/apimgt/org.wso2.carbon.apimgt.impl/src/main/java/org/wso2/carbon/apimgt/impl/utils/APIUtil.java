@@ -4786,7 +4786,7 @@ public final class APIUtil {
         return uriTemplate;
     }
 
-    public static float getAverageRating(Identifier id) throws APIManagementException {
+    public static float getAverageRating(String id) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(id);
     }
@@ -9800,7 +9800,7 @@ public final class APIUtil {
             apiProductIdentifier.setUUID(artifact.getId());
             apiProduct = new APIProduct(apiProductIdentifier);
             apiProduct.setUuid(artifact.getId());
-            apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
+            apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier.getUUID())));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
             setResourceProperties(apiProduct, registry, artifactPath);

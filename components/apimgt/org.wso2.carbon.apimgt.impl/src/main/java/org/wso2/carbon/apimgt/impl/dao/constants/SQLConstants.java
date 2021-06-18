@@ -1824,9 +1824,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION = ? " +
+                "API.API_ID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
@@ -1837,9 +1835,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_ID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1850,9 +1846,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_ID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
@@ -1863,9 +1857,7 @@ public class SQLConstants {
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
+                "API.API_ID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL";
 
@@ -1894,7 +1886,7 @@ public class SQLConstants {
             "SELECT CONTEXT FROM AM_API " + " WHERE CONTEXT= ?";
 
     public static final String GET_API_IDENTIFIER_BY_UUID_SQL =
-            "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
+            "SELECT API_PROVIDER, API_NAME, API_VERSION, API_ID FROM AM_API WHERE API_UUID = ?";
     public static final String GET_UUID_BY_IDENTIFIER_SQL =
             "SELECT API_UUID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ?";
     public static final String GET_API_ID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION =

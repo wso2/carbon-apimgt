@@ -105,8 +105,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return super.addComment(identifier, comment, user);
+    public String addComment(String apiUUID, Comment comment, String user) throws APIManagementException {
+        return super.addComment(apiUUID, comment, user);
     }
 
     @Override

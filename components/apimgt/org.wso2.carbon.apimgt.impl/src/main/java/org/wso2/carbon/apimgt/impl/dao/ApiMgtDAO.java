@@ -3023,13 +3023,13 @@ public class ApiMgtDAO {
     }
 
 
-    public void addRating(Identifier id, int rating, String user) throws APIManagementException {
+    public void addRating(String uuid, int rating, String user) throws APIManagementException {
 
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            addOrUpdateRating(id, rating, user, conn);
+            addOrUpdateRating(uuid, rating, user, conn);
 
             conn.commit();
         } catch (SQLException e) {
@@ -3047,12 +3047,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid Identifier
      * @param rating     Rating
      * @param userId     User Id
      * @throws APIManagementException if failed to add Rating
      */
-    public void addOrUpdateRating(Identifier identifier, int rating, String userId, Connection conn)
+    public void addOrUpdateRating(String uuid, int rating, String userId, Connection conn)
             throws APIManagementException, SQLException {
 
         PreparedStatement ps = null;
@@ -3069,10 +3069,10 @@ public class ApiMgtDAO {
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
-            int id;
-            id = getAPIID(identifier, conn);
+            int id = getAPIIDFromUUID(uuid);
+
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
@@ -3119,14 +3119,14 @@ public class ApiMgtDAO {
         }
     }
 
-    public void removeAPIRating(Identifier id, String user) throws APIManagementException {
+    public void removeAPIRating(String uuid, String user) throws APIManagementException {
 
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            removeAPIRating(id, user, conn);
+            removeAPIRating(uuid, user, conn);
 
             conn.commit();
         } catch (SQLException e) {
@@ -3144,11 +3144,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid Identifier
      * @param userId     User Id
      * @throws APIManagementException if failed to remove API user Rating
      */
-    public void removeAPIRating(Identifier identifier, String userId, Connection conn)
+    public void removeAPIRating(String uuid, String userId, Connection conn)
             throws APIManagementException, SQLException {
 
         PreparedStatement ps = null;
@@ -3167,13 +3167,14 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             //Get API Id
-            int id = -1;
-            id = getAPIID(identifier, conn);
+
+            int id = getAPIIDFromUUID(uuid);
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
+
 
             //This query to check the ratings already exists for the user in the AM_API_RATINGS table
             String sqlQuery = SQLConstants.GET_API_RATING_ID_SQL;
@@ -3202,7 +3203,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public int getUserRating(Identifier id, String user) throws APIManagementException {
+    public int getUserRating(String uuid, String user) throws APIManagementException {
 
         Connection conn = null;
         int userRating = 0;
@@ -3210,7 +3211,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            userRating = getUserRating(id, user, conn);
+            userRating = getUserRating(uuid, user, conn);
 
             conn.commit();
         } catch (SQLException e) {
@@ -3229,11 +3230,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid Identifier
      * @param userId     User Id
      * @throws APIManagementException if failed to get User API Rating
      */
-    public int getUserRating(Identifier identifier, String userId, Connection conn)
+    public int getUserRating(String uuid, String userId, Connection conn)
             throws APIManagementException, SQLException {
 
         PreparedStatement ps = null;
@@ -3250,10 +3251,9 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             //Get API Id
-            int id = -1;
-            id = getAPIID(identifier, conn);
+            int id = getAPIIDFromUUID(uuid);;
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
@@ -3279,11 +3279,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid Identifier
      * @param user       User name
      * @throws APIManagementException if failed to get user API Ratings
      */
-    public JSONObject getUserRatingInfo(Identifier identifier, String user) throws APIManagementException {
+    public JSONObject getUserRatingInfo(String uuid, String user) throws APIManagementException {
 
         Connection conn = null;
         JSONObject userRating = null;
@@ -3291,7 +3291,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            userRating = getUserRatingInfo(identifier, user, conn);
+            userRating = getUserRatingInfo(uuid, user, conn);
 
             conn.commit();
         } catch (SQLException e) {
@@ -3310,13 +3310,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid Identifier
      * @param userId     User Id
      * @param conn       Database connection
      * @throws APIManagementException if failed to get user API Ratings
      */
-    private JSONObject getUserRatingInfo(Identifier identifier, String userId, Connection conn)
-            throws APIManagementException, SQLException {
+    private JSONObject getUserRatingInfo(String uuid, String userId, Connection conn)
+            throws APIManagementException {
 
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -3334,12 +3334,11 @@ public class ApiMgtDAO {
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
+            id = getAPIIDFromUUID(uuid);
             //Get API Id
-            id = getAPIID(identifier, conn);
-
             String sqlQuery = SQLConstants.GET_API_RATING_INFO_SQL;
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
@@ -3371,7 +3370,7 @@ public class ApiMgtDAO {
      * @param apiId API Identifier
      * @throws APIManagementException if failed to get API Ratings
      */
-    public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
+    public JSONArray getAPIRatings(String apiId) throws APIManagementException {
 
         Connection conn = null;
         JSONArray apiRatings = null;
@@ -3398,12 +3397,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid API UUID
      * @param conn       Database connection
      * @throws APIManagementException if failed to get API Ratings
      */
-    private JSONArray getAPIRatings(Identifier identifier, Connection conn)
-            throws APIManagementException, SQLException {
+    private JSONArray getAPIRatings(String uuid, Connection conn)
+            throws APIManagementException {
 
         PreparedStatement ps = null;
         PreparedStatement psSubscriber = null;
@@ -3412,13 +3411,12 @@ public class ApiMgtDAO {
         JSONArray ratingArray = new JSONArray();
         int userRating = 0;
         String ratingId = null;
-        int id = -1;
         int subscriberId = -1;
         try {
             //Get API Id
-            id = getAPIID(identifier, conn);
+            int id = getAPIIDFromUUID(uuid);
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
@@ -3459,7 +3457,7 @@ public class ApiMgtDAO {
         return ratingArray;
     }
 
-    public float getAverageRating(Identifier apiId) throws APIManagementException {
+    public float getAverageRating(String uuid) throws APIManagementException {
 
         Connection conn = null;
         float avrRating = 0;
@@ -3467,7 +3465,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            avrRating = getAverageRating(apiId, conn);
+            avrRating = getAverageRating(uuid, conn);
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -3524,10 +3522,10 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param identifier Identifier
+     * @param uuid API UUID
      * @throws APIManagementException if failed to add Application
      */
-    public float getAverageRating(Identifier identifier, Connection conn)
+    public float getAverageRating(String uuid, Connection conn)
             throws APIManagementException, SQLException {
 
         PreparedStatement ps = null;
@@ -3535,10 +3533,9 @@ public class ApiMgtDAO {
         float avrRating = 0;
         try {
             //Get API Id
-            int apiId;
-            apiId = getAPIID(identifier, conn);
+            int apiId = getAPIIDFromUUID(uuid);
             if (apiId == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 log.error(msg);
                 return Float.NEGATIVE_INFINITY;
             }
@@ -7606,20 +7603,19 @@ public class ApiMgtDAO {
     /******************************
      * Adds a comment for an API
      *
-     * @param identifier API identifier
+     * @param apiUUID API identifier
      * @param comment Commented Text
      * @param user User who did the comment
      * @return Comment ID
      */
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
+    public String addComment(String apiUUID, Comment comment, String user) throws APIManagementException {
 
         String commentId = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            int id = -1;
             connection.setAutoCommit(false);
-            id = getAPIID(identifier, connection);
+            int id = getAPIIDFromUUID(apiUUID);
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + apiUUID;
                 throw new APIManagementException(msg);
             }
             String addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
@@ -7637,8 +7633,7 @@ public class ApiMgtDAO {
                 connection.commit();
             }
         } catch (SQLException e) {
-            handleException("Failed to add comment data, for  " + identifier.getName() + "-" + identifier.getVersion(),
-                    e);
+            handleException("Failed to add comment data, for  " + apiUUID, e);
         }
         return commentId;
     }
@@ -7647,40 +7642,26 @@ public class ApiMgtDAO {
      * Returns a specific comment of an API
      *
      * @param commentId  Comment ID
-     * @param apiTypeWrapper Api Type Wrapper
+     * @param uuid Api Type Wrapper
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit,
+    public Comment getComment(String uuid, String commentId, Integer replyLimit,
                               Integer replyOffset) throws
             APIManagementException {
-
-        Identifier identifier;
-        if (apiTypeWrapper.isAPIProduct()) {
-            identifier = apiTypeWrapper.getApiProduct().getId();
-        } else {
-            identifier = apiTypeWrapper.getApi().getId();
-        }
-
+        int id = getAPIIDFromUUID(uuid);
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+
             Comment comment = new Comment();
-            int id = -1;
-            id = getAPIID(identifier, connection);
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 throw new APIManagementException(msg);
             }
             String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
-            id = getAPIID(identifier, connection);
-            if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
-                throw new APIManagementException(msg);
-            }
+
             try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
-                prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                prepStmt.setString(2, identifier.getName());
-                prepStmt.setString(3, identifier.getVersion());
-                prepStmt.setString(4, commentId);
+                prepStmt.setInt(1, id);
+                prepStmt.setString(2, commentId);
                 try (ResultSet resultSet = prepStmt.executeQuery()) {
                     if (resultSet.next()) {
                         comment.setId(resultSet.getString("COMMENT_ID"));
@@ -7692,13 +7673,13 @@ public class ApiMgtDAO {
                         comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                         comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                         comment.setCategory(resultSet.getString("CATEGORY"));
-                        comment.setReplies(getComments(identifier, commentId, replyLimit, replyOffset, connection));
+                        comment.setReplies(getComments(uuid, commentId, replyLimit, replyOffset, connection));
                         return comment;
                     }
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve comment for API " + identifier.getName() + "with comment ID " +
+            handleException("Failed to retrieve comment for API " + uuid + "with comment ID " +
                     commentId, e);
         }
         return null;
@@ -7707,31 +7688,19 @@ public class ApiMgtDAO {
     /****************************************
      * Returns all the Comments on an API
      *
-     * @param apiTypeWrapper API type Wrapper
+     * @param uuid API UUID
      * @param parentCommentID Parent Comment ID
      * @return Comment Array
      * @throws APIManagementException
      */
-    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit,
+    public CommentList getComments(String uuid, String parentCommentID, Integer limit,
                                    Integer offset) throws APIManagementException {
 
         CommentList commentList = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            int id = -1;
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            id = getAPIID(identifier, connection);
-            if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
-                throw new APIManagementException(msg);
-            }
-            commentList = getComments(identifier, parentCommentID, limit, offset, connection);
+            commentList = getComments(uuid, parentCommentID, limit, offset, connection);
         } catch (SQLException e) {
-            handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
+            handleException("Failed to retrieve comments for API " + uuid, e);
         }
         return commentList;
     }
@@ -7744,7 +7713,7 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    private CommentList getComments(Identifier identifier, String parentCommentID, Integer limit, Integer offset,
+    private CommentList getComments(String uuid, String parentCommentID, Integer limit, Integer offset,
                                     Connection connection) throws
             APIManagementException {
 
@@ -7755,17 +7724,20 @@ public class ApiMgtDAO {
         int total = 0;
         String sqlQuery;
         String sqlQueryForCount;
+        int id = getAPIIDFromUUID(uuid);
+        if (id == -1) {
+            String msg = "Could not load API record for: " + uuid;
+            throw new APIManagementException(msg);
+        }
         if (parentCommentID == null) {
             sqlQueryForCount = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
         } else {
             sqlQueryForCount = SQLConstants.GET_REPLIES_COUNT_SQL;
         }
         try (PreparedStatement prepStmtForCount = connection.prepareStatement(sqlQueryForCount)) {
-            prepStmtForCount.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmtForCount.setString(2, identifier.getName());
-            prepStmtForCount.setString(3, identifier.getVersion());
+            prepStmtForCount.setInt(1, id);
             if (parentCommentID != null) {
-                prepStmtForCount.setString(4, parentCommentID);
+                prepStmtForCount.setString(2, parentCommentID);
             }
             try (ResultSet resultSetForCount = prepStmtForCount.executeQuery()) {
                 while (resultSetForCount.next()) {
@@ -7778,16 +7750,14 @@ public class ApiMgtDAO {
                         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_REPLIES_SQL");
                     }
                     try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-                        prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                        prepStmt.setString(2, identifier.getName());
-                        prepStmt.setString(3, identifier.getVersion());
+                        prepStmt.setInt(1, id);
                         if (parentCommentID != null) {
-                            prepStmt.setString(4, parentCommentID);
-                            prepStmt.setInt(5, offset);
-                            prepStmt.setInt(6, limit);
+                            prepStmt.setString(2, parentCommentID);
+                            prepStmt.setInt(3, offset);
+                            prepStmt.setInt(4, limit);
                         } else {
-                            prepStmt.setInt(4, offset);
-                            prepStmt.setInt(5, limit);
+                            prepStmt.setInt(2, offset);
+                            prepStmt.setInt(3, limit);
                         }
                         try (ResultSet resultSet = prepStmt.executeQuery()) {
                             while (resultSet.next()) {
@@ -7802,7 +7772,7 @@ public class ApiMgtDAO {
                                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                                 comment.setCategory(resultSet.getString("CATEGORY"));
                                 if (parentCommentID == null) {
-                                    comment.setReplies(getComments(identifier, resultSet.getString("COMMENT_ID")
+                                    comment.setReplies(getComments(uuid, resultSet.getString("COMMENT_ID")
                                             , APIConstants.REPLYLIMIT, APIConstants.REPLYOFFSET, connection));
                                 } else {
                                     CommentList emptyCommentList = new CommentList();
@@ -7823,7 +7793,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve comments for  " + identifier.getName(), e);
+            handleException("Failed to retrieve comments for API " + uuid, e);
         }
         pagination.setLimit(limit);
         pagination.setOffset(offset);
@@ -7836,18 +7806,17 @@ public class ApiMgtDAO {
     /**
      * Returns all the Comments on an API
      *
-     * @param identifier      API Identifier
+     * @param uuid      API UUID
      * @param parentCommentID Parent Comment ID
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException {
+    public Comment[] getComments(String uuid, String parentCommentID) throws APIManagementException {
 
         List<Comment> commentList = new ArrayList<Comment>();
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
-        int id = -1;
         String sqlQuery;
         if (parentCommentID == null) {
             sqlQuery = SQLConstantManagerFactory.getSQlString("GET_ROOT_COMMENTS_SQL");
@@ -7856,17 +7825,16 @@ public class ApiMgtDAO {
         }
         try {
             connection = APIMgtDBUtil.getConnection();
-            id = getAPIID(identifier, connection);
+            int id = getAPIIDFromUUID(uuid);
+
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + uuid;
                 throw new APIManagementException(msg);
             }
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getName());
-            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setInt(1, id);
             if (parentCommentID != null) {
-                prepStmt.setString(4, parentCommentID);
+                prepStmt.setString(2, parentCommentID);
             }
             resultSet = prepStmt.executeQuery();
             while (resultSet.next()) {
@@ -7890,7 +7858,7 @@ public class ApiMgtDAO {
             } catch (SQLException e1) {
                 log.error("Failed to retrieve comments ", e1);
             }
-            handleException("Failed to retrieve comments for  " + identifier.getName(), e);
+            handleException("Failed to retrieve comments for  " + uuid, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
@@ -7900,28 +7868,22 @@ public class ApiMgtDAO {
     /***********
      * Edit a comment
      *
-     * @param apiTypeWrapper API Type Wrapper
+     * @param apiUUID API uuid
      * @param commentId Comment ID
      * @param comment Comment object
      * @throws APIManagementException
      */
-    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+    public boolean editComment(String apiUUID, String commentId, Comment comment) throws
             APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            int id = -1;
+            int id = getAPIIDFromUUID(apiUUID);;
             String editCommentQuery = SQLConstants.EDIT_COMMENT;
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            id = getAPIID(identifier, connection);
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
+                String msg = "Could not load API record for: " + apiUUID;
                 throw new APIManagementException(msg);
             }
+
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmt = connection.prepareStatement(editCommentQuery)) {
                 prepStmt.setString(1, comment.getText());
@@ -7942,49 +7904,39 @@ public class ApiMgtDAO {
     /**************************************
      * Delete a comment
      *
-     * @param apiTypeWrapper API Type Wrapper
+     * @param uuid API uuid
      * @param commentId Comment ID
      * @throws APIManagementException
      */
-    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+    public boolean deleteComment(String uuid, String commentId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-            return deleteComment(identifier, commentId, connection);
+            return deleteComment(uuid, commentId, connection);
         } catch (SQLException e) {
             handleException("Error while deleting comment " + commentId + " from the database", e);
         }
         return false;
     }
 
-    private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws
+    private boolean deleteComment(String uuid, String commentId, Connection connection) throws
             APIManagementException {
 
-        int id = -1;
         String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
         String getCommentIDsOfReplies = SQLConstants.GET_IDS_OF_REPLIES_SQL;
         ResultSet resultSet = null;
         try {
-            id = getAPIID(identifier, connection);
+            int id = getAPIIDFromUUID(uuid);
             if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
-                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, identifier
-                        .getName() + "-" + identifier.getVersion()));
+                String msg = "Could not load API record for: " + uuid;
+                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
             }
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmtGetReplies = connection.prepareStatement(getCommentIDsOfReplies)) {
-                prepStmtGetReplies.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                prepStmtGetReplies.setString(2, identifier.getName());
-                prepStmtGetReplies.setString(3, identifier.getVersion());
-                prepStmtGetReplies.setString(4, commentId);
+                prepStmtGetReplies.setInt(1, id);
+                prepStmtGetReplies.setString(2, commentId);
                 resultSet = prepStmtGetReplies.executeQuery();
                 while (resultSet.next()) {
-                    deleteComment(identifier, resultSet.getString("COMMENT_ID"), connection);
+                    deleteComment(uuid, resultSet.getString("COMMENT_ID"), connection);
                 }
                 try (PreparedStatement prepStmt = connection.prepareStatement(deleteCommentQuery)) {
                     prepStmt.setInt(1, id);
@@ -8123,7 +8075,9 @@ public class ApiMgtDAO {
                     String provider = resultSet.getString(1);
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
+                    int apiId = resultSet.getInt(4);
                     identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                    identifier.setId(apiId);
                     identifier.setUuid(uuid);
                 }
             }
@@ -8159,6 +8113,29 @@ public class ApiMgtDAO {
             handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
         }
         return identifier;
+    }
+
+    /**
+     * Return the matching api id for the uuid
+     *
+     * @param uuid api uuid
+     * @return the api id
+     * @throws APIManagementException
+     * */
+    public int getAPIIDFromUUID(String uuid) throws APIManagementException {
+        int apiId = -1;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL)) {
+            prepStmt.setString(1, uuid);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    apiId = resultSet.getInt("API_ID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the API ID for UUID : " + uuid, e);
+        }
+        return apiId;
     }
 
     /**

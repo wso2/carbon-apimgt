@@ -8729,32 +8729,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(String apiUUID, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(apiUUID, comment, user);
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset)
+    public Comment getComment(String apiUUID, String commentId, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+        return apiMgtDAO.getComment(apiUUID, commentId, replyLimit, replyOffset);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID,
+    public org.wso2.carbon.apimgt.api.model.CommentList getComments(String apiUUID, String parentCommentID,
                                                                     Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
+        return apiMgtDAO.getComments(apiUUID, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override
-    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+    public boolean editComment(String apiUUID, String commentId, Comment comment) throws
             APIManagementException {
-        return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
+        return apiMgtDAO.editComment(apiUUID, commentId, comment);
     }
 
     @Override
-    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
-        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+    public boolean deleteComment(String apiUUID, String commentId) throws APIManagementException {
+        return apiMgtDAO.deleteComment(apiUUID, commentId);
     }
 
     /**
