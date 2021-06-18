@@ -65,33 +65,33 @@ public interface APIProvider extends APIManager {
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper  Api type wrapper
+     * @param apiUUID  Api type wrapper
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    CommentList getComments(String apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
+    CommentList getComments(String apiUUID, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api Type Wrapper
+     * @param apiUUID Api Type Wrapper
      * @param commentId      comment ID
      * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    boolean editComment(String apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
+    boolean editComment(String apiUUID, String commentId, Comment comment) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
      *
-     * @param apiTypeWrapper API Type Wrapper
+     * @param apiUUID API Type Wrapper
      * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */
-    boolean deleteComment(String apiTypeWrapper, String commentId) throws APIManagementException;
+    boolean deleteComment(String apiUUID, String commentId) throws APIManagementException;
 
 
     /**
