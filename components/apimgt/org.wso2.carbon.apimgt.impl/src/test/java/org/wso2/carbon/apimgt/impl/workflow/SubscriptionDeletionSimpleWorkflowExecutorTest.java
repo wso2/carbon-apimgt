@@ -31,6 +31,8 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 
+import java.util.UUID;
+
 /**
  * SubscriptionDeletionSimpleWorkflowExecutor test cases
  */
@@ -50,6 +52,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutorTest {
         subscriptionWorkflowDTO.setApiProvider("testUser");
         subscriptionWorkflowDTO.setApiName("weatherAPI");
         subscriptionWorkflowDTO.setApiVersion("v1");
+        subscriptionWorkflowDTO.setMetadata("apiId", String.valueOf(1));
         subscriptionDeletionSimpleWorkflowExecutor = new SubscriptionDeletionSimpleWorkflowExecutor();
     }
 
@@ -60,7 +63,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutorTest {
 
     @Test
     public void testExecutingSubscriptionDeletionWorkFlow() throws APIManagementException {
-        PowerMockito.doNothing().when(apiMgtDAO).removeSubscription((APIIdentifier) Mockito.anyObject(), Mockito.anyInt());
+        PowerMockito.doNothing().when(apiMgtDAO).removeSubscriptionByUUID(Mockito.anyString(), Mockito.anyInt());
         try {
             Assert.assertNotNull(subscriptionDeletionSimpleWorkflowExecutor.execute(subscriptionWorkflowDTO));
         } catch (WorkflowException e) {
@@ -72,7 +75,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutorTest {
     @Test
     public void testFailureWhileExecutingSubscriptionDeletionWorkFlow() throws APIManagementException {
         PowerMockito.doThrow(new APIManagementException("Error occurred while removing subscriptions")).when(apiMgtDAO)
-                .removeSubscription((APIIdentifier) Mockito.anyObject(), Mockito.anyInt());
+                .removeSubscriptionByUUID(Mockito.anyString(), Mockito.anyInt());
         try {
            subscriptionDeletionSimpleWorkflowExecutor.execute(subscriptionWorkflowDTO);
            Assert.fail("Expected WorkflowException is not thrown while executing subscription deletion workflow");

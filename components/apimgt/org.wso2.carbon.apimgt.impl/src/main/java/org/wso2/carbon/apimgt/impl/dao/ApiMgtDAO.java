@@ -731,37 +731,24 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
+     * Removes the subscription entry from AM_SUBSCRIPTION by api/product UUID.
      *
-     * @param identifier    Identifier
+     * @param uuid          UUID of the API
      * @param applicationId ID of the application which has the subscription
      * @throws APIManagementException
      */
-    public void removeSubscription(Identifier identifier, int applicationId)
+    public void removeSubscriptionByUUID(String uuid, int applicationId)
             throws APIManagementException {
 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        int id = -1;
-        String uuid;
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
-            if (identifier instanceof APIIdentifier) {
-                String apiUuid;
-                if (identifier.getUUID() != null) {
-                    apiUuid = identifier.getUUID();
-                } else {
-                    apiUuid = getUUIDFromIdentifier((APIIdentifier) identifier);
-                }
-                id = getAPIID(apiUuid, conn);
-            } else if (identifier instanceof APIProductIdentifier) {
-                id = ((APIProductIdentifier) identifier).getProductId();
-            }
+            String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_BY_API_UUID_SQL;
             ps = conn.prepareStatement(subscriptionUUIDQuery);
-            ps.setInt(1, id);
+            ps.setString(1, uuid);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
 
@@ -770,7 +757,7 @@ public class ApiMgtDAO {
                 SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
                 removeSubscription(subscribedAPI, conn);
             } else {
-                throw new APIManagementException("UUID does not exist for the given apiId:" + id + " and " +
+                throw new APIManagementException("UUID does not exist for the given apiUUID:" + uuid + " and " +
                         "application id:" + applicationId);
             }
 
