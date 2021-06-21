@@ -31,13 +31,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.SequencesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class SequenceApiServiceImpl implements SequenceApiService {
@@ -52,7 +49,7 @@ public class SequenceApiServiceImpl implements SequenceApiService {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
         GatewayAPIDTO gatewayAPIDTO = null;
-        SequencesDTO sequencesDTO = new SequencesDTO();
+        JSONObject responseObj = new JSONObject();
         try {
             Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
                     tenantDomain);
@@ -75,32 +72,29 @@ public class SequenceApiServiceImpl implements SequenceApiService {
 
         if (gatewayAPIDTO != null) {
             try {
-                List<String> deployedSequencesArray = new ArrayList<>();
-                List<String> notDeployedsequencesArray = new ArrayList<>();
+                JSONArray sequencesArray = new JSONArray();
+                JSONArray undeployedsequencesArray = new JSONArray();
                 if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
                     SequenceAdminServiceProxy sequenceAdminServiceProxy =
                             new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
                     for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
                         if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
-                            deployedSequencesArray.add(sequenceAdminServiceProxy.getSequence(sequence.getName()).toString());
+                            sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
                         } else {
                             log.error(sequence.getName() + " was not deployed in the gateway");
-                            notDeployedsequencesArray.add(sequence.getContent());
+                            undeployedsequencesArray.put(sequence.getContent());
                         }
                     }
                 }
-                sequencesDTO.deployedSequences(deployedSequencesArray);
-                sequencesDTO.notdeployedSequences(notDeployedsequencesArray);
-                return Response.ok().entity(sequencesDTO).build();
             } catch (AxisFault e) {
                 String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
                 log.error(errorMessage, e);
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-
+            String responseStringObj = String.valueOf(responseObj);
+            return Response.ok().entity(responseStringObj).build();
         } else {
             return Response.serverError().entity("Unexpected error occurred").build();
         }
-        return null;
     }
 }
