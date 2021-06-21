@@ -2,15 +2,15 @@
     <h1><a name="Get API Artifacts"></a>Get API Artifacts</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apiArtifactGet"></a>Get API artifact from the storage</h4> <code>GET https://apis.wso2.com/api/am/gateway/v1/api-artifact</code>
+            <h4 class="operation-heading"><a name="apiArtifactGet"></a>Get API synapse definition artifact from the storage</h4> <code>GET https://apis.wso2.com/api/am/gateway/v1/api-artifact</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain
+            <p class="marked">This operation is used to get the API synapse definition from the storage. If the Tenant domain
 is not provided carbon.super will be picked as the Tenant domain.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_publish</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -141,22 +141,13 @@ is not provided carbon.super will be picked as the Tenant domain.
                         <td class="parameter"><p class="marked">OK. API artifact successfully retrieved from the storage. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#APIArtifact">APIArtifact</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">202</p></td>
-                        <td class="parameter"><p class="marked">Accepted. The request has been accepted. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#APIArtifact">APIArtifact</a>
+                                    <a href="#!/models#API">API</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -165,16 +156,7 @@ is not provided carbon.super will be picked as the Tenant domain.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -192,7 +174,7 @@ carbon.super will be picked as the Tenant domain.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_publish</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -323,22 +305,13 @@ carbon.super will be picked as the Tenant domain.
                         <td class="parameter"><p class="marked">OK. End-points successfully retrieved from the storage for the API. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#DeployResponse">DeployResponse</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">202</p></td>
-                        <td class="parameter"><p class="marked">Accepted. The request has been accepted. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#DeployResponse">DeployResponse</a>
+                                    <a href="#!/models#Endpoints">Endpoints</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -347,16 +320,7 @@ carbon.super will be picked as the Tenant domain.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -374,7 +338,7 @@ will be picked as the Tenant domain.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_publish</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -510,17 +474,8 @@ will be picked as the Tenant domain.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">202</p></td>
-                        <td class="parameter"><p class="marked">Accepted. The request has been accepted. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#LocalEntry">LocalEntry</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -529,16 +484,7 @@ will be picked as the Tenant domain.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -556,7 +502,7 @@ will be picked as the Tenant domain.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_publish</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -692,17 +638,8 @@ will be picked as the Tenant domain.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">202</p></td>
-                        <td class="parameter"><p class="marked">Accepted. The request has been accepted. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Sequences">Sequences</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -711,16 +648,7 @@ will be picked as the Tenant domain.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. The specified resource does not exist.</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
