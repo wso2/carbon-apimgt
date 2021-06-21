@@ -7660,7 +7660,7 @@ public class ApiMgtDAO {
             String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
 
             try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
-                prepStmt.setInt(1, id);
+                prepStmt.setString(1, uuid);
                 prepStmt.setString(2, commentId);
                 try (ResultSet resultSet = prepStmt.executeQuery()) {
                     if (resultSet.next()) {
@@ -7735,7 +7735,7 @@ public class ApiMgtDAO {
             sqlQueryForCount = SQLConstants.GET_REPLIES_COUNT_SQL;
         }
         try (PreparedStatement prepStmtForCount = connection.prepareStatement(sqlQueryForCount)) {
-            prepStmtForCount.setInt(1, id);
+            prepStmtForCount.setString(1, uuid);
             if (parentCommentID != null) {
                 prepStmtForCount.setString(2, parentCommentID);
             }
@@ -7750,7 +7750,7 @@ public class ApiMgtDAO {
                         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_REPLIES_SQL");
                     }
                     try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-                        prepStmt.setInt(1, id);
+                        prepStmt.setString(1, uuid);
                         if (parentCommentID != null) {
                             prepStmt.setString(2, parentCommentID);
                             prepStmt.setInt(3, offset);
@@ -7832,7 +7832,7 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, id);
+            prepStmt.setString(1, uuid);
             if (parentCommentID != null) {
                 prepStmt.setString(2, parentCommentID);
             }

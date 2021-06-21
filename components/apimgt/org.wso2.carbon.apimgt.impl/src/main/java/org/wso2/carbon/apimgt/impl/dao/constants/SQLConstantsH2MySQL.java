@@ -275,7 +275,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_ID = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ? " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME ASC LIMIT ?, ?";
@@ -295,7 +295,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
             "WHERE " +
-                "API.API_ID = ? " +
+                "API.API_UUID = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC LIMIT ?, ?";
