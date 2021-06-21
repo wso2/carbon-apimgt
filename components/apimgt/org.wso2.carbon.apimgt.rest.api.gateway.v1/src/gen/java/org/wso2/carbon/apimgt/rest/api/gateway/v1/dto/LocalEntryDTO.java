@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class LocalEntryDTO   {
   
     private List<String> deployedLocalEntries = new ArrayList<>();
-    private List<String> unDeployedLocalEntries = new ArrayList<>();
+    private List<String> notdeployedLocalEntries = new ArrayList<>();
 
   /**
    * The local entries which has been deployed in the gateway 
@@ -41,19 +41,19 @@ public class LocalEntryDTO   {
   /**
    * The local entries which has not been deployed in the gateway 
    **/
-  public LocalEntryDTO unDeployedLocalEntries(List<String> unDeployedLocalEntries) {
-    this.unDeployedLocalEntries = unDeployedLocalEntries;
+  public LocalEntryDTO notdeployedLocalEntries(List<String> notdeployedLocalEntries) {
+    this.notdeployedLocalEntries = notdeployedLocalEntries;
     return this;
   }
 
   
   @ApiModelProperty(value = "The local entries which has not been deployed in the gateway ")
-  @JsonProperty("UnDeployedLocalEntries")
-  public List<String> getUnDeployedLocalEntries() {
-    return unDeployedLocalEntries;
+  @JsonProperty("notdeployedLocalEntries")
+  public List<String> getNotdeployedLocalEntries() {
+    return notdeployedLocalEntries;
   }
-  public void setUnDeployedLocalEntries(List<String> unDeployedLocalEntries) {
-    this.unDeployedLocalEntries = unDeployedLocalEntries;
+  public void setNotdeployedLocalEntries(List<String> notdeployedLocalEntries) {
+    this.notdeployedLocalEntries = notdeployedLocalEntries;
   }
 
 
@@ -67,12 +67,12 @@ public class LocalEntryDTO   {
     }
     LocalEntryDTO localEntry = (LocalEntryDTO) o;
     return Objects.equals(deployedLocalEntries, localEntry.deployedLocalEntries) &&
-        Objects.equals(unDeployedLocalEntries, localEntry.unDeployedLocalEntries);
+        Objects.equals(notdeployedLocalEntries, localEntry.notdeployedLocalEntries);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployedLocalEntries, unDeployedLocalEntries);
+    return Objects.hash(deployedLocalEntries, notdeployedLocalEntries);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class LocalEntryDTO   {
     sb.append("class LocalEntryDTO {\n");
     
     sb.append("    deployedLocalEntries: ").append(toIndentedString(deployedLocalEntries)).append("\n");
-    sb.append("    unDeployedLocalEntries: ").append(toIndentedString(unDeployedLocalEntries)).append("\n");
+    sb.append("    notdeployedLocalEntries: ").append(toIndentedString(notdeployedLocalEntries)).append("\n");
     sb.append("}");
     return sb.toString();
   }
