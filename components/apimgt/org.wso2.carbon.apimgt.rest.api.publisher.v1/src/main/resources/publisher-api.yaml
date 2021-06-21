@@ -10154,6 +10154,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Deployments'
+      authorizationHeader:
+        type: string
+        description: Authorization Header
 
   #-----------------------------------------------------
   # The SecurityAuditAttribute resource
