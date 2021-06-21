@@ -242,7 +242,9 @@ public class ApplicationMappingUtil {
         Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
         for (SubscribedAPI subscribedAPI : subscriptions) {
             API api = apiConsumer.getAPI(subscribedAPI.getApiId());
-            return apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api);
+            if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+                return true;
+            }
         }
         return false;
     }

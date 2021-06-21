@@ -190,26 +190,31 @@ public class EnvironmentMappingUtil {
         thirdPartyEnvironmentDTO.setProvider(thirdPartyEnvironment.getProvider());
         thirdPartyEnvironmentDTO.setDisplayName(thirdPartyEnvironment.getDisplayName());
 
-        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
-        HttpResponse response = solaceAdminApis.environmentGET(
-                thirdPartyEnvironment.getOrganization(), thirdPartyEnvironment.getName());
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            String responseString = null;
-            responseString = EntityUtils.toString(response.getEntity());
-            JSONObject jsonObject = new JSONObject(responseString);
-            JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
-            List<ThirdPartyEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
-            for (int i = 0; i < protocols.length(); i++) {
-                JSONObject protocolDetails = protocols.getJSONObject(i);
-                String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
-                String endpointURI = protocolDetails.getString("uri");
-                ThirdPartyEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURIDTO =
-                        new ThirdPartyEnvironmentProtocolURIDTO();
-                thirdPartyEnvironmentProtocolURIDTO.setProtocol(protocolName);
-                thirdPartyEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
-                endpointsList.add(thirdPartyEnvironmentProtocolURIDTO);
+        if ("solace".equalsIgnoreCase(thirdPartyEnvironment.getProvider())) {
+
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+            HttpResponse response = solaceAdminApis.environmentGET(
+                    thirdPartyEnvironment.getOrganization(), thirdPartyEnvironment.getName());
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String responseString = null;
+                responseString = EntityUtils.toString(response.getEntity());
+                JSONObject jsonObject = new JSONObject(responseString);
+                if (jsonObject.has("messagingProtocols")) {
+                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
+                    List<ThirdPartyEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
+                    for (int i = 0; i < protocols.length(); i++) {
+                        JSONObject protocolDetails = protocols.getJSONObject(i);
+                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
+                        String endpointURI = protocolDetails.getString("uri");
+                        ThirdPartyEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURIDTO =
+                                new ThirdPartyEnvironmentProtocolURIDTO();
+                        thirdPartyEnvironmentProtocolURIDTO.setProtocol(protocolName);
+                        thirdPartyEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
+                        endpointsList.add(thirdPartyEnvironmentProtocolURIDTO);
+                    }
+                    thirdPartyEnvironmentDTO.setEndpointURIs(endpointsList);
+                }
             }
-            thirdPartyEnvironmentDTO.setEndpointURIs(endpointsList);
         }
 
         return thirdPartyEnvironmentDTO;

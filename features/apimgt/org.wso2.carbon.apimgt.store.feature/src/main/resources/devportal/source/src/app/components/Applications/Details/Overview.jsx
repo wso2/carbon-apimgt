@@ -16,8 +16,6 @@ import {
     Grid, List, ListItem, MenuItem, Paper, TextField,
 } from '@material-ui/core';
 import { upperCaseString } from 'AppData/stringFormatter';
-import Chip from '@material-ui/core/Chip';
-import InputBase from '@material-ui/core/InputBase';
 
 
 const useStyles = makeStyles((theme) => ({

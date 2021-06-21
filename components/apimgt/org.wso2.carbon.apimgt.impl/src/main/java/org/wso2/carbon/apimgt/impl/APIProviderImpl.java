@@ -9919,6 +9919,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
                 log.info("API product '" + apiNameWithContext + "' and API '" + apiNameForRegistration + "' have been deleted from Solace broker");
                 return true;
+            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT) {
+                log.info("Registered API '" +apiNameWithContext+ "' is still referenced for another API product. Skipping API Deletion....");
+                return true;
             } else {
                 log.error("Error occurred while deleting the API '" + apiNameForRegistration + "' from Solace Broker");
                 throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());

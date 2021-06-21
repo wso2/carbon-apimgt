@@ -105,7 +105,7 @@ public class SolaceAdminApis {
     // check existence of API in solace
     public HttpResponse registeredAPIGet(String organization, String apiTitle) {
         HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/" + apiTitle);
+        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
         try {
             return httpClient.execute(request);
@@ -336,7 +336,7 @@ public class SolaceAdminApis {
         environments.put(environment);
         requestBody.put("environments", environments);
 
-        HashSet<String> parameters = new HashSet<>();
+        /*HashSet<String> parameters = new HashSet<>();
         for (AaiChannelItem channel : aai20Document.getChannels()) {
             parameters.addAll(channel.parameters.keySet());
         }
@@ -366,7 +366,31 @@ public class SolaceAdminApis {
                 }
             }
         }
-        requestBody.put("attributes", attributes);
+        requestBody.put("attributes", attributes);*/
+
+        HashSet<String> parameters1 = new HashSet<>();
+        org.json.JSONArray attributes1 = new org.json.JSONArray();
+        for (AaiChannelItem channel : aai20Document.getChannels()) {
+            Set<String> parameterKeySet = channel.parameters.keySet();
+            for (String parameterName : parameterKeySet) {
+                if (!parameters1.contains(parameterName)) {
+                    AaiParameter parameterObject = channel.parameters.get(parameterName);
+                    if (parameterObject.schema != null) {
+                        attributes1.put(getAttributesFromParameterSchema(parameterName, parameterObject));
+                        parameters1.add(parameterName);
+                    } else if (parameterObject.$ref != null) {
+                        if (aai20Document.components.parameters != null) {
+                            AaiParameter parameterObject1 = aai20Document.components.parameters.get(parameterName);
+                            if (parameterObject1.schema != null) {
+                                attributes1.put(getAttributesFromParameterSchema(parameterName, parameterObject1));
+                                parameters1.add(parameterName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        requestBody.put("attributes", attributes1);
 
         HashSet<String> protocolsHashSet = new HashSet<>();
         for (AaiChannelItem channel : aai20Document.getChannels()) {
@@ -382,6 +406,30 @@ public class SolaceAdminApis {
         requestBody.put("protocols", protocols);
 
         return requestBody;
+    }
+
+    private org.json.JSONObject getAttributesFromParameterSchema (String parameterName, AaiParameter parameterObj) {
+        ObjectNode schemaNode = (ObjectNode) parameterObj.schema;
+        org.json.JSONObject schemaJson = new org.json.JSONObject(schemaNode.toString());
+        String enumString = "";
+        if (schemaJson.has("enum")) {
+            org.json.JSONArray enumArray = schemaJson.getJSONArray("enum");
+            List<String> enumList = new ArrayList<>();
+            for (int i = 0; i < enumArray.length(); i++) {
+                enumList.add(enumArray.get(i).toString());
+            }
+            //List<Object> enumList = enumArray.toList();
+            StringBuilder enumStringBuilder = new StringBuilder();
+            for (String value : enumList) {
+                enumStringBuilder.append(value).append(", ");
+            }
+            enumString = enumStringBuilder.substring(0, enumStringBuilder.length() - 2);
+
+        }
+        org.json.JSONObject attributeObject = new org.json.JSONObject();
+        attributeObject.put("name", parameterName);
+        attributeObject.put("value", enumString);
+        return attributeObject;
     }
 
     public HashSet<String> getProtocols (AaiChannelItem channel) {
