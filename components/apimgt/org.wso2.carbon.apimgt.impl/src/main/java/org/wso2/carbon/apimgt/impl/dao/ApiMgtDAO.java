@@ -7649,14 +7649,14 @@ public class ApiMgtDAO {
     public Comment getComment(String uuid, String commentId, Integer replyLimit,
                               Integer replyOffset) throws
             APIManagementException {
-        int id = getAPIIDFromUUID(uuid);
+//        int id = getAPIIDFromUUID(uuid);
         try (Connection connection = APIMgtDBUtil.getConnection()) {
 
             Comment comment = new Comment();
-            if (id == -1) {
-                String msg = "Could not load API record for: " + uuid;
-                throw new APIManagementException(msg);
-            }
+//            if (id == -1) {
+//                String msg = "Could not load API record for: " + uuid;
+//                throw new APIManagementException(msg);
+//            }
             String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
 
             try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
@@ -7724,11 +7724,6 @@ public class ApiMgtDAO {
         int total = 0;
         String sqlQuery;
         String sqlQueryForCount;
-        int id = getAPIIDFromUUID(uuid);
-        if (id == -1) {
-            String msg = "Could not load API record for: " + uuid;
-            throw new APIManagementException(msg);
-        }
         if (parentCommentID == null) {
             sqlQueryForCount = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
         } else {
@@ -7825,12 +7820,6 @@ public class ApiMgtDAO {
         }
         try {
             connection = APIMgtDBUtil.getConnection();
-            int id = getAPIIDFromUUID(uuid);
-
-            if (id == -1) {
-                String msg = "Could not load API record for: " + uuid;
-                throw new APIManagementException(msg);
-            }
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, uuid);
             if (parentCommentID != null) {
@@ -7932,7 +7921,7 @@ public class ApiMgtDAO {
             }
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmtGetReplies = connection.prepareStatement(getCommentIDsOfReplies)) {
-                prepStmtGetReplies.setInt(1, id);
+                prepStmtGetReplies.setString(1, uuid);
                 prepStmtGetReplies.setString(2, commentId);
                 resultSet = prepStmtGetReplies.executeQuery();
                 while (resultSet.next()) {
