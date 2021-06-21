@@ -95,6 +95,39 @@ return null;
         }
     }
     private TypeEnum type = TypeEnum.HTTP;
+
+    @XmlType(name="AudienceEnum")
+    @XmlEnum(String.class)
+    public enum AudienceEnum {
+        PUBLIC("PUBLIC"),
+        PRIVATE("PRIVATE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
+
+        AudienceEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AudienceEnum fromValue(String v) {
+            for (AudienceEnum b : AudienceEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private AudienceEnum audience = AudienceEnum.PUBLIC;
     private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> tags = new ArrayList<String>();
@@ -578,6 +611,24 @@ return null;
   }
   public void setType(TypeEnum type) {
     this.type = type;
+  }
+
+  /**
+   * The audience of the API. Accepted values are PUBLIC, PRIVATE or RESTRICTED
+   **/
+  public APIDTO audience(AudienceEnum audience) {
+    this.audience = audience;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, PRIVATE or RESTRICTED")
+  @JsonProperty("audience")
+  public AudienceEnum getAudience() {
+    return audience;
+  }
+  public void setAudience(AudienceEnum audience) {
+    this.audience = audience;
   }
 
   /**
@@ -1197,6 +1248,7 @@ return null;
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(type, API.type) &&
+        Objects.equals(audience, API.audience) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
         Objects.equals(policies, API.policies) &&
@@ -1234,7 +1286,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
   }
 
   @Override
@@ -1260,6 +1312,7 @@ return null;
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
