@@ -128,6 +128,8 @@ public class WorkflowConstants {
         public static final String VARIABLE_CALLBACKURL = "callbackUrl";
         public static final String VARIABLE_WFREF = "wfReference";
         public static final String VARIABLE_INVOKER = "invoker";
+
+        public static final String API_ID = "apiId";
         
         public static final String DATA = "data";
         public static final String ID = "id";

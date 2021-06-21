@@ -8702,6 +8702,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setRevisionId(apiRevision.getId());
         api.setUuid(apiId);
         api.getId().setUuid(apiId);
+        api.setOrganization(organization);
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
