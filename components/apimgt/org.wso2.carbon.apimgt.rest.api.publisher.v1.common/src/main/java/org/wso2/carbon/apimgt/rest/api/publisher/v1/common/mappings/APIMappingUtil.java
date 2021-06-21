@@ -1262,7 +1262,7 @@ public class APIMappingUtil {
         if (null != model.getCreatedTime()) {
             Date created = new Date(Long.parseLong(model.getCreatedTime()));
             Timestamp timeStamp = new Timestamp(created.getTime());
-            dto.setCreatedTime(String.valueOf(timeStamp));
+            dto.setCreatedTime(String.valueOf(timeStamp.getTime()));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 
