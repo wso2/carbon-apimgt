@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class EndpointsDTO   {
   
     private List<String> deployedEndpoints = new ArrayList<>();
-    private List<String> unDeployedEndpoints = new ArrayList<>();
+    private List<String> notdeployedEndpoints = new ArrayList<>();
 
   /**
    * The end points which has been deployed in the gateway 
@@ -41,19 +41,19 @@ public class EndpointsDTO   {
   /**
    * The end points which has not been deployed in the gateway 
    **/
-  public EndpointsDTO unDeployedEndpoints(List<String> unDeployedEndpoints) {
-    this.unDeployedEndpoints = unDeployedEndpoints;
+  public EndpointsDTO notdeployedEndpoints(List<String> notdeployedEndpoints) {
+    this.notdeployedEndpoints = notdeployedEndpoints;
     return this;
   }
 
   
   @ApiModelProperty(value = "The end points which has not been deployed in the gateway ")
-  @JsonProperty("UnDeployedEndpoints")
-  public List<String> getUnDeployedEndpoints() {
-    return unDeployedEndpoints;
+  @JsonProperty("notdeployedEndpoints")
+  public List<String> getNotdeployedEndpoints() {
+    return notdeployedEndpoints;
   }
-  public void setUnDeployedEndpoints(List<String> unDeployedEndpoints) {
-    this.unDeployedEndpoints = unDeployedEndpoints;
+  public void setNotdeployedEndpoints(List<String> notdeployedEndpoints) {
+    this.notdeployedEndpoints = notdeployedEndpoints;
   }
 
 
@@ -67,12 +67,12 @@ public class EndpointsDTO   {
     }
     EndpointsDTO endpoints = (EndpointsDTO) o;
     return Objects.equals(deployedEndpoints, endpoints.deployedEndpoints) &&
-        Objects.equals(unDeployedEndpoints, endpoints.unDeployedEndpoints);
+        Objects.equals(notdeployedEndpoints, endpoints.notdeployedEndpoints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployedEndpoints, unDeployedEndpoints);
+    return Objects.hash(deployedEndpoints, notdeployedEndpoints);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class EndpointsDTO   {
     sb.append("class EndpointsDTO {\n");
     
     sb.append("    deployedEndpoints: ").append(toIndentedString(deployedEndpoints)).append("\n");
-    sb.append("    unDeployedEndpoints: ").append(toIndentedString(unDeployedEndpoints)).append("\n");
+    sb.append("    notdeployedEndpoints: ").append(toIndentedString(notdeployedEndpoints)).append("\n");
     sb.append("}");
     return sb.toString();
   }
