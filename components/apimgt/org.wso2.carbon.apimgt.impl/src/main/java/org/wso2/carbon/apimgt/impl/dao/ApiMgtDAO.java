@@ -731,67 +731,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
-     *
-     * @param identifier    Identifier
-     * @param applicationId ID of the application which has the subscription
-     * @throws APIManagementException
-     */
-    public void removeSubscription(Identifier identifier, int applicationId)
-            throws APIManagementException {
-
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        int id = -1;
-        String uuid;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
-            if (identifier.getId() > 0) {
-                id = identifier.getId();
-            } else if (identifier instanceof APIIdentifier) {
-                String apiUuid;
-                if (identifier.getUUID() != null) {
-                    apiUuid = identifier.getUUID();
-                } else {
-                    apiUuid = getUUIDFromIdentifier((APIIdentifier) identifier);
-                }
-                id = getAPIID(apiUuid, conn);
-            } else if (identifier instanceof APIProductIdentifier) {
-                id = ((APIProductIdentifier) identifier).getProductId();
-            }
-            ps = conn.prepareStatement(subscriptionUUIDQuery);
-            ps.setInt(1, id);
-            ps.setInt(2, applicationId);
-            resultSet = ps.executeQuery();
-
-            if (resultSet.next()) {
-                uuid = resultSet.getString("UUID");
-                SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
-                removeSubscription(subscribedAPI, conn);
-            } else {
-                throw new APIManagementException("UUID does not exist for the given apiId:" + id + " and " +
-                        "application id:" + applicationId);
-            }
-
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    log.error("Failed to rollback the add subscription ", ex);
-                }
-            }
-            handleException("Failed to add subscriber data ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-    }
-
-    /**
      * Removes the subscription entry from AM_SUBSCRIPTION by api/product UUID.
      *
      * @param uuid          UUID of the API
