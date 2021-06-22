@@ -179,6 +179,8 @@ public final class APIConstants {
 
     public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
+    public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
+
     public static final String DOCUMENTATION_KEY = "document";
 
     public static final String DOC_NAME = "overview_name";
@@ -326,6 +328,7 @@ public final class APIConstants {
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
     public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
+    public static final String API_ASYNCAPI_DEFINITION_RESOURCE_NAME = "asyncapi.json";
     public static final String LC_CACHE_NAME = "lcCache";
     public static final String DOC_API_BASED_VISIBILITY = "API_LEVEL";
     

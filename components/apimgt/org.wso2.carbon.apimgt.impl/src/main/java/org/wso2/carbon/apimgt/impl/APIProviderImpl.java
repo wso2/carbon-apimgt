@@ -180,14 +180,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
-import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
@@ -7828,6 +7821,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             AsyncApiParserUtil.saveAPIDefinition(api, jsonText, registry);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    public void saveAsyncApiDefinition(API api, String jsonText, String organization) throws APIManagementException {
+        String apiId;
+        if (api.getUuid() != null) {
+            apiId = api.getUuid();
+        } else if (api.getId().getUUID() != null) {
+            apiId = api.getId().getUUID();
+        } else {
+            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                    api.getId().getVersion(), organization);
+        }
+        saveAsyncApiDefinition(apiId, jsonText, organization);
+    }
+
+    public void saveAsyncApiDefinition(String apiId, String jsonText, String organization) throws APIManagementException {
+        try {
+            apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
+        } catch (AsyncSpecPersistenceException e) {
+            throw new APIManagementException("Error while persisting Async API definition ", e);
         }
     }
 

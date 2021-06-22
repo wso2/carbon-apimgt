@@ -1761,6 +1761,27 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException;
+
+    /**
+     * This method updates the swagger definition in registry
+     *
+     * @param api           API
+     * @param jsonText      openAPI definition
+     * @param organization  Identifier of an organization
+     * @throws APIManagementException
+     */
+    void saveAsyncApiDefinition(API api, String jsonText, String organization) throws APIManagementException;
+
+    /**
+     * This method updates the swagger definition in registry
+     *
+     * @param apiId         uuid of the api
+     * @param jsonText      openAPI definition
+     * @param organization  Identifier of an organization
+     * @throws APIManagementException
+     */
+    void saveAsyncApiDefinition(String apiId, String jsonText, String organization) throws APIManagementException;
+
     /**
     * Adds a new APIRevision to an existing API Product
      *

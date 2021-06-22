@@ -114,7 +114,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
+    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
+            String organization)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         APIIdentifier apiIdentifier = originalAPI.getId();
@@ -377,7 +378,7 @@ public class PublisherCommonUtils {
                     .getAsyncAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
-            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
+            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition, organization);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -762,7 +763,7 @@ public class PublisherCommonUtils {
         if (isAsyncAPI) {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition, organization);
         }
 
         //adding the api
@@ -1040,7 +1041,7 @@ public class PublisherCommonUtils {
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
 
         //updating APi with the new AsyncAPI definition
-        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition, organization);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
