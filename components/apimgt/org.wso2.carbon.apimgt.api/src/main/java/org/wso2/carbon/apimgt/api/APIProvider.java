@@ -797,13 +797,13 @@ public interface APIProvider extends APIManager {
             throws APIManagementException, FaultGatewaysException;
 
     /**
-     * This method validates the existence of all the throttling tiers in URI templates of API
+     * This method validates the existence of all the resource level throttling tiers in URI templates of API
      *
      * @param api           api
      * @param tenantDomain  tenant domain
      * @throws APIManagementException
      */
-    void validateThrottlingTiers(API api, String tenantDomain) throws APIManagementException;
+    void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException;
 
     /**
      * This method is used to configure monetization for a given API

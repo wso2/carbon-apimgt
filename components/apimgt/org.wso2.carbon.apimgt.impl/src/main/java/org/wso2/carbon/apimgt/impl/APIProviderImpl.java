@@ -800,7 +800,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        validateThrottlingTiers(api, tenantDomain);
+        validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
@@ -1410,7 +1410,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
-            validateThrottlingTiers(api, tenantDomain);
+            validateResourceThrottlingTiers(api, tenantDomain);
 
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
@@ -5515,7 +5515,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void validateThrottlingTiers(API api, String tenantDomain) throws APIManagementException {
+    public void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Validating x-throttling tiers defined in swagger api definition resource");
         }
