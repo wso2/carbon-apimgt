@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SequencesDTO   {
   
     private List<String> deployedSequences = new ArrayList<>();
-    private List<String> notdeployedSequences = new ArrayList<>();
+    private List<String> unDeployedSequences = new ArrayList<>();
 
   /**
    * The sequences which has been deployed in the gateway 
@@ -41,19 +41,19 @@ public class SequencesDTO   {
   /**
    * The sequences which has not been deployed in the gateway 
    **/
-  public SequencesDTO notdeployedSequences(List<String> notdeployedSequences) {
-    this.notdeployedSequences = notdeployedSequences;
+  public SequencesDTO unDeployedSequences(List<String> unDeployedSequences) {
+    this.unDeployedSequences = unDeployedSequences;
     return this;
   }
 
   
   @ApiModelProperty(value = "The sequences which has not been deployed in the gateway ")
-  @JsonProperty("notdeployedSequences")
-  public List<String> getNotdeployedSequences() {
-    return notdeployedSequences;
+  @JsonProperty("UnDeployedSequences")
+  public List<String> getUnDeployedSequences() {
+    return unDeployedSequences;
   }
-  public void setNotdeployedSequences(List<String> notdeployedSequences) {
-    this.notdeployedSequences = notdeployedSequences;
+  public void setUnDeployedSequences(List<String> unDeployedSequences) {
+    this.unDeployedSequences = unDeployedSequences;
   }
 
 
@@ -67,12 +67,12 @@ public class SequencesDTO   {
     }
     SequencesDTO sequences = (SequencesDTO) o;
     return Objects.equals(deployedSequences, sequences.deployedSequences) &&
-        Objects.equals(notdeployedSequences, sequences.notdeployedSequences);
+        Objects.equals(unDeployedSequences, sequences.unDeployedSequences);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployedSequences, notdeployedSequences);
+    return Objects.hash(deployedSequences, unDeployedSequences);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class SequencesDTO   {
     sb.append("class SequencesDTO {\n");
     
     sb.append("    deployedSequences: ").append(toIndentedString(deployedSequences)).append("\n");
-    sb.append("    notdeployedSequences: ").append(toIndentedString(notdeployedSequences)).append("\n");
+    sb.append("    unDeployedSequences: ").append(toIndentedString(unDeployedSequences)).append("\n");
     sb.append("}");
     return sb.toString();
   }
