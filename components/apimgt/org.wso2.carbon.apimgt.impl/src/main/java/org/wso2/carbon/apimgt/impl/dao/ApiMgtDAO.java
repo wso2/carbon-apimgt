@@ -3202,7 +3202,6 @@ public class ApiMgtDAO {
                 apiSubscription.setUUID(result.getString("SUB_UUID"));
                 apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
                 Application applicationObj = new Application(result.getString("APP_UUID"));
-                applicationObj.setId(appId);
                 apiSubscription.setApplication(applicationObj);
                 usage.addApiSubscriptions(apiSubscription);
             }
