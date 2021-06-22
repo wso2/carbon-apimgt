@@ -172,21 +172,21 @@ public interface APIConsumer extends APIManager {
     /**
      * Rate a particular API. This will be called when subscribers rate an API
      *
-     * @param apiId  The API identifier
+     * @param apiId  The API uuid
      * @param rating The rating provided by the subscriber
      * @param user   Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void rateAPI(Identifier apiId, APIRating rating, String user) throws APIManagementException;
+    void rateAPI(String apiId, APIRating rating, String user) throws APIManagementException;
 
     /**
      * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
-     * @param id   The identifier
+     * @param id   The api uuid
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void removeAPIRating(Identifier id, String user) throws APIManagementException;
+    void removeAPIRating(String id, String user) throws APIManagementException;
 
     /**
      * returns the SubscribedAPI object which is related to the subscriptionId
@@ -394,52 +394,52 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param apiUUID Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String apiUUID, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier      Api identifier
+     * @param apiUUID      Api uuid
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
+    Comment[] getComments(String apiUUID, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
      *
-     * @param apiTypeWrapper Api Type Wrapper
+     * @param apiUUID Api uuid
      * @param commentId      Comment ID
      * @param replyLimit
      * @param replyOffset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
+    Comment getComment(String apiUUID, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper  Api type wrapper
+     * @param apiUUID  Api uuid
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
+    CommentList getComments(String apiUUID, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api Type Wrapper
+     * @param uuid Api uuid
      * @param commentId      comment ID
      * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
+    boolean editComment(String uuid, String commentId, Comment comment) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
@@ -453,12 +453,12 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to delete a comment.
      *
-     * @param apiTypeWrapper API Type Wrapper
+     * @param uuid API Type Wrapper
      * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */
-    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
+    boolean deleteComment(String uuid, String commentId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -637,13 +637,13 @@ public interface APIConsumer extends APIManager {
 
     Map<String, Object> searchPaginatedAPIs(String searchTerm, String searchType, String tenantDomain, int start, int end, boolean limitAttributes) throws APIManagementException;
 
-    int getUserRating(Identifier apiId, String user) throws APIManagementException;
+    int getUserRating(String uuid, String user) throws APIManagementException;
 
-    JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException;
+    JSONObject getUserRatingInfo(String uuid, String user) throws APIManagementException;
 
-    float getAverageAPIRating(Identifier apiId) throws APIManagementException;
+    float getAverageAPIRating(String uuid) throws APIManagementException;
 
-    JSONArray getAPIRatings(Identifier apiId) throws APIManagementException;
+    JSONArray getAPIRatings(String uuid) throws APIManagementException;
 
     /**
      * Get a list of published APIs by the given provider.

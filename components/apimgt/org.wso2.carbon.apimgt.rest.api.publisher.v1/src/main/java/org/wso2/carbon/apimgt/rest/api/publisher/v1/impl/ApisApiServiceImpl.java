@@ -334,8 +334,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setEntryPoint("PUBLISHER");
             comment.setUser(username);
             comment.setApiId(apiId);
-            String createdCommentId = apiProvider.addComment(identifier, comment, username);
-            Comment createdComment = apiProvider.getComment(apiTypeWrapper, createdCommentId, 0, 0);
+            String createdCommentId = apiProvider.addComment(apiId, comment, username);
+            Comment createdComment = apiProvider.getComment(apiId, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -362,7 +362,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             String parentCommentID = null;
-            CommentList comments = apiProvider.getComments(apiTypeWrapper, parentCommentID, limit, offset);
+            CommentList comments = apiProvider.getComments(apiId, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -391,7 +391,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+            Comment comment = apiProvider.getComment(apiId, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
                 CommentDTO commentDTO;
@@ -434,7 +434,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            CommentList comments = apiProvider.getComments(apiTypeWrapper, commentId, limit, offset);
+            CommentList comments = apiProvider.getComments(apiId, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -463,7 +463,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+            Comment comment = apiProvider.getComment(apiId, commentId, 0, 0);
             if (comment != null) {
                 if (comment.getUser().equals(username)) {
                     boolean commentEdited = false;
@@ -478,8 +478,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         commentEdited = true;
                     }
                     if (commentEdited) {
-                        if (apiProvider.editComment(apiTypeWrapper, commentId, comment)) {
-                            Comment editedComment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+                        if (apiProvider.editComment(apiId, commentId, comment)) {
+                            Comment editedComment = apiProvider.getComment(apiId, commentId, 0, 0);
                             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
                             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -513,12 +513,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+            Comment comment = apiProvider.getComment(apiId, commentId, 0, 0);
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
                 if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) || comment.getUser().equals(username)) {
-                    if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
+                    if (apiProvider.deleteComment(apiId, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
                         obj.put("message", "The comment has been deleted");
