@@ -60,7 +60,7 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
             gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
             if (debugEnabled) {
-                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+                log.debug("Retrieved Artifacts for " + apiName + " from storage");
             }
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
