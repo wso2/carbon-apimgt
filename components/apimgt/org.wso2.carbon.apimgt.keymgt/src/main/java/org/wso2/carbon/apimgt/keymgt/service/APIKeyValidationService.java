@@ -356,9 +356,14 @@ public class APIKeyValidationService {
                     apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
                             tenantDomain);
                     if (apiPolicy != null) {
-                        store.addOrUpdateApiPolicy(apiPolicy);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        if (apiPolicy.getName() != null) {
+                            store.addOrUpdateApiPolicy(apiPolicy);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                            }
+                        } else {
+                            throw new APIManagementException("Exception while loading api policy for " +
+                                    urlMapping.getThrottlingPolicy() + " for domain " + tenantDomain);
                         }
                     }
 
@@ -368,9 +373,14 @@ public class APIKeyValidationService {
                 apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
                         tenantDomain);
                 if (apiPolicy != null) {
-                    store.addOrUpdateApiPolicy(apiPolicy);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Update SubscriptionDataStore API Policu for " + apiPolicy.getCacheKey());
+                    if (apiPolicy.getName() != null) {
+                        store.addOrUpdateApiPolicy(apiPolicy);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        }
+                    } else {
+                        throw new APIManagementException("Exception while loading api policy for " +
+                                urlMapping.getThrottlingPolicy() + " for domain " + tenantDomain);
                     }
                 }
             }
