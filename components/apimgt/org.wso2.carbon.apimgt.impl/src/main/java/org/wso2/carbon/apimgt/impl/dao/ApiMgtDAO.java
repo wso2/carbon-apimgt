@@ -16451,7 +16451,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                // Adding to AM_DEPLOYMENT_REVISION_MAPPING table
+                // Adding to AM_DEPLOYED_REVISION table
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_DEPLOYED_API_REVISION);
                 for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
@@ -16746,7 +16746,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                // Remove an entry from AM_DEPLOYED_REVISION table
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_DEPLOYED_API_REVISION);
                 for (DeployedAPIRevision deployment : deployments) {
