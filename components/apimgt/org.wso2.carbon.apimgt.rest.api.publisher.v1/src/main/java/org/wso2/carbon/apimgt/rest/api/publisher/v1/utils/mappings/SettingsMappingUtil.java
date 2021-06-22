@@ -89,7 +89,7 @@ public class SettingsMappingUtil {
             String authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
 
             if (authorizationHeader == null) {
-                authorizationHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
             }
             settingsDTO.setAuthorizationHeader(authorizationHeader);
         }

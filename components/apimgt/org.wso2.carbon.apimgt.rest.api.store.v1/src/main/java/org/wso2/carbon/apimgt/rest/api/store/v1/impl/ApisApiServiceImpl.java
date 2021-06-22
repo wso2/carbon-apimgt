@@ -989,7 +989,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Extracting clicked API name by the user, for the recommendation system
             String userName = RestApiUtil.getLoggedInUsername();
-            if (api.getApi().getAuthorizationHeader() == null) {
+            if (api.isAPIProduct() && StringUtils.isBlank(api.getApiProduct().getAuthorizationHeader())) {
+                String authHeader = APIUtil.getOAuthConfiguration(APIUtil.getTenantId(userName),
+                        APIConstants.AUTHORIZATION_HEADER);
+                api.getApiProduct().setAuthorizationHeader(authHeader);
+            }
+            if (!api.isAPIProduct() && StringUtils.isBlank(api.getApi().getAuthorizationHeader())) {
                 String authHeader = APIUtil.getOAuthConfiguration(APIUtil.getTenantId(userName),
                         APIConstants.AUTHORIZATION_HEADER);
                 api.getApi().setAuthorizationHeader(authHeader);

@@ -39,6 +39,7 @@ export default function AuthorizationHeader(props) {
     const [apiFromContext] = useAPI();
     const { settings } = useAppContext();
     let hasResourceWithSecurity;
+    const authorizationHeaderValue = api.authorizationHeader ? api.authorizationHeader : settings.authorizationHeader;
     if (apiFromContext.apiType === 'APIProduct') {
         const apiList = apiFromContext.apis;
         for (const apiInProduct in apiList) {
@@ -70,8 +71,7 @@ export default function AuthorizationHeader(props) {
                             defaultMessage='Authorization Header'
                         />
                     )}
-                    value={hasResourceWithSecurity ? (api.authorizationHeader || settings.authorizationHeader)
-                        : 'Authorization'}
+                    value={hasResourceWithSecurity ? authorizationHeaderValue : ' '}
                     margin='normal'
                     variant='outlined'
                     onChange={({ target: { value } }) => configDispatcher({ action: 'authorizationHeader', value })}

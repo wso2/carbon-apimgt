@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
@@ -32,6 +33,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -91,6 +93,17 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             allowHeaders = APIUtil.getAllowedHeaders();
         }
         if (authorizationHeader != null) {
+            allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + authorizationHeader;
+        } else {
+            try {
+                authorizationHeader = APIUtil
+                        .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                if (authorizationHeader == null) {
+                    authorizationHeader = HttpHeaders.AUTHORIZATION;
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while reading authorization header from APIM configurations", e);
+            }
             allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + authorizationHeader;
         }
         if (allowedOrigins == null) {
