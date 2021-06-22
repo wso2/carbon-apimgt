@@ -231,7 +231,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     resource = registry.get(resourcePath);
                 }
                 resource.setContent(api.getSwaggerDefinition());
-                resource.setMediaType("application/json");
+                resource.setMediaType(APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME);
                 registry.put(resourcePath, resource);
                 //Need to set anonymous if the visibility is public
                 RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
@@ -565,7 +565,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     resource = registry.get(resourcePath);
                 }
                 resource.setContent(api.getSwaggerDefinition());
-                resource.setMediaType("application/json");
+                resource.setMediaType(APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME);
                 registry.put(resourcePath, resource);
                 //Need to set anonymous if the visibility is public
                 RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
@@ -1833,7 +1833,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 resource = registry.get(resourcePath);
             }
             resource.setContent(apiDefinition);
-            resource.setMediaType("application/json");
+            resource.setMediaType(APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME);
             registry.put(resourcePath, resource);
 
             String[] visibleRolesArr = null;
