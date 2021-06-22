@@ -800,7 +800,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        validateResourceThrottlingTiers(api, tenantDomain);
+        validateThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
@@ -1410,7 +1410,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
-            validateResourceThrottlingTiers(api, tenantDomain);
+            validateThrottlingTiers(api, tenantDomain);
 
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
@@ -5515,12 +5515,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException {
+    public void validateThrottlingTiers(API api, String tenantDomain) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Validating x-throttling tiers defined in swagger api definition resource");
         }
         Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
         if (tierMap != null) {
+            if (api.getApiLevelPolicy() != null && !tierMap.containsKey(api.getApiLevelPolicy())) {
+                String message = "Invalid x-throttling tier " + api.getApiLevelPolicy() +
+                        " found in api definition for API level";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
             Set<URITemplate> uriTemplates = api.getUriTemplates();
             for (URITemplate template : uriTemplates) {
                 if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
