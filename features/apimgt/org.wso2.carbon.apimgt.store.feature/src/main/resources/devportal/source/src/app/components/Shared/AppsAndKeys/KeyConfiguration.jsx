@@ -135,8 +135,8 @@ const KeyConfiguration = (props) => {
         return modifiedGrantTypes;
     };
 
-    const callBackHasErrors = () => {
-        if (callbackUrl === '') {
+    const callBackHasErrors = (callbackUrlLocal) => {
+        if (callbackUrlLocal === '') {
             updateHasError(true);
             setCallbackHelper(intl.formatMessage({
                 defaultMessage: 'Call back URL can not be empty when Implicit or Authorization Code grants are selected.',
@@ -162,7 +162,7 @@ const KeyConfiguration = (props) => {
         switch (field) {
             case 'callbackUrl':
                 if (newGrantTypes.includes('implicit') || newGrantTypes.includes('authorization_code')) {
-                    callBackHasErrors();
+                    callBackHasErrors(currentTarget.value);
                 }
                 newRequest.callbackUrl = currentTarget.value;
                 break;
