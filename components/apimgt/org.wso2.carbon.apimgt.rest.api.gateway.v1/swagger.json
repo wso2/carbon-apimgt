@@ -1,7 +1,7 @@
 {
   "swagger" : "2.0",
   "info" : {
-    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
+    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v1/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
     "version" : "v1",
     "title" : "WSO2 API Manager - Gateway",
     "contact" : {
@@ -22,7 +22,7 @@
   "paths" : {
     "/redeploy-api" : {
       "post" : {
-        "tags" : [ "Deploy API" ],
+        "tags" : [ "ReDeploy API" ],
         "summary" : "Re Deploy the API in the gateway",
         "description" : "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
         "parameters" : [ {
@@ -51,44 +51,48 @@
               "$ref" : "#/definitions/DeployResponse"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
-            }
-          },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
         },
-        "security" : [ {
-          "OAuth2Security" : [ "apim:api_publish" ]
-        } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/undeploy-api" : {
       "post" : {
         "tags" : [ "Undeploy API" ],
-        "summary" : "Uneploy the API in the gateway",
-        "description" : "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
+        "summary" : "Uneploy the API from the gateway",
+        "description" : "This operation is used to undeploy an API from the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -115,44 +119,48 @@
               "$ref" : "#/definitions/DeployResponse"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
-            }
-          },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
         },
-        "security" : [ {
-          "OAuth2Security" : [ "apim:api_publish" ]
-        } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/api-artifact" : {
       "get" : {
         "tags" : [ "Get API Artifacts" ],
-        "summary" : "Get API artifact from the storage",
-        "description" : "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
+        "summary" : "Get API synapse definition artifact from the storage",
+        "description" : "This operation is used to get the API synapse definition from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -176,40 +184,44 @@
           "200" : {
             "description" : "OK.\nAPI artifact successfully retrieved from the storage.\n",
             "schema" : {
-              "$ref" : "#/definitions/APIArtifact"
-            }
-          },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/APIArtifact"
+              "$ref" : "#/definitions/API"
             }
           },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
         },
-        "security" : [ {
-          "OAuth2Security" : [ "apim:api_publish" ]
-        } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/local-entry" : {
@@ -243,37 +255,41 @@
               "$ref" : "#/definitions/LocalEntry"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/LocalEntry"
-            }
-          },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
         },
-        "security" : [ {
-          "OAuth2Security" : [ "apim:api_publish" ]
-        } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/sequence" : {
@@ -307,37 +323,41 @@
               "$ref" : "#/definitions/Sequences"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Sequences"
-            }
-          },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
         },
-        "security" : [ {
-          "OAuth2Security" : [ "apim:api_publish" ]
-        } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/end-points" : {
@@ -368,50 +388,44 @@
           "200" : {
             "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
             "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
-            }
-          },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
+              "$ref" : "#/definitions/Endpoints"
             }
           },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
         },
-        "security" : [ {
-          "OAuth2Security" : [ "apim:api_publish" ]
-        } ],
-        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
-      }
-    }
-  },
-  "securityDefinitions" : {
-    "OAuth2Security" : {
-      "type" : "oauth2",
-      "tokenUrl" : "https://localhost:9443/oauth2/token",
-      "flow" : "password",
-      "scopes" : {
-        "apim:api_publish" : "Publish API"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     }
   },
@@ -422,15 +436,24 @@
         "deployStatus" : {
           "type" : "string",
           "example" : "DEPLOYED",
-          "description" : "This attribute declares whether deployment task is successfull or failed.\n",
-          "enum" : [ "DEPLOYED", "ERROR" ]
+          "description" : "This attribute declares whether deployment task is successful or failed.\n",
+          "enum" : [ "DEPLOYED", "UNDEPLOYED", "ERROR" ]
         },
-        "jsonPayload" : {
+        "message" : {
           "type" : "string",
-          "description" : "Attributes that returned after the api deployment\n"
+          "description" : "Attributes that returned after the API deployment\n"
         }
       },
       "title" : "Deploy API Response"
+    },
+    "API" : {
+      "properties" : {
+        "api" : {
+          "type" : "string",
+          "description" : "The synapse definition of the API\n"
+        }
+      },
+      "title" : "API Definition Response"
     },
     "Endpoints" : {
       "properties" : {
@@ -441,7 +464,7 @@
             "type" : "string"
           }
         },
-        "UnDeployedEndpoints" : {
+        "notdeployedEndpoints" : {
           "type" : "array",
           "description" : "The end points which has not been deployed in the gateway\n",
           "items" : {
@@ -461,7 +484,7 @@
             "example" : "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
           }
         },
-        "UnDeployedSequences" : {
+        "notdeployedSequences" : {
           "type" : "array",
           "description" : "The sequences which has not been deployed in the gateway\n",
           "items" : {
@@ -479,38 +502,19 @@
           "description" : "The local entries which has been deployed in the gateway\n",
           "items" : {
             "type" : "string",
-            "example" : "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
+            "example" : "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
           }
         },
-        "UnDeployedLocalEntries" : {
+        "notdeployedLocalEntries" : {
           "type" : "array",
           "description" : "The local entries which has not been deployed in the gateway\n",
           "items" : {
             "type" : "string",
-            "example" : "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
+            "example" : "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
           }
         }
       },
       "title" : "LocalEntry Response"
-    },
-    "APIArtifact" : {
-      "properties" : {
-        "count" : {
-          "type" : "integer",
-          "example" : 1,
-          "description" : "Number of Artifacts Returned\n"
-        },
-        "endpoints" : {
-          "$ref" : "#/definitions/Endpoints"
-        },
-        "localEntries" : {
-          "$ref" : "#/definitions/LocalEntry"
-        },
-        "sequences" : {
-          "$ref" : "#/definitions/Sequences"
-        }
-      },
-      "title" : "API Artifact Response"
     },
     "Error" : {
       "required" : [ "code", "message" ],
@@ -557,13 +561,36 @@
       "title" : "Description of individual errors that may have occurred during a request."
     }
   },
-  "parameters" : {
-    "apiId-Q" : {
-      "name" : "apiId",
-      "in" : "query",
-      "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
-      "required" : true,
-      "type" : "string"
+  "responses" : {
+    "BadRequest" : {
+      "description" : "Bad Request. Invalid request or validation error.",
+      "examples" : {
+        "application/json" : {
+          "code" : 400,
+          "message" : "Bad Request",
+          "description" : "Invalid request or validation error",
+          "moreInfo" : "",
+          "error" : [ ]
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Error"
+      }
+    },
+    "NotFound" : {
+      "description" : "Not Found. The specified resource does not exist.",
+      "examples" : {
+        "application/json" : {
+          "code" : 404,
+          "message" : "Not Found",
+          "description" : "The specified resource does not exist",
+          "moreInfo" : "",
+          "error" : [ ]
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Error"
+      }
     }
   }
 }
