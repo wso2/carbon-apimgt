@@ -720,13 +720,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 body.setVisibility(VisibilityEnum.PUBLIC);
             }
 
-            if (body.getAuthorizationHeader() == null) {
-                body.setAuthorizationHeader(APIUtil
-                        .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
-            }
-            if (body.getAuthorizationHeader() == null) {
-                body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
-            }
             //Remove the /{version} from the context.
             if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
                 context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");

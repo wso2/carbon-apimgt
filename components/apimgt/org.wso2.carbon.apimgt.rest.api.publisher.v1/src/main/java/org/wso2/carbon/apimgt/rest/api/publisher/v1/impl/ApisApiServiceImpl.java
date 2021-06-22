@@ -398,14 +398,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + " already exists.", log);
         }
 
-        if (body.getAuthorizationHeader() == null) {
-            body.setAuthorizationHeader(APIUtil
-                    .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
-        }
-        if (body.getAuthorizationHeader() == null) {
-            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
-        }
-
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             RestApiUtil.handleBadRequest("Valid roles should be added under 'visibleRoles' to restrict " +
                     "the visibility", log);

@@ -31,6 +31,7 @@ public class SettingsDTO   {
     private String defaultAdvancePolicy = null;
     private String defaultSubscriptionPolicy = null;
     private List<DeploymentsDTO> deployments = new ArrayList<>();
+    private String authorizationHeader = null;
 
   /**
    * Store URL
@@ -225,6 +226,24 @@ public class SettingsDTO   {
     this.deployments = deployments;
   }
 
+  /**
+   * Authorization Header
+   **/
+  public SettingsDTO authorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Authorization Header")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -245,12 +264,13 @@ public class SettingsDTO   {
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
         Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
-        Objects.equals(deployments, settings.deployments);
+        Objects.equals(deployments, settings.deployments) &&
+        Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, deployments);
+    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, deployments, authorizationHeader);
   }
 
   @Override
@@ -269,6 +289,7 @@ public class SettingsDTO   {
     sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");
     sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
     sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
+    sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("}");
     return sb.toString();
   }

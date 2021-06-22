@@ -25,6 +25,7 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 /**
  *
@@ -36,7 +37,9 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
+    const { settings } = useAppContext();
     let hasResourceWithSecurity;
+    const authorizationHeaderValue = api.authorizationHeader ? api.authorizationHeader : settings.authorizationHeader;
     if (apiFromContext.apiType === 'APIProduct') {
         const apiList = apiFromContext.apis;
         for (const apiInProduct in apiList) {
@@ -68,7 +71,7 @@ export default function AuthorizationHeader(props) {
                             defaultMessage='Authorization Header'
                         />
                     )}
-                    value={hasResourceWithSecurity ? (api.authorizationHeader || ' ') : ''}
+                    value={hasResourceWithSecurity ? authorizationHeaderValue : ' '}
                     margin='normal'
                     variant='outlined'
                     onChange={({ target: { value } }) => configDispatcher({ action: 'authorizationHeader', value })}
