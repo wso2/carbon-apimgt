@@ -7,7 +7,6 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.RedeployApiApiService;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.DeployResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.Map;
@@ -26,7 +25,6 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
         }
-        DeployResponseDTO deployResponseDTO = new DeployResponseDTO();
         boolean status = false;
         try {
             Map<String, String> apiAttributes =
@@ -49,9 +47,7 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
             if (debugEnabled) {
                 log.debug("Successfully deployed " + apiName + " in gateway");
             }
-            deployResponseDTO.deployStatus(DeployResponseDTO.DeployStatusEnum.DEPLOYED);
-            deployResponseDTO.setMessage(apiName + " redeployed from the gateway");
-            return Response.ok().entity(deployResponseDTO).build();
+            return Response.ok().entity(apiName + " redeployed successfully in the Gateway").build();
         } else {
             return Response.serverError().entity("Unexpected error occurred").build();
         }
