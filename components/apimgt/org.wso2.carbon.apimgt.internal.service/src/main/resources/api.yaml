@@ -476,6 +476,46 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /runtime-metadata:
+    get:
+      summary: Metadata information for API runtimes
+      description: |
+        This will provide access to the deployment metadata in json format
+      parameters:
+      - $ref: '#/parameters/requestedTenant'
+      - name: apiId
+        in: query
+        description: |
+          **Search condition**.
+            Api ID
+        type: string
+      - name: gatewayLabel
+        in: query
+        description: |
+          **Search condition**.
+           label associated with the APIs
+        type: string
+      - name: name
+        in: query
+        description: |
+          **Search condition**.
+           name of API
+        type: string
+      - name: version
+        in: query
+        description: |
+          **Search condition**.
+           version of API
+        type: string
+      tags:
+      - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: Json file of runtime metadata
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /endpoint-certificates:
     get:
       summary: Get all the endpoint certificates for given alias.
