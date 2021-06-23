@@ -1213,7 +1213,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         appToken.setValidityTime(response.getValidityPeriod());
                         return Response.ok().entity(appToken).build();
                     } catch (APIManagementException e) {
-                        RestApiUtil.handleBadRequest(e.getErrorHandler(), log);
+                        RestApiUtil.handleBadRequest(e.getMessage(), e.getErrorHandler().getErrorCode(), log);
                     }
                 } else {
                     RestApiUtil

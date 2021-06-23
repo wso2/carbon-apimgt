@@ -18,18 +18,39 @@ package org.wso2.carbon.apimgt.impl.kmclient;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 import static feign.FeignException.errorStatus;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class KMClientErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        if (response.status() >= 400 && response.status() <= 499) {
-            return new KeyManagerClientException(response.status(), response.reason());
-        }
-        if (response.status() >= 500 && response.status() <= 599) {
-            return new KeyManagerClientException(response.status(), response.reason());
+
+        String errorDescription;
+        try {
+            String responseStr = IOUtils.toString(response.body().asInputStream(), UTF_8);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject responseJson = (JSONObject) jsonParser.parse(responseStr);
+            if (responseJson.get("error_description") != null) {
+                errorDescription = responseJson.get("error_description").toString();
+            } else {
+                errorDescription = response.reason();
+            }
+            if (response.status() >= 400 && response.status() <= 499) {
+                return new KeyManagerClientException(response.status(), errorDescription);
+            }
+            if (response.status() >= 500 && response.status() <= 599) {
+                return new KeyManagerClientException(response.status(), errorDescription);
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
         }
         return errorStatus(methodKey, response);
     }
