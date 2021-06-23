@@ -100,8 +100,7 @@ return null;
     @XmlEnum(String.class)
     public enum AudienceEnum {
         PUBLIC("PUBLIC"),
-        PRIVATE("PRIVATE"),
-        RESTRICTED("RESTRICTED");
+        PRIVATE("PRIVATE");
         private String value;
 
         AudienceEnum (String v) {
@@ -127,7 +126,7 @@ return null;
 return null;
         }
     }
-    private AudienceEnum audience = AudienceEnum.PUBLIC;
+    private AudienceEnum audience = null;
     private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> tags = new ArrayList<String>();
@@ -614,7 +613,7 @@ return null;
   }
 
   /**
-   * The audience of the API. Accepted values are PUBLIC, PRIVATE or RESTRICTED
+   * The audience of the API. Accepted values are PUBLIC, PRIVATE
    **/
   public APIDTO audience(AudienceEnum audience) {
     this.audience = audience;
@@ -622,7 +621,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, PRIVATE or RESTRICTED")
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, PRIVATE")
   @JsonProperty("audience")
   public AudienceEnum getAudience() {
     return audience;

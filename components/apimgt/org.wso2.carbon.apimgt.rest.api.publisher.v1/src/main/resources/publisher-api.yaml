@@ -7857,13 +7857,11 @@ components:
           example: HTTP
         audience:
           type: string
-          description: The audience of the API. Accepted values are PUBLIC, PRIVATE or RESTRICTED
+          description: The audience of the API. Accepted values are PUBLIC, PRIVATE
           example: PUBLIC
-          default: PUBLIC
           enum:
             - PUBLIC
             - PRIVATE
-            - RESTRICTED
         lifeCycleStatus:
           type: string
           example: CREATED
@@ -8021,13 +8019,11 @@ components:
             - SSE
         audience:
           type: string
-          description: The audience of the API. Accepted values are PUBLIC, PRIVATE or RESTRICTED 
+          description: The audience of the API. Accepted values are PUBLIC, PRIVATE
           example: PUBLIC
-          default: PUBLIC
           enum:
             - PUBLIC
             - PRIVATE
-            - RESTRICTED
         transport:
           type: array
           description: |
