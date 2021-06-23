@@ -114,8 +114,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
-            String organization)
+    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         APIIdentifier apiIdentifier = originalAPI.getId();
