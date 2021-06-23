@@ -256,11 +256,11 @@ public interface APIPersistence {
     ============================================= */
 
     /**
-     * Save OAS Schema definition
+     * Save Async API definition
      *
      * @param org           Organization the Async API definition is owned by
      * @param apiId         API ID
-     * @param apiDefinition API OAS definition
+     * @param apiDefinition Async API definition
      * @throws AsyncSpecPersistenceException
      */
     void saveAsyncDefinition(Organization org, String apiId, String apiDefinition) throws AsyncSpecPersistenceException;

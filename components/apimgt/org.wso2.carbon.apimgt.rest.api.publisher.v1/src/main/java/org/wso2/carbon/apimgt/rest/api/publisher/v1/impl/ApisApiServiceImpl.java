@@ -4984,9 +4984,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             //load topics from AsyncAPI
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
                     definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
+            apiToAdd.setOrganization(organization);
 
             apiProvider.addAPI(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd, organization);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +

@@ -378,7 +378,7 @@ public class PublisherCommonUtils {
                     .getAsyncAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
-            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition, organization);
+            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -760,10 +760,11 @@ public class PublisherCommonUtils {
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
 
+        apiToAdd.setOrganization(organization);
         if (isAsyncAPI) {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition, organization);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
         }
 
         //adding the api
@@ -1041,7 +1042,7 @@ public class PublisherCommonUtils {
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
 
         //updating APi with the new AsyncAPI definition
-        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition, organization);
+        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId());

@@ -7823,17 +7823,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException {
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            AsyncApiParserUtil.saveAPIDefinition(api, jsonText, registry);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-    }
-
-    public void saveAsyncApiDefinition(API api, String jsonText, String organization) throws APIManagementException {
         String apiId;
+        String organization = api.getOrganization();
         if (api.getUuid() != null) {
             apiId = api.getUuid();
         } else if (api.getId().getUUID() != null) {
@@ -7842,10 +7833,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
                     api.getId().getVersion(), organization);
         }
-        saveAsyncApiDefinition(apiId, jsonText, organization);
-    }
 
-    public void saveAsyncApiDefinition(String apiId, String jsonText, String organization) throws APIManagementException {
         try {
             apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
         } catch (AsyncSpecPersistenceException e) {
