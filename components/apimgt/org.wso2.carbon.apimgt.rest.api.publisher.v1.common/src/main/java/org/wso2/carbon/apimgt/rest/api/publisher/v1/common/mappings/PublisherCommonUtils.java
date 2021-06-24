@@ -759,6 +759,9 @@ public class PublisherCommonUtils {
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
 
+        //adding the api
+        apiProvider.addAPI(apiToAdd);
+
         apiToAdd.setOrganization(organization);
         if (isAsyncAPI) {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
@@ -766,8 +769,6 @@ public class PublisherCommonUtils {
             apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
         }
 
-        //adding the api
-        apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
 
