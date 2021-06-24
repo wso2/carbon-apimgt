@@ -26,10 +26,8 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -44,7 +42,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -444,8 +441,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getAsyncAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getAsyncAPIDefinition(apiId);
+        return super.getAsyncAPIDefinition(apiId, organization);
     }
 }

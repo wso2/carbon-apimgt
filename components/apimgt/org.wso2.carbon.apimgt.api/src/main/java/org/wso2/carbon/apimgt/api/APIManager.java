@@ -912,9 +912,10 @@ public interface APIManager {
     /**
      * Returns the AsyncAPI definition as a string
      *
-     * @param apiId id of the APIIdentifier
+     * @param apiId         id of the APIIdentifier
+     * @param organization  identifier of the organization
      * @return AsyncAPI string
      * @throws APIManagementException
      */
-    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
+    String getAsyncAPIDefinition(Identifier apiId, String organization) throws APIManagementException;
 }

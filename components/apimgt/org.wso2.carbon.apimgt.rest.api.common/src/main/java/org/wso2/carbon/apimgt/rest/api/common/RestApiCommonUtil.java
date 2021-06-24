@@ -462,7 +462,7 @@ public class RestApiCommonUtil {
     public static String retrieveAsyncAPIDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
 
-        return apiProvider.getAsyncAPIDefinition(api.getId());
+        return apiProvider.getAsyncAPIDefinition(api.getId(), api.getOrganization());
     }
 
     public static String getValidateTenantDomain(String xWSO2Tenant) {

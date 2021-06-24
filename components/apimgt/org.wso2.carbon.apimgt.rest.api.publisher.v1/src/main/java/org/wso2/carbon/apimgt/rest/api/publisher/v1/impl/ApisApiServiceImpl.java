@@ -4649,6 +4649,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             //String asyncAPIString = apiProvider.getAsyncAPIDefinition(apiIdentifier);
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             String updatedDefinition = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; fileNme=\"" + "asyncapi.json" + "\"").build();
