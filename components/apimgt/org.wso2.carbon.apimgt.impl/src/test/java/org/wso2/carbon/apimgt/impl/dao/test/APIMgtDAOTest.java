@@ -74,15 +74,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.events.Event;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -103,10 +99,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -148,7 +142,6 @@ public class APIMgtDAOTest {
         IdentityConfigParser.getInstance(identityConfigPath);
         OAuthServerConfiguration oAuthServerConfiguration = OAuthServerConfiguration.getInstance();
         ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oAuthServerConfiguration);
-
     }
 
     private static void initializeDatabase(String configFilePath) {
@@ -947,12 +940,6 @@ public class APIMgtDAOTest {
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId());
         subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.REJECTED);
         apiMgtDAO.updateSubscription(subscribedAPI);
-        assertTrue(apiMgtDAO.hasSubscription(subscriptionPolicy.getPolicyName(), subscriber.getName(),
-                PolicyConstants.POLICY_LEVEL_SUB));
-        assertTrue(apiMgtDAO.hasSubscription(applicationPolicy.getPolicyName(), subscriber.getName(),
-                PolicyConstants.POLICY_LEVEL_APP));
-        assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
-                PolicyConstants.POLICY_LEVEL_API));
         assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId, null))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);
@@ -1418,5 +1405,79 @@ public class APIMgtDAOTest {
         graphqlComplexityInfo.setList(list);
 
         return graphqlComplexityInfo;
+    }
+
+    @Test
+    public void testHasAPIPolicyAttached() throws APIManagementException {
+        API api = new API(new APIIdentifier("admin", "testHasAPIPolicyAttached", "1.0.0"));
+        api.setContext("/testHasAPIPolicyAttached/1.0.0");
+        api.setContextTemplate("/testHasAPIPolicyAttached");
+        api.setApiLevelPolicy("testHasAPIPolicyAttached");
+        int superTenantAPI = apiMgtDAO.addAPI(api, -1234);
+        API api2 = new API(new APIIdentifier("admin@wso2.com", "testHasAPIPolicyAttached", "1.0.0"));
+        api2.setContext("/t/wso2.com/testHasAPIPolicyAttached/1.0.0");
+        api2.setContextTemplate("/t/wso2.com/testHasAPIPolicyAttached");
+        api2.setApiLevelPolicy("testHasAPIPolicyAttached");
+        int tenantAPI = apiMgtDAO.addAPI(api2, -1234);
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached","carbon.super"));
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached","wso2.com"));
+        apiMgtDAO.deleteAPI(api.getId());
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached","carbon.super"));
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached","wso2.com"));
+        apiMgtDAO.deleteAPI(api2.getId());
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached","carbon.super"));
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached", "wso2.com"));
+    }
+
+
+    @Test
+    public void testHasAPIPolicyAttached2() throws APIManagementException {
+        API api = new API(new APIIdentifier("admin", "testHasAPIPolicyAttached2", "1.0.0"));
+        api.setContext("/testHasAPIPolicyAttached2/1.0.0");
+        api.setContextTemplate("/testHasAPIPolicyAttached2");
+        api.setApiLevelPolicy("testHasAPIPolicyAttached2");
+        int superTenantAPI = apiMgtDAO.addAPI(api, -1234);
+        API api2 = new API(new APIIdentifier("admin@wso2.com", "testHasAPIPolicyAttached2", "1.0.0"));
+        api2.setContext("/t/wso2.com/testHasAPIPolicyAttached2/1.0.0");
+        api2.setContextTemplate("/t/wso2.com/testHasAPIPolicyAttached2");
+        api2.setApiLevelPolicy("testHasAPIPolicyAttached2");
+        int tenantAPI = apiMgtDAO.addAPI(api2, -1234);
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached2","carbon.super"));
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached2","wso2.com"));
+        apiMgtDAO.deleteAPI(api2.getId());
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached2","carbon.super"));
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached2","wso2.com"));
+        apiMgtDAO.deleteAPI(api.getId());
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached2","carbon.super"));
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached2","wso2.com"));
+    }
+    @Test
+    public void testHasAPIPolicyAttached3() throws APIManagementException {
+        API api = new API(new APIIdentifier("admin", "testHasAPIPolicyAttached3", "1.0.0"));
+        api.setContext("/testHasAPIPolicyAttached3/1.0.0");
+        api.setContextTemplate("/testHasAPIPolicyAttached3");
+        URITemplate uriTemplate = new URITemplate();
+        uriTemplate.setThrottlingTier("testHasAPIPolicyAttached3");
+        uriTemplate.setUriTemplate("/abc");
+        uriTemplate.setHTTPVerb("GET");
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        uriTemplates.add(uriTemplate);
+        api.setUriTemplates(uriTemplates);
+        int superTenantAPI = apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addURITemplates(superTenantAPI,api,-1234);
+        API api2 = new API(new APIIdentifier("admin@wso2.com", "testHasAPIPolicyAttached3", "1.0.0"));
+        api2.setContext("/t/wso2.com/testHasAPIPolicyAttached3/1.0.0");
+        api2.setContextTemplate("/t/wso2.com/testHasAPIPolicyAttached3");
+        api2.setUriTemplates(uriTemplates);
+        int tenantAPI = apiMgtDAO.addAPI(api2, 1);
+        apiMgtDAO.addURITemplates(tenantAPI,api2,1);
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached3","carbon.super"));
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached3","wso2.com"));
+        apiMgtDAO.deleteAPI(api.getId());
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached3","carbon.super"));
+        Assert.assertTrue(apiMgtDAO.hasAPIPolicyAttached("testHasAPIPolicyAttached3","wso2.com"));
+        apiMgtDAO.deleteAPI(api2.getId());
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("noPolicy","carbon.super"));
+        Assert.assertFalse(apiMgtDAO.hasAPIPolicyAttached("noPolicy","wso2.com"));
     }
 }
