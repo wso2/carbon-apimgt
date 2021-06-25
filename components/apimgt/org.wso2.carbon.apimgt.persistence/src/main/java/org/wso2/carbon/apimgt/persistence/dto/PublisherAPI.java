@@ -541,9 +541,13 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.wsUriMapping = wsUriMapping;
     }
 
-    public String getAsyncApiDefinition() { return asyncApiDefinition; }
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
 
-    public void setAsyncApiDefinition(String asyncApiDefinition) { this.asyncApiDefinition = asyncApiDefinition; }
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
+    }
 
     @Override
     public String toString() {
