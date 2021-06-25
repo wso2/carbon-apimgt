@@ -239,11 +239,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
             } else if (api.getAsyncApiDefinition() != null) {
-                String apiPath = GovernanceUtils.getArtifactPath(registry, api.getUuid());
-                int prependIndex = apiPath.lastIndexOf("/api");
-                String apiSourcePath = apiPath.substring(0, prependIndex );
-                String resourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
-                        + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+                String resourcePath = RegistryPersistenceUtil
+                        .getOpenAPIDefinitionFilePath(api.getId().getName(), api.getId().getVersion(),
+                                api.getId().getProviderName());
+                resourcePath = resourcePath + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
                 Resource resource;
                 if (!registry.resourceExists(resourcePath)) {
                     resource = registry.newResource();
