@@ -5915,11 +5915,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getAsyncAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
-        return super.getAsyncAPIDefinition(apiId, organization);
-    }
-
-    @Override
     public List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiUUID);
     }

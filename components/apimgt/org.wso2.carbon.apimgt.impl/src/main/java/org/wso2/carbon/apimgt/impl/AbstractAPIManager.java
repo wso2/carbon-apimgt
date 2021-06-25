@@ -4129,27 +4129,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    /**
-     * Returns the AsyncAPI definition of the given API
-     *
-     * @param apiId         id of the APIIdentifier
-     * @param organization  identifier of the organization
-     * @return A String containing the AsyncAPI definition
-     * @throws APIManagementException
-     */
-    @Override
-    public String getAsyncAPIDefinition(Identifier apiId, String organization) throws APIManagementException {
-
-        String asyncApiDoc;
-        try {
-            asyncApiDoc = apiPersistenceInstance.getAsyncDefinition(new Organization(organization), apiId.getUUID());
-        } catch (AsyncSpecPersistenceException e) {
-            String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
-            throw new APIManagementException(msg, e);
-        }
-        return asyncApiDoc;
-    }
-
     protected boolean isOauthAppValidation() {
 
         String oauthAppValidation = getAPIManagerConfiguration()

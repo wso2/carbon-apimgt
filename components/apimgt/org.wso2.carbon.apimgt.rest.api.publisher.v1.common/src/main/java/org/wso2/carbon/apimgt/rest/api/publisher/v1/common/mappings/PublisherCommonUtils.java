@@ -1043,7 +1043,7 @@ public class PublisherCommonUtils {
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
-        return apiProvider.getAsyncAPIDefinition(existingAPI.getId(), organization);
+        return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
     }
 
     /**
