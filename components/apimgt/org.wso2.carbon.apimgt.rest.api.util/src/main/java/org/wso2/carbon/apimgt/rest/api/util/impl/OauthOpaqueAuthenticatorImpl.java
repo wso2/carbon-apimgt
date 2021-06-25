@@ -24,12 +24,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
@@ -42,17 +40,17 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
-
+import org.wso2.carbon.apimgt.rest.api.util.utils.OauthTokenInfo;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.OauthAuthenticator;
 import java.util.*;
-import javax.cache.Cache;
 
 /**
  * This web app authenticator class specifically implemented for API Manager store and publisher rest APIs
  * This will not be able to use as generic authenticator.
  */
-public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
+public class OauthOpaqueAuthenticatorImpl implements OauthAuthenticator {
 
-    private static final Log log = LogFactory.getLog(WebAppAuthenticatorImpl.class);
+    private static final Log log = LogFactory.getLog(OauthOpaqueAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -66,12 +64,12 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         boolean retrievedFromTokenCache = false;
         String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message,
                 RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
-        AccessTokenInfo tokenInfo = null;
+        OauthTokenInfo tokenInfo = null;
 
         RESTAPICacheConfiguration cacheConfiguration = APIUtil.getRESTAPICacheConfig();
         //validate the token from cache if it is enabled
         if (cacheConfiguration.isTokenCacheEnabled()) {
-            tokenInfo = (AccessTokenInfo)getRESTAPITokenCache().get(accessToken);
+            tokenInfo = (OauthTokenInfo)getRESTAPITokenCache().get(accessToken);
             if (tokenInfo != null) {
                 if (isAccessTokenExpired(tokenInfo)) {
                     tokenInfo.setTokenValid(false);
@@ -86,7 +84,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 }
             } else {
                 //if the token doesn't exist in the valid token cache, then check it in the invalid token cache
-                tokenInfo = (AccessTokenInfo)getRESTAPIInvalidTokenCache().get(accessToken);
+                tokenInfo = (OauthTokenInfo) getRESTAPIInvalidTokenCache().get(accessToken);
                 if (tokenInfo != null) {
                     retrievedFromInvalidTokenCache = true;
                 }
@@ -158,102 +156,102 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         return false;
     }
 
-    /**
-     * @param message   CXF message to be validate
-     * @param tokenInfo Token information associated with incoming request
-     * @return return true if we found matching scope in resource and token information
-     * else false(means scope validation failed).
-     */
-    private boolean validateScopes(Message message, AccessTokenInfo tokenInfo) {
-        String basePath = (String) message.get(Message.BASE_PATH);
-        // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
-        // decoded values of request parameters
-        String path = (String) message.get(Message.REQUEST_URI);
-        String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
-        String resource = path.substring(basePath.length() - 1);
-        String[] scopes = tokenInfo.getScopes();
+//    /**
+//     * @param message   CXF message to be validate
+//     * @param tokenInfo Token information associated with incoming request
+//     * @return return true if we found matching scope in resource and token information
+//     * else false(means scope validation failed).
+//     */
+////    public static boolean validateScopes(Message message, OauthTokenInfo tokenInfo) {
+////        String basePath = (String) message.get(Message.BASE_PATH);
+////        // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
+////        // decoded values of request parameters
+////        String path = (String) message.get(Message.REQUEST_URI);
+////        String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
+////        String resource = path.substring(basePath.length() - 1);
+////        String[] scopes = tokenInfo.getScopes();
+////
+////        String version = (String) message.get(RestApiConstants.API_VERSION);
+////
+////        //get all the URI templates of the REST API from the base path
+////        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
+////        if (uriTemplates.isEmpty()) {
+////            if (log.isDebugEnabled()) {
+////                log.debug("No matching scopes found for request with path: " + basePath
+////                        + ". Skipping scope validation.");
+////            }
+////            return true;
+////        }
+////
+////        for (Object template : uriTemplates.toArray()) {
+////            org.wso2.uri.template.URITemplate templateToValidate = null;
+////            Map<String, String> var = new HashMap<String, String>();
+////            //check scopes with what we have
+////            String templateString = ((URITemplate) template).getUriTemplate();
+////            try {
+////                templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
+////            } catch (URITemplateException e) {
+////                log.error("Error while creating URI Template object to validate request. Template pattern: " +
+////                        templateString, e);
+////            }
+////            if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
+////                    && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
+////                for (String scope : scopes) {
+////                    Scope scp = ((URITemplate) template).getScope();
+////                    if (scp != null) {
+////                        if (scope.equalsIgnoreCase(scp.getKey())) {
+////                            //we found scopes matches
+////                            if (log.isDebugEnabled()) {
+////                                log.debug("Scope validation successful for access token: " +
+////                                        tokenInfo.getAccessToken() + " with scope: " + scp.getKey() +
+////                                        " for resource path: " + path + " and verb " + verb);
+////                            }
+////                            return true;
+////                        }
+////                    } else if (!((URITemplate) template).retrieveAllScopes().isEmpty()) {
+////                        List<Scope> scopesList = ((URITemplate) template).retrieveAllScopes();
+////                        for (Scope scpObj : scopesList) {
+////                            if (scope.equalsIgnoreCase(scpObj.getKey())) {
+////                                //we found scopes matches
+////                                if (log.isDebugEnabled()) {
+////                                    log.debug("Scope validation successful for access token: " +
+////                                            tokenInfo.getAccessToken() + " with scope: " + scpObj.getKey() +
+////                                            " for resource path: " + path + " and verb " + verb);
+////                                }
+////                                return true;
+////                            }
+////                        }
+////                    } else {
+////                        if (log.isDebugEnabled()) {
+////                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
+////                                    + verb + " . So consider as anonymous permission and let request to continue.");
+////                        }
+////                        return true;
+////                    }
+////                }
+////            }
+////        }
+////        return false;
+////    }
 
-        String version = (String) message.get(RestApiConstants.API_VERSION);
+//    public static Cache getRESTAPITokenCache() {
+//        return CacheProvider.getRESTAPITokenCache();
+//    }
+//
+//    public static Cache getRESTAPIInvalidTokenCache() {
+//        return CacheProvider.getRESTAPIInvalidTokenCache();
+//    }
 
-        //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
-        if (uriTemplates.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("No matching scopes found for request with path: " + basePath
-                        + ". Skipping scope validation.");
-            }
-            return true;
-        }
-
-        for (Object template : uriTemplates.toArray()) {
-            org.wso2.uri.template.URITemplate templateToValidate = null;
-            Map<String, String> var = new HashMap<String, String>();
-            //check scopes with what we have
-            String templateString = ((URITemplate) template).getUriTemplate();
-            try {
-                templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
-            } catch (URITemplateException e) {
-                log.error("Error while creating URI Template object to validate request. Template pattern: " +
-                        templateString, e);
-            }
-            if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
-                    && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
-                for (String scope : scopes) {
-                    Scope scp = ((URITemplate) template).getScope();
-                    if (scp != null) {
-                        if (scope.equalsIgnoreCase(scp.getKey())) {
-                            //we found scopes matches
-                            if (log.isDebugEnabled()) {
-                                log.debug("Scope validation successful for access token: " +
-                                        tokenInfo.getAccessToken() + " with scope: " + scp.getKey() +
-                                        " for resource path: " + path + " and verb " + verb);
-                            }
-                            return true;
-                        }
-                    } else if (!((URITemplate) template).retrieveAllScopes().isEmpty()) {
-                        List<Scope> scopesList = ((URITemplate) template).retrieveAllScopes();
-                        for (Scope scpObj : scopesList) {
-                            if (scope.equalsIgnoreCase(scpObj.getKey())) {
-                                //we found scopes matches
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Scope validation successful for access token: " +
-                                            tokenInfo.getAccessToken() + " with scope: " + scpObj.getKey() +
-                                            " for resource path: " + path + " and verb " + verb);
-                                }
-                                return true;
-                            }
-                        }
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
-                                    + verb + " . So consider as anonymous permission and let request to continue.");
-                        }
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private Cache getRESTAPITokenCache() {
-        return CacheProvider.getRESTAPITokenCache();
-    }
-
-    private Cache getRESTAPIInvalidTokenCache() {
-        return CacheProvider.getRESTAPIInvalidTokenCache();
-    }
-
-    private boolean isAccessTokenExpired (AccessTokenInfo accessTokenInfo) {
+    private boolean isAccessTokenExpired (OauthTokenInfo accessTokenInfo) {
         APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
         infoDTO.setValidityPeriod(accessTokenInfo.getValidityPeriod());
         infoDTO.setIssuedTime(accessTokenInfo.getIssuedTime());
         return APIUtil.isAccessTokenExpired(infoDTO);
     }
 
-    public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
+    public static OauthTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
-        AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        OauthTokenInfo tokenInfo = new OauthTokenInfo();
         OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
         OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO.new OAuth2AccessToken();
 
@@ -271,7 +269,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         if (!responseDTO.isValid()) {
             tokenInfo.setTokenValid(responseDTO.isValid());
             log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-            tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+//            tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
             return tokenInfo;
         }
 
@@ -287,17 +285,17 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         }
 
         tokenInfo.setIssuedTime(System.currentTimeMillis());
-        tokenInfo.setScope(responseDTO.getScope());
+        tokenInfo.setScopes(responseDTO.getScope());
 
         // If token has am_application_scope, consider the token as an Application token.
-        String[] scopes = responseDTO.getScope();
-        String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
+//        String[] scopes = responseDTO.getScope();
+//        String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
 
-        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
-            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
-                tokenInfo.setApplicationToken(true);
-            }
-        }
+//        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
+//            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
+//                tokenInfo.setApplicationToken(true);
+//            }
+//        }
 
         return tokenInfo;
     }
@@ -307,7 +305,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      * @param requestDTO Token validation request
      * @return
      */
-    protected OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
+    protected static OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);
     }
