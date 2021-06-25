@@ -47,6 +47,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
     private String swaggerDefinition;
+    private String asyncApiDefinition;
     private boolean endpointAuthDigest;
     private String endpointUTUsername;
     private String endpointUTPassword;
@@ -539,6 +540,10 @@ public class PublisherAPI extends PublisherAPIInfo {
     public void setWsUriMapping(Map<String, String> wsUriMapping) {
         this.wsUriMapping = wsUriMapping;
     }
+
+    public String getAsyncApiDefinition() { return asyncApiDefinition; }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) { this.asyncApiDefinition = asyncApiDefinition; }
 
     @Override
     public String toString() {
