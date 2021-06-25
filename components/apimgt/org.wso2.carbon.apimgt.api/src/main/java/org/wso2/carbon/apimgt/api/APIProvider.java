@@ -1761,7 +1761,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException;
-
     /**
     * Adds a new APIRevision to an existing API Product
      *
