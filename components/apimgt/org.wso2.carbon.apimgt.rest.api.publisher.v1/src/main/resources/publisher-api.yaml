@@ -248,6 +248,8 @@ paths:
                 $ref: '#/components/schemas/API'
         400:
           $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
@@ -1182,6 +1184,8 @@ paths:
                 $ref: '#/components/schemas/API'
         400:
           $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -2228,6 +2232,8 @@ paths:
                 $ref: '#/components/schemas/API'
         400:
           $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
@@ -2829,6 +2835,41 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_id_amznresourcenames_get.yaml
       operationId: getAmazonResourceNamesOfAPI
+
+  /apis/api-quota:
+    get:
+      tags:
+        - Rate-limiting
+      summary: |
+        Retrieve API Quota
+      description: |
+        This operation returns whether an organizations API quota is throttled or not.
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
+      responses:
+        200:
+          description: |
+            OK.
+            API Quota state is returned.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiQuotaResponse'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/api-quota"'
+      operationId: getAPIQuota
 
   /apis/{apiId}/monetize:
     post:
@@ -10447,6 +10488,15 @@ components:
             If an error occurs, the error message will be set to this property.
             If not, this will remain null.
           example: null
+    ApiQuotaResponse:
+      title: API Quota response
+      required:
+        - isApiThrottled
+      type: object
+      properties:
+        isApiThrottled:
+          type: boolean
+          description: Flag indicating the ratelimit quota is reached or not
     ThreatProtectionPolicyList:
       title: Threat Protection Policy List
       type: object

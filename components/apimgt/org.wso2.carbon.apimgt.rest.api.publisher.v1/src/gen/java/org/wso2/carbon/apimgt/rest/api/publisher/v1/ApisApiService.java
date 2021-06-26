@@ -100,6 +100,7 @@ public interface ApisApiService {
       public Response getAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIMediationPolicyContentByPolicyId(String apiId, String mediationPolicyId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIMonetization(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIQuota(String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIResourcePaths(String apiId, String organizationId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIResourcePolicies(String apiId, String sequenceType, String organizationId, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

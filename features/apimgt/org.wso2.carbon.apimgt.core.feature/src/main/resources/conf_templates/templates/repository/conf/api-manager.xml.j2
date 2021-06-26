@@ -304,6 +304,15 @@
     </Analytics>
 
     <!--
+        Configuration to enable rate-limiting the no of APIs can be created and set the limit
+    -->
+    <RateLimit>
+        <!-- Enable API creation ratel-limiting for API Manager -->
+        <Enabled>{{apim.rate_limit.enable}}</Enabled>
+        <Threshold>{{apim.rate_limit.api_limit}}</Threshold>
+    </RateLimit>
+
+    <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
     -->
