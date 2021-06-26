@@ -603,6 +603,7 @@ public final class APIConstants {
     public static final String ENABLE_TENANT_BASE_SIGNING = "EnableTenantBasedSigning";
     public static final String DEFAULT_WEBSUB_SIGNING_ALGO = "SHA1";
     public static final String DEFAULT_WEBSUB_SIGNATURE_HEADER = "x-hub-signature";
+    public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
 
     public static class TokenStatus {
 
@@ -2725,6 +2726,8 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+        public static final int API_EXTENSION_LISTENER_ERROR = 900300;
+        public static final String API_EXTENSION_LISTENER_ERROR_MESSAGE = "API Extension Listener Error";
     }
 
     public static class GatewayArtifactConstants {

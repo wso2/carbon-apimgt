@@ -54,10 +54,8 @@ public class RuntimeArtifactGeneratorUtil {
             } else {
                 gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
             }
-            if (gatewayArtifacts != null) {
-                if (gatewayArtifacts.isEmpty()) {
-                    throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-                }
+            if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
+                return null;
             }
             return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         } else {

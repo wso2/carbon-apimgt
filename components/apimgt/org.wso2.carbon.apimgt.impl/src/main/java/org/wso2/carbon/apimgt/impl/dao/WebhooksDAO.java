@@ -173,7 +173,8 @@ public class WebhooksDAO {
                 encryptedSecret = encryptSecret(properties.getProperty(APIConstants.Webhooks.SECRET));
             }
             prepareStmt.setString(6, encryptedSecret);
-            prepareStmt.setString(7, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
+            String leaseSeconds = properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS);
+            prepareStmt.setInt(7, leaseSeconds == null ? 0 : Integer.parseInt(leaseSeconds));
             Timestamp updatedTime = (Timestamp) properties.get(APIConstants.Webhooks.UPDATED_AT);
             prepareStmt.setTimestamp(8, updatedTime);
             long expiryTime = Long.parseLong(properties.getProperty(APIConstants.Webhooks.EXPIRY_AT));
@@ -197,7 +198,8 @@ public class WebhooksDAO {
                 encryptedSecret = encryptSecret(properties.getProperty(APIConstants.Webhooks.SECRET));
             }
             prepareStmt.setString(1, encryptedSecret);
-            prepareStmt.setString(2, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
+            String leaseSeconds = properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS);
+            prepareStmt.setInt(2, leaseSeconds == null ? 0 : Integer.parseInt(leaseSeconds));
             Timestamp updatedTime = (Timestamp) properties.get(APIConstants.Webhooks.UPDATED_AT);
             prepareStmt.setTimestamp(3, updatedTime);
             long expiryTime = Long.parseLong(properties.getProperty(APIConstants.Webhooks.EXPIRY_AT));
@@ -371,7 +373,8 @@ public class WebhooksDAO {
                 encryptedSecret = encryptSecret(properties.getProperty(APIConstants.Webhooks.SECRET));
             }
             preparedStatement.setString(6, encryptedSecret);
-            preparedStatement.setString(7, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
+            String leaseSeconds = properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS);
+            preparedStatement.setInt(7, leaseSeconds == null ? 0 : Integer.parseInt(leaseSeconds));
             Timestamp updatedTime = (Timestamp)properties.get(APIConstants.Webhooks.UPDATED_AT);
             preparedStatement.setTimestamp(8, updatedTime);
             preparedStatement.executeUpdate();
