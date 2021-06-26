@@ -376,14 +376,20 @@ public class SolaceAdminApis {
                 if (!parameters1.contains(parameterName)) {
                     AaiParameter parameterObject = channel.parameters.get(parameterName);
                     if (parameterObject.schema != null) {
-                        attributes1.put(getAttributesFromParameterSchema(parameterName, parameterObject));
-                        parameters1.add(parameterName);
+                        org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName, parameterObject);
+                        if (attributeObj != null) {
+                            attributes1.put(attributeObj);
+                            parameters1.add(parameterName);
+                        }
                     } else if (parameterObject.$ref != null) {
                         if (aai20Document.components.parameters != null) {
                             AaiParameter parameterObject1 = aai20Document.components.parameters.get(parameterName);
                             if (parameterObject1.schema != null) {
-                                attributes1.put(getAttributesFromParameterSchema(parameterName, parameterObject1));
-                                parameters1.add(parameterName);
+                                org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName, parameterObject1);
+                                if (attributeObj != null) {
+                                    attributes1.put(attributeObj);
+                                    parameters1.add(parameterName);
+                                }
                             }
                         }
                     }
@@ -427,9 +433,12 @@ public class SolaceAdminApis {
 
         }
         org.json.JSONObject attributeObject = new org.json.JSONObject();
-        attributeObject.put("name", parameterName);
-        attributeObject.put("value", enumString);
-        return attributeObject;
+        if (!enumString.isEmpty()) {
+            attributeObject.put("name", parameterName);
+            attributeObject.put("value", enumString);
+            return attributeObject;
+        }
+        return null;
     }
 
     public HashSet<String> getProtocols (AaiChannelItem channel) {
