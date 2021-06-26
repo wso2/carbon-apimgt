@@ -888,9 +888,9 @@ public class APIMgtDAOTest {
         String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
         String keyManagerID = UUID.randomUUID().toString();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
-                .getName(), subscriber.getName(), clientIdProduction, keyManagerName, UUID.randomUUID().toString());
+                .getId(), clientIdProduction, keyManagerName, UUID.randomUUID().toString());
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
-                .getName(), subscriber.getName(), clientIdSandbox, keyManagerID, UUID.randomUUID().toString());
+                .getId(), clientIdSandbox, keyManagerID, UUID.randomUUID().toString());
         apiMgtDAO.updateApplicationKeyTypeMapping(application, APIConstants.API_KEY_TYPE_PRODUCTION, keyManagerID);
         apiMgtDAO.updateApplicationKeyTypeMapping(application, APIConstants.API_KEY_TYPE_SANDBOX, keyManagerID);
 
