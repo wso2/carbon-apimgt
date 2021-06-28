@@ -655,6 +655,7 @@ public class APIMappingUtil {
                 additionalPropertiesMap.put(key, additionalPropertiesDTO);
             }
             apiInfoDTO.setAdditionalProperties(additionalPropertiesMap);
+            apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -1153,6 +1154,7 @@ public class APIMappingUtil {
                 additionalPropertiesMap.put(key, additionalPropertiesDTO);
             }
             dto.setAdditionalProperties(additionalPropertiesMap);
+            dto.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
 
         if (model.getImplementation() != null) {
@@ -2205,6 +2207,7 @@ public class APIMappingUtil {
                 additionalPropertiesMap.put(key, additionalPropertiesDTO);
             }
             productDto.setAdditionalProperties(additionalPropertiesMap);
+            productDto.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
         if (product.getApiSecurity() != null) {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));

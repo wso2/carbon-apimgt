@@ -8137,6 +8137,18 @@ components:
                 default: false
           x-otherScopes:
             - apim:api_publish
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
+          x-otherScopes:
+            - apim:api_publish
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
         accessControl:
@@ -8360,6 +8372,16 @@ components:
           type: string
           example: CalculatorAPI
         additionalProperties:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
+        additionalPropertiesMap:
           type: object
           additionalProperties:
             type: object
@@ -8752,6 +8774,16 @@ components:
           x-otherScopes:
             - apim:api_publish
         additionalProperties:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
+        additionalPropertiesMap:
           type: object
           additionalProperties:
             type: object

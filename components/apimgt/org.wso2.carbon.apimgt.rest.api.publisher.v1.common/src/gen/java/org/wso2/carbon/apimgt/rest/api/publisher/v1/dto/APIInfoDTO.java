@@ -30,6 +30,7 @@ public class APIInfoDTO   {
     private String description = null;
     private String context = null;
     private Map<String, APIAdditionalPropertiesDTO> additionalProperties = new HashMap<String, APIAdditionalPropertiesDTO>();
+    private Map<String, APIAdditionalPropertiesDTO> additionalPropertiesMap = new HashMap<String, APIAdditionalPropertiesDTO>();
     private String version = null;
     private String provider = null;
     private String type = null;
@@ -124,6 +125,24 @@ public class APIInfoDTO   {
   }
   public void setAdditionalProperties(Map<String, APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIInfoDTO additionalPropertiesMap(Map<String, APIAdditionalPropertiesDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIAdditionalPropertiesDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIAdditionalPropertiesDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
@@ -295,6 +314,7 @@ public class APIInfoDTO   {
         Objects.equals(description, apIInfo.description) &&
         Objects.equals(context, apIInfo.context) &&
         Objects.equals(additionalProperties, apIInfo.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, apIInfo.additionalPropertiesMap) &&
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(type, apIInfo.type) &&
@@ -308,7 +328,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
   }
 
   @Override
@@ -321,6 +341,7 @@ public class APIInfoDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
