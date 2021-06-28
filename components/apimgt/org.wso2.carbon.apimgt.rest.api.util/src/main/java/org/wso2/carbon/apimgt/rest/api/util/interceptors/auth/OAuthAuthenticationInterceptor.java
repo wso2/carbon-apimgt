@@ -25,6 +25,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
@@ -58,6 +59,9 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         super(Phase.PRE_INVOKE);
     }
 
+
+    @Override
+    @MethodStats
     public void handleMessage(Message inMessage) {
         //by-passes the interceptor if user calls an anonymous api
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {

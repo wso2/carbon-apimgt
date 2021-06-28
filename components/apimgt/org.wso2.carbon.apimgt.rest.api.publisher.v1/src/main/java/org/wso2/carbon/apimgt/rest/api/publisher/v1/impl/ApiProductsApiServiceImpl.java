@@ -729,7 +729,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
-        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        // Validate if the USER_REST_API_SCOPES is not set in OAuthAuthenticator when scopes are validated
         // If the user need to import dependent APIs and the user has the required scope for that, allow the user to do it
         if (tokenScopes == null) {
             RestApiUtil.handleInternalServerError("Error occurred while importing the API Product", log);

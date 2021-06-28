@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
@@ -160,6 +161,7 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
         return APIUtil.isAccessTokenExpired(infoDTO);
     }
 
+    @MethodStats
     public OAuthTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         OAuthTokenInfo tokenInfo = new OAuthTokenInfo();
@@ -205,6 +207,7 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
      * @param requestDTO Token validation request
      * @return
      */
+    @MethodStats
     protected OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);

@@ -26,6 +26,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 /**
@@ -50,6 +51,7 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param inMessage cxf incoming message
      */
     @Override
+    @MethodStats
     public void handleMessage(Message inMessage) {
         //by-passes the interceptor if user calls an anonymous api
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
