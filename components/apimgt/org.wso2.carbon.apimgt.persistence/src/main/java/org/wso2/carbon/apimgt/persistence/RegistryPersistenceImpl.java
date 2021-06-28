@@ -238,6 +238,24 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
+            } else if (api.getAsyncApiDefinition() != null) {
+                String resourcePath = RegistryPersistenceUtil
+                        .getOpenAPIDefinitionFilePath(api.getId().getName(), api.getId().getVersion(),
+                                api.getId().getProviderName());
+                resourcePath = resourcePath + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+                Resource resource;
+                if (!registry.resourceExists(resourcePath)) {
+                    resource = registry.newResource();
+                } else {
+                    resource = registry.get(resourcePath);
+                }
+                resource.setContent(api.getAsyncApiDefinition());
+                resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);          //add a constant for app.json
+                registry.put(resourcePath, resource);
+                RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                        ((UserRegistry) registry).getTenantId());
+                RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                        visibleRoles, resourcePath);
             }
             
             //Set permissions to doc path
@@ -1893,6 +1911,65 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return definition;
     }
+
+    @Override
+    public void saveAsyncDefinition(Organization org, String apiId, String apiDefinition)
+            throws AsyncSpecPersistenceException {
+        boolean isTenantFlowStarted = false;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil
+                    .getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when deleting API " + apiId;
+                log.error(errorMessage);
+                throw new AsyncSpecPersistenceException(errorMessage);
+            }
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            String visibleRoles = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.lastIndexOf("/api");
+            String apiSourcePath = apiPath.substring(0, prependIndex );
+            String resourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(apiDefinition);
+            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);          //add a constant for app.json
+            registry.put(resourcePath, resource);
+
+            String[] visibleRolesArr = null;
+            if (visibleRoles != null) {
+                visibleRolesArr = visibleRoles.split(",");
+            }
+
+            RegistryPersistenceUtil
+                    .clearResourcePermissions(resourcePath, new APIIdentifier(apiProviderName, apiName, apiVersion),
+                            ((UserRegistry) registry).getTenantId());
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
+
+        } catch (RegistryException | APIPersistenceException | APIManagementException e) {
+            throw new AsyncSpecPersistenceException("Error while adding AsyncApi Definition for " + apiId, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
     @Override
     public String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException {
         String apiTenantDomain = org.getName();
@@ -1912,9 +1989,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
-                        + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+                String apiPath = GovernanceUtils.getArtifactPath(registryType, apiId);
+                int prependIndex = apiPath.lastIndexOf("/api");
+                String apiSourcePath = apiPath.substring(0, prependIndex );
+                String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
 
                 if (registryType.resourceExists(definitionPath)) {

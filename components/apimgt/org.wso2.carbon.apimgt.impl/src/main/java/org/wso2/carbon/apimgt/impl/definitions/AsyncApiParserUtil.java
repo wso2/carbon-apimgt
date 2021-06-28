@@ -122,46 +122,6 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     *  This method saves api definition json in the registry
-     *
-     * @param api               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     * @throws  APIManagementException
-     */
-    public static void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry)
-            throws APIManagementException{
-        String apiName = api.getId().getApiName();
-        String apiVersion = api.getId().getVersion();
-        String apiProviderName = api.getId().getProviderName();
-
-        try{
-            String resourcePath = APIUtil.getAsyncAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(apiDefinitionJSON);
-            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);          //add a constant for app.json
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-
-            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding AsyncApi Definition for " + apiName + "-" + apiVersion, e);
-        }
-    }
-
-    /**
      * This method returns api definition json for given api
      *
      * @param apiIdentifier api identifier

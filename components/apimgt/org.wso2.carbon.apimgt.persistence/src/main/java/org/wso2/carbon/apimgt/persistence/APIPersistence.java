@@ -256,6 +256,16 @@ public interface APIPersistence {
     ============================================= */
 
     /**
+     * Save Async API definition
+     *
+     * @param org           Organization the Async API definition is owned by
+     * @param apiId         API ID
+     * @param apiDefinition Async API definition
+     * @throws AsyncSpecPersistenceException
+     */
+    void saveAsyncDefinition(Organization org, String apiId, String apiDefinition) throws AsyncSpecPersistenceException;
+
+    /**
      * Get Async API definition
      *
      * @param org   Organization the definition is owned by
