@@ -40,7 +40,9 @@ public class APIInfoDTO   {
     @XmlEnum(String.class)
     public enum AudienceEnum {
         PUBLIC("PUBLIC"),
-        PRIVATE("PRIVATE");
+        PRIVATE("PRIVATE"),
+        SINGLE("SINGLE"),
+        PARTNERS("PARTNERS");
         private String value;
 
         AudienceEnum (String v) {
@@ -232,7 +234,7 @@ return null;
   }
 
   /**
-   * The audience of the API. Accepted values are PUBLIC, PRIVATE
+   * The audience of the API. Accepted values are PUBLIC, PRIVATE, SINGLE, PARTNERS
    **/
   public APIInfoDTO audience(AudienceEnum audience) {
     this.audience = audience;
@@ -240,7 +242,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, PRIVATE")
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, PRIVATE, SINGLE, PARTNERS")
   @JsonProperty("audience")
   public AudienceEnum getAudience() {
     return audience;
