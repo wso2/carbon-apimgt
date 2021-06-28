@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -49,6 +50,7 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
     }
 
     @Override
+    @MethodStats
     public void handleMessage(Message message) throws Fault {
         String path = (String) message.get(Message.PATH_INFO);
         if (path.contains(APIConstants.RestApiConstants.REST_API_OLD_VERSION)) {

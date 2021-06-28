@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.util.authenticators;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 
 public interface WebAppAuthenticator {
     /**
