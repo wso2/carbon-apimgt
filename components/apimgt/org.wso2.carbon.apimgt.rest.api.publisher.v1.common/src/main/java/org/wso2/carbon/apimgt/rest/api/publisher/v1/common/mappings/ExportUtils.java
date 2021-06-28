@@ -865,6 +865,7 @@ public class ExportUtils {
             String apiType = apiDtoToReturn.getType().toString();
             API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
             api.setOrganization(organization);
+            api.setId(apiIdentifier);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
