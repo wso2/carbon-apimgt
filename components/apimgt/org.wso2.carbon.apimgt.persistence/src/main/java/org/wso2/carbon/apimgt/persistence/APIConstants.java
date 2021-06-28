@@ -53,6 +53,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBLE_ROLES = "overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS = "overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
+    public static final String API_OVERVIEW_AUDIENCE = "overview_audience";
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";

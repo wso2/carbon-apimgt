@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
@@ -401,7 +402,9 @@ public class APIMappingUtil {
                 handleException(msg, e);
             }
         }
-
+        if (dto.getAudience() != null) {
+            model.setAudience(dto.getAudience().toString());
+        }
         return model;
     }
 
@@ -656,6 +659,10 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
         apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
+        if (api.getAudience() != null) {
+            apiInfoDTO.setAudience(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO.AudienceEnum
+                    .valueOf(api.getAudience()));
+        }
         if (api.getCreatedTime() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
@@ -1275,7 +1282,10 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
-
+        
+        if (model.getAudience() != null) {
+            dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
+        }
         return dto;
     }
 
