@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedEnvInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,77 +23,60 @@ import javax.validation.Valid;
 
 public class DeployedAPIRevisionDTO   {
   
-    private String revisionUUID = null;
-    private String name = null;
-    private String vhost = null;
-    private java.util.Date deployedTime = null;
+    private String apiUUID = null;
+    private String revisionID = null;
+    private List<DeployedEnvInfoDTO> envInfo = new ArrayList<DeployedEnvInfoDTO>();
 
   /**
    **/
-  public DeployedAPIRevisionDTO revisionUUID(String revisionUUID) {
-    this.revisionUUID = revisionUUID;
+  public DeployedAPIRevisionDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
     return this;
   }
 
   
   @ApiModelProperty(example = "c26b2b9b-4632-4ca4-b6f3-521c8863990c", value = "")
-  @JsonProperty("revisionUUID")
- @Size(min=0,max=255)  public String getRevisionUUID() {
-    return revisionUUID;
+  @JsonProperty("apiUUID")
+ @Size(min=0,max=255)  public String getApiUUID() {
+    return apiUUID;
   }
-  public void setRevisionUUID(String revisionUUID) {
-    this.revisionUUID = revisionUUID;
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
   }
 
   /**
    **/
-  public DeployedAPIRevisionDTO name(String name) {
-    this.name = name;
+  public DeployedAPIRevisionDTO revisionID(String revisionID) {
+    this.revisionID = revisionID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "default", value = "")
-  @JsonProperty("name")
- @Size(min=1,max=255)  public String getName() {
-    return name;
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("revisionID")
+  public String getRevisionID() {
+    return revisionID;
   }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   **/
-  public DeployedAPIRevisionDTO vhost(String vhost) {
-    this.vhost = vhost;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "mg.wso2.com", value = "")
-  @JsonProperty("vhost")
- @Pattern(regexp="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$") @Size(min=1,max=255)  public String getVhost() {
-    return vhost;
-  }
-  public void setVhost(String vhost) {
-    this.vhost = vhost;
+  public void setRevisionID(String revisionID) {
+    this.revisionID = revisionID;
   }
 
   /**
    **/
-  public DeployedAPIRevisionDTO deployedTime(java.util.Date deployedTime) {
-    this.deployedTime = deployedTime;
+  public DeployedAPIRevisionDTO envInfo(List<DeployedEnvInfoDTO> envInfo) {
+    this.envInfo = envInfo;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("deployedTime")
-  public java.util.Date getDeployedTime() {
-    return deployedTime;
+      @Valid
+  @JsonProperty("envInfo")
+  public List<DeployedEnvInfoDTO> getEnvInfo() {
+    return envInfo;
   }
-  public void setDeployedTime(java.util.Date deployedTime) {
-    this.deployedTime = deployedTime;
+  public void setEnvInfo(List<DeployedEnvInfoDTO> envInfo) {
+    this.envInfo = envInfo;
   }
 
 
@@ -103,15 +89,14 @@ public class DeployedAPIRevisionDTO   {
       return false;
     }
     DeployedAPIRevisionDTO deployedAPIRevision = (DeployedAPIRevisionDTO) o;
-    return Objects.equals(revisionUUID, deployedAPIRevision.revisionUUID) &&
-        Objects.equals(name, deployedAPIRevision.name) &&
-        Objects.equals(vhost, deployedAPIRevision.vhost) &&
-        Objects.equals(deployedTime, deployedAPIRevision.deployedTime);
+    return Objects.equals(apiUUID, deployedAPIRevision.apiUUID) &&
+        Objects.equals(revisionID, deployedAPIRevision.revisionID) &&
+        Objects.equals(envInfo, deployedAPIRevision.envInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUUID, name, vhost, deployedTime);
+    return Objects.hash(apiUUID, revisionID, envInfo);
   }
 
   @Override
@@ -119,10 +104,9 @@ public class DeployedAPIRevisionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class DeployedAPIRevisionDTO {\n");
     
-    sb.append("    revisionUUID: ").append(toIndentedString(revisionUUID)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
-    sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
+    sb.append("    revisionID: ").append(toIndentedString(revisionID)).append("\n");
+    sb.append("    envInfo: ").append(toIndentedString(envInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

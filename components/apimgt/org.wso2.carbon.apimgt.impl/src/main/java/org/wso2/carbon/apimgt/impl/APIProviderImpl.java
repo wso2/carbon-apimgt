@@ -9385,11 +9385,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                        List<DeployedAPIRevision> deployedAPIRevisionList, String organizationId)
             throws APIManagementException {
 
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-        if (apiIdentifier == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
-        }
         APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionUUID);
         if (apiRevision == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "

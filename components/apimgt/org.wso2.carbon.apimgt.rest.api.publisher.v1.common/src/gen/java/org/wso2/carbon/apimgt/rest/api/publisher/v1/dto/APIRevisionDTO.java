@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedAPIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedEnvInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -31,7 +31,7 @@ public class APIRevisionDTO   {
     private java.util.Date createdTime = null;
     private APIRevisionAPIInfoDTO apiInfo = null;
     private List<APIRevisionDeploymentDTO> deploymentInfo = new ArrayList<APIRevisionDeploymentDTO>();
-    private List<DeployedAPIRevisionDTO> successDeploymentInfo = new ArrayList<DeployedAPIRevisionDTO>();
+    private List<DeployedEnvInfoDTO> successDeploymentInfo = new ArrayList<DeployedEnvInfoDTO>();
 
   /**
    **/
@@ -139,7 +139,7 @@ public class APIRevisionDTO   {
 
   /**
    **/
-  public APIRevisionDTO successDeploymentInfo(List<DeployedAPIRevisionDTO> successDeploymentInfo) {
+  public APIRevisionDTO successDeploymentInfo(List<DeployedEnvInfoDTO> successDeploymentInfo) {
     this.successDeploymentInfo = successDeploymentInfo;
     return this;
   }
@@ -148,10 +148,10 @@ public class APIRevisionDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("successDeploymentInfo")
-  public List<DeployedAPIRevisionDTO> getSuccessDeploymentInfo() {
+  public List<DeployedEnvInfoDTO> getSuccessDeploymentInfo() {
     return successDeploymentInfo;
   }
-  public void setSuccessDeploymentInfo(List<DeployedAPIRevisionDTO> successDeploymentInfo) {
+  public void setSuccessDeploymentInfo(List<DeployedEnvInfoDTO> successDeploymentInfo) {
     this.successDeploymentInfo = successDeploymentInfo;
   }
 

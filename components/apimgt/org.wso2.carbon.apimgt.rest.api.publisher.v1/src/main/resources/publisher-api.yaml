@@ -1713,8 +1713,6 @@ paths:
         Deploy a revision
       operationId: deployedAPIRevision
       parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/revisionId-Q'
         - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: Deployment object that needs to be added
@@ -8474,7 +8472,7 @@ components:
           type: array
           readOnly: true
           items:
-            $ref: '#/components/schemas/DeployedAPIRevision'
+            $ref: '#/components/schemas/DeployedEnvInfo'
 
     #-----------------------------------------------------
     # The API Revision - API Info resource
@@ -8545,8 +8543,8 @@ components:
     #-----------------------------------------------------
     # The Deployed API Revision resource
     #-----------------------------------------------------
-    DeployedAPIRevision:
-      title: DeployedAPIRevision Info object with basic deployed API details
+    DeployedEnvInfo:
+      title: Environment information
       properties:
         revisionUUID:
           maxLength: 255
@@ -8569,6 +8567,21 @@ components:
           readOnly: true
           type: string
           format: date-time
+    DeployedAPIRevision:
+      title: Environment information
+      properties:
+        apiUUID:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        revisionID:
+          type: string
+          example: 1
+        envInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeployedEnvInfo'
     AuditReport:
       title: Resource for Audit Report
       type: object
