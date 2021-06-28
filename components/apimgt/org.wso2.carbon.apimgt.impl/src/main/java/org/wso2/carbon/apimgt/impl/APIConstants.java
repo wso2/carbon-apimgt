@@ -2573,6 +2573,7 @@ public final class APIConstants {
     public static class AsyncApi {
         public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
         public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
+        public static final String ASYNC_DEFAULT_SUBSCRIBER = "x-default-subscriber";
     }
 
     public static class TopicNames {
