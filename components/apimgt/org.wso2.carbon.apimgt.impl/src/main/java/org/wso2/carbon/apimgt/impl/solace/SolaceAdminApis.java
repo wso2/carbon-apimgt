@@ -28,7 +28,7 @@ import java.util.*;
 
 public class SolaceAdminApis {
 
-    private static final String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1/";
+    private static final String baseUrl = "http://api.solace-apim.net:3000/v1/";
     private static final String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
     private static final String developerUserName = "dev-1";
 
