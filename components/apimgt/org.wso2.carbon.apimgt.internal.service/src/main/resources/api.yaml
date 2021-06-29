@@ -478,9 +478,9 @@ paths:
             $ref: '#/definitions/Error'
   /retrieve-api-artifacts:
     post:
-      summary: Get all the API runtime artifacts for a given API UUID list and gateway label
+      summary: Get API runtime artifacts from ID list
       description: |
-        This will provide access to API runtime artifacts in database.
+        This will provide access to API runtime artifacts in database for a given API UUID list.
       parameters:
         - $ref: '#/parameters/requestedTenant'
         - name: gatewayLabel
@@ -492,7 +492,6 @@ paths:
         - name: type
           in: query
           description: |
-            **Search condition**.
              type of gateway
           type: string
         - name: uuidList
@@ -501,7 +500,7 @@ paths:
           schema:
             $ref: "#/definitions/UUIDList"
       tags:
-        - Retrieving API artifacts
+        - Retrieve API artifacts
       responses:
         200:
           description: List of runtime Artifacts

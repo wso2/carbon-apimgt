@@ -40,11 +40,11 @@ RetrieveApiArtifactsApiService delegate = new RetrieveApiArtifactsApiServiceImpl
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all the API runtime artifacts for a given API UUID list and gateway label", notes = "This will provide access to API runtime artifacts in database. ", response = Void.class, tags={ "Retrieving API artifacts" })
+    @ApiOperation(value = "Get API runtime artifacts from ID list", notes = "This will provide access to API runtime artifacts in database for a given API UUID list. ", response = Void.class, tags={ "Retrieve API artifacts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of runtime Artifacts", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response retrieveApiArtifactsPost(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "**Search condition**.  type of gateway ")  @QueryParam("type") String type, @ApiParam(value = "API UUID list payload" ) UUIDListDTO uuidList) throws APIManagementException{
+    public Response retrieveApiArtifactsPost(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "type of gateway ")  @QueryParam("type") String type, @ApiParam(value = "API UUID list payload" ) UUIDListDTO uuidList) throws APIManagementException{
         return delegate.retrieveApiArtifactsPost(xWSO2Tenant, gatewayLabel, type, uuidList, securityContext);
     }
 }
