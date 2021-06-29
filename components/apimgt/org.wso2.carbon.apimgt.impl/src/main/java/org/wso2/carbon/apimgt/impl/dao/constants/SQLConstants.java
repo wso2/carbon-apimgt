@@ -2841,6 +2841,7 @@ public class SQLConstants {
             "API_UUID = ? AND REVISION_UUID = ?";
     public static final String RESTORE_API_REVISION_METADATA = "UPDATE AM_API SET API_TIER = (SELECT API_TIER FROM " +
             "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
+    public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
 
     /** Throttle related constants**/
 

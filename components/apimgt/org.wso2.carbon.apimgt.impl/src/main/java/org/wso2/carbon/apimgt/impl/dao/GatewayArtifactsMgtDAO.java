@@ -308,7 +308,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
-        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",",Collections.nCopies(labels.length, "?")));
+        query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -363,7 +363,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
-        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",",Collections.nCopies(labels.length, "?")));
+        query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -381,8 +381,6 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                         apiRuntimeArtifactDto.setApiId(apiId);
                         String label = resultSet.getString("LABEL");
-                        // Do not handle the exception here since runtime artifacts are retrieved by API UUID
-                        // throw the exception here.
                         String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
                                 resultSet.getString("VHOST"));
                         apiRuntimeArtifactDto.setLabel(label);
@@ -419,7 +417,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
-        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",",Collections.nCopies(labels.length, "?")));
+        query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
