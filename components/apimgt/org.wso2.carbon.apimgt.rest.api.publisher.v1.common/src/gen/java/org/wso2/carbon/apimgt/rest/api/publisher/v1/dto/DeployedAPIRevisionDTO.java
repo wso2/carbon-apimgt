@@ -24,7 +24,7 @@ import javax.validation.Valid;
 public class DeployedAPIRevisionDTO   {
   
     private String apiUUID = null;
-    private String revisionID = null;
+    private Integer revisionID = null;
     private List<DeployedEnvInfoDTO> envInfo = new ArrayList<DeployedEnvInfoDTO>();
 
   /**
@@ -46,7 +46,7 @@ public class DeployedAPIRevisionDTO   {
 
   /**
    **/
-  public DeployedAPIRevisionDTO revisionID(String revisionID) {
+  public DeployedAPIRevisionDTO revisionID(Integer revisionID) {
     this.revisionID = revisionID;
     return this;
   }
@@ -54,10 +54,10 @@ public class DeployedAPIRevisionDTO   {
   
   @ApiModelProperty(example = "1", value = "")
   @JsonProperty("revisionID")
-  public String getRevisionID() {
+  public Integer getRevisionID() {
     return revisionID;
   }
-  public void setRevisionID(String revisionID) {
+  public void setRevisionID(Integer revisionID) {
     this.revisionID = revisionID;
   }
 

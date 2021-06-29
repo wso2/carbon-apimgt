@@ -4340,7 +4340,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response deployedAPIRevision(String organizationId, List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList,
+    public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -4351,7 +4351,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
             // get revision uuid
-            String revisionUUID = apiProvider.getAPIRevisionUUID(deployedAPIRevisionDTO.getRevisionID(),
+            String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionID()),
                     deployedAPIRevisionDTO.getApiUUID());
             if (revisionUUID == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
@@ -4362,7 +4362,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
                 DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
                 deployedAPIRevision.setRevisionUUID(revisionUUID);
-                deployedAPIRevision.setApiUUID(deployedAPIRevisionDTO.getApiUUID());
                 String environment = deployedEnvInfoDTO.getName();
                 if (environments.get(environment) == null) {
                     RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
@@ -4378,8 +4377,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 deployedAPIRevisions.add(deployedAPIRevision);
             }
-            //todo(amali)
-            apiProvider.addDeployedAPIRevision(deployedAPIRevisions);
+            apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiUUID(), revisionUUID, deployedAPIRevisions);
         }
 
         Response.Status status = Response.Status.CREATED;

@@ -9382,14 +9382,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void addDeployedAPIRevision(String apiId, String apiRevisionUUID,
-                                       List<DeployedAPIRevision> deployedAPIRevisionList, String organizationId)
+                                       List<DeployedAPIRevision> deployedAPIRevisionList)
             throws APIManagementException {
 
-        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionUUID);
-        if (apiRevision == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
-                    + apiRevisionUUID, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
-        }
         List<DeployedAPIRevision> currentDeployedApiRevisionList =
                 apiMgtDAO.getDeployedAPIRevisionByApiUUID(apiId);
         Set<DeployedAPIRevision> environmentsToRemove = new HashSet<>();

@@ -454,7 +454,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/{apiId}/deployed-revision")
+    @Path("/deployed-revision")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Deploy Revision", notes = "Deploy a revision ", response = Void.class, authorizations = {
@@ -466,8 +466,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "Created. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response deployedAPIRevision( @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId, @ApiParam(value = "Deployment object that needs to be added" ) List<DeployedAPIRevisionDTO> deployedAPIRevisionDTO) throws APIManagementException{
-        return delegate.deployedAPIRevision(organizationId, deployedAPIRevisionDTO, securityContext);
+    public Response deployedAPIRevision(@ApiParam(value = "Deployment object that needs to be added" ) List<DeployedAPIRevisionDTO> deployedAPIRevisionDTO) throws APIManagementException{
+        return delegate.deployedAPIRevision(deployedAPIRevisionDTO, securityContext);
     }
 
     @PATCH

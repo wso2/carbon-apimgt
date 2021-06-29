@@ -16441,7 +16441,6 @@ public class ApiMgtDAO {
     /**
      * Adds an deployed API revision to the database
      *
-     * @param apiRevisionId          uuid of the revision
      * @param deployedAPIRevisionList content of the revision deployment mapping objects
      * @throws APIManagementException if an error occurs when adding a new API revision
      */

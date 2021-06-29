@@ -84,7 +84,7 @@ public interface ApisApiService {
       public Response deleteAPIRevision(String apiId, String revisionId, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
-      public Response deployedAPIRevision(String organizationId, List<DeployedAPIRevisionDTO> deployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException;
+      public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;

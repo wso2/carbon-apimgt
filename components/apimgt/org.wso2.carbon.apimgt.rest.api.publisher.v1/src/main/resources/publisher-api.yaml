@@ -1701,7 +1701,7 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /apis/{apiId}/deployed-revision:
+  /apis/deployed-revision:
     #--------------------------------------------
     # Deploy a revision
     #--------------------------------------------
@@ -1712,8 +1712,6 @@ paths:
       description: |
         Deploy a revision
       operationId: deployedAPIRevision
-      parameters:
-        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: Deployment object that needs to be added
         content:
@@ -8576,7 +8574,7 @@ components:
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         revisionID:
-          type: string
+          type: integer
           example: 1
         envInfo:
           type: array
