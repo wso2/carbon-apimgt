@@ -105,10 +105,12 @@ public class OAuthTokenGenerator {
                 oAuthEndpoint.getPassword(), oAuthEndpoint.getGrantType(), oAuthEndpoint.getCustomParameters(),
                 refreshToken);
         assert tokenResponse != null;
-        if (OAuthMediator.isRedisEnabled) {
-            RedisCacheUtils.getInstance().addObject(oAuthEndpoint.getId(), tokenResponse);
-        } else {
-            TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), tokenResponse);
+        if (tokenResponse.getExpiresIn() != null) {
+            if (OAuthMediator.isRedisEnabled) {
+                RedisCacheUtils.getInstance().addObject(oAuthEndpoint.getId(), tokenResponse);
+            } else {
+                TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), tokenResponse);
+            }
         }
     }
 
