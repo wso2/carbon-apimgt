@@ -1121,7 +1121,8 @@ public class APIMappingUtil {
             if (model.getAsyncApiDefinition() != null) {
                 asyncAPIDefinition = model.getAsyncApiDefinition();
             } else {
-                asyncAPIDefinition = apiProvider.getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
+                asyncAPIDefinition = apiProvider
+                        .getAsyncAPIDefinition(model.getId().getUUID(), model.getOrganization());
             }
             if (asyncAPIDefinition != null) {
                 List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
