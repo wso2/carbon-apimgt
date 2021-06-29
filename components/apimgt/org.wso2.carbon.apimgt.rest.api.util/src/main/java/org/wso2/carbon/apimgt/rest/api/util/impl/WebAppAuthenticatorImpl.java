@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -164,6 +165,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      * @return return true if we found matching scope in resource and token information
      * else false(means scope validation failed).
      */
+    @MethodStats
     private boolean validateScopes(Message message, AccessTokenInfo tokenInfo) {
         String basePath = (String) message.get(Message.BASE_PATH);
         // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
@@ -251,6 +253,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         return APIUtil.isAccessTokenExpired(infoDTO);
     }
 
+    @MethodStats
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
@@ -307,6 +310,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      * @param requestDTO Token validation request
      * @return
      */
+    @MethodStats
     protected OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);

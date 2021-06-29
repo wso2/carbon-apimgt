@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -57,6 +58,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
      * @param message cxf message
      */
     @Override
+    @MethodStats
     public void handleMessage(Message message) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         //by-passes the interceptor if user is an annonymous user
@@ -114,6 +116,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         }
     }
 
+    @MethodStats
     private void loadTenantRegistry() throws APIManagementException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
