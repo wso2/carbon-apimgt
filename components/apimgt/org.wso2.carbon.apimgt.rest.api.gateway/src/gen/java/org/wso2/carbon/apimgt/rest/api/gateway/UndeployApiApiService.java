@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface UndeployApiApiService {
-      public Response undeployApiPost(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response undeployAPI(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

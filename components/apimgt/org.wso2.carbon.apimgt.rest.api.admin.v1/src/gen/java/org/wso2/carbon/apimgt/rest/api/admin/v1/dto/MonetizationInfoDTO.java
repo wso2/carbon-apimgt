@@ -66,9 +66,8 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "FixedRate", required = true, value = "Flag to indicate the monetization plan")
+  @ApiModelProperty(example = "FixedRate", value = "Flag to indicate the monetization plan")
   @JsonProperty("monetizationPlan")
-  @NotNull
   public MonetizationPlanEnum getMonetizationPlan() {
     return monetizationPlan;
   }

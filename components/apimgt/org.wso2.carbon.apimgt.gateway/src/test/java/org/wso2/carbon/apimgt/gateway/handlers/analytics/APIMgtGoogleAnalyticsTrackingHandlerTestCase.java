@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -30,7 +31,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -46,6 +46,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
     @Test
     public void testHandleRequest() {
         MessageContext msgCtx1 = Mockito.mock(MessageContext.class);
+        Mockito.when(msgCtx1.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.PUBLISHED);
         APIMgtGoogleAnalyticsTrackingHandler apiMgtGoogleAnalyticsTrackingHandler
                 = new APIMgtGoogleAnalyticsTrackingHandler();
         try {
@@ -57,7 +58,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         SynapseConfiguration synapseConfiguration = Mockito.mock(SynapseConfiguration.class);
         Mockito.when(msgCtx.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synapseConfiguration.getEntryDefinition("abc")).thenReturn(null);
-
+        Mockito.when(msgCtx.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.PUBLISHED);
         apiMgtGoogleAnalyticsTrackingHandler.setConfigKey("abc");
         //test when entry is null
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(msgCtx));
@@ -108,8 +109,8 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         } catch (XMLStreamException e) {
             fail(e.getMessage());
         }
-        Mockito.when(entryvalue.getFirstChildWithName(new QName(
-                APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED))).thenReturn(entryvalue);
+        Mockito.when(entryvalue.getFirstChildWithName(new QName(Constants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)))
+                .thenReturn(entryvalue);
         Mockito.when(entryvalue.getText()).thenReturn("true");
         // Test exception thrown from trackPageView
 
@@ -124,12 +125,13 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         OMElement entryvalue1 = Mockito.mock(OMElement.class);
         Mockito.when(msgCtx.getEntry("abc")).thenReturn(entryvalue1);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.PUBLISHED);
 
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(messageContext));
 
         //test when HOST and X_FORWARDED_FOR_HEADER are set
         transportHeaders.put(HttpHeaders.HOST, "localhost:18080");
-        transportHeaders.put(APIMgtUsagePublisherConstants.X_FORWARDED_FOR_HEADER, "192.168.0.34");
+        transportHeaders.put(Constants.X_FORWARDED_FOR_HEADER, "192.168.0.34");
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(messageContext));
 
     }

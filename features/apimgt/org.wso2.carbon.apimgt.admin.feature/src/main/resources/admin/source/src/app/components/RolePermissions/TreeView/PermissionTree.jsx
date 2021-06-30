@@ -125,7 +125,7 @@ const useStyles = makeStyles({
 export default function PermissionTreeView(props) {
     const { appMappings, role, onCheck } = props;
     const classes = useStyles();
-    const totalPermissions = appMappings.admin.length + appMappings.store.length + appMappings.publisher.length;
+    const totalPermissions = appMappings.admin.length + appMappings.devportal.length + appMappings.publisher.length;
     return (
         <TreeView
             className={classes.root}

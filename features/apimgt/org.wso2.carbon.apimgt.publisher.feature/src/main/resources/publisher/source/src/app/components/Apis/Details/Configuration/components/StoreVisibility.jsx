@@ -240,7 +240,7 @@ export default function StoreVisibility(props) {
                         helperText={
                             roleValidity ? (
                                 <FormattedMessage
-                                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                                    id='Apis.Details.Scopes.visibility.CreateScope.roles.help'
                                     defaultMessage='Enter valid role and press enter'
                                 />
                             ) : (

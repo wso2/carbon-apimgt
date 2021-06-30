@@ -18,60 +18,36 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Footer from './Footer/Footer';
+import { makeStyles } from '@material-ui/core/styles';
+import Footer from 'AppComponents/Base/Footer/Footer';
+import Header from 'AppComponents/Base/Header';
+// import CssBaseline from '@material-ui/core/CssBaseline';
 
-const styles = (theme) => ({
-    appBar: {
-        position: 'relative',
-        background: theme.palette.background.appBar,
-    },
-    icon: {
-        marginRight: theme.spacing(2),
-    },
-    menuIcon: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 35,
-    },
-    userLink: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-    },
-    // Page layout styles
-    drawer: {
-        top: 64,
-    },
+const useStyles = makeStyles((theme) => ({
     wrapper: {
-        minHeight: '100%',
-        marginBottom: -50,
+        display: 'flex',
         background: theme.custom.wrapperBackground,
     },
     contentWrapper: {
+        flexGrow: 1,
+        transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+    contentRoot: {
+        minHeight: `calc(100vh - ${64 + theme.custom.footer.height}px)`, // 64 coming from default MUI appbar height
+    },
+    drawerHeader: {
         display: 'flex',
-        flexDirection: 'row',
-        position: 'relative',
-        minHeight: 'calc(100vh - 114px)',
-    },
-    push: {
-        height: 50,
-    },
-    footer: {
-        backgroundColor: theme.palette.grey.A100,
-        paddingLeft: theme.spacing(3),
-        height: 50,
         alignItems: 'center',
-        display: 'flex',
+        padding: theme.spacing(0, 1),
+        // necessary for content to be below app bar
+        ...theme.mixins.toolbar,
+        justifyContent: 'flex-end',
+        minHeight: theme.spacing(8),
     },
-    toolbar: {
-        minHeight: 56,
-        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            minHeight: 48,
-        },
-        [theme.breakpoints.up('sm')]: {
-            minHeight: 64,
-        },
-    },
-});
-
+}));
 /**
  * Base Component for the publisher app
  * Adding a padding to Base container to avoid overlapping content with the Header AppBar
@@ -80,24 +56,28 @@ const styles = (theme) => ({
  * @class Layout
  * @extends {React.Component}
  */
-const Base = ({ classes, children, header }) => {
+const Base = ({ children, user }) => {
+    const classes = useStyles();
     return (
         <>
+            {/* <CssBaseline /> */}
             <div className={classes.wrapper}>
-                {header}
-                <div className={classes.contentWrapper}>{children}</div>
-
-                <div className={classes.push} />
+                <Header user={user} />
+                <main className={classes.contentWrapper}>
+                    <div className={classes.drawerHeader} />
+                    <div className={classes.contentRoot}>
+                        {children}
+                    </div>
+                    <Footer />
+                </main>
             </div>
-            <Footer />
         </>
     );
 };
 
 Base.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
     children: PropTypes.element.isRequired,
-    header: PropTypes.element.isRequired,
+    user: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Base);
+export default Base;

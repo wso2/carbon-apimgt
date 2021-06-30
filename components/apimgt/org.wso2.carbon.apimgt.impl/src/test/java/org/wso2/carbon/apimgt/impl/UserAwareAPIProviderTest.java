@@ -82,6 +82,8 @@ public class UserAwareAPIProviderTest {
                 .getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS);
         Mockito.doReturn(userRegistry).when(registryService)
                 .getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt());
+        Mockito.doReturn(userRegistry).when(registryService)
+                .getGovernanceSystemRegistry();
         Mockito.doReturn(userRegistry).when(registryService).getConfigSystemRegistry(Mockito.anyInt());
         Mockito.doReturn(userRegistry).when(registryService).getConfigSystemRegistry();
         Mockito.doReturn(resource).when(userRegistry).newResource();

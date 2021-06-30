@@ -15,13 +15,12 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.8.221-SNAPSHOT</version>
+        <version>9.0.174</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -67,12 +66,28 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
+                        <id>install lerna dependencies</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <skip>${npm.build.skip}</skip>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>ci</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>lerna clean</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -88,6 +103,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -103,6 +119,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -118,6 +135,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -162,6 +180,7 @@
     </build>
     <properties>
         <maven.test.skip>false</maven.test.skip>
+        <npm.build.skip>false</npm.build.skip>
         <npm.executable>npm</npm.executable>
         <npm.build.command>build:prod</npm.build.command>
         <npm.test.command>test</npm.test.command>

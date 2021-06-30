@@ -6,24 +6,24 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
- * Set if response caching enabled or not
+ * Set if response caching enabled or not.
  */
 public class ResponseCacheConfigContext extends ConfigContextDecorator {
-	
-	private API api;
-	private APIProduct apiProduct;
 
-	public ResponseCacheConfigContext(ConfigContext context, API api) {
-		super(context);
-		this.api = api;
-	}
+    private API api;
+    private APIProduct apiProduct;
+
+    public ResponseCacheConfigContext(ConfigContext context, API api) {
+        super(context);
+        this.api = api;
+    }
 
     public ResponseCacheConfigContext(ConfigContext context, APIProduct apiProduct) {
         super(context);
         this.apiProduct = apiProduct;
     }
-	
-	public VelocityContext getContext() {
+
+    public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
         if (api != null) {

@@ -16,30 +16,53 @@
 
 package org.wso2.carbon.apimgt.impl.kmclient;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
- *
- * This is the custom exception class for exceptions in the Feign Key Manager Client
- *
+ * This is the custom exception class for exceptions in the Feign Key Manager Client.
  */
 public class KeyManagerClientException extends Exception {
 
+    private int statusCode;
+    private String reason;
+
     public KeyManagerClientException() {
+
         super();
     }
 
     public KeyManagerClientException(String message) {
+
         super(message);
     }
 
     public KeyManagerClientException(String message, Exception e) {
+
         super(message, e);
     }
 
     public KeyManagerClientException(int statusCode, String reason) {
+
         super("Received status code: " + statusCode + " Reason: " + reason);
-      
+        this.reason = reason;
+        this.statusCode = statusCode;
     }
 
+    public int getStatusCode() {
+
+        return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+
+        this.statusCode = statusCode;
+    }
+
+    public String getReason() {
+
+        return reason;
+    }
+
+    public void setReason(String reason) {
+
+        this.reason = reason;
+    }
 }

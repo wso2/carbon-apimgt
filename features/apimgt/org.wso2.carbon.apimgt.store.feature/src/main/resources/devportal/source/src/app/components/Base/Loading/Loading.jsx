@@ -18,7 +18,7 @@
 
 import React from 'react';
 
-const LoadingAnimation = (props) => {
+const LoadingAnimation = () => {
     return (
         <div className='apim-dual-ring' />
     );

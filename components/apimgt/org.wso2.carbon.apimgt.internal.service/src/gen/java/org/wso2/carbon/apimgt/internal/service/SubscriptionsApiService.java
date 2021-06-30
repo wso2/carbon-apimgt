@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
-      public Response subscriptionsGet(String xWSO2Tenant, Integer apiId, Integer appId, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsGet(String xWSO2Tenant, Integer apiId, Integer appId, String apiUUID, String applicationUUID, MessageContext messageContext) throws APIManagementException;
 }

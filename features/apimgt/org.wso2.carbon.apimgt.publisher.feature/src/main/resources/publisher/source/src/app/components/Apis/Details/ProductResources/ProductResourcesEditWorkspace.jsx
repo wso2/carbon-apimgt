@@ -474,17 +474,20 @@ function ProductResourcesEdit(props) {
                         <Grid container>
                             <>
                                 <Grid item xs={8} className={classes.leftMost}>
-                                    <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select'
-                                        defaultMessage='Find and select resources for the API Product'
-                                    />
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select'
+                                            defaultMessage='Find and select resources for the API Product'
+                                        />
+                                    </Typography>
                                 </Grid>
                                 <Grid item xs={4} className={classes.rightMost}>
-                                    <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.selected'
-                                        defaultMessage='Selected resources of API Product'
-                                    />
-                                    <div />
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.ProductResources.ProductResourcesWorkspace.selected'
+                                            defaultMessage='Selected resources of API Product'
+                                        />
+                                    </Typography>
                                 </Grid>
                             </>
                         </Grid>
@@ -495,10 +498,12 @@ function ProductResourcesEdit(props) {
                         {/* ************************************************ */}
                         <Grid item xs={3}>
                             <div className={classes.colTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.ProductResources.ProductResourcesWorkspace.select.an.api'
-                                    defaultMessage='Select an API'
-                                />
+                                <Typography>
+                                    <FormattedMessage
+                                        id='Apis.Details.ProductResources.ProductResourcesWorkspace.select.an.api'
+                                        defaultMessage='Select an API'
+                                    />
+                                </Typography>
                             </div>
                             <Paper>
                                 <ListItem className={classes.searchWrapper}>
@@ -554,10 +559,12 @@ function ProductResourcesEdit(props) {
                         <Grid item xs={5}>
                             <Paper className={classes.paper}>
                                 <div className={classes.colTitle}>
-                                    <FormattedMessage
-                                        id='Apis.Details.ProductResources.ProductResourcesEdit.api.resources'
-                                        defaultMessage='Select API Resources'
-                                    />
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.api.resources'
+                                            defaultMessage='Select API Resources'
+                                        />
+                                    </Typography>
                                 </div>
                                 {selectedApi && (
                                     <Typography variant='h5' className={classes.selectedTitle}>
@@ -717,9 +724,11 @@ function ProductResourcesEdit(props) {
                                             return (
                                                 <div key={apiResource.name}>
                                                     <div className={classes.treeItemMain}>
-                                                        {apiResource.name}
-                                                        {' - '}
-                                                        {apiResource.version}
+                                                        <Typography component='p'>
+                                                            {apiResource.name}
+                                                            {' - '}
+                                                            {apiResource.version}
+                                                        </Typography>
                                                     </div>
                                                     <div className={classes.treeItemMainWrapper}>
                                                         {Object.keys(apiResource.operations).map((innerKey) => {

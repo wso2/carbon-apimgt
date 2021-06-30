@@ -98,9 +98,8 @@ public class ThrottlingPolicyMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }
-        PaginationDTO paginationDTO = new PaginationDTO();
-        paginationDTO.setNext(paginatedNext);
-        paginationDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         tierListDTO.setPagination(paginationDTO);
     }
 
@@ -122,6 +121,7 @@ public class ThrottlingPolicyMappingUtil {
         dto.setRateLimitCount(throttlingPolicy.getRateLimitCount());
         dto.setRateLimitTimeUnit(throttlingPolicy.getRateLimitTimeUnit());
         dto.setStopOnQuotaReach(throttlingPolicy.isStopOnQuotaReached());
+        dto.setDataUnit(throttlingPolicy.getBandwidthDataUnit());
         dto.setPolicyLevel(ThrottlingPolicyDTO.PolicyLevelEnum.valueOf(tierLevel.toUpperCase()));
         dto = setTierPermissions(dto, throttlingPolicy);
         if (throttlingPolicy.getQuotaPolicyType() != null) {

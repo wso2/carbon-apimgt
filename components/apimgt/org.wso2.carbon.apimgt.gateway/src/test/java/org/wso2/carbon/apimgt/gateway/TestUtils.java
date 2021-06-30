@@ -18,9 +18,11 @@ package org.wso2.carbon.apimgt.gateway;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.saaj.SOAPEnvelopeImpl;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.Entry;
@@ -29,9 +31,12 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
 import org.apache.synapse.rest.RESTConstants;
 import org.eclipse.core.runtime.Path;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPFactory;
 import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +67,7 @@ public class TestUtils {
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         Map map = new TreeMap();
         map.put(X_FORWARDED_FOR, "127.0.0.1,1.10.0.4");
         ((Axis2MessageContext) synCtx).getAxis2MessageContext()
@@ -80,6 +86,7 @@ public class TestUtils {
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         AuthenticationContext authenticationContext = new AuthenticationContext();
         authenticationContext.setUsername("sanjeewa");
         authenticationContext.setApiKey("123456789");
@@ -112,6 +119,7 @@ public class TestUtils {
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
         synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, "resource");
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         Map map = new TreeMap();
         map.put("host","127.0.0.1");
         map.put("X-FORWARDED-FOR", "127.0.0.1");

@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.common.gateway.dto;
 
 /**
- * Holds configurations related to JWKS
+ * Holds configurations related to JWKS.
  */
 public class JWKSConfigurationDTO {
     private String url;

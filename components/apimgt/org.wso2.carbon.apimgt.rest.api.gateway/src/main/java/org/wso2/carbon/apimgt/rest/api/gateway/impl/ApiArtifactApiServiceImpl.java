@@ -38,7 +38,7 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
     private boolean debugEnabled = log.isDebugEnabled();
 
     @Override
-    public Response apiArtifactGet(String apiName, String version, String tenantDomain,
+    public Response getAPIArtifacts(String apiName, String version, String tenantDomain,
                                    MessageContext messageContext) throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);

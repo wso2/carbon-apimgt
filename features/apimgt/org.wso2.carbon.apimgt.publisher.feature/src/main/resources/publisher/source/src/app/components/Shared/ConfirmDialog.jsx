@@ -13,7 +13,7 @@ import { FormattedMessage } from 'react-intl';
  */
 export default function ConfirmDialog(props) {
     const {
-        title, message, labelCancel, labelOk, open, callback,
+        title, message, labelCancel, labelOk, open, callback, idOk, idCancel,
     } = props;
 
     /**
@@ -30,16 +30,16 @@ export default function ConfirmDialog(props) {
     }
 
     return (
-        <Dialog open={open} onClose={handleRequestClose}>
+        <Dialog onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} open={open} onClose={handleRequestClose}>
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <DialogContentText>{message}</DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
+                <Button id={idCancel} onClick={() => handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
                     {labelCancel}
                 </Button>
-                <Button onClick={() => handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
+                <Button id={idOk} onClick={() => handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
                     {labelOk}
                 </Button>
             </DialogActions>

@@ -18,7 +18,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
@@ -27,10 +27,10 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
-import ApiTagThumb from './ApiTagThumb';
 import classNames from 'classnames';
+import ApiTagThumb from './ApiTagThumb';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     mainTitle: {
         paddingTop: 10,
     },
@@ -66,19 +66,17 @@ const useStyles = makeStyles(theme => ({
     },
     mainPageAllApis: {
         width: '100%',
-    }
+    },
 }));
 
 /**
- * Shared listing page
- *
- * @class TagCloudListing
- * @extends {Component}
+ * Tag cloud listing tags
+ * @param {JSON} props properties passed from parent.
+ * @returns {void}
  */
 function TagCloudListingTags(props) {
     const classes = useStyles();
     const theme = useTheme();
-    const history = useHistory();
     const {
         custom: {
             tagWise: {
@@ -94,7 +92,7 @@ function TagCloudListingTags(props) {
 
     if (allTags.count !== 0) {
         if (allTags !== null) {
-            apisTagCloudGroup = allTags.filter(item => active === true && item.value.split(key).length > 1);
+            apisTagCloudGroup = allTags.filter((item) => active === true && item.value.split(key).length > 1);
         }
         if (apisTagCloudGroup && apisTagCloudGroup.length > 0) {
             // const tagLink = tagWiseURL + ':' + apisTagCloudGroup[0].value;
@@ -110,12 +108,22 @@ function TagCloudListingTags(props) {
      */
     return apisTagCloudGroup && apisTagCloudGroup.length > 0 ? (
         <>
-            {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                <FormattedMessage defaultMessage='API Groups' id='Apis.Listing.TagCloudListingTags.title' />
-            </Typography>)}
+            {!mainPage && (
+                <Typography variant='h6' gutterBottom className={classes.filterTitle}>
+                    <FormattedMessage defaultMessage='API Groups' id='Apis.Listing.TagCloudListingTags.title' />
+                </Typography>
+            )}
             <List component='nav' aria-label='main mailbox folders' className={classNames({ [classes.mainPageList]: mainPage })}>
-                {Object.keys(apisTagCloudGroup).map((key) => {
-                    return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} mainPage={mainPage} />;
+                {Object.keys(apisTagCloudGroup).map((keyInner) => {
+                    return (
+                        <ApiTagThumb
+                            key={keyInner}
+                            tag={apisTagCloudGroup[keyInner]}
+                            path={tagWiseURL}
+                            style={style}
+                            mainPage={mainPage}
+                        />
+                    );
                 })}
             </List>
             {showAllApis && (
@@ -128,12 +136,12 @@ function TagCloudListingTags(props) {
                                 <Icon>label</Icon>
                             </ListItemIcon>
                             <ListItemText
-                                primary={
+                                primary={(
                                     <FormattedMessage
                                         defaultMessage='All Apis'
                                         id='Apis.Listing.TagCloudListingTags.allApis'
                                     />
-                                }
+                                )}
                             />
                         </ListItem>
                     </Link>
@@ -142,28 +150,30 @@ function TagCloudListingTags(props) {
         </>
 
     ) : (
-            <>
-                {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
+        <>
+            {!mainPage && (
+                <Typography variant='h6' gutterBottom className={classes.filterTitle}>
                     <FormattedMessage defaultMessage='API Groups' id='Apis.Listing.TagCloudListingTags.title' />
-                </Typography>)}
-                <div className={classes.mainTitle}>
+                </Typography>
+            )}
+            <div className={classes.mainTitle}>
+                <Typography variant='subtitle1' gutterBottom align='center'>
+                    <FormattedMessage
+                        defaultMessage='API groups cannot be found'
+                        id='Apis.Listing.TagCloudListingTags.tagsNotFound'
+                    />
+                </Typography>
+                <Link to='apis/' className={classes.linkTextWrapper}>
                     <Typography variant='subtitle1' gutterBottom align='center'>
                         <FormattedMessage
-                            defaultMessage='API groups cannot be found'
-                            id='Apis.Listing.TagCloudListingTags.tagsNotFound'
+                            defaultMessage='All Apis'
+                            id='Apis.Listing.TagCloudListingTags.allApis'
                         />
                     </Typography>
-                    <Link to='apis/' className={classes.linkTextWrapper}>
-                        <Typography variant='subtitle1' gutterBottom align='center'>
-                            <FormattedMessage
-                                defaultMessage='All Apis'
-                                id='Apis.Listing.TagCloudListingTags.allApis'
-                            />
-                        </Typography>
-                    </Link>
-                </div>
-            </>
-        );
+                </Link>
+            </div>
+        </>
+    );
 }
 
 TagCloudListingTags.propTypes = {

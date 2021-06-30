@@ -16,14 +16,14 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ReactSafeHtml from 'react-safe-html';
 import classNames from 'classnames';
 import { app } from 'Settings';
 
-const styles = theme => ({
+const styles = (theme) => ({
     parallax: {
         /* Set a specific height */
         minHeight: 200,
@@ -56,12 +56,17 @@ const styles = theme => ({
     },
 });
 
+/**
+ * Renders parallax scroll section.
+ * @param {JSON} props Parent pros.
+ * @returns {JSX} rendered parallax scroll view.
+ */
 function ParallaxScroll(props) {
     const { classes, theme, index } = props;
     const slide = theme.custom.landingPage.parallax.content[index];
 
     return (
-        <React.Fragment>
+        <>
             <div
                 className={classes.parallax}
                 style={{ backgroundImage: 'url("' + app.context + slide.src + '")' }}
@@ -76,13 +81,13 @@ function ParallaxScroll(props) {
                     </div>
                 </div>
             </div>
-        </React.Fragment>
+        </>
     );
 }
 
 ParallaxScroll.propTypes = {
-    classes: PropTypes.object.isRequired,
-    index: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    index: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 export default withStyles(styles, { withTheme: true })(ParallaxScroll);

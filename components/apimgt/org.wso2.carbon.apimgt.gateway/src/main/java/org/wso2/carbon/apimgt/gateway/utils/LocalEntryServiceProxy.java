@@ -25,8 +25,6 @@ import org.wso2.carbon.localentry.LocalEntryAdminException;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.Arrays;
-
 /**
  * This LocalEntryServiceProxy class for operating the synapse localEntries
  */
@@ -135,7 +133,12 @@ public class LocalEntryServiceProxy {
         try {
             return localEntryAdmin.getEntryNames();
         } catch (LocalEntryAdminException e) {
-            throw new AxisFault("Error while retrieving local entries",e);
+            throw new AxisFault("Error while retrieving local entries", e);
         }
+    }
+
+    public boolean localEntryExists(String entryKey) throws LocalEntryAdminException {
+
+        return localEntryAdmin.isEntryExist(entryKey);
     }
 }

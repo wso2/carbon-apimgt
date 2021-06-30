@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
 import javax.validation.constraints.*;
 
@@ -21,6 +22,7 @@ public class ThrottleLimitDTO   {
     private String quotaType = null;
     private RequestCountLimitDTO requestCount = null;
     private BandwidthLimitDTO bandwidth = null;
+    private EventCountLimitDTO eventCount = null;
 
   /**
    **/
@@ -73,6 +75,23 @@ public class ThrottleLimitDTO   {
     this.bandwidth = bandwidth;
   }
 
+  /**
+   **/
+  public ThrottleLimitDTO eventCount(EventCountLimitDTO eventCount) {
+    this.eventCount = eventCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("eventCount")
+  public EventCountLimitDTO getEventCount() {
+    return eventCount;
+  }
+  public void setEventCount(EventCountLimitDTO eventCount) {
+    this.eventCount = eventCount;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -85,12 +104,13 @@ public class ThrottleLimitDTO   {
     ThrottleLimitDTO throttleLimit = (ThrottleLimitDTO) o;
     return Objects.equals(quotaType, throttleLimit.quotaType) &&
         Objects.equals(requestCount, throttleLimit.requestCount) &&
-        Objects.equals(bandwidth, throttleLimit.bandwidth);
+        Objects.equals(bandwidth, throttleLimit.bandwidth) &&
+        Objects.equals(eventCount, throttleLimit.eventCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(quotaType, requestCount, bandwidth);
+    return Objects.hash(quotaType, requestCount, bandwidth, eventCount);
   }
 
   @Override
@@ -101,6 +121,7 @@ public class ThrottleLimitDTO   {
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    bandwidth: ").append(toIndentedString(bandwidth)).append("\n");
+    sb.append("    eventCount: ").append(toIndentedString(eventCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }

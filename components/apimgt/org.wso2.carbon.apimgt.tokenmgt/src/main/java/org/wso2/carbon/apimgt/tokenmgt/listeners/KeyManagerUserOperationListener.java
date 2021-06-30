@@ -159,18 +159,12 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             WorkflowExecutor userSignupWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForUserSignup(username);
             userSignupWFExecutor.cleanUpPendingTask(workflowExtRef);
-        } catch (WorkflowException e) {
-            // exception is not thrown to the caller since this is a event Identity(IS) listener
-            log.error("Error while cleaning up workflow task for the user: " + username, e);
-        } catch (APIManagementException e) {
-            // exception is not thrown to the caller since this is a event Identity(IS) listener
-            log.error("Error while cleaning up workflow task for the user: " + username, e);
-        } catch (UserStoreException e) {
+        } catch (WorkflowException | APIManagementException | UserStoreException e) {
             // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
         }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
-        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+        return true;
     }
 
     @Override
@@ -178,9 +172,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                              UserStoreManager userStoreManager) {
         if (!isEnable()) {
             return true;
-        }
-        if (ArrayUtils.isNotEmpty(deletedRoles)) {
-            removeGatewayKeyCache(username, userStoreManager);
         }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
         return true;
@@ -191,43 +182,8 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                              UserStoreManager userStoreManager) {
 
         boolean isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(deletedUsers, userStoreManager, true);
-        isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(newUsers, userStoreManager, isRemoveGatewayKeyCache);
-        return !isEnable() || isRemoveGatewayKeyCache;
-    }
-
-    private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
-
-        username = getUserName(username, userStoreManager);
-        APIManagerConfiguration config = getApiManagerConfiguration();
-
-        if (config.getApiGatewayEnvironments().size() <= 0) {
-            return true;
-        }
-
-        ApiMgtDAO apiMgtDAO = getDAOInstance();
-        Set<String> activeTokens;
-
-        try {
-            activeTokens = apiMgtDAO.getActiveAccessTokensOfUser(username);
-        } catch (APIManagementException e) {
-            log.error("Error while getting active access tokens of user " + username, e);
-            return false;
-        }
-
-        if (activeTokens == null || activeTokens.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("No active tokens found for the user " + username);
-            }
-            return true;
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Found " + activeTokens.size() + " active tokens of the user " + username);
-        }
-
-        APIAuthenticationAdminClient client = getApiAuthenticationAdminClient();
-        client.invalidateCachedTokens(activeTokens);
-
+        invalidateMultipleCacheKeys(newUsers, userStoreManager, isRemoveGatewayKeyCache);
+        isEnable();
         return true;
     }
 
@@ -351,11 +307,22 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         for (String username : users) {
             username = getUserName(username, userStoreManager);
             APIUtil.clearRoleCache(username);
-            if (isEnable()) {
-                removedGatewayCache = removedGatewayCache && removeGatewayKeyCache(username, userStoreManager);
-            }
         }
         return removedGatewayCache;
+    }
+    @Override
+    public boolean doPostSetUserClaimValue(String userName, UserStoreManager userStoreManager)
+            throws org.wso2.carbon.user.core.UserStoreException {
+
+        return super.doPostSetUserClaimValue(userName, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostSetUserClaimValues(String userName, Map<String, String> claims, String profileName,
+                                            UserStoreManager userStoreManager)
+            throws org.wso2.carbon.user.core.UserStoreException {
+
+        return super.doPostSetUserClaimValues(userName, claims, profileName, userStoreManager);
     }
 
 }

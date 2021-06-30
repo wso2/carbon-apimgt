@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.utils.ThrottlePolicyStartupListener;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -55,12 +56,15 @@ public class ThrottlePolicyDeployerComponent {
             log.warn("API Manager Configuration not properly set.");
             return;
         }
-        ThrottlePolicyStartupListener throttlePolicyStartupListener =
-                new ThrottlePolicyStartupListener();
-        registration = context.getBundleContext()
-                .registerService(ServerStartupObserver.class, throttlePolicyStartupListener, null);
-        registration = context.getBundleContext()
-                .registerService(ServerShutdownHandler.class, throttlePolicyStartupListener, null);
+        ThrottleProperties throttleProperties = configuration.getThrottleProperties();
+        if (throttleProperties.isEnablePolicyDeployment()) {
+            ThrottlePolicyStartupListener throttlePolicyStartupListener =
+                    new ThrottlePolicyStartupListener();
+            registration = context.getBundleContext()
+                    .registerService(ServerStartupObserver.class, throttlePolicyStartupListener, null);
+            registration = context.getBundleContext()
+                    .registerService(ServerShutdownHandler.class, throttlePolicyStartupListener, null);
+        }
     }
 
     @Reference(

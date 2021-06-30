@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
-import com.google.common.io.Files;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -26,23 +25,19 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
@@ -50,13 +45,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamException;
-
+/**
+ * This class used to generate Synapse Artifact.
+ */
 @Component(
         name = "synapse.artifact.generator.service",
         immediate = true,
@@ -64,7 +59,7 @@ import javax.xml.stream.XMLStreamException;
 )
 public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
-    private static final Log log  = LogFactory.getLog(SynapseArtifactGenerator.class);
+    private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
@@ -76,7 +71,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             if (runTimeArtifact.isFile()) {
                 String tenantDomain = runTimeArtifact.getTenantDomain();
                 String label = runTimeArtifact.getLabel();
-                Environment environment = APIUtil.getEnvironment(label, tenantDomain);
+                Environment environment = APIUtil.getEnvironments().get(label);
                 GatewayAPIDTO gatewayAPIDTO = null;
                 if (environment != null) {
                     try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
@@ -87,15 +82,14 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                             artifact);
                             if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
                                 APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(extractedFolderPath);
+                                apiProductDTO.setId(runTimeArtifact.getApiId());
                                 APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
                                         apiProductDTO.getProvider());
                                 APIDefinitionValidationResponse apiDefinitionValidationResponse =
                                         ImportUtils.retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                 apiProduct.setDefinition(apiDefinitionValidationResponse.getContent());
-                                gatewayAPIDTO = TemplateBuilderUtil
-                                        .retrieveGatewayAPIDto(apiProduct, environment, tenantDomain,
-                                                extractedFolderPath,
-                                                apiDefinitionValidationResponse);
+                                gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct, environment,
+                                        tenantDomain, extractedFolderPath);
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
@@ -113,23 +107,28 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     graphqlSchema = graphQLSchemaDefinition
                                             .buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
                                     api.setGraphQLSchema(graphqlSchema);
-                                    gatewayAPIDTO = TemplateBuilderUtil
-                                            .retrieveGatewayAPIDto(api, environment, tenantDomain, apidto,
-                                                    extractedFolderPath);
+                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
+                                            tenantDomain, apidto, extractedFolderPath);
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
-                                    APIDefinitionValidationResponse apiDefinitionValidationResponse =
-                                            ImportUtils.retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
+                                    APIDefinitionValidationResponse apiDefinitionValidationResponse = ImportUtils
+                                            .retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                     api.setSwaggerDefinition(apiDefinitionValidationResponse.getContent());
-                                    gatewayAPIDTO = TemplateBuilderUtil
-                                            .retrieveGatewayAPIDto(api, environment, tenantDomain, apidto,
-                                                    extractedFolderPath, apiDefinitionValidationResponse);
+                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
+                                            tenantDomain, apidto, extractedFolderPath, apiDefinitionValidationResponse);
                                 } else if (api.getType() != null &&
-                                        APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-                                    gatewayAPIDTO =
-                                            TemplateBuilderUtil.retrieveGatewayAPIDtoForWebSocket(api);
+                                        (APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
+                                                APIConstants.APITransportType.SSE.toString().equals(api.getType()) ||
+                                                APIConstants.APITransportType.WEBSUB.toString()
+                                                        .equals(api.getType()))) {
+                                    APIDefinitionValidationResponse asyncApiDefinition =
+                                            ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(
+                                                    extractedFolderPath);
+                                    api.setAsyncApiDefinition(asyncApiDefinition.getContent());
+                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDtoForStreamingAPI(api,
+                                            environment, tenantDomain, apidto, extractedFolderPath);
                                 }
                             }
                             if (gatewayAPIDTO != null) {
@@ -139,8 +138,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         } finally {
                             FileUtils.deleteQuietly(baseDirectory);
                         }
-                    } catch (APIImportExportException | IOException |
-                            XMLStreamException | APITemplateException | CertificateManagementException e) {
+                    } catch (Exception e) {
                         // only do error since we need to continue for other apis
 
                         log.error("Error while creating Synapse configurations", e);

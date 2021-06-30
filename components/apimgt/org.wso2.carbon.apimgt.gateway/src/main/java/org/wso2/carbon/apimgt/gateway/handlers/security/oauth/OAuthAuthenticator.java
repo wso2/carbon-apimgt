@@ -28,6 +28,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
@@ -44,7 +45,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.cache.Cache;
 
 /**
@@ -122,13 +121,13 @@ public class OAuthAuthenticator implements Authenticator {
         TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
+        String tenantDomain = GatewayUtils.getTenantDomain();
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
         }
 
         if (jwtValidator == null) {
-            this.jwtValidator = new JWTValidator(this.keyValidator);
+            this.jwtValidator = new JWTValidator(this.keyValidator, tenantDomain);
         }
 
         config = getApiManagerConfiguration();
@@ -146,28 +145,27 @@ public class OAuthAuthenticator implements Authenticator {
             defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
         }
 
-
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Default Version API invoked");
         }
 
-        if(removeOAuthHeadersFromOutMessage){
+        if (removeOAuthHeadersFromOutMessage) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
             if (StringUtils.isNotBlank(remainingAuthHeader)) {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Removing OAuth key from Authorization header");
                 }
                 headers.put(getSecurityHeader(), remainingAuthHeader);
                 remainingAuthHeader = "";
             } else {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Removing Authorization header from headers");
                 }
                 headers.remove(getSecurityHeader());
             }
 
         }
-        if(removeDefaultAPIHeaderFromOutMessage){
+        if (removeDefaultAPIHeaderFromOutMessage) {
             headers.remove(defaultAPIHeader);
         }
 
@@ -215,13 +213,20 @@ public class OAuthAuthenticator implements Authenticator {
                     }
 
                     signedJWTInfo = getSignedJwt(accessToken);
+                    if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
+                            || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
+                        log.debug("Invalid Token Provided");
+                        return new AuthenticationResponse(false, isMandatory, true,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    }
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
-                    if (StringUtils.isNotEmpty(keyManager)){
+                    if (StringUtils.isNotEmpty(keyManager)) {
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
                             isJwtToken = true;
-                        }else{
+                        } else {
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
@@ -291,8 +296,8 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
-            synCtx.setProperty("API_NAME", GatewayUtils.getAPINameFromContextAndVersion(apiContext, apiVersion,
-                    GatewayUtils.getTenantDomain()));
+            String apiNameFromContextAndVersion = GatewayUtils.getAPINameFromContextAndVersion(synCtx);
+            synCtx.setProperty("API_NAME", apiNameFromContextAndVersion);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return new AuthenticationResponse(true, isMandatory, false, 0, null);
         } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
@@ -305,7 +310,7 @@ public class OAuthAuthenticator implements Authenticator {
                     log.debug("OAuth headers not found");
                 } else if (apiContext == null) {
                     log.debug("Couldn't find API Context");
-                } else if (apiVersion == null) {
+                } else {
                     log.debug("Could not find api version");
                 }
             }

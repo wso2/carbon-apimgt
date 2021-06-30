@@ -131,7 +131,7 @@ public class APIProductResource {
 
     // Used by velocity template to generate synapse definition
     public String getEndpointKey() {
-        return apiIdentifier.getApiName() + "--v" + apiIdentifier.getVersion();
+        return productIdentifier.getName() + "--v" + productIdentifier.getVersion() + "--" + apiId;
     }
 
     public Map<String, EndpointSecurity> getEndpointSecurityMap() {

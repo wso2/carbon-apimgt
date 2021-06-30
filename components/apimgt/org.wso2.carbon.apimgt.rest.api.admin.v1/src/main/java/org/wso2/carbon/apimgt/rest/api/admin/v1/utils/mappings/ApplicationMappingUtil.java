@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
@@ -29,7 +30,7 @@ import java.util.Map;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
+    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
         if (applicationInfoDTOs == null) {
@@ -37,12 +38,8 @@ public class ApplicationMappingUtil {
             applicationListDTO.setList(applicationInfoDTOs);
         }
 
-        //identifying the proper start and end indexes
-        int start = offset < applications.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= applications.length - 1 ? offset + limit - 1 : applications.length - 1;
-
-        for (int i = start; i <= end; i++) {
-            applicationInfoDTOs.add(fromApplicationToInfoDTO(applications[i]));
+        for (Application application : applications) {
+            applicationInfoDTOs.add(fromApplicationToInfoDTO(application));
         }
         applicationListDTO.setCount(applicationInfoDTOs.size());
         return applicationListDTO;
@@ -67,16 +64,26 @@ public class ApplicationMappingUtil {
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), null);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiCommonUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+                        paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), null);
         }
-        applicationListDTO.setNext(paginatedNext);
-        applicationListDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        applicationListDTO.setPagination(paginationDTO);
+    }
+
+    private static PaginationDTO getPaginationDTO(int limit, int offset, int total, String next, String previous) {
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(total);
+        paginationDTO.setNext(next);
+        paginationDTO.setPrevious(previous);
+        return paginationDTO;
     }
 
     /**

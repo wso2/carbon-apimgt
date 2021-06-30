@@ -24,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
@@ -41,15 +40,14 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
@@ -73,7 +71,10 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
     @MethodStats
     @Override
-	public boolean handleRequest(MessageContext msgCtx) {
+    public boolean handleRequest(MessageContext msgCtx) {
+        if (GatewayUtils.isAPIStatusPrototype(msgCtx)) {
+            return true;
+        }
         TracingSpan span = null;
         TracingTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
@@ -126,7 +127,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 if (Util.tracingEnabled()) {
                     Util.inject(span, tracer, tracerSpecificCarrier);
                     if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
-                        Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                        Map headers =
+                                (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
                                 org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                         headers.putAll(tracerSpecificCarrier);
                         org.apache.axis2.context.MessageContext.getCurrentMessageContext()
@@ -176,7 +178,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         }
 
         // Get client IP
-        String xForwardedFor = (String) headers.get(APIMgtUsagePublisherConstants.X_FORWARDED_FOR_HEADER);
+        String xForwardedFor = (String) headers
+                .get(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.X_FORWARDED_FOR_HEADER);
         String userIP;
         if(xForwardedFor == null || xForwardedFor.isEmpty()) {
             userIP = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
@@ -286,10 +289,12 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 		private String googleAnalyticsTrackingID;
 		
 		public GoogleAnalyticsConfig(OMElement config) {
-			googleAnalyticsTrackingID = config.getFirstChildWithName(new QName(
-					APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ID)).getText();
+            googleAnalyticsTrackingID = config.getFirstChildWithName(new QName(
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_TRACKING_ID))
+                    .getText();
             String googleAnalyticsEnabledStr = config.getFirstChildWithName(new QName(
-            		APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)).getText();
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED))
+                    .getText();
             enabled =  googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
 		}
 

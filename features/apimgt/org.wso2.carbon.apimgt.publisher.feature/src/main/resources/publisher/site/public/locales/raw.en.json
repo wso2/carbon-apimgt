@@ -1,0 +1,3978 @@
+{
+  "Api.category.dropdown.tooltip": {
+    "defaultMessage": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API."
+  },
+  "Apis.APIProductCreateWrapper.error.errorMessage.create.revision": {
+    "defaultMessage": "Something went wrong while creating the API Revision"
+  },
+  "Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision": {
+    "defaultMessage": "Something went wrong while deploying the API Revision"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.back": {
+    "defaultMessage": "Back"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.defineProvide": {
+    "defaultMessage": "Define API Product"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.error.policies.not.available": {
+    "defaultMessage": "Throttling policies not available. Contact your administrator"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.heading": {
+    "defaultMessage": "Create an API Product"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.next": {
+    "defaultMessage": "Next"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.publish": {
+    "defaultMessage": "Publish"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.resources": {
+    "defaultMessage": "Add Resources"
+  },
+  "Apis.Create.APIProduct.APIProductCreateWrapper.sub.heading": {
+    "defaultMessage": "Create an API Product by providing a Name, a Context, Resources, and Business Plans (optional)."
+  },
+  "Apis.Create.AsyncAPI.ApiCreateAsyncAPI.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Create.AsyncAPI.ApiCreateAsyncAPI.heading": {
+    "defaultMessage": "Create an API using an AsyncAPI definition."
+  },
+  "Apis.Create.AsyncAPI.ApiCreateAsyncAPI.sub.heading": {
+    "defaultMessage": "Create an API using an existing AsyncAPI definition file or URL."
+  },
+  "Apis.Create.AsyncAPI.ApiCreateAsyncAPI.wizard.one": {
+    "defaultMessage": "Provide AsyncAPI"
+  },
+  "Apis.Create.AsyncAPI.ApiCreateAsyncAPI.wizard.two": {
+    "defaultMessage": "Create API"
+  },
+  "Apis.Create.AsyncAPI.Steps.ProvideAsyncAPI.Input.file.dropzone": {
+    "defaultMessage": "Drag & Drop AsyncAPI File here {break} or {break} Browse files"
+  },
+  "Apis.Create.AsyncAPI.Steps.ProvideAsyncAPI.Input.file.upload": {
+    "defaultMessage": "Browse File to Upload"
+  },
+  "Apis.Create.AsyncAPI.Steps.ProvideAsyncAPI.Input.type": {
+    "defaultMessage": "Input Type"
+  },
+  "Apis.Create.Components.DefaultAPIForm.api.context": {
+    "defaultMessage": "Context"
+  },
+  "Apis.Create.Components.DefaultAPIForm.api.product.context": {
+    "defaultMessage": "Context"
+  },
+  "Apis.Create.Components.DefaultAPIForm.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Create.Components.DefaultAPIForm.version": {
+    "defaultMessage": "Version"
+  },
+  "Apis.Create.Components.NewTopic.topic.name": {
+    "defaultMessage": "Topic Name"
+  },
+  "Apis.Create.Components.SelectPolicies.business.plans": {
+    "defaultMessage": "Business plan(s)"
+  },
+  "Apis.Create.Default.APICreateDefault.api.heading": {
+    "defaultMessage": "Create an API"
+  },
+  "Apis.Create.Default.APICreateDefault.api.sub.heading": {
+    "defaultMessage": "Create an API by providing a Name, a Version, a Context and Backend Endpoint (optional)"
+  },
+  "Apis.Create.Default.APICreateDefault.apiProduct.heading": {
+    "defaultMessage": "Create an API Product"
+  },
+  "Apis.Create.Default.APICreateDefault.apiProduct.sub.heading": {
+    "defaultMessage": "Create an API Product by providing a Name, a Context, and Business Plans (optional)."
+  },
+  "Apis.Create.Default.APICreateDefault.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Create.Default.APICreateDefault.error.errorMessage.create.revision": {
+    "defaultMessage": "Something went wrong while creating the API Revision"
+  },
+  "Apis.Create.Default.APICreateDefault.error.errorMessage.deploy.revision": {
+    "defaultMessage": "Something went wrong while deploying the API Revision"
+  },
+  "Apis.Create.Default.APICreateDefault.error.errorMessage.publish": {
+    "defaultMessage": "Something went wrong while publishing the API"
+  },
+  "Apis.Create.Default.APICreateDefault.error.policies.not.available": {
+    "defaultMessage": "Throttling policies not available. Contact your administrator"
+  },
+  "Apis.Create.Default.APICreateDefault.success.otherStatus": {
+    "defaultMessage": "API updated successfully"
+  },
+  "Apis.Create.Default.APICreateDefault.success.publishStatus": {
+    "defaultMessage": "Lifecycle state change request has been sent"
+  },
+  "Apis.Create.Default.APICreateDefault.webSocket.heading": {
+    "defaultMessage": "Create a WebSocket API"
+  },
+  "Apis.Create.Default.APICreateDefault.webSocket.sub.heading": {
+    "defaultMessage": "Create a WebSocket API by providing a Name, and a Context."
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.back": {
+    "defaultMessage": "Back"
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.create": {
+    "defaultMessage": "Create"
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.error.policies.not.available": {
+    "defaultMessage": "Throttling policies not available. Contact your administrator"
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.heading": {
+    "defaultMessage": "Create an API using a GraphQL SDL definition"
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.next": {
+    "defaultMessage": "Next"
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.sub.heading": {
+    "defaultMessage": "Create an API by importing an existing GraphQL SDL definition."
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.wizard.one": {
+    "defaultMessage": "Provide GraphQL"
+  },
+  "Apis.Create.GraphQL.ApiCreateGraphQL.wizard.two": {
+    "defaultMessage": "Create API"
+  },
+  "Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.dropzone": {
+    "defaultMessage": "Drag & Drop files here {break} or {break} Browse files{break}({accept})"
+  },
+  "Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.upload": {
+    "defaultMessage": "Browse File to Upload"
+  },
+  "Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.type": {
+    "defaultMessage": "Provide GraphQL File"
+  },
+  "Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Create.OpenAPI.ApiCreateOpenAPI.heading": {
+    "defaultMessage": "Create an API using an OpenAPI definition."
+  },
+  "Apis.Create.OpenAPI.ApiCreateOpenAPI.sub.heading": {
+    "defaultMessage": "Create an API using an existing OpenAPI definition file or URL."
+  },
+  "Apis.Create.OpenAPI.ApiCreateOpenAPI.wizard.one": {
+    "defaultMessage": "Provide OpenAPI"
+  },
+  "Apis.Create.OpenAPI.ApiCreateOpenAPI.wizard.two": {
+    "defaultMessage": "Create API"
+  },
+  "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone": {
+    "defaultMessage": "Drag & Drop Open API File/Archive here {break} or {break} Browse files"
+  },
+  "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.upload": {
+    "defaultMessage": "Browse File to Upload"
+  },
+  "Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.type": {
+    "defaultMessage": "Input Type"
+  },
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.heading": {
+    "defaultMessage": "Create a Streaming API"
+  },
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": {
+    "defaultMessage": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+  },
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": {
+    "defaultMessage": "Create an API by providing a Name, a Version and a Context"
+  },
+  "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": {
+    "defaultMessage": "Throttling policies not available. Contact your administrator"
+  },
+  "Apis.Create.WSDL.ApiCreateWSDL.heading": {
+    "defaultMessage": "Expose a SOAP Service as a REST API"
+  },
+  "Apis.Create.WSDL.ApiCreateWSDL.sub.heading": {
+    "defaultMessage": "Expose an existing SOAP service as a REST API by importing the WSDL of the SOAP service."
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.archive.dropzone": {
+    "defaultMessage": "Drag & Drop WSDL file/archive {break} -or-"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.dropzone": {
+    "defaultMessage": "Drag & Drop WSDL file {break} -or-"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.Input.file.upload": {
+    "defaultMessage": "Browse File to Upload"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.Input.type": {
+    "defaultMessage": "Input Type"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label": {
+    "defaultMessage": "Generate REST APIs"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.file.label.wsdl.file.archive": {
+    "defaultMessage": "WSDL File/Archive"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type": {
+    "defaultMessage": "Implementation Type"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label": {
+    "defaultMessage": "Pass Through"
+  },
+  "Apis.Create.WSDL.Steps.ProvideWSDL.url.label": {
+    "defaultMessage": "WSDL URL"
+  },
+  "Apis.Create.asyncAPI.Components.SelectPolicies.business.plans": {
+    "defaultMessage": "Protocol"
+  },
+  "Apis.Create.streaming.Components.SelectPolicies.business.plans": {
+    "defaultMessage": "Protocol"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.api.definition": {
+    "defaultMessage": "API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.api.definition.oas.updated.successfully": {
+    "defaultMessage": "API Definition Updated Successfully"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation": {
+    "defaultMessage": "Are you sure you want to save the API Definition? This might affect the existing resources."
+  },
+  "Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully": {
+    "defaultMessage": "API Definition updated successfully"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.async.api.definition.updated.successfully": {
+    "defaultMessage": "API Definition updated successfully"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.async.api.import.definition.updated.successfully": {
+    "defaultMessage": "API Definition Updated Successfully"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.asyncAPI.definition": {
+    "defaultMessage": "AsyncAPI Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.audit.api": {
+    "defaultMessage": "Audit API"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.btn.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.btn.no": {
+    "defaultMessage": "CANCEL"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.convert.to": {
+    "defaultMessage": "Convert to"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.documents.swagger.editor.update.content": {
+    "defaultMessage": "Update Content"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.download.definition": {
+    "defaultMessage": "Download Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.edit": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.error.updating.graphQL.schema": {
+    "defaultMessage": "Error while updating GraphQL schema"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.error.while.parsing.api.definition": {
+    "defaultMessage": "Error occurred while updating the API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition": {
+    "defaultMessage": "Error occurred while updating the API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition": {
+    "defaultMessage": "Error occurred while updating the API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.error.while.updating.import.api.definition": {
+    "defaultMessage": "Error while updating the API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.error.while.updating.import.async.api.definition": {
+    "defaultMessage": "Error while updating the API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully": {
+    "defaultMessage": "Schema Definition Updated Successfully"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition": {
+    "defaultMessage": "Import Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition.asyncApi": {
+    "defaultMessage": "Import AsyncAPI Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition.graphql": {
+    "defaultMessage": "Import GraphQL Schema Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition.import": {
+    "defaultMessage": "Import"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition.oas": {
+    "defaultMessage": "Import OpenAPI Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.definition.wsdl": {
+    "defaultMessage": "Import WSDL"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.import.wsdl": {
+    "defaultMessage": "Import WSDL"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.save.api.definition": {
+    "defaultMessage": "Save API Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.schema.definition": {
+    "defaultMessage": "Schema Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.update.not.allowed": {
+    "defaultMessage": "Unauthorized: Insufficient permissions to update API Definition"
+  },
+  "Apis.Details.APIDefinition.AuditApi\n                                                                    .OverallScoreProgress": {
+    "defaultMessage": "{overallScore}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.ApiSecurityAuditReport": {
+    "defaultMessage": "API Security Audit Report"
+  },
+  "Apis.Details.APIDefinition.AuditApi.AuditScoreSummary": {
+    "defaultMessage": "Audit Score and Summary"
+  },
+  "Apis.Details.APIDefinition.AuditApi.DataValidation": {
+    "defaultMessage": "Data Validation"
+  },
+  "Apis.Details.APIDefinition.AuditApi.DataValidationNumOfIssues": {
+    "defaultMessage": "{dataNumOfIssuesText} {dataNumOfIssues}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.DataValidationScore": {
+    "defaultMessage": "{dataScoreText} {dataScore} / 70"
+  },
+  "Apis.Details.APIDefinition.AuditApi.DataValidationSummary": {
+    "defaultMessage": "{dataValidationSummary}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.FailedToValidate.Content": {
+    "defaultMessage": "Fix the critical errors shown below and run the audit again."
+  },
+  "Apis.Details.APIDefinition.AuditApi.FailedToValidate.Heading": {
+    "defaultMessage": "Failed to Validate OpenAPI File"
+  },
+  "Apis.Details.APIDefinition.AuditApi.GetReportError": {
+    "defaultMessage": "Something went wrong while retrieving the API Security Report"
+  },
+  "Apis.Details.APIDefinition.AuditApi.LinkToDetailedReport": {
+    "defaultMessage": "{linkToDetailedReportText} {link} {afterLinkText}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.OASNoIssuesFound": {
+    "defaultMessage": "No Issues Found"
+  },
+  "Apis.Details.APIDefinition.AuditApi.OpenApiFormatRequirements": {
+    "defaultMessage": "OpenAPI Format Requirements"
+  },
+  "Apis.Details.APIDefinition.AuditApi.OverallCriticality": {
+    "defaultMessage": "{overallCriticalityText} {overallCriticality}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.ReferenceSection": {
+    "defaultMessage": "Visit this {link} to view a detailed description, possible exploits and remediation for this issue.",
+    "description": "Link to visit for detail on how to remedy issue"
+  },
+  "Apis.Details.APIDefinition.AuditApi.ScoreFooter": {
+    "defaultMessage": "out of 100"
+  },
+  "Apis.Details.APIDefinition.AuditApi.Security": {
+    "defaultMessage": "Security"
+  },
+  "Apis.Details.APIDefinition.AuditApi.SecurityNumOfIssues": {
+    "defaultMessage": "{securityNumOfIssuesText} {securityNumOfIssues}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.SecurityScore": {
+    "defaultMessage": "{securityScoreText} {securityScore} / 30"
+  },
+  "Apis.Details.APIDefinition.AuditApi.SecuritySummary": {
+    "defaultMessage": "{securitySummary}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.TotalNumOfErrors": {
+    "defaultMessage": "{totalNumOfErrorsText} {totalNumOfErrors}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.WaitForReport": {
+    "defaultMessage": "Please wait..."
+  },
+  "Apis.Details.APIDefinition.AuditApi.WaitForReport.Content": {
+    "defaultMessage": "Auditing an API for the first time will take some time"
+  },
+  "Apis.Details.APIDefinition.AuditApi.dataCriticality": {
+    "defaultMessage": "{dataCriticalityText} {dataCriticality}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.overallScore": {
+    "defaultMessage": "{overallScoreText} {overallScore} / 100"
+  },
+  "Apis.Details.APIDefinition.AuditApi.securityCriticality": {
+    "defaultMessage": "{securityCriticalityText} {securityCriticality}"
+  },
+  "Apis.Details.APIDefinition.AuditApi.tooltip.critical": {
+    "defaultMessage": "5. CRITICAL"
+  },
+  "Apis.Details.APIDefinition.AuditApi.tooltip.high": {
+    "defaultMessage": "4. HIGH"
+  },
+  "Apis.Details.APIDefinition.AuditApi.tooltip.info": {
+    "defaultMessage": "1. INFO"
+  },
+  "Apis.Details.APIDefinition.AuditApi.tooltip.low": {
+    "defaultMessage": "2. LOW"
+  },
+  "Apis.Details.APIDefinition.AuditApi.tooltip.medium": {
+    "defaultMessage": "3. MEDIUM"
+  },
+  "Apis.Details.APIDefinition.AuditApi.tooltip.severity": {
+    "defaultMessage": "Severity ranges from:"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.api.outdated.definition": {
+    "defaultMessage": "Current API definition is outdated. You can either re-import the new definition or create a new version of this API."
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.hide.diff": {
+    "defaultMessage": "Hide Diff"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.reimport": {
+    "defaultMessage": "Re-import"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.show.diff": {
+    "defaultMessage": "Show Diff"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.import.error": {
+    "defaultMessage": "Error while re-importing API definition"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.import.success": {
+    "defaultMessage": "Re-imported API definition successfully!"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.new.api.definition.error": {
+    "defaultMessage": "Something went wrong while retrieving new API definition."
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition": {
+    "defaultMessage": "Outdated Definition"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.heading": {
+    "defaultMessage": "Outdated Definition"
+  },
+  "Apis.Details.APIDefinition.DefinitionOutdated.service.retrieve.error": {
+    "defaultMessage": "Something went wrong while rendering diff for API Definition"
+  },
+  "Apis.Details.APIDefinition.ImportDefinition.WSDL.updated.successfully": {
+    "defaultMessage": "WSDL Updated Successfully"
+  },
+  "Apis.Details.APIDefinition.ImportDefinition.error.updating.WSDL": {
+    "defaultMessage": "Error while updating WSDL"
+  },
+  "Apis.Details.APIDefinition.WSDL.download.definition": {
+    "defaultMessage": "Download WSDL"
+  },
+  "Apis.Details.APIDefinition.WSDL.download.error": {
+    "defaultMessage": "Error downloading WSDL ZIP file"
+  },
+  "Apis.Details.APIDefinition.WSDL.error.loading.wsdl": {
+    "defaultMessage": "Error loading WSDL"
+  },
+  "Apis.Details.APIDefinition.WSDL.error.loading.wsdl.info": {
+    "defaultMessage": "Error loading WSDL"
+  },
+  "Apis.Details.APIDefinition.WSDL.preview.not.available": {
+    "defaultMessage": "The API has a WSDL ZIP hence the preview is not available."
+  },
+  "Apis.Details.APIDefinition.WSDL.update.not.allowed": {
+    "defaultMessage": "Unauthorized: Insufficient permissions to update WSDL Definition"
+  },
+  "Apis.Details.APIDefinition.WSDL.wsdl.definition": {
+    "defaultMessage": "WSDL Definition"
+  },
+  "Apis.Details.APIDefinition.import.asyncAPI": {
+    "defaultMessage": "Import AsyncAPI"
+  },
+  "Apis.Details.APIDefinition.info.updating.auditapi": {
+    "defaultMessage": "To reflect the changes made, you need to click Audit API"
+  },
+  "Apis.Details.APIDetailsTopMenu.download.api": {
+    "defaultMessage": "Download API"
+  },
+  "Apis.Details.APILevelRateLimitingPolicies.components.Configuration.tooltip": {
+    "defaultMessage": "Selected Rate Limiting Policy will be applied to all the requests of this API."
+  },
+  "Apis.Details.AccessControl.roles.help": {
+    "defaultMessage": "Enter valid role and press enter"
+  },
+  "Apis.Details.ApiConsole.ApiConsole.title": {
+    "defaultMessage": "Try Out"
+  },
+  "Apis.Details.ApiConsole.deployments.api.gateways": {
+    "defaultMessage": "API Gateways"
+  },
+  "Apis.Details.ApiConsole.deployments.isAPIRetired": {
+    "defaultMessage": "Can not Try Out retired APIs!"
+  },
+  "Apis.Details.ApiConsole.deployments.no": {
+    "defaultMessage": "{artifactType} is not deployed yet! Please deploy the {artifactType} before trying out"
+  },
+  "Apis.Details.ApiConsole.environment": {
+    "defaultMessage": "Environment"
+  },
+  "Apis.Details.ApiConsole.generate.test.key": {
+    "defaultMessage": "Generate Key"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
+    "defaultMessage": "Business Information of the API Product"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.business.info": {
+    "defaultMessage": "Business Information"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.business.owner.email": {
+    "defaultMessage": "Business Owner Email"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.business.owner.email.helper.text": {
+    "defaultMessage": "Provide the email of the business owner"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.business.owner.email.helper.text.error": {
+    "defaultMessage": "Please enter a valid email address"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.business.owner.name": {
+    "defaultMessage": "Business Owner"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.business.owner.name.helper.text": {
+    "defaultMessage": "Provide the name of the business owner"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.sub.heading": {
+    "defaultMessage": "Business Information of the API"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.email": {
+    "defaultMessage": "Technical Owner Email"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.email.helper.text": {
+    "defaultMessage": "Provide the email of the technical owner"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.email.helper.text.error": {
+    "defaultMessage": "Please enter a valid email address"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.name": {
+    "defaultMessage": "Technical Owner"
+  },
+  "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.name.helper.text": {
+    "defaultMessage": "Provide the name of the technical owner"
+  },
+  "Apis.Details.Comments.Comment.load.more.replies": {
+    "defaultMessage": "Show More Replies"
+  },
+  "Apis.Details.Comments.Comment.something.went.wrong": {
+    "defaultMessage": "Something went wrong while deleting comment"
+  },
+  "Apis.Details.Comments.CommentAdd.btn.add.comment": {
+    "defaultMessage": "Comment"
+  },
+  "Apis.Details.Comments.CommentAdd.btn.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Comments.CommentAdd.write.comment.help": {
+    "defaultMessage": "Write a comment"
+  },
+  "Apis.Details.Comments.CommentAdd.write.comment.label": {
+    "defaultMessage": "Write a comment"
+  },
+  "Apis.Details.Comments.CommentOptions.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Comments.CommentOptions.reply": {
+    "defaultMessage": "Reply"
+  },
+  "Apis.Details.Comments.load.previous.comments": {
+    "defaultMessage": "Show More"
+  },
+  "Apis.Details.Comments.no.comments": {
+    "defaultMessage": "No Comments Yet"
+  },
+  "Apis.Details.Comments.no.comments.content": {
+    "defaultMessage": "No comments available for this API yet"
+  },
+  "Apis.Details.Comments.title": {
+    "defaultMessage": "Comments"
+  },
+  "Apis.Details.Configurartion.components.QueryAnalysis": {
+    "defaultMessage": "Query Analysis"
+  },
+  "Apis.Details.Configurartion.components.QueryAnalysis.cancle.btn": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Configurartion.components.QueryAnalysis.edit": {
+    "defaultMessage": "Edit Complexity Values"
+  },
+  "Apis.Details.Configuration.AuthHeader.helper.text": {
+    "defaultMessage": "Authorization header name cannot contain spaces or special characters"
+  },
+  "Apis.Details.Configuration.Components.APISecurity.Components.\n                                    ApplicationLevel.http": {
+    "defaultMessage": "Application Level Security"
+  },
+  "Apis.Details.Configuration.Components.APISecurity.Components.\n                                    TransportLevel.transport.level.security": {
+    "defaultMessage": "Transport Level Security"
+  },
+  "Apis.Details.Configuration.Components.MaxBackendTps.maximum.backend.throughput": {
+    "defaultMessage": "Backend Throughput"
+  },
+  "Apis.Details.Configuration.Configuration.AuthHeader.tooltip": {
+    "defaultMessage": "The header name that is used to send the authorization information. \"Authorization\" is the default header."
+  },
+  "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": {
+    "defaultMessage": "Configure basic API Product meta information"
+  },
+  "Apis.Details.Configuration.Configuration.Design.sub.heading": {
+    "defaultMessage": "Configure basic API meta information"
+  },
+  "Apis.Details.Configuration.Configuration.Design.topic.header": {
+    "defaultMessage": "Design Configurations"
+  },
+  "Apis.Details.Configuration.Configuration.Endpoints.edit.api.endpoints": {
+    "defaultMessage": "Edit API Endpoints"
+  },
+  "Apis.Details.Configuration.Configuration.auth.header.label": {
+    "defaultMessage": "Authorization Header"
+  },
+  "Apis.Details.Configuration.Configuration.cache.timeout": {
+    "defaultMessage": "Cache Timeout (seconds)"
+  },
+  "Apis.Details.Configuration.Configuration.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Configuration.Configuration.defaultversion.tooltip": {
+    "defaultMessage": "Indicates if this is the default version of the API. If an API is invoked without specifying a version, the API Gateway will route the request to the default version of the API."
+  },
+  "Apis.Details.Configuration.Configuration.isdefault.label": {
+    "defaultMessage": "Make this the default version"
+  },
+  "Apis.Details.Configuration.Configuration.isdefault.no": {
+    "defaultMessage": "No"
+  },
+  "Apis.Details.Configuration.Configuration.isdefault.yes": {
+    "defaultMessage": "Yes"
+  },
+  "Apis.Details.Configuration.Configuration.prototype": {
+    "defaultMessage": "Deploy as a Prototype"
+  },
+  "Apis.Details.Configuration.Configuration.prototype.endpoints.provided": {
+    "defaultMessage": "Prototype Endpoint provided"
+  },
+  "Apis.Details.Configuration.Configuration.publisher": {
+    "defaultMessage": "Publish"
+  },
+  "Apis.Details.Configuration.Configuration.requirements": {
+    "defaultMessage": "Requirements"
+  },
+  "Apis.Details.Configuration.Configuration.requirements.state.transition": {
+    "defaultMessage": "Requirements for next state transition"
+  },
+  "Apis.Details.Configuration.Configuration.response.caching": {
+    "defaultMessage": "Response Caching"
+  },
+  "Apis.Details.Configuration.Configuration.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Configuration.Configuration.schema.validation": {
+    "defaultMessage": "Schema Validation"
+  },
+  "Apis.Details.Configuration.Configuration.section.backend": {
+    "defaultMessage": "Backend"
+  },
+  "Apis.Details.Configuration.Configuration.section.events": {
+    "defaultMessage": "Events"
+  },
+  "Apis.Details.Configuration.Configuration.section.initial.request": {
+    "defaultMessage": "Initial Request"
+  },
+  "Apis.Details.Configuration.Configuration.section.request": {
+    "defaultMessage": "Request"
+  },
+  "Apis.Details.Configuration.Configuration.section.response": {
+    "defaultMessage": "Response"
+  },
+  "Apis.Details.Configuration.Configuration.transports": {
+    "defaultMessage": "Transports"
+  },
+  "Apis.Details.Configuration.Configuration.update.not.allowed": {
+    "defaultMessage": "* You are not authorized to update particular fields of the API due to insufficient permissions"
+  },
+  "Apis.Details.Configuration.Resources.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.\n                                                    product.endpoint": {
+    "defaultMessage": "Please refer respective APIs for endpoint information"
+  },
+  "Apis.Details.Configuration.RuntimeConfiguration.no.km.error": {
+    "defaultMessage": "Select one or more Key Managers"
+  },
+  "Apis.Details.Configuration.RuntimeConfiguration.section.fault": {
+    "defaultMessage": "Fault"
+  },
+  "Apis.Details.Configuration.RuntimeConfiguration.topic.header": {
+    "defaultMessage": "Runtime Configurations"
+  },
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.backend.websocket": {
+    "defaultMessage": "Backend Websocket"
+  },
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.section.client.websocket": {
+    "defaultMessage": "Client Websocket"
+  },
+  "Apis.Details.Configuration.RuntimeConfigurationWebSocket.topic.header": {
+    "defaultMessage": "Runtime Configurations"
+  },
+  "Apis.Details.Configuration.components.APILevelRateLimitingPolicies.configuration": {
+    "defaultMessage": "Rate Limiting Configuration"
+  },
+  "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success": {
+    "defaultMessage": "Certificate added successfully"
+  },
+  "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.alias.error": {
+    "defaultMessage": "Something went wrong while adding the API certificate"
+  },
+  "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.error": {
+    "defaultMessage": "Error while deleting certificate"
+  },
+  "Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.success": {
+    "defaultMessage": "Certificate Deleted Successfully"
+  },
+  "Apis.Details.Configuration.components.APISecurity.allOptional": {
+    "defaultMessage": "Please select at least one API security level as 'Mandatory'!"
+  },
+  "Apis.Details.Configuration.components.APISecurity.api.unsecured": {
+    "defaultMessage": "Application level security is not required since API has no secured resources"
+  },
+  "Apis.Details.Configuration.components.APISecurity.application.mandatory": {
+    "defaultMessage": "Choose whether Application level security is mandatory or optional"
+  },
+  "Apis.Details.Configuration.components.APISecurity.emptySchemas": {
+    "defaultMessage": "Please select at least one API security method!"
+  },
+  "Apis.Details.Configuration.components.APISecurity.http.mandatory": {
+    "defaultMessage": "Choose whether Transport level security is mandatory or optional"
+  },
+  "Apis.Details.Configuration.components.APISecurity.tooltip": {
+    "defaultMessage": "This option determines the type of security that will be used to secure this API. An API can be secured with either OAuth2/Basic/ApiKey or it can be secured with all of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation."
+  },
+  "Apis.Details.Configuration.components.AccessControl.dropdown.none": {
+    "defaultMessage": "All"
+  },
+  "Apis.Details.Configuration.components.AccessControl.dropdown.restricted": {
+    "defaultMessage": "Restrict by role(s)"
+  },
+  "Apis.Details.Configuration.components.AccessControl.form.helper.text": {
+    "defaultMessage": "There are no access restrictions by default"
+  },
+  "Apis.Details.Configuration.components.AccessControl.head.topic": {
+    "defaultMessage": "Publisher Access Control"
+  },
+  "Apis.Details.Configuration.components.AccessControl.roles": {
+    "defaultMessage": "Roles"
+  },
+  "Apis.Details.Configuration.components.AccessControl.tooltip.all": {
+    "defaultMessage": "All :"
+  },
+  "Apis.Details.Configuration.components.AccessControl.tooltip.all.desc": {
+    "defaultMessage": "The API is viewable, modifiable by all the publishers and creators."
+  },
+  "Apis.Details.Configuration.components.AccessControl.tooltip.restrict": {
+    "defaultMessage": "Restricted by roles :"
+  },
+  "Apis.Details.Configuration.components.AccessControl.tooltip.restrict.\n                                    desc": {
+    "defaultMessage": "The API can be viewed and modified only by specific publishers and creators with the roles that you specify"
+  },
+  "Apis.Details.Configuration.components.CORSConfiguration.allow.\n                                                    headers": {
+    "defaultMessage": "Access Control Allow Headers"
+  },
+  "Apis.Details.Configuration.components.CORSConfiguration.allow.\n                                                    methods": {
+    "defaultMessage": "Access Control Allow Methods"
+  },
+  "Apis.Details.Configuration.components.CORSConfiguration.allow.\n                                                    origins": {
+    "defaultMessage": "Access Control Allow Origins"
+  },
+  "Apis.Details.Configuration.components.CORSConfiguration.allow.credentials": {
+    "defaultMessage": "Access Control Allow Credentials"
+  },
+  "Apis.Details.Configuration.components.CORSConfiguration.cors.configuration": {
+    "defaultMessage": "CORS Configuration"
+  },
+  "Apis.Details.Configuration.components.CORSConfiguration.tooltip": {
+    "defaultMessage": "If enabled, the CORS configuration for the API will be enabled."
+  },
+  "Apis.Details.Configuration.components.CORSConfigurations.header.helper": {
+    "defaultMessage": "Press `Enter` after typing the header name, to add a new header"
+  },
+  "Apis.Details.Configuration.components.CORSConfigurations.method.helper": {
+    "defaultMessage": "Press `Enter` after typing the method name, to add a new method"
+  },
+  "Apis.Details.Configuration.components.CORSConfigurations.origin.helper": {
+    "defaultMessage": "Press `Enter` after typing the origin name,to add a new origin"
+  },
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.content.button": {
+    "defaultMessage": "Edit description"
+  },
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.description.of": {
+    "defaultMessage": "Description :"
+  },
+  "Apis.Details.Configuration.components.DescriptionEditor.update.cont.button": {
+    "defaultMessage": "Update Content"
+  },
+  "Apis.Details.Configuration.components.Endpoints.dynamic": {
+    "defaultMessage": "Dynamic"
+  },
+  "Apis.Details.Configuration.components.Endpoints.endpoints": {
+    "defaultMessage": "Endpoints"
+  },
+  "Apis.Details.Configuration.components.Endpoints.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.Configuration.components.Endpoints.production": {
+    "defaultMessage": "Production"
+  },
+  "Apis.Details.Configuration.components.Endpoints.prototype": {
+    "defaultMessage": "Prototype"
+  },
+  "Apis.Details.Configuration.components.Endpoints.sandbox": {
+    "defaultMessage": "Sandbox"
+  },
+  "Apis.Details.Configuration.components.Endpoints.sandbox.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.Configuration.components.KeyManager.allow.all": {
+    "defaultMessage": "Allow all"
+  },
+  "Apis.Details.Configuration.components.KeyManager.allow.selected": {
+    "defaultMessage": "Allow selected"
+  },
+  "Apis.Details.Configuration.components.KeyManager.configuration": {
+    "defaultMessage": "Key Manager Configuration"
+  },
+  "Apis.Details.Configuration.components.KeyManager.more.than.one.error": {
+    "defaultMessage": "Select at least one Key Manager"
+  },
+  "Apis.Details.Configuration.components.KeyManager.more.than.one.info": {
+    "defaultMessage": "Select one or more Key Managers"
+  },
+  "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": {
+    "defaultMessage": "Maximum backend transactions per second in integers"
+  },
+  "Apis.Details.Configuration.components.MaxBackendTps.tooltip": {
+    "defaultMessage": "Limits the total number of calls the API Manager is allowed to make to the backend"
+  },
+  "Apis.Details.Configuration.components.ResponseCaching.tooltip": {
+    "defaultMessage": "If enabled, the API response will be cached at the gateway level to improve the response time and minimize the backend load"
+  },
+  "Apis.Details.Configuration.components.SchemaValidation.description": {
+    "defaultMessage": "Enabling JSON schema validation will cause to build the payload in every request and response. This will impact the round trip time of an API request!"
+  },
+  "Apis.Details.Configuration.components.SchemaValidation.description.question": {
+    "defaultMessage": "Do you want to enable schema validation?"
+  },
+  "Apis.Details.Configuration.components.SchemaValidation.title": {
+    "defaultMessage": "Caution!"
+  },
+  "Apis.Details.Configuration.components.Social.giturl": {
+    "defaultMessage": "GitHub URL"
+  },
+  "Apis.Details.Configuration.components.Social.giturl.help": {
+    "defaultMessage": "This GitHub URL will be available in the API overview page in developer portal"
+  },
+  "Apis.Details.Configuration.components.Social.slack": {
+    "defaultMessage": "Slack URL"
+  },
+  "Apis.Details.Configuration.components.Social.slack_url.help": {
+    "defaultMessage": "This Slack Channel URL will be available in the API overview page in developer portal"
+  },
+  "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": {
+    "defaultMessage": "Public"
+  },
+  "Apis.Details.Configuration.components.Subscription.secret": {
+    "defaultMessage": "Secret"
+  },
+  "Apis.Details.Configuration.components.Subscription.signature.header": {
+    "defaultMessage": "Signature Header"
+  },
+  "Apis.Details.Configuration.components.Subscription.signingAlgorithm": {
+    "defaultMessage": "Signing Algortithm"
+  },
+  "Apis.Details.Configuration.components.Tags.helper": {
+    "defaultMessage": "Press `Enter` after typing the tag name to add a new tag"
+  },
+  "Apis.Details.Configuration.components.Tags.title": {
+    "defaultMessage": "Tags"
+  },
+  "Apis.Details.Configuration.components.Tags.validation.error": {
+    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
+  },
+  "Apis.Details.Configuration.components.Transports.tooltip": {
+    "defaultMessage": "API will be exposed in selected transport(s) in the gateway(s) If Mutual SSL option is selected, a trusted client certificate should be presented to access the API"
+  },
+  "Apis.Details.Configuration.components.oauth.disabled": {
+    "defaultMessage": "Key Manager configuration only valid when OAuth2 security is enabled."
+  },
+  "Apis.Details.Configuration.components.schema.validation.tooltip": {
+    "defaultMessage": "Enable the request and response validation against the OpenAPI definition"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.dropdown.private": {
+    "defaultMessage": "Visible to my domain"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.dropdown.restrict": {
+    "defaultMessage": "Restrict by role(s)"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.form.helper.text": {
+    "defaultMessage": "By default API is visible to all developer portal users"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.head.topic": {
+    "defaultMessage": "Developer Portal Visibility"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.roles": {
+    "defaultMessage": "Roles"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.tooltip.public": {
+    "defaultMessage": "Public :"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.tooltip.public.desc": {
+    "defaultMessage": "The API is accessible to everyone and can be advertised in multiple developer portals - a central developer portal and/or non-WSO2 developer portals."
+  },
+  "Apis.Details.Configuration.components.storeVisibility.tooltip.restrict": {
+    "defaultMessage": "Restricted by roles(s) :"
+  },
+  "Apis.Details.Configuration.components.storeVisibility.tooltip.restrict.desc": {
+    "defaultMessage": "The API is visible only to specific user roles in the tenant developer portal that you specify."
+  },
+  "Apis.Details.Configuration.components.transport.empty": {
+    "defaultMessage": "Please select at least one transport!"
+  },
+  "Apis.Details.Configuration.components.transport.sslHttps": {
+    "defaultMessage": "Please select Https as transport with mutual SSL!"
+  },
+  "Apis.Details.Configurations.api.categories": {
+    "defaultMessage": "API Categories"
+  },
+  "Apis.Details.Configurations.api.categories.empty": {
+    "defaultMessage": "No API Categories defined."
+  },
+  "Apis.Details.Documents.Create.heading": {
+    "defaultMessage": "Documents"
+  },
+  "Apis.Details.Documents.Create.markdown.editor.add.document.button": {
+    "defaultMessage": "Add Document"
+  },
+  "Apis.Details.Documents.Create.markdown.editor.add.document.cancel.button": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Documents.Create.markdown.editor.add.error": {
+    "defaultMessage": "Error adding the document"
+  },
+  "Apis.Details.Documents.Create.markdown.editor.success": {
+    "defaultMessage": "added successfully."
+  },
+  "Apis.Details.Documents.Create.markdown.editor.upload.error": {
+    "defaultMessage": "Error uploading the file"
+  },
+  "Apis.Details.Documents.Create.successful.file.upload.message": {
+    "defaultMessage": "File uploaded successfully."
+  },
+  "Apis.Details.Documents.Create.title": {
+    "defaultMessage": "Add New Document"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.content.info": {
+    "defaultMessage": "Please save the document. The content can be edited in the next step."
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type": {
+    "defaultMessage": "Type"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.how.to": {
+    "defaultMessage": "How To"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.other": {
+    "defaultMessage": "Other"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.other.document.category": {
+    "defaultMessage": "Other Document Type *"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.other.document.category.helper.text": {
+    "defaultMessage": "Provide the document type"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.public.forum": {
+    "defaultMessage": "Public Forum"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.sample": {
+    "defaultMessage": "Sample and SDK"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": {
+    "defaultMessage": "Support Forum"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.docVisibility": {
+    "defaultMessage": "Document Visibility"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.docVisibility.dropdown.ownerOnly": {
+    "defaultMessage": "Owner Only"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.docVisibility.dropdown.private": {
+    "defaultMessage": "Private"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.docVisibility.dropdown.public": {
+    "defaultMessage": "Same as API Visibility"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.name": {
+    "defaultMessage": "Name *"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.name.helper.text": {
+    "defaultMessage": "Provide the name for the document"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.summary": {
+    "defaultMessage": "Summary *"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.summary.error.empty": {
+    "defaultMessage": "Document summary can not be empty"
+  },
+  "Apis.Details.Documents.CreateEditForm.document.summary.helper.text": {
+    "defaultMessage": "Provide a brief description for the document"
+  },
+  "Apis.Details.Documents.CreateEditForm.duplicate.document.name.helper.text": {
+    "defaultMessage": "Duplicate document name"
+  },
+  "Apis.Details.Documents.CreateEditForm.empty.document.name.helper.text": {
+    "defaultMessage": "Document name cannot be empty"
+  },
+  "Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text": {
+    "defaultMessage": "Document name exceeds the maximum length of 60 characters"
+  },
+  "Apis.Details.Documents.CreateEditForm.invalid.document.name.helper.text": {
+    "defaultMessage": "Document name cannot contain spaces or special characters"
+  },
+  "Apis.Details.Documents.CreateEditForm.source": {
+    "defaultMessage": "Source"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.file": {
+    "defaultMessage": "File"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": {
+    "defaultMessage": "Document source file name cannot contain spaces or special characters"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.inline": {
+    "defaultMessage": "Inline"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.markdown": {
+    "defaultMessage": "Markdown"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.url": {
+    "defaultMessage": "URL"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.url.helper.text": {
+    "defaultMessage": "Provide the URL to the source"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.empty": {
+    "defaultMessage": "URL Field cannot be empty"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.invalid": {
+    "defaultMessage": "Enter a valid URL to the source"
+  },
+  "Apis.Details.Documents.CreateEditForm.source.url.url": {
+    "defaultMessage": "URL"
+  },
+  "Apis.Details.Documents.Delete.document.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Documents.Delete.document.delete.error": {
+    "defaultMessage": "Error while deleting documents!"
+  },
+  "Apis.Details.Documents.Delete.document.delete.successfully": {
+    "defaultMessage": "deleted successfully."
+  },
+  "Apis.Details.Documents.Delete.document.listing.delete": {
+    "defaultMessage": "Yes. Delete"
+  },
+  "Apis.Details.Documents.Delete.document.listing.delete.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Documents.Delete.document.listing.delete.confirm": {
+    "defaultMessage": "Confirm Delete"
+  },
+  "Apis.Details.Documents.Delete.document.listing.delete.confirm.body": {
+    "defaultMessage": "Selected document will be deleted from the API.You will not be able to undo this action."
+  },
+  "Apis.Details.Documents.Delete.document.listing.delete.confirm.title": {
+    "defaultMessage": "Delete Document"
+  },
+  "Apis.Details.Documents.Delete.document.listing.delete.yes": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Documents.Delete.document.listing.label.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Documents.Delete.document.listing.label.ok.confirm": {
+    "defaultMessage": "Are you sure you want to delete scope {scope} ?"
+  },
+  "Apis.Details.Documents.Delete.document.listing.label.ok.yes": {
+    "defaultMessage": "Yes"
+  },
+  "Apis.Details.Documents.Delete.selected.document.listing.delete.confirm.body": {
+    "defaultMessage": "Selected documents will be deleted from the API. You will not be able to undo this action."
+  },
+  "Apis.Details.Documents.Delete.selected.document.listing.delete.confirm.title": {
+    "defaultMessage": "Delete Selected Documents"
+  },
+  "Apis.Details.Documents.Download.documents.listing.download": {
+    "defaultMessage": "Download"
+  },
+  "Apis.Details.Documents.Download.documents.markdown.editor.download.error": {
+    "defaultMessage": "Error downloading the file"
+  },
+  "Apis.Details.Documents.Edit.documents.text.editor.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Documents.Edit.documents.text.editor.edit": {
+    "defaultMessage": "Edit Meta Data"
+  },
+  "Apis.Details.Documents.Edit.documents.text.editor.edit.content": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.Documents.Edit.documents.text.editor.update.content": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Documents.Edit.markdown.editor.update.error.message": {
+    "defaultMessage": "Error adding the document"
+  },
+  "Apis.Details.Documents.Edit.markdown.editor.update.success.message": {
+    "defaultMessage": "Updated successfully."
+  },
+  "Apis.Details.Documents.Edit.markdown.editor.upload.error.message": {
+    "defaultMessage": "Error uploading the file."
+  },
+  "Apis.Details.Documents.Edit.markdown.editor.upload.success.message": {
+    "defaultMessage": "File uploaded successfully."
+  },
+  "Apis.Details.Documents.GoToEdit.add.content": {
+    "defaultMessage": "Add Content"
+  },
+  "Apis.Details.Documents.GoToEdit.back.to.listing": {
+    "defaultMessage": "Back to Listing"
+  },
+  "Apis.Details.Documents.GoToEdit.description.content": {
+    "defaultMessage": "You can add content to the document or go back to the document listing page."
+  },
+  "Apis.Details.Documents.GoToEdit.description.file": {
+    "defaultMessage": "You can go back to the document listing page and upload the file by editing the document."
+  },
+  "Apis.Details.Documents.GoToEdit.title": {
+    "defaultMessage": "Document Created Successfully"
+  },
+  "Apis.Details.Documents.Listing.APIProduct.add.new.msg.content": {
+    "defaultMessage": "You can add different types of documents to an API. Proper documentation helps API publishers to market their APIs better and sustain competition."
+  },
+  "Apis.Details.Documents.Listing.add.new.document.button": {
+    "defaultMessage": "Add New Document"
+  },
+  "Apis.Details.Documents.Listing.add.new.msg.button": {
+    "defaultMessage": "Add New Document"
+  },
+  "Apis.Details.Documents.Listing.add.new.msg.content": {
+    "defaultMessage": "You can add different types of documents to an API. Proper documentation helps API publishers to market their APIs better and sustain competition."
+  },
+  "Apis.Details.Documents.Listing.add.new.msg.title": {
+    "defaultMessage": "Create Documents"
+  },
+  "Apis.Details.Documents.Listing.column.header.action": {
+    "defaultMessage": "action"
+  },
+  "Apis.Details.Documents.Listing.column.header.name": {
+    "defaultMessage": "name"
+  },
+  "Apis.Details.Documents.Listing.column.header.source.type": {
+    "defaultMessage": "sourceType"
+  },
+  "Apis.Details.Documents.Listing.column.header.type": {
+    "defaultMessage": "type"
+  },
+  "Apis.Details.Documents.Listing.documents.listing.fetching.error.message": {
+    "defaultMessage": "Error in fetching documents list of the API"
+  },
+  "Apis.Details.Documents.Listing.documents.listing.fetching.error.message.api.product": {
+    "defaultMessage": "Error in fetching documents list of the API Product"
+  },
+  "Apis.Details.Documents.Listing.documents.listing.title": {
+    "defaultMessage": "Documents"
+  },
+  "Apis.Details.Documents.Listing.documents.open": {
+    "defaultMessage": "Open"
+  },
+  "Apis.Details.Documents.Listing.loading": {
+    "defaultMessage": "Loading..."
+  },
+  "Apis.Details.Documents.MarkdownEditor.cancel.button": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Documents.MarkdownEditor.edit.content": {
+    "defaultMessage": "Edit Content"
+  },
+  "Apis.Details.Documents.MarkdownEditor.edit.content.of": {
+    "defaultMessage": "Edit Content of"
+  },
+  "Apis.Details.Documents.MarkdownEditor.update.content.button": {
+    "defaultMessage": "Update Content"
+  },
+  "Apis.Details.Documents.MarkdownEditor.update.success.message": {
+    "defaultMessage": "updated successfully."
+  },
+  "Apis.Details.Documents.TextEditor.cancel.button": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Documents.TextEditor.edit.content": {
+    "defaultMessage": "Edit Content"
+  },
+  "Apis.Details.Documents.TextEditor.edit.content.of": {
+    "defaultMessage": "Edit Content of"
+  },
+  "Apis.Details.Documents.TextEditor.update.content.button": {
+    "defaultMessage": "Update Content"
+  },
+  "Apis.Details.Documents.TextEditor.update.error.message": {
+    "defaultMessage": "update failed."
+  },
+  "Apis.Details.Documents.TextEditor.update.success.message": {
+    "defaultMessage": "updated successfully."
+  },
+  "Apis.Details.Documents.View.btn.download": {
+    "defaultMessage": "Download"
+  },
+  "Apis.Details.Documents.View.error.downloading": {
+    "defaultMessage": "Error downloading the file"
+  },
+  "Apis.Details.Documents.View.heading": {
+    "defaultMessage": "Documents"
+  },
+  "Apis.Details.Documents.View.meta.catogery": {
+    "defaultMessage": "Categorized as"
+  },
+  "Apis.Details.Documents.View.meta.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Documents.View.meta.source": {
+    "defaultMessage": "Source Type"
+  },
+  "Apis.Details.Documents.View.meta.summary": {
+    "defaultMessage": "Summary"
+  },
+  "Apis.Details.Edit.MediationPolicies.EditMediationPolicies.custom.mediation.policies": {
+    "defaultMessage": "Custom Mediation Policies"
+  },
+  "Apis.Details.EditScopes.Roles.Invalid": {
+    "defaultMessage": "Role is invalid"
+  },
+  "Apis.Details.Endpoints..EndpointOverview.change.type.proceed": {
+    "defaultMessage": "Proceed"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.action": {
+    "defaultMessage": "Action"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.cancel.button": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.config.save.button": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connect.cancel": {
+    "defaultMessage": "Connect Cancel"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connect.timeout": {
+    "defaultMessage": "Connect Timeout"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connection.closed": {
+    "defaultMessage": "Connection Closed"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connection.failed": {
+    "defaultMessage": "Connection Failed"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connection.timed.out": {
+    "defaultMessage": "Connection Timed Out"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.discard.message": {
+    "defaultMessage": "Discard Message"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.duration.ms": {
+    "defaultMessage": "Duration (ms)"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.endpoint.timeout.state": {
+    "defaultMessage": "Endpoint Timeout State"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.error.code": {
+    "defaultMessage": "Error Code"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.execute.fault.sequence": {
+    "defaultMessage": "Execute Fault Sequence"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.factor": {
+    "defaultMessage": "Factor"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.format.select": {
+    "defaultMessage": "Format"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.initial.duration.ms": {
+    "defaultMessage": "Initial Duration (ms)"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.leave.as.is": {
+    "defaultMessage": "Leave As-Is"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.max.duration.ms": {
+    "defaultMessage": "Max Duration (ms)"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.message.content": {
+    "defaultMessage": "Message Content"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.optimize.select": {
+    "defaultMessage": "Optimize"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.plain.old.xml": {
+    "defaultMessage": "Plain Old XML (POX)"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.receiving": {
+    "defaultMessage": "Receiver IO error Receiving"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.sending": {
+    "defaultMessage": "Retriever IO Error Sending"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.representational.state.transfer": {
+    "defaultMessage": "Representational State Transfer (REST)"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.response.processing.failure": {
+    "defaultMessage": "Response Processing Failure"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retries.before.suspension": {
+    "defaultMessage": "Retries Before Suspension"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retry.delay.ms": {
+    "defaultMessage": "Retry Delay (ms)"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.send.abort": {
+    "defaultMessage": "Send Abort"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.sender.io.error.receiving": {
+    "defaultMessage": "Sender IO Error Receiving"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.sender.io.error.sending": {
+    "defaultMessage": "Sender IO Error Sending"
+  },
+  "Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.tpp.protocol.violation": {
+    "defaultMessage": "TTP Protocol Violation"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.advance.endpoint.configuration": {
+    "defaultMessage": "Advanced Configurations"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.accessKey": {
+    "defaultMessage": "Access Key"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.accessMethod": {
+    "defaultMessage": "Access Method"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.accessMethod.roleSupplied": {
+    "defaultMessage": "Using IAM role-supplied temporary AWS credentials"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.accessMethod.stored": {
+    "defaultMessage": "Using stored AWS credentials"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.linkToResources": {
+    "defaultMessage": "Go to Resources to map ARNs"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.region": {
+    "defaultMessage": "Region"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.secretKey": {
+    "defaultMessage": "Secret Key"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.awslambda.endpoint.tooltip": {
+    "defaultMessage": "You can and should use an IAM role to manage temporary credentials for applications that run on an EC2 instance"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.change.type.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.endpoint.security.configuration": {
+    "defaultMessage": "Endpoint Security Configurations"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation": {
+    "defaultMessage": "Change Endpoint Type"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.endpoint.type.change.confirmation.message": {
+    "defaultMessage": "Your current endpoint configuration will be lost."
+  },
+  "Apis.Details.Endpoints.EndpointOverview.general.config.header": {
+    "defaultMessage": "General Endpoint Configurations"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.lb.failover.endpoints.header": {
+    "defaultMessage": "Load balance and Failover Configurations"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.loadbalance.config.cancel.button": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.loadbalance.config.save.button": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.production.endpoint.production.header": {
+    "defaultMessage": "Production Endpoint"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.production.endpoint.production.label": {
+    "defaultMessage": "Production Endpoint"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.prototype.endpoint.prototype.header": {
+    "defaultMessage": "Prototype Endpoint"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.prototype.endpoint.prototype.label": {
+    "defaultMessage": "Prototype Endpoint"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.sandbox.endpoint": {
+    "defaultMessage": "Sandbox Endpoint"
+  },
+  "Apis.Details.Endpoints.EndpointOverview.upload.mediation.message": {
+    "defaultMessage": "Please upload a mediation sequence file to Message Mediation Policies, which sets the endpoints."
+  },
+  "Apis.Details.Endpoints.Endpoints.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Endpoints.Endpoints.endpoints.header": {
+    "defaultMessage": "Endpoints"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error": {
+    "defaultMessage": "Access Key, Secret Key and Region should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.endpoint.error": {
+    "defaultMessage": "Either one of Production or Sandbox Endpoints should be added."
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.prod.endpoint.loadbalance": {
+    "defaultMessage": "Default Production Endpoint should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.prototype.url": {
+    "defaultMessage": "Prototype Endpoint URL should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.sandbox.endpoint.loadbalance": {
+    "defaultMessage": "Default Sandbox Endpoint should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.security.oauth.client.error": {
+    "defaultMessage": "Endpoint Security Token URL/API Key/API Secret should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.security.oauth.password.error": {
+    "defaultMessage": "Endpoint Security Token URL/API Key/API Secret/Username/Password should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.missing.security.username.error": {
+    "defaultMessage": "Endpoint Security User Name/ Password should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.update.not.allowed": {
+    "defaultMessage": "*You are not authorized to update endpoints of the API due to insufficient permissions"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.add.success": {
+    "defaultMessage": "Certificate added successfully"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.alias.exist": {
+    "defaultMessage": "Adding Certificate Failed. Certificate Alias Exists."
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.error": {
+    "defaultMessage": "Error Deleting Certificate"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.success": {
+    "defaultMessage": "Certificate Deleted Successfully"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.details.of": {
+    "defaultMessage": "Details of"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.error": {
+    "defaultMessage": "Something went wrong while adding the certificate."
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificates": {
+    "defaultMessage": "Certificates"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete": {
+    "defaultMessage": "Do you want to delete"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cancel.button": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.ok.button": {
+    "defaultMessage": "OK"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.deleteCertificate": {
+    "defaultMessage": "Delete Certificate"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.details.close.button": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.status": {
+    "defaultMessage": "Status"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.Certificates.subject": {
+    "defaultMessage": "Subject"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EditableParameterRow.Parameter.Name": {
+    "defaultMessage": "Parameter Name"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EditableParameterRow.Parameter.Value": {
+    "defaultMessage": "Parameter Value"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.add.new.parameter": {
+    "defaultMessage": "Add New Parameter"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.add.new.parameter.info": {
+    "defaultMessage": "You can add any additional payload parameters required for the endpoint below"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.basic": {
+    "defaultMessage": "Basic Auth"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.clientId.input": {
+    "defaultMessage": "Client ID"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.clientId.message": {
+    "defaultMessage": "Enter Client ID"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.clientSecret.input": {
+    "defaultMessage": "Client Secret"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.clientSecret.message": {
+    "defaultMessage": "Enter Client Secret"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.digest.auth": {
+    "defaultMessage": "Digest Auth"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.grant.type.input": {
+    "defaultMessage": "Grant Type"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.input.parameter.name": {
+    "defaultMessage": "Parameter Name"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.input.parameter.value": {
+    "defaultMessage": "Parameter Value"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.label.parameter.name": {
+    "defaultMessage": "Parameter Name"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.label.parameter.value": {
+    "defaultMessage": "Parameter Value"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.clientId.error": {
+    "defaultMessage": "Client ID should not be empty"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.clientSecret.error": {
+    "defaultMessage": "Client Secret should not be empty"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.password.error": {
+    "defaultMessage": "Password should not be empty"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.tokenUrl.error": {
+    "defaultMessage": "Token URL should not be empty or formatted incorrectly"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.no.username.error": {
+    "defaultMessage": "Username should not be empty"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.none": {
+    "defaultMessage": "None"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth": {
+    "defaultMessage": "OAuth 2.0"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth.grant.type.client": {
+    "defaultMessage": "Client Credentials"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.oauth.grant.type.password": {
+    "defaultMessage": "Resource Owner Password"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input": {
+    "defaultMessage": "Password"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.message": {
+    "defaultMessage": "Enter Password"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.token.url.input": {
+    "defaultMessage": "Token URL"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.tokenUrl.message": {
+    "defaultMessage": "Enter Token URL"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input": {
+    "defaultMessage": "Username"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.username.message": {
+    "defaultMessage": "Enter Username"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurityConfig.cancel.button": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurityConfig.config.save.button": {
+    "defaultMessage": "Submit"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias": {
+    "defaultMessage": "Alias"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.default.message": {
+    "defaultMessage": "Alias for the Certificate"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias.exist.error": {
+    "defaultMessage": "Alias already exists"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.cancel.button": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.click.or.drop.to.upload.file": {
+    "defaultMessage": "Click or drag the certificate file to upload."
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.config.save.button": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint": {
+    "defaultMessage": "Endpoint"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.empty.error": {
+    "defaultMessage": "Save endpoints before adding the Certificate"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.error": {
+    "defaultMessage": "Endpoint should not be empty"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint.helpertext": {
+    "defaultMessage": "Endpoint for the Certificate"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.invalid.file": {
+    "defaultMessage": "Invalid file type"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.uploadCertificate": {
+    "defaultMessage": "Upload Certificate"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading": {
+    "defaultMessage": "Certificates"
+  },
+  "Apis.Details.Endpoints.GeneralConfiguration.not.allowed": {
+    "defaultMessage": "*You are not authorized to view certificates due to insufficient permissions"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.check.endpoint": {
+    "defaultMessage": "Check endpoint status"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.config.endpoint": {
+    "defaultMessage": "Endpoint configurations"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": {
+    "defaultMessage": "Endpoint URL should not be empty"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.security.endpoint": {
+    "defaultMessage": "Endpoint security"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.service.url.input": {
+    "defaultMessage": "Service URL"
+  },
+  "Apis.Details.Endpoints.LoadBalanceConfig.algorithm": {
+    "defaultMessage": "Algorithm"
+  },
+  "Apis.Details.Endpoints.LoadBalanceConfig.class.name.for.algorithm": {
+    "defaultMessage": "Class Name for Algorithm"
+  },
+  "Apis.Details.Endpoints.LoadBalanceConfig.failover": {
+    "defaultMessage": "Enable Failover"
+  },
+  "Apis.Details.Endpoints.LoadBalanceConfig.session.management": {
+    "defaultMessage": "Session Management"
+  },
+  "Apis.Details.Endpoints.LoadBalanceConfig.session.timeout": {
+    "defaultMessage": "Session Timeout (Millis)"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.endpoint.type": {
+    "defaultMessage": "Endpoint Type"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.failover.heading": {
+    "defaultMessage": "Failover Endpoints"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.load.balance.configuration.title": {
+    "defaultMessage": "Load Balance Configurations"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.loadbalance.heading": {
+    "defaultMessage": "Load Balanced Endpoints"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.no.endpoints.message": {
+    "defaultMessage": "Add Production/ Sandbox endpoints to configure."
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.none.heading": {
+    "defaultMessage": "Not Configured"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.production.failover.endpoint": {
+    "defaultMessage": "Production Failover Endpoints"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.production.loadbalance.endpoint": {
+    "defaultMessage": "Production Loadbalanced Endpoints"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.sandbox.failover.endpoint": {
+    "defaultMessage": "Sandbox Failover Endpoints"
+  },
+  "Apis.Details.Endpoints.LoadbalanceFailoverConfig.sandbox.loadbalance.endpoint": {
+    "defaultMessage": "Sandbox Loadbalanced Endpoints"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.add.endpoints.header": {
+    "defaultMessage": "Select an Endpoint Type to Add"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.awslambda.endpoint": {
+    "defaultMessage": "AWS Lambda Endpoint"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.awslambda.endpoint.description": {
+    "defaultMessage": "If you need to invoke AWS Lambda functions through API gateway."
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.button": {
+    "defaultMessage": "Add"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.dynamic.endpoint": {
+    "defaultMessage": "Dynamic Endpoint"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.dynamic.endpoint.description": {
+    "defaultMessage": "If you need to send the request to the URI specified in the TO header."
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.http.endpoint": {
+    "defaultMessage": "HTTP/ REST Endpoint"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.http.endpoint.description": {
+    "defaultMessage": "A REST API endpoint based on a URI template."
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.prototype.endpoint": {
+    "defaultMessage": "Prototype Endpoint"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.prototype.endpoint.description": {
+    "defaultMessage": "Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does support prototype SOAP APIs"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint": {
+    "defaultMessage": "HTTP/ SOAP Endpoint"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint.description": {
+    "defaultMessage": "The direct URI of the web service."
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints": {
+    "defaultMessage": "Prototype Endpoint"
+  },
+  "Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation": {
+    "defaultMessage": "Prototype Implementation"
+  },
+  "Apis.Details.Endpoints.Prototype.InlineEndpoints.script": {
+    "defaultMessage": "Script"
+  },
+  "Apis.Details.Environments\n                                                                                .deploy.vhost": {
+    "defaultMessage": "VHost"
+  },
+  "Apis.Details.Environments.Environments\n                                                                    .select.table": {
+    "defaultMessage": "Select Revision"
+  },
+  "Apis.Details.Environments.Environments\n                                                                    .select.vhost": {
+    "defaultMessage": "Select Access URL"
+  },
+  "Apis.Details.Environments.Environments\n                                                                .deploy.button": {
+    "defaultMessage": "Deploy"
+  },
+  "Apis.Details.Environments.Environments.APIGateways": {
+    "defaultMessage": "API Gateways"
+  },
+  "Apis.Details.Environments.Environments.Create.Revision.Deploy": {
+    "defaultMessage": "Create new revision and deploy"
+  },
+  "Apis.Details.Environments.Environments.Deployments": {
+    "defaultMessage": "Revisions"
+  },
+  "Apis.Details.Environments.Environments.api.gateways.heading": {
+    "defaultMessage": "API Gateways"
+  },
+  "Apis.Details.Environments.Environments.api.gateways.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Environments.Environments.create.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Environments.Environments.create.create": {
+    "defaultMessage": "Create"
+  },
+  "Apis.Details.Environments.Environments.deploy.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Environments.Environments.deploy.deploy": {
+    "defaultMessage": "Deploy"
+  },
+  "Apis.Details.Environments.Environments.deploy.new.revision": {
+    "defaultMessage": "Deploy New Revision"
+  },
+  "Apis.Details.Environments.Environments.deploy.new.revision.heading": {
+    "defaultMessage": "Deploy New Revision"
+  },
+  "Apis.Details.Environments.Environments.deployments.heading": {
+    "defaultMessage": "Deployments"
+  },
+  "Apis.Details.Environments.Environments.deployments.sub.heading": {
+    "defaultMessage": "Create revisions and deploy in Gateway Environments"
+  },
+  "Apis.Details.Environments.Environments.display.devportal": {
+    "defaultMessage": "Display Gateway Access URLs in developer portal."
+  },
+  "Apis.Details.Environments.Environments.gateway\n                                                    .deployed.revision": {
+    "defaultMessage": "Deployed Revision"
+  },
+  "Apis.Details.Environments.Environments.gateway.accessUrl": {
+    "defaultMessage": "Gateway Access URL"
+  },
+  "Apis.Details.Environments.Environments.gateway.action": {
+    "defaultMessage": "Action"
+  },
+  "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": {
+    "defaultMessage": "Add a description to the revision"
+  },
+  "Apis.Details.Environments.Environments.revision.create.heading": {
+    "defaultMessage": "Create New Revision (From Current API)"
+  },
+  "Apis.Details.Environments.Environments.revision.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Environments.Environments.revision.delete.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Environments.Environments.revision.delete.confirm.message": {
+    "defaultMessage": "Are you sure you want to delete {revision} ?"
+  },
+  "Apis.Details.Environments.Environments.revision.delete.confirm.ok": {
+    "defaultMessage": "Yes"
+  },
+  "Apis.Details.Environments.Environments.revision.delete.confirm.title": {
+    "defaultMessage": "Confirm Delete"
+  },
+  "Apis.Details.Environments.Environments.revision.delete.error": {
+    "defaultMessage": "Something went wrong while deleting the revision"
+  },
+  "Apis.Details.Environments.Environments.revision.delete.success": {
+    "defaultMessage": "Revision Deleted Successfully"
+  },
+  "Apis.Details.Environments.Environments.revision.description.create": {
+    "defaultMessage": "Brief description of the new revision"
+  },
+  "Apis.Details.Environments.Environments.revision.description.deploy": {
+    "defaultMessage": "Brief description of the new revision"
+  },
+  "Apis.Details.Environments.Environments.revision.restore": {
+    "defaultMessage": "Restore"
+  },
+  "Apis.Details.Environments.Environments.revision.restore.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Environments.Environments.revision.restore.confirm.message": {
+    "defaultMessage": "Are you sure you want to restore {revision} (To Current API)?"
+  },
+  "Apis.Details.Environments.Environments.revision.restore.confirm.ok": {
+    "defaultMessage": "Yes"
+  },
+  "Apis.Details.Environments.Environments.revision.restore.confirm.title": {
+    "defaultMessage": "Confirm Restore"
+  },
+  "Apis.Details.Environments.Environments.select.rev.delete": {
+    "defaultMessage": "Revision to delete"
+  },
+  "Apis.Details.Environments.Environments.select.rev.helper": {
+    "defaultMessage": "Please select a revision to delete as the number of revisions have reached a maximum of {count}"
+  },
+  "Apis.Details.Environments.Environments.select.rev.helper1": {
+    "defaultMessage": "Please undeploy and delete a revision as the number of revisions have reached a maximum of {count}"
+  },
+  "Apis.Details.Environments.Environments.select.rev.warning": {
+    "defaultMessage": "Please delete a revision as the number of revisions have reached a maximum of {count}"
+  },
+  "Apis.Details.Environments.Environments.undeploy.btn": {
+    "defaultMessage": "Undeploy"
+  },
+  "Apis.Details.Environments.Environments.visibility.in.devportal": {
+    "defaultMessage": "Gateway URL Visibility"
+  },
+  "Apis.Details.Environments.deploy.vhost": {
+    "defaultMessage": "VHost"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.endpoint": {
+    "defaultMessage": "Endpoint"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.error.getting.published.external.stores": {
+    "defaultMessage": "Error while getting published external developer portals!! {reason}"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.error.while.updating.external.stores": {
+    "defaultMessage": "Error while updating external developer portals!! {reason}"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.external-stores": {
+    "defaultMessage": "External Developer Portals"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.body": {
+    "defaultMessage": "No External Developer Portals configured for the current tenant"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.title": {
+    "defaultMessage": "External Developert Portals not found for the API : {apiUUID}"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores": {
+    "defaultMessage": "Successfully Published to external developer portals: {successfulStores}"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.type": {
+    "defaultMessage": "Type"
+  },
+  "Apis.Details.ExternalStores.ExternalStores.update.not.allowed": {
+    "defaultMessage": "* You are not authorized to publish the API to external developer portals due to insufficient permissions"
+  },
+  "Apis.Details.GoTo.GoTo.btn": {
+    "defaultMessage": "Go To"
+  },
+  "Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected": {
+    "defaultMessage": "Business Plan(s) selected"
+  },
+  "Apis.Details.LifeCycle.CheckboxLabels.cert.provided": {
+    "defaultMessage": "Certificate provided"
+  },
+  "Apis.Details.LifeCycle.CheckboxLabels.endpoints.provided": {
+    "defaultMessage": "Endpoint provided"
+  },
+  "Apis.Details.LifeCycle.LifeCycle.change.not.allowed": {
+    "defaultMessage": "* You are not authorized to change the life cycle state of the API due to insufficient permissions"
+  },
+  "Apis.Details.LifeCycle.LifeCycle.history": {
+    "defaultMessage": "History"
+  },
+  "Apis.Details.LifeCycle.LifeCycle.lifecycle": {
+    "defaultMessage": "Lifecycle"
+  },
+  "Apis.Details.LifeCycle.LifeCycleHistory.action": {
+    "defaultMessage": "Action"
+  },
+  "Apis.Details.LifeCycle.LifeCycleHistory.lifecycle.state.history": {
+    "defaultMessage": "LC has changed from {previous} to {post}"
+  },
+  "Apis.Details.LifeCycle.LifeCycleHistory.time": {
+    "defaultMessage": "Time"
+  },
+  "Apis.Details.LifeCycle.LifeCycleHistory.user": {
+    "defaultMessage": "User"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.current.state": {
+    "defaultMessage": "Current state is"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.delete.task": {
+    "defaultMessage": "Delete Task"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.dialog,delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.dialog.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.dialog.text.description": {
+    "defaultMessage": "The life cycle task will be removed"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.dialog.title": {
+    "defaultMessage": "Delete Task"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.error": {
+    "defaultMessage": "Error while deleting task"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.pending": {
+    "defaultMessage": "Pending lifecycle state change."
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.success": {
+    "defaultMessage": "Lifecycle task deleted successfully"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.error.certs": {
+    "defaultMessage": "Error while retrieving certificates"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.success.createStatus": {
+    "defaultMessage": "Lifecycle state change request has been sent"
+  },
+  "Apis.Details.LifeCycle.LifeCycleUpdate.success.otherStatus": {
+    "defaultMessage": "Lifecycle state updated successfully"
+  },
+  "Apis.Details.LifeCycle.Policies.business.plans": {
+    "defaultMessage": "Business Plans"
+  },
+  "Apis.Details.LifeCycle.Policies.select.plan.api": {
+    "defaultMessage": "Select a plan for the API and enable API level throttling."
+  },
+  "Apis.Details.LifeCycle.Policies.select.plan.api.product": {
+    "defaultMessage": "Select a plan for the API product."
+  },
+  "Apis.Details.LifeCycle.components": {
+    "defaultMessage": "Publish API without deployments"
+  },
+  "Apis.Details.LifeCycle.publish.content": {
+    "defaultMessage": "The API will not be available for consumption unless it is deployed."
+  },
+  "Apis.Details.LifeCycle.publish.content.info.deployments": {
+    "defaultMessage": "Deployments"
+  },
+  "Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error": {
+    "defaultMessage": "Error while adding mediation policy"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.cancel.btn": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.click.or.drop.to.upload.file": {
+    "defaultMessage": "Click or drag the mediation file to upload."
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.common.policies": {
+    "defaultMessage": "Common Policies"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.custom.policies": {
+    "defaultMessage": "Custom Policies"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.delete.error": {
+    "defaultMessage": "Error deleting the file"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.delete.success": {
+    "defaultMessage": "Mediation policy deleted successfully."
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.download.error": {
+    "defaultMessage": "Error downloading the file"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.error": {
+    "defaultMessage": "Error retrieving mediation policies"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.global.delete": {
+    "defaultMessage": "Cannot delete Global mediation policies."
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.none": {
+    "defaultMessage": "None"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.btn": {
+    "defaultMessage": "Select"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.policy": {
+    "defaultMessage": "Select a Mediation Policy"
+  },
+  "Apis.Details.MediationPolicies.Edit.EditMediationPolicy.success": {
+    "defaultMessage": "Mediation policy added successfully"
+  },
+  "Apis.Details.MediationPolicies.EditMediationPolicy.download": {
+    "defaultMessage": "Download"
+  },
+  "Apis.Details.MediationPolicies.Mediation": {
+    "defaultMessage": "Message Mediation"
+  },
+  "Apis.Details.Monetization.BusinessPlans.commercial.policies": {
+    "defaultMessage": "Commercial Policies"
+  },
+  "Apis.Details.Monetization.BusinessPlans.monetized": {
+    "defaultMessage": "Monetized"
+  },
+  "Apis.Details.Monetization.BusinessPlans.not.monetized": {
+    "defaultMessage": "Not Monetized"
+  },
+  "Apis.Details.Monetization.Index.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Monetization.Index.monetization": {
+    "defaultMessage": "Monetization"
+  },
+  "Apis.Details.Monetization.Index.monetization.configured.successfully": {
+    "defaultMessage": "Monetization Enabled Successfully"
+  },
+  "Apis.Details.Monetization.Index.monetization.disabled.successfully": {
+    "defaultMessage": "Monetization Disabled Successfully"
+  },
+  "Apis.Details.Monetization.Index.monetization.properties": {
+    "defaultMessage": "Monetization Properties"
+  },
+  "Apis.Details.Monetization.Index.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization": {
+    "defaultMessage": "Something went wrong while configuring monetization"
+  },
+  "Apis.Details.Monetization.Index.there.are.no .monetization.properties.configured": {
+    "defaultMessage": "There are no monetization properties configured"
+  },
+  "Apis.Details.Monetization.Index.update.not.allowed": {
+    "defaultMessage": "* You are not authorized to update API monetization due to insufficient permissions"
+  },
+  "Apis.Details.NewOverview.BusinessInformation.business.owner": {
+    "defaultMessage": "Business Owner"
+  },
+  "Apis.Details.NewOverview.BusinessInformation.business.owner.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.BusinessInformation.technical.owner": {
+    "defaultMessage": "Technical Owner"
+  },
+  "Apis.Details.NewOverview.BusinessInformation.technical.owner.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.Endpoints.endpoint.security": {
+    "defaultMessage": "Endpoint Security"
+  },
+  "Apis.Details.NewOverview.Endpoints.endpoints": {
+    "defaultMessage": "Endpoints"
+  },
+  "Apis.Details.NewOverview.Endpoints.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.Endpoints.production.endpoint": {
+    "defaultMessage": "Production Endpoint"
+  },
+  "Apis.Details.NewOverview.Endpoints.prototype.endpoint": {
+    "defaultMessage": "Prototype Endpoint"
+  },
+  "Apis.Details.NewOverview.Endpoints.sandbox.endpoint": {
+    "defaultMessage": "Sandbox Endpoint"
+  },
+  "Apis.Details.NewOverview.Endpoints.sandbox.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.Endpoints.security.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.access.control": {
+    "defaultMessage": "Access Control"
+  },
+  "Apis.Details.NewOverview.MetaData.access.control.all.tooltip": {
+    "defaultMessage": "All : The API is viewable, modifiable by all the publishers and creators."
+  },
+  "Apis.Details.NewOverview.MetaData.access.control.tooltip": {
+    "defaultMessage": "Restricted by roles : The API can be viewable and modifiable by only specific publishers and creators with the roles that you specify"
+  },
+  "Apis.Details.NewOverview.MetaData.config": {
+    "defaultMessage": "Configuration"
+  },
+  "Apis.Details.NewOverview.MetaData.context:": {
+    "defaultMessage": "Context:"
+  },
+  "Apis.Details.NewOverview.MetaData.created.time": {
+    "defaultMessage": "Created Time"
+  },
+  "Apis.Details.NewOverview.MetaData.createdTime.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.NewOverview.MetaData.description.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.last.updated.time": {
+    "defaultMessage": "Last Updated Time"
+  },
+  "Apis.Details.NewOverview.MetaData.lastUpdatedTime.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.metadata": {
+    "defaultMessage": "Metadata"
+  },
+  "Apis.Details.NewOverview.MetaData.provider": {
+    "defaultMessage": "Provider"
+  },
+  "Apis.Details.NewOverview.MetaData.securityScheme": {
+    "defaultMessage": "API Security"
+  },
+  "Apis.Details.NewOverview.MetaData.securityScheme.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.securityScheme.tooltip": {
+    "defaultMessage": "OAuth2 is used as the default security schema."
+  },
+  "Apis.Details.NewOverview.MetaData.tags": {
+    "defaultMessage": "Tags"
+  },
+  "Apis.Details.NewOverview.MetaData.tags.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.transport.tooltip": {
+    "defaultMessage": "HTTP is less secure than HTTPS and makes your API vulnerable to security threats."
+  },
+  "Apis.Details.NewOverview.MetaData.transports": {
+    "defaultMessage": "Transports"
+  },
+  "Apis.Details.NewOverview.MetaData.transports.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.type.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.MetaData.type:": {
+    "defaultMessage": "Type:"
+  },
+  "Apis.Details.NewOverview.MetaData.version": {
+    "defaultMessage": "Version"
+  },
+  "Apis.Details.NewOverview.MetaData.visibility.store": {
+    "defaultMessage": "Visibility on Developer Portal"
+  },
+  "Apis.Details.NewOverview.MetaData.visibility.store.all.tooltip": {
+    "defaultMessage": "Public: The API is accessible to everyone and can be advertised in multiple developer portals - a central developer portal and/or non-WSO2 developer portals."
+  },
+  "Apis.Details.NewOverview.MetaData.visibility.store.res.tooltip": {
+    "defaultMessage": "Restricted by roles: The API is visible only to specific user roles in the tenant Developer Portal that you specify."
+  },
+  "Apis.Details.NewOverview.MetaData.workflow.status": {
+    "defaultMessage": "Workflow Status"
+  },
+  "Apis.Details.NewOverview.MetaData.workflowStatus.not.set": {
+    "defaultMessage": "-"
+  },
+  "Apis.Details.NewOverview.Operations.ShowMore": {
+    "defaultMessage": "Show More"
+  },
+  "Apis.Details.NewOverview.Operations.operation": {
+    "defaultMessage": "Operations"
+  },
+  "Apis.Details.NewOverview.Operations.operations": {
+    "defaultMessage": "Operation"
+  },
+  "Apis.Details.NewOverview.Policies.business.plans": {
+    "defaultMessage": "Business Plans:"
+  },
+  "Apis.Details.NewOverview.Resources.loading": {
+    "defaultMessage": "loading..."
+  },
+  "Apis.Details.NewOverview.Resources.resource.not.found": {
+    "defaultMessage": "resource not found..."
+  },
+  "Apis.Details.NewOverview.Resources.resources": {
+    "defaultMessage": "Resources"
+  },
+  "Apis.Details.NewOverview.async.api.topics": {
+    "defaultMessage": "Topics"
+  },
+  "Apis.Details.NewVersion.NewVersion.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.NewVersion.NewVersion.create": {
+    "defaultMessage": "Create"
+  },
+  "Apis.Details.NewVersion.NewVersion.create.new.version": {
+    "defaultMessage": "Create New Version"
+  },
+  "Apis.Details.NewVersion.NewVersion.default": {
+    "defaultMessage": "Make this the default version"
+  },
+  "Apis.Details.NewVersion.NewVersion.error": {
+    "defaultMessage": "Something went wrong while creating a new version!. Error:"
+  },
+  "Apis.Details.NewVersion.NewVersion.new.version": {
+    "defaultMessage": "New Version"
+  },
+  "Apis.Details.NewVersion.NewVersion.service.version": {
+    "defaultMessage": "Service Version"
+  },
+  "Apis.Details.NewVersion.NewVersion.success": {
+    "defaultMessage": "Successfully created new version"
+  },
+  "Apis.Details.NewVersion.NewVersion.tooltip": {
+    "defaultMessage": "Indicates if this is the default version of the API. If an API is invoked without specifying a version, the API Gateway will route the request to the default version of the API."
+  },
+  "Apis.Details.Operations.Operation.OperationType": {
+    "defaultMessage": "Operation Type"
+  },
+  "Apis.Details.Operations.Operation.authType": {
+    "defaultMessage": "Security Enabled"
+  },
+  "Apis.Details.Operations.Operation.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Operations.Operation.operation.no.api.scope.available": {
+    "defaultMessage": "No API scopes available"
+  },
+  "Apis.Details.Operations.Operation.operation.no.sharedpi.scope.available": {
+    "defaultMessage": "No shared scopes available"
+  },
+  "Apis.Details.Operations.Operation.operation.scope.helperText": {
+    "defaultMessage": "Select a scope to control permissions to this operation"
+  },
+  "Apis.Details.Operations.Operation.operation.scope.label.default": {
+    "defaultMessage": "Operation scope"
+  },
+  "Apis.Details.Operations.Operation.operation.scope.label.notAvailable": {
+    "defaultMessage": "No scope available"
+  },
+  "Apis.Details.Operations.Operation.operation.scope.select.local": {
+    "defaultMessage": "API Scopes"
+  },
+  "Apis.Details.Operations.Operation.operation.scope.select.shared": {
+    "defaultMessage": "Shared Scopes"
+  },
+  "Apis.Details.Operations.Operation.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Operations.Operation.scopes": {
+    "defaultMessage": "Scope"
+  },
+  "Apis.Details.Operations.Operation.throttling.policy": {
+    "defaultMessage": "Rate Limiting"
+  },
+  "Apis.Details.Operations.Operations.title": {
+    "defaultMessage": "Operations"
+  },
+  "Apis.Details.Operations.operation.operationName": {
+    "defaultMessage": "Operation"
+  },
+  "Apis.Details.Overview.\n                                                                    CustomizedStepper.Endpoint": {
+    "defaultMessage": "Endpoint"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Deploy": {
+    "defaultMessage": "Deploy"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Develop": {
+    "defaultMessage": "Develop"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Test": {
+    "defaultMessage": "Test"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Tier": {
+    "defaultMessage": "Business Plan"
+  },
+  "Apis.Details.Overview.CustomizedStepper.blocked": {
+    "defaultMessage": "Blocked"
+  },
+  "Apis.Details.Overview.CustomizedStepper.deprecated": {
+    "defaultMessage": "Deprecated"
+  },
+  "Apis.Details.Overview.CustomizedStepper.pending": {
+    "defaultMessage": "The request is pending"
+  },
+  "Apis.Details.Overview.CustomizedStepper.prototyped": {
+    "defaultMessage": "Prototyped"
+  },
+  "Apis.Details.Overview.CustomizedStepper.publish": {
+    "defaultMessage": "Published"
+  },
+  "Apis.Details.Overview.CustomizedStepper.publish.current.api": {
+    "defaultMessage": "(Current API)"
+  },
+  "Apis.Details.Overview.CustomizedStepper.retired": {
+    "defaultMessage": "Retired"
+  },
+  "Apis.Details.Overview.CustomizedStepper.view.devportal": {
+    "defaultMessage": "View in devportal"
+  },
+  "Apis.Details.Overview.Overview.topic.header": {
+    "defaultMessage": "Overview"
+  },
+  "Apis.Details.Overview.ProductResources.resources": {
+    "defaultMessage": "Resources"
+  },
+  "Apis.Details.ProductResources.ProductResourcesEdit.api.resources": {
+    "defaultMessage": "Select API Resources"
+  },
+  "Apis.Details.ProductResources.ProductResourcesEdit.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.ProductResources.ProductResourcesEdit.title": {
+    "defaultMessage": "Manage Resources"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": {
+    "defaultMessage": "Use the left side panel to add resources"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                        toolbar.add.selected": {
+    "defaultMessage": "Add Selected"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.ApisnotFound": {
+    "defaultMessage": "No REST APIs are created yet"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.find.and.select": {
+    "defaultMessage": "Find and select resources for the API Product"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.select.an.api": {
+    "defaultMessage": "Select an API"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.selected": {
+    "defaultMessage": "Selected resources of API Product"
+  },
+  "Apis.Details.ProductResources.ProductResourcesWorkspace.toolbar.\n                                                add.all": {
+    "defaultMessage": "Add All"
+  },
+  "Apis.Details.Properties.\n                                                            Properties.editable.show.in.devporal": {
+    "defaultMessage": "Show in devportal"
+  },
+  "Apis.Details.Properties.Properties.\n                                                                    show.add.property.invalid.error": {
+    "defaultMessage": "Invalid property name"
+  },
+  "Apis.Details.Properties.Properties.\n                                                                show.add.property.property.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Properties.Properties.\n                                property.name.exists": {
+    "defaultMessage": "Property name already exists"
+  },
+  "Apis.Details.Properties.Properties.\n                                show.add.property.invalid.error": {
+    "defaultMessage": "Invalid property name"
+  },
+  "Apis.Details.Properties.Properties.\n                            property.name.exists": {
+    "defaultMessage": "Property name already exists"
+  },
+  "Apis.Details.Properties.Properties.\n                    no.changes.to.save": {
+    "defaultMessage": "No changes to save"
+  },
+  "Apis.Details.Properties.Properties.\n                    property.name.empty.error": {
+    "defaultMessage": "Property name/value can not be empty"
+  },
+  "Apis.Details.Properties.Properties.\n                    property.name.keyword.error": {
+    "defaultMessage": "Property name can not be a system reserved keyword"
+  },
+  "Apis.Details.Properties.Properties.APIProduct.\n                                            add.new.property.message.content": {
+    "defaultMessage": "Add specific custom properties to your API here."
+  },
+  "Apis.Details.Properties.Properties.add": {
+    "defaultMessage": "Add"
+  },
+  "Apis.Details.Properties.Properties.add.new.property": {
+    "defaultMessage": "Add New Property"
+  },
+  "Apis.Details.Properties.Properties.add.new.property.message.content": {
+    "defaultMessage": "Add specific custom properties to your API here."
+  },
+  "Apis.Details.Properties.Properties.add.new.property.message.title": {
+    "defaultMessage": "Create Additional Properties"
+  },
+  "Apis.Details.Properties.Properties.add.new.property.table": {
+    "defaultMessage": "Property Name"
+  },
+  "Apis.Details.Properties.Properties.add.new.property.value": {
+    "defaultMessage": "Property Value"
+  },
+  "Apis.Details.Properties.Properties.add.new.property.visibility": {
+    "defaultMessage": "Visibility"
+  },
+  "Apis.Details.Properties.Properties.api.product.properties": {
+    "defaultMessage": "API Product Properties"
+  },
+  "Apis.Details.Properties.Properties.api.properties": {
+    "defaultMessage": "API Properties"
+  },
+  "Apis.Details.Properties.Properties.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Properties.Properties.editable.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Properties.Properties.editable.row.edit.mode.property.value": {
+    "defaultMessage": "Property Value"
+  },
+  "Apis.Details.Properties.Properties.editable.row.property.name": {
+    "defaultMessage": "Property Name"
+  },
+  "Apis.Details.Properties.Properties.editable.show.in.devporal": {
+    "defaultMessage": "Show in devportal"
+  },
+  "Apis.Details.Properties.Properties.editable.update": {
+    "defaultMessage": "Update"
+  },
+  "Apis.Details.Properties.Properties.editable.visible.in.store": {
+    "defaultMessage": "Visible in devportal"
+  },
+  "Apis.Details.Properties.Properties.help": {
+    "defaultMessage": "Property name should be unique, should not contain spaces, cannot be more than 80 chars and cannot be any of the following reserved keywords : provider, version, context, status, description, subcontext, doc, lcState, name, tags."
+  },
+  "Apis.Details.Properties.Properties.help.main": {
+    "defaultMessage": "Usually, APIs have a pre-defined set of properties such as the name, version, context, etc. API Properties allows you to add specific custom properties to the API."
+  },
+  "Apis.Details.Properties.Properties.property.value": {
+    "defaultMessage": "Value"
+  },
+  "Apis.Details.Properties.Properties.update.not.allowed": {
+    "defaultMessage": "*You are not authorized to update properties of the API due to insufficient permissions"
+  },
+  "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": {
+    "defaultMessage": "Fields"
+  },
+  "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexitysum": {
+    "defaultMessage": "Sum of the Complexity"
+  },
+  "Apis.Details.QueryAnalysis.UpdateComplexity.typeName": {
+    "defaultMessage": "Type"
+  },
+  "Apis.Details.QyeryAnalysis.UpdateComplexity.save": {
+    "defaultMessage": "Set"
+  },
+  "Apis.Details.Resources.APIOperations.title": {
+    "defaultMessage": "Resources"
+  },
+  "Apis.Details.Resources.Resources.api.scope.deleted.successfully": {
+    "defaultMessage": "API Scope deleted successfully!"
+  },
+  "Apis.Details.Resources.Resources.edit.resources.button": {
+    "defaultMessage": "Edit Resources"
+  },
+  "Apis.Details.Resources.Resources.something.went.wrong.while.updating.the.api": {
+    "defaultMessage": "Error occurred while updating API"
+  },
+  "Apis.Details.Resources.components.AddOperation.add.tooltip": {
+    "defaultMessage": "Add new operation"
+  },
+  "Apis.Details.Resources.components.AddOperation.clear.inputs.tooltip": {
+    "defaultMessage": "Clear inputs"
+  },
+  "Apis.Details.Resources.components.AddOperation.http.verb": {
+    "defaultMessage": "HTTP Verb"
+  },
+  "Apis.Details.Resources.components.AddOperation.operation.target.or.verb.cannot.be.empty.warning": {
+    "defaultMessage": "Operation target or operation verb(s) can't be empty"
+  },
+  "Apis.Details.Resources.components.AddOperation.operation.topic.cannot.have.path.params.warning": {
+    "defaultMessage": "WebSub topic can't have path parameters"
+  },
+  "Apis.Details.Resources.components.AddOperation.option": {
+    "defaultMessage": "OPTIONS"
+  },
+  "Apis.Details.Resources.components.AddParameter.clear.inputs.tooltip": {
+    "defaultMessage": "Clear inputs"
+  },
+  "Apis.Details.Resources.components.Operation.Delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Resources.components.Operation.cannot.delete.when.used.in.api.products": {
+    "defaultMessage": "Cannot delete operation when used in an API product"
+  },
+  "Apis.Details.Resources.components.Operation.delete.operation": {
+    "defaultMessage": "Delete operation"
+  },
+  "Apis.Details.Resources.components.Operation.this.operation.used.in.products": {
+    "defaultMessage": "This operation is used in {isUsedInAPIProduct} API product(s)"
+  },
+  "Apis.Details.Resources.components.Operation.undo.delete": {
+    "defaultMessage": "Undo Delete"
+  },
+  "Apis.Details.Resources.components.operationComponents.AWSLambdaSettings.Title": {
+    "defaultMessage": "AWS Lambda Settings"
+  },
+  "Apis.Details.Resources.components.operationComponents.AddParameter.add": {
+    "defaultMessage": "Add"
+  },
+  "Apis.Details.Resources.components.operationComponents.AddParameter.add.tooltip": {
+    "defaultMessage": "Add new parameter"
+  },
+  "Apis.Details.Resources.components.operationComponents.AddParameter.enter.content.type": {
+    "defaultMessage": "Enter Content Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.AddParameter.enter.parameter.name": {
+    "defaultMessage": "Enter Parameter Name"
+  },
+  "Apis.Details.Resources.components.operationComponents.AddParameter.parameter.name.already.exists": {
+    "defaultMessage": "Parameter name already exists"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.data.format": {
+    "defaultMessage": "Data Format"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.done": {
+    "defaultMessage": "Done"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.required": {
+    "defaultMessage": "Required"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type": {
+    "defaultMessage": "Select the Format of Data Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": {
+    "defaultMessage": "No Data Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": {
+    "defaultMessage": "Select the Schema Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.title": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.type": {
+    "defaultMessage": "Parameter Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.use.done.button.to.persist.changes": {
+    "defaultMessage": "Use DONE button in the page to persist changes"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.done": {
+    "defaultMessage": "Done"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.title": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.body": {
+    "defaultMessage": "Body"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.edit": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.no": {
+    "defaultMessage": "No"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name": {
+    "defaultMessage": "Name/Content Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error": {
+    "defaultMessage": "Error in resolving the definition!"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.type": {
+    "defaultMessage": "Parameter Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.required": {
+    "defaultMessage": "Required"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.yes": {
+    "defaultMessage": "Yes"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProperties.edit": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProps.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.Security.tooltip": {
+    "defaultMessage": "This will enable/disable Application Level securities defined in the Runtime Configurations page."
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.no.api.scope.available": {
+    "defaultMessage": "No API scopes available"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.no.sharedpi.scope.available": {
+    "defaultMessage": "No shared scopes available"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.create.new.scope": {
+    "defaultMessage": "Create New Scope"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.helperText": {
+    "defaultMessage": "Select a scope to control permissions to this operation"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.label.default": {
+    "defaultMessage": "Operation scope"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.label.notAvailable": {
+    "defaultMessage": "No scope available"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.select.local": {
+    "defaultMessage": "API Scopes"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.operation.scope.select.shared": {
+    "defaultMessage": "Shared Scopes"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.API.level": {
+    "defaultMessage": "API Level"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.button.text": {
+    "defaultMessage": "Change rate limiting level"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.governed.by": {
+    "defaultMessage": "Rate limiting is governed by"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section1": {
+    "defaultMessage": "Use"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section2": {
+    "defaultMessage": "Operation Level"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section3": {
+    "defaultMessage": "rate limiting to"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section4": {
+    "defaultMessage": "enable"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.helperText.section5": {
+    "defaultMessage": "rate limiting per operation"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.policy": {
+    "defaultMessage": "Rate limiting policy"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.policy.select": {
+    "defaultMessage": "Select a rate limit policy for this operation"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.subTitle": {
+    "defaultMessage": "(Security, Rate Limiting & Scopes)"
+  },
+  "Apis.Details.Resources.components.operationComponents.OperationGovernance.title": {
+    "defaultMessage": "Operation Governance"
+  },
+  "Apis.Details.Resources.components.operationComponents.content.type": {
+    "defaultMessage": "Content Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.parameter.name": {
+    "defaultMessage": "Parameter Name"
+  },
+  "Apis.Details.Resources.components.operationComponents.parameter.name.exists": {
+    "defaultMessage": "Parameter type already exists"
+  },
+  "Apis.Details.Resources.components.operationComponents.required": {
+    "defaultMessage": "Required"
+  },
+  "Apis.Details.Resources.components.operationComponents.required.helper.text": {
+    "defaultMessage": "Check whether the parameter is required."
+  },
+  "Apis.Details.Resources.components.operationComponents.select.parameter.type": {
+    "defaultMessage": "Select the parameter type"
+  },
+  "Apis.Details.Scopes.CreateScope.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Scopes.CreateScope.create.new.scope": {
+    "defaultMessage": "Create New Scope"
+  },
+  "Apis.Details.Scopes.CreateScope.description.about.the.scope": {
+    "defaultMessage": "Short description about the scope"
+  },
+  "Apis.Details.Scopes.CreateScope.roles.help": {
+    "defaultMessage": "Enter a valid role and press `Enter`."
+  },
+  "Apis.Details.Scopes.CreateScope.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Scopes.CreateScope.saving": {
+    "defaultMessage": "Saving"
+  },
+  "Apis.Details.Scopes.CreateScope.scope.added.successfully": {
+    "defaultMessage": "Scope added successfully"
+  },
+  "Apis.Details.Scopes.CreateScope.scope.updated.successfully": {
+    "defaultMessage": "Scope updated successfully"
+  },
+  "Apis.Details.Scopes.CreateScope.short.description.name": {
+    "defaultMessage": "Enter Scope Name ( E.g.,: creator )"
+  },
+  "Apis.Details.Scopes.EditScope.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Scopes.EditScope.short.description.about.the.scope": {
+    "defaultMessage": "Short description about the scope"
+  },
+  "Apis.Details.Scopes.EditScope.update": {
+    "defaultMessage": "Update"
+  },
+  "Apis.Details.Scopes.EditScope.update.scope": {
+    "defaultMessage": "Update Scope"
+  },
+  "Apis.Details.Scopes.EditScopes.roles.help": {
+    "defaultMessage": "Enter a valid role and press `Enter`."
+  },
+  "Apis.Details.Scopes.Roles.Invalid": {
+    "defaultMessage": "Role is invalid"
+  },
+  "Apis.Details.Scopes.Roles.User.Invalid": {
+    "defaultMessage": "At least one role must be associated with the API creator"
+  },
+  "Apis.Details.Scopes.Scopes.create.scopes.button": {
+    "defaultMessage": "Create Scopes"
+  },
+  "Apis.Details.Scopes.Scopes.create.scopes.title": {
+    "defaultMessage": "Create API Local Scopes"
+  },
+  "Apis.Details.Scopes.Scopes.heading.edit.scope.heading": {
+    "defaultMessage": "Scopes"
+  },
+  "Apis.Details.Scopes.Scopes.heading.scope.add_new": {
+    "defaultMessage": "Add New Local Scope"
+  },
+  "Apis.Details.Scopes.Scopes.heading.scope.heading": {
+    "defaultMessage": "Scopes"
+  },
+  "Apis.Details.Scopes.Scopes.heading.scope.title.tooltip": {
+    "defaultMessage": "Manage scopes that are local to this API"
+  },
+  "Apis.Details.Scopes.Scopes.heading.scope.title.tooltip2": {
+    "defaultMessage": "Manage scopes that are local to this API"
+  },
+  "Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control": {
+    "defaultMessage": "Scopes enable fine-grained access control to API resources based on user roles."
+  },
+  "Apis.Details.Scopes.Scopes.table.header.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Scopes.Scopes.table.header.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Scopes.Scopes.table.header.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Scopes.Scopes.table.header.roles": {
+    "defaultMessage": "Roles"
+  },
+  "Apis.Details.Scopes.Scopes.table.header.usages": {
+    "defaultMessage": "Used In"
+  },
+  "Apis.Details.Scopes.Scopes.update.not.allowed": {
+    "defaultMessage": "*You are not authorized to update scopes of the API due to insufficient permissions"
+  },
+  "Apis.Details.Scopes.visibility.CreateScope.roles.help": {
+    "defaultMessage": "Enter valid role and press enter"
+  },
+  "Apis.Details.Security.AddPolicy.add.policy.to.api": {
+    "defaultMessage": "Add Policy to API"
+  },
+  "Apis.Details.Security.AddPolicy.add.threat.protection.policy": {
+    "defaultMessage": "Add New Threat Protection Policy"
+  },
+  "Apis.Details.Security.AddPolicy.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Security.AddPolicy.policy": {
+    "defaultMessage": "Policy"
+  },
+  "Apis.Details.Security.AddPolicy.policy.label": {
+    "defaultMessage": "Policy:"
+  },
+  "Apis.Details.Security.AddPolicy.policy.type.label": {
+    "defaultMessage": "Policy Type:"
+  },
+  "Apis.Details.Security.AddPolicy.select.policy": {
+    "defaultMessage": "Please select a policy"
+  },
+  "Apis.Details.Security.AddPolicy.threat.protection.policy.add.failure": {
+    "defaultMessage": "Failed to add threat protection policy."
+  },
+  "Apis.Details.Security.AddPolicy.threat.protection.policy.add.success": {
+    "defaultMessage": "Threat protection policy added successfully."
+  },
+  "Apis.Details.Security.SecurityOverview.add.threat.protection.policy": {
+    "defaultMessage": "Add New Threat Protection Policy"
+  },
+  "Apis.Details.Security.SecurityOverview.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Security.SecurityOverview.manage.threat.protection.policies": {
+    "defaultMessage": "Manage Threat Protection Policies"
+  },
+  "Apis.Details.Security.SecurityOverview.policy": {
+    "defaultMessage": "Policy"
+  },
+  "Apis.Details.Security.SecurityOverview.policy.name": {
+    "defaultMessage": "Policy Name"
+  },
+  "Apis.Details.Security.SecurityOverview.policy.remove.failure": {
+    "defaultMessage": "Failed to remove policy."
+  },
+  "Apis.Details.Security.SecurityOverview.policy.remove.success": {
+    "defaultMessage": "Policy removed successfully."
+  },
+  "Apis.Details.Security.SecurityOverview.policy.type": {
+    "defaultMessage": "Policy Type"
+  },
+  "Apis.Details.Security.SecurityOverview.threat.protection.policies": {
+    "defaultMessage": "Threat Protection Policies"
+  },
+  "Apis.Details.Subscriptions.Listing.column.header.application": {
+    "defaultMessage": "Application"
+  },
+  "Apis.Details.Subscriptions.Listing.column.header.subscriber": {
+    "defaultMessage": "Subscriber"
+  },
+  "Apis.Details.Subscriptions.Listing.column.header.subscription.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Subscriptions.Listing.column.header.subscription.invoice": {
+    "defaultMessage": "Invoice"
+  },
+  "Apis.Details.Subscriptions.Listing.column.header.subscription.status": {
+    "defaultMessage": "Status"
+  },
+  "Apis.Details.Subscriptions.Listing.column.header.throttling.tier": {
+    "defaultMessage": "Tier"
+  },
+  "Apis.Details.Subscriptions.Subscriber.no.claims": {
+    "defaultMessage": "No subscriber claims data available"
+  },
+  "Apis.Details.Subscriptions.SubscriptionAvailability.all.tenants": {
+    "defaultMessage": "Available to all the tenants"
+  },
+  "Apis.Details.Subscriptions.SubscriptionAvailability.current.tenant.only": {
+    "defaultMessage": "Available to current tenant only"
+  },
+  "Apis.Details.Subscriptions.SubscriptionAvailability.specific.tenants": {
+    "defaultMessage": "Available to specific tenants"
+  },
+  "Apis.Details.Subscriptions.SubscriptionAvailability.sub.heading": {
+    "defaultMessage": "Make subscriptions available to tenants"
+  },
+  "Apis.Details.Subscriptions.SubscriptionAvailability.subscription.availability": {
+    "defaultMessage": "Subscription Availability"
+  },
+  "Apis.Details.Subscriptions.SubscriptionPoliciesManage.APIProduct.sub.heading": {
+    "defaultMessage": "Attach business plans to API"
+  },
+  "Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans": {
+    "defaultMessage": "Business Plans"
+  },
+  "Apis.Details.Subscriptions.SubscriptionPoliciesManage.sub.heading": {
+    "defaultMessage": "Attach business plans to API"
+  },
+  "Apis.Details.Subscriptions.Subscriptions.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Subscriptions.Subscriptions.save": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.active.subs.state": {
+    "defaultMessage": "Active"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.blocked.production.only.subs.state": {
+    "defaultMessage": "Blocked Production Only"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.blocked.subs.state": {
+    "defaultMessage": "Blocked"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block": {
+    "defaultMessage": "Error: Unable to block subscription. (Reason: {message})"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block.prod.only": {
+    "defaultMessage": "Error: Unable to block subscription. (Reason: {message})"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.unblock": {
+    "defaultMessage": "Error: Unable to unblock subscription. (Reason: {message})"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions": {
+    "defaultMessage": "Manage Subscriptions"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.no.subscriptions": {
+    "defaultMessage": "No subscriptions data available"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.sub.heading": {
+    "defaultMessage": "Manage subscriptions of the API"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.subscriber.info.error": {
+    "defaultMessage": "Error while retrieving the subscriber information"
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.subscription.blocked": {
+    "defaultMessage": "Subscription was blocked."
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.subscription.blocked.prod.only": {
+    "defaultMessage": "Subscription was blocked for production only."
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.subscription.unblocked": {
+    "defaultMessage": "Subscription was unblocked."
+  },
+  "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
+    "defaultMessage": "Error while retrieving the subscriptions"
+  },
+  "Apis.Details.Topics.components.AddOperation.op.type": {
+    "defaultMessage": "Type"
+  },
+  "Apis.Details.Topics.components.AddOperation.operation.topic.or.type.cannot.be.empty.warning": {
+    "defaultMessage": "Topic name or topic type(s) can't be empty"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditParameter.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditParameter.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditParameter.select.data.type": {
+    "defaultMessage": "Select the Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.select.data.type": {
+    "defaultMessage": "Select the Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.datatype": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.Security.tooltip": {
+    "defaultMessage": "This will enable/disable Application Level securities defined in the Runtime Configurations page."
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.api.scope.available": {
+    "defaultMessage": "No API scopes available"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.sharedpi.scope.available": {
+    "defaultMessage": "No shared scopes available"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.create.new.scope": {
+    "defaultMessage": "Create New Scope"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.helperText": {
+    "defaultMessage": "Select a scope to control permissions to this operation"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.default": {
+    "defaultMessage": "Operation scope"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.notAvailable": {
+    "defaultMessage": "No scope available"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.local": {
+    "defaultMessage": "API Scopes"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.shared": {
+    "defaultMessage": "Shared Scopes"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.subTitle": {
+    "defaultMessage": "(Security & Scopes)"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.title": {
+    "defaultMessage": "Operation Governance"
+  },
+  "Apis.Details.TryOutConsole.token.label": {
+    "defaultMessage": "Internal API Key"
+  },
+  "Apis.Details.components.APIDetailsTopMenu.created.by": {
+    "defaultMessage": "Created by:"
+  },
+  "Apis.Details.components.APIDetailsTopMenu.current.api": {
+    "defaultMessage": "Current API"
+  },
+  "Apis.Details.components.APIDetailsTopMenu.error": {
+    "defaultMessage": "Something went wrong while downloading the API."
+  },
+  "Apis.Details.components.APIDetailsTopMenu.last.updated.time": {
+    "defaultMessage": "Last updated:"
+  },
+  "Apis.Details.components.APIDetailsTopMenu.read.only.label": {
+    "defaultMessage": "Read only"
+  },
+  "Apis.Details.components.APIDetailsTopMenu.state": {
+    "defaultMessage": "State"
+  },
+  "Apis.Details.components.APIDetailsTopMenu.view.in.portal": {
+    "defaultMessage": "View in Dev Portal"
+  },
+  "Apis.Details.components.CreateNewVersionButton.create.new.version": {
+    "defaultMessage": "Create New Version"
+  },
+  "Apis.Details.components.DeleteApiButton.button.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.components.DeleteApiButton.button.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.components.DeleteApiButton.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.components.DeleteApiButton.text.description": {
+    "defaultMessage": "{type} <b> {name} {version} </b> will be deleted permanently."
+  },
+  "Apis.Details.components.DeleteApiButton.title": {
+    "defaultMessage": "Delete {type}"
+  },
+  "Apis.Details.index.Tryout.menu.name": {
+    "defaultMessage": "Try Out"
+  },
+  "Apis.Details.index.api.definition2": {
+    "defaultMessage": "API definition"
+  },
+  "Apis.Details.index.api.not.found.body": {
+    "defaultMessage": "Cannot find the API with the given id"
+  },
+  "Apis.Details.index.api.not.found.title": {
+    "defaultMessage": "API is not found in the {environmentLabel} Environment"
+  },
+  "Apis.Details.index.asyncApi.definition": {
+    "defaultMessage": "AsyncAPI Definition"
+  },
+  "Apis.Details.index.business.info": {
+    "defaultMessage": "business info"
+  },
+  "Apis.Details.index.comments": {
+    "defaultMessage": "Comments"
+  },
+  "Apis.Details.index.design.configs": {
+    "defaultMessage": "Basic info"
+  },
+  "Apis.Details.index.documents": {
+    "defaultMessage": "documents"
+  },
+  "Apis.Details.index.endpoints": {
+    "defaultMessage": "endpoints"
+  },
+  "Apis.Details.index.environments": {
+    "defaultMessage": "Deployments"
+  },
+  "Apis.Details.index.external-stores": {
+    "defaultMessage": "external dev portals"
+  },
+  "Apis.Details.index.left.menu.scope": {
+    "defaultMessage": "Local Scopes"
+  },
+  "Apis.Details.index.lifecycle": {
+    "defaultMessage": "lifecycle"
+  },
+  "Apis.Details.index.monetization": {
+    "defaultMessage": "monetization"
+  },
+  "Apis.Details.index.operations": {
+    "defaultMessage": "operations"
+  },
+  "Apis.Details.index.overview": {
+    "defaultMessage": "overview"
+  },
+  "Apis.Details.index.properties": {
+    "defaultMessage": "properties"
+  },
+  "Apis.Details.index.resources": {
+    "defaultMessage": "resources"
+  },
+  "Apis.Details.index.runtime.configs": {
+    "defaultMessage": "Runtime"
+  },
+  "Apis.Details.index.schema.definition": {
+    "defaultMessage": "Schema Definition"
+  },
+  "Apis.Details.index.subscriptions": {
+    "defaultMessage": "subscriptions"
+  },
+  "Apis.Details.index.topics": {
+    "defaultMessage": "topics"
+  },
+  "Apis.Details.index.wsdl.definition": {
+    "defaultMessage": "WSDL Definition"
+  },
+  "Apis.Details.local.Scopes.heading.edit.heading": {
+    "defaultMessage": "Local Scopes"
+  },
+  "Apis.Details.local.Scopes.heading.scope.heading": {
+    "defaultMessage": "Local Scopes"
+  },
+  "Apis.Details.scopes.Edit.text.editor.edit": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Listing.ApiTableView.context": {
+    "defaultMessage": "Context"
+  },
+  "Apis.Listing.ApiTableView.items.per.page": {
+    "defaultMessage": "Items per page"
+  },
+  "Apis.Listing.ApiTableView.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Listing.ApiTableView.provider": {
+    "defaultMessage": "Provider"
+  },
+  "Apis.Listing.ApiTableView.version": {
+    "defaultMessage": "Version"
+  },
+  "Apis.Listing.ApiThumb.by": {
+    "defaultMessage": "By"
+  },
+  "Apis.Listing.ApiThumb.by.colon": {
+    "defaultMessage": ":"
+  },
+  "Apis.Listing.ApiThumb.channel": {
+    "defaultMessage": "Channel"
+  },
+  "Apis.Listing.ApiThumb.context": {
+    "defaultMessage": "Context"
+  },
+  "Apis.Listing.ApiThumb.version": {
+    "defaultMessage": "Version"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.create.new": {
+    "defaultMessage": "Let’s get started !"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.create.new.description": {
+    "defaultMessage": "Choose your option to create an API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.graphql.api": {
+    "defaultMessage": "GraphQL"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.content": {
+    "defaultMessage": "Use an existing definition"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title": {
+    "defaultMessage": "Import GraphQL SDL"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
+    "defaultMessage": "REST API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content": {
+    "defaultMessage": "Import OAS 3 or Swagger 2.0 definition"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title": {
+    "defaultMessage": "Import Open API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.content": {
+    "defaultMessage": "Design and prototype a new REST API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.title": {
+    "defaultMessage": "Start From Scratch"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content": {
+    "defaultMessage": "Sample Pizza Shack API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.title": {
+    "defaultMessage": "Deploy Sample API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.service.catalog.api": {
+    "defaultMessage": "Service Catalog"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.soap.api": {
+    "defaultMessage": "SOAP API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content": {
+    "defaultMessage": "Generate REST or create a pass-through API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title": {
+    "defaultMessage": "Import WSDL"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.api": {
+    "defaultMessage": "Streaming API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title": {
+    "defaultMessage": "Web Socket API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content": {
+    "defaultMessage": "Create a Web Socket API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.import.content": {
+    "defaultMessage": "Upload a file or provide an Async API URL"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.import.title": {
+    "defaultMessage": "Import an AsyncAPI"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content": {
+    "defaultMessage": "Create a Server-Sent Events API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title": {
+    "defaultMessage": "SSE API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content": {
+    "defaultMessage": "Create a Webhook/WebSub API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title": {
+    "defaultMessage": "Webhook API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPIProduct.title": {
+    "defaultMessage": "Let’s get started !"
+  },
+  "Apis.Listing.SampleAPI.continue.on.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Listing.SampleAPI.continue.on.error": {
+    "defaultMessage": "Continue"
+  },
+  "Apis.Listing.SampleAPI.popup.create.complete": {
+    "defaultMessage": "API created successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.create.inprogress": {
+    "defaultMessage": "Creating sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.deploy.complete": {
+    "defaultMessage": "API deployed successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.deploy.inprogress": {
+    "defaultMessage": "Deploying sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.publish.complete": {
+    "defaultMessage": "API published successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.publish.inprogress": {
+    "defaultMessage": "Publishing sample API to developer portal ..."
+  },
+  "Apis.Listing.SampleAPI.popup.revision.complete": {
+    "defaultMessage": "API revision created successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.revision.inprogress": {
+    "defaultMessage": "Creating a revision of sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.update.complete": {
+    "defaultMessage": "API updated successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.update.inprogress": {
+    "defaultMessage": "Updating sample API ..."
+  },
+  "Apis.Listing.SampleAPIProduct.creator.error": {
+    "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
+  },
+  "Apis.Listing.SampleAPIProduct.description": {
+    "defaultMessage": "Combine multiple API resources in to a single API"
+  },
+  "Apis.Listing.TableView.TableView.doc.flag": {
+    "defaultMessage": "[Doc]"
+  },
+  "Apis.Listing.TableView.TableView.error.loading": {
+    "defaultMessage": "Error While Loading APIs"
+  },
+  "Apis.Listing.TaskState.generic.error.prefix": {
+    "defaultMessage": "Error while"
+  },
+  "Apis.Listing.components.ImageGenerator.DocThumb.apiName": {
+    "defaultMessage": "API Name"
+  },
+  "Apis.Listing.components.ImageGenerator.DocThumb.apiVersion": {
+    "defaultMessage": "API Version"
+  },
+  "Apis.Listing.components.ImageGenerator.DocThumb.sourceType": {
+    "defaultMessage": "Source Type:"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.cancel.btn": {
+    "defaultMessage": "CANCEL"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": {
+    "defaultMessage": "Remove"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": {
+    "defaultMessage": "Remove"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": {
+    "defaultMessage": "Save"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.saving.btn": {
+    "defaultMessage": "Saving"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.an.icon": {
+    "defaultMessage": "Select an icon from the Material Icons for your API."
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.background": {
+    "defaultMessage": "Select a Background"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.category": {
+    "defaultMessage": "Select Category"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.select.color.for.the.icon": {
+    "defaultMessage": "Select a color for the icon"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.error": {
+    "defaultMessage": "Error occurred while uploading new thumbnail. Please try again."
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.success": {
+    "defaultMessage": "Thumbnail uploaded successfully"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.validation.error": {
+    "defaultMessage": "Invalid file or API information is not set correctly."
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.upload": {
+    "defaultMessage": "Upload"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn": {
+    "defaultMessage": "Upload"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.uploading.btn": {
+    "defaultMessage": "Uploading"
+  },
+  "Apis.Listing.components.TopMenu.api.singular": {
+    "defaultMessage": "API"
+  },
+  "Apis.Listing.components.TopMenu.apiproduct.singular": {
+    "defaultMessage": "API product"
+  },
+  "Apis.Listing.components.TopMenu.apiproducts": {
+    "defaultMessage": "API Products"
+  },
+  "Apis.Listing.components.TopMenu.apiproducts.results": {
+    "defaultMessage": "API products"
+  },
+  "Apis.Listing.components.TopMenu.apis": {
+    "defaultMessage": "APIs"
+  },
+  "Apis.Listing.components.TopMenu.create.an.api.product": {
+    "defaultMessage": "Create an API Product"
+  },
+  "Apis.Listing.components.TopMenu.create.api": {
+    "defaultMessage": "Create API"
+  },
+  "Apis.Listing.components.TopMenu.displaying": {
+    "defaultMessage": "Total:"
+  },
+  "Apis.Listing.components.TopMenu.search.results": {
+    "defaultMessage": "Search results"
+  },
+  "Apis.Listing.components.TopMenu.search.results.singular": {
+    "defaultMessage": "Search result"
+  },
+  "Apis.Listing.components.TopMenu.unified.search": {
+    "defaultMessage": "Unified search"
+  },
+  "Apis.Listing.import.from.service.catalog.title": {
+    "defaultMessage": "Import From Service Catalog"
+  },
+  "Apis.Shared.AppErrorBoundary.something.went.wrong": {
+    "defaultMessage": "Something went wrong"
+  },
+  "Apis.Shared.ConfirmDialog.are.you.sure": {
+    "defaultMessage": "Are you sure?"
+  },
+  "Apis.Shared.ConfirmDialog.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Shared.ConfirmDialog.ok": {
+    "defaultMessage": "OK"
+  },
+  "Apis.Shared.ConfirmDialog.please.confirm": {
+    "defaultMessage": "Please Confirm"
+  },
+  "Apis.Shared.PublisherRootErrorBoundary.refresh": {
+    "defaultMessage": "Refresh"
+  },
+  "Apis.Shared.PublisherRootErrorBoundary.refresh.or.try.again.message": {
+    "defaultMessage": "You may refresh the page now or try again later"
+  },
+  "Apis.Shared.PublisherRootErrorBoundary.something.went.wrong.while.rendering.button": {
+    "defaultMessage": "Something went wrong while rendering the"
+  },
+  "Apis.Shared.PublisherRootErrorBoundary.something.went.wrong.while.rendering.heading": {
+    "defaultMessage": "Something went wrong while rendering the"
+  },
+  "Apis.Shared.RedirectToLogin.you.will.be.redirected.to": {
+    "defaultMessage": "You will be redirected to {page}"
+  },
+  "Applications.Details.Invoice.view.btn": {
+    "defaultMessage": "View Invoice"
+  },
+  "Base.Errors.AuthorizedError.default_body": {
+    "defaultMessage": "User is not authorized to access the API"
+  },
+  "Base.Errors.AuthorizedError.default_tittle": {
+    "defaultMessage": "Authorized Error"
+  },
+  "Base.Errors.ResourceNotFound.api.list": {
+    "defaultMessage": "API List"
+  },
+  "Base.Errors.ResourceNotFound.api.product.list": {
+    "defaultMessage": "API Product List"
+  },
+  "Base.Errors.ResourceNotFound.more.links": {
+    "defaultMessage": "You may check the links below"
+  },
+  "Base.Errors.ResourceNotfound.default_body": {
+    "defaultMessage": "The page you are looking for is not available"
+  },
+  "Base.Errors.ResourceNotfound.default_tittle": {
+    "defaultMessage": "Page Not Found"
+  },
+  "Base.Footer.Footer.product_details": {
+    "defaultMessage": "WSO2 API-M v4.0.0 | © 2021 WSO2 Inc"
+  },
+  "Base.Header.avatar.Avatar.logout": {
+    "defaultMessage": "Logout"
+  },
+  "Base.Header.headersearch.HeaderSearch.search_api.tooltip": {
+    "defaultMessage": "Search"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option0": {
+    "defaultMessage": "Content [ Default ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option1": {
+    "defaultMessage": "Name [ Syntax - name:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option10": {
+    "defaultMessage": "Properties [Syntax - property_name:property_value]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option11": {
+    "defaultMessage": "Tags [ Syntax - tags:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option12": {
+    "defaultMessage": "Api Category [ Syntax - api-category:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option2": {
+    "defaultMessage": "Provider [ Syntax - provider:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option3": {
+    "defaultMessage": "Version [ Syntax - version:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option4": {
+    "defaultMessage": "Context [ Syntax - context:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option5": {
+    "defaultMessage": "Status [ Syntax - status:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.option6": {
+    "defaultMessage": "Description [ Syntax - description:xxxx ]"
+  },
+  "Base.Header.headersearch.HeaderSearch.tooltip.title": {
+    "defaultMessage": "Search Options for APIs and APIProducts"
+  },
+  "Base.Header.navbar.GlobalNavBar.Service.Catalog": {
+    "defaultMessage": "Services"
+  },
+  "Base.Header.navbar.GlobalNavBar.analytics": {
+    "defaultMessage": "Analytics"
+  },
+  "Base.Header.navbar.GlobalNavBar.api.products": {
+    "defaultMessage": "API Products"
+  },
+  "Base.Header.navbar.GlobalNavBar.apis": {
+    "defaultMessage": "APIs"
+  },
+  "Base.Header.navbar.GlobalNavBar.scopes": {
+    "defaultMessage": "Scopes"
+  },
+  "Connection.Timeout": {
+    "defaultMessage": "Connection Timeout"
+  },
+  "Endpoint.Suspension.State": {
+    "defaultMessage": "Endpoint Suspension State"
+  },
+  "Error.while.validating.the.imported.graphQLSchema": {
+    "defaultMessage": "Error while validating the imported schema"
+  },
+  "LoginDenied.logout": {
+    "defaultMessage": "Logout"
+  },
+  "LoginDenied.message": {
+    "defaultMessage": "The server could not verify that you are authorized to access the requested resource."
+  },
+  "LoginDenied.title": {
+    "defaultMessage": "Error 403 : Forbidden"
+  },
+  "Scopes.Create.CreateScope.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Scopes.Create.CreateScope.create.new.scope": {
+    "defaultMessage": "Create New Scope"
+  },
+  "Scopes.Create.CreateScope.heading.scope.heading": {
+    "defaultMessage": "Scopes"
+  },
+  "Scopes.Create.CreateScope.roles.help": {
+    "defaultMessage": "Enter a valid role and press `Enter`."
+  },
+  "Scopes.Create.CreateScope.save": {
+    "defaultMessage": "Save"
+  },
+  "Scopes.Create.CreateScope.saving": {
+    "defaultMessage": "Saving"
+  },
+  "Scopes.Create.CreateScope.scope.added.successfully": {
+    "defaultMessage": "Scope added successfully"
+  },
+  "Scopes.Create.CreateScope.short.description.display.name": {
+    "defaultMessage": "Enter Scope Display Name ( E.g.,: creator )"
+  },
+  "Scopes.Create.CreateScope.short.description.name": {
+    "defaultMessage": "Enter Scope Name ( E.g.,: creator )"
+  },
+  "Scopes.Create.Scope.description.length.exceeded": {
+    "defaultMessage": "Exceeds maximum length limit of 512 characters"
+  },
+  "Scopes.Create.Scope.display.name.length.exceeded": {
+    "defaultMessage": "Exceeds maximum length limit of 512 characters"
+  },
+  "Scopes.Create.Scope.displayName.length.exceeded": {
+    "defaultMessage": "Exceeds maximum length limit of 255 characters"
+  },
+  "Scopes.Create.Scope.name.length.exceeded": {
+    "defaultMessage": "Exceeds maximum length limit of 60 characters"
+  },
+  "Scopes.Create.ScopeCreate.Roles.Invalid": {
+    "defaultMessage": "Role is invalid"
+  },
+  "Scopes.Delete.Delete.document.scope.label.ok.confirm": {
+    "defaultMessage": "Are you sure you want to delete scope {scope} ?"
+  },
+  "Scopes.Delete.Delete.scope.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Scopes.Delete.Delete.scope.deleted.successfully": {
+    "defaultMessage": "API Scope deleted successfully!"
+  },
+  "Scopes.Delete.Delete.scope.listing.delete.confirm": {
+    "defaultMessage": "Confirm Delete"
+  },
+  "Scopes.Delete.Delete.scope.listing.label.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Scopes.Delete.Delete.scope.listing.label.ok.yes": {
+    "defaultMessage": "Yes"
+  },
+  "Scopes.Delete.Delete.something.went.wrong.while.updating.the.api": {
+    "defaultMessage": "Error occurred while deleting scope"
+  },
+  "Scopes.EditScope.Roles.Invalid": {
+    "defaultMessage": "Role is invalid"
+  },
+  "Scopes.EditScope.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Scopes.EditScope.heading.scope.heading": {
+    "defaultMessage": "Scopes"
+  },
+  "Scopes.EditScope.roles.help": {
+    "defaultMessage": "Enter a valid role and press `Enter`."
+  },
+  "Scopes.EditScope.scope.updated.successfully": {
+    "defaultMessage": "Scope updated successfully"
+  },
+  "Scopes.EditScope.short.description.about.the.scope": {
+    "defaultMessage": "Short description about the scope"
+  },
+  "Scopes.EditScope.short.description.display.name": {
+    "defaultMessage": "Enter Scope Display Name ( E.g.,: creator )"
+  },
+  "Scopes.EditScope.update": {
+    "defaultMessage": "Update"
+  },
+  "Scopes.EditScope.update.scope": {
+    "defaultMessage": "Update Scope"
+  },
+  "Scopes.Listing.Listing.heading.scope.add_new": {
+    "defaultMessage": "Add New Scope"
+  },
+  "Scopes.Listing.Listing.heading.scope.heading": {
+    "defaultMessage": "Scopes"
+  },
+  "Scopes.Listing.Listing.scopes.enable.fine.gained.access.control": {
+    "defaultMessage": "Scopes enable fine-grained access control to API resources based on user roles."
+  },
+  "Scopes.Listing.Listing.scopes.text.editor.edit": {
+    "defaultMessage": "Edit"
+  },
+  "Scopes.Listing.Listing.table.header.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Scopes.Listing.Listing.table.header.description": {
+    "defaultMessage": "Description"
+  },
+  "Scopes.Listing.Listing.table.header.display.name": {
+    "defaultMessage": "Display Name"
+  },
+  "Scopes.Listing.Listing.table.header.name": {
+    "defaultMessage": "Name"
+  },
+  "Scopes.Listing.Listing.table.header.number.of.usages": {
+    "defaultMessage": "Number of usages"
+  },
+  "Scopes.Listing.Listing.table.header.roles": {
+    "defaultMessage": "Roles"
+  },
+  "Scopes.Listing.Listing.update.not.allowed": {
+    "defaultMessage": "*You are not authorized to update scopes of the API due to insufficient permissions"
+  },
+  "Scopes.Usage.Usage.api.context": {
+    "defaultMessage": "Context:"
+  },
+  "Scopes.Usage.Usage.api.name": {
+    "defaultMessage": "API Name:"
+  },
+  "Scopes.Usage.Usage.api.provider": {
+    "defaultMessage": "Provider:"
+  },
+  "Scopes.Usage.Usage.api.version": {
+    "defaultMessage": "Version:"
+  },
+  "Scopes.Usage.Usage.scope.usage": {
+    "defaultMessage": "Usage"
+  },
+  "Scopes.Usage.Usage.usage": {
+    "defaultMessage": "Usages of"
+  },
+  "Scopes.Usage.Usage.usage.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Scopes.Usage.UsageView.resource.target": {
+    "defaultMessage": "Target"
+  },
+  "Scopes.Usage.UsageView.resource.usage": {
+    "defaultMessage": "List of Resources"
+  },
+  "Scopes.Usage.UsageView.resource.verb": {
+    "defaultMessage": "Verb"
+  },
+  "Scopes.Usage.UsageViewAPI.api.usage": {
+    "defaultMessage": "List of APIs"
+  },
+  "ServiceCatalog.CreateApi.api.context.label": {
+    "defaultMessage": "Context"
+  },
+  "ServiceCatalog.CreateApi.api.created.successfully": {
+    "defaultMessage": "API created from service successfully!"
+  },
+  "ServiceCatalog.CreateApi.api.name.label": {
+    "defaultMessage": "Name"
+  },
+  "ServiceCatalog.CreateApi.api.version.label": {
+    "defaultMessage": "Version"
+  },
+  "ServiceCatalog.CreateApi.cancel.btn": {
+    "defaultMessage": "Cancel"
+  },
+  "ServiceCatalog.CreateApi.create.api": {
+    "defaultMessage": "Create API"
+  },
+  "ServiceCatalog.CreateApi.create.api.dialog.helper": {
+    "defaultMessage": "Create API from service {serviceName}"
+  },
+  "ServiceCatalog.CreateApi.create.api.dialog.title": {
+    "defaultMessage": "Create API"
+  },
+  "ServiceCatalog.CreateApi.error.create.api": {
+    "defaultMessage": "Error while creating API from service"
+  },
+  "ServiceCatalog.CreateApi.mandatory.field.label": {
+    "defaultMessage": "Mandatory fields"
+  },
+  "ServiceCatalog.CreateApi.select.protocol": {
+    "defaultMessage": "Select Protocol"
+  },
+  "ServiceCatalog.CreateApi.update.btn": {
+    "defaultMessage": "Create API"
+  },
+  "ServiceCatalog.Listing.Delete.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "ServiceCatalog.Listing.Delete.confirm": {
+    "defaultMessage": "Confirm Delete"
+  },
+  "ServiceCatalog.Listing.Delete.ok.confirm": {
+    "defaultMessage": "Are you sure you want to delete the service {service} ?"
+  },
+  "ServiceCatalog.Listing.Delete.ok.yes": {
+    "defaultMessage": "Yes"
+  },
+  "ServiceCatalog.Listing.Listing.error.delete": {
+    "defaultMessage": "Error while deleting service"
+  },
+  "ServiceCatalog.Listing.Listing.error.loading": {
+    "defaultMessage": "Error while loading services"
+  },
+  "ServiceCatalog.Listing.Listing.heading": {
+    "defaultMessage": "Service Catalog"
+  },
+  "ServiceCatalog.Listing.Listing.heading.displaying.service": {
+    "defaultMessage": "Service"
+  },
+  "ServiceCatalog.Listing.Listing.heading.displaying.services": {
+    "defaultMessage": "Services"
+  },
+  "ServiceCatalog.Listing.Listing.heading.displaying.total": {
+    "defaultMessage": "Total:"
+  },
+  "ServiceCatalog.Listing.Listing.service.deleted.successfully": {
+    "defaultMessage": "Service deleted successfully!"
+  },
+  "ServiceCatalog.Listing.Onboarding.add.sample.success": {
+    "defaultMessage": "Sample Service added successfully!"
+  },
+  "ServiceCatalog.Listing.Onboarding.error.creating.sample.service": {
+    "defaultMessage": "Error while creating Sample Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading": {
+    "defaultMessage": "Learn to write your first"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading.sub": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading.text": {
+    "defaultMessage": "Create and Deploy your first Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.link": {
+    "defaultMessage": "Get Started"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.add": {
+    "defaultMessage": "Add Sample Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading": {
+    "defaultMessage": "Add a sample"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading.sub": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading.text": {
+    "defaultMessage": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
+  },
+  "ServiceCatalog.Listing.Overview.back.btn": {
+    "defaultMessage": "Go Back"
+  },
+  "ServiceCatalog.Listing.Overview.close.btn": {
+    "defaultMessage": "Close"
+  },
+  "ServiceCatalog.Listing.Overview.created.time": {
+    "defaultMessage": "Created Time"
+  },
+  "ServiceCatalog.Listing.Overview.definition.download": {
+    "defaultMessage": "Service Definition"
+  },
+  "ServiceCatalog.Listing.Overview.definition.type": {
+    "defaultMessage": "Schema Type"
+  },
+  "ServiceCatalog.Listing.Overview.display.name": {
+    "defaultMessage": "{serviceDisplayName}"
+  },
+  "ServiceCatalog.Listing.Overview.download.service": {
+    "defaultMessage": "Download"
+  },
+  "ServiceCatalog.Listing.Overview.download.service.error": {
+    "defaultMessage": "Something went wrong while downloading the Service Definition."
+  },
+  "ServiceCatalog.Listing.Overview.error.loading.service": {
+    "defaultMessage": "Error while loading service"
+  },
+  "ServiceCatalog.Listing.Overview.mutual.ssl": {
+    "defaultMessage": "Mutual SSL"
+  },
+  "ServiceCatalog.Listing.Overview.mutual.ssl.disabled": {
+    "defaultMessage": "Disabled"
+  },
+  "ServiceCatalog.Listing.Overview.mutual.ssl.enabled": {
+    "defaultMessage": "Enabled"
+  },
+  "ServiceCatalog.Listing.Overview.parent.breadcrumb": {
+    "defaultMessage": "Service Catalog"
+  },
+  "ServiceCatalog.Listing.Overview.readonly.breadcrumb": {
+    "defaultMessage": "Overview"
+  },
+  "ServiceCatalog.Listing.Overview.retrieve.service.def.error": {
+    "defaultMessage": "Something went wrong while retrieving the Service Definition."
+  },
+  "ServiceCatalog.Listing.Overview.security.type": {
+    "defaultMessage": "Security Type"
+  },
+  "ServiceCatalog.Listing.Overview.service.description": {
+    "defaultMessage": "{description}"
+  },
+  "ServiceCatalog.Listing.Overview.service.type.async.tooltip": {
+    "defaultMessage": "Async API Service"
+  },
+  "ServiceCatalog.Listing.Overview.service.type.graphql.tooltip": {
+    "defaultMessage": "GraphQL Service"
+  },
+  "ServiceCatalog.Listing.Overview.service.type.rest.tooltip": {
+    "defaultMessage": "REST Service"
+  },
+  "ServiceCatalog.Listing.Overview.service.type.soap.tooltip": {
+    "defaultMessage": "SOAP Service"
+  },
+  "ServiceCatalog.Listing.Overview.service.url": {
+    "defaultMessage": "Service URL"
+  },
+  "ServiceCatalog.Listing.Overview.service.version": {
+    "defaultMessage": "{serviceVersion}"
+  },
+  "ServiceCatalog.Listing.Overview.view.definition": {
+    "defaultMessage": "View Definition"
+  },
+  "ServiceCatalog.Listing.Usages.api.context": {
+    "defaultMessage": "Context"
+  },
+  "ServiceCatalog.Listing.Usages.api.name": {
+    "defaultMessage": "API Name"
+  },
+  "ServiceCatalog.Listing.Usages.api.version": {
+    "defaultMessage": "Version"
+  },
+  "ServiceCatalog.Listing.Usages.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "ServiceCatalog.Listing.Usages.service.usage": {
+    "defaultMessage": "Used by {usage} API(s)"
+  },
+  "ServiceCatalog.Listing.Usages.usage": {
+    "defaultMessage": "Usages of {serviceName}"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.create.api": {
+    "defaultMessage": "Create API"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.type": {
+    "defaultMessage": "Type"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.version": {
+    "defaultMessage": "Version"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": {
+    "defaultMessage": "Created Time"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.name": {
+    "defaultMessage": "Service"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.schema.type": {
+    "defaultMessage": "Schema Type"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.service.url": {
+    "defaultMessage": "Service URL"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.usage": {
+    "defaultMessage": "Number of Usages"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.version": {
+    "defaultMessage": "Version"
+  },
+  "UnexpectedError.logout": {
+    "defaultMessage": "Logout"
+  },
+  "UnexpectedError.message": {
+    "defaultMessage": "Error occurred due to invalid request"
+  },
+  "UnexpectedError.title": {
+    "defaultMessage": "Internal Server Error"
+  },
+  "api.console.security.heading": {
+    "defaultMessage": "Security"
+  },
+  "app.components.Shared.Banner.back": {
+    "defaultMessage": "Back"
+  },
+  "block.all": {
+    "defaultMessage": "Block All"
+  },
+  "block.production.only": {
+    "defaultMessage": "Block Production Only"
+  },
+  "by": {
+    "defaultMessage": "By"
+  },
+  "cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "colon": {
+    "defaultMessage": ":"
+  },
+  "documents.markdown.editor.default": {
+    "defaultMessage": "#Enter your markdown content"
+  },
+  "error.list.401": {
+    "defaultMessage": "401 : Authorization Required."
+  },
+  "error.list.401.description": {
+    "defaultMessage": "The server could not verify that you are authorized to access the requested resource"
+  },
+  "error.list.403": {
+    "defaultMessage": "403 : Forbidden."
+  },
+  "error.list.403.description": {
+    "defaultMessage": "You do not have permission to access anything with that kind of request."
+  },
+  "error.list.404": {
+    "defaultMessage": "404 : The page cannot be found."
+  },
+  "error.list.404.description": {
+    "defaultMessage": "The page you are looking for might have been removed, had its name changed or is temporarily unavailable."
+  },
+  "error.list.500": {
+    "defaultMessage": "500 : The page cannot be displayed."
+  },
+  "error.list.500.description": {
+    "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
+  },
+  "save": {
+    "defaultMessage": "Save"
+  },
+  "the.icon.is.not.modified": {
+    "defaultMessage": "The icon is not modified"
+  },
+  "unblock": {
+    "defaultMessage": "Unblock"
+  },
+  "upload.image": {
+    "defaultMessage": "Click or drag the image to upload."
+  },
+  "upload.image.size.error": {
+    "defaultMessage": "Uploaded File is too large. Maximum file size limit to 1MB"
+  },
+  "upload.image.size.info": {
+    "defaultMessage": "Maximum file size limit to 1MB"
+  }
+}

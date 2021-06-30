@@ -17,6 +17,9 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class RestApiConstants {
@@ -33,6 +36,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
+    public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
     public static final String OAUTH2_AUTHENTICATION = "oauth2";
@@ -41,6 +45,9 @@ public final class RestApiConstants {
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+    public static final String CREATOR_SCOPE = "apim:api_create";
+    public static final String ADMIN_SCOPE = "apim:admin";
+    public static final String PUBLISHER_SCOPE = "apim:api_publish";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
@@ -94,7 +101,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
-    public static final String RESOURCE_PATH_LABEL = "/labels";
+    public static final String RESOURCE_PATH_ENVIRONMENT = "/environments";
     public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
     public static final String RESOURCE_PATH_REVISIONS = "/revisions";
     public static final String RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID =
@@ -119,7 +126,7 @@ public final class RestApiConstants {
     public static final String SERVER_PASSWORD = "password";
 
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
-    public static final String RESOURCE_PATH_TIERS = "/tiers";
+    public static final String RESOURCE_PATH_TIERS = "/throttling-policies";
     public static final String RESOURCE_PATH_TIERS_API = RESOURCE_PATH_TIERS + "/api";
     public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
@@ -139,12 +146,15 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
+    public static final String RESOURCE_PATH_SWAGGER= "/swagger.yaml";
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
     public static final String RESOURCE_PATH_CATEGORY_THUMBNAIL = RESOURCE_PATH_API_CATEGORIES + "/" + APICATEGORYID_PARAM + "/thumbnail";
     public static final String REST_API_DEVELOPER_PORTAL_VERSION ="v2";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
     public static final String REST_API_DEVELOPER_PORTAL_CONTEXT = "api/am/devportal";
+    public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_SETTINGS = "/settings";
+    public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_TENANTS = "/tenants";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
     public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT +
             REST_API_DEVELOPER_PORTAL_VERSION;
@@ -289,10 +299,11 @@ public final class RestApiConstants {
     public static final String ERROR_TOKEN_EXPIRED = "Access token is expired";
     public static final String ERROR_SCOPE_VALIDATION_FAILED = "You cannot access API as scope validation failed";
 
-    public static final String DEFAULT_ENVIRONMENT = "Production and Sandbox";
-
     public static final String TENANT_DOMAIN = "LoggedInUserTenantDomain";
 
     public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
+
+    public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
+            Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
 }

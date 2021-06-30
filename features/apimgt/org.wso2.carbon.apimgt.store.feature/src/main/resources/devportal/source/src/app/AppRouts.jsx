@@ -25,7 +25,6 @@ import Progress from 'AppComponents/Shared/Progress';
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "Apis" */));
 const Landing = lazy(() => import('AppComponents/LandingPage/Landing' /* webpackChunkName: "Landing" */));
 const TagCloudListing = lazy(() => import('AppComponents/Apis/Listing/TagCloudListing' /* webpackChunkName: "TagCloudListing" */));
-const SettingsBase = lazy(() => import('AppComponents/Settings/SettingsBase' /* webpackChunkName: "SettingsBase" */));
 const ChangePassword = lazy(() => import('AppComponents/Settings/ChangePassword/ChangePassword'));
 const Listing = lazy(() => import('AppComponents/Applications/Listing/Listing' /* webpackChunkName: "ApiListing" */));
 const Details = lazy(() => import('AppComponents/Applications/Details/index' /* webpackChunkName: "ApplicationDetails" */));
@@ -63,16 +62,6 @@ function AppRouts(props) {
                 <Route path='/home' component={Landing} />
                 <Route path='/api-groups' component={TagCloudListing} />
                 <Route path='/(apis|api-products)' component={Apis} />
-                <Route
-                    path='/settings/manage-alerts'
-                    render={(localProps) => {
-                        if (isAuthenticated) {
-                            return <SettingsBase {...localProps} />;
-                        } else {
-                            return <RedirectToLogin {...localProps} />;
-                        }
-                    }}
-                />
                 <Route
                     path='/settings/change-password/'
                     render={(localProps) => {
@@ -122,6 +111,18 @@ function AppRouts(props) {
                 />
                 <Route
                     path='/applications/:application_uuid/'
+                    render={(localProps) => {
+                        if (isAuthenticated) {
+                            return <Details {...localProps} />;
+                        } else if (isUserFound) {
+                            return <ScopeNotFound {...localProps} />;
+                        } else {
+                            return <RedirectToLogin {...localProps} />;
+                        }
+                    }}
+                />
+                <Route
+                    path='/applications/:application_uuid/webhooks/'
                     render={(localProps) => {
                         if (isAuthenticated) {
                             return <Details {...localProps} />;

@@ -33,15 +33,13 @@ const Documents = (props) => {
     return (
         <div>
             <Switch>
-                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents'} component={Listing} />} />
-                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/details'} component={View} />} />
-                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/edit'} component={Edit} />} />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents'} component={Listing} />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/details'} component={View} />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/edit'} component={Edit} />
                 <Route
                     exact
                     path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/edit-content'}
-                    component={EditContent}
-                />
-                } />
+                    component={EditContent} />
                 <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/create'} component={DocCreate} />
                 <Route component={ResourceNotFound} />
             </Switch>

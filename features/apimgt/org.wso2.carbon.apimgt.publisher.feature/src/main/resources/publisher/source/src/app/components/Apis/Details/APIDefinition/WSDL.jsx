@@ -124,6 +124,20 @@ class WSDL extends React.Component {
     }
 
     /**
+     * Downloads and loads the API's WSDL in the editor. If the WSDL is ZIP, the operation is skipped
+     * and it is indicated in the UI.
+     *
+     *  @param {boolean} isArchive states whether the WSDL is a ZIP
+     */
+    setSchemaDefinition = (isArchive) => {
+        this.setState({ isArchive, wsdl: null });
+        if (!isArchive) {
+            const { api } = this.props;
+            this.loadWSDLInEditor(api);
+        }
+    }
+
+    /**
      * Downloads WSDL ZIP file.
      *
      */
@@ -142,20 +156,6 @@ class WSDL extends React.Component {
                     defaultMessage: 'Error downloading WSDL ZIP file',
                 }));
             });
-    }
-
-    /**
-     * Downloads and loads the API's WSDL in the editor. If the WSDL is ZIP, the operation is skipped
-     * and it is indicated in the UI.
-     *
-     *  @param {boolean} isArchive states whether the WSDL is a ZIP
-     */
-    setSchemaDefinition = (isArchive) => {
-        this.setState({ isArchive, wsdl: null });
-        if (!isArchive) {
-            const { api } = this.props;
-            this.loadWSDLInEditor(api);
-        }
     }
 
     /**

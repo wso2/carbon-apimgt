@@ -34,14 +34,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -74,15 +71,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.events.Event;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -103,7 +96,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -255,12 +247,14 @@ public class APIMgtDAOTest {
     }
     @Test
     public void testAddSubscription() throws Exception {
+       Application application = new Application(100);
         APIIdentifier apiIdentifier = new APIIdentifier("SUMEDHA", "API1", "V1.0.0");
         apiIdentifier.setApplicationId("APPLICATION99");
         apiIdentifier.setTier("T1");
+        apiIdentifier.setId(apiMgtDAO.getAPIID(apiIdentifier));
         API api = new API(apiIdentifier);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED", "admin");
+        apiMgtDAO.addSubscription(apiTypeWrapper, application, "UNBLOCKED", "admin");
     }
 
 
@@ -392,46 +386,88 @@ public class APIMgtDAOTest {
     }
     @Test
     public void testKeyForwardCompatibility() throws Exception {
-        Set<APIIdentifier> apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
-        assertEquals(1, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertEquals("V1.0.0", apiId.getVersion());
-        }
+        List<API> oldApiVersionList = new ArrayList<>();
+        API apiOld = new API(new APIIdentifier("SUMEDHA", "API1", "V1.0.0"));
+        oldApiVersionList.add(apiOld);
 
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
         api.setContextTemplate("/context1/{version}");
         api.setUUID(UUID.randomUUID().toString());
-
-        apiMgtDAO.addAPI(api, -1234);
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
-        apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
-        assertEquals(2, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertTrue("V1.0.0".equals(apiId.getVersion()) || "V2.0.0".equals(apiId.getVersion()));
-        }
-
-        apiSet = apiMgtDAO.getAPIByConsumerKey("p1q2r3s4");
-        assertEquals(2, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertTrue("V1.0.0".equals(apiId.getVersion()) || "V2.0.0".equals(apiId.getVersion()));
-        }
-
-        apiSet = apiMgtDAO.getAPIByConsumerKey("a1b2c3d4");
-        assertEquals(1, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("PRABATH", apiId.getProviderName());
-            assertEquals("API2", apiId.getApiName());
-            assertEquals("V1.0.0", apiId.getVersion());
-        }
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, oldApiVersionList);
     }
+
+    @Test
+    public void testForwardingBlockedAndProdOnlyBlockedSubscriptionsToNewAPIVersion() throws APIManagementException {
+        List<API> oldApiVersionList = new ArrayList<>();
+
+        Subscriber subscriber = new Subscriber("new_sub_user1");
+        subscriber.setEmail("newuser1@wso2.com");
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("SUB_FORWARD_APP", subscriber);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+
+        // Add the first version of the API
+        APIIdentifier apiId1 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V1.0.0");
+        apiId1.setTier("T20");
+        API api = new API(apiId1);
+        api.setContext("/subForward");
+        api.setContextTemplate("/subForward/{version}");
+        api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID));
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        // Add a subscription and update state to BLOCKED
+        application.setId(applicationId);
+        int subscriptionId = apiMgtDAO.addSubscription(
+                apiTypeWrapper, application, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
+        apiMgtDAO.updateSubscriptionStatus(subscriptionId, APIConstants.SubscriptionStatus.BLOCKED);
+
+
+        // Add the second version of the API
+        APIIdentifier apiId2 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V2.0.0");
+        API api2 = new API(apiId2);
+        api2.setContext("/context1");
+        api2.setContextTemplate("/context1/{version}");
+        api2.getId().setId(apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID));
+        // once API v2.0.0 is added, v1.0.0 becomes an older version hence add it to oldApiVersionList
+        oldApiVersionList.add(api);
+
+        ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, oldApiVersionList);
+
+        List<SubscribedAPI> subscriptionsOfAPI2 =
+                apiMgtDAO.getSubscriptionsOfAPI(apiId2.getApiName(), "V2.0.0", apiId2.getProviderName());
+        assertEquals(1, subscriptionsOfAPI2.size());
+        SubscribedAPI blockedSubscription = subscriptionsOfAPI2.get(0);
+        assertEquals(APIConstants.SubscriptionStatus.BLOCKED, blockedSubscription.getSubStatus());
+
+        // update the BLOCKED subscription of the second API version to PROD_ONLY_BLOCKED
+        apiMgtDAO.updateSubscription(apiId2, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, applicationId);
+
+        // Add the third version of the API
+        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
+        API api3 = new API(apiId3);
+        api3.setContext("/context1");
+        api3.setContextTemplate("/context1/{version}");
+        api3.getId().setId(apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID));
+        // Once API v2.0.0 is added, v2.0.0 becomes an older version hence add it to oldApiVersionList
+        // This needs to be sorted as latest API last.
+        oldApiVersionList.add(api2);
+        ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
+
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, oldApiVersionList);
+
+        List<SubscribedAPI> subscriptionsOfAPI3 =
+                apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());
+        assertEquals(1, subscriptionsOfAPI3.size());
+        SubscribedAPI prodOnlyBlockedSubscription = subscriptionsOfAPI3.get(0);
+        assertEquals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, prodOnlyBlockedSubscription.getSubStatus());
+    }
+
     @Test
     public void testInsertApplicationPolicy() throws APIManagementException {
         String policyName = "TestInsertAppPolicy";
@@ -807,14 +843,16 @@ public class APIMgtDAOTest {
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api, -1234);
+        int internalAPIID2 = apiMgtDAO.addAPI(api, -1234);
+        api.getId().setId(internalAPIID2);
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
         api1.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api1, -1234);
+        int apiInternalId = apiMgtDAO.addAPI(api1, -1234);
+        api1.getId().setId(apiInternalId);
         apiMgtDAO.createApplicationRegistrationEntry(applicationRegistrationWorkflowDTO, false);
         ApplicationRegistrationWorkflowDTO retrievedApplicationRegistrationWorkflowDTO = new
                 ApplicationRegistrationWorkflowDTO();
@@ -823,8 +861,8 @@ public class APIMgtDAOTest {
         apiMgtDAO.populateAppRegistrationWorkflowDTO(retrievedApplicationRegistrationWorkflowDTO);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         ApiTypeWrapper apiTypeWrapper1 = new ApiTypeWrapper(api1);
-        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
-        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application.getId(),
+        apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application,
                 APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.isContextExist(api.getContext()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(apiId)));
@@ -881,10 +919,10 @@ public class APIMgtDAOTest {
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
         api.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api, -1234);
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234));
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(),
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                 APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.getApplicationsByTier(subscriptionPolicy.getPolicyName()).length > 0);
         String subStatus = apiMgtDAO.getSubscriptionStatusById(subsId);
@@ -929,7 +967,7 @@ public class APIMgtDAOTest {
         assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);
-        apiMgtDAO.updateDefaultAPIPublishedVersion(apiId, APIConstants.PUBLISHED, APIConstants.CREATED);
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiId);
         assertTrue(apiMgtDAO.getConsumerKeys(apiId).length > 0);
         apiMgtDAO.removeAllSubscriptions(apiId);
         assertTrue(apiMgtDAO.getAPINamesMatchingContext(api.getContext()).size() > 0);

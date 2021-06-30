@@ -6,9 +6,12 @@ target
 *.i??
 .idea
 .factorypath
-features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
+*.h2.db
+*.mv.db
 *.DS_Store
-WSO2AM_DB.trace.db
+*.trace.db
+*-api.yaml.sha256
+*.war
 components/apimgt/org.wso2.carbon.apimgt.internal.service/.swagger-codegen/VERSION
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/libs/Saxon-HE-9.5.1-8.jar
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/workflowextensions/default-workflow-extensions.xml

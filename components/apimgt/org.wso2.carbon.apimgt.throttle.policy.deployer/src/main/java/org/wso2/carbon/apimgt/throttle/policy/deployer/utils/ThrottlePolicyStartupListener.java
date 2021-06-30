@@ -19,9 +19,9 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;

@@ -31,17 +31,18 @@ import java.util.Map;
 
 /**
  * This class is responsible for mapping APIM core documentation related objects into REST API documentation
- * related DTOs
+ * related DTOs.
  */
 public class DocumentationMappingUtil {
 
     /**
-     * Converts a APIM core Document object into corresponding REST API Document DTO object
+     * Converts a APIM core Document object into corresponding REST API Document DTO object.
      *
      * @param documentation Documentation object
      * @return a new DocumentDTO object corresponding to given Documentation object
      */
     public static DocumentDTO fromDocumentationToDTO(Documentation documentation) {
+
         DocumentDTO documentDTO = new DocumentDTO();
         documentDTO.setDocumentId(documentation.getId());
         documentDTO.setName(documentation.getName());
@@ -49,16 +50,18 @@ public class DocumentationMappingUtil {
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentation.getType().toString()));
         documentDTO.setOtherTypeName(documentation.getOtherTypeName());
         documentDTO.setFileName(documentation.getFilePath());
-        if (documentation.getSourceType() != null)
+        if (documentation.getSourceType() != null) {
             documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.fromValue(documentation.getSourceType().toString()));
+        }
         documentDTO.setSourceUrl(documentation.getSourceUrl());
-        if (documentation.getVisibility() != null)
+        if (documentation.getVisibility() != null) {
             documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentation.getVisibility().toString()));
+        }
         return documentDTO;
     }
 
     /**
-     * Converts a REST API Document DTO object into corresponding APIM core Document object
+     * Converts a REST API Document DTO object into corresponding APIM core Document object.
      *
      * @param documentDTO DocumentDTO object
      * @return a new Documentation object corresponding to given DocumentDTO object
@@ -68,20 +71,22 @@ public class DocumentationMappingUtil {
         Documentation documentation = new Documentation(DocumentationType.valueOf(documentDTO.getType().toString()),
                 documentDTO.getName());
         documentation.setSummary(documentDTO.getSummary());
-        if (documentDTO.getSourceType() != null)
+        if (documentDTO.getSourceType() != null) {
             documentation
                     .setSourceType(Documentation.DocumentSourceType.valueOf(documentDTO.getSourceType().toString()));
+        }
         documentation.setSourceUrl(documentDTO.getSourceUrl());
         documentation.setOtherTypeName(documentDTO.getOtherTypeName());
         documentation.setFilePath(documentDTO.getFileName());
-        if (documentDTO.getVisibility() != null)
+        if (documentDTO.getVisibility() != null) {
             documentation
                     .setVisibility(Documentation.DocumentVisibility.valueOf(documentDTO.getVisibility().toString()));
+        }
         return documentation;
     }
 
     /**
-     * Converts a List object of Documents into a DTO
+     * Converts a List object of Documents into a DTO.
      *
      * @param documentations List of Documentations
      * @param limit          maximum number of APIs returns
@@ -89,7 +94,8 @@ public class DocumentationMappingUtil {
      * @return DocumentListDTO object containing Document DTOs
      */
     public static DocumentListDTO fromDocumentationListToDTO(List<Documentation> documentations, int offset,
-            int limit) {
+                                                             int limit) {
+
         DocumentListDTO documentListDTO = new DocumentListDTO();
         List<DocumentDTO> documentDTOs = documentListDTO.getList();
         if (documentDTOs == null) {
@@ -108,16 +114,15 @@ public class DocumentationMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters
+     * Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters.
      *
      * @param documentListDTO a DocumentListDTO object
-     * @param limit max number of objects returned
-     * @param offset starting index
-     * @param size max offset
-     *
+     * @param limit           max number of objects returned
+     * @param offset          starting index
+     * @param size            max offset
      */
     public static void setPaginationParams(DocumentListDTO documentListDTO, String apiId, int offset, int limit,
-            int size) {
+                                           int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -142,16 +147,17 @@ public class DocumentationMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a DocumentListDTO object (associated to an api product) given pagination parameters and url parameters
+     * Sets pagination urls for a DocumentListDTO object (associated to an api product) given pagination parameters
+     * and url parameters.
      *
      * @param documentListDTO a DocumentListDTO object
-     * @param limit max number of objects returned
-     * @param offset starting index
-     * @param size max offset
-     *
+     * @param limit           max number of objects returned
+     * @param offset          starting index
+     * @param size            max offset
      */
-    public static void setProductDocListPaginationParams(DocumentListDTO documentListDTO, String productId, int offset, int limit,
-            int size) {
+    public static void setProductDocListPaginationParams(DocumentListDTO documentListDTO, String productId,
+                                                         int offset, int limit,
+                                                         int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -160,13 +166,13 @@ public class DocumentationMappingUtil {
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
-                    .getProductDocumentationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), productId);
+                    .getProductDocumentPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET), productId);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiCommonUtil
-                    .getProductDocumentationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    .getProductDocumentPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), productId);
         }
 

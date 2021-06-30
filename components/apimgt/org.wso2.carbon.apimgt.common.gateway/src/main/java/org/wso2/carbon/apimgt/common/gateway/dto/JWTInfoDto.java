@@ -26,39 +26,39 @@ import java.util.Map;
  *
  */
 public class JWTInfoDto {
-    private String applicationtier;
-    private String keytype;
+    private String applicationTier;
+    private String keyType;
     private String version;
-    private String applicationname;
-    private String enduser;
-    private int endusertenantid;
-    private String applicationuuid;
+    private String applicationName;
+    private String endUser;
+    private int endUserTenantId;
+    private String applicationUUId;
     private String subscriber;
     private String subscriptionTier;
-    private String applicationid;
-    private String apicontext;
+    private String applicationId;
+    private String apiContext;
     private String apiName;
     private JWTValidationInfo jwtValidationInfo;
     private Map<String, String> appAttributes = new HashMap<>();
 
-    public String getApplicationtier() {
+    public String getApplicationTier() {
 
-        return applicationtier;
+        return applicationTier;
     }
 
-    public void setApplicationtier(String applicationtier) {
+    public void setApplicationTier(String applicationTier) {
 
-        this.applicationtier = applicationtier;
+        this.applicationTier = applicationTier;
     }
 
-    public String getKeytype() {
+    public String getKeyType() {
 
-        return keytype;
+        return keyType;
     }
 
-    public void setKeytype(String keytype) {
+    public void setKeyType(String keyType) {
 
-        this.keytype = keytype;
+        this.keyType = keyType;
     }
 
     public String getVersion() {
@@ -71,44 +71,44 @@ public class JWTInfoDto {
         this.version = version;
     }
 
-    public String getApplicationname() {
+    public String getApplicationName() {
 
-        return applicationname;
+        return applicationName;
     }
 
-    public void setApplicationname(String applicationname) {
+    public void setApplicationName(String applicationName) {
 
-        this.applicationname = applicationname;
+        this.applicationName = applicationName;
     }
 
-    public String getEnduser() {
+    public String getEndUser() {
 
-        return enduser;
+        return endUser;
     }
 
-    public void setEnduser(String enduser) {
+    public void setEndUser(String endUser) {
 
-        this.enduser = enduser;
+        this.endUser = endUser;
     }
 
-    public int getEndusertenantid() {
+    public int getEndUserTenantId() {
 
-        return endusertenantid;
+        return endUserTenantId;
     }
 
-    public void setEndusertenantid(int endusertenantid) {
+    public void setEndUserTenantId(int endUserTenantId) {
 
-        this.endusertenantid = endusertenantid;
+        this.endUserTenantId = endUserTenantId;
     }
 
-    public String getApplicationuuid() {
+    public String getApplicationUUId() {
 
-        return applicationuuid;
+        return applicationUUId;
     }
 
-    public void setApplicationuuid(String applicationuuid) {
+    public void setApplicationUUId(String applicationUUId) {
 
-        this.applicationuuid = applicationuuid;
+        this.applicationUUId = applicationUUId;
     }
 
     public String getSubscriber() {
@@ -131,24 +131,24 @@ public class JWTInfoDto {
         this.subscriptionTier = subscriptionTier;
     }
 
-    public String getApplicationid() {
+    public String getApplicationId() {
 
-        return applicationid;
+        return applicationId;
     }
 
-    public void setApplicationid(String applicationid) {
+    public void setApplicationId(String applicationId) {
 
-        this.applicationid = applicationid;
+        this.applicationId = applicationId;
     }
 
-    public String getApicontext() {
+    public String getApiContext() {
 
-        return apicontext;
+        return apiContext;
     }
 
-    public void setApicontext(String apicontext) {
+    public void setApiContext(String apiContext) {
 
-        this.apicontext = apicontext;
+        this.apiContext = apiContext;
     }
 
     public JWTValidationInfo getJwtValidationInfo() {

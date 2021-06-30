@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -25,6 +26,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersGet(String xWSO2Tenant, MessageContext messageContext) {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+
+        if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+            tenantDomain = xWSO2Tenant;
+        }
+
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =

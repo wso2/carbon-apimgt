@@ -26,7 +26,9 @@ import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
 import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.wso2.carbon.apimgt.gateway.webhooks.SubscriptionsDataServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
+import org.wso2.carbon.apimgt.impl.webhooks.SubscriptionsDataService;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 public class ServerStartupListener implements ServerStartupObserver {
@@ -51,6 +53,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataServiceImpl);
         ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
         ServiceReferenceHolder.getInstance().setRevokedTokenService(new RevokedTokenDataImpl());
+        SubscriptionsDataService subscriptionsDataService = new SubscriptionsDataServiceImpl();
+        ServiceReferenceHolder.getInstance().setSubscriptionsDataService(subscriptionsDataService);
         log.debug("APIThrottleDataService Registered...");
     }
 }

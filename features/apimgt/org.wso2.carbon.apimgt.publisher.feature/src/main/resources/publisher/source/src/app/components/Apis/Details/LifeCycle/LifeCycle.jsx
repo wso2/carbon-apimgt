@@ -179,7 +179,7 @@ class LifeCycle extends Component {
         }
         return (
             <>
-                <Typography variant='h4' gutterBottom>
+                <Typography id='itest-api-details-lifecycle-head' variant='h4' gutterBottom>
                     <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.lifecycle' defaultMessage='Lifecycle' />
                 </Typography>
                 <div className={classes.contentWrapper}>

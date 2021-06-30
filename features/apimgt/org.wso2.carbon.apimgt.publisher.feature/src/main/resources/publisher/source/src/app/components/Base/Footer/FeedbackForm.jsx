@@ -79,7 +79,7 @@ export default function FeedbackForm() {
         feedbackDispatcher({ type: 'clear' });
     }
     const theme = useTheme();
-    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+    const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
     /**
      *
      *
@@ -152,10 +152,10 @@ export default function FeedbackForm() {
                                 </Tooltip>
                             </ButtonGroup>
                         </Grid>
-                        <Grid item md={12}>
+                        <Grid item xs={12}>
                             <DialogContentText>Type your message below</DialogContentText>
                         </Grid>
-                        <Grid item md={12}>
+                        <Grid item xs={12}>
                             <TextField
                                 disabled={isSending}
                                 onChange={({ target: { value } }) => feedbackDispatcher(

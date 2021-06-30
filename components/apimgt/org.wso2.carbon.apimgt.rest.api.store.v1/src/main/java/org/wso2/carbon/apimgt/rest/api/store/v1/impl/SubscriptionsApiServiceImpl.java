@@ -38,17 +38,19 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -57,7 +59,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.ws.rs.core.Response;
 
 /**
@@ -122,7 +123,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                        .fromSubscriptionListToDTO(subscribedAPIList, tenantDomain, limit, offset);
+
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit,
+                        offset, subscribedAPIList.size());
 
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -141,8 +145,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         .getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, limit, groupId);
                 subscribedAPIList.addAll(subscriptions);
 
-                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
-                        offset);
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, tenantDomain,
+                        limit, offset);
                 return Response.ok().entity(subscriptionListDTO).build();
 
             } else {
@@ -219,7 +223,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .addSubscription(apiTypeWrapper, username, application.getId());
+                    .addSubscription(apiTypeWrapper, username, application);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
@@ -325,11 +329,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .updateSubscription(apiTypeWrapper, username, application.getId(), subscriptionId,
+                    .updateSubscription(apiTypeWrapper, username, application, subscriptionId,
                             currentThrottlingPolicy, requestedThrottlingPolicy);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
-            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
+                    tenantDomain);
             WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
             if (workflowResponse instanceof HttpWorkflowResponse) {
                 String payload = workflowResponse.getJSONPayload();
@@ -383,7 +388,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
                 if (!org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils
-                        .isUserAccessAllowedForAPI(apiIdentifier)) {
+                        .isUserAccessAllowedForAPIByUUID(subscriptionDTO.getApiId(),tenantDomain)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API,
                             subscriptionDTO.getApiId(), log);
                 }
@@ -409,11 +414,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 apiTypeWrapper.setTier(subscriptionDTO.getThrottlingPolicy());
                 SubscriptionResponse subscriptionResponse = apiConsumer
-                        .addSubscription(apiTypeWrapper, username, application.getId());
+                        .addSubscription(apiTypeWrapper, username, application);
                 SubscribedAPI addedSubscribedAPI = apiConsumer
                         .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
                 SubscriptionDTO addedSubscriptionDTO =
-                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI, tenantDomain);
                 subscriptions.add(addedSubscriptionDTO);
 
             } catch (APIMgtAuthorizationFailedException e) {
@@ -452,12 +457,15 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-
-            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
+            // for cross tenant scenario, we need to get the API's tenant domain. logged in user is not applicable
+            tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI, tenantDomain);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
@@ -509,7 +517,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-
             apiConsumer.removeSubscription(subscribedAPI);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -524,10 +531,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
         if (subscribedAPI == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            return null;
         }
-        if (!RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
+        if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(subscribedAPI.getApplication())) {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
         }
         return subscribedAPI;
     }
+
 }

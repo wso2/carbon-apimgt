@@ -54,6 +54,7 @@ public class API implements Serializable {
     private String wadlUrl;
     private String swaggerDefinition;
     private String graphQLSchema;
+    private String asyncApiDefinition;
     private String type;
     private String context;
     private String contextTemplate;
@@ -88,8 +89,6 @@ public class API implements Serializable {
     private String visibleRoles;
     private String visibleTenants;
 
-    private List<Label> gatewayLabels;
-
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
     private String endpointUTUsername;
@@ -111,11 +110,16 @@ public class API implements Serializable {
     private boolean advertiseOnly;
     private String apiOwner;
     private String redirectURL;
+    private String vendor;
 
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
+
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -165,11 +169,6 @@ public class API implements Serializable {
      */
     private boolean isMonetizationEnabled = false;
 
-    /**
-     * Property to hold selected deployment environments of the  particular API.
-     */
-    private Set<DeploymentEnvironments> deploymentEnvironments;
-
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
@@ -208,6 +207,32 @@ public class API implements Serializable {
      * Property to hold revision id
      */
     private int revisionId;
+
+    /**
+     * Property to indicate whether this is a solace API.
+     */
+    private boolean isSolaceAPI = false;
+
+    public boolean isSolaceAPI() {
+        return isSolaceAPI;
+    }
+
+    public void setSolaceAPI(boolean solaceAPI) {
+        isSolaceAPI = solaceAPI;
+    }
+
+    /**
+     * Property to hold Solace API transport protocols
+     */
+    private String solaceTransportProtocols;
+
+    public String getSolaceTransportProtocols() {
+        return solaceTransportProtocols;
+    }
+
+    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+    }
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -358,6 +383,14 @@ public class API implements Serializable {
         return graphQLSchema;
     }
 
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
+    }
+
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -448,6 +481,14 @@ public class API implements Serializable {
 
     public void setRedirectURL(String redirectURL) {
         this.redirectURL = redirectURL;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public API(APIIdentifier id) {
@@ -719,14 +760,6 @@ public class API implements Serializable {
         this.visibleTenants = visibleTenants;
     }
 
-    public List<Label> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(List<Label> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
-    }
-
     public boolean isApiHeaderChanged() {
         return apiHeaderChanged;
     }
@@ -951,6 +984,30 @@ public class API implements Serializable {
         this.monetizationCategory = monetizationCategory;
     }
 
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
+    }
+
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
+    }
+
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
@@ -1149,14 +1206,6 @@ public class API implements Serializable {
         this.keyManagers = keyManagers;
     }
 
-    public Set<DeploymentEnvironments> getDeploymentEnvironments() {
-        return deploymentEnvironments;
-    }
-
-    public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
-        this.deploymentEnvironments = deploymentEnvironments;
-    }
-    
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;
     }
@@ -1222,9 +1271,6 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
-            return true;
-        }
-        return false;
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
 }

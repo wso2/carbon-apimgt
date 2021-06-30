@@ -27,6 +27,7 @@ public class SubscriptionPolicy extends Policy {
     private Boolean stopOnQuotaReach = null;
     private Integer graphQLMaxComplexity = null;
     private Integer graphQLMaxDepth = null;
+    private Integer subscriberCount = null;
 
     public SubscriptionPolicy() {
         setType(PolicyType.SUBSCRIPTION);
@@ -76,5 +77,13 @@ public class SubscriptionPolicy extends Policy {
 
     public void setGraphQLMaxDepth(int graphQLMaxDepth) {
         this.graphQLMaxDepth = graphQLMaxDepth;
+    }
+
+    public Integer getSubscriberCount() {
+        return subscriberCount;
+    }
+
+    public void setSubscriberCount(Integer subscriberCount) {
+        this.subscriberCount = subscriberCount;
     }
 }

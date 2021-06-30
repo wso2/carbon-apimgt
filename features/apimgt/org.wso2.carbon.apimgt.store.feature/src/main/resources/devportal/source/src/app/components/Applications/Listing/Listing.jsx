@@ -1,5 +1,6 @@
+/* eslint-disable no-nested-ternary */
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -35,7 +36,6 @@ import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/S
 import Alert from 'AppComponents/Shared/Alert';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
-import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { appSettings } from 'Settings';
 import AppBar from '@material-ui/core/AppBar';
@@ -44,17 +44,17 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
+import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
 import DeleteConfirmation from './DeleteConfirmation';
-import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
 
 /**
  *
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     noDataMessage: {
         display: 'flex',
         alignItems: 'center',
@@ -182,7 +182,7 @@ const styles = theme => ({
     clearSearchLink: {
         color: theme.palette.primary.light,
         cursor: 'pointer',
-    }
+    },
 });
 
 /**
@@ -191,9 +191,6 @@ const styles = theme => ({
  * @extends {Component}
  */
 class Listing extends Component {
-    static contextType = Settings;
-    static rowsPerPage = 10;
-
     /**
      *
      * @param {any} props properties
@@ -216,48 +213,28 @@ class Listing extends Component {
         this.handleSearchKeyPress = this.handleSearchKeyPress.bind(this);
         this.filterApps = this.filterApps.bind(this);
         this.clearSearch = this.clearSearch.bind(this);
-
-    }
-    /**
-     * @memberof Listing
-     */
-    setQuery = (event) => {
-        const newQuery = event.target.value;
-        if(newQuery === '') {
-            this.clearSearch();
-        } else {
-            this.setState({ query: newQuery});
-        }
-    };
-    /**
-     * @memberof Listing
-     */
-    handleSearchKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            this.setState({ page: 0 });
-            this.updateApps(undefined, 0);
-            this.isApplicationGroupSharingEnabled();
-        }
-    }
-    /**
-     * @memberof Listing
-     */
-    filterApps = () => {
-        this.setState({ page: 0 });
-        this.updateApps(undefined, 0);
-        this.isApplicationGroupSharingEnabled();
     }
 
-    clearSearch = () => {
-        this.setState({ query: '', data: null, page: 0 });
-        this.updateApps('', 0);
-        this.isApplicationGroupSharingEnabled();
-    }
     /**
      * @memberof Listing
      */
     componentDidMount() {
         this.updateApps();
+        this.isApplicationGroupSharingEnabled();
+    }
+
+    /**
+     * @memberof Listing
+     */
+     constfilterApps = () => {
+         this.setState({ page: 0 });
+         this.updateApps(undefined, 0);
+         this.isApplicationGroupSharingEnabled();
+     }
+
+    clearSearch = () => {
+        this.setState({ query: '', data: null, page: 0 });
+        this.updateApps('', 0);
         this.isApplicationGroupSharingEnabled();
     }
 
@@ -274,6 +251,18 @@ class Listing extends Component {
     /**
      * @memberof Listing
      */
+    setQuery = (event) => {
+        const newQuery = event.target.value;
+        if (newQuery === '') {
+            this.clearSearch();
+        } else {
+            this.setState({ query: newQuery });
+        }
+    };
+
+    /**
+     * @memberof Listing
+     */
     updateApps = (newQuery, newPage) => {
         const {
             page, rowsPerPage, order, orderBy, query,
@@ -286,7 +275,7 @@ class Listing extends Component {
                 const { pagination: { total } } = applications;
                 // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
                 const apps = new Map();
-                applications.list.map(app => apps.set(app.applicationId, app)); // Store application against its UUID
+                applications.list.map((app) => apps.set(app.applicationId, app)); // Store application against its UUID
                 this.setState({ data: apps, totalApps: total });
             })
             .catch((error) => {
@@ -348,6 +337,35 @@ class Listing extends Component {
     };
 
     /**
+     * @memberof Listing
+     */
+     filterApps = () => {
+         this.setState({ page: 0 });
+         this.updateApps(undefined, 0);
+         this.isApplicationGroupSharingEnabled();
+     }
+
+    toggleDeleteConfirmation = (event) => {
+        let id = '';
+        if (event) {
+            id = event.currentTarget.getAttribute('data-appid');
+        }
+        this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen, deletingId: id }));
+    }
+
+    /**
+     * @memberof Listing
+     * @param {Event} event click event
+     */
+    handleSearchKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            this.setState({ page: 0 });
+            this.updateApps(undefined, 0);
+            this.isApplicationGroupSharingEnabled();
+        }
+    }
+
+    /**
      * @param {*} event event
      * @memberof Listing
      */
@@ -368,7 +386,8 @@ class Listing extends Component {
                 newData.delete(deletingId);
                 Alert.info(message);
                 this.toggleDeleteConfirmation();
-                // Page is reduced by 1, when there is only one application in a particular page and it is deleted (except when in first page)
+                // Page is reduced by 1, when there is only one application in a
+                // particular page and it is deleted (except when in first page)
                 if (newData.size === 0 && page !== 0) {
                     this.setState((state) => ({ page: state.page - 1 }));
                 }
@@ -384,17 +403,11 @@ class Listing extends Component {
         });
     }
 
-    toggleDeleteConfirmation = (event) => {
-        let id = '';
-        if (event) {
-            id = event.currentTarget.getAttribute('data-appid');
-        }
-        this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen, deletingId: id }));
-    }
+    static rowsPerPage = 10;
 
     /**
-     * @inheritdoc
-     */
+    * @inheritdoc
+    */
     render() {
         const {
             data, order, orderBy, rowsPerPage, page, isApplicationSharingEnabled,
@@ -404,7 +417,7 @@ class Listing extends Component {
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const paginationEnabled = totalApps > Listing.rowsPerPage;
         return (
-            <main className={classes.content}>
+            <div className={classes.content}>
                 <div className={classes.root}>
                     <Box display='flex' flexDirection='row' justifyContent='flex-start' alignItems='center'>
                         <div className={classes.mainIconWrapper}>
@@ -422,7 +435,7 @@ class Listing extends Component {
                                     resourcePath={resourcePaths.APPLICATIONS}
                                     resourceMethod={resourceMethods.POST}
                                 >
-                                    <Link to='/applications/create'>
+                                    <Link id='itest-application-create-link' to='/applications/create'>
                                         <Button
                                             variant='contained'
                                             color='primary'
@@ -450,11 +463,11 @@ class Listing extends Component {
                     </Box>
                 </div>
                 <Paper className={classes.paper}>
-                    <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
+                    <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
                         <Toolbar>
-                            <Grid container spacing={2} alignItems="center">
+                            <Grid container spacing={2} alignItems='center'>
                                 <Grid item>
-                                    <SearchIcon className={classes.block} color="inherit" />
+                                    <SearchIcon className={classes.block} color='inherit' />
                                 </Grid>
                                 <Grid item xs>
                                     <TextField
@@ -464,7 +477,7 @@ class Listing extends Component {
                                             defaultMessage: 'Search',
                                             id: 'Applications.Listing.Listing.applications.search.label',
                                         })}
-                                        placeholder="Search application by name"
+                                        placeholder='Search application by name'
                                         InputProps={{
                                             disableUnderline: true,
                                             className: classes.searchInput,
@@ -473,87 +486,99 @@ class Listing extends Component {
                                         onChange={this.setQuery}
                                         onKeyPress={this.handleSearchKeyPress}
                                     />
-                                    {query.length > 0 && (<Tooltip title={intl.formatMessage({
-                                        defaultMessage: 'Clear Search',
-                                        id: 'Applications.Listing.Listing.clear.search',
-                                    })}>
-                                        <IconButton aria-label="delete" className={classes.clearSearch} onClick={this.clearSearch}>
-                                            <HighlightOffRoundedIcon />
-                                        </IconButton>
-                                    </Tooltip>)}
+                                    {query.length > 0 && (
+                                        <Tooltip title={intl.formatMessage({
+                                            defaultMessage: 'Clear Search',
+                                            id: 'Applications.Listing.Listing.clear.search',
+                                        })}
+                                        >
+                                            <IconButton aria-label='delete' className={classes.clearSearch} onClick={this.clearSearch}>
+                                                <HighlightOffRoundedIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    )}
                                 </Grid>
                                 <Grid item>
-                                    <Button variant="contained" className={classes.addUser} onClick={this.filterApps}>
+                                    <Button variant='contained' className={classes.addUser} onClick={this.filterApps}>
                                         <FormattedMessage
                                             id='Applications.Listing.Listing.applications.search'
                                             defaultMessage='Search'
-                                        />                                    </Button>
+                                        />
+
+                                    </Button>
 
                                 </Grid>
                             </Grid>
                         </Toolbar>
                     </AppBar>
-                    {!data && (<div className={classes.contentWrapper}>
-                        <Loading />
-                    </div>)}
-                    {data && (<div className={classes.contentWrapper}>
-                        {data.size > 0 ? (
-                            <div className={classes.appContent}>
-                                <Paper className={classes.appTablePaper}>
-                                    <Table>
-                                        <ApplicationTableHead
-                                            order={order}
-                                            orderBy={orderBy}
-                                            onRequestSort={this.handleRequestSort}
-                                        />
-                                        <AppsTableContent
-                                            handleAppDelete={this.handleAppDelete}
-                                            apps={data}
-                                            page={page}
-                                            rowsPerPage={rowsPerPage}
-                                            order={order}
-                                            orderBy={orderBy}
-                                            isApplicationSharingEnabled={isApplicationSharingEnabled}
-                                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
-                                        />
-                                        {paginationEnabled
-                                            && (
-                                                <TableFooter>
-                                                    <TableRow>
-                                                        <TablePagination
-                                                            component='td'
-                                                            count={totalApps}
-                                                            rowsPerPage={rowsPerPage}
-                                                            rowsPerPageOptions={[5, 10, 15]}
-                                                            labelRowsPerPage='Show'
-                                                            page={page}
-                                                            backIconButtonProps={{
-                                                                'aria-label': 'Previous Page',
-                                                            }}
-                                                            nextIconButtonProps={{
-                                                                'aria-label': 'Next Page',
-                                                            }}
-                                                            onChangePage={this.handleChangePage}
-                                                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                                        />
-                                                    </TableRow>
-                                                </TableFooter>
-                                            )}
-                                    </Table>
-                                </Paper>
-                            </div>
-                        ) : (
+                    {!data && (
+                        <div className={classes.contentWrapper}>
+                            <Loading />
+                        </div>
+                    )}
+                    {data && (
+                        <div className={classes.contentWrapper}>
+                            {data.size > 0 ? (
+                                <div className={classes.appContent}>
+                                    <Paper className={classes.appTablePaper}>
+                                        <Table id='itest-application-list-table'>
+                                            <ApplicationTableHead
+                                                order={order}
+                                                orderBy={orderBy}
+                                                onRequestSort={this.handleRequestSort}
+                                            />
+                                            <AppsTableContent
+                                                handleAppDelete={this.handleAppDelete}
+                                                apps={data}
+                                                page={page}
+                                                rowsPerPage={rowsPerPage}
+                                                order={order}
+                                                orderBy={orderBy}
+                                                isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                                toggleDeleteConfirmation={this.toggleDeleteConfirmation}
+                                            />
+                                            {paginationEnabled
+                                                && (
+                                                    <TableFooter>
+                                                        <TableRow>
+                                                            <TablePagination
+                                                                component='td'
+                                                                count={totalApps}
+                                                                rowsPerPage={rowsPerPage}
+                                                                rowsPerPageOptions={[5, 10, 15]}
+                                                                labelRowsPerPage='Show'
+                                                                page={page}
+                                                                backIconButtonProps={{
+                                                                    'aria-label': 'Previous Page',
+                                                                }}
+                                                                nextIconButtonProps={{
+                                                                    'aria-label': 'Next Page',
+                                                                }}
+                                                                onChangePage={this.handleChangePage}
+                                                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                                            />
+                                                        </TableRow>
+                                                    </TableFooter>
+                                                )}
+                                        </Table>
+                                    </Paper>
+                                </div>
+                            ) : (
                                 query === '' ? (
                                     <div className={classes.noDataMessage}>
-                                        <Typography variant="h6" gutterBottom>
+                                        <Typography variant='h6' gutterBottom>
                                             <FormattedMessage
                                                 id='Applications.Listing.Listing.noapps.display.title'
                                                 defaultMessage='No Applications Available'
                                             />
                                         </Typography>
-                                        
-                                        <Typography variant="body2" gutterBottom>
-                                            <a onClick={this.handleClickOpen} className={classes.clearSearchLink}>
+
+                                        <Typography variant='body2' gutterBottom>
+                                            <a
+                                                onClick={this.handleClickOpen}
+                                                onKeyDown={this.handleClickOpen}
+                                                className={classes.clearSearchLink}
+                                            >
                                                 <FormattedMessage
                                                     id='Applications.Listing.Listing.noapps.display.link.text'
                                                     defaultMessage='Add New Application'
@@ -561,40 +586,48 @@ class Listing extends Component {
                                             </a>
                                         </Typography>
                                     </div>
-                                ) :
-                                    (<div className={classes.noDataMessage}>
-                                        <Typography variant="h6" gutterBottom>
-                                            <FormattedMessage
-                                                id='Applications.Listing.Listing.applications.no.search.results.title'
-                                                defaultMessage='No Matching Applications'
-                                            />
-                                        </Typography>
-                                        <Typography variant="body2" gutterBottom>
-                                            <FormattedMessage
-                                                id='Applications.Listing.Listing.applications.no.search.results.body.prefix'
-                                                defaultMessage='Check the spelling or try to '
-                                            />
-                                            <a onClick={this.clearSearch} className={classes.clearSearchLink}>
+                                )
+                                    : (
+                                        <div className={classes.noDataMessage}>
+                                            <Typography variant='h6' gutterBottom>
                                                 <FormattedMessage
-                                                    id='Applications.Listing.Listing.applications.no.search.results.body.sufix'
-                                                    defaultMessage='clear the search'
+                                                    id='Applications.Listing.Listing.applications.no.search.results.title'
+                                                    defaultMessage='No Matching Applications'
                                                 />
-                                            </a>
-                                        </Typography>
-                                    </div>)
+                                            </Typography>
+                                            <Typography variant='body2' gutterBottom>
+                                                <FormattedMessage
+                                                    id='Applications.Listing.Listing.applications.no.search.results.body.prefix'
+                                                    defaultMessage='Check the spelling or try to '
+                                                />
+                                                <a
+                                                    onClick={this.clearSearch}
+                                                    onKeyDown={this.clearSearch}
+                                                    className={classes.clearSearchLink}
+                                                >
+                                                    <FormattedMessage
+                                                        id='Applications.Listing.Listing.applications.no.search.results.body.sufix'
+                                                        defaultMessage='clear the search'
+                                                    />
+                                                </a>
+                                            </Typography>
+                                        </div>
+                                    )
                             )}
-                        <DeleteConfirmation
-                            handleAppDelete={this.handleAppDelete}
-                            isDeleteOpen={isDeleteOpen}
-                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
-                        />
-                    </div>)}
+                            <DeleteConfirmation
+                                handleAppDelete={this.handleAppDelete}
+                                isDeleteOpen={isDeleteOpen}
+                                toggleDeleteConfirmation={this.toggleDeleteConfirmation}
+                            />
+                        </div>
+                    )}
 
                 </Paper>
-            </main>
+            </div>
         );
     }
 }
+Listing.contextType = Settings;
 Listing.propTypes = {
     classes: PropTypes.shape({
         root: PropTypes.string,

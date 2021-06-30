@@ -264,6 +264,53 @@ class Utils {
         const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
         return(languageWithoutRegionCode || language);
     }
+
+    static hexToRGBA(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+
+        if (alpha) {
+            return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+        } else {
+            return 'rgb(' + r + ', ' + g + ', ' + b + ')';
+        }
+    }
+    /**
+     * return R,G & B color components
+     * @param {Strinng} hex HEX color code string i:e `#AF2386`
+     * @returns {Object} colors
+     */
+         static hexToRGBHash(hex) {
+            // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            const commonHex = hex.replace(shorthandRegex, (m, r, g, b) => {
+                return r + r + g + g + b + b;
+            });
+    
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(commonHex);
+            return result
+                ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16),
+                }
+                : null;
+        }
+    
+        /**
+         * Return HEX hashed color code given the R,G & B color components
+         * @param {Integer} r Red
+         * @param {Integer} g Green
+         * @param {Integer} b Blue
+         * @returns {String} Hex code
+         */
+        static rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map((x) => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
 }
 
 Utils.CONST = {

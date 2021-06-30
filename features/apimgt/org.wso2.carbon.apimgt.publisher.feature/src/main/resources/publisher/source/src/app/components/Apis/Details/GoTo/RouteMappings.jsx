@@ -184,10 +184,6 @@ const suggestions = {
             route: 'deployments',
         },
         {
-            label: 'Microgateway Labels',
-            route: 'deployments',
-        },
-        {
             label: 'Environments',
             route: 'deployments',
         },
@@ -501,10 +497,6 @@ const suggestions = {
         },
         {
             label: 'API Gateways',
-            route: 'deployments',
-        },
-        {
-            label: 'Microgateway Labels',
             route: 'deployments',
         },
         {

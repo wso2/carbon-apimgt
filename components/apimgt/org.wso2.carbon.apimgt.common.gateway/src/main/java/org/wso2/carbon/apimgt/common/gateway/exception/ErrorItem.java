@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.common.gateway.exception;
 
 /**
- * ErrorHandler implementation for dynamic error items
+ * ErrorHandler implementation for dynamic error items.
  */
 public class ErrorItem implements ErrorHandler {
 

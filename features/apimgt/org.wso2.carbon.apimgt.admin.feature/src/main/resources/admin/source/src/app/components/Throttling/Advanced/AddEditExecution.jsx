@@ -247,12 +247,6 @@ function AddEditExecution(props) {
                             onChange={update}
                             classes={{ root: classes.slectRoot }}
                         >
-                            <MenuItem value='sec'>
-                                <FormattedMessage
-                                    id='Throttling.Advanced.AddEdit.form.timeUnit.second'
-                                    defaultMessage='Second(s)'
-                                />
-                            </MenuItem>
                             <MenuItem value='min'>
                                 <FormattedMessage
                                     id='Throttling.Advanced.AddEdit.form.timeUnit.minute'
@@ -275,12 +269,6 @@ function AddEditExecution(props) {
                                 <FormattedMessage
                                     id='Throttling.Advanced.AddEdit.form.timeUnit.month'
                                     defaultMessage='Month(s)'
-                                />
-                            </MenuItem>
-                            <MenuItem value='year'>
-                                <FormattedMessage
-                                    id='Throttling.Advanced.AddEdit.form.timeUnit.year'
-                                    defaultMessage='Year(s)'
                                 />
                             </MenuItem>
                         </Select>

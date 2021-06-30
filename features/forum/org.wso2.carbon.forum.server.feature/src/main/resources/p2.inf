@@ -1,5 +1,0 @@
-instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.forum.server_${feature.version}/rxts/forum/,target:${installFolder}/../../resources/rxts/forum,overwrite:true);\
-
-
-

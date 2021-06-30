@@ -100,7 +100,7 @@ export default function ProvideGraphQL(props) {
             onDrop([inputValue]);
         }
     }, [inputValue]);
-
+    const accept = '.graphql,text/plain';
     return (
         <>
             <Grid container spacing={5}>
@@ -165,14 +165,15 @@ export default function ProvideGraphQL(props) {
                             error={isValid.file}
                             onDrop={onDrop}
                             files={apiInputs.inputValue}
-                            accept='.graphql,text/plain'
+                            accept={accept}
                         >
                             {isValidating ? (<CircularProgress />)
                                 : ([
                                     <FormattedMessage
                                         id='Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.dropzone'
-                                        defaultMessage='Drag & Drop files here {break} or {break} Browse files'
-                                        values={{ break: <br /> }}
+                                        defaultMessage={'Drag & Drop files here {break} or {break} '
+                                        + 'Browse files{break}({accept})'}
+                                        values={{ break: <br />, accept }}
                                     />,
                                     <Button
                                         color='primary'

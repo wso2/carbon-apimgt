@@ -18,13 +18,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Collapse from '@material-ui/core/Collapse';
-import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { Typography } from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid/Grid';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
-import API from 'AppData/api';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import CommentsAPI from 'AppData/Comments';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 
@@ -35,13 +35,29 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
+    paper: {
+        marginRight: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+        paddingRight: theme.spacing(2),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    },
     contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing(2),
-        paddingTop: theme.spacing.unig,
+        paddingLeft: theme.spacing(3),
+        marginTop: theme.spacing(1),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    },
+    contentWrapperOverview: {
+        padding: 0,
+        width: '100%',
+        boxShadow: 'none',
     },
     titleSub: {
         cursor: 'pointer',
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -51,7 +67,21 @@ const styles = (theme) => ({
         marginTop: theme.spacing(0.2),
     },
     loadMoreLink: {
-        textDecoration: 'underline',
+        textDecoration: 'none',
+    },
+    genericMessageWrapper: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        marginRight: theme.spacing(3),
+    },
+    paperProgress: {
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(2),
+        textAlign: 'center',
+    },
+    dialogContainer: {
+        width: 1000,
+        padding: theme.spacing(2),
     },
 });
 
@@ -73,11 +103,14 @@ class Comments extends Component {
             allComments: [],
             comments: [],
             totalComments: 0,
-            startCommentsToDisplay: 0,
+            apiId: null,
+            loading: true,
         };
-        this.updateCommentList = this.updateCommentList.bind(this);
         this.handleExpandClick = this.handleExpandClick.bind(this);
         this.handleLoadMoreComments = this.handleLoadMoreComments.bind(this);
+        this.addComment = this.addComment.bind(this);
+        this.updateComment = this.updateComment.bind(this);
+        this.onDeleteComment = this.onDeleteComment.bind(this);
     }
 
     /**
@@ -86,22 +119,19 @@ class Comments extends Component {
      */
     componentDidMount() {
         const { api, theme } = this.props;
-        const Api = new API();
-        Api.getAllComments(api.id)
+        this.setState({ apiId: api.id });
+        const limit = theme.custom.commentsLimit;
+        const offset = 0;
+
+        CommentsAPI.all(api.id, limit, offset)
             .then((result) => {
                 const commentList = result.body.list;
-                this.setState({ allComments: commentList, totalComments: commentList.length });
-                if (commentList.length < theme.custom.commentsLimit) {
-                    this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
-                        comments: commentList.slice(
-                            commentList.length - theme.custom.commentsLimit,
-                            commentList.length,
-                        ),
-                    });
-                }
+                this.setState({
+                    allComments: commentList,
+                    comments: commentList,
+                    totalComments: result.body.pagination.total,
+                    loading: false,
+                });
             })
             .catch((error) => {
                 console.error(error);
@@ -114,20 +144,101 @@ class Comments extends Component {
     }
 
     /**
+     * Delete a comment
+     * @param {string} commentIdOfCommentToDelete id of deleted commetn
+     * @memberof Comments
+     */
+    onDeleteComment(commentIdOfCommentToDelete) {
+        const {
+            apiId, comments, totalComments,
+        } = this.state;
+
+        const remainingComments = comments.filter((item) => item.id !== commentIdOfCommentToDelete);
+        const newTotal = totalComments - 1;
+
+        if (newTotal > remainingComments.length) {
+            CommentsAPI
+                .all(apiId, 1, remainingComments.length)
+                .then((result) => {
+                    if (result.body) {
+                        this.setState({
+                            totalComments: newTotal,
+                            comments: [...remainingComments, ...result.body.list],
+                            allComments: [...remainingComments, ...result.body.list],
+                        });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        } else {
+            this.setState({
+                totalComments: newTotal,
+                comments: remainingComments,
+                allComments: remainingComments,
+            });
+        }
+    }
+
+    /**
+     * Add comment to the comment list
+     * @param {any} comment added comment
+     * @memberof Comments
+     */
+    addComment(comment) {
+        const { totalComments, allComments } = this.state;
+        const newTotal = totalComments + 1;
+
+        this.setState({
+            allComments: [comment, ...allComments],
+            totalComments: newTotal,
+            comments: [comment, ...allComments],
+        });
+    }
+
+    /**
+     * Update a specific comment in the comment list
+     * @param {any} comment updated comment
+     * @memberof Comments
+     */
+    updateComment(comment) {
+        const { comments } = this.state;
+
+        const newComments = comments.reduce((acc, cur) => {
+            let temp = cur;
+            if (cur.id === comment.id) {
+                temp = comment;
+            }
+            return [...acc, temp];
+        }, []);
+        this.setState({
+            allComments: newComments,
+            comments: newComments,
+        });
+    }
+
+    /**
      * Handles loading the previous comments
      * @memberof Comments
      */
     handleLoadMoreComments() {
-        const { totalComments, startCommentsToDisplay, allComments } = this.state;
-        const { theme } = this.props;
-        if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
-            this.setState({ startCommentsToDisplay: 0, comments: allComments.slice(0, totalComments) });
-        } else {
-            this.setState({
-                startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
-                comments: allComments.slice(startCommentsToDisplay - theme.custom.commentsLimit, totalComments),
+        const { allComments, comments } = this.state;
+        const { theme, api: { id: apiId } } = this.props;
+        const limit = theme.custom.commentsLimit;
+        const offset = comments.length;
+
+        CommentsAPI.all(apiId, limit, offset)
+            .then((result) => {
+                const newAllCommentList = allComments.concat(result.body.list);
+                this.setState({ allComments: newAllCommentList, comments: newAllCommentList });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
             });
-        }
     }
 
     /**
@@ -140,46 +251,6 @@ class Comments extends Component {
     }
 
     /**
-     * Updates the comment list, This is passed through props to child component
-     * @param {any} comments Updated comment list
-     * @memberof Comments
-     */
-    updateCommentList(comments) {
-        const { startCommentsToDisplay, totalComments } = this.state;
-        const { theme } = this.props;
-        let newStart;
-        let difference;
-        let newTotal;
-        this.setState({ allComments: comments });
-        if (totalComments < theme.custom.commentsLimit) {
-            newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: 0, totalComments: newTotal, comments });
-        } else if (totalComments <= comments.length) {
-            difference = comments.length - totalComments;
-            newStart = startCommentsToDisplay + difference;
-            newTotal = comments.length;
-            this.setState({
-                startCommentsToDisplay: newStart,
-                totalComments: newTotal,
-                comments: comments.slice(newStart, newTotal),
-            });
-        } else {
-            difference = totalComments - comments.length;
-            if (startCommentsToDisplay === 0) {
-                newStart = startCommentsToDisplay;
-            } else {
-                newStart = startCommentsToDisplay - difference;
-            }
-            newTotal = comments.length;
-            this.setState({
-                startCommentsToDisplay: newStart,
-                totalComments: newTotal,
-                comments: comments.slice(newStart, newTotal),
-            });
-        }
-    }
-
-    /**
      * Render method of the component
      * @returns {React.Component} Comment html component
      * @memberof Comments
@@ -187,60 +258,84 @@ class Comments extends Component {
     render() {
         const { classes, api } = this.props;
         const {
-            comments, expanded, allComments, startCommentsToDisplay, totalComments,
+            comments, allComments, totalComments, loading,
         } = this.state;
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
-                    <ArrowDropDownCircleOutlined onClick={this.handleExpandClick} aria-expanded={expanded} />
-                    <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
-                        Comments
+                    <Typography id='itest-api-details-comments-head' variant='h4' className={classes.titleSub}>
+                        {totalComments > 0 ? totalComments + (' ') : ''}
+                        <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                     </Typography>
                 </div>
-                <Collapse in={expanded} timeout='auto' unmountOnExit>
+
+                <div className={classes.paper}>
                     <CommentAdd
                         api={api}
-                        commentsUpdate={this.updateCommentList}
+                        commentsUpdate={this.addComment}
+                        addComment={this.addComment}
                         allComments={allComments}
-                        parentCommentId={null}
-                        cancelButton={false}
+                        replyTo={null}
+                        cancelButton
                     />
-                    <Comment
-                        comments={comments}
-                        api={api}
-                        commentsUpdate={this.updateCommentList}
-                        allComments={allComments}
-                    />
-                    {startCommentsToDisplay !== 0 && (
-                        <div className={classes.contentWrapper}>
-                            <Grid container spacing={8} className={classes.root}>
-                                <Grid item>
-                                    <Typography
-                                        className={classes.verticalSpace}
-                                        variant='body1'
-                                        onClick={this.handleLoadMoreComments}
-                                    >
-                                        <a className={classes.link + ' ' + classes.loadMoreLink}>
-                                            Load Previous Comments
-                                        </a>
-                                    </Typography>
-                                </Grid>
-                                <Grid>
-                                    <ArrowDropDown
-                                        onClick={this.handleLoadMoreComments}
-                                        className={classes.link + ' ' + classes.verticalSpace}
+                </div>
+
+                {loading && (
+                    <div className={classes.paperProgress}>
+                        <CircularProgress size={24} />
+                    </div>
+                )}
+                {!loading && totalComments === 0
+                    && (
+                        <div className={classes.genericMessageWrapper}>
+                            <InlineMessage type='info' className={classes.dialogContainer}>
+                                <Typography variant='h5' component='h3'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Comments.no.comments'
+                                        defaultMessage='No Comments Yet'
                                     />
-                                </Grid>
-                                <Grid item>
-                                    <Typography className={classes.verticalSpace} variant='body1'>
-                                        Showing comments
-                                        {totalComments + -startCommentsToDisplay + ' of ' + totalComments}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+                                </Typography>
+                                <Typography component='p'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Comments.no.comments.content'
+                                        defaultMessage='No comments available for this API yet'
+                                    />
+                                </Typography>
+                            </InlineMessage>
                         </div>
                     )}
-                </Collapse>
+                <Comment
+                    comments={comments}
+                    api={api}
+                    allComments={allComments}
+                    onDeleteComment={this.onDeleteComment}
+                    updateComment={this.updateComment}
+                />
+                {totalComments > comments.length && (
+                    <div className={classes.contentWrapper}>
+                        <Grid container spacing={4} className={classes.root}>
+                            <Grid item>
+                                <Typography className={classes.verticalSpace} variant='body1'>
+                                    <a
+                                        className={classes.link + ' ' + classes.loadMoreLink}
+                                        onClick={this.handleLoadMoreComments}
+                                        onKeyDown={this.handleLoadMoreComments}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Comments.load.previous.comments'
+                                            defaultMessage='Show More'
+                                        />
+                                    </a>
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography className={classes.verticalSpace} variant='body1'>
+                                    {'(' + comments.length + ' of ' + totalComments + ')'}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </div>
+                )}
             </div>
         );
     }
@@ -252,4 +347,4 @@ Comments.propTypes = {
     theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Comments);
+export default injectIntl(withStyles(styles, { withTheme: true })(Comments));

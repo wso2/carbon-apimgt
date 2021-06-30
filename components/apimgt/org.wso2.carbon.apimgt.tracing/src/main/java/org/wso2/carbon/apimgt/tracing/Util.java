@@ -30,8 +30,9 @@ import java.util.Map;
 
 /**
  * Span utility class
- * */
+ */
 public class Util {
+
     private static boolean isTraceEnabled = false;
 
     /**
@@ -39,24 +40,25 @@ public class Util {
      *
      * @param spanName
      * @param parentSpan
-     * @param tracer      io.opentracing tracer
+     * @param tracer     io.opentracing tracer
      * @return a TracingSpan object
-     * */
+     */
     public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
+
         if (parentSpan == null) {
             Span span = tracer.getTracingTracer().buildSpan(spanName).start();
             return new TracingSpan(span);
         } else {
             Object sp = parentSpan.getSpan();
             Span childSpan;
-            if (sp != null){
+            if (sp != null) {
                 if (sp instanceof Span) {
                     childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((Span) sp).start();
                 } else {
                     childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((SpanContext) sp).start();
                 }
-            }else{
-                 childSpan = tracer.getTracingTracer().buildSpan(spanName).start();
+            } else {
+                childSpan = tracer.getTracingTracer().buildSpan(spanName).start();
             }
             return new TracingSpan(childSpan);
         }
@@ -68,8 +70,9 @@ public class Util {
      * @param span
      * @param key
      * @param value
-     * */
+     */
     public static void setTag(TracingSpan span, String key, String value) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).setTag(key, value);
@@ -77,6 +80,7 @@ public class Util {
     }
 
     public static void setLog(TracingSpan span, String key, String value) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).log(ImmutableMap.of(key, value));
@@ -84,6 +88,7 @@ public class Util {
     }
 
     public static void setLog(TracingSpan span, String key) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).log(key);
@@ -94,8 +99,9 @@ public class Util {
      * Finish the span
      *
      * @param span
-     * */
+     */
     public static void finishSpan(TracingSpan span) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).finish();
@@ -108,8 +114,9 @@ public class Util {
      * @param span
      * @param tracer
      * @param tracerSpecificCarrier
-     * */
+     */
     public static void inject(TracingSpan span, TracingTracer tracer, Map<String, String> tracerSpecificCarrier) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             tracer.getTracingTracer().inject(((Span) sp).context(), Format.Builtin.HTTP_HEADERS,
@@ -126,13 +133,15 @@ public class Util {
      * @param tracer
      * @param headerMap
      * @return a TracingSpan object
-     * */
+     */
     public static TracingSpan extract(TracingTracer tracer, Map<String, String> headerMap) {
+
         return new TracingSpan(tracer.getTracingTracer().extract(Format.Builtin.HTTP_HEADERS,
                 new TextMapExtractAdapter(headerMap)));
     }
 
     public static TracingTracer getGlobalTracer() {
+
         return new TracingTracer(GlobalTracer.get());
     }
 
@@ -142,8 +151,9 @@ public class Util {
      * @param span
      * @param key
      * @param value
-     * */
+     */
     public static void baggageSet(TracingSpan span, String key, String value) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             ((Span) sp).setBaggageItem(key, value);
@@ -156,8 +166,9 @@ public class Util {
      * @param span
      * @param key
      * @return a baggage item String
-     * */
+     */
     public static String baggageGet(TracingSpan span, String key) {
+
         Object sp = span.getSpan();
         if (sp instanceof Span) {
             return ((Span) sp).getBaggageItem(key);
@@ -173,10 +184,12 @@ public class Util {
     }
 
     public static void setTracingEnabled(boolean isTraceEnabled) {
+
         Util.isTraceEnabled = isTraceEnabled;
     }
 
     public static boolean tracingEnabled() {
+
         return isTraceEnabled;
     }
 }

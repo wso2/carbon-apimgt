@@ -6,9 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
 import javax.validation.constraints.*;
 
 
@@ -33,7 +33,7 @@ public class SettingsDTO   {
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
-    private List<DeploymentsDTO> deployments = new ArrayList<DeploymentsDTO>();
+    private List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments = new ArrayList<ThirdPartyEnvironmentDTO>();
 
   /**
    * The Developer Portal URL
@@ -180,20 +180,20 @@ public class SettingsDTO   {
 
   /**
    **/
-  public SettingsDTO deployments(List<DeploymentsDTO> deployments) {
-    this.deployments = deployments;
+  public SettingsDTO thirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
+    this.thirdPartyEnvironments = thirdPartyEnvironments;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("deployments")
-  public List<DeploymentsDTO> getDeployments() {
-    return deployments;
+  @JsonProperty("thirdPartyEnvironments")
+  public List<ThirdPartyEnvironmentDTO> getThirdPartyEnvironments() {
+    return thirdPartyEnvironments;
   }
-  public void setDeployments(List<DeploymentsDTO> deployments) {
-    this.deployments = deployments;
+  public void setThirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
+    this.thirdPartyEnvironments = thirdPartyEnvironments;
   }
 
 
@@ -214,12 +214,12 @@ public class SettingsDTO   {
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
-        Objects.equals(deployments, settings.deployments);
+        Objects.equals(thirdPartyEnvironments, settings.thirdPartyEnvironments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, deployments);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, thirdPartyEnvironments);
   }
 
   @Override
@@ -235,7 +235,7 @@ public class SettingsDTO   {
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
-    sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
+    sb.append("    thirdPartyEnvironments: ").append(toIndentedString(thirdPartyEnvironments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

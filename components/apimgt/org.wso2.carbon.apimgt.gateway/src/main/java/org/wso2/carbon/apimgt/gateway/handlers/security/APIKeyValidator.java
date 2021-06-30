@@ -94,10 +94,6 @@ public class APIKeyValidator {
         this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
     }
 
-    protected String getKeyValidatorClientType() {
-        return APISecurityUtils.getKeyValidatorClientType();
-    }
-
     protected Cache getGatewayKeyCache() {
         return CacheProvider.getGatewayKeyCache();
     }

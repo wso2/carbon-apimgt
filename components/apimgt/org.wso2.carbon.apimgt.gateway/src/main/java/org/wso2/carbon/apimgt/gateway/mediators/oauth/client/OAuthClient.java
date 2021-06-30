@@ -84,9 +84,9 @@ public class OAuthClient {
             if (refreshToken != null) {
                 payload.append(APIConstants.OAuthConstants.REFRESH_TOKEN_GRANT_TYPE)
                         .append("&refresh_token=").append(refreshToken);
-            } else if (grantType.equals(APIConstants.OAuthConstants.CLIENT_CREDENTIALS)) {
+            } else if (APIConstants.OAuthConstants.CLIENT_CREDENTIALS.equals(grantType)) {
                 payload.append(APIConstants.OAuthConstants.CLIENT_CRED_GRANT_TYPE);
-            } else if (grantType.equals(APIConstants.OAuthConstants.PASSWORD)) {
+            } else if (APIConstants.OAuthConstants.PASSWORD.equals(grantType)) {
                 payload.append(APIConstants.OAuthConstants.PASSWORD_GRANT_TYPE + "&username=")
                         .append(username).append("&password=")
                         .append(String.valueOf(password));

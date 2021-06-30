@@ -54,7 +54,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(requestedTenantDomain);
             boolean recommendationEnabled = apiConsumer.isRecommendationEnabled(requestedTenantDomain);
-            boolean anonymousEnabled = apiConsumer.isDevPortalAnonymousEnabled(requestedTenantDomain);
+            boolean anonymousEnabled = RestApiUtil.isDevPortalAnonymousEnabled(requestedTenantDomain);
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;

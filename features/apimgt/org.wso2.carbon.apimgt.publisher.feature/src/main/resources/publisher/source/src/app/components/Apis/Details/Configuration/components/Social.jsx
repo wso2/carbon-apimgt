@@ -30,8 +30,8 @@ import TextField from '@material-ui/core/TextField';
  * @param {*} props
  * @returns
  */
-export default function Social(props) {
-    const { api, configDispatcher } = props;
+const Social = (props) => {
+    const { slackURL, githubURL, configDispatcher } = props;
     const [apiFromContext] = useAPI();
     return (
         <>
@@ -43,7 +43,7 @@ export default function Social(props) {
                     />
                 )}
                 variant='outlined'
-                value={api.additionalProperties.github_repo || ''}
+                value={githubURL || ''}
                 fullWidth
                 margin='normal'
                 onChange={(e) => configDispatcher({ action: 'github_repo', value: e.target.value })}
@@ -51,8 +51,7 @@ export default function Social(props) {
                 helperText={(
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Social.giturl.help'
-                        defaultMessage={`You need to enable social feature to view this from devportal. 
-                        Set custom.social.showSharing.active to true. Refer documentation for more information`}
+                        defaultMessage='This GitHub URL will be available in the API overview page in developer portal'
                     />
                 )}
                 style={{ marginTop: 0 }}
@@ -65,7 +64,7 @@ export default function Social(props) {
                     />
                 )}
                 variant='outlined'
-                value={api.additionalProperties.slack_url || ''}
+                value={slackURL || ''}
                 fullWidth
                 margin='normal'
                 onChange={(e) => configDispatcher({ action: 'slack_url', value: e.target.value })}
@@ -73,17 +72,20 @@ export default function Social(props) {
                 helperText={(
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Social.slack_url.help'
-                        defaultMessage={`You need to enable social feature to view this from devportal. 
-                        Set custom.social.showSharing.active to true. Refer documentation for more information`}
+                        defaultMessage={'This Slack Channel URL will be available in the'
+                        + ' API overview page in developer portal'}
                     />
                 )}
                 style={{ marginTop: 0 }}
             />
         </>
     );
-}
+};
 
 Social.propTypes = {
-    api: PropTypes.shape({}).isRequired,
+    slackURL: PropTypes.string.isRequired,
+    githubURL: PropTypes.string.isRequired,
     configDispatcher: PropTypes.func.isRequired,
 };
+
+export default React.memo(Social);

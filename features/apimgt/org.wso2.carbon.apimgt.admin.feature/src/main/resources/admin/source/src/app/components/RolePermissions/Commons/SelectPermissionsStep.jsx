@@ -16,7 +16,6 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -54,21 +53,6 @@ export default function SelectPermissionsStep(props) {
                     control={<Radio color='primary' />}
                     label='Role alias'
                 />
-                {
-                    permissionType === ROLE_ALIAS && (
-                        <Box
-                            pl={7}
-                            display='inline'
-                            color='warning.main'
-                        >
-                            <FormattedMessage
-                                id='RolePermissions.Common.SelectPermissionsStep.scope.select.warning'
-                                defaultMessage={'Please check whether the required permissions are assigned to the role'
-                                + ' to function with the assigned scope, before proceeding'}
-                            />
-                        </Box>
-                    )
-                }
                 <Box width={400} display='inline' pl={7} pt={2} pb={2}>
                     <Autocomplete
                         // multiple
@@ -120,21 +104,6 @@ export default function SelectPermissionsStep(props) {
                     control={<Radio color='primary' />}
                     label='Custom scope assignments'
                 />
-                {
-                    permissionType === SELECT_PERMISSIONS && (
-                        <Box
-                            pl={7}
-                            display='inline'
-                            color='warning.main'
-                        >
-                            <FormattedMessage
-                                id='RolePermissions.Common.SelectPermissionsStep.scope.select.custom.warning'
-                                defaultMessage={'Please check whether the required permissions are assigned to the role'
-                                + ' to function with the assigned scope, before proceeding'}
-                            />
-                        </Box>
-                    )
-                }
                 <Box pl={7} pt={2}>
                     <PermissionTree
                         disabled={permissionType !== SELECT_PERMISSIONS}

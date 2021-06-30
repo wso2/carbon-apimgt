@@ -135,7 +135,7 @@ export default function AccessControl(props) {
         } else {
             return (
                 <FormattedMessage
-                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                    id='Apis.Details.AccessControl.roles.help'
                     defaultMessage='Enter valid role and press enter'
                 />
             );

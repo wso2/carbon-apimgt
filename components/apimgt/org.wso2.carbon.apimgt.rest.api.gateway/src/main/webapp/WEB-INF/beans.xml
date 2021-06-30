@@ -56,6 +56,9 @@
             </list>
         </property>
         <property name="allowCredentials" value="true"/>
+        <property name="allowOrigins"
+                  value="#{systemProperties['rest.api.gateway.allowed.origins'] != null ?
+                      systemProperties['rest.api.gateway.allowed.origins'].split(',') : {}}"/>
     </bean>
     <cxf:bus>
         <cxf:inInterceptors>

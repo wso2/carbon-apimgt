@@ -28,7 +28,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { makeStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
-import { withAPI, useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
 
 const useStyles = makeStyles((theme) => ({
@@ -36,6 +36,11 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         right: theme.spacing(-4),
         top: theme.spacing(1),
+    },
+    listItemText: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     },
 }));
 /**
@@ -112,6 +117,20 @@ function APICategories(props) {
                     SelectProps={{
                         multiple: true,
                         renderValue: (selected) => (Array.isArray(selected) ? selected.join(', ') : selected),
+                        MenuProps: {
+                            anchorOrigin: {
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            },
+                            getContentAnchorEl: null,
+                            keepMounted: true,
+                            PaperProps: {
+                                style: {
+                                    maxHeight: 300,
+                                    maxWidth: 300,
+                                },
+                            },
+                        },
                     }}
                     onChange={(e) => configDispatcher({ action: 'categories', value: e.target.value })}
                     InputProps={{
@@ -128,7 +147,11 @@ function APICategories(props) {
                             value={category.name}
                         >
                             <Checkbox color='primary' checked={api.categories.includes(category.name)} />
-                            <ListItemText primary={category.name} secondary={category.description} />
+                            <ListItemText
+                                primary={category.name}
+                                secondary={category.description}
+                                classes={{ primary: classes.listItemText }}
+                            />
                         </MenuItem>
                     ))}
                 </TextField>
@@ -163,4 +186,4 @@ APICategories.defaultProps = {
     configDispatcher: PropTypes.func.isRequired,
 };
 
-export default withAPI(APICategories);
+export default APICategories;

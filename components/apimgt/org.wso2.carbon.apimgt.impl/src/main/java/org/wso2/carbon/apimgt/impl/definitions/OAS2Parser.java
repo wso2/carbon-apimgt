@@ -112,7 +112,7 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger Json
      */
     @Override
-    public Map<String, Object> generateExample(String swaggerDef) {
+    public Map<String, Object> generateExample(String swaggerDef) throws APIManagementException {
         // create APIResourceMediationPolicy List = policyList
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
@@ -125,20 +125,25 @@ public class OAS2Parser extends APIDefinition {
             int responseCode = 0;
             int minResponseCode = 0;
             String path = entry.getKey();
-            //initializing apiResourceMediationPolicyObject
-            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
-            //setting path for apiResourceMediationPolicyObject
-            apiResourceMediationPolicyObject.setPath(path);
             Map<String, Model> definitions = swagger.getDefinitions();
             //operation map to get verb
             Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
             List<Operation> operations = swagger.getPaths().get(path).getOperations();
-            for (Operation op : operations) {
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                //initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                //setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
-                //for each HTTP method get the verb
-                for (Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
-                    //add verb to apiResourceMediationPolicyObject
-                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<HttpMethod, Operation> operationEntry =
+                            (Map.Entry<HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
                 StringBuilder genCode = new StringBuilder();
                 boolean hasJsonPayload = false;

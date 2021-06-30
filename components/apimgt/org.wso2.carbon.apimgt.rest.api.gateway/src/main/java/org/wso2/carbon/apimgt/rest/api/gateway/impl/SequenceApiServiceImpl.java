@@ -38,7 +38,7 @@ public class SequenceApiServiceImpl implements SequenceApiService {
     private static final Log log = LogFactory.getLog(SequenceApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext)
+    public Response getSequences(String apiName, String version, String tenantDomain, MessageContext messageContext)
             throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);

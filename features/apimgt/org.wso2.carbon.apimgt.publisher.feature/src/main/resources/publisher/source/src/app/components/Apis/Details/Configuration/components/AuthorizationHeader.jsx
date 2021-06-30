@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -26,6 +26,7 @@ import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
+import APIValidation from 'AppData/APIValidation';
 
 /**
  *
@@ -34,9 +35,11 @@ import API from 'AppData/api';
  * @param {*} props
  * @returns
  */
+
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
+    const [isHeaderNameValid, setIsHeaderNameValid] = useState(true);
     let hasResourceWithSecurity;
     if (apiFromContext.apiType === API.CONSTS.APIProduct) {
         const apiList = apiFromContext.apis;
@@ -57,6 +60,18 @@ export default function AuthorizationHeader(props) {
         configDispatcher({ action: 'authorizationHeader', value: '' });
     }
 
+    function validateHeader(value) {
+        const headerValidity = APIValidation.authorizationHeader.required()
+            .validate(value, { abortEarly: false }).error;
+        if (headerValidity === null) {
+            setIsHeaderNameValid(true);
+            configDispatcher({ action: 'saveButtonDisabled', value: false });
+        } else {
+            setIsHeaderNameValid(false);
+            configDispatcher({ action: 'saveButtonDisabled', value: true });
+        }
+    }
+
     return (
         <Grid container spacing={1} alignItems='center'>
             <Grid item xs={11}>
@@ -70,6 +85,22 @@ export default function AuthorizationHeader(props) {
                         />
                     )}
                     value={hasResourceWithSecurity ? (api.authorizationHeader || ' ') : ''}
+                    error={!isHeaderNameValid}
+                    helperText={
+                        (!isHeaderNameValid)
+                        && (
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.AuthHeader.helper.text'
+                                defaultMessage='Authorization header name cannot contain spaces or special characters'
+                            />
+                        )
+                    }
+                    InputProps={{
+                        id: 'itest-id-headerName-input',
+                        onBlur: ({ target: { value } }) => {
+                            validateHeader(value);
+                        },
+                    }}
                     margin='normal'
                     variant='outlined'
                     onChange={({ target: { value } }) => configDispatcher({ action: 'authorizationHeader', value })}

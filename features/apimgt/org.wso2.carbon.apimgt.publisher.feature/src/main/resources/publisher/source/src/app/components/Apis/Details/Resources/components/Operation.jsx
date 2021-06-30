@@ -71,6 +71,7 @@ function Operation(props) {
         arns,
         resolvedSpec,
         sharedScopes,
+        setFocusOperationLevel,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -274,6 +275,7 @@ function Operation(props) {
                             target={target}
                             verb={verb}
                             sharedScopes={sharedScopes}
+                            setFocusOperationLevel={setFocusOperationLevel}
                         />
                         {!hideParameters && (
                             <Parameters

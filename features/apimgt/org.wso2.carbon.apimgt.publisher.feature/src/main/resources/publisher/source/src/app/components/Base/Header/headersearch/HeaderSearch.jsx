@@ -38,11 +38,13 @@ const styles = (theme) => ({
     },
     smContainer: {
         position: 'absolute',
+        left: 0,
     },
     suggestionsContainerOpen: {
+        marginTop: theme.spacing(1),
         display: 'block',
         position: 'absolute',
-        width: '415px',
+        width: '400px',
         zIndex: theme.zIndex.modal + 1,
     },
     suggestion: {
@@ -55,6 +57,7 @@ const styles = (theme) => ({
     },
     input: {
         width: '300px',
+        borderRadius: theme.shape.borderRadius * 5,
         background: theme.palette.getContrastText(theme.palette.background.appBar),
         '-webkit-transition': 'all .35s ease-in-out',
         transition: 'all .35s ease-in-out',
@@ -70,7 +73,7 @@ const styles = (theme) => ({
     },
     infoButton: {
         margin: theme.spacing(1),
-        color: 'white',
+        color: theme.palette.background.paper,
     },
     InfoToolTip: {
         backgroundColor: '#f5f5f9',
@@ -115,6 +118,33 @@ class HeaderSearch extends React.Component {
     }
 
     /**
+     * On enter pressed after giving a search text
+     * @param event
+     */
+    onKeyDown(event) {
+        if (event.key === 'Enter' && !this.suggestionSelected) {
+            const { history } = this.props;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
+        }
+        this.suggestionSelected = false;
+    }
+
+    /**
+     * To provide accessibility for Enter key upon suggestion selection
+     * @param {React.SyntheticEvent} event event
+     * @param {Object} suggestion This is either API object or document coming from search API call
+     */
+    onSuggestionSelected(event, { suggestion }) {
+        const { history } = this.props;
+        this.suggestionSelected = true;
+        if (event.key === 'Enter') {
+            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview`
+                : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            history.push(path);
+        }
+    }
+
+    /**
      * On change search input element
      *
      * @param {React.SyntheticEvent} event ReactDOM event
@@ -149,33 +179,6 @@ class HeaderSearch extends React.Component {
         this.setState({
             suggestions: [],
         });
-    }
-
-    /**
-     * On enter pressed after giving a search text
-     * @param event
-     */
-    onKeyDown(event) {
-        if (event.key === 'Enter' && !this.suggestionSelected) {
-            const { history } = this.props;
-            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
-        }
-        this.suggestionSelected = false;
-    }
-
-    /**
-     * To provide accessibility for Enter key upon suggestion selection
-     * @param {React.SyntheticEvent} event event
-     * @param {Object} suggestion This is either API object or document coming from search API call
-     */
-    onSuggestionSelected(event, { suggestion }) {
-        const { history } = this.props;
-        this.suggestionSelected = true;
-        if (event.key === 'Enter') {
-            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview`
-                : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
-            history.push(path);
-        }
     }
 
     /**
@@ -260,6 +263,7 @@ class HeaderSearch extends React.Component {
                         onKeyDown: this.onKeyDown,
                         onBlur: this.clearOnBlur,
                         isLoading,
+                        disableUnderline: true,
                     }}
                 />
                 <Tooltip
@@ -327,24 +331,6 @@ class HeaderSearch extends React.Component {
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option12'
                                         defaultMessage='Api Category [ Syntax - api-category:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option7'
-                                        defaultMessage='Sub-Context [ Syntax - subcontext:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option8'
-                                        defaultMessage='Documentation Content [ Syntax - doc:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option9'
-                                        defaultMessage='Microgateway Label [ Syntax - label:xxxx ]'
                                     />
                                 </li>
                                 <li style={{ marginTop: '5px' }}>

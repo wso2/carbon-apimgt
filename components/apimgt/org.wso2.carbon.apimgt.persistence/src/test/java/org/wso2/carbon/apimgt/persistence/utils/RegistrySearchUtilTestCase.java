@@ -40,7 +40,7 @@ public class RegistrySearchUtilTestCase {
 
         String searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
 
-        String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
+        String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
@@ -70,7 +70,7 @@ public class RegistrySearchUtilTestCase {
         
         String searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         String expected = "publisher_roles=(null OR internal\\/creator OR internal\\/publisher OR internal\\/everyone)"
-                + "&name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
+                + "&name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 

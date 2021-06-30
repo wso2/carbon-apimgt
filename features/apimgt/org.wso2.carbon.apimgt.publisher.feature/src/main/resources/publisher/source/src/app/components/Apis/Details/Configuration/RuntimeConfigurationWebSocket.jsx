@@ -21,14 +21,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
 import ArrowForwardIcon from '@material-ui/icons/SettingsEthernet';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api';
 import Endpoints from './components/Endpoints';
@@ -183,6 +183,7 @@ export default function RuntimeConfiguration() {
     }
     const { api, updateAPI } = useContext(APIContext);
     const [isUpdating, setIsUpdating] = useState(false);
+    const history = useHistory();
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
 
@@ -200,6 +201,22 @@ export default function RuntimeConfiguration() {
                 }
             })
             .finally(() => setIsUpdating(false));
+    }
+
+    function handleSaveAndDeploy() {
+        setIsUpdating(true);
+
+        updateAPI(apiConfig)
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                }
+            })
+            .finally(() => history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            }));
     }
 
     return (
@@ -256,21 +273,27 @@ export default function RuntimeConfiguration() {
                 <Grid container>
                     <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
                         <Grid item>
-                            <Button
-                                disabled={isUpdating
+                            {api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
-                                    || isRestricted(['apim:api_create'], api))}
-                                type='submit'
-                                variant='contained'
-                                color='primary'
-                                onClick={handleSave}
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.save'
-                                    defaultMessage='Save'
-                                />
-                                {isUpdating && <CircularProgress size={15} />}
-                            </Button>
+                                || isRestricted(['apim:api_create'], api)) ? (
+                                    <Button
+                                        disabled
+                                        type='submit'
+                                        variant='contained'
+                                        color='primary'
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.save'
+                                            defaultMessage='Save'
+                                        />
+                                    </Button>
+                                ) : (
+                                    <CustomSplitButton
+                                        handleSave={handleSave}
+                                        handleSaveAndDeploy={handleSaveAndDeploy}
+                                        isUpdating={isUpdating}
+                                    />
+                                )}
                         </Grid>
                         <Grid item>
                             <Link to={'/apis/' + api.id + '/overview'}>

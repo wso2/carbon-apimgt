@@ -18,25 +18,14 @@
 
 import React from 'react';
 import { withRouter } from 'react-router';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
+import OnboardingMenuCard from 'AppComponents/Shared/Onboarding/OnboardingMenuCard';
+import Onboarding from 'AppComponents/Shared/Onboarding/Onboarding';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Create from '@material-ui/icons/Create';
-import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
-
-const useStyles = makeStyles((theme) => ({
-    head: {
-        paddingBottom: theme.spacing(2),
-        fontWeight: 200,
-    },
-    content: {
-        paddingBottom: theme.spacing(2),
-    },
-}));
+import Alert from 'AppComponents/Shared/MuiAlert';
 
 /**
  * Show Initial Welcome card if no APIs are available to list
@@ -46,55 +35,45 @@ const useStyles = makeStyles((theme) => ({
  * @extends {Component}
  */
 function SampleAPI() {
-    const classes = useStyles();
-
-    /**
-     *
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof SampleAPI
-     */
-
+    const theme = useTheme();
+    const { apiproductAddIcon } = theme.custom.landingPage.icons;
     return (
-        <InlineMessage type='info' height={140}>
-            <div className={classes.contentWrapper}>
-                <Typography variant='h5' component='h3' className={classes.head}>
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPIProduct.manager'
-                        defaultMessage='Welcome to WSO2 API Manager'
-                    />
-                </Typography>
-                <Typography component='p' className={classes.content}>
-                    <FormattedMessage
-                        id='Apis.Listing.SampleAPIProduct.description'
-                        defaultMessage={
-                            'The API resources in an API product can come from'
-                            + ' one or more APIs, so you can mix and match resources from multiple'
-                            + ' API resources to create specialized feature sets.'
-                        }
-                    />
-                </Typography>
-                {!AuthManager.isNotPublisher() && (
-                    <div className={classes.actions}>
-                        <Link id='itest-id-createdefault' to='/api-products/create' className={classes.links}>
-                            <Button
-                                size='small'
-                                color='primary'
-                                variant='contained'
-                                className='rightAlign'
-                            >
-
-                                <Create />
-                                <FormattedMessage
-                                    id='Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product'
-                                    defaultMessage='Create New API Product'
-                                />
-                            </Button>
-                        </Link>
-                    </div>
-                )}
-            </div>
-        </InlineMessage>
+        <Onboarding
+            title={(
+                <FormattedMessage
+                    id='Apis.Listing.SampleAPI.SampleAPIProduct.title'
+                    defaultMessage='Let’s get started !'
+                />
+            )}
+            subTitle={(
+                <FormattedMessage
+                    id='Apis.Listing.SampleAPIProduct.description'
+                    defaultMessage='Combine multiple API resources in to a single API'
+                />
+            )}
+        >
+            {AuthManager.isNotPublisher()
+            && (
+                <>
+                    <Grid item xs={6}>
+                        <Alert variant='outlined' severity='warning'>
+                            <FormattedMessage
+                                id='Apis.Listing.SampleAPIProduct.creator.error'
+                                defaultMessage='API is not deployed yet! Please deploy the API before trying out'
+                            />
+                        </Alert>
+                    </Grid>
+                    <Grid item xs={12} />
+                </>
+            )}
+            <OnboardingMenuCard
+                disabled={AuthManager.isNotPublisher()}
+                id='itest-id-create-api-product'
+                to='/api-products/create'
+                name='API Product'
+                iconName={apiproductAddIcon}
+            />
+        </Onboarding>
     );
 }
 

@@ -115,6 +115,7 @@ public class APIConfigContext extends ConfigContext {
         }
         // API test key
         context.put("testKey", api.getTestKey());
+        context.put("apiType", api.getType());
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
@@ -164,6 +165,7 @@ public class APIConfigContext extends ConfigContext {
         }
         // API test key
         context.put("testKey", apiProduct.getTestKey());
+        context.put("apiType", apiProduct.getType());
     }
 
     public String getAPIName(API api) {

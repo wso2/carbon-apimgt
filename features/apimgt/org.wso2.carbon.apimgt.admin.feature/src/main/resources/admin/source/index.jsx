@@ -20,8 +20,11 @@ import 'react-app-polyfill/ie11';
 import 'react-app-polyfill/stable';
 import 'fastestsmallesttextencoderdecoder'; // Added to fix TextEncoding issue in edge <79
 
+import { hot } from 'react-hot-loader/root'; // Added to do the Hot Module Replacement(HMR)
 import ReactDOM from 'react-dom';
 import React from 'react';
 import Admin from './src/Admin';
 
-ReactDOM.render(<Admin />, document.getElementById('react-root'));
+// What about production? # https://github.com/gaearon/react-hot-loader#what-about-production
+const HotApp = hot(Admin);
+ReactDOM.render(<HotApp />, document.getElementById('react-root'));

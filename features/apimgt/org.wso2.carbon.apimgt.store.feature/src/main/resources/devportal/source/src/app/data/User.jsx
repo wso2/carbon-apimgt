@@ -134,6 +134,13 @@ export default class User {
         _user.isSideBarOpen = userJson.isSideBarOpen;
         return _user;
     }
+
+    /**
+     * Check whether the current user has admin role or not
+     */
+     isAdmin() {
+        return this.scopes.includes('apim:admin');
+    }
 }
 
 User.CONST = {

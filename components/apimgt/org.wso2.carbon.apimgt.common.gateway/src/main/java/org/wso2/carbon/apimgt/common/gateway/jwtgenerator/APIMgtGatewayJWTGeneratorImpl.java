@@ -30,7 +30,7 @@ import java.util.Set;
 
 
 /**
- * Default implementation of backend jwt generation
+ * Default implementation of backend jwt generation.
  */
 public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGenerator {
 
@@ -51,20 +51,20 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
             claims.put(dialect + "subscriber", jwtInfoDto.getSubscriber());
         }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationid())) {
-            claims.put(dialect + "applicationid", jwtInfoDto.getApplicationid());
+        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationId())) {
+            claims.put(dialect + "applicationid", jwtInfoDto.getApplicationId());
         }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationname())) {
-            claims.put(dialect + "applicationname", jwtInfoDto.getApplicationname());
+        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationName())) {
+            claims.put(dialect + "applicationname", jwtInfoDto.getApplicationName());
         }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationtier())) {
-            claims.put(dialect + "applicationtier", jwtInfoDto.getApplicationtier());
+        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationTier())) {
+            claims.put(dialect + "applicationtier", jwtInfoDto.getApplicationTier());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApiName())) {
             claims.put(dialect + "apiname", jwtInfoDto.getApiName());
         }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApicontext())) {
-            claims.put(dialect + "apicontext", jwtInfoDto.getApicontext());
+        if (StringUtils.isNotEmpty(jwtInfoDto.getApiContext())) {
+            claims.put(dialect + "apicontext", jwtInfoDto.getApiContext());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getVersion())) {
             claims.put(dialect + "version", jwtInfoDto.getVersion());
@@ -72,15 +72,15 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriptionTier())) {
             claims.put(dialect + "tier", jwtInfoDto.getSubscriptionTier());
         }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getKeytype())) {
-            claims.put(dialect + "keytype", jwtInfoDto.getKeytype());
+        if (StringUtils.isNotEmpty(jwtInfoDto.getKeyType())) {
+            claims.put(dialect + "keytype", jwtInfoDto.getKeyType());
         } else {
             claims.put(dialect + "keytype", "PRODUCTION");
         }
         claims.put(dialect + "usertype", JWTConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
-        claims.put(dialect + "enduser", jwtInfoDto.getEnduser());
-        claims.put(dialect + "enduserTenantId", String.valueOf(jwtInfoDto.getEndusertenantid()));
-        claims.put(dialect + "applicationUUId", jwtInfoDto.getApplicationuuid());
+        claims.put(dialect + "enduser", jwtInfoDto.getEndUser());
+        claims.put(dialect + "enduserTenantId", String.valueOf(jwtInfoDto.getEndUserTenantId()));
+        claims.put(dialect + "applicationUUId", jwtInfoDto.getApplicationUUId());
         Map<String, String> appAttributes = jwtInfoDto.getAppAttributes();
         if (appAttributes != null && !appAttributes.isEmpty()) {
             claims.put(dialect + "applicationAttributes", appAttributes);

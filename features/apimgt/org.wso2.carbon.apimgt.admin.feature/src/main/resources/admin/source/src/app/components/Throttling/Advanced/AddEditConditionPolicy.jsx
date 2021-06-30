@@ -81,27 +81,7 @@ function AddEditConditionPolicy(props) {
         }
         switch (fieldName) {
             case 'name':
-                if (fieldValue === '') {
-                    error = `Policy name ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.empty.error',
-                        defaultMessage: ' is empty',
-                    })}`;
-                } else if (fieldValue.length > 60) {
-                    error = intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.policy.name.too.long.error.msg',
-                        defaultMessage: 'Throttling policy name is too long',
-                    });
-                } else if (fieldValue !== '' && /\s/g.test(fieldValue)) {
-                    error = `Policy name ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.empty.error',
-                        defaultMessage: ' contains white spaces.',
-                    })}`;
-                } else if (/[^A-Za-z0-9]/.test(fieldValue)) {
-                    error = `Policy name ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.special.characters.error',
-                        defaultMessage: ' contains invalid characters.',
-                    })}`;
-                }
+                error = fieldValue === '' ? fieldName + ' is Empty' : false;
                 break;
             case 'value':
                 error = fieldValue === '' ? fieldName + ' is Empty' : false;

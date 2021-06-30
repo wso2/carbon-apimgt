@@ -37,7 +37,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
     private static final Log log = LogFactory.getLog(LocalEntryApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response localEntryGet(String apiName, String version, String tenantDomain, MessageContext messageContext)
+    public Response getLocalEntries(String apiName, String version, String tenantDomain, MessageContext messageContext)
             throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);

@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 
 const copyAccessTokenStep = (props) => {
     const {
-        currentStep, createdToken, handleReset, handleRedirectTest,
+        currentStep, createdToken, handleReset,
     } = props;
     const history = useHistory();
     const { api, updateSubscriptionData } = useContext(ApiContext);

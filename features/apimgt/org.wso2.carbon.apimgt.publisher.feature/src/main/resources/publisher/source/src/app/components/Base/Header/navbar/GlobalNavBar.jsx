@@ -15,23 +15,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { Drawer, withStyles } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import clsx from 'clsx';
+import Drawer from '@material-ui/core/Drawer';
 import PropTypes from 'prop-types';
-import Hidden from '@material-ui/core/Hidden';
+import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core';
+import { useLocation } from 'react-router-dom';
+
 import GlobalNavLinks from './GlobalNavLinks';
 
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
     list: {
-        width: theme.custom.drawerWidth,
+        width: theme.custom.globalNavBar.opened.drawerWidth,
     },
-    drawerStyles: {
-        top: 56, // Based on https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810
-        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            top: 48,
-        },
+    drawer: {
+        width: theme.custom.globalNavBar.opened.drawerWidth,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+    },
+    drawerOpen: {
+        width: theme.custom.globalNavBar.opened.drawerWidth,
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    drawerClose: {
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        overflowX: 'hidden',
+        width: theme.spacing(7) + 1,
         [theme.breakpoints.up('sm')]: {
-            top: 64,
+            width: theme.spacing(7) + 1,
         },
     },
     listText: {
@@ -43,72 +61,59 @@ const styles = (theme) => ({
             flexDirection: 'row',
         },
     },
-});
+    paperStyles: {
+        backgroundColor: theme.palette.background.drawer,
+        top: theme.spacing(8),
+    },
+}));
+
 const GlobalNavBar = (props) => {
     const {
-        open, toggleGlobalNavBar, classes, theme,
+        open, setOpen,
     } = props;
+    const classes = useStyles();
+    const theme = useTheme();
+    const drawerCommon = { style: { top: theme.spacing(8) } };
+    const location = useLocation();
 
-    const commonStyle = {
-        style: { top: 64 },
-    };
-    const paperStyles = {
-        style: {
-            backgroundColor: theme.palette.background.drawer,
-            top: 64,
-        },
-    };
+    let isRootPage = false;
+    const { pathname } = location;
+    if (/^\/(apis|api-products|scopes|service-catalog)($|\/$)/g.test(pathname)) {
+        isRootPage = true;
+    }
+    useEffect(() => {
+        if (!isRootPage) {
+            setOpen(false);
+        }
+    }, [location, isRootPage]);
+    const pathSegments = pathname && pathname.split('/');
+    const [, currentPage] = pathSegments.length > 1 ? pathname.split('/') : ['', ''];
     return (
-        <>
-            <Drawer
-                className={classes.drawerStyles}
-                PaperProps={paperStyles}
-                SlideProps={commonStyle}
-                ModalProps={commonStyle}
-                BackdropProps={commonStyle}
-                open={open}
-                onClose={toggleGlobalNavBar}
-            >
-                <div tabIndex={0} role='button' onClick={toggleGlobalNavBar} onKeyDown={toggleGlobalNavBar}>
-                    <div className={classes.list} />
-                </div>
-                <div
-                    tabIndex={0}
-                    role='button'
-                >
-                    <Hidden smDown>
-                        <div className={classes.list}>
-                            <GlobalNavLinks smallView={false} toggleGlobalNavBar={toggleGlobalNavBar} />
-                        </div>
-                    </Hidden>
-                    <Hidden mdUp>
-                        <div className={classes.list}>
-                            <GlobalNavLinks smallView toggleGlobalNavBar={toggleGlobalNavBar} />
-                        </div>
-                    </Hidden>
-                </div>
-            </Drawer>
-        </>
+        <Drawer
+            variant={isRootPage ? 'permanent' : 'temporary'}
+            className={clsx(classes.drawer, {
+                [classes.drawerOpen]: open,
+                [classes.drawerClose]: !open,
+            })}
+            classes={{
+                paper: clsx({
+                    [classes.drawerOpen]: open,
+                    [classes.drawerClose]: !open,
+                }),
+            }}
+            PaperProps={drawerCommon}
+            SlideProps={drawerCommon}
+            ModalProps={drawerCommon}
+            BackdropProps={drawerCommon}
+            open={open}
+        >
+            <GlobalNavLinks selected={currentPage} />
+        </Drawer>
     );
 };
 
 GlobalNavBar.propTypes = {
     open: PropTypes.bool.isRequired,
-    toggleGlobalNavBar: PropTypes.func.isRequired,
-    classes: PropTypes.shape({
-        drawerStyles: PropTypes.string,
-        list: PropTypes.string,
-        listText: PropTypes.string,
-    }).isRequired,
-    theme: PropTypes.shape({
-        palette: PropTypes.shape({
-            getContrastText: PropTypes.func,
-            background: PropTypes.shape({
-                drawer: PropTypes.string,
-                leftMenu: PropTypes.string,
-            }),
-        }),
-    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(GlobalNavBar);
+export default GlobalNavBar;

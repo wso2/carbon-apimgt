@@ -35,7 +35,7 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
     private static final Log log = LogFactory.getLog(UndeployApiApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response undeployApiPost(String apiName, String version, String tenantDomain,
+    public Response undeployAPI(String apiName, String version, String tenantDomain,
                                     MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();

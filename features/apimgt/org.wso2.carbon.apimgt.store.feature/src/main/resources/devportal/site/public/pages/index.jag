@@ -43,7 +43,7 @@
   <div id="react-root">
     <div class="apim-dual-ring"></div>
   </div>
-  <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/defaultTheme.js"></script>
+  <script type="text/javascript" src="<%= settings.Settings.app.context %>/site/public/theme/userTheme.js"></script>
   <script type="text/javascript" src="<%= settings.Settings.app.context %>/services/settings/settings.js"></script>
   <script type="text/javascript">
     Settings.app.customUrl.tenantDomain = '<%=appUtils.getCustomUrlEnabledDomain()%>';

@@ -74,10 +74,17 @@ export default function CORSConfiguration(props) {
     const isAllowAllOrigins = corsConfiguration.accessControlAllowOrigins[0] === '*'
         && corsConfiguration.accessControlAllowOrigins.length === 1;
     const classes = useStyles();
-
+    const generateElement = (isEnabled) => {
+        if (isEnabled) {
+            return (
+                <ExpandMoreIcon />
+            );
+        }
+        return (null);
+    };
     return (
         <WrappedExpansionPanel className={classes.expansionPanel} id='corsConfiguration'>
-            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+            <ExpansionPanelSummary expandIcon={generateElement(corsConfiguration.corsConfigurationEnabled)}>
                 <Typography className={classes.subHeading} variant='h6'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.CORSConfiguration.cors.configuration'

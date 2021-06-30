@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface LocalEntryApiService {
-      public Response localEntryGet(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response getLocalEntries(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

@@ -173,6 +173,22 @@ public final class APIMgtDBUtil {
     }
 
     /**
+     * Function converts IS to byte[]
+     * Used for handling inputstreams
+     * @param is - The Input Stream
+     * @return - The inputStream as a byte array
+     */
+    public static byte[] getBytesFromInputStream(InputStream is) {
+        byte[] byteArray = null;
+        try {
+            byteArray = IOUtils.toByteArray(is);
+        } catch (IOException e) {
+            log.error("Error occurred while converting input stream to byte array.", e);
+        }
+        return byteArray;
+    }
+
+    /**
      * Set autocommit state of the connection
      * @param dbConnection Connection
      * @param autoCommit autoCommitState

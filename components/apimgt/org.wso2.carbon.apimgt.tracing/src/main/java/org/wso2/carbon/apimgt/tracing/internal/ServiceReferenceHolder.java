@@ -31,11 +31,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class holds the osgi references for opentracing.
+ */
 public class ServiceReferenceHolder {
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
-    private APIManagerConfigurationService amConfigService;
     private static final String REMOTE_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
     private static final String LOG_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
     private static Map<String, OpenTracer> openTracerMap = new HashMap();
@@ -66,7 +68,7 @@ public class ServiceReferenceHolder {
     }
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
-        this.amConfigService = amConfigService;
+
     }
 
     public static Map<String, OpenTracer> getOpenTracerMap() {

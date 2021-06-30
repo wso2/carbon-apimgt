@@ -33,6 +33,7 @@ public class APIKey {
     private Object additionalProperties;
     private String keyManager;
     private String appMetaData;
+    private String createMode;
 
     public String getState() {
         return state;
@@ -161,5 +162,14 @@ public class APIKey {
     public void setAppMetaData(String appMetaData) {
 
         this.appMetaData = appMetaData;
+    }
+
+    public void setCreateMode(String createMode) {
+        this.createMode = createMode;
+    }
+
+    public String getCreateMode() {
+
+        return createMode;
     }
 }

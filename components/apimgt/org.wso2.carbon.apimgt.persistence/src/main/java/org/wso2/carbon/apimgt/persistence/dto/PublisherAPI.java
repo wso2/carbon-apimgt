@@ -46,6 +46,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String visibleRoles;
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
+    private String asyncApiDefinition;
     private String swaggerDefinition;
     private boolean endpointAuthDigest;
     private String endpointUTUsername;
@@ -59,6 +60,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String redirectURL;  // check ??
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String endpointConfig;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
@@ -74,7 +77,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private Set<String> availableTierNames;
     private Set<String> environments;
     private CORSConfiguration corsConfiguration;
-    private Set<String> gatewayLabels;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
     private Set<String> apiCategories;
     private boolean isMonetizationEnabled;
     private Map<String, String> monetizationProperties = new JSONObject();
@@ -88,6 +91,9 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String createdTime;
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
+    private Map<String, String> wsUriMapping;
+    private boolean isSolaceAPI = false;
+    private String solaceTransportProtocols;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
         return soapToRestSequences;
@@ -95,6 +101,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
         this.soapToRestSequences = soapToRestSequences;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 
     public String getSwaggerDefinition() {
@@ -297,6 +311,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
+    }
+
     public String getEndpointConfig() {
         return endpointConfig;
     }
@@ -417,12 +439,12 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.corsConfiguration = corsConfiguration;
     }
 
-    public Set<String> getGatewayLabels() {
-        return gatewayLabels;
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
     }
 
-    public void setGatewayLabels(Set<String> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
     }
 
     public Set<String> getApiCategories() {
@@ -521,6 +543,24 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.lastUpdated = lastUpdated;
     }
 
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
+    }
+
+    public boolean isSolaceAPI() { return isSolaceAPI; }
+
+    public void setSolaceAPI(boolean solaceAPI) { isSolaceAPI = solaceAPI; }
+
+    public String getSolaceTransportProtocols() { return solaceTransportProtocols; }
+
+    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
@@ -539,7 +579,8 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", apiSecurity=" + apiSecurity + ", enableSchemaValidation=" + enableSchemaValidation
                 + ", enableStore=" + enableStore + ", testKey=" + testKey + ", contextTemplate=" + contextTemplate
                 + ", availableTierNames=" + availableTierNames + ", environments=" + environments
-                + ", corsConfiguration=" + corsConfiguration + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + ", corsConfiguration=" + corsConfiguration + ", websubSubscriptionConfiguration="
+                + websubSubscriptionConfiguration + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", monetizationProperties="
                 + monetizationProperties + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
                 + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl

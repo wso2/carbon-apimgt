@@ -32,7 +32,7 @@ import { app } from 'Settings';
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     thumbContent: {
         width: theme.custom.tagWise.thumbnail.width - theme.spacing(1),
         backgroundColor: theme.palette.background.paper,

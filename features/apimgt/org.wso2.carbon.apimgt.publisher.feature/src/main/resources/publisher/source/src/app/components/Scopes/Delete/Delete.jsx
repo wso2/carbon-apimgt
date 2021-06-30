@@ -58,7 +58,7 @@ const styles = {
 * @returns {any} Returns the rendered UI for scope delete.
 */
 function Delete(props) {
-    const { intl, fetchScopeData } = props;
+    const { intl, fetchScopeData, usageCount } = props;
     const [open, setOpen] = useState(false);
     const toggleOpen = () => {
         setOpen(!open);
@@ -98,7 +98,7 @@ function Delete(props) {
 
     return (
         <div>
-            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create'])}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:shared_scope_manage']) || usageCount > 0}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage
                     id='Scopes.Delete.Delete.scope.delete'

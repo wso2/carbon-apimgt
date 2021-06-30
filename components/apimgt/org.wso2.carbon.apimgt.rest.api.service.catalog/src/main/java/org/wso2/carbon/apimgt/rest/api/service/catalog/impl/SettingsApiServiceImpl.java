@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.*;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.*;
 
@@ -26,6 +31,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.SettingsMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
 
@@ -37,12 +44,17 @@ import javax.ws.rs.core.SecurityContext;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
+    private static final Log log = LogFactory.getLog(SettingsApiService.class);
+
     public Response getSettings(MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status  = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented for this endpoint");
-        return Response.status(status).entity(errorObject).build();
+        try {
+            SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO();
+            return Response.ok().entity(settingsDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving Service Catalog Settings";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 }

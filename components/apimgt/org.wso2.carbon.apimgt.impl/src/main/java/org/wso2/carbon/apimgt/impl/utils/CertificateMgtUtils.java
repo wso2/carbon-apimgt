@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -60,7 +62,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
-
+import java.util.Optional;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -662,20 +664,22 @@ public class CertificateMgtUtils {
 
         AxisConfiguration axisConfiguration =
                 ServiceReferenceHolder.getContextService().getServerConfigContext().getAxisConfiguration();
-        OMElement dynamicSSLProfilesConfigElement =
-                axisConfiguration.getTransportOut(APIConstants.HTTPS_PROTOCOL).getParameter("dynamicSSLProfilesConfig")
-                        .getParameterElement();
-
-        if (dynamicSSLProfilesConfigElement != null) {
-            OMElement filePathElement =
-                    dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
-            if (filePathElement != null) {
-                String sslProfilePath = filePathElement.getText();
-                if (sslProfilePath.contains(".xml")) {
-                    return getFullPath(sslProfilePath);
+        TransportOutDescription transportOut = axisConfiguration.getTransportOut(APIConstants.HTTPS_PROTOCOL);
+        if (transportOut != null && transportOut.getParameter("dynamicSSLProfilesConfig") != null) {
+            OMElement dynamicSSLProfilesConfigElement =
+                    transportOut.getParameter("dynamicSSLProfilesConfig").getParameterElement();
+            if (dynamicSSLProfilesConfigElement != null) {
+                OMElement filePathElement =
+                        dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
+                if (filePathElement != null) {
+                    String sslProfilePath = filePathElement.getText();
+                    if (sslProfilePath.contains(".xml")) {
+                        return getFullPath(sslProfilePath);
+                    }
                 }
             }
         }
+
         return null;
     }
 
@@ -683,17 +687,18 @@ public class CertificateMgtUtils {
 
         AxisConfiguration axisConfiguration =
                 ServiceReferenceHolder.getContextService().getServerConfigContext().getAxisConfiguration();
-        OMElement dynamicSSLProfilesConfigElement =
-                axisConfiguration.getTransportIn(APIConstants.HTTPS_PROTOCOL).getParameter("dynamicSSLProfilesConfig")
-                        .getParameterElement();
-
-        if (dynamicSSLProfilesConfigElement != null) {
-            OMElement filePathElement =
-                    dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
-            if (filePathElement != null) {
-                String sslProfilePath = filePathElement.getText();
-                if (sslProfilePath.contains(".xml")) {
-                    return getFullPath(sslProfilePath);
+        TransportInDescription transportIn = axisConfiguration.getTransportIn(APIConstants.HTTPS_PROTOCOL);
+        if (transportIn != null && transportIn.getParameter("dynamicSSLProfilesConfig") != null) {
+            OMElement dynamicSSLProfilesConfigElement =
+                    transportIn.getParameter("dynamicSSLProfilesConfig").getParameterElement();
+            if (dynamicSSLProfilesConfigElement != null) {
+                OMElement filePathElement =
+                        dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
+                if (filePathElement != null) {
+                    String sslProfilePath = filePathElement.getText();
+                    if (sslProfilePath.contains(".xml")) {
+                        return getFullPath(sslProfilePath);
+                    }
                 }
             }
         }
@@ -854,5 +859,31 @@ public class CertificateMgtUtils {
             log.error("Error in loading trust store.", e);
         }
 
+    }
+
+    /**
+     * Convert javax.security.cert.X509Certificate to java.security.cert.X509Certificate
+     *
+     * @param cert the certificate to be converted
+     * @return java.security.cert.X509Certificate type certificate
+     */
+    public static Optional<X509Certificate> convert(javax.security.cert.X509Certificate cert) {
+
+        if (cert != null) {
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cert.getEncoded())) {
+
+                java.security.cert.CertificateFactory certificateFactory
+                        = java.security.cert.CertificateFactory.getInstance("X.509");
+                return Optional.of((java.security.cert.X509Certificate) certificateFactory.generateCertificate(
+                        byteArrayInputStream));
+            } catch (javax.security.cert.CertificateEncodingException e) {
+                log.error("Error while decoding the certificate ", e);
+            } catch (java.security.cert.CertificateException e) {
+                log.error("Error while generating the certificate", e);
+            } catch (IOException e) {
+                log.error("Error while retrieving the encoded certificate", e);
+            }
+        }
+        return Optional.ofNullable(null);
     }
 }

@@ -29,17 +29,21 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Base64;
 
+/**
+ * This class used as a utility for alerts.
+ */
 public class PublisherAlertsAPIUtils {
 
-    private static final  Log log = LogFactory.getLog(PublisherAlertsAPIUtils.class);
+    private static final Log log = LogFactory.getLog(PublisherAlertsAPIUtils.class);
 
     /**
      * Validate the provided configuration id.
      *
      * @param configId : The configuration id
      * @return true if the validation is successful. Error response otherwise.
-     * */
+     */
     public static boolean validateConfigParameters(String configId) throws APIManagementException {
+
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
         if (parameters.length < 2) {
@@ -63,8 +67,9 @@ public class PublisherAlertsAPIUtils {
      *
      * @param userName : The required user name.
      * @return User name with tenant domain.
-     * */
+     */
     public static String getTenantAwareUserName(String userName) {
+
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             return userName + "@" + tenantDomain;

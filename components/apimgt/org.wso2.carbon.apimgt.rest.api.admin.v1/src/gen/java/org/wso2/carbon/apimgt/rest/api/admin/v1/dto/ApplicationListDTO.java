@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,9 +25,8 @@ import javax.validation.Valid;
 public class ApplicationListDTO   {
   
     private Integer count = null;
-    private String next = null;
-    private String previous = null;
     private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>();
+    private PaginationDTO pagination = null;
 
   /**
    * Number of applications returned. 
@@ -47,42 +47,6 @@ public class ApplicationListDTO   {
   }
 
   /**
-   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
-   **/
-  public ApplicationListDTO next(String next) {
-    this.next = next;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/applications?limit=1&offset=2&user=", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
-  @JsonProperty("next")
-  public String getNext() {
-    return next;
-  }
-  public void setNext(String next) {
-    this.next = next;
-  }
-
-  /**
-   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
-   **/
-  public ApplicationListDTO previous(String previous) {
-    this.previous = previous;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/applications?limit=1&offset=0&user=", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
-  @JsonProperty("previous")
-  public String getPrevious() {
-    return previous;
-  }
-  public void setPrevious(String previous) {
-    this.previous = previous;
-  }
-
-  /**
    **/
   public ApplicationListDTO list(List<ApplicationInfoDTO> list) {
     this.list = list;
@@ -100,6 +64,24 @@ public class ApplicationListDTO   {
     this.list = list;
   }
 
+  /**
+   **/
+  public ApplicationListDTO pagination(PaginationDTO pagination) {
+    this.pagination = pagination;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("pagination")
+  public PaginationDTO getPagination() {
+    return pagination;
+  }
+  public void setPagination(PaginationDTO pagination) {
+    this.pagination = pagination;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -111,14 +93,13 @@ public class ApplicationListDTO   {
     }
     ApplicationListDTO applicationList = (ApplicationListDTO) o;
     return Objects.equals(count, applicationList.count) &&
-        Objects.equals(next, applicationList.next) &&
-        Objects.equals(previous, applicationList.previous) &&
-        Objects.equals(list, applicationList.list);
+        Objects.equals(list, applicationList.list) &&
+        Objects.equals(pagination, applicationList.pagination);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, next, previous, list);
+    return Objects.hash(count, list, pagination);
   }
 
   @Override
@@ -127,9 +108,8 @@ public class ApplicationListDTO   {
     sb.append("class ApplicationListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
-    sb.append("    next: ").append(toIndentedString(next)).append("\n");
-    sb.append("    previous: ").append(toIndentedString(previous)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
     return sb.toString();
   }

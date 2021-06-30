@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -28,22 +30,25 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.Map;
 
+/**
+ * This Class used to  map Rest api Search models to Data Models.
+ */
 public class SearchResultMappingUtil {
 
     private static final Log log = LogFactory.getLog(SearchResultMappingUtil.class);
 
     /**
-     * Get API result representation for content search
+     * Get API result representation for content search.
      *
      * @param api API
      * @return APISearchResultDTO
@@ -70,7 +75,7 @@ public class SearchResultMappingUtil {
     }
 
     /**
-     * Get API result representation for content search
+     * Get API result representation for content search.
      *
      * @param apiProduct APIProduct
      * @return APIProductSearchResultDTO
@@ -94,13 +99,15 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
         return apiProductResultDTO;
     }
+
     /**
-     * Get Document result representation for content search
+     * Get Document result representation for content search.
      *
      * @param document Api Document
      * @return DocumentSearchResultDTO
      */
-    public static DocumentSearchResultDTO fromDocumentationToDocumentResultDTO(Documentation document, API api) {
+    public static DocumentSearchResultDTO fromDocumentationToDocumentResultDTO(
+            Documentation document, API api) throws APIManagementException {
 
         DocumentSearchResultDTO docResultDTO = new DocumentSearchResultDTO();
         docResultDTO.setId(document.getId());
@@ -109,8 +116,8 @@ public class SearchResultMappingUtil {
         docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
         docResultDTO.setSummary(document.getSummary());
         docResultDTO.associatedType(APIConstants.AuditLogConstants.API);
-        docResultDTO.setVisibility(DocumentSearchResultDTO.VisibilityEnum.valueOf(document.getVisibility().toString()));
-        docResultDTO.setSourceType(DocumentSearchResultDTO.SourceTypeEnum.valueOf(document.getSourceType().toString()));
+        docResultDTO.setVisibility(mapVisibilityFromDocumentToDTO(document.getVisibility()));
+        docResultDTO.setSourceType(mapSourceTypeFromDocumentToDTO(document.getSourceType()));
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
@@ -120,8 +127,8 @@ public class SearchResultMappingUtil {
         return docResultDTO;
     }
 
-    public static DocumentSearchResultDTO fromDocumentationToProductDocumentResultDTO(Documentation document,
-                                                                                      APIProduct apiProduct) {
+    public static DocumentSearchResultDTO fromDocumentationToProductDocumentResultDTO(
+            Documentation document, APIProduct apiProduct) throws APIManagementException {
 
         DocumentSearchResultDTO docResultDTO = new DocumentSearchResultDTO();
         docResultDTO.setId(document.getId());
@@ -130,8 +137,8 @@ public class SearchResultMappingUtil {
         docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
         docResultDTO.associatedType(APIConstants.AuditLogConstants.API_PRODUCT);
         docResultDTO.setSummary(document.getSummary());
-        docResultDTO.setVisibility(DocumentSearchResultDTO.VisibilityEnum.valueOf(document.getVisibility().toString()));
-        docResultDTO.setSourceType(DocumentSearchResultDTO.SourceTypeEnum.valueOf(document.getSourceType().toString()));
+        docResultDTO.setVisibility(mapVisibilityFromDocumentToDTO(document.getVisibility()));
+        docResultDTO.setSourceType(mapSourceTypeFromDocumentToDTO(document.getSourceType()));
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIProductIdentifier apiId = apiProduct.getId();
         docResultDTO.setApiName(apiId.getName());
@@ -142,7 +149,7 @@ public class SearchResultMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a SearchResultListDTO object given pagination parameters and url parameters
+     * Sets pagination urls for a SearchResultListDTO object given pagination parameters and url parameters.
      *
      * @param resultListDTO a SearchResultListDTO object
      * @param query         search condition
@@ -150,7 +157,8 @@ public class SearchResultMappingUtil {
      * @param offset        starting index
      * @param size          max offset
      */
-    public static void setPaginationParams(SearchResultListDTO resultListDTO, String query, int offset, int limit, int size) {
+    public static void setPaginationParams(SearchResultListDTO resultListDTO, String query, int offset, int limit,
+                                           int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -178,4 +186,37 @@ public class SearchResultMappingUtil {
         resultListDTO.setPagination(paginationDTO);
     }
 
+    public static DocumentSearchResultDTO.SourceTypeEnum mapSourceTypeFromDocumentToDTO
+            (Documentation.DocumentSourceType sourceType) throws APIManagementException {
+
+        switch (sourceType) {
+            case URL:
+                return DocumentSearchResultDTO.SourceTypeEnum.URL;
+            case FILE:
+                return DocumentSearchResultDTO.SourceTypeEnum.FILE;
+            case INLINE:
+                return DocumentSearchResultDTO.SourceTypeEnum.INLINE;
+            case MARKDOWN:
+                return DocumentSearchResultDTO.SourceTypeEnum.MARKDOWN;
+            default:
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.DOCUMENT_INVALID_SOURCE_TYPE,
+                        sourceType.toString()));
+        }
+    }
+
+    public static DocumentSearchResultDTO.VisibilityEnum mapVisibilityFromDocumentToDTO
+            (Documentation.DocumentVisibility visibility) throws APIManagementException {
+
+        switch (visibility) {
+            case API_LEVEL:
+                return DocumentSearchResultDTO.VisibilityEnum.API_LEVEL;
+            case OWNER_ONLY:
+                return DocumentSearchResultDTO.VisibilityEnum.OWNER_ONLY;
+            case PRIVATE:
+                return DocumentSearchResultDTO.VisibilityEnum.PRIVATE;
+            default:
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.DOCUMENT_INVALID_VISIBILITY,
+                        visibility.toString()));
+        }
+    }
 }

@@ -55,7 +55,7 @@ post:
           ],
           "endpointSecurity":null,
           "gatewayEnvironments":[
-            "Production and Sandbox"
+            "Default"
           ],
           "labels":[
 
@@ -266,7 +266,7 @@ post:
           ],
           "endpointSecurity":null,
           "gatewayEnvironments":[
-            "Production and Sandbox"
+            "Default"
           ],
           "labels":[
 

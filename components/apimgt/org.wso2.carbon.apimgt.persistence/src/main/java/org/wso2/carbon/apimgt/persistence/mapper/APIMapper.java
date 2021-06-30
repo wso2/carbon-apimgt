@@ -75,6 +75,7 @@ public interface APIMapper {
     @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
+    @Mapping(source = "updatedTime", target = "lastUpdated")
     API toApi(PublisherAPIInfo api);
 
     @Mapping(source = "providerName", target = "id.providerName")
@@ -84,6 +85,7 @@ public interface APIMapper {
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
     @Mapping(source = "availableTierNames", target = "availableTiers")
+    @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
     API toApi(DevPortalAPIInfo api);
     
     @Mapping(source = "providerName", target = "id.providerName")
@@ -142,30 +144,6 @@ public interface APIMapper {
             return fromJson;
         }
         return null;
-    }
-
-    default List<Label> mapLabelToList(Set<String> labelSet) {
-        List<Label> labels = new ArrayList<Label>();
-        if (labelSet != null) {
-            for (String labelName : labelSet) {
-                Label label = new Label();
-                label.setName(labelName);
-                labels.add(label);
-            }
-        }
-        return labels;
-
-    }
-
-    default Set<String> mapLabelToSet(List<Label> labelList) {
-        Set<String> labelSet = new HashSet<String>();
-        if (labelList != null) {
-            for (Label label : labelList) {
-                labelSet.add(label.getName());
-            }
-        }
-
-        return labelSet;
     }
 
     default String mapAccessControlRolesToString(Set<String> accessControlRoles) {

@@ -30,6 +30,7 @@ import CONSTS from 'AppData/Constants';
 import Progress from 'AppComponents/Shared/Progress';
 import { FormattedMessage } from 'react-intl';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import { isRestricted } from 'AppData/AuthManager';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 import SubscriptionAvailability from './SubscriptionAvailability';
@@ -108,7 +109,7 @@ function Subscriptions(props) {
     }
     return (
         <>
-            <SubscriptionPoliciesManage api={api} policies={policies} setPolices={setPolices} />
+            {!api.solaceAPI && (<SubscriptionPoliciesManage api={api} policies={policies} setPolices={setPolices} />)}
             {tenants !== 0 && settings.crossTenantSubscriptionEnabled && (
                 <SubscriptionAvailability
                     api={api}
@@ -119,38 +120,40 @@ function Subscriptions(props) {
                 />
             )}
             { updateInProgress && <Progress /> }
-            <Grid
-                container
-                direction='row'
-                alignItems='flex-start'
-                spacing={1}
-                className={classes.buttonSection}
-            >
-                <Grid item>
-                    <Button
-                        type='submit'
-                        variant='contained'
-                        color='primary'
-                        disabled={api.isRevision}
-                        onClick={() => saveAPI()}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.Subscriptions.save'
-                            defaultMessage='Save'
-                        />
-                    </Button>
-                </Grid>
-                <Grid item>
-                    <Link to={'/apis/' + api.id + '/overview'}>
-                        <Button>
+            {!api.solaceAPI && (
+                <Grid
+                    container
+                    direction='row'
+                    alignItems='flex-start'
+                    spacing={1}
+                    className={classes.buttonSection}
+                >
+                    <Grid item>
+                        <Button
+                            type='submit'
+                            variant='contained'
+                            color='primary'
+                            disabled={api.isRevision || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                            onClick={() => saveAPI()}
+                        >
                             <FormattedMessage
-                                id='Apis.Details.Subscriptions.Subscriptions.cancel'
-                                defaultMessage='Cancel'
+                                id='Apis.Details.Subscriptions.Subscriptions.save'
+                                defaultMessage='Save'
                             />
                         </Button>
-                    </Link>
+                    </Grid>
+                    <Grid item>
+                        <Link to={'/apis/' + api.id + '/overview'}>
+                            <Button>
+                                <FormattedMessage
+                                    id='Apis.Details.Subscriptions.Subscriptions.cancel'
+                                    defaultMessage='Cancel'
+                                />
+                            </Button>
+                        </Link>
+                    </Grid>
                 </Grid>
-            </Grid>
+            )}
             <SubscriptionsTable api={api} />
         </>
     );

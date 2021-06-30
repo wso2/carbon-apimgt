@@ -57,7 +57,7 @@ import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -80,7 +80,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -264,11 +263,6 @@ public class APIManagerComponent {
             SQLConstantManagerFactory.initializeSQLConstantManager();
             // Initialize PasswordResolver
             PasswordResolverFactory.initializePasswordResolver();
-
-            boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
-            if (analyticsEnabled) {
-                ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
-            }
 
             APIUtil.init();
 

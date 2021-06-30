@@ -34,9 +34,7 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import Configurations from 'Config';
 
-const propertyDisplaySuffix = Configurations.app.propertyDisplaySuffix || '__display';
 const useStyles = makeStyles(() => ({
     link: {
         cursor: 'pointer',
@@ -61,19 +59,17 @@ const useStyles = makeStyles(() => ({
  */
 function EditableRow(props) {
     const {
-        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl, setEditing, isRestricted, api,
-        isKeyword, validateEmpty,
+        oldKey, oldValue, handleUpdateList, handleDelete, intl, setEditing, isRestricted, api,
+        isDisplayInStore, isKeyword, validateEmpty,
     } = props;
-    const [newKey, setKey] = useState(oldKey.indexOf(propertyDisplaySuffix) !== -1
-        ? oldKey.replace(propertyDisplaySuffix, '')
-        : oldKey);
+    const [newKey, setKey] = useState(oldKey);
     const [newValue, setValue] = useState(oldValue);
     const [editMode, setEditMode] = useState(false);
-    const [isVisibleInStore, setIsVisibleInStore] = useState(oldKey.indexOf(propertyDisplaySuffix) !== -1);
+    const [isVisibleInStore, setIsVisibleInStore] = useState(isDisplayInStore);
     const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     const resetText = () => {
-        setIsVisibleInStore(oldKey.indexOf(propertyDisplaySuffix) !== -1);
+        setIsVisibleInStore(isDisplayInStore);
         setKey(oldKey);
         setValue(oldValue);
     };
@@ -88,22 +84,22 @@ function EditableRow(props) {
     };
     const handleKeyChange = (event) => {
         const { value } = event.target;
-        setKey(isVisibleInStore ? value + propertyDisplaySuffix : value);
+        setKey(value);
     };
     const handleValueChange = (event) => {
         const { value } = event.target;
         setValue(value);
     };
     const saveRow = () => {
-        const oldRow = { oldKey, oldValue };
-        const newRow = { newKey: newKey || oldKey, newValue: newValue || oldValue };
+        const oldRow = { oldKey, oldValue, isDisplayInStore };
+        const newRow = { newKey, newValue, display: isVisibleInStore };
         if (handleUpdateList(oldRow, newRow)) {
             setEditMode(false);
             setEditing(false);
         }
     };
     const deleteRow = () => {
-        handleDelete(apiAdditionalProperties, oldKey);
+        handleDelete(oldKey);
     };
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -111,11 +107,6 @@ function EditableRow(props) {
         }
     };
     const handleChangeVisibleInStore = (event) => {
-        if (event.target.checked) {
-            setKey(newKey + propertyDisplaySuffix);
-        } else {
-            setKey(newKey.indexOf(propertyDisplaySuffix) !== -1 ? newKey.replace(propertyDisplaySuffix, '') : newKey);
-        }
         setIsVisibleInStore(event.target.checked);
     };
     const classes = useStyles();
@@ -135,9 +126,7 @@ function EditableRow(props) {
                         margin='dense'
                         variant='outlined'
                         className={classes.addProperty}
-                        value={newKey.indexOf(propertyDisplaySuffix) !== -1
-                            ? newKey.replace(propertyDisplaySuffix, '')
-                            : newKey}
+                        value={newKey}
                         onChange={handleKeyChange}
                         onKeyDown={handleKeyDown}
                         helperText={validateEmpty(newKey) ? ''
@@ -151,8 +140,7 @@ function EditableRow(props) {
                 </TableCell>
             ) : (
                 <TableCell>
-                    {oldKey.indexOf(propertyDisplaySuffix) !== -1
-                        ? oldKey.replace(propertyDisplaySuffix, '') : oldKey}
+                    {oldKey}
                 </TableCell>
             )}
             {editMode ? (

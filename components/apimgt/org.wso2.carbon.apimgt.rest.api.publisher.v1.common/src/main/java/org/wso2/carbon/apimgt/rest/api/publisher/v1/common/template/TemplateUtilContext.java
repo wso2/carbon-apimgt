@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.velocity.VelocityContext;
 
 /**
- * This is a utility class with a bunch of methods to help in Template
+ * This is a utility class with a bunch of methods to help in Template.
  */
 public class TemplateUtilContext extends ConfigContextDecorator {
 
@@ -30,14 +30,14 @@ public class TemplateUtilContext extends ConfigContextDecorator {
 
     @Override
     public VelocityContext getContext() {
-        VelocityContext context =  super.getContext();
+        VelocityContext context = super.getContext();
 
-        context.put("util",this);
+        context.put("util", this);
 
         return context;
     }
 
-    public String escapeXml(String url){
+    public String escapeXml(String url) {
         return StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(url)).trim();
     }
 }

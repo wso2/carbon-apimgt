@@ -25,13 +25,14 @@ import java.util.Objects;
  * for the validation purpose in a gateway.
  */
 public class ApplicationRegistrationEvent extends Event {
-
+    private String applicationUUID;
     private int applicationId;
     private String consumerKey;
     private String keyType;
     private String keyManager;
 
-    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int applicationId,
+    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId,
+                                        String tenantDomain, int applicationId, String applicationUUID,
                                         String consumerKey, String keyType, String keyManager) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -42,19 +43,18 @@ public class ApplicationRegistrationEvent extends Event {
         this.keyType = keyType;
         this.keyManager = keyManager;
         this.tenantDomain = tenantDomain;
+        this.applicationUUID = applicationUUID;
     }
 
     @Override
     public String toString() {
+
         return "ApplicationRegistrationEvent{" +
-                "applicationId=" + applicationId +
+                "applicationUUID='" + applicationUUID + '\'' +
+                ", applicationId=" + applicationId +
                 ", consumerKey='" + consumerKey + '\'' +
                 ", keyType='" + keyType + '\'' +
-                ", eventId='" + eventId + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", type='" + type + '\'' +
-                ", tenantId=" + tenantId + '\'' +
-                ", tenantDomain=" + tenantDomain +
+                ", keyManager='" + keyManager + '\'' +
                 '}';
     }
 
@@ -105,5 +105,15 @@ public class ApplicationRegistrationEvent extends Event {
     public void setKeyManager(String keyManager) {
 
         this.keyManager = keyManager;
+    }
+
+    public String getApplicationUUID() {
+
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+
+        this.applicationUUID = applicationUUID;
     }
 }

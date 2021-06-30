@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.cache.invalidation;
 
 import org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder;
+import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 

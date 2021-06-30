@@ -12,7 +12,10 @@ import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import Application from 'AppData/Application';
+import {
+    Grid, List, ListItem, MenuItem, Paper, TextField,
+} from '@material-ui/core';
+import { upperCaseString } from 'AppData/stringFormatter';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -74,6 +77,66 @@ const useStyles = makeStyles((theme) => ({
     actionPanel: {
         justifyContent: 'flex-start',
     },
+    Paper: {
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(2),
+    },
+    Paper2: {
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(2),
+        height: '80%',
+    },
+    list: {
+        width: '100%',
+        maxWidth: 800,
+        backgroundColor: theme.palette.background.paper,
+        position: 'relative',
+        overflow: 'auto',
+        maxHeight: 175,
+    },
+    urlPaper: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        border: `solid 1px ${theme.palette.grey[300]}`,
+        '& .MuiInputBase-root:before,  .MuiInputBase-root:hover': {
+            borderBottom: 'none !important',
+            color: theme.palette.primary.main,
+        },
+        '& .MuiSelect-select': {
+            color: theme.palette.primary.main,
+            paddingLeft: theme.spacing(),
+        },
+        '& .MuiInputBase-input': {
+            color: theme.palette.primary.main,
+        },
+        '& .material-icons': {
+            fontSize: 16,
+            color: `${theme.palette.grey[700]} !important`,
+        },
+        borderRadius: 10,
+        marginRight: theme.spacing(),
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+    },
+    avatar: {
+        width: 30,
+        height: 30,
+        background: 'transparent',
+        border: `solid 1px ${theme.palette.grey[300]}`,
+    },
+    iconStyle: {
+        cursor: 'pointer',
+        margin: '-10px 0',
+        padding: '0 0 0 5px',
+        '& .material-icons': {
+            fontSize: 18,
+            color: '#9c9c9c',
+        },
+    },
 }));
 
 /**
@@ -87,6 +150,10 @@ function Overview(props) {
     const [tierDescription, setTierDescription] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const { match: { params: { applicationId } } } = props;
+    const [environment, setEnvironment] = useState(null);
+    const [selectedProtocol, setSelectedProtocol] = useState(null);
+    const [selectedEndpoint, setSelectedEndpoint] = useState(null);
+    const [topics, setTopics] = useState(null);
     useEffect(() => {
         const client = new API();
         // Get application
@@ -94,10 +161,20 @@ function Overview(props) {
         promisedApplication
             .then((response) => {
                 const promisedTier = client.getTierByName(response.obj.throttlingPolicy, 'application');
-                const app = response.obj;
+                const appInner = response.obj;
                 promisedTier.then((tierResponse) => {
                     setTierDescription(tierResponse.obj.description);
-                    setApplication(app);
+                    setApplication(appInner);
+                    if (appInner.solaceDeployedEnvironments !== null) {
+                        setEnvironment(appInner.solaceDeployedEnvironments[0]);
+                        setSelectedProtocol(appInner.solaceDeployedEnvironments[0].solaceURLs[0].protocol);
+                        setSelectedEndpoint(appInner.solaceDeployedEnvironments[0].solaceURLs[0].endpointURL);
+                        if (appInner.solaceDeployedEnvironments[0].solaceURLs[0].protocol === 'mqtt') {
+                            setTopics(appInner.solaceDeployedEnvironments[0].SolaceTopicsObject.mqttSyntax);
+                        } else {
+                            setTopics(appInner.solaceDeployedEnvironments[0].SolaceTopicsObject.defaultSyntax);
+                        }
+                    }
                 });
             }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -117,7 +194,31 @@ function Overview(props) {
     if (!application) {
         return <Loading />;
     }
-    const pathPrefix = '/applications/' + applicationId;
+    if (environment) {
+        console.log(environment);
+        console.log(topics);
+    }
+    const handleChange = (event) => {
+        setEnvironment(event.target.value);
+        console.log(event.target.value);
+    };
+    const handleChangeProtocol = (event) => {
+        setSelectedProtocol(event.target.value);
+        // console.log(event.target.value);
+        let protocol;
+        environment.solaceURLs.map((e) => {
+            if (e.protocol === event.target.value) {
+                setSelectedEndpoint(e.endpointURL);
+                protocol = e.protocol;
+            }
+            return null;
+        });
+        if (protocol === 'mqtt') {
+            setTopics(environment.SolaceTopicsObject.mqttSyntax);
+        } else {
+            setTopics(environment.SolaceTopicsObject.defaultSyntax);
+        }
+    };
     return (
         <>
             <div className={classes.root}>
@@ -234,6 +335,241 @@ function Overview(props) {
 
                     </TableBody>
                 </Table>
+                {/* {application.containsSolaceApis === true && environment && (
+                    <div className={classes.root}>
+                        <Typography id='itest-api-details-bushiness-plans-head' variant='h5'>
+                            <FormattedMessage
+                                id='solace.application.available.topics.heading'
+                                defaultMessage='Available Topics'
+                            />
+                        </Typography>
+                        <Typography variant='caption' gutterBottom>
+                            <FormattedMessage
+                                id='solace.application.available.topics.subheading'
+                                defaultMessage='Topics permitted to access from solace applications'
+                            />
+                        </Typography>
+                        <Paper className={classes.Paper}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        select
+                                        onChange={handleChange}
+                                        value={environment.environmentDisplayName}
+                                        style={{ maxWidth: '50%' }}
+                                        variant='outlined'
+                                    >
+                                        {application.solaceDeployedEnvironments.map((e) => (
+                                            <MenuItem key={e} value={e.environmentDisplayName}>
+                                                {e.environmentDisplayName}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.protocols.endpoints'
+                                                defaultMessage='Protocols & Endpoints'
+                                            />
+                                        </Typography>
+                                        <Grid container spacing={2} xs={12}>
+                                            <Grid item xs={12} />
+                                            {environment.solaceURLs.map((u) => (
+                                                <Grid item xs={12}>
+                                                    <Grid container spacing={2} xs={12}>
+                                                        <Grid
+                                                            item
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                            }}
+                                                        >
+                                                            <Chip
+                                                                label={upperCaseString(u.protocol)}
+                                                                color='primary'
+                                                                style={{
+                                                                    width: '60px',
+                                                                }}
+                                                                size='small'
+                                                            />
+                                                        </Grid>
+                                                        <Grid
+                                                            item
+                                                            xs={10}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                            }}
+                                                        >
+                                                            <Paper id='gateway-envirounment' component='form' className={classes.urlPaper}>
+                                                                <InputBase
+                                                                    inputProps={{ 'aria-label': 'api url' }}
+                                                                    value={u.endpointURL}
+                                                                    className={classes.input}
+                                                                />
+                                                            </Paper>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.topics.publish'
+                                                defaultMessage='Publish Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {environment.publishTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.topics.subscribe'
+                                                defaultMessage='Subscribe Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {environment.subscribeTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </div>
+                )} */}
+                {application.containsSolaceApis === true && environment && topics && (
+                    <div className={classes.root}>
+                        <Typography id='itest-api-details-bushiness-plans-head' variant='h5'>
+                            <FormattedMessage
+                                id='solace.application.available.topics.heading'
+                                defaultMessage='Available Topics'
+                            />
+                        </Typography>
+                        <Typography variant='caption' gutterBottom>
+                            <FormattedMessage
+                                id='solace.application.available.topics.subheading'
+                                defaultMessage='Topics permitted to access from solace applications'
+                            />
+                        </Typography>
+                        <Paper className={classes.Paper}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <Grid container spacing={2}>
+                                        <Grid item>
+                                            <TextField
+                                                select
+                                                onChange={handleChange}
+                                                value={environment.environmentDisplayName}
+                                                style={{ maxWidth: '100%' }}
+                                                variant='outlined'
+                                                label='Environment Name'
+                                            >
+                                                {application.solaceDeployedEnvironments.map((e) => (
+                                                    <MenuItem key={e} value={e.environmentDisplayName}>
+                                                        {e.environmentDisplayName}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item>
+                                            <TextField
+                                                select
+                                                onChange={handleChangeProtocol}
+                                                value={selectedProtocol}
+                                                style={{ maxWidth: '100%' }}
+                                                variant='outlined'
+                                                label='Protocol'
+                                            >
+                                                {environment.solaceURLs.map((e) => (
+                                                    <MenuItem key={e.protocol} value={e.protocol}>
+                                                        {upperCaseString(e.protocol)}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item>
+                                            {/* <Paper id='gateway-envirounment' component='form' className={classes.urlPaper}>
+                                                <InputBase
+                                                    inputProps={{ 'aria-label': 'api url' }}
+                                                    value={selectedEndpoint}
+                                                    className={classes.input}
+                                                />
+                                            </Paper> */}
+                                            <TextField
+                                                style={{ minWidth: '200%' }}
+                                                label='Endpoint URL'
+                                                value={selectedEndpoint}
+                                                variant='outlined'
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.topics.publish'
+                                                defaultMessage='Publish Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {topics.publishTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Paper className={classes.Paper2}>
+                                        <Typography id='itest-api-details-bushiness-plans-head' variant='h6'>
+                                            <FormattedMessage
+                                                id='solace.application.topics.subscribe'
+                                                defaultMessage='Subscribe Topics'
+                                            />
+                                        </Typography>
+                                        <List className={classes.list}>
+                                            {topics.subscribeTopics.map((t) => (
+                                                <ListItem>
+                                                    <Typography gutterBottom align='left'>
+                                                        {t}
+                                                    </Typography>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Paper>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </div>
+                )}
             </div>
         </>
     );

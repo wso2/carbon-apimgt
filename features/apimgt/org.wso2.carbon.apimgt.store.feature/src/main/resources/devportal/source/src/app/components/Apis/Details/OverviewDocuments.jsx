@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -30,6 +29,7 @@ import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  * Add two numbers.
@@ -91,7 +91,14 @@ const styles = (theme) => ({
     },
     listItemStyle: {
         padding: 0,
-        marging: 0,
+        margin: 0,
+    },
+    listItemIcon: {
+        minWidth: 30,
+        color: '#BBBEBC66',
+    },
+    listItemPrimary: {
+        fontSize: '14px',
     },
 });
 
@@ -102,11 +109,8 @@ const styles = (theme) => ({
  */
 function OverviewDocuments(props) {
     const [docs, setDocs] = useState([]);
-    const { apiId, setDocsCount } = props;
+    const { apiId } = props;
     const history = useHistory();
-    const truncateString = (n, str) => {
-        return (str.length > n) ? str.substr(0, n - 1) + '...' : str;
-    };
     useEffect(() => {
         const restApi = new API();
         const promisedApi = restApi.getDocumentsByAPIId(apiId);
@@ -115,7 +119,6 @@ function OverviewDocuments(props) {
                 if (response.obj.list.length > 0) {
                     // Rearanging the response to group them by the sourceType property.
                     setDocs(response.obj.list);
-                    setDocsCount(response.obj.count);
                 }
             })
             .catch((error) => {
@@ -161,53 +164,21 @@ function OverviewDocuments(props) {
         docs.length > 0 && (
             <List
                 component='nav'
-                aria-labelledby='nested-list-subheader'
-                subheader={(
-                    <ListSubheader component='div' id='nested-list-subheader' className={classes.listItemStyle}>
-                        <FormattedMessage
-                            id='Apis.Details.Overview.documents.list.title.prefix'
-                            defaultMessage='Showing '
-                        />
-                        {docs.length === 1 && (
-                            <>
-                                1
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.documents.list.title.sufix.document'
-                                    defaultMessage=' Document'
-                                />
-                            </>
-                        )}
-                        {docs.length === 2 && (
-                            <>
-                                2
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.documents.list.title.sufix.documents'
-                                    defaultMessage=' Documents'
-                                />
-                            </>
-                        )}
-                        {docs.length > 2 && (
-                            <>
-                                3
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.documents.list.title.sufix.documents.multiple'
-                                    defaultMessage=' Documents out of '
-                                />
-                                {docs.length}
-                            </>
-                        )}
-                    </ListSubheader>
-                )}
+                aria-label='Available document list'
                 className={classes.listWrapper}
             >
                 {docs.map((doc, index) => (
-                    index <= 2
+                    index <= 1
                     && (
                         <ListItem button onClick={() => gotoDoc(doc.documentId)} className={classes.listItemStyle} key={doc.name}>
-                            <ListItemIcon>
+                            <ListItemIcon classes={{ root: classes.listItemIcon }}>
                                 <Icon>insert_drive_file</Icon>
                             </ListItemIcon>
-                            <ListItemText primary={doc.name} secondary={truncateString(100, doc.summary)} />
+                            <ListItemText
+                                primary={doc.name}
+                                // secondary={truncateString(100, doc.summary)}
+                                classes={{ primary: classes.listItemPrimary }}
+                            />
                         </ListItem>
                     )
                 ))}

@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RedeployApiApiService {
-      public Response redeployApiPost(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response redployAPI(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

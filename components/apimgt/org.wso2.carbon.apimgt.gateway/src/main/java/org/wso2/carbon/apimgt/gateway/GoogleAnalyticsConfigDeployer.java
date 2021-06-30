@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -26,11 +27,14 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.localentry.LocalEntryAdminException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,9 +43,9 @@ import java.net.URL;
 public class GoogleAnalyticsConfigDeployer {
 
     private static final Log log = LogFactory.getLog(GoogleAnalyticsConfigDeployer.class);
-    private String tenantDomain;
     private final EventHubConfigurationDto eventHubConfigurationDto =
             ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
+    private String tenantDomain;
     private String baseURL = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
 
     public GoogleAnalyticsConfigDeployer(String tenantDomain) {
@@ -53,7 +57,7 @@ public class GoogleAnalyticsConfigDeployer {
     public void deploy() throws APIManagementException {
 
         try {
-            LocalEntryAdminClient localEntryAdminClient = new LocalEntryAdminClient(tenantDomain);
+            LocalEntryServiceProxy localEntryAdminClient = new LocalEntryServiceProxy(tenantDomain);
 
             String endpoint = baseURL + APIConstants.GA_CONFIG_RETRIEVAL_ENDPOINT;
 
@@ -67,17 +71,25 @@ public class GoogleAnalyticsConfigDeployer {
     }
 
     private void deployAsLocalEntry(CloseableHttpResponse closeableHttpResponse,
-                                    LocalEntryAdminClient localEntryAdminClient)
+                                    LocalEntryServiceProxy localEntryServiceProxy)
             throws IOException, ArtifactSynchronizerException {
 
         if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
             try (InputStream content = closeableHttpResponse.getEntity().getContent()) {
+                MessageContext.setCurrentMessageContext(GatewayUtils.createAxis2MessageContext());
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 String resourceContent = IOUtils.toString(content);
-                if (localEntryAdminClient.localEntryExists(APIConstants.GA_CONF_KEY)) {
-                    localEntryAdminClient.deleteEntry(APIConstants.GA_CONF_KEY);
+                if (localEntryServiceProxy.localEntryExists(APIConstants.GA_CONF_KEY)) {
+                    localEntryServiceProxy.deleteEntry(APIConstants.GA_CONF_KEY);
                 }
-                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
+                localEntryServiceProxy.addLocalEntry("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
                         + resourceContent + "</localEntry>");
+            } catch (LocalEntryAdminException e) {
+                log.error("Error while deploying LocalEntry ga-config", e);
+            } finally {
+                MessageContext.destroyCurrentMessageContext();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         } else {
             throw new ArtifactSynchronizerException("Error while deploying localEntry status code : " +

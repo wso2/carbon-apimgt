@@ -25,6 +25,7 @@ public class APIRevisionDeployment implements Serializable {
     private int id;
     private String revisionUUID;
     private String deployment;
+    private String vhost;
     private boolean isDisplayOnDevportal;
     private String deployedTime;
 
@@ -50,6 +51,14 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setDeployment(String deployment) {
         this.deployment = deployment;
+    }
+
+    public String getVhost() {
+        return vhost;
+    }
+
+    public void setVhost(String vhost) {
+        this.vhost = vhost;
     }
 
     public boolean isDisplayOnDevportal() {

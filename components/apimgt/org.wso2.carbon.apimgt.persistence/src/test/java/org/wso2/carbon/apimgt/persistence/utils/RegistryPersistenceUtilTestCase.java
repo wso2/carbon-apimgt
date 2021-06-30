@@ -146,8 +146,7 @@ public class RegistryPersistenceUtilTestCase {
         Label label = new Label();
         label.setName("TestLabel");
         gatewayLabels.add(label);
-        api.setGatewayLabels(gatewayLabels);
-        
+
         GenericArtifact genericArtifact = new GenericArtifactImpl(new QName("", "TestAPI", ""),
                 "application/vnd.wso2-api+xml");
         genericArtifact.setAttribute("URITemplate", "/test");

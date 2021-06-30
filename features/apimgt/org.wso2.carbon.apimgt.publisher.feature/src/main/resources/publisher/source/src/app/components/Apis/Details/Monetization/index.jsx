@@ -68,6 +68,30 @@ class Monetization extends Component {
         this.getMonetizationData();
     }
 
+    getMonetizationData() {
+        const { api } = this.props;
+        if (api.apiType === API.CONSTS.APIProduct) {
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            apiProduct.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            apiProduct.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });
+        } else {
+            api.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            api.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });
+        }
+    }
+
     handleChange = (event) => {
         this.setState({ monStatus: event.target.checked });
     };
@@ -156,30 +180,6 @@ class Monetization extends Component {
         }
     }
 
-    getMonetizationData() {
-        const { api } = this.props;
-        if (api.apiType === API.CONSTS.APIProduct) {
-            const apiProduct = new APIProduct(api.name, api.context, api.policies);
-            apiProduct.getSettings().then((settings) => {
-                if (settings.monetizationAttributes != null) {
-                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
-                }
-            });
-            apiProduct.getMonetization(this.props.api.id).then((status) => {
-                this.setState({ monStatus: status.enabled });
-            });
-        } else {
-            api.getSettings().then((settings) => {
-                if (settings.monetizationAttributes != null) {
-                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
-                }
-            });
-            api.getMonetization(this.props.api.id).then((status) => {
-                this.setState({ monStatus: status.enabled });
-            });
-        }
-    }
-
     render() {
         const { api, classes } = this.props;
         const { monetizationAttributes, monStatus } = this.state;
@@ -211,7 +211,7 @@ class Monetization extends Component {
             <form method='post' onSubmit={this.handleSubmit}>
                 <Grid container xs={6} spacing={2}>
                     <Grid item xs={12}>
-                        <Typography variant='h4'>
+                        <Typography id='itest-api-details-api-monetization-head' variant='h4'>
                             <FormattedMessage
                                 id='Apis.Details.Monetization.Index.monetization'
                                 defaultMessage='Monetization'
@@ -247,7 +247,7 @@ class Monetization extends Component {
                                     (monetizationAttributes.length > 0) ? (
                                         (monetizationAttributes.map((monetizationAttribute, i) => (
                                             <TextField
-                                                disabled={isRestricted(['apim:api_publish'], api)}
+                                                disabled={!monStatus || isRestricted(['apim:api_publish'], api)}
                                                 fullWidth
                                                 id={'attribute' + i}
                                                 label={monetizationAttribute.displayName}

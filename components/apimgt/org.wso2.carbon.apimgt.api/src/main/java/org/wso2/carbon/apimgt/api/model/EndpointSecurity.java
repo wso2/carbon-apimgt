@@ -44,11 +44,33 @@ public class EndpointSecurity {
 
     private Map additionalProperties = new HashMap();
 
+    public EndpointSecurity(EndpointSecurity endpointSecurity) {
+
+        this.uniqueIdentifier = endpointSecurity.uniqueIdentifier;
+        this.password = endpointSecurity.password;
+        this.type = endpointSecurity.type;
+        this.enabled = endpointSecurity.enabled;
+        this.username = endpointSecurity.username;
+        this.grantType = endpointSecurity.grantType;
+        this.tokenUrl = endpointSecurity.tokenUrl;
+        this.clientId = endpointSecurity.clientId;
+        this.clientSecret = endpointSecurity.clientSecret;
+        this.customParameters = endpointSecurity.customParameters;
+        this.additionalProperties = endpointSecurity.additionalProperties;
+
+    }
+
+    public EndpointSecurity() {
+
+    }
+
     public String getUniqueIdentifier() {
+
         return uniqueIdentifier;
     }
 
     public void setUniqueIdentifier(String uniqueIdentifier) {
+
         this.uniqueIdentifier = uniqueIdentifier;
     }
 
@@ -93,42 +115,52 @@ public class EndpointSecurity {
     }
 
     public String getGrantType() {
+
         return grantType;
     }
 
     public void setGrantType(String grantType) {
+
         this.grantType = grantType;
     }
 
     public String getTokenUrl() {
+
         return tokenUrl;
     }
 
     public void setTokenUrl(String tokenUrl) {
+
         this.tokenUrl = tokenUrl;
     }
 
     public String getClientId() {
+
         return clientId;
     }
 
     public void setClientId(String clientId) {
+
         this.clientId = clientId;
     }
 
     public String getClientSecret() {
+
         return clientSecret;
     }
 
     public void setClientSecret(String clientSecret) {
+
         this.clientSecret = clientSecret;
     }
 
     public String getCustomParameters() {
+
         return customParameters;
     }
 
     public void setCustomParameters(String customParameters) {
+
         this.customParameters = customParameters;
     }
 
@@ -142,7 +174,9 @@ public class EndpointSecurity {
         this.additionalProperties = additionalProperties;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
+
         return "EndpointSecurity{" + "uniqueIdentifier='" + uniqueIdentifier + '\'' + ", password='" + password + '\''
                 + ", type='" + type + '\'' + ", enabled=" + enabled + ", username='" + username + '\'' + ", grantType='"
                 + grantType + '\'' + ", tokenUrl='" + tokenUrl + '\'' + ", clientId='" + clientId + '\''

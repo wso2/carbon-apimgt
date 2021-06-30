@@ -24,12 +24,7 @@ import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
     },
@@ -37,7 +32,7 @@ const styles = theme => ({
         marginLeft: 20,
         '& span span': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
-        }
+        },
     },
     select: {
         width: 100,
@@ -45,12 +40,15 @@ const styles = theme => ({
 });
 
 /**
- *
- *
  * @class SubscriptionPolicySelect
  * @extends {React.Component}
  */
 class SubscriptionPolicySelect extends React.Component {
+    /**
+     * Create instance of SubscriptionPolicySelect
+     * @param {JSON} props Props pass from the parent.
+     * @returns {void}
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -59,10 +57,8 @@ class SubscriptionPolicySelect extends React.Component {
     }
 
     /**
-     *
-     *
-     * @returns
-     * @memberof SubscriptionPolicySelect
+     * Calls when component did mount.
+     * @returns {void}
      */
     componentDidMount() {
         const { policies } = this.props;
@@ -71,10 +67,8 @@ class SubscriptionPolicySelect extends React.Component {
     }
 
     /**
-     *
-     *
-     * @returns
-     * @memberof SubscriptionPolicySelect
+     * renders method.
+     * @returns {JSX} Policy selection component.
      */
     render() {
         const {
@@ -93,7 +87,7 @@ class SubscriptionPolicySelect extends React.Component {
                             this.setState({ selectedPolicy: e.target.value });
                         }}
                     >
-                        {policies.map(policy => (
+                        {policies.map((policy) => (
                             <MenuItem value={policy} key={policy}>
                                 {policy}
                             </MenuItem>
@@ -122,7 +116,11 @@ class SubscriptionPolicySelect extends React.Component {
 }
 
 SubscriptionPolicySelect.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    policies: PropTypes.shape({}).isRequired,
+    apiId: PropTypes.string.isRequired,
+    handleSubscribe: PropTypes.func.isRequired,
+    applicationId: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(SubscriptionPolicySelect);

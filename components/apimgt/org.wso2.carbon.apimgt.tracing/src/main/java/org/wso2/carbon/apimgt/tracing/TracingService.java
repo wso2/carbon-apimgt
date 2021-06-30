@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.tracing;
 
+/**
+ * This Interface used to register Tracers.
+ */
 public interface TracingService {
 
     TracingTracer buildTracer(String serviceName);

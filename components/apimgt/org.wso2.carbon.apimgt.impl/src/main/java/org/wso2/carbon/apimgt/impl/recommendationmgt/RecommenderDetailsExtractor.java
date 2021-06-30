@@ -69,9 +69,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
 
-    public RecommenderDetailsExtractor(API api, String tenantDomain) {
+    public RecommenderDetailsExtractor(API api, String tenantDomain, String eventType) {
 
-        this.publishingDetailType = APIConstants.ADD_API;
+        if (APIConstants.ADD_API.equals(eventType)) {
+            this.publishingDetailType = APIConstants.ADD_API;
+        } else if (APIConstants.DELETE_API.equals(eventType)) {
+            this.publishingDetailType = APIConstants.DELETE_API;
+        }
         this.api = api;
         this.tenantDomain = tenantDomain;
     }
@@ -133,7 +137,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         tenantFlowStarted = true;
         try {
             if (APIUtil.isRecommendationEnabled(tenantDomain)) {
-                if (APIConstants.ADD_API.equals(publishingDetailType)) {
+                if (APIConstants.ADD_API.equals(publishingDetailType) ||
+                        APIConstants.DELETE_API.equals(publishingDetailType)) {
                     publishAPIDetails(api, tenantDomain);
                 } else if (APIConstants.ADD_NEW_APPLICATION.equals(publishingDetailType)) {
                     publishApplicationDetails(application, userName, applicationId);
@@ -171,7 +176,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         if (apiStatus == null) {
             apiStatus = APIConstants.DELETED_STATUS;
         }
-        if (apiStatus.equals(APIConstants.PUBLISHED_STATUS)) {
+        if (apiStatus.equals(APIConstants.PUBLISHED_STATUS) && APIConstants.ADD_API.equals(publishingDetailType)) {
             String apiDescription = api.getDescription();
             String apiContext = api.getContext();
             String apiTags = api.getTags().toString();
@@ -210,6 +215,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             payload.put("action", APIConstants.ADD_API);
             payload.put("payload", obj);
             publishEvent(payload.toString());
+            log.info("Add API event for " + apiName + " API was published to the recommendation server");
         } else {
             JSONObject obj = new JSONObject();
             obj.put("api_name", apiName);
@@ -219,7 +225,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             payload.put(APIConstants.ACTION_STRING, APIConstants.DELETE_API);
             payload.put(APIConstants.PAYLOAD_STRING, obj);
             publishEvent(payload.toString());
-            log.info(apiName + " API published to recommendation server");
+            log.info("Delete API event for " + apiName + " API was published to the recommendation server");
         }
     }
 
@@ -240,7 +246,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_NEW_APPLICATION);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
-        log.info(appName + " Application published to recommendations server");
+        log.info("Add Application event for " + appName + " application was published to the recommendation server");
     }
 
     @Override
@@ -253,7 +259,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.DELETE_APPLICATION);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
-        log.info("Delete event for Application id " + appId + " sent to recommendations server");
+        log.info("Delete Application event for Application id " + appId + " was sent to recommendations server");
     }
 
     @Override
@@ -274,6 +280,9 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_CLICKED_API);
             payload.put(APIConstants.PAYLOAD_STRING, obj);
             publishEvent(payload.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("User clicked API event was published for recommendation server with payload " + payload);
+            }
         }
     }
 
@@ -295,6 +304,9 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_SEARCHED_QUERY);
             payload.put(APIConstants.PAYLOAD_STRING, obj);
             publishEvent(payload.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("User searched query event was published for recommendation server with payload " + payload);
+            }
         }
     }
 

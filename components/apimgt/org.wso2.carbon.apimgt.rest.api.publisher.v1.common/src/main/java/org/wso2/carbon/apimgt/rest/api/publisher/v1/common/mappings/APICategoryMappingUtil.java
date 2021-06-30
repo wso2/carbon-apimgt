@@ -24,10 +24,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICategoryListDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class used to map Rest API to model object mapping.
+ */
 public class APICategoryMappingUtil {
 
     /**
-     * Convert list of API Categories to CategoryListDTO
+     * Convert list of API Categories to CategoryListDTO.
      *
      * @param categories List of api categories
      * @return CategoryListDTO list containing api category data

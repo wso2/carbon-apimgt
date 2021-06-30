@@ -31,7 +31,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
-import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import ProvideOpenAPI from './Steps/ProvideOpenAPI';
 
@@ -45,7 +44,6 @@ import ProvideOpenAPI from './Steps/ProvideOpenAPI';
 export default function ApiCreateOpenAPI(props) {
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
-    const { settings } = useAppContext();
 
     /**
      *
@@ -139,8 +137,6 @@ export default function ApiCreateOpenAPI(props) {
                 },
             };
         }
-        additionalProperties.gatewayEnvironments = Array.isArray(settings.environment)
-            && settings.environment.length > 0 ? [settings.environment[0].name] : [];
         const newAPI = new API(additionalProperties);
         const promisedResponse = inputType === 'file'
             ? newAPI.importOpenAPIByFile(inputValue) : newAPI.importOpenAPIByUrl(inputValue);

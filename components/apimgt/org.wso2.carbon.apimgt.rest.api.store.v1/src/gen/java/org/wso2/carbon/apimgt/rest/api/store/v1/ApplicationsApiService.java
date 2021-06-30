@@ -47,7 +47,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String groupId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType, ApplicationKeyDTO applicationKeyDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId, String keyType, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO applicationKeyMappingRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO applicationKeyMappingRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysGet(String applicationId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(String applicationId, String keyMappingId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(String applicationId, String keyMappingId, ApplicationTokenGenerateRequestDTO applicationTokenGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;

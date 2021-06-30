@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *

@@ -68,12 +68,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param offset      starting index
      * @param query       search condition
      * @param accept      accept header value
-     * @param ifNoneMatch If-None-Match header value
      * @return Matched global mediation policies for given search condition
      */
     @Override
     public Response policiesMediationGet(Integer limit, Integer offset, String query, String accept,
-                                         String ifNoneMatch, MessageContext messageContext) {
+                                         MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -95,13 +94,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * Deletes an existing global mediation policy
      *
      * @param mediationPolicyId Uuid of mediation policy resource
-     * @param ifMatch           If-match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 response if deleted successfully
      */
     @Override
-    public Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId, String ifMatch,
-                                                             String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Delete given global mediation policy
@@ -124,13 +120,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      *
      * @param mediationPolicyId Mediation policy uuid
      * @param accept            Accept header value
-     * @param ifNoneMatch       If-None-Match header value
-     * @param ifModifiedSince   If-Modified-Since header value
      * @return returns the matched mediation
      */
     @Override
-    public Response policiesMediationMediationPolicyIdGet(String mediationPolicyId, String accept, String ifNoneMatch
-            , String ifModifiedSince, MessageContext messageContext) {
+    public Response policiesMediationMediationPolicyIdGet(String mediationPolicyId, String accept,
+                                                          MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Get given global mediation policy
@@ -155,13 +149,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param mediationPolicyId uuid of mediation policy
      * @param body              updated MediationDTO
      * @param contentType       Content-Type header
-     * @param ifMatch           If-match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return updated mediation DTO as response
      */
     @Override
     public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, String contentType,
-                  MediationDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
+                  MediationDTO body, MessageContext messageContext) {
         InputStream contentStream = null;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -230,13 +222,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      *
      * @param body              Mediation DTO as request body
      * @param contentType       Content-Type header
-     * @param ifMatch           If-match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return created mediation DTO as response
      */
     @Override
-    public Response policiesMediationPost(String contentType, MediationDTO body, String ifMatch,
-                                          String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response policiesMediationPost(String contentType, MediationDTO body, MessageContext messageContext) {
         InputStream contentStream = null;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();

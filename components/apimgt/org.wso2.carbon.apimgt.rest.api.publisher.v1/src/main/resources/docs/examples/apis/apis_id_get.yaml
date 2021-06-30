@@ -53,7 +53,7 @@
         ],
         "endpointSecurity":null,
         "gatewayEnvironments":[
-          "Production and Sandbox"
+          "Default"
         ],
         "labels":[
 

@@ -135,7 +135,7 @@ const AppConfiguration = (props) => {
                                 </MenuItem>
                             ))}
                         </TextField>
-                    ) : (config.type === 'select' && config.multiple === true) ? (
+                    ) : (config.type === 'select' && config.multiple === true && Array.isArray(selectedValue)) ? (
                         <>
                             <FormControl variant="outlined" className={classes.formControl} fullWidth>
                                 <InputLabel id="multi-select-label">{config.label}</InputLabel>

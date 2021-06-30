@@ -30,7 +30,7 @@ import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiTh
 import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocThumb';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
+import APILanding from 'AppComponents/Apis/Listing/Landing';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
@@ -87,19 +87,23 @@ class TableView extends React.Component {
         this.state = {
             apisAndApiProducts: null,
             notFound: true,
-            displayCount: 0,
             listType: defaultApiView,
             loading: true,
+            totalCount: -1,
+            rowsPerPage: 10,
+            page: 0,
         };
-        this.page = 0;
-        this.count = 100;
-        this.rowsPerPage = localStorage.getItem('publisher.rowsPerPage') || 10;
         this.setListType = this.setListType.bind(this);
         this.updateData = this.updateData.bind(this);
     }
 
     componentDidMount() {
-        this.getData();
+        const { rowsPerPage, page } = this.state;
+        this.getData(rowsPerPage, page);
+        const userRowsPerPage = parseInt(localStorage.getItem('publisher.rowsPerPage'), 10);
+        if (userRowsPerPage) {
+            this.setState({ rowsPerPage: userRowsPerPage });
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -131,7 +135,7 @@ class TableView extends React.Component {
     }
 
     getMuiTheme = () => {
-        const { listType } = this.state;
+        const { listType, totalCount } = this.state;
         const { theme } = this.props;
         let themeAdditions = {};
         let muiTheme = {
@@ -139,7 +143,6 @@ class TableView extends React.Component {
                 MUIDataTable: {
                     root: {
                         backgroundColor: 'transparent',
-                        marginLeft: 40,
                     },
                     paper: {
                         boxShadow: 'none',
@@ -174,6 +177,11 @@ class TableView extends React.Component {
                             },
                         },
                     },
+                    MuiTableBody: {
+                        root: {
+                            justifyContent: totalCount > 4 ? 'center' : 'flex-start',
+                        },
+                    },
                 },
             };
         }
@@ -182,14 +190,20 @@ class TableView extends React.Component {
     };
 
     // get apisAndApiProducts
-    getData = () => {
+    getData = (rowsPerPage, page) => {
         const { intl } = this.props;
-        this.xhrRequest().then((data) => {
+        this.setState({ loading: true });
+        return this.xhrRequest(rowsPerPage, page).then((data) => {
             const { body } = data;
-            const { list, pagination, count } = body;
+            const { list, pagination } = body;
             const { total } = pagination;
-            this.count = total;
-            this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
+            this.setState({
+                totalCount: total,
+                apisAndApiProducts: list,
+                notFound: false,
+                rowsPerPage,
+                page,
+            });
         }).catch(() => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error While Loading APIs',
@@ -212,16 +226,17 @@ class TableView extends React.Component {
     };
 
     changePage = (page) => {
-        this.page = page;
         const { intl } = this.props;
+        const { rowsPerPage } = this.state;
         this.setState({ loading: true });
-        this.xhrRequest().then((data) => {
+        this.xhrRequest(rowsPerPage, page).then((data) => {
             const { body } = data;
-            const { list, count } = body;
+            const { list, pagination } = body;
             this.setState({
                 apisAndApiProducts: list,
                 notFound: false,
-                displayCount: count,
+                totalCount: pagination.total,
+                page,
             });
         }).catch(() => {
             Alert.error(intl.formatMessage({
@@ -234,19 +249,18 @@ class TableView extends React.Component {
             });
     };
 
-    xhrRequest = () => {
-        const { page, rowsPerPage } = this;
+    xhrRequest = (rowsPerPage, page) => {
         const { isAPIProduct, query } = this.props;
         if (query) {
             const composeQuery = queryString.parse(query);
-            composeQuery.limit = this.rowsPerPage;
+            composeQuery.limit = rowsPerPage;
             composeQuery.offset = page * rowsPerPage;
             return API.search(composeQuery);
         }
         if (isAPIProduct) {
-            return APIProduct.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return APIProduct.all({ limit: rowsPerPage, offset: page * rowsPerPage });
         } else {
-            return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return API.all({ limit: rowsPerPage, offset: page * rowsPerPage });
         }
     };
 
@@ -257,11 +271,12 @@ class TableView extends React.Component {
      * @memberof Listing
      */
     updateData() {
-        const { page, rowsPerPage, count } = this;
-        if (count - 1 === rowsPerPage * page && page !== 0) {
-            this.page = page - 1;
+        const { rowsPerPage, page, totalCount } = this.state;
+        let newPage = page;
+        if (totalCount - 1 === rowsPerPage * page && page !== 0) {
+            newPage = page - 1;
         }
-        this.getData();
+        this.getData(rowsPerPage, newPage);
     }
 
     /**
@@ -274,7 +289,9 @@ class TableView extends React.Component {
         const {
             intl, isAPIProduct, classes, query,
         } = this.props;
-        const { loading } = this.state;
+        const {
+            loading, totalCount, rowsPerPage, apisAndApiProducts, notFound, listType, page,
+        } = this.state;
         const columns = [
             {
                 name: 'id',
@@ -365,37 +382,33 @@ class TableView extends React.Component {
                 },
             },
         ];
-        const { page, count, rowsPerPage } = this;
-        const {
-            apisAndApiProducts, notFound, listType, displayCount,
-        } = this.state;
         const options = {
             filterType: 'dropdown',
             responsive: 'stacked',
-            serverSide: true,
             search: false,
-            count,
+            count: totalCount,
+            serverSide: true,
             page,
-            onTableChange: (action, tableState) => {
-                switch (action) {
-                    case 'changePage':
-                        this.changePage(tableState.page);
-                        break;
-                    default:
-                        break;
-                }
-            },
+            onChangePage: this.changePage,
             selectableRows: 'none',
             rowsPerPage,
-            onChangeRowsPerPage: (numberOfRows) => {
-                this.rowsPerPage = numberOfRows;
-                if (page * numberOfRows > count) {
-                    this.page = 0;
-                } else if (count - 1 === rowsPerPage * page && page !== 0) {
-                    this.page = page - 1;
+            onChangeRowsPerPage: (newNumberOfRows) => {
+                let newPage;
+                if (page * newNumberOfRows > totalCount) {
+                    newPage = 0;
+                } else if (totalCount - 1 === newNumberOfRows * page && page !== 0) {
+                    newPage = page - 1;
                 }
-                localStorage.setItem('publisher.rowsPerPage', numberOfRows);
-                this.getData();
+                localStorage.setItem('publisher.rowsPerPage', newNumberOfRows);
+                this.getData(newNumberOfRows, newPage);
+            },
+            textLabels: {
+                pagination: {
+                    rowsPerPage: intl.formatMessage({
+                        id: 'Apis.Listing.ApiTableView.items.per.page',
+                        defaultMessage: 'Items per page',
+                    }),
+                },
             },
         };
         if (listType === 'grid') {
@@ -407,10 +420,10 @@ class TableView extends React.Component {
                         return <DocThumb doc={artifact} />;
                     } else if (artifact.type === 'APIPRODUCT') {
                         artifact.state = 'PUBLISHED';
-                        return <ApiThumb api={artifact} isAPIProduct updateData={tableViewObj.updateData} />;
+                        return <ApiThumb api={artifact} isAPIProduct updateData={this.updateData} />;
                     } else {
                         return (
-                            <ApiThumb api={artifact} isAPIProduct={isAPIProduct} updateData={tableViewObj.updateData} />
+                            <ApiThumb api={artifact} isAPIProduct={isAPIProduct} updateData={this.updateData} />
                         );
                     }
                 }
@@ -430,12 +443,12 @@ class TableView extends React.Component {
             options.download = true;
             options.viewColumns = true;
         }
-        if (page === 0 && this.count <= rowsPerPage && rowsPerPage === 10) {
+        if (page === 0 && totalCount <= rowsPerPage && rowsPerPage === 10) {
             options.pagination = false;
         } else {
             options.pagination = true;
         }
-        if (loading || !apisAndApiProducts) {
+        if (!apisAndApiProducts) {
             return <Progress per={90} message='Loading APIs ...' />;
         }
         if (notFound) {
@@ -446,19 +459,17 @@ class TableView extends React.Component {
                 <>
                     <TopMenu
                         data={apisAndApiProducts}
-                        count={displayCount}
+                        count={totalCount}
                         setListType={this.setListType}
                         isAPIProduct={isAPIProduct}
                         listType={listType}
                         showToggle={this.showToggle}
                     />
-                    <div className={classes.contentInside}>
-                        {isAPIProduct ? (
-                            <SampleAPIProduct />
-                        ) : (
-                            <SampleAPI />
-                        )}
-                    </div>
+                    {isAPIProduct ? (
+                        <SampleAPIProduct />
+                    ) : (
+                        <APILanding />
+                    )}
                 </>
             );
         }
@@ -467,7 +478,7 @@ class TableView extends React.Component {
             <>
                 <TopMenu
                     data={apisAndApiProducts}
-                    count={displayCount}
+                    count={totalCount}
                     setListType={this.setListType}
                     isAPIProduct={isAPIProduct}
                     listType={listType}
@@ -475,9 +486,17 @@ class TableView extends React.Component {
                     query={query}
                 />
                 <div className={classes.contentInside}>
-                    <MuiThemeProvider theme={this.getMuiTheme()}>
-                        <MUIDataTable title='' data={apisAndApiProducts} columns={columns} options={options} />
-                    </MuiThemeProvider>
+                    {loading ? (
+                        <Progress
+                            per={96}
+                            message='Updating page ...'
+                        />
+                    )
+                        : (
+                            <MuiThemeProvider theme={this.getMuiTheme()}>
+                                <MUIDataTable title='' data={apisAndApiProducts} columns={columns} options={options} />
+                            </MuiThemeProvider>
+                        )}
                 </div>
             </>
         );
@@ -491,7 +510,7 @@ TableView.propTypes = {
     intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     theme: PropTypes.shape({
-        custom: PropTypes.string,
+        custom: PropTypes.shape({}),
     }).isRequired,
     query: PropTypes.string,
 };

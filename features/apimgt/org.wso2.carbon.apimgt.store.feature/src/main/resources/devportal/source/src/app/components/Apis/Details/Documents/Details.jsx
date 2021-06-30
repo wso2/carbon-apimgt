@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Icon from '@material-ui/core/Icon';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import View from 'AppComponents/Apis/Details/Documents/View';
 import Typography from '@material-ui/core/Typography';
-import { matchPath } from 'react-router';
-import API from 'AppData/api';
-import Progress from 'AppComponents/Shared/Progress';
-import Alert from 'AppComponents/Shared/Alert';
-import DocList from './DocList';
 
 const useStyles = makeStyles((theme) => ({
     fullView: {
@@ -64,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Details(props) {
     // const restApi = new API();
-    const { documentList, apiId, selectedDoc } = props;
+    const { apiId, selectedDoc } = props;
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     // const [doc, setDoc] = useState(null);
@@ -75,15 +69,21 @@ export default function Details(props) {
         <>
             <div className={classes.paper}>
                 {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
-                    <Icon className={classes.fullView} onClick={toggleOpen}>
-                        launch
-                    </Icon>
+                    <IconButton
+                        onClick={toggleOpen}
+                        aria-label={'View ' + selectedDoc.name + ' document in full screen'}
+                        className={classes.fullView}
+                    >
+                        <Icon>
+                            launch
+                        </Icon>
+                    </IconButton>
                 )}
                 <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
             </div>
             <Dialog fullScreen open={open} onClose={toggleOpen}>
                 <div square className={classes.popupHeader}>
-                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
+                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close full screen view'>
                         <Icon>close</Icon>
                     </IconButton>
                     <Typography variant='h4'>{selectedDoc.name}</Typography>

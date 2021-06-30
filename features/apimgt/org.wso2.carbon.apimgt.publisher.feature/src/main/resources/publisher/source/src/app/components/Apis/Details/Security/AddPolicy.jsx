@@ -33,7 +33,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 
-const styles = theme => ({
+const styles = (theme) => ({
     addNewWrapper: {
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.getContrastText(theme.palette.background.paper),
@@ -64,16 +64,25 @@ const styles = theme => ({
 });
 
 class AddPolicy extends Component {
-    state = {
-        selectedPolicy: {
-            uuid: '',
-            name: 'Select',
-            policy: '',
-            type: '',
-        },
-        policies: [],
-    };
+    /**
+     * AddPolicy
+     */
+    constructor() {
+        super();
+        this.state = {
+            selectedPolicy: {
+                uuid: '',
+                name: 'Select',
+                policy: '',
+                type: '',
+            },
+            policies: [],
+        };
+    }
 
+    /**
+     * AddPolicy
+     */
     componentDidMount() {
         const api = new API();
         const promisedPolicies = api.getThreatProtectionPolicies();
@@ -85,6 +94,26 @@ class AddPolicy extends Component {
             this.setState({ currentApi: response.obj });
         });
     }
+
+    /**
+     * AddPolicy
+     */
+    formatPolicy = (policy) => {
+        let formattedPolicy = policy;
+        formattedPolicy = formattedPolicy.replace(':', ' : ');
+        formattedPolicy = formattedPolicy.split(',').join(',\n');
+        return formattedPolicy;
+    }
+
+    handleChange = () => (event) => {
+        const policyId = event.target.value;
+        const api = new API();
+        const promisedPolicy = api.getThreatProtectionPolicy(policyId);
+        promisedPolicy.then((response) => {
+            this.setState({ selectedPolicy: response.obj });
+        });
+    }
+
 
     handlePolicyAdd() {
         const { intl } = this.props;
@@ -118,22 +147,6 @@ class AddPolicy extends Component {
         }
     }
 
-    handleChange = () => (event) => {
-        const policyId = event.target.value;
-        const api = new API();
-        const promisedPolicy = api.getThreatProtectionPolicy(policyId);
-        promisedPolicy.then((response) => {
-            this.setState({ selectedPolicy: response.obj });
-        });
-    }
-
-    formatPolicy = (policy) => {
-        let formattedPolicy = policy;
-        formattedPolicy = formattedPolicy.replace(':', ' : ');
-        formattedPolicy = formattedPolicy.split(',').join(',\n');
-        return formattedPolicy;
-    }
-
     render() {
         const { classes } = this.props;
         return (
@@ -163,7 +176,8 @@ class AddPolicy extends Component {
                                 return (
                                     <MenuItem key={n.uuid} value={n.uuid}>{n.name}</MenuItem>
                                 );
-                            })};
+                            })}
+                            ;
                         </Select>
                         <br />
                         <br />
@@ -217,4 +231,3 @@ AddPolicy.propTypes = {
 
 
 export default injectIntl(withStyles(styles)(AddPolicy));
-

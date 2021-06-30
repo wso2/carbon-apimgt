@@ -240,7 +240,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = ImportUtils
-                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application.getId(),
+                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application,
                                 update, apiConsumer);
             }
             Application importedApplication = apiConsumer.getApplicationById(application.getId());
@@ -480,6 +480,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
 
         apiConsumer.updateApplication(application);
+
+        ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationtoDTO(apiConsumer.getApplicationByUUID(applicationId));
+        if (newApp.isContainsSolaceApis()) {
+            if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
+                apiConsumer.renameSolaceApplication(newApp.getSolaceOrganization(), application);
+            }
+        }
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
@@ -745,6 +752,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
                             jsonParams, keyManagerName, xWSO2Tenant);
+                    if (ApplicationMappingUtil.containsSolaceApis(application)) {
+                        ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationtoDTO(apiConsumer.getApplicationByUUID(applicationId));
+                        apiConsumer.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
+                    }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1075,7 +1086,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
-                                                         MessageContext messageContext) throws APIManagementException {
+                                                         String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
@@ -1094,7 +1106,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName);
+                                application.getName(), keyType, tokenType, keyManagerName, xWSO2Tenant);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1191,6 +1203,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             appToken.setTokenScopes(Arrays.asList(response.getScopes()));
                         }
                         appToken.setValidityTime(response.getValidityPeriod());
+                        // for solace applications
+                        if (ApplicationMappingUtil.containsSolaceApis(application)) {
+                            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(apiConsumer.getApplicationByUUID(applicationId));
+                            apiConsumer.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
+                        }
                         return Response.ok().entity(appToken).build();
                     } catch (APIManagementException e) {
                         RestApiUtil.handleBadRequest(e.getErrorHandler(), log);

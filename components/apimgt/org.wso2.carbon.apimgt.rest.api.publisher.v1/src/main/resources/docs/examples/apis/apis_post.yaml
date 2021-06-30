@@ -16,7 +16,7 @@
         ],
         "tags": ["pizza"],
         "policies": ["Unlimited"],
-        "gatewayEnvironments": ["Production and Sandbox"],
+        "gatewayEnvironments": ["Default"],
         "endpointConfig":    {
           "endpoint_type": "http",
           "sandbox_endpoints":       {
@@ -100,7 +100,7 @@
         "visibleRoles": [],
         "visibleTenants": [],
         "endpointSecurity": null,
-        "gatewayEnvironments": ["Production and Sandbox"],
+        "gatewayEnvironments": ["Default"],
         "labels": [],
         "mediationPolicies": [],
         "subscriptionAvailability": "ALL_TENANTS",

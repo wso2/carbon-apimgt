@@ -26,7 +26,6 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
-import Create from '@material-ui/icons/Create';
 import IconButton from '@material-ui/core/IconButton';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -35,12 +34,13 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
 import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
 import Box from '@material-ui/core/Box';
+import OnboardingMenuCard from 'AppComponents/Shared/Onboarding/OnboardingMenuCard';
+import Onboarding from 'AppComponents/Shared/Onboarding/Onboarding';
 import Delete from '../Delete/Delete';
 import Usage from '../Usage/Usage';
 
@@ -91,11 +91,6 @@ const styles = (theme) => ({
     },
     mainTitle: {
         paddingLeft: 0,
-    },
-    button: {
-        textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-        marginLeft: theme.spacing(1),
     },
     buttonIcon: {
         marginRight: theme.spacing(1),
@@ -260,6 +255,8 @@ class Listing extends React.Component {
      */
     render() {
         const { scopes } = this.state;
+        const { theme } = this.props;
+        const { scopesAddIcon } = theme.custom.landingPage.icons;
         const {
             intl, classes,
         } = this.props;
@@ -324,13 +321,13 @@ class Listing extends React.Component {
                                     />
                                     <Link
                                         to={!isRestricted(['apim:shared_scope_manage'])
-                                                    && {
-                                                        pathname: editUrl,
-                                                        state: {
-                                                            scopeName,
-                                                            scopeId,
-                                                        },
-                                                    }}
+                                            && {
+                                                pathname: editUrl,
+                                                state: {
+                                                    scopeName,
+                                                    scopeId,
+                                                },
+                                            }}
                                         className={isRestricted(['apim:shared_scope_manage'])
                                             ? classes.disableLink : ''}
                                     >
@@ -346,6 +343,7 @@ class Listing extends React.Component {
                                         scopeName={scopeName}
                                         scopeId={scopeId}
                                         fetchScopeData={this.fetchScopeData}
+                                        usageCount={usageCount}
                                     />
                                 </Box>
                             );
@@ -394,49 +392,43 @@ class Listing extends React.Component {
 
         if (scopes.length === 0) {
             return (
-                <div className={classes.contentInside}>
-                    <InlineMessage type='info' height={140}>
-                        <div className={classes.contentWrapper}>
-                            <Typography variant='h5' component='h3' className={classes.head}>
-                                <FormattedMessage
-                                    id='Scopes.Listing.sample.scope.manager'
-                                    defaultMessage='Welcome to WSO2 API Manager'
-                                />
-                            </Typography>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id='Scopes.Listing.Listing.scopes.enable.fine.gained.access.control'
-                                    defaultMessage={
-                                        'Scopes enable fine-grained access control to API resources'
-                                        + ' based on user roles.'
-                                    }
-                                />
-                            </Typography>
-                            <div className={classes.actions}>
-                                <Link to={url}>
-                                    <Button
-                                        size='small'
-                                        variant='contained'
-                                        color='primary'
-                                        className={classes.button}
-                                    >
-                                        <Create />
-                                        <FormattedMessage
-                                            id='Scopes.Listing.Listing.create.scopes.button'
-                                            defaultMessage='Create a new scope'
-                                        />
-                                    </Button>
-                                </Link>
-                            </div>
-                        </div>
-                    </InlineMessage>
-                </div>
+                <Onboarding
+                    title={(
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.create.new'
+                            defaultMessage='Let’s get started !'
+                        />
+                    )}
+                    subTitle={(
+                        <FormattedMessage
+                            id='Scopes.Listing.Listing.scopes.enable.fine.gained.access.control'
+                            defaultMessage={
+                                'Scopes enable fine-grained access control to API resources'
+                                + ' based on user roles.'
+                            }
+                        />
+                    )}
+                >
+                    <OnboardingMenuCard
+                        to='/scopes/create'
+                        name='Scopes'
+                        iconName={scopesAddIcon}
+                        disabled={isRestricted(['apim:shared_scope_manage'])}
+                    />
+                </Onboarding>
             );
         }
 
         return (
             <div className={classes.heading}>
-                <Grid className={classes.titleWrapper} xs={12} sm={12} md={11} lg={11} item>
+                <Grid
+                    className={classes.titleWrapper}
+                    xs={12}
+                    sm={12}
+                    md={11}
+                    lg={11}
+                    item
+                >
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Scopes.Listing.Listing.heading.scope.heading'
@@ -447,17 +439,20 @@ class Listing extends React.Component {
                         to={!isRestricted(['apim:shared_scope_manage']) && url}
                         className={isRestricted(['apim:shared_scope_manage']) ? classes.disableLink : ''}
                     >
-                        <Button
-                            size='small'
-                            className={classes.button}
-                            disabled={isRestricted(['apim:shared_scope_manage'])}
-                        >
-                            <AddCircle className={classes.buttonIcon} />
-                            <FormattedMessage
-                                id='Scopes.Listing.Listing.heading.scope.add_new'
-                                defaultMessage='Add New Scope'
-                            />
-                        </Button>
+                        <Box pl={1}>
+                            <Button
+                                color='primary'
+                                variant='outlined'
+                                size='small'
+                                disabled={isRestricted(['apim:shared_scope_manage'])}
+                            >
+                                <AddCircle className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Scopes.Listing.Listing.heading.scope.add_new'
+                                    defaultMessage='Add New Scope'
+                                />
+                            </Button>
+                        </Box>
                     </Link>
                     {isRestricted(['apim:shared_scope_manage']) && (
                         <Grid item>
@@ -493,4 +488,4 @@ Listing.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withAPI(withStyles(styles)(Listing)));
+export default injectIntl(withAPI(withStyles(styles, { withTheme: true })(Listing)));

@@ -60,7 +60,7 @@ const styles = (theme) => ({
         paddingBottom: theme.spacing(2),
         '& span, & h5, & label, & td, & li, & div': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
-        }
+        },
     },
     tableMain: {
         '& > table': {
@@ -70,7 +70,7 @@ const styles = (theme) => ({
             marginLeft: theme.spacing(2),
             marginRight: theme.spacing(1),
         },
-        '& table > tr td':{
+        '& table > tr td': {
             paddingLeft: theme.spacing(1),
         },
         '&  table > tr:nth-child(even)': {
@@ -163,22 +163,30 @@ const styles = (theme) => ({
  * @extends {React.Component}
  */
 class Credentials extends React.Component {
-    static contextType = ApiContext;
+    /**
+     *Creates an instance of Credentials.
+     * @param JSON props
+     * @memberof Credentials
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            expanded: true,
+            selectedAppId: false,
+            selectedKeyType: false,
+            subscriptionRequest: {
+                applicationId: '',
+                apiId: '',
+                throttlingPolicy: '',
+            },
+            throttlingPolicyList: [],
+            applicationOwner: '',
+            hashEnabled: false,
+            isSubscribing: false,
+        };
+        this.api = new Api();
+    }
 
-    state = {
-        expanded: true,
-        selectedAppId: false,
-        selectedKeyType: false,
-        subscriptionRequest: {
-            applicationId: '',
-            apiId: '',
-            throttlingPolicy: '',
-        },
-        throttlingPolicyList: [],
-        applicationOwner: '',
-        hashEnabled: false,
-        isSubscribing: false,
-    };
 
     /**
      *  Set the initial values for subscription request
@@ -246,6 +254,10 @@ class Credentials extends React.Component {
                 this.setState({ isSubscribing: false });
             })
             .catch((error) => {
+                Alert.error(intl.formatMessage({
+                    id: 'Applications.Details.Subscriptions.error.occurred.during.subscription.not.201',
+                    defaultMessage: 'Error occurred during subscription',
+                }));
                 console.log('Error while creating the subscription.');
                 console.error(error);
                 this.setState({ isSubscribing: false });
@@ -330,12 +342,14 @@ class Credentials extends React.Component {
             isSubscribing,
         } = this.state;
         const user = AuthManager.getUser();
-        const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
-        !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
-        const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2') &&
-         !api.securityScheme.includes('api_key');
+        const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2')
+        && !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
+        const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2')
+         && !api.securityScheme.includes('api_key');
+        const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+        const isSetAllorResidentKeyManagers = (api.keyManagers && api.keyManagers.includes('all'))
+            || (api.keyManagers && api.keyManagers.includes('Resident Key Manager'));
         const renderCredentialInfo = () => {
-            const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
             if (isPrototypedAPI) {
                 return (
                     <>
@@ -352,15 +366,15 @@ class Credentials extends React.Component {
                 );
             } else if (isOnlyMutualSSL || isOnlyBasicAuth) {
                 return (
-                        <InlineMessage type='info' className={classes.dialogContainer}>
-                            <Typography component='p'>
+                    <InlineMessage type='info' className={classes.dialogContainer}>
+                        <Typography component='p'>
                             <FormattedMessage
-                                        id='Apis.Details.Creadentials.credetials.mutualssl'
-                                        defaultMessage={'Subscription is not required for Mutual SSL APIs' + 
-                                        ' or APIs with only Basic Authentication.'}
-                                    />
-                            </Typography>
-                        </InlineMessage>
+                                id='Apis.Details.Creadentials.credetials.mutualssl'
+                                defaultMessage={'Subscription is not required for Mutual SSL APIs'
+                                        + ' or APIs with only Basic Authentication.'}
+                            />
+                        </Typography>
+                    </InlineMessage>
                 );
             } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
                 return (
@@ -394,10 +408,10 @@ class Credentials extends React.Component {
                                 resourcePath={resourcePaths.SUBSCRIPTIONS}
                                 resourceMethod={resourceMethods.POST}
                             >
-                                <Typography variant='h5'>
+                                <Typography variant='h5' component='h2'>
                                     <FormattedMessage
-                                        id={'Apis.Details.Credentials.Credentials.' +
-                                        'subscribe.to.application'}
+                                        id={'Apis.Details.Credentials.Credentials.'
+                                        + 'subscribe.to.application'}
                                         defaultMessage='Subscribe'
                                     />
                                 </Typography>
@@ -417,8 +431,9 @@ class Credentials extends React.Component {
                                                 />
                                             </Typography>
                                             <Link
-                                                to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null :
-                                                     `/apis/${api.id}/credentials/wizard`}
+                                                to={(isOnlyMutualSSL || isOnlyBasicAuth
+                                                    || !isSetAllorResidentKeyManagers) ? null
+                                                    : `/apis/${api.id}/credentials/wizard`}
                                                 style={!api.isSubscriptionAvailable
                                                     ? { pointerEvents: 'none' } : null}
                                             >
@@ -426,8 +441,8 @@ class Credentials extends React.Component {
                                                     variant='contained'
                                                     color='primary'
                                                     className={classes.buttonElm}
-                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL || 
-                                                        isOnlyBasicAuth}
+                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
+                                                        || isOnlyBasicAuth || !isSetAllorResidentKeyManagers}
                                                 >
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.'
@@ -483,7 +498,7 @@ class Credentials extends React.Component {
                                     */}
                         {subscribedApplications && subscribedApplications.length > 0 && (
                             <>
-                                <Typography variant='h5' className={classes.subsListTitle}>
+                                <Typography variant='h5' component='h2' className={classes.subsListTitle}>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'api.credentials.subscribed.apps.title'}
@@ -527,11 +542,11 @@ class Credentials extends React.Component {
                                                     + 'api.credentials.subscribed.apps.action'}
                                                     defaultMessage='Actions'
                                                 />
-                                        </th>
+                                            </th>
                                         </tr>
                                         {subscribedApplications.map((app, index) => (
                                             <SubscriptionTableRow
-                                                key={index}
+                                                key={app.id}
                                                 loadInfo={this.loadInfo}
                                                 handleSubscriptionDelete={this.handleSubscriptionDelete}
                                                 selectedAppId={selectedAppId}
@@ -554,17 +569,14 @@ class Credentials extends React.Component {
         return (
             <Grid container>
                 <Grid item md={12} lg={11}>
-                    <Grid container spacing={5}>
+                    <Grid container spacing={2}>
                         <Grid item md={12}>
-                            <Typography onClick={this.handleExpandClick} variant='h4' component='h2' className={classes.titleSub}>
-                                <FormattedMessage
-                                    id='Apis.Details.Credentials.Credentials.api.credentials'
-                                    defaultMessage='Subscriptions'
-                                />
+                            <Typography onClick={this.handleExpandClick} variant='h4' component='div' className={classes.titleSub}>
                                 {applicationsAvailable.length > 0 && (
                                     <Link
-                                        to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null :
-                                             `/apis/${api.id}/credentials/wizard`}
+                                        to={(isOnlyMutualSSL || isOnlyBasicAuth || isPrototypedAPI
+                                            || !isSetAllorResidentKeyManagers) ? null
+                                            : `/apis/${api.id}/credentials/wizard`}
                                         style={!api.isSubscriptionAvailable
                                             ? { pointerEvents: 'none' } : null}
                                         className={classes.addLinkWrapper}
@@ -572,7 +584,8 @@ class Credentials extends React.Component {
                                         <Button
                                             color='secondary'
                                             disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
-                                                 || isOnlyBasicAuth}
+                                                 || isOnlyBasicAuth || isPrototypedAPI
+                                                 || !isSetAllorResidentKeyManagers}
                                             size='small'
                                         >
                                             <Icon>add_circle_outline</Icon>
@@ -622,5 +635,6 @@ Credentials.propTypes = {
     history: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
+Credentials.contextType = ApiContext;
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Credentials));

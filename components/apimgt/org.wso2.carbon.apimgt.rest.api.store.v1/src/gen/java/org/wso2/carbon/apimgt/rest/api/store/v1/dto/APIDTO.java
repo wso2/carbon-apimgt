@@ -5,17 +5,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIIngressURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
@@ -51,12 +49,10 @@ public class APIDTO   {
     private List<String> tags = new ArrayList<String>();
     private List<APITiersDTO> tiers = new ArrayList<APITiersDTO>();
     private Boolean hasThumbnail = false;
-    private Map<String, String> additionalProperties = new HashMap<String, String>();
+    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
     private APIMonetizationInfoDTO monetization = null;
-    private List<APIIngressURLsDTO> ingressURLs = new ArrayList<APIIngressURLsDTO>();
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
     private APIBusinessInformationDTO businessInformation = null;
-    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private List<String> environmentList = new ArrayList<String>();
     private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
     private String avgRating = null;
@@ -66,6 +62,9 @@ public class APIDTO   {
     private Object keyManagers = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+    private Boolean solaceAPI = null;
+    private List<String> solaceTransportProtocols = new ArrayList<String>();
+    private List<APISolaceEndpointURLsDTO> solaceEndpointURLs = new ArrayList<APISolaceEndpointURLsDTO>();
 
   /**
    * UUID of the api 
@@ -397,18 +396,19 @@ public class APIDTO   {
   /**
    * Custom(user defined) properties of API 
    **/
-  public APIDTO additionalProperties(Map<String, String> additionalProperties) {
+  public APIDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
   @ApiModelProperty(example = "{}", value = "Custom(user defined) properties of API ")
+      @Valid
   @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
+  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
@@ -428,24 +428,6 @@ public class APIDTO   {
   }
   public void setMonetization(APIMonetizationInfoDTO monetization) {
     this.monetization = monetization;
-  }
-
-  /**
-   **/
-  public APIDTO ingressURLs(List<APIIngressURLsDTO> ingressURLs) {
-    this.ingressURLs = ingressURLs;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("ingressURLs")
-  public List<APIIngressURLsDTO> getIngressURLs() {
-    return ingressURLs;
-  }
-  public void setIngressURLs(List<APIIngressURLsDTO> ingressURLs) {
-    this.ingressURLs = ingressURLs;
   }
 
   /**
@@ -482,25 +464,6 @@ public class APIDTO   {
   }
   public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
-  }
-
-  /**
-   * Labels of micro-gateway environments attached to the API. 
-   **/
-  public APIDTO labels(List<LabelDTO> labels) {
-    this.labels = labels;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API. ")
-      @Valid
-  @JsonProperty("labels")
-  public List<LabelDTO> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<LabelDTO> labels) {
-    this.labels = labels;
   }
 
   /**
@@ -663,6 +626,59 @@ public class APIDTO   {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
+  /**
+   **/
+  public APIDTO solaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("solaceAPI")
+  public Boolean isSolaceAPI() {
+    return solaceAPI;
+  }
+  public void setSolaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+  }
+
+  /**
+   * Supported transports for the solace API (http and/or https). 
+   **/
+  public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
+  @JsonProperty("solaceTransportProtocols")
+  public List<String> getSolaceTransportProtocols() {
+    return solaceTransportProtocols;
+  }
+  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+  }
+
+  /**
+   **/
+  public APIDTO solaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
+    this.solaceEndpointURLs = solaceEndpointURLs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("solaceEndpointURLs")
+  public List<APISolaceEndpointURLsDTO> getSolaceEndpointURLs() {
+    return solaceEndpointURLs;
+  }
+  public void setSolaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
+    this.solaceEndpointURLs = solaceEndpointURLs;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -693,10 +709,8 @@ public class APIDTO   {
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
         Objects.equals(monetization, API.monetization) &&
-        Objects.equals(ingressURLs, API.ingressURLs) &&
         Objects.equals(endpointURLs, API.endpointURLs) &&
         Objects.equals(businessInformation, API.businessInformation) &&
-        Objects.equals(labels, API.labels) &&
         Objects.equals(environmentList, API.environmentList) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(avgRating, API.avgRating) &&
@@ -705,12 +719,15 @@ public class APIDTO   {
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(createdTime, API.createdTime) &&
-        Objects.equals(lastUpdatedTime, API.lastUpdatedTime);
+        Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
+        Objects.equals(solaceAPI, API.solaceAPI) &&
+        Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols) &&
+        Objects.equals(solaceEndpointURLs, API.solaceEndpointURLs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, solaceAPI, solaceTransportProtocols, solaceEndpointURLs);
   }
 
   @Override
@@ -738,10 +755,8 @@ public class APIDTO   {
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
-    sb.append("    ingressURLs: ").append(toIndentedString(ingressURLs)).append("\n");
     sb.append("    endpointURLs: ").append(toIndentedString(endpointURLs)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
@@ -751,6 +766,9 @@ public class APIDTO   {
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    solaceAPI: ").append(toIndentedString(solaceAPI)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
+    sb.append("    solaceEndpointURLs: ").append(toIndentedString(solaceEndpointURLs)).append("\n");
     sb.append("}");
     return sb.toString();
   }

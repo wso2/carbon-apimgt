@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.common.jms.utils.JMSUtils;
 
 import java.util.Hashtable;
 

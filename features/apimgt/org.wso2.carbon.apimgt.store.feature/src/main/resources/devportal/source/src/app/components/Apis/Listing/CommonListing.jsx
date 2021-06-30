@@ -1,5 +1,6 @@
+/* eslint-disable prefer-destructuring */
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -163,8 +164,6 @@ const styles = (theme) => ({
  * @extends {Component}
  */
 class CommonListing extends React.Component {
-    static contextType = Settings;
-
     /**
      * Constructor
      *
@@ -174,8 +173,8 @@ class CommonListing extends React.Component {
         super(props);
         let { defaultApiView } = props.theme.custom;
         this.showToggle = true;
-        if(typeof defaultApiView === 'object' && defaultApiView.length > 0) {
-            if(defaultApiView.length === 1) { // We will disable the other
+        if (typeof defaultApiView === 'object' && defaultApiView.length > 0) {
+            if (defaultApiView.length === 1) { // We will disable the other
                 this.showToggle = false;
             }
             defaultApiView = defaultApiView[0];
@@ -193,17 +192,6 @@ class CommonListing extends React.Component {
 
     /**
      *
-     * Switch the view between grid and list view
-     * @param {String} value view type
-     * @memberof CommonListing
-     */
-    setListType = (value) => {
-        localStorage.setItem('portal.listType', value);
-        this.setState({ listType: value });
-    };
-
-    /**
-     *
      * Get all tags
      * @memberof CommonListing
      */
@@ -218,16 +206,27 @@ class CommonListing extends React.Component {
                 console.log(error);
             });
         const promisedCategories = restApiClient.apiCategories();
-            promisedCategories
-                .then((response) => {
-                    this.setState({ allCategories: response.body.list });
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+        promisedCategories
+            .then((response) => {
+                this.setState({ allCategories: response.body.list });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
         this.isMonetizationEnabled();
         this.isRecommendationEnabled();
     }
+
+    /**
+     *
+     * Switch the view between grid and list view
+     * @param {String} value view type
+     * @memberof CommonListing
+     */
+     setListType = (value) => {
+         localStorage.setItem('portal.listType', value);
+         this.setState({ listType: value });
+     };
 
     toggleLeftMenu = () => {
         this.setState((prevState) => ({ showLeftMenu: !prevState.showLeftMenu }));
@@ -266,12 +265,12 @@ class CommonListing extends React.Component {
         const user = AuthManager.getUser();
         const {
             custom: {
-                tagWise: { key, active, style },
+                tagWise: { key, active },
                 tagCloud: { active: tagCloudActive },
             },
         } = theme;
         const {
-            listType, allTags, showLeftMenu, isMonetizationEnabled, allCategories, isRecommendationEnabled
+            listType, allTags, showLeftMenu, isMonetizationEnabled, allCategories, isRecommendationEnabled,
         } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const searchParam = new URLSearchParams(search);
@@ -281,7 +280,7 @@ class CommonListing extends React.Component {
             // For the tagWise search
             if (active && key) {
                 const splits = searchQuery.split(':');
-                if (splits.length > 1 && splits[1].search(key) != -1) {
+                if (splits.length > 1 && splits[1].search(key) !== -1) {
                     const splitTagArray = splits[1].split(key);
                     if (splitTagArray.length > 0) {
                         selectedTag = splitTagArray[0];
@@ -297,7 +296,11 @@ class CommonListing extends React.Component {
             <>
                 {(categoryPaneVisible || tagPaneVisible) && showLeftMenu && (
                     <div className={classes.LeftMenu}>
-                        <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
+                        <div
+                            className={classes.sliderButton}
+                            onClick={this.toggleLeftMenu}
+                            onKeyDown={this.toggleLeftMenu}
+                        >
                             <Icon>keyboard_arrow_left</Icon>
                         </div>
                         {categoryPaneVisible && <CategoryListingCategories allCategories={allCategories} />}
@@ -307,16 +310,27 @@ class CommonListing extends React.Component {
                 )}
                 {(categoryPaneVisible || tagPaneVisible) && !showLeftMenu && (
                     <div className={classes.LeftMenuForSlider}>
-                        <div className={classes.sliderButton} onClick={this.toggleLeftMenu}>
+                        <div
+                            className={classes.sliderButton}
+                            onClick={this.toggleLeftMenu}
+                            onKeyDown={this.toggleLeftMenu}
+                        >
                             <Icon>keyboard_arrow_right</Icon>
                         </div>
-                        <div className={classes.rotatedText} onClick={this.toggleLeftMenu}>
-                            <FormattedMessage defaultMessage='Tags / API Categories' id='Apis.Listing.Listing.ApiTagCloud.title' />
+                        <div
+                            className={classes.rotatedText}
+                            onClick={this.toggleLeftMenu}
+                            onKeyDown={this.toggleLeftMenu}
+                        >
+                            <FormattedMessage
+                                defaultMessage='Tags / API Categories'
+                                id='Apis.Listing.Listing.ApiTagCloud.title'
+                            />
                         </div>
                     </div>
                 )}
 
-                <main
+                <div
                     className={classNames(
                         classes.content,
                         { [classes.contentWithoutTags]: !(tagPaneVisible || categoryPaneVisible) || !showLeftMenu },
@@ -330,40 +344,44 @@ class CommonListing extends React.Component {
                             <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                         </div>
                         <div className={classes.mainTitleWrapper} id='mainTitleWrapper'>
-                            <Typography variant='h4' className={classes.mainTitle}>
+                            <Typography variant='h4' component='h1' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
                         </div>
-                        {this.showToggle && (<div className={classes.buttonRight} id='listGridWrapper'>
-                            <IconButton
-                                aria-label='List View'
-                                className={classes.button}
-                                onClick={() => this.setListType('list')}
-                            >
-                                <Icon
-                                    className={classNames(
-                                        { [classes.iconSelected]: listType === 'list' },
-                                        { [classes.iconDefault]: listType === 'grid' },
-                                    )}
+                        {this.showToggle && (
+                            <div className={classes.buttonRight} id='listGridWrapper'>
+                                <IconButton
+                                    aria-label='Change to list view'
+                                    className={classes.button}
+                                    onClick={() => this.setListType('list')}
+                                    disabled={listType === 'list'}
                                 >
-                                    list
-                                </Icon>
-                            </IconButton>
-                            <IconButton
-                                aria-label='Grid view'
-                                className={classes.button}
-                                onClick={() => this.setListType('grid')}
-                            >
-                                <Icon
-                                    className={classNames(
-                                        { [classes.iconSelected]: listType === 'grid' },
-                                        { [classes.iconDefault]: listType === 'list' },
-                                    )}
+                                    <Icon
+                                        className={classNames(
+                                            { [classes.iconSelected]: listType === 'list' },
+                                            { [classes.iconDefault]: listType === 'grid' },
+                                        )}
+                                    >
+                                        list
+                                    </Icon>
+                                </IconButton>
+                                <IconButton
+                                    aria-label='Change to grid view'
+                                    className={classes.button}
+                                    onClick={() => this.setListType('grid')}
+                                    disabled={listType === 'grid'}
                                 >
-                                    grid_on
-                                </Icon>
-                            </IconButton>
-                        </div>)}
+                                    <Icon
+                                        className={classNames(
+                                            { [classes.iconSelected]: listType === 'grid' },
+                                            { [classes.iconDefault]: listType === 'list' },
+                                        )}
+                                    >
+                                        grid_on
+                                    </Icon>
+                                </IconButton>
+                            </div>
+                        )}
                     </div>
                     {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
                     <div className={classes.listContentWrapper}>
@@ -378,28 +396,30 @@ class CommonListing extends React.Component {
                             </ApiContext.Provider>
                         )}
                     </div>
-                    {isRecommendationEnabled && user &&
-                        <div>
-                            {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
-                            <div className={classes.listContentWrapper}>
-                                {listType === 'grid' && (
-                                    <ApiContext.Provider value={{ isRecommendationEnabled }}>
-                                        <Recommendations gridView query={search} />
-                                    </ApiContext.Provider>
-                                )}
-                                {listType === 'list' && (
-                                    <ApiContext.Provider value={{ isRecommendationEnabled }}>
-                                        <Recommendations gridView query={search} />
-                                    </ApiContext.Provider>
-                                )}
+                    {isRecommendationEnabled && user
+                        && (
+                            <div>
+                                {active && allTags && allTags.length > 0 && <ApiBreadcrumbs selectedTag={selectedTag} />}
+                                <div className={classes.listContentWrapper}>
+                                    {listType === 'grid' && (
+                                        <ApiContext.Provider value={{ isRecommendationEnabled }}>
+                                            <Recommendations gridView query={search} />
+                                        </ApiContext.Provider>
+                                    )}
+                                    {listType === 'list' && (
+                                        <ApiContext.Provider value={{ isRecommendationEnabled }}>
+                                            <Recommendations gridView query={search} />
+                                        </ApiContext.Provider>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    }
-                </main>
+                        )}
+                </div>
             </>
         );
     }
 }
+CommonListing.contextType = Settings;
 
 CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,

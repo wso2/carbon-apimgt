@@ -25,8 +25,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -39,6 +41,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
 import java.util.List;
 import java.util.Map;
@@ -178,25 +182,6 @@ public interface APIConsumer extends APIManager {
      */
     SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException;
 
-
-    /**
-     * Returns a set of SubscribedAPI purchased by the given Subscriber
-     *
-     * @param subscriber Subscriber
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
-
-    /**
-     * @param subscriber the subscriber to be subscribed to the API
-     * @param groupingId the groupId of the subscriber
-     * @return the subscribed API's
-     * @throws APIManagementException
-     */
-    Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId) throws APIManagementException;
-
-
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name.
      *
@@ -205,18 +190,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get API for subscriber
      */
     Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
-            throws APIManagementException;
-
-    /**
-     * Returns a set of SubscribedAPIs filtered by the given application id.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application Id
-     * @param groupingId the groupId of the subscriber
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<SubscribedAPI> getSubscribedAPIsByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
             throws APIManagementException;
 
     /**
@@ -233,7 +206,7 @@ public interface APIConsumer extends APIManager {
      */
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                String applicationName, String keyType, String tokenType,
-                                               String keyManagerName) throws APIManagementException;
+                                               String keyManagerName,String tenantDomain) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -331,11 +304,11 @@ public interface APIConsumer extends APIManager {
      *
      * @param apiTypeWrapper    Identifier
      * @param userId        id of the user
-     * @param applicationId Application Id
+     * @param application Application Id
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId)
+    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application)
             throws APIManagementException;
 
     /**
@@ -347,30 +320,9 @@ public interface APIConsumer extends APIManager {
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
+    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
                                             String subscriptionId, String currentThrottlingPolicy,
                                             String requestedThrottlingPolicy) throws APIManagementException;
-
-    /**
-     * Add new Subscriber with GroupId
-     *
-     * @param apiTypeWrapper    APIIdentifier
-     * @param userId        id of the user
-     * @param applicationId Application Id
-     * @param groupId       GroupId of user
-     * @return SubscriptionResponse subscription response object
-     * @throws APIManagementException if failed to add subscription details to database
-     */
-    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId, String groupId)
-            throws APIManagementException;
-
-    /**
-     *
-     * @param subscriptionId id of the subscription
-     * @return
-     * @throws APIManagementException if failed to get subscription detail from database
-     */
-    String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application
@@ -411,23 +363,11 @@ public interface APIConsumer extends APIManager {
     void removeSubscriber(APIIdentifier identifier, String userId) throws APIManagementException;
 
     /**
-     * This method is to update the subscriber.
-     *
-     * @param identifier    APIIdentifier
-     * @param userId        user id
-     * @param applicationId Application Id
-     * @throws APIManagementException if failed to update subscription
-     */
-    void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId) throws APIManagementException;
-
-    /**
      * @param identifier Api identifier
-     * @param comment comment text
-     * @param user Username of the comment author
+     * @param comment    comment text
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
-     *
-     * @deprecated
-     * This method needs to be removed once the Jaggery web apps are removed.
+     * @deprecated This method needs to be removed once the Jaggery web apps are removed.
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
 
@@ -435,44 +375,70 @@ public interface APIConsumer extends APIManager {
      * This method is to add a comment.
      *
      * @param identifier Api identifier
-     * @param comment comment object
-     * @param user Username of the comment author
+     * @param comment    comment object
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier Api identifier
+     * @param identifier      Api identifier
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
      *
-     * @param identifier API identifier
-     * @param commentId Comment ID
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId      Comment ID
+     * @param replyLimit
+     * @param replyOffset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(Identifier identifier, String commentId) throws APIManagementException;
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
+            APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api type wrapper
+     * @param apiTypeWrapper  Api type wrapper
+     * @param parentCommentID
+     * @param replyLimit
+     * @param replyOffset
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId      comment ID
+     * @param comment        Comment object
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
      *
      * @param identifier API Identifier
-     * @param commentId Comment ID
+     * @param commentId  Comment ID
      * @throws APIManagementException if failed to delete comment for identifier
      */
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId      Comment ID
+     * @return boolean
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -563,7 +529,7 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    Application[] getApplicationsByOwner(String userId) throws APIManagementException;
+    Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException;
 
     /**
      * Updates the application owner of a given application
@@ -769,28 +735,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns the swagger definition of the API for the given microgateway gateway label as a string
-     *
-     * @param api api
-     * @param labelName name of the microgateway label
-     * @return swagger string
-     * @throws APIManagementException if error occurred while obtaining the swagger definition
-     */
-    String getOpenAPIDefinitionForLabel(API api, String labelName)
-            throws APIManagementException;
-
-    /**
-     * Returns the swagger definition of the API for the given container managed cluster name as a string
-     *
-     * @param api api
-     * @param clusterName name of the container managed cluster
-     * @return swagger string
-     * @throws APIManagementException if error occurred while obtaining the swagger definition
-     */
-    String getOpenAPIDefinitionForClusterName(API api, String clusterName)
-            throws APIManagementException;
-
-    /**
      * Revokes the oldAccessToken generating a new one.
      *
      * @param oldAccessToken          Token to be revoked
@@ -849,16 +793,6 @@ public interface APIConsumer extends APIManager {
      */
     Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException;
-
-    /**
-     * Returns a set of scopes for a given space seperated scope key string
-     *
-     * @param scopeKeys a space seperated string of scope keys
-     * @param tenantId  tenant id
-     * @return set of scopes
-     * @throws APIManagementException
-     */
-    Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
     /**
      * Returns the groupId of a specific Application when the Id is provided
@@ -980,12 +914,22 @@ public interface APIConsumer extends APIManager {
     String getRequestedTenant();
 
     /**
-     * Checks whether the DevPortal Anonymous Mode is enabled.
      *
-     * @param tenantDomain       tenant domain
-     * @throws APIManagementException if an error occurs while reading configs
+     * @param apiId API UUID
+     * @return Set of Topics defined in a specified Async API
+     * @throws APIManagementException if an error occurs while retrieving data
      */
-    boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
+    Set<Topic> getTopics(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves webhook subscriptions for a webhook API
+     *
+     * @param applicationId Application UUID
+     * @param apiId         API UUID
+     * @return Set of Subscriptions of application to a API
+     * @throws APIManagementException if an error occurs while retrieving data
+     */
+    Set<Subscription> getTopicSubscriptions(String applicationId, String apiId) throws APIManagementException;
 
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
@@ -994,4 +938,43 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given gateway environment as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param environmentName API Gateway environment name
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
+            throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param labelName name of the microgateway label
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName)
+            throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details of API by providing API uuid
+     *
+     * @param apiUUID API UUID
+     * @return List<APIRevisionDeployment> Object
+     * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
+
+    void renameSolaceApplication(String organization, Application application) throws APIManagementException;
+
+    boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException;
+
+    String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException;
+
+    void patchSolaceApplicationClientId(String organization, Application application, String consumerKey) throws APIManagementException;
 }

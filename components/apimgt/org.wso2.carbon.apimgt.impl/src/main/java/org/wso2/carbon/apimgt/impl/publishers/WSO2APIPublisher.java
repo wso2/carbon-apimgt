@@ -49,11 +49,10 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -74,8 +73,8 @@ import javax.xml.stream.XMLStreamException;
 
 /**
  * This class handles all the Publisher functionality when publishing an API to an external WSO2 Store.
- * When publishing an API to an external store, this uses APIImportExportManager to export the API with advertise_only
- * property true and uses the Import API Admin REST API in external store to import and publish the API. To remove
+ * When publishing an API to an external store, this uses ImportExportAPI service to export the API with advertise_only
+ * property true and uses the APIs Import Publisher REST API in external store to import and publish the API. To remove
  * an API from external store, this class uses the API DELETE Publisher REST API of external store.
  */
 public class WSO2APIPublisher implements APIPublisher {
@@ -131,54 +130,34 @@ public class WSO2APIPublisher implements APIPublisher {
     private File exportAPIArchive(API api) throws APIManagementException {
 
         File apiArchive;
-        String archiveBasePath = null;
         String tenantDomain = null;
         int tenantId;
-        APIImportExportManager apiImportExportManager;
 
         try {
-            apiImportExportManager = new APIImportExportManager(getLoggedInUserProvider(), getLoggedInUsername());
-            //Set additional API properties to identify it as an advertised only API
-            api.setAdvertiseOnly(true);
-            //Change owner to original provider as the provider will be overriding after importing
-            api.setApiOwner(api.getId().getProviderName());
-            //set redirect URL for the original Store
+            // Get tenant domain and ID to generate the original DevPortal URL (redirect URL) for the original Store
             tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
                     api.getId().getProviderName()));
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            api.setRedirectURL(getExternalStoreRedirectURLForAPI(tenantId, api.getUUID()));
-            //remove custom sequences from API to prevent them getting deployed in external store gateway
-            api.setInSequence(null);
-            api.setOutSequence(null);
-            api.setFaultSequence(null);
+
             //Export API as an archive file and set it as a multipart entity in the request
-            archiveBasePath = apiImportExportManager.exportAPIArtifacts(api, Boolean.TRUE, ExportFormat.JSON);
-            //remove endpoint_certificates.json if exists to prevent adding them into external store trustore
-            File endpointCertificates = new File(archiveBasePath + File.separator + api.getId().getApiName() + "-"
-                    + api.getId().getVersion() + APIImportExportConstants.JSON_ENDPOINTS_CERTIFICATE_FILE);
-            if (endpointCertificates.exists()) {
-                FileUtils.deleteQuietly(endpointCertificates);
-            }
-            CommonUtil.archiveDirectory(archiveBasePath);
-            apiArchive = new File(archiveBasePath + APIConstants.ZIP_FILE_EXTENSION);
+            ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+            apiArchive = importExportAPI.exportAPI(api.getUuid(), api.getId().getName(), api.getId().getVersion(),
+                    String.valueOf(api.getRevisionId()), api.getId().getProviderName(), Boolean.TRUE, ExportFormat.JSON,
+                    Boolean.TRUE, Boolean.TRUE, Boolean.FALSE,
+                    getExternalStoreRedirectURLForAPI(tenantId, api.getUuid()));
             if (log.isDebugEnabled()) {
                 log.debug("API successfully exported to file: " + apiArchive.getName());
             }
         } catch (APIImportExportException e) {
             String errorMessage = "Error while exporting API: " + api.getId().getApiName() + " version: "
                     + api.getId().getVersion();
-            log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         } catch (UserStoreException e) {
-            String errorMessage = "Error while getting tenantId for tenant domain: " + tenantDomain
-                    + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
-            log.error(errorMessage, e);
+            String errorMessage =
+                    "Error while getting tenantId for tenant domain: " + tenantDomain + " when exporting API:" + api
+                            .getId().getApiName() + " version: " + api.getId().getVersion();
             throw new APIManagementException(errorMessage, e);
-        } finally {
-            if (archiveBasePath != null) {
-                FileUtils.deleteQuietly(new File(archiveBasePath));
-            }
         }
         return apiArchive;
     }
@@ -207,9 +186,9 @@ public class WSO2APIPublisher implements APIPublisher {
             multipartEntityBuilder = MultipartEntityBuilder.create();
             multipartEntityBuilder.addPart(APIConstants.RestApiConstants.IMPORT_API_ARCHIVE_FILE,
                     new FileBody(apiArchive));
-            //Get Admin REST import API endpoint from given store endpoint
-            storeEndpoint = getAdminRESTURLFromStoreURL(store.getEndpoint())
-                    + APIConstants.RestApiConstants.REST_API_ADMIN_IMPORT_API_RESOURCE;
+            //Get Publisher REST API apis/import endpoint from given store endpoint
+            storeEndpoint = getPublisherRESTURLFromStoreURL(store.getEndpoint())
+                    + APIConstants.RestApiConstants.REST_API_PUBLISHER_API_IMPORT_RESOURCE;
             httpclient = getHttpClient(storeEndpoint);
             uriBuilder = new URIBuilder(storeEndpoint);
             //Add preserveProvider query parameter false
@@ -239,20 +218,6 @@ public class WSO2APIPublisher implements APIPublisher {
             FileUtils.deleteQuietly(apiArchive);
         }
         return httpResponse;
-    }
-
-    /**
-     * Get Admin REST API URL from given Store Endpoint URL assuming that given Store endpoint URL is similar to
-     * "http://localhost:9763/store.
-     *
-     * @param storeEndpoint Store endpoint URL with "/store" context
-     * @return Admin REST API URL of external store
-     */
-    private String getAdminRESTURLFromStoreURL(String storeEndpoint) throws APIManagementException {
-
-        //Get Admin REST import API endpoint from given store endpoint
-        return getStoreHostURLFromEndpoint(storeEndpoint)
-                .concat(APIConstants.RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0);
     }
 
     /**

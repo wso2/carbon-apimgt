@@ -27,7 +27,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import InlineMessage from 'AppComponents/Shared/InlineMessage'
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import ButtonPanel from './ButtonPanel';
 
@@ -59,7 +59,6 @@ const createAppStep = (props) => {
     });
     const [isNameValid, setIsNameValid] = useState(true);
     const [allAppAttributes, setAllAppAttributes] = useState(null);
-    const [notFound, setNotFound] = useState(false);
     const [hasValidKM, setHasValidKM] = useState(null);
     const {
         currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses,
@@ -203,12 +202,14 @@ const createAppStep = (props) => {
                 const responseKeyManagerList = [];
                 keyManagers.body.list.map((item) => responseKeyManagerList.push(item));
 
-                let hasValidKM;
+                let hasValidKMInner;
                 if (responseKeyManagerList.length > 0) {
-                    const responseKeyManagerList_default = responseKeyManagerList.filter(x => x.name === 'Resident Key Manager' && x.enabled);
-                    hasValidKM = responseKeyManagerList_default.length !== 0;
+                    const responseKeyManagerListDefault = responseKeyManagerList.filter(
+                        (x) => x.name === 'Resident Key Manager' && x.enabled,
+                    );
+                    hasValidKMInner = responseKeyManagerListDefault.length !== 0;
                 }
-                setHasValidKM(hasValidKM);
+                setHasValidKM(hasValidKMInner);
                 setApplicationRequest(newRequest);
                 setThrottlingPolicyList(throttlingPolicyListLocal);
                 setAllAppAttributes(allAppAttr);
@@ -219,7 +220,10 @@ const createAppStep = (props) => {
                 }
                 const { status } = error;
                 if (status === 404) {
-                    setNotFound(true);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Credentials.Wizard.CreateAppStep.error.404',
+                        defaultMessage: 'Resource not found',
+                    }));
                 }
             });
     }, []);
@@ -229,21 +233,24 @@ const createAppStep = (props) => {
         return (
             <Box mb={1} ml={4}>
                 <InlineMessage type='warn'>
-                        <FormattedMessage
-                            id='Apis.Details.Credentials.Wizard.CreateAppStep.default.km.msg'
-                            defaultMessage={'Wizard is only accessible via the Resident Key Manager.'
+                    <FormattedMessage
+                        id='Apis.Details.Credentials.Wizard.CreateAppStep.default.km.msg'
+                        defaultMessage={'Wizard is only accessible via the Resident Key Manager.'
                                 + 'But the Resident Key Manager is disabled at the moment.'}
-                        />
+                    />
                 </InlineMessage>
                 <Box mt={2}>
                     <Link to={`/apis/${apiObject.id}/credentials`}>
-                        <Button variant="contained"><FormattedMessage
-                            id='Apis.Details.Credentials.Wizard.CreateAppStep.cancel'
-                            defaultMessage='Cancel'
-                        /></Button>
+                        <Button variant='contained'>
+                            <FormattedMessage
+                                id='Apis.Details.Credentials.Wizard.CreateAppStep.cancel'
+                                defaultMessage='Cancel'
+                            />
+                        </Button>
                     </Link>
                 </Box>
-            </Box>);
+            </Box>
+        );
     }
 
     return (

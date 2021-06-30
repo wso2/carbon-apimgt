@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.apimgt.notification.internal;
 
-import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 
 import java.util.HashMap;
@@ -30,8 +31,9 @@ import java.util.Map;
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-    private Map<String, KeyManagerEventHandler> keyManagerEventHandlerMap = new HashMap<>();
+    private Map<String, EventHandler> eventHandlerMap = new HashMap<>();
     private EventStreamService eventStreamService;
+    private APIManagerConfigurationService apiManagerConfigurationService;
 
     private ServiceReferenceHolder() {
 
@@ -42,20 +44,20 @@ public class ServiceReferenceHolder {
         return instance;
     }
 
-    public KeyManagerEventHandler getKeyManagerEventHandlerByType(String type) {
+    public EventHandler getEventHandlerByType(String type) {
 
-        return keyManagerEventHandlerMap.get(type);
+        return eventHandlerMap.get(type);
     }
 
-    public void addKeyManagerEventHandler(String type, KeyManagerEventHandler keyManagerEventHandler) {
+    public void addEventHandler(String type, EventHandler eventHandler) {
 
-        keyManagerEventHandlerMap.put(type, keyManagerEventHandler);
+        eventHandlerMap.put(type, eventHandler);
 
     }
 
-    public void removeKeyManagerEventHandlers(String type) {
+    public void removeEventHandlers(String type) {
 
-        keyManagerEventHandlerMap.remove(type);
+        eventHandlerMap.remove(type);
 
     }
 
@@ -67,5 +69,13 @@ public class ServiceReferenceHolder {
     public EventStreamService getEventStreamService() {
 
         return eventStreamService;
+    }
+
+    public APIManagerConfigurationService getAPIManagerConfigurationService() {
+        return apiManagerConfigurationService;
+    }
+
+    public void setAPIManagerConfigurationService(APIManagerConfigurationService apiManagerConfigurationService) {
+        this.apiManagerConfigurationService = apiManagerConfigurationService;
     }
 }

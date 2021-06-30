@@ -17,7 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
 import org.apache.velocity.VelocityContext;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 
 /**
  * Set environment in context

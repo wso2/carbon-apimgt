@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -70,5 +71,12 @@ public interface KeyManagerConnectorConfiguration {
     public default String getDefaultConsumerKeyClaim() {
 
         return "";
+    }
+    
+    /**
+     * This method returns keymanager endpoint configurations.
+     */
+    public default List<ConfigurationDto> getEndpointConfigurations() {
+        return Collections.emptyList();
     }
 }

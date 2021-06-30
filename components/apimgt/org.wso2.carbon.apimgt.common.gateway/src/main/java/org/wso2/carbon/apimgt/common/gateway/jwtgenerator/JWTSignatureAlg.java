@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 /**
- * Enum for the jwt signature algorithm
+ * Enum for the jwt signature algorithm.
  */
 public enum JWTSignatureAlg {
     SHA256_WITH_RSA("RS256"), NONE("none");

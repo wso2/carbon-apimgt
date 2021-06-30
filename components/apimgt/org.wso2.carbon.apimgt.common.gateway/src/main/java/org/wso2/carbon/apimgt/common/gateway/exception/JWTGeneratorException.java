@@ -49,7 +49,7 @@ public class JWTGeneratorException extends Exception {
     }
 
     /**
-     * This is a default constructure where you can pass error code to error DTO
+     * This is a default constructure where you can pass error code to error DTO.
      *
      * @param message Error message
      * @param code    Exception code that need to pass to the error DTO
@@ -60,7 +60,7 @@ public class JWTGeneratorException extends Exception {
     }
 
     /**
-     * This is a default constructure where you can pass error code to error DTO
+     * This is a default constructure where you can pass error code to error DTO.
      *
      * @param code Exception code that need to pass to the error DTO
      */
@@ -70,7 +70,7 @@ public class JWTGeneratorException extends Exception {
     }
 
     /**
-     * This is a default constructure where you can pass error code to error DTO
+     * This is a default constructure where you can pass error code to error DTO.
      *
      * @param message Error message
      * @param cause   throwable object.

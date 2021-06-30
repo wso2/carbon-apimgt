@@ -22,7 +22,6 @@ public class ServiceDTO   {
   
     private String id = null;
     private String name = null;
-    private String displayName = null;
     private String description = null;
     private String version = null;
     private String serviceKey = null;
@@ -98,7 +97,7 @@ return null;
 return null;
         }
     }
-    private SecurityTypeEnum securityType = null;
+    private SecurityTypeEnum securityType = SecurityTypeEnum.NONE;
     private Boolean mutualSSLEnabled = false;
     private Integer usage = null;
     private String createdTime = null;
@@ -134,28 +133,11 @@ return null;
   @ApiModelProperty(example = "Pizzashack-Endpoint", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="^[^\\*]+$")  public String getName() {
+ @Pattern(regexp="^[^\\*]+$") @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   **/
-  public ServiceDTO displayName(String displayName) {
-    this.displayName = displayName;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "Pizzashack-Endpoint", value = "")
-  @JsonProperty("displayName")
- @Pattern(regexp="^[^\\*]+$")  public String getDisplayName() {
-    return displayName;
-  }
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
   }
 
   /**
@@ -168,7 +150,7 @@ return null;
   
   @ApiModelProperty(example = "A Catalog Entry that exposes a REST endpoint", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
@@ -186,7 +168,7 @@ return null;
   @ApiModelProperty(example = "v1", required = true, value = "")
   @JsonProperty("version")
   @NotNull
-  public String getVersion() {
+ @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
@@ -203,7 +185,7 @@ return null;
   
   @ApiModelProperty(example = "Pizzashack-Endpoint-1.0.0", value = "")
   @JsonProperty("serviceKey")
-  public String getServiceKey() {
+ @Size(max=512)  public String getServiceKey() {
     return serviceKey;
   }
   public void setServiceKey(String serviceKey) {
@@ -218,8 +200,9 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "http://localhost/pizzashack", value = "")
+  @ApiModelProperty(example = "http://localhost/pizzashack", required = true, value = "")
   @JsonProperty("serviceUrl")
+  @NotNull
   public String getServiceUrl() {
     return serviceUrl;
   }
@@ -236,8 +219,9 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "OAS3", value = "The type of the provided API definition")
+  @ApiModelProperty(example = "OAS3", required = true, value = "The type of the provided API definition")
   @JsonProperty("definitionType")
+  @NotNull
   public DefinitionTypeEnum getDefinitionType() {
     return definitionType;
   }
@@ -272,7 +256,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Whether Mutual SSL is enabled for the endpoint")
+  @ApiModelProperty(example = "false", value = "Whether Mutual SSL is enabled for the endpoint")
   @JsonProperty("mutualSSLEnabled")
   public Boolean isMutualSSLEnabled() {
     return mutualSSLEnabled;
@@ -379,7 +363,6 @@ return null;
     ServiceDTO service = (ServiceDTO) o;
     return Objects.equals(id, service.id) &&
         Objects.equals(name, service.name) &&
-        Objects.equals(displayName, service.displayName) &&
         Objects.equals(description, service.description) &&
         Objects.equals(version, service.version) &&
         Objects.equals(serviceKey, service.serviceKey) &&
@@ -396,7 +379,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
+    return Objects.hash(id, name, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
   }
 
   @Override
@@ -406,7 +389,6 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    serviceKey: ").append(toIndentedString(serviceKey)).append("\n");

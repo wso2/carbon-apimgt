@@ -64,7 +64,8 @@ return null;
     public enum SourceTypeEnum {
         INLINE("INLINE"),
         URL("URL"),
-        FILE("FILE");
+        FILE("FILE"),
+        MARKDOWN("MARKDOWN");
         private String value;
 
         SourceTypeEnum (String v) {

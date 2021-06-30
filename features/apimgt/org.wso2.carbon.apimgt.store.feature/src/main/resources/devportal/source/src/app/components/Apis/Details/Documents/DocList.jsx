@@ -23,7 +23,6 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -31,14 +30,9 @@ import Button from '@material-ui/core/Button';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Alert from 'AppComponents/Shared/Alert';
-import API from 'AppData/api';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import useWindowSize from 'AppComponents/Shared/UseWindowSize';
 import Details from 'AppComponents/Apis/Details/Documents/Details';
-import { PageNotFound } from 'AppComponents/Base/Errors';
-import Progress from 'AppComponents/Shared/Progress';
 
 const styles = (theme) => ({
     paper: {
@@ -52,11 +46,6 @@ const styles = (theme) => ({
         minHeight: 400 + theme.spacing(4),
         height: '100%',
         background: theme.custom.apiDetailPages.documentBackground,
-    },
-    contentWrapper: {
-        paddingLeft: theme.spacing(3),
-        paddingRight: theme.spacing(3),
-        paddingTop: theme.spacing(3),
     },
     docContent: {
         paddingTop: theme.spacing(1),
@@ -83,11 +72,6 @@ const styles = (theme) => ({
         '& .material-icons': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
         },
-    },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing(3),
-        paddingTop: theme.spacing(3),
     },
     titleSub: {
         marginLeft: theme.spacing(2),
@@ -128,7 +112,6 @@ const styles = (theme) => ({
     },
     toggleWrapper: {
         position: 'relative',
-        background: '#fff9',
         paddingLeft: 20,
         background: theme.custom.apiDetailPages.documentBackground,
     },
@@ -246,6 +229,7 @@ function DocList(props) {
                                                             inset
                                                             primary={doc.name}
                                                             classes={{ root: classes.docLinkRoot }}
+                                                            aria-label={'View ' + doc.name + ' document'}
                                                         />
                                                     </ListItem>
                                                 ))}
@@ -258,7 +242,11 @@ function DocList(props) {
                     </div>
                 )}
                 <div className={classes.toggleWrapper}>
-                    <Button className={classes.toggler} onClick={toggleDocList}>
+                    <Button
+                        className={classes.toggler}
+                        onClick={toggleDocList}
+                        aria-label='Toggle the document list'
+                    >
                         <div className={classes.togglerTextParent}>
                             <div className={classes.togglerText}>
                                 {showDocList ? (

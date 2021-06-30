@@ -180,6 +180,39 @@ export default class User {
             sessionState: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
         };
     }
+
+    /**
+     * Property should be defined in `User.PROPERTIES`
+     * @param {String} name Name of the property, Should be a defined property in User.CONST.PROPERTIES
+     * @returns {Object} property from local storage
+     */
+    getProperty(name) {
+        if (!Object.values(User.PROPERTIES).includes(name)) {
+            throw new Error(`${name} is not a valid property, `
+            + `property name should be one of ${Object.values(User.PROPERTIES).join(',')} `);
+        }
+        return JSON.parse(localStorage.getItem(`wso2_pub_user_${name}`));
+    }
+
+    /**
+     * Property should be a defined property in `User.PROPERTIES`
+     * @param {String} name property name
+     * @param {Object} value property value should be in string format
+     */
+    setProperty(name, value) {
+        if (!Object.values(User.PROPERTIES).includes(name)) {
+            throw new Error(`${name} is not a valid property, `
+            + `property name should be one of ${Object.values(User.PROPERTIES).join(',')} `);
+        }
+        localStorage.setItem(`${User.CONST.PROPERTY_PREFIX}${name}`, JSON.stringify(value));
+    }
+
+    /**
+     * Check whether the current user has admin role or not
+     */
+    isAdmin() {
+        return this.scopes.includes('apim:admin');
+    }
 }
 
 User.CONST = {
@@ -190,7 +223,15 @@ User.CONST = {
     LOCAL_STORAGE_USER: 'wso2_user_publisher',
     USER_EXPIRY_TIME: 'user_expiry_time',
     PUBLISHER_SESSION_STATE: 'publisher_session_state',
+    PROPERTY_PREFIX: 'wso2_pub_user_',
 };
+
+User.PROPERTIES = {
+    PORTAL_CONFIG_OPEN: 'apis_details_portal_config_open_state',
+    API_CONFIG_OPEN: 'apis_details_api_config_open_state',
+};
+
+Object.freeze(User.PROPERTIES);// Do not allow to add properties dynamically
 /**
  * Map of users (key = environmentLabel, value = User instance)
  * @type {Map}
@@ -198,3 +239,5 @@ User.CONST = {
  */
 User._userMap = new Map();
 /* eslint-enable no-underscore-dangle */
+
+export const { PROPERTIES, CONST } = User;

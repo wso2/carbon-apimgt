@@ -43,7 +43,6 @@ public class RegistrySearchUtil {
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
-    public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String SEARCH_AND_TAG = "&";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
     public static final String NAME_TYPE_PREFIX = "name";
@@ -74,7 +73,7 @@ public class RegistrySearchUtil {
     public static final String NULL_USER_ROLE_LIST = "null";
     public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
-            NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
+            NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
             CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase() };
@@ -99,10 +98,9 @@ public class RegistrySearchUtil {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                        if (DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])
-                                || SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
+                        if (DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
                             throw new APIPersistenceException("Invalid query. AND based search is not supported for "
-                                    + "doc and subcontext prefixes");
+                                    + "doc prefix");
                         }
                     }
                     if (i == 0) {
@@ -244,8 +242,7 @@ public class RegistrySearchUtil {
 
         // Filtering the queries related with custom properties
         for (String query : searchQueries) {
-            if (searchQuery.startsWith(SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
-                    searchQuery.startsWith(DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+            if (searchQuery.startsWith(DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 filteredQuery.append(query);
                 break;
             }
@@ -396,8 +393,7 @@ public class RegistrySearchUtil {
     
     public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
-        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery) &&
-                !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(modifiedQuery)) {
+        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
             String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
             if (displayMultipleStatus) {

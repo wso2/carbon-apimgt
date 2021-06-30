@@ -23,13 +23,14 @@ import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
 import ReactSafeHtml from 'react-safe-html';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { ApiContext } from '../ApiContext';
 import API from 'AppData/api';
+import { ApiContext } from '../ApiContext';
 import Alert from '../../../Shared/Alert';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
@@ -68,7 +69,7 @@ const styles = theme => ({
     fileAvailability: {
         marginTop: theme.spacing(1),
         marginLeft: theme.spacing(0.8),
-    }
+    },
 });
 /**
  *
@@ -78,35 +79,21 @@ const styles = theme => ({
  */
 function View(props) {
     const {
-        classes, doc, apiId, fullScreen, intl,
+        classes, doc, apiId, fullScreen, intl, dontShowName,
     } = props;
     const { api } = useContext(ApiContext);
     const [code, setCode] = useState('');
-    const [isFileAvailable,setIsFileAvailable] = useState(false);
+    const [isFileAvailable, setIsFileAvailable] = useState(false);
     const restAPI = new API();
-
-    useEffect(() => {
-        if (doc.sourceType === 'MARKDOWN' || doc.sourceType === 'INLINE') loadContentForDoc();
-        if (doc.sourceType === 'FILE') {
-            const promised_get_content = restAPI.getFileForDocument(apiId, doc.documentId);
-            promised_get_content
-                .then(() => {
-                    setIsFileAvailable(true);
-                })
-                .catch(() => {
-                    setIsFileAvailable(false);
-                });
-        } 
-    }, [props.doc]);
 
     const loadContentForDoc = () => {
         const docPromise = restAPI.getInlineContentOfDocument(apiId, doc.documentId);
         docPromise
-            .then((doc) => {
-                let text = doc.text;
-
-                Object.keys(api).map( fieldName => {
-                    let regex = new RegExp('\_\_\_'+ fieldName +'\_\_\_', 'g');
+            .then((docComplete) => {
+                let { text } = docComplete;
+                Object.keys(api).forEach((fieldName) => {
+                    // eslint-disable-next-line no-useless-escape
+                    const regex = new RegExp('\_\_\_' + fieldName + '\_\_\_', 'g');
                     text = text.replace(regex, api[fieldName]);
                 });
                 setCode(text);
@@ -117,11 +104,27 @@ function View(props) {
                 }
             });
     };
+    useEffect(() => {
+        if (doc.sourceType === 'MARKDOWN' || doc.sourceType === 'INLINE') loadContentForDoc();
+        if (doc.sourceType === 'FILE') {
+            const promisedGetContent = restAPI.getFileForDocument(apiId, doc.documentId);
+            promisedGetContent
+                .then(() => {
+                    setIsFileAvailable(true);
+                })
+                .catch(() => {
+                    setIsFileAvailable(false);
+                });
+        }
+    }, [props.doc]);
+
     /**
      * Download the document related file
      * @param {any} response Response of download file
+     * @param {any} doc Response of download file
+     * @returns {void}
      */
-    const downloadFile = (response, doc) => {
+    const downloadFile = (response) => {
         let fileName = '';
         const contentDisposition = response.headers['content-disposition'];
 
@@ -160,10 +163,10 @@ function View(props) {
         }
     };
     const handleDownload = () => {
-        const promised_get_content = restAPI.getFileForDocument(apiId, doc.documentId);
-        promised_get_content
+        const promisedGetContent = restAPI.getFileForDocument(apiId, doc.documentId);
+        promisedGetContent
             .then((done) => {
-                downloadFile(done, document);
+                downloadFile(done);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -176,26 +179,41 @@ function View(props) {
             });
     };
     return (
-        <React.Fragment>
+        <>
             {!fullScreen && <div className={classes.docBadge}>{doc.type}</div>}
 
-            {doc.summary && (
+            {(!dontShowName && doc.summary) && (
                 <Typography variant='body1' className={classes.docSummary}>
                     {doc.summary}
                 </Typography>
             )}
 
-            {doc.sourceType === 'MARKDOWN' && <ReactMarkdown escapeHtml={false} source={code} />}
+            {doc.sourceType === 'MARKDOWN'
+            && (
+                <ReactMarkdown plugins={[gfm]} escapeHtml>
+                    {code}
+                </ReactMarkdown>
+            )}
             {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
             {doc.sourceType === 'URL' && (
-                <a className={classes.displayURL} href={doc.sourceUrl} target='_blank'>
+                <a
+                    className={classes.displayURL}
+                    href={doc.sourceUrl}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                >
                     {doc.sourceUrl}
                     <Icon className={classes.displayURLLink}>open_in_new</Icon>
                 </a>
             )}
             {doc.sourceType === 'FILE' && (
-                <Button variant='contained' color='default' className={classes.button} 
-                disabled={!isFileAvailable} onClick={handleDownload} >
+                <Button
+                    variant='contained'
+                    color='default'
+                    className={classes.button}
+                    disabled={!isFileAvailable}
+                    onClick={handleDownload}
+                >
                     <FormattedMessage id='Apis.Details.Documents.View.btn.download' defaultMessage='Download' />
 
                     <Icon>arrow_downward</Icon>
@@ -209,10 +227,12 @@ function View(props) {
                     />
                 </Typography>
             )}
-        </React.Fragment>
+        </>
     );
 }
-
+View.defaultProps = {
+    dontShowName: false,
+};
 View.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     doc: PropTypes.shape({}).isRequired,
@@ -221,6 +241,7 @@ View.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
     fullScreen: PropTypes.bool.isRequired,
+    dontShowName: PropTypes.bool,
 };
 
 export default injectIntl(withStyles(styles)(View));

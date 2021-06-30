@@ -191,10 +191,12 @@ public class URITemplate implements Serializable{
         httpVerbs.add(httpVerb);
     }
 
-    public String getHttpVerbs() {
+    public LinkedHashSet<String> getHttpVerbs() {
 
-        return httpVerb;
+        return httpVerbs;
     }
+
+
 
     public void setAuthTypes(String authType) {
 

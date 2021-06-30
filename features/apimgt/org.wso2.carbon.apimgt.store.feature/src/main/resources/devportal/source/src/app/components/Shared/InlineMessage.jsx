@@ -4,6 +4,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Icon from '@material-ui/core/Icon';
 import VerticalDivider from './VerticalDivider';
+import { Alert, AlertTitle } from '@material-ui/lab';
+
 /**
  * Main style object
  *
@@ -11,31 +13,10 @@ import VerticalDivider from './VerticalDivider';
  */
 const styles = theme => ({
     root: {
-        display: 'flex',
-        minHeight: 100,
-        alignItems: 'center',
-        paddingLeft: theme.spacing(2),
-        borderRadius: theme.shape.borderRadius,
-        border: 'solid 1px #ddd',
-        '& span.material-icons': {
-            fontSize: 60,
-            color: theme.custom.info.color,
+        width: '100%',
+        '& > * + *': {
+            marginTop: theme.spacing(2),
         },
-        '& span, & h5, & label, & input': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
-        },
-    },
-    iconItem: {
-        paddingRight: theme.spacing(2),
-        fontSize: 60,
-    },
-    button: {
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1),
-    },
-    content: {
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
     },
 });
 /**
@@ -44,31 +25,21 @@ const styles = theme => ({
  * @class InlineMessage
  * @extends {React.Component}
  */
-class InlineMessage extends React.Component {
-    state = {
-        value: 0,
-    };
+function InlineMessage(props) {
+    const { type, title } = props;
+    const messageType = type || 'info';
+    return (
+        <Alert severity={messageType}>
+            {title && (<AlertTitle>{title}</AlertTitle>)}
+            {props.children}
+        </Alert>
 
-    handleExpandClick = () => {
-        this.setState(state => ({ expanded: !state.expanded }));
-    };
-
-    render() {
-        const { classes, type } = this.props;
-        const messgeType = type || 'info';
-        return (
-            <Paper className={classes.root} elevation={1}>
-                {messgeType === 'info' && <Icon className={classes.iconItem}>info</Icon>}
-                {messgeType === 'warn' && <Icon className={classes.iconItem}>warning</Icon>}
-                <VerticalDivider height={100} />
-                <div className={classes.content}>{this.props.children}</div>
-            </Paper>
-        );
-    }
+    );
 }
+
 InlineMessage.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     type: PropTypes.string.isRequired,
 };
 
-export default withStyles(styles)(InlineMessage);
+export default InlineMessage;

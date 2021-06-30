@@ -39,12 +39,13 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String redirectURL;  // (originalStoreUrl)
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
     private List<String> securityScheme = new ArrayList<>();
     private Set<String> environments;
-    private Set<String> gatewayLabels;
     private Set<String> apiCategories;
     private boolean isMonetizationEnabled; //(monetizationStatus)
     private List<String> keyManagers = new ArrayList<>();
@@ -59,6 +60,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
+    private boolean isSolaceAPI = false;
+    private String solaceTransportProtocols;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -172,6 +175,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
+    }
+
     public String getSubscriptionAvailability() {
         return subscriptionAvailability;
     }
@@ -210,14 +221,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setEnvironments(Set<String> environments) {
         this.environments = environments;
-    }
-
-    public Set<String> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(Set<String> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
     }
 
     public Set<String> getApiCategories() {
@@ -301,7 +304,15 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
+    public boolean isSolaceAPI() { return isSolaceAPI; }
 
+    public void setSolaceAPI(boolean solaceAPI) { isSolaceAPI = solaceAPI; }
+
+    public String getSolaceTransportProtocols() { return solaceTransportProtocols; }
+
+    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+    }
 
     @Override
     public String toString() {
@@ -312,7 +323,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + ", environments=" + environments + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="

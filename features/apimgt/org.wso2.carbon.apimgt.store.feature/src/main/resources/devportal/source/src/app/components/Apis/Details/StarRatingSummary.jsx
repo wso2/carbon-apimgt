@@ -23,15 +23,11 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 
-/**
- *
- *
- * @param {*} theme
- */
 const styles = (theme) => {
     const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(theme.custom.infoBar.background);
     return {
         starRate: {
+            marginRight: theme.spacing(),
             color: starColor,
             '&.material-icons': {
                 fontSize: 30,
@@ -45,22 +41,28 @@ const styles = (theme) => {
     };
 };
 
+/**
+ *
+ * @param {JSON} props props passed from parent
+ * @returns {JSX} summary of the rating
+ */
 function StarRatingSummary(props) {
     const {
         classes, theme, avgRating, reviewCount, returnCount,
     } = props;
     return (
-        <React.Fragment>
+        <>
             {returnCount > 0 ? (
-                <React.Fragment>
-                    <Icon className={classes.starRate}>star_border</Icon>
+                <>
+                    <Icon className={classes.starRate}>star</Icon>
                     <div className={classes.ratingSummary}>
-                        <div className={classes.userRating}>
+                        <div aria-label='User rating' className={classes.userRating}>
                             <Typography variant='body1'>{avgRating}</Typography>
-                            <Typography variant='body1'>/5.0</Typography>
+                            <Typography aria-label='out of five' variant='body1'>/5.0</Typography>
                         </div>
-                        <Typography variant='body1' gutterBottom align='left'>
-                            {reviewCount}{' '}
+                        <Typography aria-label='Number of users who has rated' variant='body1' gutterBottom align='left'>
+                            {reviewCount}
+                            {' '}
                             {reviewCount === 1 ? (
                                 <FormattedMessage defaultMessage='user' id='Apis.Details.StarRatingSummary.user' />
                             ) : (
@@ -68,18 +70,18 @@ function StarRatingSummary(props) {
                             )}
                         </Typography>
                     </div>
-                </React.Fragment>
+                </>
             ) : (
-                <React.Fragment>
+                <>
                     <StarRate className={classes.starRate} style={{ color: theme.palette.grey.A200 }} />
                     <div className={classes.ratingSummary}>
                         <Typography variant='caption' gutterBottom align='left'>
                             <FormattedMessage defaultMessage='Not Rated' id='Apis.Details.StarRatingSummary.not.rated' />
                         </Typography>
                     </div>
-                </React.Fragment>
+                </>
             )}
-        </React.Fragment>
+        </>
     );
 }
 

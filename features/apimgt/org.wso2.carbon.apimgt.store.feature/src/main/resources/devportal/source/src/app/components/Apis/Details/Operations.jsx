@@ -19,21 +19,17 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import { withStyles, withTheme } from '@material-ui/core/styles';
-import { FormattedMessage } from 'react-intl';
-import { injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Table from '@material-ui/core/Table';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import Api from 'AppData/api';
 
 /**
- *
- *
- * @param {*} props
- * @returns
+ * @param {JSON} props props from parent
+ * @returns {JSX} chip item
  */
 function RenderMethodBase(props) {
     const { theme, method } = props;
@@ -42,7 +38,7 @@ function RenderMethodBase(props) {
         : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properlly');
+        console.log('Check the theme settings. The resourceChipColors is not populated properly');
         chipColor = '#cccccc';
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.operationChipColor[method]);
@@ -51,8 +47,8 @@ function RenderMethodBase(props) {
 }
 
 RenderMethodBase.propTypes = {
-    theme: PropTypes.object.isRequired,
-    method: PropTypes.object.isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    method: PropTypes.shape({}).isRequired,
 };
 
 const RenderMethod = withTheme(RenderMethodBase);
@@ -103,26 +99,26 @@ class Operations extends React.Component {
     }
 
     /**
-     *
-     *
-     * @returns
+     * @returns {JSX} operations
      * @memberof Operations
      */
     render() {
         const { operations } = this.state;
         if (!operations) {
-            return <div>
-                <FormattedMessage
-                    id='Apis.Details.Operations.notFound'
-                    defaultMessage='Operations Not Found'
-                />
-            </div>;
+            return (
+                <div>
+                    <FormattedMessage
+                        id='Apis.Details.Operations.notFound'
+                        defaultMessage='Operations Not Found'
+                    />
+                </div>
+            );
         }
         const { classes } = this.props;
 
         return (
             <Table>
-                {operations && operations.length !== 0 && operations.map(item => (
+                {operations && operations.length !== 0 && operations.map((item) => (
                     <TableRow style={{ borderStyle: 'hidden' }} key={item.target + '_' + item.verb}>
                         <TableCell>
                             <Typography className={classes.heading} component='p' variant='body2'>
@@ -139,11 +135,11 @@ class Operations extends React.Component {
     }
 }
 Operations.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
-   
+
 };
 
 export default injectIntl(withStyles(styles)(Operations));

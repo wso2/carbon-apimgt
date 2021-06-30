@@ -34,9 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -56,10 +54,7 @@ public class RegistryCacheInvalidationClient {
     
 
     public RegistryCacheInvalidationClient() throws APIManagementException {
-        APIManagerConfiguration config =
-                                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                                               .getAPIManagerConfiguration();
-        environments = config.getApiGatewayEnvironments();
+        environments = APIUtil.getEnvironments();
     }
 
     

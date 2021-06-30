@@ -57,7 +57,7 @@ function renderInput(inputProps) {
         );
     }
     return (
-        <React.Fragment>
+        <>
             <div className={classes.searchBoxWrap}>
                 <InputLabel className={classes.ariaLabel} htmlFor='searchEnvironment'>Environment</InputLabel>
                 <NativeSelect
@@ -69,19 +69,19 @@ function renderInput(inputProps) {
                         id='Base.Header.headersearch.SearchUtils.lcState.all'
                         defaultMessage='All'
                     >
-                        {placeholder => <option value=''>{placeholder}</option>}
+                        {(placeholder) => <option value=''>{placeholder}</option>}
                     </FormattedMessage>
                     <FormattedMessage
                         id='Base.Header.headersearch.SearchUtils.lcState.published'
                         defaultMessage='Production'
                     >
-                        {placeholder => <option value='PUBLISHED'>{placeholder}</option>}
+                        {(placeholder) => <option value='PUBLISHED'>{placeholder}</option>}
                     </FormattedMessage>
                     <FormattedMessage
                         id='Base.Header.headersearch.SearchUtils.lcState.prototyped'
                         defaultMessage='Prototyped'
                     >
-                        {placeholder => <option value='PROTOTYPED'>{placeholder}</option>}
+                        {(placeholder) => <option value='PROTOTYPED'>{placeholder}</option>}
                     </FormattedMessage>
                 </NativeSelect>
                 <InputLabel className={classes.ariaLabel} htmlFor='searchQuery'>Search APIs</InputLabel>
@@ -102,7 +102,7 @@ function renderInput(inputProps) {
                     }}
                 />
             </div>
-        </React.Fragment>
+        </>
     );
 }
 
@@ -121,7 +121,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
     // TODO: Style the version ( and apiName if docs) apearing in the menu item
     const suffix = suggestion.type === 'API' ? suggestion.version : (suggestion.apiName + ' ' + suggestion.apiVersion);
     return (
-        <React.Fragment>
+        <>
             <Link to={path} style={{ color: 'black' }}>
                 <MenuItem selected={isHighlighted}>
                     <ListItemIcon>
@@ -146,7 +146,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
                 </MenuItem>
             </Link>
             <Divider />
-        </React.Fragment>
+        </>
     );
 }
 
@@ -168,9 +168,9 @@ function getSuggestionValue(suggestion) {
  * @returns {string}
  */
 function buildSearchQuery(searchText, lcstate) {
-    searchText = (searchText && !searchText.includes(':')) ? 'content:' + searchText : searchText;
+    const newSearchText = (searchText && !searchText.includes(':')) ? 'content:' + searchText : searchText;
     return lcstate
-        ? (searchText + ' status:' + lcstate).trim().toLowerCase() : searchText.trim();
+        ? (newSearchText + ' status:' + lcstate).trim().toLowerCase() : newSearchText.trim();
 }
 
 /**
@@ -182,7 +182,7 @@ function buildSearchQuery(searchText, lcstate) {
 function getSuggestions(searchText, lcstate) {
     const searchQuery = buildSearchQuery(searchText, lcstate);
     if (/:(\s+|(?![\s\S]))/g.test(searchText)) {
-        return new Promise(resolve => resolve({ obj: { list: [] } }));
+        return new Promise((resolve) => resolve({ obj: { list: [] } }));
     } else {
         const api = new API();
         return api.search({ query: searchQuery, limit: 8 });

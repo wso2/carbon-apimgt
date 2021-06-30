@@ -18,19 +18,27 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
@@ -41,6 +49,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,7 +64,7 @@ import java.util.Objects;
  */
 public class ServiceEntryMappingUtil {
 
-    private static final Log log = LogFactory.getLog(Md5HashGenerator.class);
+    private static final Log log = LogFactory.getLog(ServiceEntryMappingUtil.class);
 
     /**
      * Converts a single metadata file content into a ServiceEntry model
@@ -70,6 +79,7 @@ public class ServiceEntryMappingUtil {
         }
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             service = mapper.readValue(file, ServiceEntry.class);
             if (StringUtils.isBlank(service.getKey())) {
                 service.setKey(generateServiceKey(service));
@@ -93,18 +103,14 @@ public class ServiceEntryMappingUtil {
         for (File file : files) {
             if (file.isDirectory()) {
                 ServiceEntry serviceInfo = new ServiceEntry();
-                File[] fList = Objects.requireNonNull(file.listFiles());
+                File metadataFile = getServiceFile(APIConstants.METADATA_FILE, file);
+                File definitionFile = getServiceFile(APIConstants.DEFINITION_FILE, file);
                 String key = null;
                 try {
-                    for (File aFile : fList) {
-                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            serviceInfo = fromFileToServiceEntry(aFile, serviceInfo);
-                            serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
-                            key = serviceInfo.getKey();
-                        } else if (aFile.getName().startsWith(APIConstants.DEFINITION_FILE)) {
-                            serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
-                        }
-                    }
+                    serviceInfo = fromFileToServiceEntry(metadataFile, serviceInfo);
+                    serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(metadataFile)));
+                    key = serviceInfo.getKey();
+                    serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(definitionFile)));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while reading service resource files. " +
                             "Zip might not include valid data", e, log);
@@ -113,6 +119,19 @@ public class ServiceEntryMappingUtil {
             }
         }
         return endpointDetails;
+    }
+
+    private static File getServiceFile(String fileName, File files) {
+        FilenameFilter filenameFilter = (file, name) -> name.equals(fileName);
+        File[] retrievedFiles = files.listFiles(filenameFilter);
+        if (retrievedFiles == null || retrievedFiles.length == 0) {
+            RestApiUtil.handleBadRequest("Required file " + fileName + " is not provided", log);
+            return null;
+        } else if (retrievedFiles.length > 1) {
+            RestApiUtil.handleBadRequest("More than one " + fileName + " is provided", log);
+            return null;
+        }
+        return retrievedFiles[0];
     }
 
     public static String generateServiceKey(ServiceEntry serviceEntry) {
@@ -175,7 +194,6 @@ public class ServiceEntryMappingUtil {
         serviceDTO.setMd5(service.getMd5());
         serviceDTO.setServiceKey(service.getKey());
         if (!shrink) {
-            serviceDTO.setDisplayName(service.getDisplayName());
             serviceDTO.setServiceUrl(service.getServiceUrl());
             serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
                     .toString()));
@@ -185,6 +203,7 @@ public class ServiceEntryMappingUtil {
             serviceDTO.setMutualSSLEnabled(service.isMutualSSLEnabled());
             serviceDTO.setCreatedTime(String.valueOf(service.getCreatedTime()));
             serviceDTO.setLastUpdatedTime(String.valueOf(service.getLastUpdatedTime()));
+            serviceDTO.setUsage(service.getUsage());
         }
         return serviceDTO;
     }
@@ -211,11 +230,20 @@ public class ServiceEntryMappingUtil {
      */
     public static String generateServiceFiles(ServiceEntry serviceEntry) {
         String pathToCreateFiles = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
-        fromInputStreamToFile(serviceEntry.getMetadata(), pathToCreateFiles + File.separator +
-                APIConstants.METADATA_FILE);
-        fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator +
-                APIConstants.DEFINITION_FILE);
-
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String metadataString = gson.toJson(serviceEntry);
+            JSONParser jsonParser = new JSONParser();
+            org.json.simple.JSONObject metadataJson = (org.json.simple.JSONObject) jsonParser.parse(metadataString);
+            metadataJson.remove("endpointDef");
+            metadataString = CommonUtil.jsonToYaml(gson.toJson(metadataJson));
+            fromInputStreamToFile(new ByteArrayInputStream(metadataString.getBytes()), pathToCreateFiles
+                    + File.separator + APIConstants.METADATA_FILE);
+            fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator +
+                    APIConstants.DEFINITION_FILE);
+        } catch (ParseException | IOException e) {
+            RestApiUtil.handleInternalServerError("Error while generating the zip file", log);
+        }
         return pathToCreateFiles;
     }
 
@@ -224,7 +252,6 @@ public class ServiceEntryMappingUtil {
      * @param name Service name
      * @param version Service version
      * @param definitionType Service Definition Type
-     * @param displayName Service Display name
      * @param key Service key
      * @param sortBy Sort By
      * @param sortOrder Sort Order
@@ -233,8 +260,8 @@ public class ServiceEntryMappingUtil {
      * @return
      */
     public static ServiceFilterParams getServiceFilterParams(String name, String version, String definitionType,
-                                                             String displayName, String key, String sortBy,
-                                                             String sortOrder, Integer limit, Integer offset) {
+                                                             String key, String sortBy, String sortOrder, Integer limit,
+                                                             Integer offset) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -243,14 +270,12 @@ public class ServiceEntryMappingUtil {
         name = name != null ? name : StringUtils.EMPTY;
         version = version != null ? version : StringUtils.EMPTY;
         definitionType = definitionType != null ? definitionType : StringUtils.EMPTY;
-        displayName = displayName != null ? displayName : StringUtils.EMPTY;
         key = key != null ? key : StringUtils.EMPTY;
 
         ServiceFilterParams filterParams = new ServiceFilterParams();
         filterParams.setName(name);
         filterParams.setVersion(version);
         filterParams.setDefinitionType(definitionType);
-        filterParams.setDisplayName(displayName);
         filterParams.setKey(key);
         filterParams.setSortBy(sortBy);
         filterParams.setSortOrder(sortOrder);
@@ -278,6 +303,16 @@ public class ServiceEntryMappingUtil {
         serviceListDTO.setPagination(paginationDTO);
     }
 
+    public static APIInfoDTO fromAPIToAPIInfoDTO(API api) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setName(api.getId().getApiName());
+        apiInfoDTO.setVersion(api.getId().getVersion());
+        apiInfoDTO.setContext(api.getContext());
+        apiInfoDTO.setId(api.getUuid());
+        apiInfoDTO.setProvider(api.getId().getProviderName());
+        return apiInfoDTO;
+    }
+
     private static String getServiceSortByField(String sortBy) {
         String updatedSortBy = StringUtils.EMPTY;
         // Default sortBy field is name
@@ -300,10 +335,11 @@ public class ServiceEntryMappingUtil {
     }
 
     private static String getServicesPaginatedUrl(Integer offset, Integer limit, ServiceFilterParams filterParams) {
-        return  "/service-entries?name=" + filterParams.getName() + "&version=" + filterParams.getVersion()
+        String sortBy = "SERVICE_NAME".equals(filterParams.getSortBy()) ? "name" : "definitionType";
+        return  "/services?name=" + filterParams.getName() + "&version=" + filterParams.getVersion()
                 + "&definitionType=" + filterParams.getDefinitionType() + "&displayName="
                 + filterParams.getDisplayName() + "&key=" + filterParams.getKey() + "&sortBy="
-                + filterParams.getSortBy() + "&sortOrder=" + filterParams.getSortOrder() + "&limit=" + limit
+                + sortBy + "&sortOrder=" + filterParams.getSortOrder() + "&limit=" + limit
                 + "&offset=" + offset;
     }
 

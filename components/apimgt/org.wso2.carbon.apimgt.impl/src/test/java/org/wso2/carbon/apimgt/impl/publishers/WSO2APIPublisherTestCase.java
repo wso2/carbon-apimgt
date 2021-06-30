@@ -48,8 +48,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.TestUtils;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -81,7 +82,7 @@ public class WSO2APIPublisherTestCase {
     private TenantManager tenantManager;
     private String apiArtifactDir = "/tmp/test";
     private StatusLine statusLine;
-    private APIImportExportManager apiImportExportManager;
+    private ImportExportAPI importExportAPI;
     private CloseableHttpClient defaultHttpClient;
 
     @Before
@@ -126,8 +127,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.when(MultipartEntityBuilder.create()).thenReturn(multipartEntityBuilder);
         Mockito.when(multipartEntityBuilder.build()).thenReturn(Mockito.mock(HttpEntity.class));
         Mockito.doNothing().when(httpPost).setEntity(Matchers.any());
-        apiImportExportManager = Mockito.mock(APIImportExportManager.class);
-        PowerMockito.whenNew(APIImportExportManager.class).withAnyArguments().thenReturn(apiImportExportManager);
+        importExportAPI = Mockito.mock(ImportExportAPI.class);
     }
 
     @Test
@@ -150,8 +150,11 @@ public class WSO2APIPublisherTestCase {
     public void testPublishAndUpdateToStore() throws Exception {
 
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
-        Mockito.doReturn(apiArtifactDir).when(apiImportExportManager).exportAPIArtifacts(Matchers.any(API.class),
-                Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
+        Mockito.when(APIImportExportUtil.getImportExportAPI()).thenReturn(importExportAPI);
+        Mockito.doReturn(new File(apiArtifactDir)).when(importExportAPI)
+                .exportAPI(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
+                        Matchers.anyString(), Matchers.anyBoolean(), Matchers.any(ExportFormat.class),
+                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString());
         //Test Unauthenticated scenario for publishing API
         Mockito.doReturn(HttpStatus.SC_UNAUTHORIZED).when(statusLine).getStatusCode();
         String unauthenticatedResponse = "{\"code\":401,\"message\":\"\",\"description\":\"Unauthenticated request\"," +
@@ -184,8 +187,11 @@ public class WSO2APIPublisherTestCase {
     public void testFailureWhileExportingAPI() throws Exception {
 
         //Error path - When exporting API failed
-        PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(apiImportExportManager)
-                .exportAPIArtifacts(Matchers.any(API.class), Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
+        Mockito.when(APIImportExportUtil.getImportExportAPI()).thenReturn(importExportAPI);
+        PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(importExportAPI)
+                .exportAPI(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
+                        Matchers.anyString(), Matchers.anyBoolean(), Matchers.any(ExportFormat.class),
+                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString());
         try {
             wso2APIPublisher.publishToStore(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");

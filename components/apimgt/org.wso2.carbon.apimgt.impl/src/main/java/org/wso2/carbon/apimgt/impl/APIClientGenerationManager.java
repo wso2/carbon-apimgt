@@ -86,65 +86,16 @@ public class APIClientGenerationManager {
      * @param sdkLanguage preferred language to generate the SDK
      * @param apiName     name of the API
      * @param apiVersion  version of the API
-     * @param apiProvider provider of the API
-     * @param loggedInUsername username of the currently logged in user
+     * @param swaggerAPIDefinition Swagger Definition of the API
      * @return a map containing the zip file name and its' temporary location until it is downloaded
      * @throws APIClientGenerationException if failed to generate the SDK
      */
-    public Map<String, String> generateSDK(String sdkLanguage, String apiName, String apiVersion, String apiProvider,
-                                           String loggedInUsername)
+    public Map<String, String> generateSDK(String sdkLanguage, String apiName, String apiVersion,
+                                           String swaggerAPIDefinition)
             throws APIClientGenerationException {
-
-        if (StringUtils.isBlank(sdkLanguage) || StringUtils.isBlank(apiName) || StringUtils.isBlank(apiVersion) ||
-                StringUtils.isBlank(apiProvider) || StringUtils.isBlank(loggedInUsername)) {
-            handleSDKGenException("SDK Language, API Name, API Version, API Provider or Logged In Username " +
-                    "should not be null.");
-        }
-        //we should replace the '@' sign with '-AT-' hence it is needed to retrieve the API identifier
-        String apiProviderNameWithReplacedEmailDomain = APIUtil.replaceEmailDomain(apiProvider);
-        APIIdentifier apiIdentifier = new APIIdentifier(apiProviderNameWithReplacedEmailDomain, apiName, apiVersion);
-        String requestedTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProvider));
-        int tenantId = 0;
-
-        try {
-            tenantId = getTenantId(requestedTenant);
-        } catch (UserStoreException e) {
-            handleSDKGenException("Error occurred when retrieving the tenant ID for tenant : " + requestedTenant, e);
-        }
-        boolean isTenantFlowStarted = false;
-        String swaggerAPIDefinition = null;
-
-        if (StringUtils.isNotBlank(requestedTenant)) {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
-            isTenantFlowStarted = true;
-            try {
-                APIUtil.loadTenantRegistry(tenantId);
-            } catch (RegistryException e) {
-                handleSDKGenException("Failed to load tenant registry for tenant ID : " + tenantId, e);
-            }
-            Registry requiredRegistry = null;
-            try {
-                requiredRegistry =
-                        getGovernanceUserRegistry(MultitenantUtils.getTenantAwareUsername(loggedInUsername), tenantId);
-            } catch (RegistryException e) {
-                handleSDKGenException("Error occurred when retrieving the tenant registry for tenant : " +
-                        requestedTenant + " tenant ID : " + tenantId, e);
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiProvider);
-            try {
-                swaggerAPIDefinition = OASParserUtil.getAPIDefinition(apiIdentifier, requiredRegistry);
-            } catch (APIManagementException e) {
-                handleSDKGenException("Error loading swagger file for API " + apiName + " from registry.", e);
-            }
-        }
 
         if (StringUtils.isEmpty(swaggerAPIDefinition)) {
             handleSDKGenException("Error loading the Swagger definition. Swagger file is empty.");
-        }
-
-        if (isTenantFlowStarted) {
-            PrivilegedCarbonContext.endTenantFlow();
         }
 
         //create a temporary directory with a random name to store files created during generating the SDK
@@ -158,7 +109,7 @@ public class APIClientGenerationManager {
 
         String specFileLocation = tempDirectoryLocation + File.separator + UUID.randomUUID().toString() +
                 APIConstants.JSON_FILE_EXTENSION;
-        //the below swaggerSpecFile will be deleted when cleaning the temp directory by the caller
+        //The below swaggerSpecFile will be deleted when cleaning the temp directory by the caller
         File swaggerSpecFile = new File(specFileLocation);
         FileWriter fileWriter = null;
         BufferedWriter bufferedWriter = null;

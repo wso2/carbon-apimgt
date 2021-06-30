@@ -398,9 +398,11 @@ public class OASParserUtil {
                 if (REQUEST_BODIES.equalsIgnoreCase(category)) {
                     Map<String, RequestBody> sourceRequestBodies = sourceComponents.getRequestBodies();
 
-                    for (String refKey : refCategoryEntry.getValue()) {
-                        RequestBody requestBody = sourceRequestBodies.get(refKey);
-                        setRefOfRequestBody(requestBody, context);
+                    if (sourceRequestBodies != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            RequestBody requestBody = sourceRequestBodies.get(refKey);
+                            setRefOfRequestBody(requestBody, context);
+                        }
                     }
                 }
 
@@ -582,8 +584,12 @@ public class OASParserUtil {
     private static void setRefOfRequestBody(RequestBody requestBody, SwaggerUpdateContext context) {
         if (requestBody != null) {
             Content content = requestBody.getContent();
-
-            extractReferenceFromContent(content, context);
+            if (content != null) {
+                extractReferenceFromContent(content, context);
+            } else {
+                String ref = requestBody.get$ref();
+                addToReferenceObjectMap(ref, context);
+            }
         }
     }
 
@@ -1127,9 +1133,11 @@ public class OASParserUtil {
         if (api.isEndpointSecured()) {
             ObjectNode securityConfigObj = objectMapper.createObjectNode();
             if (api.isEndpointAuthDigest()) {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             } else {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             }
             if (!StringUtils.isEmpty(api.getEndpointUTUsername())) {
                 securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());

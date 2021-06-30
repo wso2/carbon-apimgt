@@ -23,7 +23,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtFaultHandler;
 
 /**
  * Test class for APIMgtFaultHandler

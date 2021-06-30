@@ -86,6 +86,7 @@ function EndpointListing(props) {
         addNewEndpoint,
         removeEndpoint,
         setAdvancedConfigOpen,
+        setESConfigOpen,
         apiId,
     } = props;
     const [endpointType, setEndpointType] = useState(epType);
@@ -136,6 +137,7 @@ function EndpointListing(props) {
                                         editEndpoint={editEndpoint}
                                         deleteEndpoint={removeEndpoint}
                                         setAdvancedConfigOpen={setAdvancedConfigOpen}
+                                        setESConfigOpen={setESConfigOpen}
                                         apiId={apiId}
                                     />
                                 );
@@ -164,6 +166,7 @@ EndpointListing.propTypes = {
     removeEndpoint: PropTypes.func.isRequired,
     editEndpoint: PropTypes.func.isRequired,
     setAdvancedConfigOpen: PropTypes.func.isRequired,
+    setESConfigOpen: PropTypes.func.isRequired,
     apiId: PropTypes.string.isRequired,
 };
 

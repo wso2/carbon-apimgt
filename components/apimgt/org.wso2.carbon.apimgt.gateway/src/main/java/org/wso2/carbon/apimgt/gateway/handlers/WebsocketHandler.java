@@ -26,6 +26,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInboundHandler, WebsocketOutboundHandler> {
@@ -38,6 +39,11 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
+                    System.currentTimeMillis());
+        }
 
         if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PongWebSocketFrame)) {
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
@@ -48,10 +54,12 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 outboundHandler().write(ctx, msg, promise);
                 // publish analytics events if analytics is enabled
                 if (APIUtil.isAnalyticsEnabled()) {
-                    String clientIp = getClientIp(ctx);
-                    inboundHandler().publishRequestEvent(clientIp, true);
+                    inboundHandler().publishSubscribeEvent(ctx);
                 }
             } else {
+                if (APIUtil.isAnalyticsEnabled())  {
+                    inboundHandler().publishSubscribeThrottledEvent(ctx);
+                }
                 if (log.isDebugEnabled()){
                     log.debug("Outbound Websocket frame is throttled. " + ctx.channel().toString());
                 }

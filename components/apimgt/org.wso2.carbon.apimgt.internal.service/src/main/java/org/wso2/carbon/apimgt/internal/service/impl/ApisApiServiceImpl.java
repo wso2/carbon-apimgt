@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataU
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
-
 import javax.ws.rs.core.Response;
 
 public class ApisApiServiceImpl implements ApisApiService {
@@ -52,7 +51,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 API api = subscriptionValidationDAO.getApiByUUID(apiId, gatewayLabel, xWSO2Tenant);
                 apiListDTO = SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api);
             } else if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
-                if (!context.startsWith("/t/"+xWSO2Tenant.toLowerCase())){
+                if (!context.startsWith("/t/" + xWSO2Tenant.toLowerCase())) {
                     apiListDTO = new APIListDTO();
                 }
                 API api = subscriptionValidationDAO.getAPIByContextAndVersion(context, version, gatewayLabel);

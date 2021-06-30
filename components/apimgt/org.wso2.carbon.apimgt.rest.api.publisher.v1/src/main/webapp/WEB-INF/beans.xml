@@ -16,9 +16,6 @@
         <jaxrs:serviceBeans>
 
             <!-- Generated -->
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertSubscriptionsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertTypesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi"/>
 	        <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApi"/>
@@ -34,17 +31,22 @@
             <!-- Manually Added -->
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SwaggerYamlApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.TenantsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiCategoriesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.DeploymentsApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
             <ref bean="cors-filter" />
         </jaxrs:providers>
+        <jaxrs:properties>
+            <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
+            <entry key="map.cxf.interceptor.fault" value="true" />
+            <!-- This is added to restrict the size of attachments sent through the requests. -->
+            <entry key="attachment-max-size" value="#{systemProperties['rest.api.publisher.attachment.max.size'] != null ?
+              systemProperties['rest.api.publisher.attachment.max.size'] :  T(java.lang.Integer).toString(10485760) }"/>
+        </jaxrs:properties>
     </jaxrs:server>
 
     <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor" />
@@ -71,6 +73,9 @@
             </list>
         </property>
         <property name="allowCredentials" value="true" />
+        <property name="allowOrigins"
+                  value="#{systemProperties['rest.api.publisher.allowed.origins'] != null ?
+                      systemProperties['rest.api.publisher.allowed.origins'].split(',') : {}}"/>
     </bean>
 
     <!-- Out interceptors -->

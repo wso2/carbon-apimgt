@@ -35,7 +35,7 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
     private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response endPointsGet(String apiName, String version, String tenantDomain, MessageContext messageContext)
+    public Response getEndpoints(String apiName, String version, String tenantDomain, MessageContext messageContext)
             throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);

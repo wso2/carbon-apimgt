@@ -108,6 +108,10 @@ class BusinessInformation extends React.Component {
         this.setState({ [name]: value });
     };
 
+    isValid = () => {
+        return (this.isValidBusinessOwnerEmail && this.isValidTechnicalOwnerEmail && this.isFormUpdated);
+    }
+
     /**
      *
      *
@@ -123,10 +127,6 @@ class BusinessInformation extends React.Component {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         };
         updateAPI({ businessInformation });
-    }
-
-    isValid = () => {
-        return (this.isValidBusinessOwnerEmail && this.isValidTechnicalOwnerEmail && this.isFormUpdated);
     }
 
     /**
@@ -145,7 +145,7 @@ class BusinessInformation extends React.Component {
             <>
                 <Container maxWidth='md'>
                     <Box mb={3}>
-                        <Typography variant='h4'>
+                        <Typography id='itest-api-details-bushiness-info-head' variant='h4'>
                             <FormattedMessage
                                 id='Apis.Details.BusinessInformation.BusinessInformation.business.info'
                                 defaultMessage='Business Information'
@@ -156,7 +156,7 @@ class BusinessInformation extends React.Component {
                                 <Typography variant='caption'>
                                     <FormattedMessage
                                         id='Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading'
-                                        defaultMessage='Business Information of the API'
+                                        defaultMessage='Business Information of the API Product'
                                     />
                                 </Typography>
                             )

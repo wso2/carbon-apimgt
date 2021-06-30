@@ -106,6 +106,7 @@ function LoadbalanceFailoverConfig(props) {
         classes,
         endpointsDispatcher,
         toggleAdvanceConfig,
+        toggleESConfig,
         globalEpType,
         handleEndpointCategorySelect,
     } = props;
@@ -315,6 +316,7 @@ function LoadbalanceFailoverConfig(props) {
                                                 removeEndpoint={removeEndpoint}
                                                 editEndpoint={editEndpoint}
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                setESConfigOpen={toggleESConfig}
                                                 category='production_endpoints'
                                                 apiId={api.id}
                                             />
@@ -349,6 +351,7 @@ function LoadbalanceFailoverConfig(props) {
                                                 removeEndpoint={removeEndpoint}
                                                 editEndpoint={editEndpoint}
                                                 setAdvancedConfigOpen={toggleAdvanceConfig}
+                                                setESConfigOpen={toggleESConfig}
                                                 category='sandbox_endpoints'
                                                 apiId={api.id}
                                             />
@@ -376,6 +379,7 @@ function LoadbalanceFailoverConfig(props) {
                         algoCombo={epConfig.algoCombo}
                         algoClassName={epConfig.algoClassName}
                         sessionTimeOut={epConfig.sessionTimeOut}
+                        failOver={epConfig.failOver}
                         sessionManagement={epConfig.sessionManagement}
                     />
                 </DialogContent>
@@ -391,6 +395,7 @@ LoadbalanceFailoverConfig.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     endpointsDispatcher: PropTypes.func.isRequired,
     toggleAdvanceConfig: PropTypes.func.isRequired,
+    toggleESConfig: PropTypes.func.isRequired,
     handleEndpointCategorySelect: PropTypes.func.isRequired,
     globalEpType: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,

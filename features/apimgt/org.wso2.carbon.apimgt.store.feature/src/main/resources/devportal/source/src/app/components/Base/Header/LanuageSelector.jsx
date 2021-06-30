@@ -17,24 +17,23 @@
  */
 
 import React, { useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Box from '@material-ui/core/Box';
-import { useTheme } from '@material-ui/core/styles';
 import { app } from 'Settings';
 import Hidden from '@material-ui/core/Hidden';
 import Utils from 'AppData/Utils';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     formControl: {
         margin: theme.spacing(1),
         minWidth: theme.custom.languageSwitch.minWidth,
         '& > div:before': {
             borderBottom: 'none',
-        }
+        },
     },
     selectEmpty: {
         marginTop: theme.spacing(2),
@@ -44,48 +43,67 @@ const useStyles = makeStyles(theme => ({
     },
     langText: {
         textIndent: theme.spacing(1),
-    }
+    },
 }));
 
-export default function LanuageSelector() {
+/**
+ * Creates an instance of LanguageSelector.
+ * @returns {JSX} selector dropdown
+ */
+export default function LanguageSelector() {
     const classes = useStyles();
     const theme = useTheme();
-    const [language, setLanuage] = React.useState(null);
+    const [language, setLanguage] = React.useState(null);
     const { custom: { languageSwitch: { languages, showFlag, showText } } } = theme;
     useEffect(() => {
-        let locale = Utils.getBrowserLocal();
+        const locale = Utils.getBrowserLocal();
 
         let selectedLanguage = localStorage.getItem('language');
-        if(!selectedLanguage && languages && languages.length > 0){
+        if (!selectedLanguage && languages && languages.length > 0) {
             selectedLanguage = locale;
         }
-        setLanuage(selectedLanguage);
-    }, [])
+        setLanguage(selectedLanguage);
+    }, []);
 
-    const handleChange = event => {
+    const handleChange = (event) => {
         const selectedLanguage = event.target.value;
-        setLanuage(selectedLanguage);
+        setLanguage(selectedLanguage);
         localStorage.setItem('language', selectedLanguage);
         window.location.reload();
     };
 
     return (
         <FormControl className={classes.formControl}>
-            {language && <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={language}
-                onChange={handleChange}
-                className={classes.listTextSmall}
-            >
-                {languages.map((lang) => <MenuItem value={lang.key}>
-                    <Box display='flex'>
-                        {showFlag && <img src={`${app.context}${lang.image}`} alt={lang.key} width={`${lang.imageWidth}px`} />}
-                        <Hidden mdDown>{showText && <Typography variant="body1" className={classes.langText}>{lang.text}</Typography>}</Hidden>
-                    </Box>
-                </MenuItem>)}
+            {language && (
+                <Select
+                    labelId='demo-language-select-label'
+                    id='demo-language-select'
+                    value={language}
+                    onChange={handleChange}
+                    className={classes.listTextSmall}
+                >
+                    {languages.map((lang) => (
+                        <MenuItem value={lang.key}>
+                            <Box display='flex'>
+                                {showFlag
+                                && (
+                                    <img
+                                        src={`${app.context}${lang.image}`}
+                                        alt={lang.key}
+                                        width={`${lang.imageWidth}px`}
+                                    />
+                                )}
+                                <Hidden mdDown>
+                                    {showText && (
+                                        <Typography variant='body1' className={classes.langText}>{lang.text}</Typography>
+                                    )}
+                                </Hidden>
+                            </Box>
+                        </MenuItem>
+                    ))}
 
-            </Select>}
+                </Select>
+            )}
         </FormControl>
     );
 }

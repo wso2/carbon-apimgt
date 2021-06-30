@@ -25,6 +25,7 @@ public class QuotaPolicy {
     private String quotaType;
     private RequestCountLimit requestCount;
     private BandwidthLimit bandwidth;
+    private EventCountLimit eventCount;
 
     public String getQuotaType() {
         return quotaType;
@@ -50,9 +51,19 @@ public class QuotaPolicy {
         this.bandwidth = bandwidth;
     }
 
+    public EventCountLimit getEventCount() {
+        return eventCount;
+    }
+
+    public void setEventCount(EventCountLimit eventCount) {
+        this.eventCount = eventCount;
+    }
+
     public Limit getLimit() {
         if (this.requestCount != null) {
             return this.requestCount;
+        } else if (this.eventCount != null) {
+            return this.eventCount;
         }
         return this.bandwidth;
     }

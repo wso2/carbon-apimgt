@@ -95,7 +95,9 @@ public class ApplicationUtils {
         authApplicationInfo.setTokenType(tokenType);
 
         if (clientDetails != null) {
+
             //parse json string and set applicationInfo parameters.
+
             KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
             if (keyManagerInstance != null) {
                 authApplicationInfo = keyManagerInstance.buildFromJSON(authApplicationInfo, clientDetails);

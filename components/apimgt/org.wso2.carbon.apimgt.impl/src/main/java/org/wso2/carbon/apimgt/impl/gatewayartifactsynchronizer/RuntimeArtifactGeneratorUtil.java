@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
-import com.nimbusds.jose.util.Base64URL;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.apache.commons.codec.binary.Base64;
 
 import java.util.List;
 import java.util.Set;
@@ -55,10 +54,8 @@ public class RuntimeArtifactGeneratorUtil {
             } else {
                 gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
             }
-            if (gatewayArtifacts != null) {
-                if (gatewayArtifacts.isEmpty()) {
-                    throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-                }
+            if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
+                return null;
             }
             return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         } else {

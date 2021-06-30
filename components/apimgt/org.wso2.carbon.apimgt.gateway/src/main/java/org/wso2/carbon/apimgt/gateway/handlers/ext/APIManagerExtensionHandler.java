@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
 
+import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,6 +78,15 @@ public class APIManagerExtensionHandler extends AbstractHandler {
 
     @MethodStats
     public boolean handleRequest(MessageContext messageContext) {
+        // reset HTTP_METHOD, to rest api values before send them to analytics.
+        // (only for graphQL APIs)
+        if (messageContext.getProperty(APIConstants.API_TYPE) != null && APIConstants.GRAPHQL_API
+                .equals(messageContext.getProperty(APIConstants.API_TYPE).toString())) {
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                    setProperty(Constants.Configuration.HTTP_METHOD,
+                            messageContext.getProperty(APIConstants.HTTP_VERB));
+        }
+
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
         TracingSpan requestMediationSpan = null;

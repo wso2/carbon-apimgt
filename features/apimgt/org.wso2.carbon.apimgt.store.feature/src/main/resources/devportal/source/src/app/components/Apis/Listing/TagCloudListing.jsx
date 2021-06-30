@@ -23,7 +23,7 @@ import API from 'AppData/api';
 import TagCloudListingTags from './TagCloudListingTags';
 import CustomIcon from '../../Shared/CustomIcon';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     appBar: {
         height: 70,
         background: theme.custom.infoBar.background,
@@ -54,7 +54,10 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.getContrastText(theme.custom.infoBar.background),
     },
 }));
-
+/**
+ * Renders tag cloud.
+ * @returns {JSX} Tag cloud listing.
+ */
 export default function TagCloudListing() {
     const classes = useStyles();
     const theme = useTheme();
@@ -88,7 +91,7 @@ export default function TagCloudListing() {
                 </div>
             </div>
             <div className={classes.listContentWrapper}>
-                {allTags && <TagCloudListingTags allTags={allTags} mainPage={true} />}
+                {allTags && <TagCloudListingTags allTags={allTags} mainPage />}
             </div>
         </main>
     );

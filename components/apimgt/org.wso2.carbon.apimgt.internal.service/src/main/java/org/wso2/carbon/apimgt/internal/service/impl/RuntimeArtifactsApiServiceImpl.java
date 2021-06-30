@@ -19,9 +19,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.hsqldb.lib.StringUtil;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -31,11 +29,13 @@ import org.wso2.carbon.apimgt.internal.service.RuntimeArtifactsApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-
-import java.io.File;
-import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
 
 /**
  * Runtime Artifact Service implementation.
@@ -53,7 +53,14 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();
-                return Response.ok(artifact).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                StreamingOutput streamingOutput = (outputStream) -> {
+                    try {
+                        Files.copy(artifact.toPath(), outputStream);
+                    } finally {
+                        Files.delete(artifact.toPath());
+                    }
+                };
+                return Response.ok(streamingOutput).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
                         APIConstants.APPLICATION_ZIP).build();
             } else {
@@ -65,7 +72,11 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
                 return Response.ok().entity(synapseArtifactListDTO)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
             }
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.NO_API_ARTIFACT_FOUND))
+                    .build();
         }
-        return Response.noContent().build();
     }
 }

@@ -28,8 +28,8 @@ public class ServiceEntry {
     private String md5 = null;
     private String name = null;
     private String version = null;
-    private String displayName = null;
     private String serviceUrl = null;
+    private int usage = 0;
 
     public enum DefinitionType {
         OAS2, OAS3, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API
@@ -39,7 +39,7 @@ public class ServiceEntry {
     private String description = null;
 
     public enum SecurityType {
-        BASIC, DIGEST, OAUTH2, NONE
+        BASIC, DIGEST, OAUTH2, NONE, X509
     }
     private SecurityType securityType = SecurityType.NONE;
     private boolean mutualSSLEnabled = false;
@@ -122,14 +122,6 @@ public class ServiceEntry {
         this.version = version;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
     public String getServiceUrl() {
         return serviceUrl;
     }
@@ -193,4 +185,8 @@ public class ServiceEntry {
     public void setCreatedTime(Timestamp createdTime) {
         this.createdTime = createdTime;
     }
+
+    public void setUsage(int usage) { this.usage = usage; }
+
+    public int getUsage() { return usage; }
 }

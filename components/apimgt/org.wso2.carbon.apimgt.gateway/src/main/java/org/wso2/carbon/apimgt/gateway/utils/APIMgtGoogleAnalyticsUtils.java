@@ -21,9 +21,9 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
@@ -53,10 +53,9 @@ public class APIMgtGoogleAnalyticsUtils {
 
         public GoogleAnalyticsConfig(OMElement config) {
             googleAnalyticsTrackingID = config
-                    .getFirstChildWithName(new QName(APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ID))
-                    .getText();
-            String googleAnalyticsEnabledStr = config.getFirstChildWithName(
-                    new QName(APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)).getText();
+                    .getFirstChildWithName(new QName(Constants.API_GOOGLE_ANALYTICS_TRACKING_ID)).getText();
+            String googleAnalyticsEnabledStr = config
+                    .getFirstChildWithName(new QName(Constants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)).getText();
             enabled = googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
         }
     }

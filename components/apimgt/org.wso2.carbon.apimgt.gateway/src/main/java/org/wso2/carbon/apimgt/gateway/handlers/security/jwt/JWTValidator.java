@@ -27,18 +27,19 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
-import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -46,25 +47,21 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import java.text.ParseException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.cache.Cache;
-import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
 
 /**
@@ -81,28 +78,34 @@ public class JWTValidator {
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
 
-    public JWTValidator(APIKeyValidator apiKeyValidator) throws APIManagementException{
-
+    public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain) throws APIManagementException{
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.apiKeyValidator = apiKeyValidator;
-        jwtConfigurationDto =
-                (JWTConfigurationDto) ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
-        jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
+        ExtendedJWTConfigurationDto extendedJWTConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+        this.jwtConfigurationDto = new JWTConfigurationDto(extendedJWTConfigurationDto);
+        jwtGenerationEnabled = extendedJWTConfigurationDto.isEnabled();
         apiMgtGatewayJWTGenerator =
                 ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
-                        .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+                        .get(this.jwtConfigurationDto.getGatewayJWTGeneratorImpl());
         if (jwtGenerationEnabled) {
             // Set certificate to jwtConfigurationDto
-            jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+            if (extendedJWTConfigurationDto.isTenantBasedSigningEnabled()) {
+                this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+            } else {
+                this.jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                this.jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+            }
 
             // Set private key to jwtConfigurationDto
-            jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
 
             // Set ttl to jwtConfigurationDto
-            jwtConfigurationDto.setTtl(getTtl());
+            this.jwtConfigurationDto.setTtl(getTtl());
 
             //setting the jwt configuration dto
-            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
+            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(this.jwtConfigurationDto);
         }
 
         jwtValidationService = ServiceReferenceHolder.getInstance().getJwtValidationService();
@@ -265,7 +268,7 @@ public class JWTValidator {
 
         String endUserToken = null;
         boolean valid = false;
-        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
+        String jwtTokenCacheKey = jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
                 .concat(tokenSignature);
         if (isGatewayTokenCacheEnabled) {
             Object token = getGatewayJWTTokenCache().get(jwtTokenCacheKey);
@@ -273,7 +276,7 @@ public class JWTValidator {
                 endUserToken = (String) token;
                 String[] splitToken = ((String) token).split("\\.");
                 JSONObject payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                long exp = payload.getLong("exp");
+                long exp = payload.getLong("exp") * 1000L;
                 long timestampSkew = getTimeStampSkewInSeconds() * 1000;
                 valid = (exp - System.currentTimeMillis() > timestampSkew);
             }
@@ -330,15 +333,16 @@ public class JWTValidator {
      * Authenticates the given WebSocket handshake request with a JWT token to see if an API consumer is allowed to
      * access a particular API or not.
      *
-     * @param signedJWTInfo   The JWT token sent with the API request
-     * @param apiContext The context of the invoked API
-     * @param apiVersion The version of the invoked API
+     * @param signedJWTInfo    The JWT token sent with the API request
+     * @param apiContext       The context of the invoked API
+     * @param apiVersion       The version of the invoked API
+     * @param matchingResource template of matching api resource
      * @return an AuthenticationContext object which contains the authentication information
      * @throws APISecurityException in case of authentication failure
      */
     @MethodStats
     public AuthenticationContext authenticateForWebSocket(SignedJWTInfo signedJWTInfo, String apiContext,
-                                                          String apiVersion)
+                                                          String apiVersion, String matchingResource)
             throws APISecurityException {
 
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
@@ -364,14 +368,14 @@ public class JWTValidator {
             log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
                     apiVersion, jwtValidationInfo);
-            if (APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(apiVersion)) {
-                apiVersion = apiKeyValidationInfoDTO.getApiVersion();
-            }
             if (log.isDebugEnabled()) {
                 log.debug("Subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager() + ". Status: " +
                         apiKeyValidationInfoDTO.isAuthorized());
             }
             if (apiKeyValidationInfoDTO.isAuthorized()) {
+                validateScopes(apiContext, apiVersion, matchingResource,
+                               WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
+                               signedJWTInfo);
                 log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = null;
                 JWTInfoDto jwtInfoDto;

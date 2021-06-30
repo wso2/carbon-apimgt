@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SequenceApiService {
-      public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response getSequences(String apiName, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

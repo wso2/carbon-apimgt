@@ -65,6 +65,7 @@ module.exports = {
             plugins: [
                 '@babel/plugin-proposal-class-properties',
                 '@babel/plugin-syntax-dynamic-import',
+                'react-hot-loader/babel',
                 ['@babel/plugin-transform-spread'],
                 '@babel/plugin-proposal-object-rest-spread',
             ],

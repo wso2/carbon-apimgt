@@ -15,12 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, {useEffect, useState, useContext} from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import {Link as MUILink} from '@material-ui/core';
+import { Link as MUILink } from '@material-ui/core';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import Box from '@material-ui/core/Box';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
@@ -40,10 +40,12 @@ const useStyles = makeStyles((theme) => {
                 marginTop: theme.spacing(2),
             },
         },
-    }
+    };
 });
 
-
+/**
+ * @returns {JSX} breadcrumb
+ */
 export default function Breadcrumb() {
     const { api } = useContext(ApiContext);
     const classes = useStyles();
@@ -72,28 +74,23 @@ export default function Breadcrumb() {
         {
             route: 'sdk',
             text: 'SDKs',
-        }
+        },
     ];
 
     const [selected, setSelected] = useState(pages[0]);
 
-    const handleClick = (event) => {
-        event.preventDefault();
-        console.info('You clicked a breadcrumb.');
-    }
-
     const detectCurrentMenu = (location = null) => {
-        if (!location) {
-            location = window.location;
+        let locationLocal = location;
+        if (!locationLocal) {
+            locationLocal = window.location;
         }
-        const { pathname } = location;
-        for (var i = 0; i < pages.length; i++) {
+        const { pathname } = locationLocal;
+        for (let i = 0; i < pages.length; i++) {
             const test1 = new RegExp('/' + pages[i].route + '$', 'g');
             const test2 = new RegExp('/' + pages[i].route + '/', 'g');
             if (pathname.match(test1) || pathname.match(test2)) {
                 setSelected(pages[i]);
             }
-
         }
     };
     useEffect(() => {
@@ -105,13 +102,13 @@ export default function Breadcrumb() {
     return (
         <div className={classes.root}>
             <Box display='flex' flexDirection='row' alignItems='center'>
-                <Typography color="textPrimary" variant='h6'>{selected.text}</Typography>
+                <Typography color='textPrimary' component='h1' variant='h6'>{selected.text}</Typography>
                 <VerticalDivider height={15} />
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
-                    <MUILink color="inherit"  to={'/apis/' + api.id + '/overview'} component={Link}>
+                <Breadcrumbs separator={<NavigateNextIcon fontSize='small' />} aria-label='breadcrumb'>
+                    <MUILink color='inherit' to={'/apis/' + api.id + '/overview'} component={Link}>
                         {api.name}
                     </MUILink>
-                    <Typography color="textPrimary">{selected.text}</Typography>
+                    <Typography color='textPrimary'>{selected.text}</Typography>
                 </Breadcrumbs>
             </Box>
 

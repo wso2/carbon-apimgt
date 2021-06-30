@@ -100,8 +100,6 @@ public class APIMapperTestCase {
         PublisherAPI pubAPI = APIMapper.INSTANCE.toPublisherApi(api);
         Assert.assertEquals("API name does not match", api.getId().getName(), pubAPI.getApiName());
         Assert.assertEquals("API uuid does not match", api.getUuid(), pubAPI.getId());
-        Assert.assertEquals("API label does not match", api.getGatewayLabels().get(0).getName(),
-                pubAPI.getGatewayLabels().iterator().next());
         Assert.assertTrue("Mapped api does not have status", pubAPI.toString().contains(api.getStatus()));
         API mappedAPI = APIMapper.INSTANCE.toApi(pubAPI);
         Assert.assertEquals("Mapped api name does not match", mappedAPI.getId().getName(), api.getId().getName());
@@ -113,8 +111,6 @@ public class APIMapperTestCase {
         DevPortalAPI devAPI = APIMapper.INSTANCE.toDevPortalApi(api);
         Assert.assertEquals("API name does not match", api.getId().getName(), devAPI.getApiName());
         Assert.assertEquals("API uuid does not match", api.getUuid(), devAPI.getId());
-        Assert.assertEquals("API label does not match", api.getGatewayLabels().get(0).getName(),
-                devAPI.getGatewayLabels().iterator().next());
         Assert.assertTrue("Mapped api does not have status", devAPI.toString().contains(api.getStatus()));
         API mappedAPI = APIMapper.INSTANCE.toApi(devAPI);
         Assert.assertEquals("Mapped api name does not match", mappedAPI.getId().getName(), api.getId().getName());

@@ -24,19 +24,22 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @Component(
         name = "microgateway.artifact.generator.service",
@@ -50,16 +53,40 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             throws APIManagementException {
 
         try {
+            DeploymentDescriptorDto descriptorDto = new DeploymentDescriptorDto();
+            Map<String, ApiProjectDto> deploymentsMap = new HashMap<>();
+
+            // "tempDirectory" is the root artifact directory
             File tempDirectory = CommonUtil.createTempDirectory(null);
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
                 if (apiRuntimeArtifactDto.isFile()) {
                     InputStream artifact = (InputStream) apiRuntimeArtifactDto.getArtifact();
-                    Path path = Paths.get(tempDirectory.getAbsolutePath(),
-                            apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
-                                    .concat(APIConstants.ZIP_FILE_EXTENSION));
+                    String fileName = apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
+                            .concat(APIConstants.ZIP_FILE_EXTENSION);
+                    Path path = Paths.get(tempDirectory.getAbsolutePath(), fileName);
                     FileUtils.copyInputStreamToFile(artifact, path.toFile());
+
+                    ApiProjectDto apiProjectDto = deploymentsMap.get(fileName);
+                    if (apiProjectDto == null) {
+                        apiProjectDto = new ApiProjectDto();
+                        deploymentsMap.put(fileName, apiProjectDto);
+                        apiProjectDto.setApiFile(fileName);
+                        apiProjectDto.setEnvironments(new HashSet<>());
+                    }
+                    // environment is unique for a revision in a deployment
+                    // create new environment
+                    EnvironmentDto environment = new EnvironmentDto();
+                    environment.setName(apiRuntimeArtifactDto.getLabel());
+                    environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                    apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }
             }
+            descriptorDto.setDeployments(new HashSet<>(deploymentsMap.values()));
+            String descriptorFile = Paths.get(tempDirectory.getAbsolutePath(),
+                    APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE).toString();
+            CommonUtil.writeDtoToFile(descriptorFile, ExportFormat.JSON,
+                    APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, descriptorDto);
+
             CommonUtil.archiveDirectory(tempDirectory.getAbsolutePath());
             FileUtils.deleteQuietly(tempDirectory);
             RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();

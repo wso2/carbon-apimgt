@@ -20,8 +20,9 @@ import React, { useState, useEffect } from 'react';
 import Tokens from 'AppComponents/Shared/AppsAndKeys/Tokens';
 import Application from 'AppData/Application';
 import { makeStyles } from '@material-ui/core/styles';
-import { injectIntl, defineMessages } from 'react-intl';
+import { defineMessages, useIntl } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
+import Alert from 'AppComponents/Shared/Alert';
 import ButtonPanel from './ButtonPanel';
 
 const useStyles = makeStyles((theme) => ({
@@ -35,10 +36,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const generateAccessTokenStep = (props) => {
+    const intl = useIntl();
     const [keyType, setKeyType] = useState('PRODUCTION');
     const [selectedTab, setSelectedTab] = useState('Resident Key Manager');
     const [subscriptionScopes, setSubscriptionScopes] = useState([]);
-    const [notFound, setNotFound] = useState(false);
 
     const [accessTokenRequest, setAccessTokenRequest] = useState({
         timeout: 3600,
@@ -46,7 +47,7 @@ const generateAccessTokenStep = (props) => {
         keyType: '',
     });
     const {
-        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, intl, createdSelectedTab
+        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, createdSelectedTab,
     } = props;
 
     useEffect(() => {
@@ -54,7 +55,7 @@ const generateAccessTokenStep = (props) => {
         setKeyType(createdKeyType);
         setSelectedTab(createdSelectedTab);
         setAccessTokenRequest(newRequest);
-    }, [createdKeyType,createdSelectedTab]);
+    }, [createdKeyType, createdSelectedTab]);
 
     useEffect(() => {
         Application.get(createdApp.value)
@@ -70,7 +71,10 @@ const generateAccessTokenStep = (props) => {
                 }
                 const { status } = error;
                 if (status === 404) {
-                    setNotFound(true);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Credentials.Wizard.GenerateAccessTokenStep.error.404',
+                        defaultMessage: 'Resource not found',
+                    }));
                 }
             });
     }, []);
@@ -97,7 +101,10 @@ const generateAccessTokenStep = (props) => {
                 }
                 const { status } = error;
                 if (status === 404) {
-                    setNotFound(true);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Credentials.Wizard.GenerateAccessTokenStep.error.404',
+                        defaultMessage: 'Resource not found',
+                    }));
                 }
             });
     };
@@ -130,4 +137,4 @@ const generateAccessTokenStep = (props) => {
     );
 };
 
-export default injectIntl(generateAccessTokenStep);
+export default generateAccessTokenStep;

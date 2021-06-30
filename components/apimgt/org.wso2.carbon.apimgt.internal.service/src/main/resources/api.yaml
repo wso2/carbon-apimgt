@@ -255,6 +255,18 @@ paths:
             **Search condition**.
               Application ID  of the subscription
           type: integer
+        - name: apiUUID
+          in: query
+          description: |
+            **Search condition**.
+              Api UUID  of the subscription
+          type: string
+        - name: applicationUUID
+          in: query
+          description: |
+            **Search condition**.
+              Application UUID  of the subscription
+          type: string
       tags:
         - Subscription Validation
       responses:
@@ -509,37 +521,26 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /synapse-attributes:
+  /webhooks-subscriptions:
     get:
-      summary: Get API UUID and label associated with it
+      summary: Get webhooks subscriptions
       description: |
-        This will provide access to synapse artifacts in database.
+        This will provide list of webhooks subscriptions from the database.
       parameters:
-        - name: apiName
-          in: query
+        - name: xWSO2Tenant
+          in: header
           description: |
-            **Search condition**.
-              API Name
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
           type: string
-        - name: tenantDomain
-          in: query
-          description: |
-            **Search condition**.
-             tenantDomain associated with the API
-          type: string
-        - name: version
-          in: query
-          description: |
-            **Search condition**.
-            version of the API
-          type: string
+          required: true
       tags:
-        - Retrieving Synapse artifacts
+        - Retrieving webhooks subscriptions
       responses:
         200:
-          description: An array of gatewayRuntimeArtifacts
+          description: An array of webhooks subscriptions
           schema:
-            $ref: '#/definitions/SynapseAttributes'
+            $ref: '#/definitions/webhooksSubscriptionsList'
         default:
           description: Unexpected error
           schema:
@@ -563,6 +564,10 @@ paths:
           description: 'Event Received success'
           schema:
             type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -748,6 +753,10 @@ definitions:
         type: string
         description: Type of the API.
         example: APIProduct
+      status:
+        type: string
+        description: Type of the API.
+        example: APIProduct
       isDefaultVersion:
         type: boolean
         description: Whether this is the default version of the API.
@@ -877,12 +886,18 @@ definitions:
   #-----------------------------------------------------
   Subscription:
     properties:
+      subscriptionUUID:
+        type: string
       subscriptionId:
         type: integer
       policyId:
         type: string
+      apiUUID:
+        type: string
       apiId:
         type: integer
+      applicationUUID:
+        type: string
       appId:
         type: integer
       subscriptionState:
@@ -929,6 +944,8 @@ definitions:
     properties:
       applicationId:
         type: integer
+      applicationUUID:
+        type: string
       consumerKey:
         type: string
       keyType:
@@ -970,7 +987,72 @@ definitions:
           type: string
 
 
-
+  #-----------------------------------------------------
+  # The Webhooks Subscription List resource
+  #-----------------------------------------------------
+  webhooksSubscriptionsList:
+    title: Scopes List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/webhooksSubscription'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Webhooks Subscription resource
+  #-----------------------------------------------------
+  webhooksSubscription:
+    properties:
+      apiUUID:
+        type: string
+        description: The API UUID
+      apiContext:
+        type: string
+        description: The API context.
+      apiVersion:
+        type: string
+        description: The API version.
+      tenantDomain:
+        type: string
+        description: The tenant domain.
+      tenantId:
+        type: integer
+        description: The tenant id.
+        example: -1234
+      appID:
+        type: string
+        description: The application ID of the subscription.
+        example: 1
+      callbackURL:
+        type: string
+        description: The callback URL
+      topicName:
+        type: string
+        description: The topic name.
+      secret:
+        type: string
+        description: Secret value of the subscription.
+      expiryTime:
+        type: integer
+        format: int64
+        description: the expiry time in millis
+      tier:
+        type: string
+        description: the subscription tier.
+        example: Bronze
+      applicationTier:
+        type: string
+        description: the application tier.
+        example: Unlimited
+      apiTier:
+        type: string
+        description: the API tier.
+        example: Bronze
+      subscriberName:
+        type: string
+        description: the subscriber name.
+        example: admin
 
 
   #---------------------  --------------------------------
@@ -1233,6 +1315,8 @@ definitions:
         $ref: '#/definitions/RequestCountLimit'
       bandwidth:
         $ref: '#/definitions/BandwidthLimit'
+      eventCount:
+        $ref: '#/definitions/EventCountLimit'
 
   #-----------------------------------------------------
   # The Throttling Bandwidth Limit resource
@@ -1270,4 +1354,21 @@ definitions:
             format: int64
             description: Maximum number of requests allowed
             example: 1000
+
+  #-----------------------------------------------------
+  # The Throttling Event Count Limit resource
+  #-----------------------------------------------------
+  EventCountLimit:
+    title: Event Count Limit object
+    allOf:
+      - $ref: '#/components/schemas/ThrottleLimitBase'
+      - required:
+          - eventCount
+        type: object
+        properties:
+          eventCount:
+            type: integer
+            description: Maximum number of events allowed
+            format: int64
+            example: 3000
 

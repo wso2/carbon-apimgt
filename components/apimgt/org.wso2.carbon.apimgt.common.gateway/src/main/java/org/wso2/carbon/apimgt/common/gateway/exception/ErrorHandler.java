@@ -23,35 +23,35 @@ package org.wso2.carbon.apimgt.common.gateway.exception;
  */
 public interface ErrorHandler {
     /**
-     * Get error code that defined in the enum
+     * Get error code that defined in the enum.
      *
      * @return error code
      */
     long getErrorCode();
 
     /**
-     * Get error message that defined in the enum
+     * Get error message that defined in the enum.
      *
      * @return error message
      */
     String getErrorMessage();
 
     /**
-     * Get error description that defined in the enum
+     * Get error description that defined in the enum.
      *
      * @return error description.
      */
     String getErrorDescription();
 
     /**
-     * Get Http status code that defined in the enum
+     * Get Http status code that defined in the enum.
      *
      * @return error code.
      */
     int getHttpStatusCode();
 
     /**
-     * Return true if stack trace to print;
+     * Return true if stack trace to print.
      *
      * @return
      */
