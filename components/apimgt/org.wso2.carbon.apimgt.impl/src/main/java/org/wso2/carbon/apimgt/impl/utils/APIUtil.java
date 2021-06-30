@@ -9768,7 +9768,7 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
     }
-    //read from DB
+
     public static Map<String, Environment> getEnvironments() throws APIManagementException {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         // get dynamic gateway environments read from database
