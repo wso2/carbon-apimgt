@@ -3711,7 +3711,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected void populateAPIInformation(String uuid, String organization, API api)
-            throws APIManagementException, OASPersistenceException, ParseException {
+            throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
         Organization org = new Organization(organization);
         //UUID
         if (api.getUuid() == null) {
@@ -3767,13 +3767,22 @@ public abstract class AbstractAPIManager implements APIManager {
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
         //templates
-        String resourceConfigsString = null;
+        String resourceConfigsString;
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
             resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
         }
         api.setSwaggerDefinition(resourceConfigsString);
+
+        if (resourceConfigsString == null) {
+            if (api.getAsyncApiDefinition() != null) {
+                resourceConfigsString = api.getAsyncApiDefinition();
+            } else {
+                resourceConfigsString = apiPersistenceInstance.getAsyncDefinition(org, uuid);
+            }
+            api.setAsyncApiDefinition(resourceConfigsString);
+        }
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, organization));
