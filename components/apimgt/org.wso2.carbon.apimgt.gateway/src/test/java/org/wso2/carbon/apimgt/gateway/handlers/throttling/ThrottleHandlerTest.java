@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -57,7 +58,7 @@ import java.util.Map;
  * Test cases for for ThrottleHandler.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class})
+@PrepareForTest({org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class, GatewayUtils.class})
 public class ThrottleHandlerTest {
 
     private Timer timer;
@@ -117,7 +118,8 @@ public class ThrottleHandlerTest {
                 (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getExtensionListenerMap()).thenReturn(extensionListenerMap);
-
+        PowerMockito.mockStatic(GatewayUtils.class);
+        PowerMockito.when(GatewayUtils.isImmediateSubscriptionUpdateEnabled()).thenReturn(false);
     }
 
     @Test

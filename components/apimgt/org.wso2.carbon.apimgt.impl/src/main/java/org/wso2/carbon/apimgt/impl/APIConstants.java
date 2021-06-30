@@ -1909,6 +1909,7 @@ public final class APIConstants {
         public static final String TRUE = "true";
         public static final String ADD = "add";
         public static final String ENABLE_POLICY_DEPLOYMENT = "EnablePolicyDeployment";
+        public static final String ENABLE_IMMEDIATE_SUBSCRIPTION_POLICY_UPDATE = "EnableImmediateSubscriptionUpdate";
     }
 
     /**
