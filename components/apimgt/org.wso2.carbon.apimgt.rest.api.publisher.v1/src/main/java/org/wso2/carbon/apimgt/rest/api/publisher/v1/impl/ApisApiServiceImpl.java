@@ -4956,7 +4956,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //load topics from AsyncAPI
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
-                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
+                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || apiDTOFromProperties.isSolaceAPI()));
 
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);

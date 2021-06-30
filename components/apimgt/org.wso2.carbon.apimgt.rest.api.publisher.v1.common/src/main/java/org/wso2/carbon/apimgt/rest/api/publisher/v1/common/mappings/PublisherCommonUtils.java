@@ -1009,7 +1009,7 @@ public class PublisherCommonUtils {
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
-                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
+                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()) || existingAPI.isSolaceAPI());
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
