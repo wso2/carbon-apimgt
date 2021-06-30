@@ -76,23 +76,5 @@ public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGa
 
         apiAdmin.addEnvironment(tenantDomain, env);
 
-        /* The following section is for the testing the
-             webhook because of the version incompatibility.
-         */
-        //why not API
-        //GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
-        //gatewayAPIDTO.setName("test1");
-        //gatewayAPIDTO.setVersion("1.0.0");
-        //gatewayAPIDTO.setProvider("ABC");
-        //gatewayAPIDTO.setApiId("1234");
-        //gatewayAPIDTO.setApiDefinition("Gold");
-
-        //try {
-        //    APIDeployer apiDeployer = new APIDeployerImpl();
-        //   apiDeployer.deployArtifacts(gatewayAPIDTO, "test");
-        //} catch (Exception e) {
-        //    log.debug("Unexpected Error:" + e);
-        //}
-
     }
 }
