@@ -89,6 +89,8 @@ const tenantListing = (props) => {
             });
     }
 
+    const { custom: { landingPage } } = theme;
+
     return (
         <div className={classes.root}>
             <Grid container md={4} justify='left' spacing={0} className={classes.wrapper}>
@@ -110,7 +112,7 @@ const tenantListing = (props) => {
                                     style={{
                                         textDecoration: 'none',
                                     }}
-                                    to={`/apis?tenant=${domain}`}
+                                    to={landingPage.active ? `/home?tenant=${domain}` : `/apis?tenant=${domain}`}
                                     onClick={() => getSettings(domain)}
                                 >
                                     <Paper elevation={0} square className={classes.paper}>
