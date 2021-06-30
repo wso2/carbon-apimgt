@@ -175,6 +175,15 @@ function Endpoints(props) {
     const saveAPI = (isRedirect) => {
         const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
+
+        if ((endpointConfig.endpoint_security.production || endpointConfig.endpoint_security.sandbox)
+            && endpointConfig.endpoint_security.username && endpointConfig.endpoint_security.type) {
+            delete endpointConfig.endpoint_security.type;
+            delete endpointConfig.endpoint_security.username;
+            delete endpointConfig.endpoint_security.password;
+            apiObject.endpointConfig = endpointConfig;
+        }
+
         if (endpointImplementationType === 'INLINE') {
             api.updateSwagger(swagger).then((resp) => {
                 setSwagger(resp.obj);

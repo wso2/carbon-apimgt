@@ -99,6 +99,9 @@ function EndpointSecurity(props) {
     const [parameterName, setParameterName] = useState(null);
     const [parameterValue, setParameterValue] = useState(null);
     const endpointType = isProduction ? 'production' : 'sandbox';
+    const [isUsernameUpdated, setIsUsernameUpdated] = useState(false);
+    const [isPasswordUpdated, setIsPasswordUpdated] = useState(false);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     const authTypes = [
         {
@@ -559,9 +562,10 @@ function EndpointSecurity(props) {
                                     defaultMessage='Username'
                                 />
                             )}
-                            onChange={(event) => setEndpointSecurityInfo(
-                                { ...endpointSecurityInfo, username: event.target.value },
-                            )}
+                            onChange={(event) => {
+                                setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value });
+                                setIsUsernameUpdated(true);
+                            }}
                             value={endpointSecurityInfo.username}
                             onBlur={() => validateAndUpdateSecurityInfo('username')}
                         />
@@ -572,7 +576,8 @@ function EndpointSecurity(props) {
                             disabled={isRestricted(['apim:api_create'], api)}
                             required
                             fullWidth
-                            error={securityValidity && securityValidity.password === false}
+                            error={(securityValidity && securityValidity.password === false)
+                                || (isUsernameUpdated && !isPasswordUpdated)}
                             helperText={
                                 securityValidity && securityValidity.password === false ? (
                                     <FormattedMessage
@@ -580,13 +585,17 @@ function EndpointSecurity(props) {
                                         + 'EndpointSecurity.no.password.error'}
                                         defaultMessage='Password should not be empty'
                                     />
-                                ) : (
+                                ) : iff(isUsernameUpdated && !isPasswordUpdated,
+                                    <FormattedMessage
+                                        id={'Apis.Details.Endpoints.GeneralConfiguration.'
+                                        + 'EndpointSecurity.change.password.error'}
+                                        defaultMessage='Password change is required when the username is changed'
+                                    />,
                                     <FormattedMessage
                                         id={'Apis.Details.Endpoints.GeneralConfiguration.'
                                         + 'EndpointSecurity.password.message'}
                                         defaultMessage='Enter Password'
-                                    />
-                                )
+                                    />)
                             }
                             variant='outlined'
                             type='password'
@@ -598,9 +607,10 @@ function EndpointSecurity(props) {
                                 />
                             )}
                             value={endpointSecurityInfo.password}
-                            onChange={(event) => setEndpointSecurityInfo(
-                                { ...endpointSecurityInfo, password: event.target.value },
-                            )}
+                            onChange={(event) => {
+                                setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value });
+                                setIsPasswordUpdated(true);
+                            }}
                             onBlur={() => validateAndUpdateSecurityInfo('password')}
                             InputProps={{
                                 autoComplete: 'new-password',
@@ -765,6 +775,9 @@ function EndpointSecurity(props) {
                     autoFocus
                     variant='contained'
                     style={{ marginTop: '10px', marginRight: '10px', marginBottom: '10px' }}
+                    disabled={(endpointSecurityInfo.type !== 'NONE'
+                                && (!isUsernameUpdated && !isPasswordUpdated))
+                                || (isUsernameUpdated && !isPasswordUpdated)}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurityConfig.config.save.button'
