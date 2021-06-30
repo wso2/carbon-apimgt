@@ -176,7 +176,7 @@ function Endpoints(props) {
         const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
 
-        if ((endpointConfig.endpoint_security.production || endpointConfig.endpoint_security.sandbox)
+        if (endpointConfig.endpoint_security && (endpointConfig.endpoint_security.production || endpointConfig.endpoint_security.sandbox)
             && endpointConfig.endpoint_security.username && endpointConfig.endpoint_security.type) {
             delete endpointConfig.endpoint_security.type;
             delete endpointConfig.endpoint_security.username;
