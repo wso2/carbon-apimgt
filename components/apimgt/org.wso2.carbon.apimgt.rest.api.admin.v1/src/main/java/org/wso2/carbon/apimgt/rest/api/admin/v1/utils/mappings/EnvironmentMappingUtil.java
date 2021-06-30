@@ -60,6 +60,7 @@ public class EnvironmentMappingUtil {
         envDTO.setIsReadOnly(env.isReadOnly());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
+        envDTO.setExternalGWEnv((env.isExternalGWEnv()));
         return envDTO;
     }
 
@@ -109,6 +110,7 @@ public class EnvironmentMappingUtil {
         env.setReadOnly(false);
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
+        env.setExternalGWEnv((envDTO.isExternalGWEnv()));
         return env;
     }
 

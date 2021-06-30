@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -77,6 +78,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -113,15 +115,21 @@ import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.gatewayBridge.deployers.APIDeployer;
+import org.wso2.carbon.apimgt.impl.gatewayBridge.deployers.APIDeployerImpl;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -8716,11 +8724,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
+        Map<String, Environment> environmentMap = APIUtil.getEnvironments();
+        List<Environment> externalEnvironments = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
                 if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
                         apiRevisionDeployment.getDeployment())) {
                     environmentsToRemove.add(currentapiRevisionDeployment);
+                }
+            }
+            if (environmentMap.containsKey(apiRevisionDeployment.getDeployment())) {
+                Environment envObject = environmentMap.get(apiRevisionDeployment.getDeployment());
+                //adding external gateway envs to the externalEnvironments array list
+                if (envObject.isExternalGWEnv()) {
+                    externalEnvironments.add(envObject);
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
@@ -8737,6 +8754,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (environmentsToAdd.size() > 0) {
             // TODO remove this to organization once the microgateway can build gateway based on organization.
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
+        }
+        if (externalEnvironments.size() > 0 ) {
+            for (Environment env : externalEnvironments) {
+                GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+                gatewayAPIDTO.setName(api.getId().getName());
+                gatewayAPIDTO.setProvider(api.getId().getProviderName());
+                gatewayAPIDTO.setVersion(api.getId().getVersion());
+                gatewayAPIDTO.setApiId(api.getId().getUUID());
+                gatewayAPIDTO.setApiDefinition(api.getSwaggerDefinition());
+                String externalGWName = env.getName();
+                List<APIRuntimeArtifactDto> gatewayArtifacts;
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
+
+                GatewayArtifactGenerator gatewayArtifactGenerator =
+                        ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator("ExternalGWArtifact");
+
+                RuntimeArtifactDto runtimeArtifactDto = gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+
+                try {
+                    APIDeployer apiDeployer = new APIDeployerImpl();
+                    apiDeployer.deployArtifacts(gatewayAPIDTO, externalGWName, runtimeArtifactDto);
+                } catch (Exception e) {
+                    log.debug("Unexpected Error:" + e);
+                }
+            }
         }
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
         String defaultVersion = getDefaultVersion(apiIdentifier);

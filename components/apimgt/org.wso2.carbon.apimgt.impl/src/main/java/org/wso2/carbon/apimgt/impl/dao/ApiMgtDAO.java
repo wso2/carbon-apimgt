@@ -13699,6 +13699,7 @@ public class ApiMgtDAO {
                     String name = rs.getString("NAME");
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
+                    Boolean externalGWEnv = rs.getBoolean("EXTERNAL_GATEWAY_ENVIRONMENT");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -13706,6 +13707,7 @@ public class ApiMgtDAO {
                     env.setName(name);
                     env.setDisplayName(displayName);
                     env.setDescription(description);
+                    env.setExternalGWEnv(externalGWEnv);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -13737,6 +13739,7 @@ public class ApiMgtDAO {
                     String name = rs.getString("NAME");
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
+                    Boolean externalGWEnv = rs.getBoolean("EXTERNAL_GATEWAY_ENVIRONMENT");
 
                     env = new Environment();
                     env.setId(id);
@@ -13745,6 +13748,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                    env.setExternalGWEnv(externalGWEnv);
                 }
             }
         } catch (SQLException e) {
@@ -13776,6 +13780,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, tenantDomain);
                 prepStmt.setString(4, environment.getDisplayName());
                 prepStmt.setString(5, environment.getDescription());
+                prepStmt.setBoolean(6, environment.isExternalGWEnv());
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();

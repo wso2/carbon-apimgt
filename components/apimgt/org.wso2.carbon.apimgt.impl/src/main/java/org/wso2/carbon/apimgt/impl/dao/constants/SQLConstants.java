@@ -2570,18 +2570,18 @@ public class SQLConstants {
     /** Environment related constants **/
 
     public static final String GET_ENVIRONMENT_BY_TENANT_SQL =
-            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
+            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, EXTERNAL_GATEWAY_ENVIRONMENT " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ?";
 
     public static final String GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL =
-            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
+            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, EXTERNAL_GATEWAY_ENVIRONMENT " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ? AND UUID = ?";
 
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
-            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION) " +
-            "VALUES (?,?,?,?,?)";
+            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION, EXTERNAL_GATEWAY_ENVIRONMENT) " +
+            "VALUES (?,?,?,?,?,?)";
 
     public static final String INSERT_GATEWAY_VHOSTS_SQL = "INSERT INTO " +
             "AM_GW_VHOST (GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT) " +
@@ -3318,6 +3318,23 @@ public class SQLConstants {
                         " WHERE API_UUID = ? " +
                         " AND APPLICATION_ID = ?" +
                         " AND TENANT_DOMAIN = ?";
+    }
+    /**
+     * Static class to hold database queries related to external gateway webhooks subscriptions
+     */
+    public static class ExternalGatewayWebhooksSqlConstants {
+        public static final String FIND_SUBSCRIPTION =
+                "SELECT WH_SUBSCRIPTION_ID FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_SUBSCRIBER_NAME = ? AND " +
+                        "WH_CALLBACK_URL = ? AND  WH_TOPIC = ?";
+        public static final String ADD_SUBSCRIPTION =
+                "INSERT INTO GB_WEBHOOKS_SUBSCRIPTION (WH_SUBSCRIBER_NAME, WH_CALLBACK_URL, WH_TOPIC," +
+                        "EXPIRY_AT ) VALUES (?,?,?,?)";
+        public static final String GET_SUBSCRIPTIONS_BY_NAME =
+                "SELECT WH_CALLBACK_URL, WH_SUBSCRIBER_NAME " +
+                        "FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_SUBSCRIBER_NAME= ? ";
+        public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE GB_WEBHOOKS_SUBSCRIPTION SET " +
+                "WH_CALLBACK_URL = ?, WH_TOPIC = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
+
     }
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
