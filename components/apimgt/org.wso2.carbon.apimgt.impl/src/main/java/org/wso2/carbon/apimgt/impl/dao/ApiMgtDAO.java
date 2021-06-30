@@ -8957,6 +8957,78 @@ public class ApiMgtDAO {
         }
     }
 
+    public boolean hasApplicationPolicyAttachedToApplication(String policyName, int tenantID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_APPLICATION)) {
+                preparedStatement.setInt(1,tenantID);
+                preparedStatement.setString(2,policyName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking existence of Policy " + policyName + "Attached to Application.", e);
+        }
+
+        return false;
+    }
+
+    public boolean hasSubscriptionPolicyAttached(String policyName, String tenantDomain) throws APIManagementException {
+
+        String sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_SUBSCRIPTION_SUPER_TENANT;
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_SUBSCRIPTION_TENANT;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    preparedStatement.setString(1, APIConstants.TENANT_PREFIX.concat(tenantDomain).concat("%"));
+                    preparedStatement.setString(2, policyName);
+                    preparedStatement.setString(3, APIConstants.TENANT_PREFIX.concat(tenantDomain).concat("%"));
+                    preparedStatement.setString(4, policyName);
+                } else {
+                    preparedStatement.setString(1, policyName);
+                    preparedStatement.setString(2, policyName);
+                }
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking existence of Policy " + policyName + "Attached to Subscription.", e);
+        }
+
+        return false;
+    }
+    public boolean hasAPIPolicyAttached(String policyName, String tenantDomain) throws APIManagementException {
+
+        String sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_API_RESOURCE_SUPER_TENANT;
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_API_RESOURCE_TENANT;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    preparedStatement.setString(1, APIConstants.TENANT_PREFIX.concat(tenantDomain).concat("%"));
+                    preparedStatement.setString(2, policyName);
+                    preparedStatement.setString(3, APIConstants.TENANT_PREFIX.concat(tenantDomain).concat("%"));
+                    preparedStatement.setString(4, policyName);
+                } else {
+                    preparedStatement.setString(1, policyName);
+                    preparedStatement.setString(2, policyName);
+                }
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking existence of Policy " + policyName + "Attached to API/Resouce.", e);
+        }
+
+        return false;
+    }
+
     private class SubscriptionInfo {
         private int subscriptionId;
         private String tierId;
@@ -13039,52 +13111,6 @@ public class ApiMgtDAO {
         }
         return status;
     }
-
-    public boolean hasSubscription(String tierId, String tenantDomainWithAt, String policyLevel) throws APIManagementException {
-        PreparedStatement checkIsExistPreparedStatement = null;
-        Connection connection = null;
-        ResultSet checkIsResultSet = null;
-        boolean status = false;
-        try {
-             /*String apiProvider = tenantId;*/
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
-            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_RESOURCES_API;
-            } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-                isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_APPLICATION;
-            } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
-                isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
-            }
-
-            checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
-            checkIsExistPreparedStatement.setString(1, tierId);
-
-            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                checkIsExistPreparedStatement.setString(2, tierId);
-            }
-            checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
-            if (checkIsResultSet != null && checkIsResultSet.next()) {
-                int count = checkIsResultSet.getInt(1);
-                if (count > 0) {
-                    status = true;
-                }
-
-            }
-
-            connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            String msg = "Couldn't check Subscription Exist";
-            log.error(msg, e);
-            handleException(msg, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, connection, checkIsResultSet);
-        }
-        return status;
-
-    }
-
 
     /**
      * Get a list of access tokens issued for given user under the given app of given owner. Returned object carries

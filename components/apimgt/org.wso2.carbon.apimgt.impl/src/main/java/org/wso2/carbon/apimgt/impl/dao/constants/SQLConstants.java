@@ -3366,7 +3366,28 @@ public class SQLConstants {
                 + "WHERE "
                 + "(DEFAULT_QUOTA_TYPE  = '" + QUOTA_TYPE_BANDWIDTH + "' OR QUOTA_TYPE  = '"+ QUOTA_TYPE_BANDWIDTH + "') "
                 + "AND TENANT_ID = ?";
+        public static final String TIER_HAS_ATTACHED_TO_APPLICATION = "SELECT 1 FROM AM_APPLICATION WHERE " +
+                "SUBSCRIBER_ID IN (SELECT SUBSCRIBER_ID FROM AM_SUBSCRIBER WHERE TENANT_ID = ?) " +
+                "AND AM_APPLICATION.APPLICATION_TIER = ?";
 
+        public static final String TIER_HAS_ATTACHED_TO_SUBSCRIPTION_SUPER_TENANT = "(SELECT 1 from AM_SUBSCRIPTION " +
+                "WHERE API_ID IN (SELECT API_ID FROM AM_API WHERE CONTEXT NOT LIKE '/t/%') AND TIER_ID_PENDING = ?) " +
+                "UNION " +
+                "(SELECT 1 FROM AM_SUBSCRIPTION WHERE  API_ID IN (SELECT API_ID FROM AM_API WHERE CONTEXT NOT LIKE " +
+                "'/t/%') AND TIER_ID = ?)";
+        public static final String TIER_HAS_ATTACHED_TO_SUBSCRIPTION_TENANT = "(SELECT 1 from AM_SUBSCRIPTION " +
+                "WHERE API_ID IN (SELECT API_ID FROM AM_API WHERE CONTEXT LIKE ?) AND TIER_ID_PENDING = ?) " +
+                "UNION " +
+                "(SELECT 1 FROM AM_SUBSCRIPTION WHERE  API_ID IN (SELECT API_ID FROM AM_API WHERE CONTEXT LIKE ?) " +
+                "AND  TIER_ID = ?)";
+        public static final String TIER_HAS_ATTACHED_TO_API_RESOURCE_SUPER_TENANT = "(SELECT 1 FROM AM_API WHERE " +
+                "CONTEXT NOT LIKE '/t/%' AND API_TIER = ?) " +
+                "UNION " +
+                "(SELECT 1 FROM AM_API_URL_MAPPING WHERE API_ID IN (SELECT API_ID FROM AM_API WHERE CONTEXT NOT LIKE " +
+                "'/t/%') AND THROTTLING_TIER = ?)";
+        public static final String TIER_HAS_ATTACHED_TO_API_RESOURCE_TENANT = "(SELECT 1 FROM AM_API WHERE " +
+                "CONTEXT LIKE ? AND API_TIER = ?) UNION (SELECT 1 FROM AM_API_URL_MAPPING WHERE API_ID IN " +
+                "(SELECT API_ID FROM AM_API WHERE CONTEXT LIKE ?) AND THROTTLING_TIER = ?)";
     }
 
     public static class CertificateConstants {

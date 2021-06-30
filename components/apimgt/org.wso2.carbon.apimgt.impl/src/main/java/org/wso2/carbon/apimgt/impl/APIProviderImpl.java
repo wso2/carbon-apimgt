@@ -6785,15 +6785,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public boolean hasAttachments(String username, String policyName, String policyType) throws APIManagementException {
+
         int tenantID = APIUtil.getTenantId(username);
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        String tenantDomainWithAt = username;
-        if (APIUtil.getSuperTenantId() != tenantID) {
-            tenantDomainWithAt = "@" + tenantDomain;
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyType)) {
+            return apiMgtDAO.hasApplicationPolicyAttachedToApplication(policyName, tenantID);
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyType)) {
+            return apiMgtDAO.hasSubscriptionPolicyAttached(policyName, tenantDomain);
+        } else {
+            return apiMgtDAO.hasAPIPolicyAttached(policyName, tenantDomain);
         }
-
-        boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt, policyType);
-        return hasSubscription;
     }
 
     @Override
