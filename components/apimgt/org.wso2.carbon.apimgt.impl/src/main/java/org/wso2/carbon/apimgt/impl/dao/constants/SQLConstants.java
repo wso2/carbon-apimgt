@@ -1620,18 +1620,6 @@ public class SQLConstants {
 
     public static final String UPDATE_API_SQL =
             "UPDATE AM_API " +
-            "SET " +
-            "   CONTEXT = ?, " +
-            "   CONTEXT_TEMPLATE = ?, " +
-            "   UPDATED_BY = ?," +
-            "   UPDATED_TIME = ?, " +
-            "   API_TIER = ?, " +
-            "   API_TYPE = ? " +
-            " WHERE " +
-            "   API_UUID = ? ";
-
-    public static final String UPDATE_API_SQL_WITH_API_RENAME =
-            "UPDATE AM_API " +
                     "SET " +
                     "   CONTEXT = ?, " +
                     "   API_NAME = ?, " +

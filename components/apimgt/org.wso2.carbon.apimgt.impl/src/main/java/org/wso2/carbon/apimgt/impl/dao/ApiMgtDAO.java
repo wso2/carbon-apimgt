@@ -6859,41 +6859,22 @@ public class ApiMgtDAO {
             //Header change check not required here as we update API level throttling tier
             //from same call.
             //TODO review and run tier update as separate query if need.
-            if (resolver instanceof OnPremResolver) {
-                prepStmt = connection.prepareStatement(query);
-                prepStmt.setString(1, api.getContext());
-                String contextTemplate = api.getContextTemplate();
-                //If the context template ends with {version} this means that the version will be at the end of the
-                // context.
-                if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
-                    //Remove the {version} part from the context template.
-                    contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
-                }
-                prepStmt.setString(2, contextTemplate);
-                prepStmt.setString(3, username);
-                prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, api.getApiLevelPolicy());
-                prepStmt.setString(6, api.getType());
-                prepStmt.setString(7, api.getUuid());
-            } else {
-                query = SQLConstants.UPDATE_API_SQL_WITH_API_RENAME;
-                prepStmt = connection.prepareStatement(query);
-                prepStmt.setString(1, api.getContext());
-                String contextTemplate = api.getContextTemplate();
-                //If the context template ends with {version} this means that the version will be at the end of the
-                // context.
-                if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
-                    //Remove the {version} part from the context template.
-                    contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
-                }
-                prepStmt.setString(2, api.getId().getApiName());
-                prepStmt.setString(3, contextTemplate);
-                prepStmt.setString(4, username);
-                prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(6, api.getApiLevelPolicy());
-                prepStmt.setString(7, api.getType());
-                prepStmt.setString(8, api.getUuid());
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, api.getContext());
+            String contextTemplate = api.getContextTemplate();
+            //If the context template ends with {version} this means that the version will be at the end of the
+            // context.
+            if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
+                //Remove the {version} part from the context template.
+                contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
+            prepStmt.setString(2, api.getId().getApiName());
+            prepStmt.setString(3, contextTemplate);
+            prepStmt.setString(4, username);
+            prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(6, api.getApiLevelPolicy());
+            prepStmt.setString(7, api.getType());
+            prepStmt.setString(8, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has

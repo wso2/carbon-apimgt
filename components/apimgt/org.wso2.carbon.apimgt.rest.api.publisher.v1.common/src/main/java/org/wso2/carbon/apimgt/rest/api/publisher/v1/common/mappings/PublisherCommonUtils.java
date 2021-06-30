@@ -284,9 +284,6 @@ public class PublisherCommonUtils {
         OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         if (resolver instanceof OnPremResolver) {
             apiDtoToUpdate.setName(apiIdentifier.getApiName());
-        } else if (StringUtils.isEmpty(apiDtoToUpdate.getName())) {
-                throw new APIManagementException(
-                        "Cannot update the API as API Name is empty");
         }
         apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
         apiDtoToUpdate.setProvider(apiIdentifier.getProviderName());
