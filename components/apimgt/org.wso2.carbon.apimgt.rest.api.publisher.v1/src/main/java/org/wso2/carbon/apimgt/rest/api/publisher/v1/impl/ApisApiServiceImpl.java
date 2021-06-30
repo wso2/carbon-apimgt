@@ -3785,7 +3785,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             File file = importExportAPI
                     .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                            Boolean.TRUE, Boolean.TRUE, exportLatestRevision, StringUtils.EMPTY, organization);
+                            Boolean.TRUE, Boolean.FALSE, exportLatestRevision, StringUtils.EMPTY, organization);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
@@ -4649,6 +4649,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             //String asyncAPIString = apiProvider.getAsyncAPIDefinition(apiIdentifier);
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            api.setOrganization(organization);
             String updatedDefinition = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; fileNme=\"" + "asyncapi.json" + "\"").build();
@@ -4984,9 +4985,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             //load topics from AsyncAPI
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
                     definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
+            apiToAdd.setOrganization(organization);
+            apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
             apiProvider.addAPI(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +

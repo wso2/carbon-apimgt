@@ -759,10 +759,11 @@ public class PublisherCommonUtils {
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
 
+        apiToAdd.setOrganization(organization);
         if (isAsyncAPI) {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
+            apiToAdd.setAsyncApiDefinition(apiDefinition);
         }
 
         //adding the api
@@ -1043,7 +1044,7 @@ public class PublisherCommonUtils {
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
-        return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
+        return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
     }
 
     /**

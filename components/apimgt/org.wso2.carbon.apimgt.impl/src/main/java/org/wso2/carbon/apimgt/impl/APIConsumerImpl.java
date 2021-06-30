@@ -3154,6 +3154,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setSubscriber(userId);
             workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
             workflowDTO.setApplicationId(applicationId);
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_ID, String.valueOf(identifier.getId()));
+
             String status = null;
             if (apiIdentifier != null) {
                 status = apiMgtDAO.getSubscriptionStatus(apiIdentifier.getUUID(), applicationId);
@@ -5895,11 +5897,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName) throws APIManagementException {
-        return getAsyncAPIDefinitionForDeployment(apiId, environmentName);
-    }
-
-    @Override
     public String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
         List<Label> gatewayLabels;
         String updatedDefinition = null;
@@ -5918,37 +5915,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
-        return super.getAsyncAPIDefinition(apiId);
-    }
-
-    @Override
     public List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiUUID);
-    }
-
-    /**
-     * Get server URL updated AsyncAPI definition for given synapse gateway environment
-     * @param apiId Id of the API
-     * @param environmentName Name of the synapse gateway environment
-     * @return Updated AsyncAPI definition
-     * @throws APIManagementException
-     */
-    private String getAsyncAPIDefinitionForDeployment(Identifier apiId, String environmentName)
-            throws APIManagementException {
-        String apiTenantDomain;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition = super.getAsyncAPIDefinition(apiId);
-        AsyncApiParser asyncAPIParser = new AsyncApiParser();
-        if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId);
-            apiTenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironmentWS(apiTenantDomain, environmentName);
-            updatedDefinition = asyncAPIParser.getAsyncApiDefinitionForStore(api, definition, hostsWithSchemes);
-        }
-        return updatedDefinition;
     }
 
     /**

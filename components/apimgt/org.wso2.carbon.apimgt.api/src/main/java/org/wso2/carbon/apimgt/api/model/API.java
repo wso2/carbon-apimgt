@@ -208,6 +208,16 @@ public class API implements Serializable {
      * Property to hold revision id
      */
     private int revisionId;
+    
+    private String audience;
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;

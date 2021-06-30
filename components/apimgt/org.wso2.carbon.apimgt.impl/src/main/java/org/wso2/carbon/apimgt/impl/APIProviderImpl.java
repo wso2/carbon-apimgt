@@ -188,6 +188,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
@@ -7822,12 +7823,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException {
+        String apiId;
+        String organization = api.getOrganization();
+        if (api.getUuid() != null) {
+            apiId = api.getUuid();
+        } else if (api.getId().getUUID() != null) {
+            apiId = api.getId().getUUID();
+        } else {
+            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                    api.getId().getVersion(), organization);
+        }
+
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            AsyncApiParserUtil.saveAPIDefinition(api, jsonText, registry);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+            apiPersistenceInstance.saveAsyncDefinition(new Organization(organization), apiId, jsonText);
+        } catch (AsyncSpecPersistenceException e) {
+            throw new APIManagementException("Error while persisting Async API definition ", e);
         }
     }
 
@@ -8702,6 +8712,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setRevisionId(apiRevision.getId());
         api.setUuid(apiId);
         api.getId().setUuid(apiId);
+        api.setOrganization(organization);
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();

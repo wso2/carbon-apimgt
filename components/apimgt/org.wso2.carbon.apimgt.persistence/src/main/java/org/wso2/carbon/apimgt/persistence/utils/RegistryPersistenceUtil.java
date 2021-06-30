@@ -284,6 +284,7 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
 
+            artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCE, api.getAudience());
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -727,6 +728,7 @@ public class RegistryPersistenceUtil {
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
 
             api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
+            api.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -1218,6 +1220,11 @@ public class RegistryPersistenceUtil {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    public static String getAsyncAPIDefinitionFilePath(String apiName, String apipVersion, String apiProvider) {
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apipVersion + RegistryConstants.PATH_SEPARATOR;
     }
     
     public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {

@@ -65,6 +65,34 @@ public class SOAPOperationBindingTestCase {
         Assert.assertTrue(swagger.getDefinitions().get("CheckPhoneNumber").getProperties().size() == 2);
     }
 
+    @Test public void testGetSwaggerFromWSDLWithExternalXSDs() throws Exception {
+
+        String externalXSDElementName = "InvokeClaimGeniousDataIntoCordysElement";
+        String externalXSDElementInputOperation = "invokeClaimGeniousDataIntoCordysBindingOperationInput";
+        String externalXSDElementOutputOperation = "invokeClaimGeniousDataIntoCordysBindingOperationOutput";
+        String externalXSDElementPropertyName = "LocalizableMessage";
+
+        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(
+                Thread.currentThread().getContextClassLoader()
+                        .getResource("wsdls/wsdl-with-external-xsds/sampleWSDLWithExternalXSDFiles.wsdl")
+                        .toExternalForm());
+
+        Swagger swagger = new SwaggerParser().parse(swaggerStr);
+        Assert.assertTrue("Unable to parse the swagger from the given string", swagger != null);
+        Assert.assertNotNull(swagger.getPaths());
+
+        //Assert WSDL elements
+        Assert.assertEquals(1, swagger.getPaths().size());
+        Assert.assertEquals(5, swagger.getDefinitions().size());
+        Assert.assertNotNull(swagger.getDefinitions().get(externalXSDElementOutputOperation));
+        Assert.assertNotNull(swagger.getDefinitions().get(externalXSDElementInputOperation));
+        Assert.assertNotNull(swagger.getDefinitions().get(externalXSDElementName));
+        //Assert WSDL external XSD element
+        Assert.assertTrue(swagger.getDefinitions().get(externalXSDElementName).getProperties().size() == 1);
+        Assert.assertNotNull(swagger.getDefinitions().get(externalXSDElementName).getProperties()
+                .get(externalXSDElementPropertyName));
+    }
+
     @Test
     public void testCompareGeneratedSwagger() throws Exception {
         String swaggerString = "{\n" + "  \"swagger\": \"2.0\",\n" + "  \"paths\": {\n" + "    \"/getCustomer\": {\n"
