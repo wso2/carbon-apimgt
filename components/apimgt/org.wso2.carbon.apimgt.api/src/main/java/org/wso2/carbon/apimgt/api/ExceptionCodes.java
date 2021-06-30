@@ -368,7 +368,9 @@ ExceptionCodes implements ErrorHandler {
 
     //mediation policies related common errors
     MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)");
+                                                "The name of the mediation policy exceeds the max length (%s)"),
+    INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
+            "Invalid Endpoint Security " + "credentials", false);
 
     private final long errorCode;
     private final String errorMessage;
