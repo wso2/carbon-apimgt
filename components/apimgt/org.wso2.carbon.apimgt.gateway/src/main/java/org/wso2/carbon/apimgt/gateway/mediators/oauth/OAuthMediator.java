@@ -119,22 +119,16 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
             oAuthEndpoint.setGrantType(grantType);
             oAuthEndpoint.setCustomParameters(customParameters);
 
+            TokenResponse tokenResponse = null;
             if (oAuthEndpoint != null) {
                 try {
-                    OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
+                    tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
                     latch.await();
                 } catch(InterruptedException | APISecurityException e) {
                     log.error("Could not generate access token...", e);
                 }
             }
 
-            TokenResponse tokenResponse;
-            if (isRedisEnabled) {
-                assert oAuthEndpoint != null;
-                tokenResponse = (TokenResponse) redisCacheUtils.getObject(oAuthEndpoint.getId(), TokenResponse.class);
-            } else {
-                tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
-            }
             if (tokenResponse != null) {
                 String accessToken = tokenResponse.getAccessToken();
                 Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
