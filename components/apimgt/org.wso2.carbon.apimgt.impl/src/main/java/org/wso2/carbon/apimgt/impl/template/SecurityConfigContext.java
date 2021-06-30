@@ -96,11 +96,10 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                 getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
         if (api != null) {
             Map<String, EndpointSecurityModel> endpointSecurityModelMap = new HashMap<>();
-            endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurityModel());
-            endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurityModel());
             String alias = api.getId().getProviderName() + "--" + api.getId().getApiName()
                     + api.getId().getVersion();
-
+            endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurityModel());
+            endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurityModel());
             if (api.isEndpointSecured()) {
                 EndpointSecurityModel endpointSecurityModel = new EndpointSecurityModel();
                 endpointSecurityModel.setEnabled(true);
@@ -116,12 +115,13 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                 endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(unpw.getBytes())));
                 endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityModel);
                 endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecurityModel);
-            } else {
-                if (StringUtils.isNotEmpty(api.getEndpointConfig())) {
-                    if (productionEndpointSecurity != null) {
-                        EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
-                                .convertValue(productionEndpointSecurity, EndpointSecurityModel.class);
-                        if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
+            }
+            if (StringUtils.isNotEmpty(api.getEndpointConfig())) {
+                if (productionEndpointSecurity != null) {
+                    EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
+                            .convertValue(productionEndpointSecurity, EndpointSecurityModel.class);
+                    if (endpointSecurityModel != null) {
+                        if (endpointSecurityModel.isEnabled()) {
                             if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())
                                     && StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
                                 endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
@@ -131,14 +131,15 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                             endpointSecurityModel.setUniqueIdentifier(api.getId() + "-" + UUID.randomUUID().toString());
                             endpointSecurityModel.setAlias(
                                     alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
-                            endpointSecurityModelMap
-                                    .put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityModel);
                         }
+                        endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityModel);
                     }
-                    if (sandboxEndpointSecurity != null) {
-                        EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
-                                .convertValue(sandboxEndpointSecurity, EndpointSecurityModel.class);
-                        if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
+                }
+                if (sandboxEndpointSecurity != null) {
+                    EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
+                            .convertValue(sandboxEndpointSecurity, EndpointSecurityModel.class);
+                    if (endpointSecurityModel != null) {
+                        if (endpointSecurityModel.isEnabled()) {
                             if (StringUtils.isNotBlank(endpointSecurityModel.getUsername()) &&
                                     StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
                                 endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
@@ -148,9 +149,8 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                             endpointSecurityModel.setUniqueIdentifier(api.getId() + "-" + UUID.randomUUID().toString());
                             endpointSecurityModel.setAlias(
                                     alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_SANDBOX));
-                            endpointSecurityModelMap
-                                    .put(APIConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecurityModel);
                         }
+                        endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecurityModel);
                     }
                 }
             }

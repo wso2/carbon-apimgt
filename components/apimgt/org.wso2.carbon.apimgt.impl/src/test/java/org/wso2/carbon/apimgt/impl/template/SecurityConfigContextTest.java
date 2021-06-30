@@ -22,8 +22,8 @@ import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.velocity.VelocityContext;
 import org.junit.Assert;
-import org.mockito.Mockito;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -80,6 +80,7 @@ public class SecurityConfigContextTest {
         Assert.assertTrue("Property isSecureVaultEnabled cannot be false. ",
                 velocityContext.get("isSecureVaultEnabled").equals(true));
     }
+
 
     @Test
     public void testSecurityConfigContextPerEndpointProductionType() throws Exception {
@@ -182,7 +183,7 @@ public class SecurityConfigContextTest {
         String json = "{\"endpoint_security\":{\n" +
                 "  \"sandbox\":{\n" +
                 "    \"enabled\":true,\n" +
-                "    \"type\":\"DIGEST\",\n" +
+                "    \"type\":\"digest\",\n" +
                 "    \"username\":\"admin\",\n" +
                 "    \"password\":\"admin123#QA\"\n" +
                 "  }\n" +
@@ -218,14 +219,14 @@ public class SecurityConfigContextTest {
     }
 
     @Test
-    public void testSecurityConfigContextIgnoringEndpointConfig() throws Exception {
+    public void testSecurityConfigContextOvverrideSandbox() throws Exception {
 
         String json = "{\"endpoint_security\":{\n" +
                 "  \"sandbox\":{\n" +
                 "    \"enabled\":true,\n" +
-                "    \"type\":\"DIGEST\",\n" +
-                "    \"username\":\"admin\",\n" +
-                "    \"password\":\"admin123#QA\"\n" +
+                "    \"type\":\"digest\",\n" +
+                "    \"username\":\"overrideSandboxuser\",\n" +
+                "    \"password\":\"overrideSandboxpassword\"\n" +
                 "  }\n" +
                 "  }\n" +
                 "}";
@@ -254,13 +255,83 @@ public class SecurityConfigContextTest {
                     endpointSecurityModelEntry.getValue().isEnabled());
             Assert.assertTrue("Property isEndpointAuthDigest cannot be false.",
                     endpointSecurityModelEntry.getValue().getType().contains("digest"));
-            Assert.assertTrue("Property username does not match.",
-                    "admin".equals(endpointSecurityModelEntry.getValue().getUsername()));
-            Assert.assertTrue("Property base64unpw does not match. ",
-                    new String(Base64.encodeBase64("admin:admin123".getBytes()))
-                            .equalsIgnoreCase(endpointSecurityModelEntry.getValue().getBase64EncodedPassword()));
-            Assert.assertTrue("Property securevault_alias does not match.",
-                    "admin--TestAPI1.0.0".equalsIgnoreCase(endpointSecurityModelEntry.getValue().getAlias()));
+            if (APIConstants.ENDPOINT_SECURITY_PRODUCTION.equals(endpointSecurityModelEntry.getKey())) {
+                Assert.assertTrue("Property username does not match.",
+                        "admin".equals(endpointSecurityModelEntry.getValue().getUsername()));
+                Assert.assertTrue("Property base64unpw does not match. ",
+                        new String(Base64.encodeBase64("admin:admin123".getBytes()))
+                                .equalsIgnoreCase(endpointSecurityModelEntry.getValue().getBase64EncodedPassword()));
+                Assert.assertTrue("Property securevault_alias does not match.",
+                        "admin--TestAPI1.0.0".equalsIgnoreCase(endpointSecurityModelEntry.getValue().getAlias()));
+            } else {
+                Assert.assertTrue("Property username does not match.",
+                        "overrideSandboxuser".equals(endpointSecurityModelEntry.getValue().getUsername()));
+                Assert.assertTrue("Property base64unpw does not match. ",
+                        new String(Base64.encodeBase64("overrideSandboxuser:overrideSandboxpassword".getBytes()))
+                                .equalsIgnoreCase(endpointSecurityModelEntry.getValue().getBase64EncodedPassword()));
+                Assert.assertTrue("Property securevault_alias does not match.",
+                        "admin--TestAPI1.0.0".concat("--sandbox").equalsIgnoreCase(endpointSecurityModelEntry.getValue().getAlias()));
+
+            }
+        }
+        Assert.assertTrue("Property isSecureVaultEnabled cannot be false. ",
+                velocityContext.get("isSecureVaultEnabled").equals(true));
+    }
+    @Test
+    public void testSecurityConfigContextOvverrideProduction() throws Exception {
+
+        String json = "{\"endpoint_security\":{\n" +
+                "  \"production\":{\n" +
+                "    \"enabled\":true,\n" +
+                "    \"type\":\"digest\",\n" +
+                "    \"username\":\"overrideProductionUser\",\n" +
+                "    \"password\":\"overrideProductionPassword\"\n" +
+                "  }\n" +
+                "  }\n" +
+                "}";
+
+        API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
+        api.setStatus(APIConstants.CREATED);
+        api.setContextTemplate("/");
+        api.setTransports(Constants.TRANSPORT_HTTP);
+        api.setEndpointConfig(json);
+        api.setEndpointUTUsername("admin");
+        api.setEndpointUTPassword("admin123");
+        api.setEndpointSecured(true);
+        api.setEndpointAuthDigest(true);
+        ConfigContext configcontext = new APIConfigContext(api);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+        SecurityConfigContext securityConfigContext =
+                new SecurityConfigContextWrapper(configcontext, api, apiManagerConfiguration);
+        securityConfigContext.validate();
+        VelocityContext velocityContext = securityConfigContext.getContext();
+        Assert.assertNotNull(velocityContext.get("endpoint_security"));
+        Map<String, EndpointSecurityModel> endpointSecurityModelMap =
+                (Map<String, EndpointSecurityModel>) velocityContext.get("endpoint_security");
+        for (Map.Entry<String, EndpointSecurityModel> endpointSecurityModelEntry : endpointSecurityModelMap
+                .entrySet()) {
+            Assert.assertTrue("Property isEndpointSecured cannot be false.",
+                    endpointSecurityModelEntry.getValue().isEnabled());
+            Assert.assertTrue("Property isEndpointAuthDigest cannot be false.",
+                    endpointSecurityModelEntry.getValue().getType().contains("digest"));
+            if (APIConstants.ENDPOINT_SECURITY_SANDBOX.equals(endpointSecurityModelEntry.getKey())) {
+                Assert.assertTrue("Property username does not match.",
+                        "admin".equals(endpointSecurityModelEntry.getValue().getUsername()));
+                Assert.assertTrue("Property base64unpw does not match. ",
+                        new String(Base64.encodeBase64("admin:admin123".getBytes()))
+                                .equalsIgnoreCase(endpointSecurityModelEntry.getValue().getBase64EncodedPassword()));
+                Assert.assertTrue("Property securevault_alias does not match.",
+                        "admin--TestAPI1.0.0".equalsIgnoreCase(endpointSecurityModelEntry.getValue().getAlias()));
+            } else {
+                Assert.assertTrue("Property username does not match.",
+                        "overrideProductionUser".equals(endpointSecurityModelEntry.getValue().getUsername()));
+                Assert.assertTrue("Property base64unpw does not match. ",
+                        new String(Base64.encodeBase64("overrideProductionUser:overrideProductionPassword".getBytes()))
+                                .equalsIgnoreCase(endpointSecurityModelEntry.getValue().getBase64EncodedPassword()));
+                Assert.assertTrue("Property securevault_alias does not match.",
+                        "admin--TestAPI1.0.0".concat("--production").equalsIgnoreCase(endpointSecurityModelEntry.getValue().getAlias()));
+
+            }
         }
         Assert.assertTrue("Property isSecureVaultEnabled cannot be false. ",
                 velocityContext.get("isSecureVaultEnabled").equals(true));
