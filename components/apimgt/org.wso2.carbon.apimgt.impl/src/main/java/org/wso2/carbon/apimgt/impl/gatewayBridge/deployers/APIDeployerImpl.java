@@ -28,7 +28,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayBridge.dto.WebhookSubscriptionDTO;
 import org.wso2.carbon.apimgt.impl.gatewayBridge.webhooks.WebhookSubscriptionGetService;
 import org.wso2.carbon.apimgt.impl.gatewayBridge.webhooks.WebhookSubscriptionGetServiceImpl;
@@ -54,7 +57,7 @@ public class APIDeployerImpl implements APIDeployer {
      * @param subscriberName             the topic subscribed
      */
     @Override
-    public void deployArtifacts(GatewayAPIDTO gatewayAPIDTO, String subscriberName) throws Exception {
+    public void deployArtifacts(GatewayAPIDTO gatewayAPIDTO, String subscriberName, RuntimeArtifactDto runtimeArtifactDto) throws Exception {
 
         WebhookSubscriptionGetService webhookSubscriptionGetService = new WebhookSubscriptionGetServiceImpl();
         subscriptionsList = webhookSubscriptionGetService.getWebhookSubscription(subscriberName);
@@ -65,12 +68,29 @@ public class APIDeployerImpl implements APIDeployer {
 
             post = new HttpPost(iterator.next().getCallback());
 
+            String artifactsArray = runtimeArtifactDto.getArtifact().toString();
+            String payload = null;
+
+            JSONArray artifacts = new JSONArray(artifactsArray);
+            for (int i = 0; i < artifacts.length(); i++) {
+                JSONObject obj = artifacts.getJSONObject(i);
+                if (obj.has("data")) {
+                    JSONObject dataObj =obj.getJSONObject("data");
+                    if (dataObj.has("id")) {
+                        if (dataObj.getString("id").equals(gatewayAPIDTO.getApiId())) {
+                            payload = dataObj.toString();
+                        }
+                    }
+                }
+            }
             List<NameValuePair> urlParameters = new ArrayList<>();
             urlParameters.add(new BasicNameValuePair("name", gatewayAPIDTO.getName()));
             urlParameters.add(new BasicNameValuePair("version", gatewayAPIDTO.getVersion()));
             urlParameters.add(new BasicNameValuePair("provider", gatewayAPIDTO.getProvider()));
             urlParameters.add(new BasicNameValuePair("apiId", gatewayAPIDTO.getApiId()));
-            urlParameters.add(new BasicNameValuePair("apiDefinition", gatewayAPIDTO.getApiDefinition()));
+            if (payload != null) {
+                urlParameters.add(new BasicNameValuePair("apiDefinition", payload));
+            }
 
             post.setEntity(new UrlEncodedFormEntity(urlParameters));
 

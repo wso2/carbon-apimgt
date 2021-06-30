@@ -115,17 +115,13 @@ import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayBridge.deployers.APIDeployer;
 import org.wso2.carbon.apimgt.impl.gatewayBridge.deployers.APIDeployerImpl;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -8749,9 +8745,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 gatewayAPIDTO.setApiId(api.getId().getUUID());
                 gatewayAPIDTO.setApiDefinition(api.getSwaggerDefinition());
                 String externalGWName = env.getName();
+                List<APIRuntimeArtifactDto> gatewayArtifacts;
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
+
+                GatewayArtifactGenerator gatewayArtifactGenerator =
+                        ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator("ExternalGWArtifact");
+
+                RuntimeArtifactDto runtimeArtifactDto = gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+
                 try {
                     APIDeployer apiDeployer = new APIDeployerImpl();
-                    apiDeployer.deployArtifacts(gatewayAPIDTO, externalGWName);
+                    apiDeployer.deployArtifacts(gatewayAPIDTO, externalGWName, runtimeArtifactDto);
                 } catch (Exception e) {
                     log.debug("Unexpected Error:" + e);
                 }

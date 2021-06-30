@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.gatewayBridge.deployers;
 
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 
 /**
  * Class for deploying apis.
@@ -29,7 +30,7 @@ public interface APIDeployer {
      * Deploys artifacts to other API gateways.
      * @param gatewayAPIDTO     the API DTO contains API details
      */
-    void deployArtifacts(GatewayAPIDTO gatewayAPIDTO , String subscriberName)
+    void deployArtifacts(GatewayAPIDTO gatewayAPIDTO , String subscriberName, RuntimeArtifactDto runtimeArtifactDto)
             throws Exception;
 
     void unDeployArtifacts(GatewayAPIDTO gatewayAPIDTO, String subscriberName)
