@@ -156,7 +156,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeployedEnvInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
@@ -4331,57 +4330,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
-    }
-
-    /**
-     * Deployed revision
-     *
-     * @param messageContext message context object
-     * @return response with 200 status code
-     */
-    @Override
-    public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList,
-                                        MessageContext messageContext) throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList){
-            //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(deployedAPIRevisionDTO.getApiUUID());
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-
-            // get revision uuid
-            String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionID()),
-                    deployedAPIRevisionDTO.getApiUUID());
-            if (revisionUUID == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
-            }
-
-            Map<String, Environment> environments = APIUtil.getEnvironments();
-            List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
-            for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
-                DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
-                deployedAPIRevision.setRevisionUUID(revisionUUID);
-                String environment = deployedEnvInfoDTO.getName();
-                if (environments.get(environment) == null) {
-                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
-                }
-                deployedAPIRevision.setDeployment(environment);
-                deployedAPIRevision.setVhost(deployedEnvInfoDTO.getVhost());
-                if (StringUtils.isEmpty(deployedEnvInfoDTO.getVhost())) {
-                    // vhost is only required when deploying an revision, not required when un-deploying a revision
-                    // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
-                    RestApiUtil.handleBadRequest(
-                            "Required field 'vhost' not found in deployment", log
-                    );
-                }
-                deployedAPIRevisions.add(deployedAPIRevision);
-            }
-            apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiUUID(), revisionUUID, deployedAPIRevisions);
-        }
-
-        Response.Status status = Response.Status.CREATED;
-        return Response.status(status).build();
     }
 
     /**
