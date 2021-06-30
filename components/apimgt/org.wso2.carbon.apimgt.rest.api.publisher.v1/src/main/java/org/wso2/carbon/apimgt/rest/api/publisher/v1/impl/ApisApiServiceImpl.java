@@ -3983,7 +3983,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private APIDTO getAPIByID(String apiId, APIProvider apiProvider, String organization) {
         try {
             API api = apiProvider.getAPIbyUUID(apiId, organization);
-
+            api.setOrganization(organization);
             return APIMappingUtil.fromAPItoDTO(api, apiProvider);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need

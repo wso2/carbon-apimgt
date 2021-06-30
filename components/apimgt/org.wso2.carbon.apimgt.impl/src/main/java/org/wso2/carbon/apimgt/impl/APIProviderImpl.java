@@ -7981,6 +7981,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
+        } catch (AsyncSpecPersistenceException e) {
+            throw new APIManagementException("Error while retrieving the Async API definition", e);
         }
     }
 
