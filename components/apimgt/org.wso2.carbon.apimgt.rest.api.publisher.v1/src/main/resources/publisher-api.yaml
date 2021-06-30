@@ -7855,6 +7855,13 @@ components:
         type:
           type: string
           example: HTTP
+        audience:
+          type: string
+          description: The audience of the API. Accepted values are PUBLIC, SINGLE
+          example: PUBLIC
+          enum:
+            - PUBLIC
+            - SINGLE
         lifeCycleStatus:
           type: string
           example: CREATED
@@ -8010,6 +8017,13 @@ components:
             - GRAPHQL
             - WEBSUB
             - SSE
+        audience:
+          type: string
+          description: The audience of the API. Accepted values are PUBLIC, SINGLE
+          example: PUBLIC
+          enum:
+            - PUBLIC
+            - SINGLE
         transport:
           type: array
           description: |

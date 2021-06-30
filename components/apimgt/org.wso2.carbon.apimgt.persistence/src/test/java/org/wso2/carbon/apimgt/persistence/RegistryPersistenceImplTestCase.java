@@ -315,6 +315,8 @@ public class RegistryPersistenceImplTestCase {
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
         Assert.assertEquals("API UUID does not match", apiUUID, publisherAPI.getId());
+        Assert.assertEquals("API audience does not match", artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE),
+                publisherAPI.getAudience());
     }
     
     @Test
