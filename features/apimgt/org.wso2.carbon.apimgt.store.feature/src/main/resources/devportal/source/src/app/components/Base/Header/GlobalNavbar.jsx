@@ -38,6 +38,7 @@ function GlobalNavBar(props) {
     } = props;
     const { custom: { landingPage: { active: landingPageActive, activeForAnonymous } } } = theme;
     const isUserFound = AuthManager.getUser();
+    React.useEffect(() => {}, [selected]);
     return (
         <List className={classes.listRootInline} component='nav' >
             {landingPageActive && (isUserFound && !activeForAnonymous ||  activeForAnonymous)
