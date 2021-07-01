@@ -697,7 +697,12 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization)
             throws APIManagementException, CryptoException {
-
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        if (resolver instanceof OnPremResolver) {
+            String name = apiDto.getName();
+            //replace all white spaces in the API Name
+            apiDto.setName(name.replaceAll("\\s+", ""));
+        }
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
