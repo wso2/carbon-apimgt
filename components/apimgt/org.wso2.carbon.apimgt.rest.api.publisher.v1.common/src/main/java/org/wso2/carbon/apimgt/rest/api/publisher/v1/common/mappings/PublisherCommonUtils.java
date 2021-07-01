@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -66,7 +65,6 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -281,8 +279,7 @@ public class PublisherCommonUtils {
         }
         //Overriding some properties:
         //API Name change not allowed if OnPrem
-        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
-        if (resolver instanceof OnPremResolver) {
+        if (APIUtil.isOnPremResolver()) {
             apiDtoToUpdate.setName(apiIdentifier.getApiName());
         }
         apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
@@ -697,8 +694,7 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization)
             throws APIManagementException, CryptoException {
-        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
-        if (resolver instanceof OnPremResolver) {
+        if (APIUtil.isOnPremResolver()) {
             String name = apiDto.getName();
             //replace all white spaces in the API Name
             apiDto.setName(name.replaceAll("\\s+", ""));
