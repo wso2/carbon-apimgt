@@ -225,7 +225,7 @@ class Layout extends React.Component {
         this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
         const { history } = props;
         history.listen((location) => {
-            this.ditectCurrentMenu(location);
+            this.ditectCurrentMenu();
         });
     }
 
@@ -237,8 +237,9 @@ class Layout extends React.Component {
         openUserMenu: false,
         selected: 'home',
     };
-    ditectCurrentMenu = (location) => {
-        const { pathname } = location;
+    ditectCurrentMenu = () => {
+        // We can't use history location since with logout redirection, it behaves strangely.
+        const pathname = window.location.pathname;
         if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
             this.setState({ selected: 'apis' });
         } else if (/\/home$/g.test(pathname) || /\/home\//g.test(pathname)) {
