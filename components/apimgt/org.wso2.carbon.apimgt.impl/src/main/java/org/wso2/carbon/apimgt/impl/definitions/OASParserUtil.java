@@ -1255,8 +1255,6 @@ public class OASParserUtil {
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
         extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
         extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
-        extensions.remove(APIConstants.X_WSO2_REQUEST_INTERCEPTOR);
-        extensions.remove(APIConstants.X_WSO2_RESPONSE_INTERCEPTOR);
     }
 
     /**
