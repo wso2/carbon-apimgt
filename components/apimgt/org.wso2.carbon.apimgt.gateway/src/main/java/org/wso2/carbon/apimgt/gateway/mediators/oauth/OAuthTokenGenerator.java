@@ -43,35 +43,37 @@ public class OAuthTokenGenerator {
      * Method to check for and refresh expired/generate new access tokens
      * @param oAuthEndpoint OAuthEndpoint object for token endpoint properties
      * @param latch CountDownLatch for blocking call when OAuth API is invoked
+     * @return TokenResponse object
      * @throws APISecurityException In the event of errors when generating new token
      */
-    public static void generateToken(OAuthEndpoint oAuthEndpoint, CountDownLatch latch)
+    public static TokenResponse generateToken(OAuthEndpoint oAuthEndpoint, CountDownLatch latch)
             throws APISecurityException {
         try {
-            TokenResponse previousResponse = null;
+            TokenResponse tokenResponse = null;
             if (OAuthMediator.isRedisEnabled) {
                 Object previousResponseObject = RedisCacheUtils.getInstance().getObject(oAuthEndpoint.getId(), TokenResponse.class);
                 if (previousResponseObject != null) {
-                    previousResponse = (TokenResponse) previousResponseObject;
+                    tokenResponse = (TokenResponse) previousResponseObject;
                 }
             } else {
-                previousResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
+                tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
             }
-            if (previousResponse != null) {
-                long validTill = previousResponse.getValidTill();
+            if (tokenResponse != null) {
+                long validTill = tokenResponse.getValidTill();
                 long currentTimeInSeconds = System.currentTimeMillis() / 1000;
                 long timeDifference = validTill - currentTimeInSeconds;
 
                 if (timeDifference <= 1) {
-                    if (previousResponse.getRefreshToken() != null) {
-                        addTokenToCache(oAuthEndpoint, previousResponse.getRefreshToken());
+                    if (tokenResponse.getRefreshToken() != null) {
+                        tokenResponse = addTokenToCache(oAuthEndpoint, tokenResponse.getRefreshToken());
                     } else {
-                        addTokenToCache(oAuthEndpoint, null);
+                        tokenResponse = addTokenToCache(oAuthEndpoint, null);
                     }
                 }
             } else {
-                addTokenToCache(oAuthEndpoint, null);
+                tokenResponse = addTokenToCache(oAuthEndpoint, null);
             }
+            return tokenResponse;
         } catch (IOException e) {
             log.error("Error while generating OAuth Token" + getEndpointId(oAuthEndpoint));
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -84,9 +86,10 @@ public class OAuthTokenGenerator {
             log.error("Could not retrieve OAuth Token" + getEndpointId(oAuthEndpoint));
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while parsing OAuth Token endpoint response", e);
-        }
-        if (latch != null) {
-            latch.countDown();
+        } finally {
+            if (latch != null) {
+                latch.countDown();
+            }
         }
     }
 
@@ -95,10 +98,11 @@ public class OAuthTokenGenerator {
      * in-memory cache or redis cache
      * @param oAuthEndpoint OAuthEndpoint object for token endpoint properties
      * @param refreshToken Refresh token if exists
+     * @return TokenResponse object
      * @throws IOException In the event of errors with HttpClient connections
      * @throws APIManagementException In the event of errors when accessing the token endpoint url
      */
-    private static void addTokenToCache(OAuthEndpoint oAuthEndpoint, String refreshToken)
+    private static TokenResponse addTokenToCache(OAuthEndpoint oAuthEndpoint, String refreshToken)
             throws IOException, APIManagementException, ParseException {
         TokenResponse tokenResponse = OAuthClient.generateToken(oAuthEndpoint.getTokenApiUrl(),
                 oAuthEndpoint.getClientId(), oAuthEndpoint.getClientSecret(), oAuthEndpoint.getUsername(),
@@ -112,6 +116,7 @@ public class OAuthTokenGenerator {
                 TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), tokenResponse);
             }
         }
+        return tokenResponse;
     }
 
     /**
