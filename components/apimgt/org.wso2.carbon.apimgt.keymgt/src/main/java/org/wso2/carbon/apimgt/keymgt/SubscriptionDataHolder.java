@@ -37,13 +37,22 @@ public class SubscriptionDataHolder {
         return instance;
     }
 
-    public void registerTenantSubscriptionStore(String tenantDomain) {
+    public SubscriptionDataStore registerTenantSubscriptionStore(String tenantDomain) {
 
         SubscriptionDataStore tenantStore = subscriptionStore.get(tenantDomain);
         if (tenantStore == null) {
             tenantStore = new SubscriptionDataStoreImpl(tenantDomain);
         }
         subscriptionStore.put(tenantDomain, tenantStore);
+        return tenantStore;
+    }
+
+    public void initializeSubscriptionStore(String tenantDomain) {
+
+        SubscriptionDataStore tenantStore = subscriptionStore.get(tenantDomain);
+        if (tenantStore != null) {
+            tenantStore.init();
+        }
     }
 
     public void unregisterTenantSubscriptionStore(String tenantDomain) {
