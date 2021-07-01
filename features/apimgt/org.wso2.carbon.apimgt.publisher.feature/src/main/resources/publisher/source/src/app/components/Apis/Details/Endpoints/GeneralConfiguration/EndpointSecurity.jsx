@@ -776,6 +776,7 @@ function EndpointSecurity(props) {
                     variant='contained'
                     style={{ marginTop: '10px', marginRight: '10px', marginBottom: '10px' }}
                     disabled={(endpointSecurityInfo.type !== 'NONE'
+                                && endpointSecurityInfo.grantType !== 'CLIENT_CREDENTIALS'
                                 && (!isUsernameUpdated && !isPasswordUpdated))
                                 || (isUsernameUpdated && !isPasswordUpdated)}
                 >
