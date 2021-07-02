@@ -5855,8 +5855,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 result.put("length", compoundResult.size());
             }
-        }
-        catch (APIPersistenceException e) {
+        } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);
         }
         result.put("apis", compoundResult);
