@@ -6937,16 +6937,13 @@ public class ApiMgtDAO {
                 //Remove the {version} part from the context template.
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
-            prepStmt.setString(2, contextTemplate);
-            prepStmt.setString(3, username);
-            prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            prepStmt.setString(5, api.getApiLevelPolicy());
-            prepStmt.setString(6, api.getType());
-            prepStmt.setString(7, api.getUUID());
-            prepStmt.setString(8, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            prepStmt.setString(9, api.getId().getApiName());
-            prepStmt.setString(10, api.getId().getVersion());
-            prepStmt.setString(11, api.getOrganizationId());
+            prepStmt.setString(2, api.getId().getApiName());
+            prepStmt.setString(3, contextTemplate);
+            prepStmt.setString(4, username);
+            prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(6, api.getApiLevelPolicy());
+            prepStmt.setString(7, api.getType());
+            prepStmt.setString(8, api.getUuid());
             prepStmt.execute();
             //}
 

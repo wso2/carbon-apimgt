@@ -7942,7 +7942,7 @@ components:
         name:
           maxLength: 50
           minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+\[\]\/]*$)'
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
         description:

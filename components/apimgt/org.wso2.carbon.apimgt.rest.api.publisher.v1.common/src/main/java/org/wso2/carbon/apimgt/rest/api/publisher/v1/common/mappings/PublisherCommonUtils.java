@@ -278,7 +278,6 @@ public class PublisherCommonUtils {
             apiDtoToUpdate = getFieldOverriddenAPIDTO(apiDtoToUpdate, originalAPI, tokenScopes);
         }
         //Overriding some properties:
-        apiDtoToUpdate.setName(apiIdentifier.getApiName());
         apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
         apiDtoToUpdate.setProvider(apiIdentifier.getProviderName());
         apiDtoToUpdate.setContext(originalAPI.getContextTemplate());

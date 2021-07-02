@@ -1631,18 +1631,15 @@ public class SQLConstants {
             "UPDATE AM_API " +
                     "SET " +
                     "   CONTEXT = ?, " +
+                    "   API_NAME = ?, " +
                     "   CONTEXT_TEMPLATE = ?, " +
                     "   UPDATED_BY = ?," +
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
-                    "   API_TYPE = ?, " +
-                    "   API_UUID = ? " +
+                    "   API_TYPE = ? " +
                     " WHERE " +
-                    "   API_PROVIDER = ? " +
-                    "   AND API_NAME = ? " +
-                    "   AND API_VERSION = ? " +
-                    "   AND ORGANIZATION_ID = ? ";
-
+                    "   API_UUID = ? ";
+                    
     public static final String GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_ID_SQL =
             "SELECT API_UUID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? " +
                     "AND ORGANIZATION_ID = ?";
