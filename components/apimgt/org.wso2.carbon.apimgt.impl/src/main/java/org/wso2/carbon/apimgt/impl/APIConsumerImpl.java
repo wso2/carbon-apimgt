@@ -5848,15 +5848,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiSet.add(api);
                     }
                 }
+                compoundResult.addAll(apiSet);
+                compoundResult.addAll(docMap.entrySet());
+                compoundResult.sort(new ContentSearchResultNameComparator());
+                result.put("length", sResults.getTotalCount());
+            } else {
+                result.put("length", compoundResult.size());
             }
-            compoundResult.addAll(apiSet);
-            compoundResult.addAll(docMap.entrySet());
-            compoundResult.sort(new ContentSearchResultNameComparator());
-        } catch (APIPersistenceException e) {
+        }
+        catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);
         }
         result.put("apis", compoundResult);
-        result.put("length", totalLength );
         return result;
     }
 
