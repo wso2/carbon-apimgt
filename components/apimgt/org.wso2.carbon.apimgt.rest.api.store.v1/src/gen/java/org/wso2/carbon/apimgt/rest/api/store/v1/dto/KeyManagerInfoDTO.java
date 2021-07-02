@@ -327,7 +327,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "ZyxWExFdfe4fAZ7sc1W8bkX2r80a", value = "The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token ")
+  @ApiModelProperty(example = "https://localhost:8243/token", value = "The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token ")
   @JsonProperty("alias")
   public String getAlias() {
     return alias;

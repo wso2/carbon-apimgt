@@ -5156,7 +5156,7 @@ components:
           description: |
             The alias of Identity Provider.
             If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token
-          example: ZyxWExFdfe4fAZ7sc1W8bkX2r80a
+          example: https://localhost:8243/token
         additionalProperties:
           type: object
           properties: {}
