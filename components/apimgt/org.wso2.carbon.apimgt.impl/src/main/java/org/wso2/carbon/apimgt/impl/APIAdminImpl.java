@@ -369,7 +369,7 @@ public class APIAdminImpl implements APIAdmin {
     private void setAliasForTokenExchangeKeyManagers(List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant,
             String tenantDomain) throws APIManagementException {
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
-            if (org.apache.commons.lang3.StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+            if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                     keyManagerConfigurationDTO.getTokenType())) {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                     IdentityProvider identityProvider;
@@ -378,7 +378,7 @@ public class APIAdminImpl implements APIAdmin {
                                 .getIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(), tenantDomain,
                                         Boolean.FALSE);
                     } catch (IdentityProviderManagementException e) {
-                        throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                        throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
                                 ExceptionCodes.IDP_RETRIEVAL_FAILED);
                     }
                     // Set alias value since this will be used from the Devportal side.

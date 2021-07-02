@@ -4166,8 +4166,8 @@ components:
           type: string
           description: |
             The alias of Identity Provider.
-            If the tokenType is EXCHANGED, the alias value should be equal to the audience value of the JWT token
-          example: https://localhost:8243/token
+            If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token
+          example: https://localhost:9443/oauth2/token
         scopeManagementEndpoint:
           type: string
           example: https://wso2is.com:9444/api/identity/oauth2/v1.0/scopes
