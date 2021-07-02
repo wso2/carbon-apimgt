@@ -143,6 +143,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMap
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -4911,6 +4912,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
+            if (apiDTOFromProperties.getAdditionalPropertiesMap() != null) {
+                for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : apiDTOFromProperties
+                        .getAdditionalPropertiesMap().entrySet()) {
+                    apiToAdd.addProperty(entry.getKey(), entry.getValue().getValue());
+                }
+            }
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
