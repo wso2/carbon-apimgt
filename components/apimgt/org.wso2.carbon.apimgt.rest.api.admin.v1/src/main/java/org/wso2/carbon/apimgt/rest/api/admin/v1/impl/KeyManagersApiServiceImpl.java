@@ -97,7 +97,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         keyManagerConfigurationDTO.setEnabled(identityProvider.isEnable());
                     }
                 } catch (IdentityProviderManagementException e) {
-                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
                             ExceptionCodes.IDP_RETRIEVAL_FAILED);
                 }
             }
@@ -124,7 +124,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                                     APIUtil.getInternalOrganizationDomain(organization));
                 }
             } catch (IdentityProviderManagementException e) {
-                throw new APIManagementException("IdP deletion failed. " + e.getMessage(),
+                throw new APIManagementException("IdP deletion failed. " + e.getMessage(), e,
                         ExceptionCodes.IDP_DELETION_FAILED);
             }
         }
@@ -152,7 +152,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         mergeIdpWithKeyManagerConfiguration(identityProvider, keyManagerDTO);
                     }
                 } catch (IdentityProviderManagementException e) {
-                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
                             ExceptionCodes.IDP_RETRIEVAL_FAILED);
                 }
             }
@@ -198,7 +198,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                             organization;
             RestApiUtil.handleInternalServerError(error, e, log);
         } catch (IdentityProviderManagementException e) {
-            throw new APIManagementException("IdP adding failed. " + e.getMessage(), ExceptionCodes.IDP_ADDING_FAILED);
+            throw new APIManagementException("IdP adding failed. " + e.getMessage(), e,
+                    ExceptionCodes.IDP_ADDING_FAILED);
         }
         return null;
     }
@@ -228,7 +229,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             String error = "Error while Creating Key Manager configuration in organization " + organization;
             RestApiUtil.handleInternalServerError(error, e, log);
         } catch (IdentityProviderManagementException e) {
-            throw new APIManagementException("IdP adding failed. " + e.getMessage(), ExceptionCodes.IDP_ADDING_FAILED);
+            throw new APIManagementException("IdP adding failed. " + e.getMessage(), e,
+                    ExceptionCodes.IDP_ADDING_FAILED);
         }
         return null;
     }

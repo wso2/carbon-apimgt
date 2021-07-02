@@ -57,6 +57,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
+import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
+import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -355,10 +358,34 @@ public class APIAdminImpl implements APIAdmin {
             keyManagerConfigurationsByTenant.addAll(keyManagerConfigurationsByOrganization);
         }
 
+        setAliasForTokenExchangeKeyManagers(keyManagerConfigurationsByTenant, tenantDomain);
+
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         }
         return keyManagerConfigurationsByTenant;
+    }
+
+    private void setAliasForTokenExchangeKeyManagers(List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant,
+            String tenantDomain) throws APIManagementException {
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+            if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType())) {
+                if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
+                    IdentityProvider identityProvider;
+                    try {
+                        identityProvider = IdentityProviderManager.getInstance()
+                                .getIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(), tenantDomain,
+                                        Boolean.FALSE);
+                    } catch (IdentityProviderManagementException e) {
+                        throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
+                                ExceptionCodes.IDP_RETRIEVAL_FAILED);
+                    }
+                    // Set alias value since this will be used from the Devportal side.
+                    keyManagerConfigurationDTO.setAlias(identityProvider.getAlias());
+                }
+            }
+        }
     }
 
     @Override

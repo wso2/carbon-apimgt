@@ -5151,6 +5151,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyManagerApplicationConfiguration'
+        alias:
+          type: string
+          description: |
+            The alias of Identity Provider.
+            If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token
+          example: https://localhost:9443/oauth2/token
         additionalProperties:
           type: object
           properties: {}

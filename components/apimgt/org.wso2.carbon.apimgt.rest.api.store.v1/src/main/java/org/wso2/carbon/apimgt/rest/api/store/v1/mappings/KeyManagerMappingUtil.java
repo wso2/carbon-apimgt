@@ -31,6 +31,7 @@ public class KeyManagerMappingUtil {
         keyManagerInfoDTO.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         keyManagerInfoDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerInfoDTO.setType(keyManagerConfigurationDTO.getType());
+        keyManagerInfoDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
         JsonElement grantTypesElement = jsonObject.get(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE);
         if (grantTypesElement instanceof JsonArray) {
