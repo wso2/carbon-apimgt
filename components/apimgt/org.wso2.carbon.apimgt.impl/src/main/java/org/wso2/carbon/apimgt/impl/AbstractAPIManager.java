@@ -1721,14 +1721,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             int tenantId = getTenantManager()
                     .getTenantId(getTenantDomain(username));
-            SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
-                    .DEFAULT_DIALECT_URI);
-            String email = claims.get(APIConstants.EMAIL_CLAIM);
-            if (StringUtils.isNotEmpty(email)) {
-                subscriber.setEmail(email);
-            } else {
                 subscriber.setEmail(StringUtils.EMPTY);
-            }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
