@@ -60,7 +60,6 @@ public class JWTValidatorImpl implements JWTValidator {
         boolean state;
         try {
             state = validateSignature(signedJWTInfo.getSignedJWT());
-//            state =true;
             if (state) {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
                 state = isValidCertificateBoundAccessToken(signedJWTInfo);
@@ -181,7 +180,6 @@ public class JWTValidatorImpl implements JWTValidator {
 
     protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {
 
-        //can add NBF here
         long timestampSkew =
                 ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds();
         Date now = new Date();
