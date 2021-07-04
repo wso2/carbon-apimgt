@@ -43,10 +43,10 @@ public class ApiRateLimitInterceptor extends AbstractPhaseInterceptor {
     public void handleMessage(Message message) {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean rateLimitEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_RATE_LIMIT_ENABLE));
+        boolean isRateLimitEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_RATE_LIMIT_ENABLE));
         int apiLimit = Integer.parseInt(config.getFirstProperty(APIConstants.API_RATE_LIMIT_API_LIMIT));
 
-        if (rateLimitEnabled && getToBeRateLimited(message)) {
+        if (isRateLimitEnabled && getToBeRateLimited(message)) {
             Map<String, String> queryParamsMap = UrlUtils.parseQueryString(
                     (String) message.get(RateLimitInterceptorConstants.QUERY_PARAM_STRING));
             if (queryParamsMap.containsKey(RateLimitInterceptorConstants.QUERY_PARAM_ORGANIZATION_ID)) {
