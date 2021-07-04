@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.util.utils;
 /**
  * Details about an oauth Access Token.
  */
-public class OauthTokenInfo {
+public class OAuthTokenInfo { //OAuthTokenInfo
 
     private boolean isTokenValid;
 

@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,22 +18,32 @@
 package org.wso2.carbon.apimgt.rest.api.util.authenticators;
 
 import org.apache.cxf.message.Message;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+
 import javax.cache.Cache;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.rest.api.util.utils.OauthTokenInfo;
 
-public interface OauthAuthenticator {
-     Log log = LogFactory.getLog(OauthAuthenticator.class);
+import java.util.Set;
+import java.util.List;
+
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.uri.template.URITemplateException;
+
+public interface OAuthAuthenticator {
+    Log log = LogFactory.getLog(OAuthAuthenticator.class);
+
     /**
      * @param message cxf message to be authenticated
      * @return true if authentication was successful else false
      * @throws APIManagementException when error in authentication process
      */
-    public boolean authenticate(Message message) throws APIManagementException;
+    boolean authenticate(Message message) throws APIManagementException;
 
     /**
      * @return rest API token cache
@@ -55,7 +65,7 @@ public interface OauthAuthenticator {
      * @return return true if we found matching scope in resource and token information
      * else false(means scope validation failed).
      */
-    default boolean validateScopes(Message message, OauthTokenInfo tokenInfo) {
+    default boolean validateScopes(Message message, OAuthTokenInfo tokenInfo) {
         String basePath = (String) message.get(Message.BASE_PATH);
         // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
         // decoded values of request parameters
@@ -64,10 +74,10 @@ public interface OauthAuthenticator {
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
 
-        String version = (String) message.get(org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.API_VERSION);
+        String version = (String) message.get(RestApiConstants.API_VERSION);
 
         //get all the URI templates of the REST API from the base path
-        java.util.Set<org.wso2.carbon.apimgt.api.model.URITemplate> uriTemplates = org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getURITemplatesForBasePath(basePath + version);
+        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("No matching scopes found for request with path: " + basePath
@@ -80,17 +90,17 @@ public interface OauthAuthenticator {
             org.wso2.uri.template.URITemplate templateToValidate = null;
             java.util.Map<String, String> var = new java.util.HashMap<String, String>();
             //check scopes with what we have
-            String templateString = ((org.wso2.carbon.apimgt.api.model.URITemplate) template).getUriTemplate();
+            String templateString = ((URITemplate) template).getUriTemplate();
             try {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
-            } catch (org.wso2.uri.template.URITemplateException e) {
+            } catch (URITemplateException e) {
                 log.error("Error while creating URI Template object to validate request. Template pattern: " +
                         templateString, e);
             }
             if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
-                    && verb != null && verb.equalsIgnoreCase(((org.wso2.carbon.apimgt.api.model.URITemplate) template).getHTTPVerb())) {
+                    && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
                 for (String scope : scopes) {
-                    org.wso2.carbon.apimgt.api.model.Scope scp = ((org.wso2.carbon.apimgt.api.model.URITemplate) template).getScope();
+                    Scope scp = ((URITemplate) template).getScope();
                     if (scp != null) {
                         if (scope.equalsIgnoreCase(scp.getKey())) {
                             //we found scopes matches
@@ -101,9 +111,9 @@ public interface OauthAuthenticator {
                             }
                             return true;
                         }
-                    } else if (!((org.wso2.carbon.apimgt.api.model.URITemplate) template).retrieveAllScopes().isEmpty()) {
-                        java.util.List<org.wso2.carbon.apimgt.api.model.Scope> scopesList = ((org.wso2.carbon.apimgt.api.model.URITemplate) template).retrieveAllScopes();
-                        for (org.wso2.carbon.apimgt.api.model.Scope scpObj : scopesList) {
+                    } else if (!((URITemplate) template).retrieveAllScopes().isEmpty()) {
+                        List<Scope> scopesList = ((URITemplate) template).retrieveAllScopes();
+                        for (Scope scpObj : scopesList) {
                             if (scope.equalsIgnoreCase(scpObj.getKey())) {
                                 //we found scopes matches
                                 if (log.isDebugEnabled()) {
@@ -126,5 +136,4 @@ public interface OauthAuthenticator {
         }
         return false;
     }
-    //default method for scope validation
 }

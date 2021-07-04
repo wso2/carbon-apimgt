@@ -26,8 +26,13 @@ import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.OauthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
+
 import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * This class will validate incoming requests with OAUth authenticator headers
@@ -40,7 +45,8 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
     private static final String OAUTH_AUTHENTICATOR = "OAuth";
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
-    private volatile OauthAuthenticator authenticator;
+    private volatile OAuthAuthenticator authenticator;
+    private Map<String, OAuthAuthenticator> authenticatorMap= new HashMap<>();
 
     public OAuthAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
@@ -61,12 +67,12 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         attributes.put("aud", "choreoportalapplication");
         attributes.put("name", "test");
         attributes.put("email", "first@gmail.com");
-        attributes.put("scope", "org-id-1:apim:api_create org-id-1:apim:api_publish org-id-2:apim:api_subscribe org-id-2:apim:api_view");
+        attributes.put("scope", "urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:api_create urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:api_view urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:api_publish urn:choreo:org-id-2:apim:api_subscribe urn:choreo:org-id-1:choreo:app_create urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:api_import_export urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:api_delete urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:app_manage urn:choreo:0c63f8f8-7a1a-466e-a98c-e60f46d0fd90:apim:subscribe");
         java.io.File keyStoreFile = java.nio.file.Paths.get("/Users/shehanir/Documents/Choreo_features/JWT_Auth/test1/wso2am-4.0.0-SNAPSHOT/repository/resources/security/wso2carbon.jks").toFile();
 
         String ISSUER_1 = "https://localhost:9443/oauth2/token";
         try {
-            generatedJWT = JWTAuthenticationInterceptor.generatedJWT(keyStoreFile, "wso2carbon", "wso2carbon", "wso2carbon", "wso2carbon", "userexternal",
+            generatedJWT = JWTAuthenticationInterceptor.generatedJWT(keyStoreFile, "wso2carbon", "wso2carbon", "wso2carbon", "wso2carbon", "12f1ee96-d7fc-11eb-b8bc-0242ac130003",
                     ISSUER_1, attributes);
 
         } catch (Exception e){
@@ -84,10 +90,10 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //identify Oauth2 and JWT tokens seperately
         if (accessToken.contains(RestApiConstants.DOT)){
             inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.JWT_AUTHENTICATION);
-            inMessage.put(RestApiConstants.AUTHENTICATION_CLASS, RestApiConstants.JWT_AUTHENTICATOR);
+            authenticatorMap.put(RestApiConstants.JWT_AUTHENTICATION, new OAuthJwtAuthenticatorImpl());
         } else {
-            inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OAUTH2_AUTHENTICATION);
-            inMessage.put(RestApiConstants.AUTHENTICATION_CLASS, RestApiConstants.OAUTH2_AUTHENTICATOR);
+            inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OPAQUE_AUTHENTICATION);
+            authenticatorMap.put(RestApiConstants.OPAQUE_AUTHENTICATION, new OAuthOpaqueAuthenticatorImpl());
         }
 
         if(handleRequest(inMessage, null)){
@@ -111,19 +117,12 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * This method will initialize Web APP authenticator to validate incoming requests
      * Here we will get implementation class and create object of it.
      */
-    public void initializeAuthenticator(String authenticationClass) throws APIManagementException {
+    public void initializeAuthenticator(Message message) throws APIManagementException {
         try {
             //TODO Retrieve this class name from configuration and let it configurable.
             //  authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
             //      RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
-
-            Class<OauthAuthenticator> WebAppAuthenticator = (Class<OauthAuthenticator>) Class.forName(authenticationClass);
-            authenticator = WebAppAuthenticator.getDeclaredConstructor().newInstance();
-//            if (authenticationScheme.equals(RestApiConstants.JWT_AUTHENTICATION)){
-//                authenticator = new
-//            } else {
-//                authenticator = new WebAppAuthenticatorImpl();
-//            }
+            authenticator = authenticatorMap.get(message.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME));
         } catch (Exception e) {
             throw new APIManagementException("Error while initializing authenticator of " + "type: ",e);
         }
@@ -136,9 +135,8 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
      */
     public boolean handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
-//        if (authenticator == null) {
             try {
-                initializeAuthenticator(message.get(RestApiConstants.AUTHENTICATION_CLASS).toString());
+                initializeAuthenticator(message);
             } catch (APIManagementException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(" Initializing the authenticator resulted in an exception", e);
@@ -147,7 +145,6 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 }
                 return false;
             }
-//          }
             try {
                 if (logger.isDebugEnabled()) {
                     logger.debug(String.format("Authenticating request: " + message.getId()));
