@@ -40,16 +40,11 @@ public final class RestApiConstants {
     public static final String ORGANIZATION = "organization";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
-    public static final String AUTHENTICATION_CLASS = "authentication_class";
     public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
     public static final String JWT_AUTHENTICATION = "jwt";
     public static final String DOT = ".";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
-    public static final String JWT_AUTHENTICATOR = "org.wso2.carbon.apimgt.rest.api.util.impl.OauthJwtAuthenticatorImpl";
-    public static final String OAUTH2_AUTHENTICATOR = "org.wso2.carbon.apimgt.rest.api.util.impl.OauthOpaqueAuthenticatorImpl";
-    public static final String JWT_VALIDATOR_IMPL = "org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl";
-
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
