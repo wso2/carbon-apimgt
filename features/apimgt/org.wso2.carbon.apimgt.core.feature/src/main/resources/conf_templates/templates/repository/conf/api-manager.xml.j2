@@ -828,7 +828,7 @@
             <aud>{{apim.rest_api.jwt.audience}}</aud>
           {% endif %}
          {% if apim.rest_api.jwt.alias is defined %}
-            <alias>{{apim.rest_api.}}</alias>
+            <alias>{{apim.rest_api.jwt.alias}}</alias>
          {% endif %}
         </JwtAuth>
     </RESTAPI>
