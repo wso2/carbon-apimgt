@@ -476,6 +476,38 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /retrieve-api-artifacts:
+    post:
+      summary: Get API runtime artifacts from ID list
+      description: |
+        This will provide access to API runtime artifacts in database for a given API UUID list.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the APIs
+          type: string
+        - name: type
+          in: query
+          description: |
+             type of gateway
+          type: string
+        - name: uuidList
+          in: body
+          description: 'API UUID list payload'
+          schema:
+            $ref: "#/definitions/UUIDList"
+      tags:
+        - Retrieve API artifacts
+      responses:
+        200:
+          description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /runtime-metadata:
    get:
      summary: Metadata information for API runtimes
@@ -697,6 +729,12 @@ definitions:
         items:
           type: string
       subscription:
+        type: array
+        items:
+          type: string
+  UUIDList:
+    properties:
+      uuids:
         type: array
         items:
           type: string
