@@ -975,6 +975,10 @@ public final class APIConstants {
     public static final String API_USAGE_SKIP_WORKFLOW_EVENT_RECEIVER_CONN =
             API_ANALYTICS + "SkipWorkflowEventPublisher";
 
+    public static final String API_RATE_LIMIT = "RateLimit.";
+    public static final String API_RATE_LIMIT_ENABLE = API_RATE_LIMIT + "Enabled";
+    public static final String API_RATE_LIMIT_API_LIMIT = API_RATE_LIMIT + "Threshold";
+
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";

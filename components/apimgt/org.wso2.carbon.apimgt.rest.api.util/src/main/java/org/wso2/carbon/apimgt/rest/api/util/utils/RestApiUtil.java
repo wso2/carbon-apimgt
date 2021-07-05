@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
@@ -59,6 +60,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.interceptors.rateLimit.RateLimitInterceptorConstants;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -242,6 +244,33 @@ public class RestApiUtil {
         } else {
             return xTenantHeader;
         }
+    }
+
+    /**
+     * This method returns the number of regular APIs created in an organization
+     *
+     * @param organizationId the Id of the organization interested in
+     */
+    public static int getRegularAPICount(String organizationId) {
+        int apiCount = 0;
+        try {
+            List<API> allMatchedApis = new ArrayList<>();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            Map<String, Object> result = apiProvider.searchPaginatedAPIs("", organizationId, 0, 50);
+            Set<API> apis = (Set<API>) result.get("apis");
+            allMatchedApis.addAll(apis);
+
+            for (int i = 0; i < allMatchedApis.size(); i++) {
+                if (!allMatchedApis.get(i).getAdditionalProperties().containsKey(RateLimitInterceptorConstants
+                        .APPLICATION_KEY)) {
+                    apiCount += 1;
+                }
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving APIs";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return apiCount;
     }
 
     /**

@@ -40,6 +40,8 @@
   "apim.cache.jwt_claim.enable": true,
   "apim.cache.restapi_token.expiry_time" : "300s",
   "apim.cache.restapi_cache_control_headers.max_age" : "86400s",
+  "apim.rate_limit.enable": false,
+  "apim.rate_limit.api_limit": 10,
   "apim.analytics.enable": false,
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",
