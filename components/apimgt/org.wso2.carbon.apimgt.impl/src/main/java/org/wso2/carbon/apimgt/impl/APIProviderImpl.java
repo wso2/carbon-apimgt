@@ -1501,8 +1501,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiPublished.setGatewayLabels(labelsToPublish);
                             // map contain failed to publish Environments
                             Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
-
-                            environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
                             environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
                             apiPublished.setGatewayLabels(labelsToPublish);
