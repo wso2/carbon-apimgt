@@ -212,7 +212,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             return apiGatewayAdminStub.deployAPI(convertDto(gatewayAPIDTO));
         } catch (RemoteException e) {
-            throw new AxisFault("Error while Deploying API ", e);
+            throw new AxisFault("Error while Deploying API: " + e.getMessage(), e);
         }
     }
 

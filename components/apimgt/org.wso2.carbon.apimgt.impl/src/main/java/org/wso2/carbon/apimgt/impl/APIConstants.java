@@ -1601,6 +1601,8 @@ public final class APIConstants {
     public static final String REGISTRY_RESOURCE_URL_PREFIX =
             "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
 
+    public static final String INVALID_URI_TEMPLATE_ERROR = "Error while parsing the URI template";
+
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
     }
