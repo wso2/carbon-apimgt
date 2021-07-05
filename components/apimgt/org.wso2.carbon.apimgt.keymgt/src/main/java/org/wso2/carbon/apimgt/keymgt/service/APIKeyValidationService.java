@@ -541,6 +541,24 @@ public class APIKeyValidationService {
     }
 
     /**
+     * Validates the subscriptions of a particular API.
+     *
+     * @param context     Requested context
+     * @param version Version of the API
+     * @param appId Application ID
+     * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
+     * authorized, tier information will be <pre>null</pre>
+     */
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
+                                                        String tenantDomain)
+            throws APIKeyMgtException, APIManagementException {
+
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        return keyValidationHandler.validateSubscription(context, version, appId);
+    }
+
+    /**
      * Validate scopes bound to the resource of the API being invoked against the scopes of the token.
      *
      * @param tokenValidationContext Token validation context
