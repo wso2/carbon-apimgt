@@ -241,39 +241,33 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch,
-                                                             String ifUnmodifiedSince, MessageContext messageContext) {
+                                                             String ifUnmodifiedSince, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //This will give PolicyNotFoundException if there's no policy exists with UUID
+        APIPolicy existingPolicy = null;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            //This will give PolicyNotFoundException if there's no policy exists with UUID
-            APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
-            }
-            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
-                    PolicyConstants.POLICY_LEVEL_API)) {
-                String message = "Policy " + policyId + " already attached to API/Resource";
-                log.error(message);
-                throw new APIManagementException(message);
-            }
-            if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(),
-                    PolicyConstants.POLICY_LEVEL_API, tenantDomain)) {
-                String message = "Policy " + policyId + " configured as the Default Policy.";
-                log.error(message);
-                throw new APIManagementException(message);
-            }
-            apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
-            return Response.ok().build();
+            existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
-            } else {
-                String errorMessage = "Error while deleting Advanced level policy : " + policyId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
         }
-        return null;
+        if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
+        }
+        if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API)) {
+            String message = "Policy " + policyId + " already attached to API/Resource";
+            throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.POLICY_DELETE_ERROR, message));
+        }
+        if (APIUtil.checkPolicyConfiguredAsDefault(existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API,
+                tenantDomain)) {
+            String message =
+                    "Policy " + existingPolicy.getPolicyName() + ": " + policyId + " configured as the Default Policy.";
+            throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.POLICY_DELETE_ERROR, message));
+        }
+        apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
+        return Response.ok().build();
     }
 
     /**
