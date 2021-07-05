@@ -2858,6 +2858,7 @@ public class SQLConstants {
             "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String API_ID_REGEX = "_API_IDS_";
+    public static final int API_ID_CHUNK_SIZE = 25;
 
     /** Throttle related constants**/
 

@@ -362,12 +362,12 @@ public class GatewayArtifactsMgtDAO {
         List<List<String>> apiIdsChunk = new ArrayList<>();
         int apiIdListSize = apiIds.size();
         int apiIdArrayIndex = 0;
-        int apiIdsChunkSize = 25;
+        int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
         while (apiIdsChunkSize < apiIdListSize) {
             apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, apiIdsChunkSize));
-            apiIdListSize = apiIdListSize - 25;
-            apiIdArrayIndex = apiIdArrayIndex + 25;
-            apiIdsChunkSize = apiIdsChunkSize + 25;
+            apiIdListSize = apiIdListSize - SQLConstants.API_ID_CHUNK_SIZE;
+            apiIdArrayIndex = apiIdArrayIndex + SQLConstants.API_ID_CHUNK_SIZE;
+            apiIdsChunkSize = apiIdsChunkSize + SQLConstants.API_ID_CHUNK_SIZE;
         }
         if (apiIdListSize > 0) {
             apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, apiIdArrayIndex + apiIdListSize));
