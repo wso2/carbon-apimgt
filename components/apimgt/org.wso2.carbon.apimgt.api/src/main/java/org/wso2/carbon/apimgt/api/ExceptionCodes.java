@@ -248,7 +248,7 @@ ExceptionCodes implements ErrorHandler {
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
-    POLICY_DELETE_ERROR(900988, "Cannot delete the policy", 403, "%s"),
+    POLICY_DELETE_ERROR(900971, "Cannot delete the policy", 403, "%s"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
