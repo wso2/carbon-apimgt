@@ -1948,7 +1948,7 @@ public final class APIConstants {
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
-        public static final String KEY_MANAGER = "KeyManager (IdP)";
+        public static final String KEY_MANAGER = "KeyManager/IdP";
 
         public static final String NAME = "name";
         public static final String VERSION = "version";
