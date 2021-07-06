@@ -7949,7 +7949,7 @@ components:
           type: string
           example: This is a simple API for Pizza Shack online pizza delivery store.
         context:
-          maxLength: 82
+          maxLength: 232
           minLength: 1
           type: string
           example: pizza
