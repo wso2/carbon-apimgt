@@ -28,6 +28,7 @@ public class APIRevisionDeployment implements Serializable {
     private String vhost;
     private boolean isDisplayOnDevportal;
     private String deployedTime;
+    private String successDeployedTime;
 
     public int getId() {
         return id;
@@ -75,5 +76,13 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setDeployedTime(String deployedTime) {
         this.deployedTime = deployedTime;
+    }
+
+    public String getSuccessDeployedTime() {
+        return successDeployedTime;
+    }
+
+    public void setSuccessDeployedTime(String successDeployedTime) {
+        this.successDeployedTime = successDeployedTime;
     }
 }

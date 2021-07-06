@@ -9878,4 +9878,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
+
+    @Override
+    public List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException {
+        return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
+    }
 }
