@@ -26,6 +26,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
@@ -228,17 +229,13 @@ class Comments extends Component {
      * @param {*} currentUser current logged in user
      * @returns {boolean} true or false
      */
-    isCrossTenant(apiProvider, currentUser) {
-        let tenantDomain = null;
+    isCrossTenant(currentUser) {
+        const { tenantDomain } = this.props;
+        if(!tenantDomain) {
+            return false;
+        }
         let loggedInUserDomain = null;
         const loggedInUser = currentUser.name;
-
-        if (apiProvider.includes('@')) {
-            const splitDomain = apiProvider.split('@');
-            tenantDomain = splitDomain[splitDomain.length - 1];
-        } else {
-            tenantDomain = 'carbon.super';
-        }
 
         if (loggedInUser.includes('@')) {
             const splitLoggedInUser = loggedInUser.split('@');
@@ -281,7 +278,7 @@ class Comments extends Component {
                             </div>
                         )}
                         {!showLatest && AuthManager.getUser() &&
-                        !this.isCrossTenant(api.provider, AuthManager.getUser()) && (
+                        !this.isCrossTenant(AuthManager.getUser()) && (
                             <Paper className={classes.paper}>
                                 <CommentAdd
                                     apiId={api.id}
@@ -370,4 +367,4 @@ Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
 };
 
-export default injectIntl(withStyles(styles, { withTheme: true })(Comments));
+export default withSettings(injectIntl(withStyles(styles, { withTheme: true })(Comments)));
