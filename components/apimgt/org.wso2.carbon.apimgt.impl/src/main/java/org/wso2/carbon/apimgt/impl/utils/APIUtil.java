@@ -43,6 +43,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -8720,7 +8721,7 @@ public final class APIUtil {
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
         jsonObject.put("info", entityInfo);
-        audit.info(jsonObject.toString());
+        audit.info(StringEscapeUtils.unescapeJava(jsonObject.toString()));
     }
 
     public static int getPortOffset() {

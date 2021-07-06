@@ -1,21 +1,28 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
@@ -28,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.application.common.model.ClaimConfig;
@@ -38,11 +46,13 @@ import org.wso2.carbon.identity.application.common.util.IdentityApplicationConst
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -129,7 +139,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             }
         }
         apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId);
-
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
+                RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 
@@ -190,6 +202,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 }
                 KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO =
                         apiAdmin.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                        new Gson().toJson(keyManagerConfigurationDTO),
+                        APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
                 return Response.ok(KeyManagerMappingUtil.toKeyManagerDTO(retrievedKeyManagerConfigurationDTO)).build();
             }
         } catch (APIManagementException e) {
@@ -222,6 +237,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             }
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                    new Gson().toJson(keyManagerConfigurationDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
             return Response.created(location)
                     .entity(KeyManagerMappingUtil.toKeyManagerDTO(createdKeyManagerConfiguration)).build();
