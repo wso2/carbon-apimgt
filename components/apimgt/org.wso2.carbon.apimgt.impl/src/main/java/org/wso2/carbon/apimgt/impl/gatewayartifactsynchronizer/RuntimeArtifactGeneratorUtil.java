@@ -88,7 +88,7 @@ public class RuntimeArtifactGeneratorUtil {
                             deploymentsMap.put(fileName, apiProjectDto);
                             apiProjectDto.setApiFile(fileName);
                             apiProjectDto.setEnvironments(new HashSet<>());
-                            apiProjectDto.setOrganization(apiRuntimeArtifactDto.getOrganization());
+                            apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                         }
 
                         EnvironmentDto environment = new EnvironmentDto();
