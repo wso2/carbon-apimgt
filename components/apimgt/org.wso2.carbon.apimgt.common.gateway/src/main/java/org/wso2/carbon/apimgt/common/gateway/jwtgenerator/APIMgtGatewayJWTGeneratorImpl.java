@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -37,8 +38,8 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
     @Override
     public Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto) {
 
-        long currentTime = System.currentTimeMillis();
-        long expireIn = currentTime + super.jwtConfigurationDto.getTTL() * 1000;
+        long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        long expireIn = currentTime + super.jwtConfigurationDto.getTTL();
         String dialect = getDialectURI();
         Map<String, Object> claims = new HashMap<>();
         claims.put("iss", API_GATEWAY_ID);
