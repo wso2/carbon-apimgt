@@ -586,7 +586,9 @@ public class OASParserUtil {
                 extractReferenceFromContent(content, context);
             } else {
                 String ref = requestBody.get$ref();
-                addToReferenceObjectMap(ref, context);
+                if (ref != null) {
+                    addToReferenceObjectMap(ref, context);
+                }
             }
         }
     }
@@ -596,7 +598,14 @@ public class OASParserUtil {
             for (ApiResponse response : responses.values()) {
                 Content content = response.getContent();
 
-                extractReferenceFromContent(content, context);
+                if (content != null) {
+                    extractReferenceFromContent(content, context);
+                } else {
+                    String ref = response.get$ref();
+                    if (ref != null) {
+                        extractReferenceWithoutSchema(ref, context);
+                    }
+                }
             }
         }
     }
