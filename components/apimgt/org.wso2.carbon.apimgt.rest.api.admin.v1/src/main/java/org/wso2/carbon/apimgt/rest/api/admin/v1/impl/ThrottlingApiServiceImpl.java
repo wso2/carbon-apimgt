@@ -237,9 +237,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
         }
         if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API)) {
-            String message =
-                    "Policy " + existingPolicy.getPolicyName() + ": " + policyId + " already attached to API/Resource";
-            throw new APIManagementException(message, ExceptionCodes.from(ExceptionCodes.POLICY_DELETE_ERROR, message));
+            String message = "Advanced Throttling Policy " + existingPolicy.getPolicyName() + ": " + policyId
+                    + " already attached to API/Resource";
+            throw new APIManagementException(message, ExceptionCodes
+                    .from(ExceptionCodes.ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR,
+                            existingPolicy.getPolicyName()));
         }
         apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
         return Response.ok().build();
