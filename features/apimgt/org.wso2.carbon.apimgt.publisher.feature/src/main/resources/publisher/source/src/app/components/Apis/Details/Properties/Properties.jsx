@@ -178,7 +178,7 @@ function Properties(props) {
     const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
     const keywords = ['provider', 'version', 'context', 'status', 'description',
-        'subcontext', 'doc', 'lcState', 'name', 'tags'];
+        'subcontext', 'doc', 'lcstate', 'name', 'tags'];
 
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
@@ -274,7 +274,8 @@ function Properties(props) {
         }
     };
     const validateBeforeAdd = (fieldKey, fieldValue, additionalPropertiesCopy, action = 'add') => {
-        if (additionalPropertiesCopy[fieldKey] != null && action === 'add') {
+        if ((additionalPropertiesCopy[fieldKey] != null || additionalPropertiesCopy[fieldKey + propertyDisplaySuffix]
+            != null) && action === 'add') {
             Alert.warning(intl.formatMessage({
                 id: `Apis.Details.Properties.Properties.
                     property.name.exists`,
