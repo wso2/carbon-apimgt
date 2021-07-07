@@ -278,7 +278,10 @@ public class PublisherCommonUtils {
             apiDtoToUpdate = getFieldOverriddenAPIDTO(apiDtoToUpdate, originalAPI, tokenScopes);
         }
         //Overriding some properties:
-        apiDtoToUpdate.setName(apiIdentifier.getApiName());
+        //API Name change not allowed if OnPrem
+        if (APIUtil.isOnPremResolver()) {
+            apiDtoToUpdate.setName(apiIdentifier.getApiName());
+        }
         apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
         apiDtoToUpdate.setProvider(apiIdentifier.getProviderName());
         apiDtoToUpdate.setContext(originalAPI.getContextTemplate());
@@ -360,11 +363,10 @@ public class PublisherCommonUtils {
 
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
-        apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
             String oldDefinition = apiProvider
-                    .getOpenAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
+                    .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -374,7 +376,7 @@ public class PublisherCommonUtils {
             }
         } else {
             String oldDefinition = apiProvider
-                    .getAsyncAPIDefinition(apiIdentifier.getUUID(), originalAPI.getOrganization());
+                    .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -692,7 +694,11 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization)
             throws APIManagementException, CryptoException {
-
+        if (APIUtil.isOnPremResolver()) {
+            String name = apiDto.getName();
+            //replace all white spaces in the API Name
+            apiDto.setName(name.replaceAll("\\s+", ""));
+        }
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||

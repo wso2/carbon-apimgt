@@ -1620,19 +1620,16 @@ public class SQLConstants {
 
     public static final String UPDATE_API_SQL =
             "UPDATE AM_API " +
-            "SET " +
-            "   CONTEXT = ?, " +
-            "   CONTEXT_TEMPLATE = ?, " +
-            "   UPDATED_BY = ?," +
-            "   UPDATED_TIME = ?, " +
-            "   API_TIER = ?, " +
-            "   API_TYPE = ?, " +
-                    "   API_UUID = ? " +
-            " WHERE " +
-            "   API_PROVIDER = ? " +
-            "   AND API_NAME = ? " +
-            "   AND" + " API_VERSION = ? " +
-            "   AND ORGANIZATION = ? ";
+                    "SET " +
+                    "   CONTEXT = ?, " +
+                    "   API_NAME = ?, " +
+                    "   CONTEXT_TEMPLATE = ?, " +
+                    "   UPDATED_BY = ?," +
+                    "   UPDATED_TIME = ?, " +
+                    "   API_TIER = ?, " +
+                    "   API_TYPE = ? " +
+                    " WHERE " +
+                    "   API_UUID = ? ";
 
     public static final String GET_ORGANIZATION_BY_API_ID = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?";
 

@@ -5058,6 +5058,11 @@ public final class APIUtil {
         }
         return resolver;
     }
+
+    public static boolean isOnPremResolver() throws APIManagementException {
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        return resolver instanceof OnPremResolver;
+    }
     
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
