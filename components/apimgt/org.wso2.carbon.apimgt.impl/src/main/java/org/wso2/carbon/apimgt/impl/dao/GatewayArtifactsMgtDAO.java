@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -576,7 +577,7 @@ public class GatewayArtifactsMgtDAO {
 
     public String retrieveAPIContextFromApiId(String apiId) throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
+        String query = SQLConstants.GET_API_CONTEXT_BY_API_UUID_SQL;
         String context =  null;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -587,8 +588,27 @@ public class GatewayArtifactsMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway Artifact for ApiId : " + apiId + "", e);
+            handleException("Failed to retrieve Api context for ApiId : " + apiId + "", e);
         }
         return context;
     }
+
+
+    public Map<String, String> retrieveAllAPIContext() throws APIManagementException {
+
+        Map<String, String> contextUuidMap = new HashMap<>();
+        String query = SQLConstants.GET_ALL_CONTEXT_AND_UUID_SQL;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    contextUuidMap.put(resultSet.getString("API_UUID"),resultSet.getString("CONTEXT"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API Contexts for all APIs", e);
+        }
+        return contextUuidMap;
+    }
+
 }

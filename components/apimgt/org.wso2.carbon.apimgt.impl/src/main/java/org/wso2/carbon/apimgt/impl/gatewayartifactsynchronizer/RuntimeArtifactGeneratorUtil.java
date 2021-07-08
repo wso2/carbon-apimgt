@@ -69,7 +69,15 @@ public class RuntimeArtifactGeneratorUtil {
             throws APIManagementException {
 
         List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
+        Map<String, String> contextUuidMap = new HashMap<>();
         if (gatewayArtifacts != null) {
+
+            if (StringUtils.isNotEmpty(apiId)) {
+                contextUuidMap.put(apiId, gatewayArtifactsMgtDAO.retrieveAPIContextFromApiId(apiId));
+            } else {
+                contextUuidMap = gatewayArtifactsMgtDAO.retrieveAllAPIContext();
+            }
+
             try {
                 MetadataDescriptorDto metadataDescriptorDto = new MetadataDescriptorDto();
                 Map<String, ApiMetadataProjectDto> deploymentsMap = new HashMap<>();
@@ -89,7 +97,7 @@ public class RuntimeArtifactGeneratorUtil {
                             apiProjectDto.setEnvironments(new HashSet<>());
                             apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                             apiProjectDto.setVersion(apiRuntimeArtifactDto.getVersion());
-                            apiProjectDto.setApiContext(gatewayArtifactsMgtDAO.retrieveAPIContextFromApiId(apiRuntimeArtifactDto.getApiId()));
+                            apiProjectDto.setApiContext(contextUuidMap.get(apiRuntimeArtifactDto.getApiId()));
                         }
 
                         EnvironmentDto environment = new EnvironmentDto();

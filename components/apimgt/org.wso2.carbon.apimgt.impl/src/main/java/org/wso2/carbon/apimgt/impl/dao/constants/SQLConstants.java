@@ -1871,6 +1871,8 @@ public class SQLConstants {
 
     public static final String GET_ALL_CONTEXT_SQL = "SELECT CONTEXT FROM AM_API ";
 
+    public static final String GET_ALL_CONTEXT_AND_UUID_SQL = "SELECT CONTEXT, API_UUID FROM AM_API ";
+
     public static final String GET_APPLICATION_REGISTRATION_ENTRY_BY_SUBSCRIBER_SQL =
             "SELECT " +
             "   APP.APPLICATION_ID," +
