@@ -12,7 +12,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -334,7 +338,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
-        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",",Collections.nCopies(labels.length, "?")));
+        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",", Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -551,7 +555,6 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
-
     public void addGatewayAPIArtifactAndMetaData(String apiUUID, String apiName, String version, String revisionUUID,
                                                  String organization, String apiType, File artifact)
             throws APIManagementException {
@@ -569,5 +572,23 @@ public class GatewayArtifactsMgtDAO {
         } catch (SQLException | IOException e) {
             handleException("Failed to Add Artifact to Database", e);
         }
+    }
+
+    public String retrieveAPIContextFromApiId(String apiId) throws APIManagementException {
+
+        String query = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
+        String context =  null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    context = resultSet.getString("CONTEXT");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Gateway Artifact for ApiId : " + apiId + "", e);
+        }
+        return context;
     }
 }
