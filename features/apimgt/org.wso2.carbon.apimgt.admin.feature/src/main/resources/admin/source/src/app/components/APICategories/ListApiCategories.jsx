@@ -199,7 +199,7 @@ export default function ListApiCategories() {
                 content={(
                     <FormattedMessage
                         id='ApiCategories.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Api Categories.'
+                        defaultMessage={'You don\'t have sufficient permission to view Api Categories.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

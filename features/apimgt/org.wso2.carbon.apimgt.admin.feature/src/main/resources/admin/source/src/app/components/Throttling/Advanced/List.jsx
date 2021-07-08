@@ -280,7 +280,7 @@ export default function ListMG() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Advanced.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Advanced Rate Limiting Policies.'
+                        defaultMessage={'You don\'t have sufficient permission to view Advanced Rate Limiting Policies.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

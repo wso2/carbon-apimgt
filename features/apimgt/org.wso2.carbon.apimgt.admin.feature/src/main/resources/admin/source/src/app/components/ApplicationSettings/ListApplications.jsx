@@ -207,7 +207,7 @@ export default function ListApplications() {
                 content={(
                     <FormattedMessage
                         id='ApplicationSettings.ListApplications.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Application Settings.'
+                        defaultMessage={'You don\'t have sufficient permission to view Application Settings.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

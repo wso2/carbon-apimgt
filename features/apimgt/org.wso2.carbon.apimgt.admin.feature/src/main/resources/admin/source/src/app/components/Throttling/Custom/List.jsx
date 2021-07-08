@@ -220,7 +220,7 @@ export default function ListCustomThrottlingPolicies() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Custom.Policy.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Custom Rate Limiting Policies.'
+                        defaultMessage={'You don\'t have sufficient permission to view Custom Rate Limiting Policies.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

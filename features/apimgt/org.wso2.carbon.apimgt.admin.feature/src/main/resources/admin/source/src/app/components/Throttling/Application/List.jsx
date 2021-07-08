@@ -235,7 +235,7 @@ export default function ListApplicationThrottlingPolicies() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Application.Policy.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Application Rate Limiting Policies.'
+                        defaultMessage={'You don\'t have sufficient permission to view Application Rate Limiting Policies.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

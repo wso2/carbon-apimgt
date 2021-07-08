@@ -216,7 +216,7 @@ export default function ListKeyManagers() {
                 content={(
                     <FormattedMessage
                         id='KeyManagers.ListKeyManagers.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Key Managers.'
+                        defaultMessage={'You don\'t have sufficient permission to view Key Managers.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

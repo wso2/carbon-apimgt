@@ -234,7 +234,7 @@ export default function ListMGLabels() {
                 content={(
                     <FormattedMessage
                         id='Gateways.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Gateway Labels.'
+                        defaultMessage={'You don\'t have sufficient permission to view Gateway Labels.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

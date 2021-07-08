@@ -295,7 +295,7 @@ export default function ListDetectedBotData() {
                 content={(
                     <FormattedMessage
                         id='BotDetection.detected.data.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view detected data.'
+                        defaultMessage={'You don\'t have sufficient permission to view detected data.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

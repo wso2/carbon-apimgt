@@ -306,7 +306,7 @@ export default function ListSubscriptionThrottlingPolicies() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Subscription.Policy.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Subscription Rate Limiting Policies.'
+                        defaultMessage={'You don\'t have sufficient permission to view Subscription Rate Limiting Policies.'
                         + ' Please contact the site administrator.'}
                     />
                 )}

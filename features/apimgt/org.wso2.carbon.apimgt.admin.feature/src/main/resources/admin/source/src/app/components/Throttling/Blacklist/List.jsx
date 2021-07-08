@@ -272,7 +272,7 @@ export default function ListBlacklistThrottlingPolicies() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Deny Policies.'
+                        defaultMessage={'You don\'t have sufficient permission to view Deny Policies.'
                         + ' Please contact the site administrator.'}
                     />
                 )}
