@@ -39,11 +39,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymanager.feature</artifactId>
             <type>zip</type>
         </dependency>
@@ -83,12 +78,23 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:compatible:${carbon.kernel.feature.version}</importFeatureDef>
                             </importFeatures>
+                            <bundles>
+                                <bundleDef>
+                                    org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    software.amazon.ion:ion-java:${software.amazon.ion.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.analytics:${carbon.apimgt.version}
+                                </bundleDef>
+                            </bundles>
                             <includedFeatures>
                                 <includedFeatureDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${carbon.apimgt.version}
-                                </includedFeatureDef>
-                                <includedFeatureDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.feature:${carbon.apimgt.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymanager.feature:${carbon.apimgt.version}

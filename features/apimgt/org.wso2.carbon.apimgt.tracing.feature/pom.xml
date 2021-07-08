@@ -97,6 +97,7 @@
                                 <bundleDef>io.zipkin.reporter2:zipkin-sender-okhttp3</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
+                                <bundleDef>javax.annotation:javax.annotation-api</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
