@@ -251,7 +251,7 @@ export default function ListEmails() {
                 content={(
                     <FormattedMessage
                         id='BotDetection.Email.List.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view emails.'
+                        defaultMessage={'You don\'t have sufficient permission to view emails.'
                         + ' Please contact the site administrator.'}
                     />
                 )}
