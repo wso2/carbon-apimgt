@@ -32,7 +32,7 @@ import Configurations from 'Config';
 import Delete from 'AppComponents/MicrogatewayLabels/DeleteMGLabel';
 import AddEdit from 'AppComponents/MicrogatewayLabels/AddEditMGLabel';
 import EditIcon from '@material-ui/icons/Edit';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

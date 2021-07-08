@@ -32,7 +32,7 @@ import AddEdit from 'AppComponents/Throttling/Application/AddEdit';
 import Delete from 'AppComponents/Throttling/Application/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

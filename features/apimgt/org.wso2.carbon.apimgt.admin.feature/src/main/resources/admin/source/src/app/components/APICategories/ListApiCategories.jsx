@@ -32,7 +32,7 @@ import Configurations from 'Config';
 import Delete from 'AppComponents/APICategories/DeleteAPICategory';
 import AddEdit from 'AppComponents/APICategories/AddEditAPICategory';
 import EditIcon from '@material-ui/icons/Edit';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

@@ -27,7 +27,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
 import Button from '@material-ui/core/Button';
 import API from 'AppData/api';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

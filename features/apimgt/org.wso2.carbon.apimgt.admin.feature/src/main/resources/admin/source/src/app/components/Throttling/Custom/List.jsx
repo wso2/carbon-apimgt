@@ -33,7 +33,7 @@ import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
 import { Link as RouterLink } from 'react-router-dom';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

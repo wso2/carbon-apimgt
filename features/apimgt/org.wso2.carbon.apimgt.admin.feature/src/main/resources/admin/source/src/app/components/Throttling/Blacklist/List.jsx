@@ -34,7 +34,7 @@ import Delete from 'AppComponents/Throttling/Blacklist/Delete';
 import API from 'AppData/api';
 import cloneDeep from 'lodash.clonedeep';
 import Alert from 'AppComponents/Shared/Alert';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

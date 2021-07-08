@@ -31,7 +31,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import EditIcon from '@material-ui/icons/Edit';
-import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase'
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 let limit = Configurations.app.applicationCount;
 

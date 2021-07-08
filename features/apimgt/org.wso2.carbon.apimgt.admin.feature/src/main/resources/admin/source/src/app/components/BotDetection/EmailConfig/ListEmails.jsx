@@ -36,7 +36,7 @@ import DeleteEmail from 'AppComponents/BotDetection/EmailConfig/DeleteEmail';
 import AddEmails from 'AppComponents/BotDetection/EmailConfig/AddEmail';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list
