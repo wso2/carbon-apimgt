@@ -52,6 +52,8 @@ import java.util.List;
  */
 public class CertificateMgtDAO {
 
+    private static final String CERTIFICATE_TABLE_NAME = "AM_CERTIFICATE_METADATA";
+    private static final String PERCENTAGE_MARK = "%";
     private static Log log = LogFactory.getLog(CertificateMgtDAO.class);
     private static CertificateMgtDAO certificateMgtDAO = new CertificateMgtDAO();
 
@@ -360,7 +362,6 @@ public class CertificateMgtDAO {
                         }
                         certificateMetadataList.add(certificateMetadataDTO);
                     }
-
                 }
             }
 
