@@ -275,7 +275,8 @@ function Properties(props) {
     };
     const validateBeforeAdd = (fieldKey, fieldValue, additionalPropertiesCopy, action = 'add') => {
         if ((additionalPropertiesCopy[fieldKey] != null || additionalPropertiesCopy[fieldKey + propertyDisplaySuffix]
-            != null) && action === 'add') {
+            != null || additionalPropertiesCopy[fieldKey.replace(propertyDisplaySuffix, '')] != null)
+            && action === 'add') {
             Alert.warning(intl.formatMessage({
                 id: `Apis.Details.Properties.Properties.
                     property.name.exists`,
