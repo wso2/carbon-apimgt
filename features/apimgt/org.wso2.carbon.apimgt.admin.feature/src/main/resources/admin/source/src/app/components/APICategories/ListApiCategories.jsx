@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -32,22 +32,7 @@ import Configurations from 'Config';
 import Delete from 'AppComponents/APICategories/DeleteAPICategory';
 import AddEdit from 'AppComponents/APICategories/AddEditAPICategory';
 import EditIcon from '@material-ui/icons/Edit';
-
-/**
- * API call to get api category list
- * @returns {Promise}.
- */
-function apiCall() {
-    const restApi = new API();
-    return restApi
-        .apiCategoriesListGet()
-        .then((result) => {
-            return result.body.list;
-        })
-        .catch((error) => {
-            throw error;
-        });
-}
+import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
 
 /**
  * Render a list
@@ -55,6 +40,29 @@ function apiCall() {
  */
 export default function ListApiCategories() {
     const intl = useIntl();
+    const [hasListApiCategoriesPermission, setHasListApiCategoriesPermission] = useState(true);
+
+    /**
+     * API call to get api category list
+     * @returns {Promise}.
+     */
+    function apiCall() {
+        const restApi = new API();
+        return restApi
+            .apiCategoriesListGet()
+            .then((result) => {
+                return result.body.list;
+            })
+            .catch((error) => {
+                if (error.statusCode === 401) {
+                    setHasListApiCategoriesPermission(false);
+                } else {
+                    setHasListApiCategoriesPermission(true);
+                    throw error;
+                }
+            });
+    }
+
     const columProps = [
         { name: 'id', options: { display: false } },
         {
@@ -170,20 +178,49 @@ export default function ListApiCategories() {
         ),
     };
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            EditComponent={AddEdit}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Edit API Category',
-            }}
-            DeleteComponent={Delete}
-        />
-    );
+    if (!hasListApiCategoriesPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'ApiCategories.List.title.apiCategories',
+                        defaultMessage: 'API Categories',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='ApiCategories.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='ApiCategories.List.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Api Categories.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                EditComponent={AddEdit}
+                editComponentProps={{
+                    icon: <EditIcon/>,
+                    title: 'Edit API Category',
+                }}
+                DeleteComponent={Delete}
+            />
+        );
+    }
 }

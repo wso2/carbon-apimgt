@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -33,6 +33,7 @@ import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
 import { Link as RouterLink } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
 
 /**
  * Render a list
@@ -41,6 +42,7 @@ import Button from '@material-ui/core/Button';
 export default function ListSubscriptionThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
+    const [hasListSubscriptionThrottlingPoliciesPermission, setHasListSubscriptionThrottlingPoliciesPermission] = useState(true);
 
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
@@ -274,28 +276,58 @@ export default function ListSubscriptionThrottlingPolicies() {
                 .map(Object.values);
             return (subscriptionThrottlingvalues);
         }).catch((error) => {
-            const { response } = error;
-            if (response.body) {
-                throw (response.body.description);
+            if (error.statusCode === 401) {
+                setHasListSubscriptionThrottlingPoliciesPermission(false);
+            } else {
+                setHasListSubscriptionThrottlingPoliciesPermission(true);
+                throw error;
             }
-            return null;
         });
     }
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonOverride={addButtonOverride}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Edit Subscription Policy',
-                routeTo: '/throttling/subscription/',
-            }}
-            DeleteComponent={Delete}
-        />
-    );
+    if (!hasListSubscriptionThrottlingPoliciesPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'Throttling.Subscription.Policy.List.title.subscription.rate.limiting.policies',
+                        defaultMessage: 'Subscription Rate Limiting Policies',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='Throttling.Subscription.Policy.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Throttling.Subscription.Policy.List.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Subscription Rate Limiting Policies.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonOverride={addButtonOverride}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                editComponentProps={{
+                    icon: <EditIcon/>,
+                    title: 'Edit Subscription Policy',
+                    routeTo: '/throttling/subscription/',
+                }}
+                DeleteComponent={Delete}
+            />
+        );
+    }
 }

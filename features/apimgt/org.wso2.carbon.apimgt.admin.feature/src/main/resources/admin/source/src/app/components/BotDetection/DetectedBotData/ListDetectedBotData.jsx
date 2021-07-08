@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
@@ -34,6 +34,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Configurations from 'Config';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
+import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
 
 /**
  * Render a list
@@ -44,6 +45,7 @@ export default function ListDetectedBotData() {
     const intl = useIntl();
     const isAnalyticsEnabled = settings.analyticsEnabled;
     const restApi = new API();
+    const [hasListBotDetectionDataPermission, setHasListBotDetectionDataPermission] = useState(true);
 
     /**
      * API call to get Detected Data
@@ -56,7 +58,12 @@ export default function ListDetectedBotData() {
                 return (result.body.list);
             })
             .catch((error) => {
-                throw (error);
+                if (error.statusCode === 401) {
+                    setHasListBotDetectionDataPermission(false);
+                } else {
+                    setHasListBotDetectionDataPermission(true);
+                    throw error;
+                }
             });
     }
 
@@ -267,27 +274,56 @@ export default function ListDetectedBotData() {
         );
     }
 
-    return (
-        isAnalyticsEnabled ? (
-            <ListBase
-                columProps={columProps}
-                pageProps={pageProps}
-                searchProps={searchProps}
-                emptyBoxProps={emptyBoxProps}
-                apiCall={apiCall}
-                showActionColumn={false}
+    if (!hasListBotDetectionDataPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'BotDetection.detected.data.List.title.detected.data',
+                        defaultMessage: 'Detected Data',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='BotDetection.detected.data.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='BotDetection.detected.data.List.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view detected data.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
             />
-        ) : (
-            <ContentBase
-                {...pageProps}
-                pageStyle='small'
-            >
-                <Card>
-                    <CardContent>
-                        {analyticsDisabledEmptyBoxProps.title}
-                        {analyticsDisabledEmptyBoxProps.content}
-                    </CardContent>
-                </Card>
-            </ContentBase>
-        ));
+        );
+    } else {
+        return (
+            isAnalyticsEnabled ? (
+                <ListBase
+                    columProps={columProps}
+                    pageProps={pageProps}
+                    searchProps={searchProps}
+                    emptyBoxProps={emptyBoxProps}
+                    apiCall={apiCall}
+                    showActionColumn={false}
+                />
+            ) : (
+                <ContentBase
+                    {...pageProps}
+                    pageStyle='small'
+                >
+                    <Card>
+                        <CardContent>
+                            {analyticsDisabledEmptyBoxProps.title}
+                            {analyticsDisabledEmptyBoxProps.content}
+                        </CardContent>
+                    </Card>
+                </ContentBase>
+            ));
+    }
 }

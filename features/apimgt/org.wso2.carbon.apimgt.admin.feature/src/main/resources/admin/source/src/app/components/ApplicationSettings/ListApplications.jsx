@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -31,6 +31,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import EditIcon from '@material-ui/icons/Edit';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase'
 
 let limit = Configurations.app.applicationCount;
 
@@ -44,6 +45,7 @@ export default function ListApplications() {
     const [applicationList, setApplicationList] = useState([]);
     const [loadNextActive, setLoadNextActive] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
+    const [hasListApplicationsPermission, setHasListApplicationsPermission] = useState(true);
 
     /**
     * API call to get application list
@@ -77,7 +79,12 @@ export default function ListApplications() {
                 return list;
             })
             .catch((error) => {
-                throw error;
+                if (error.statusCode === 401) {
+                    setHasListApplicationsPermission(false);
+                } else {
+                    setHasListApplicationsPermission(true);
+                    throw error;
+                }
             });
     }
 
@@ -179,28 +186,57 @@ export default function ListApplications() {
         ),
     };
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={() => <span />}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            EditComponent={EditApplication}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Change Application Owner',
-                applicationList,
-            }}
-            DeleteComponent={() => <span />}
-            muiDataTableOptions={{ pagination: false }}
-            loadNextFeature={
-                {
-                    active: true,
-                    loadNextActive,
+    if (!hasListApplicationsPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'ApplicationSettings.ListApplications.title.applications',
+                        defaultMessage: 'Application Settings',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='ApplicationSettings.ListApplications.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='ApplicationSettings.ListApplications.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Application Settings.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={() => <span/>}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                EditComponent={EditApplication}
+                editComponentProps={{
+                    icon: <EditIcon/>,
+                    title: 'Change Application Owner',
+                    applicationList,
+                }}
+                DeleteComponent={() => <span/>}
+                muiDataTableOptions={{pagination: false}}
+                loadNextFeature={
+                    {
+                        active: false,
+                        loadNextActive,
+                    }
                 }
-            }
-        />
-    );
+            />
+        );
+    }
 }

@@ -36,6 +36,7 @@ import DeleteEmail from 'AppComponents/BotDetection/EmailConfig/DeleteEmail';
 import AddEmails from 'AppComponents/BotDetection/EmailConfig/AddEmail';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
+import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
 
 /**
  * Render a list
@@ -47,6 +48,7 @@ export default function ListEmails() {
     const [emailList, setEmailList] = useState([]);
     const isAnalyticsEnabled = settings.analyticsEnabled;
     const restApi = new API();
+    const [hasListBotDetectionEmailsPermission, setHasListBotDetectionEmailsPermission] = useState(true);
 
     /**
      * API call to get all emails
@@ -60,7 +62,12 @@ export default function ListEmails() {
                 return result.body.list;
             })
             .catch((error) => {
-                throw error;
+                if (error.statusCode === 401) {
+                    setHasListBotDetectionEmailsPermission(false);
+                } else {
+                    setHasListBotDetectionEmailsPermission(true);
+                    throw error;
+                }
             });
     }
 
@@ -223,29 +230,58 @@ export default function ListEmails() {
         );
     }
 
-    return (isAnalyticsEnabled ? (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            EditComponent={AddEmails}
-            DeleteComponent={DeleteEmail}
-        />
-    )
-        : (
-            <ContentBase
-                {...pageProps}
-                pageStyle='small'
-            >
-                <Card>
-                    <CardContent>
-                        {analyticsDisabledEmptyBoxProps.title}
-                        {analyticsDisabledEmptyBoxProps.content}
-                    </CardContent>
-                </Card>
-            </ContentBase>
-        ));
+    if (!hasListBotDetectionEmailsPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'BotDetection.Email.List.title.emails',
+                        defaultMessage: 'Emails',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='BotDetection.Email.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='BotDetection.Email.List.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view emails.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (isAnalyticsEnabled ? (
+                <ListBase
+                    columProps={columProps}
+                    pageProps={pageProps}
+                    addButtonProps={addButtonProps}
+                    searchProps={searchProps}
+                    emptyBoxProps={emptyBoxProps}
+                    apiCall={apiCall}
+                    EditComponent={AddEmails}
+                    DeleteComponent={DeleteEmail}
+                />
+            )
+            : (
+                <ContentBase
+                    {...pageProps}
+                    pageStyle='small'
+                >
+                    <Card>
+                        <CardContent>
+                            {analyticsDisabledEmptyBoxProps.title}
+                            {analyticsDisabledEmptyBoxProps.content}
+                        </CardContent>
+                    </Card>
+                </ContentBase>
+            ));
+    }
 }

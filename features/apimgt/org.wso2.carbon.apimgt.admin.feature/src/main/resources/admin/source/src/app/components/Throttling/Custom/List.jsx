@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
@@ -33,6 +33,7 @@ import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
 import { Link as RouterLink } from 'react-router-dom';
+import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
 
 /**
  * Render a list
@@ -41,6 +42,7 @@ import { Link as RouterLink } from 'react-router-dom';
 export default function ListCustomThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
+    const [hasListCustomThrottlingPoliciesPermission, setHasListCustomThrottlingPoliciesPermission] = useState(true);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -177,11 +179,12 @@ export default function ListCustomThrottlingPolicies() {
             });
             return (customPolicies);
         }).catch((error) => {
-            const { response } = error;
-            if (response.body) {
-                throw (response.body.description);
+            if (error.statusCode === 401) {
+                setHasListCustomThrottlingPoliciesPermission(false);
+            } else {
+                setHasListCustomThrottlingPoliciesPermission(true);
+                throw error;
             }
-            return null;
         });
     }
 
@@ -196,21 +199,50 @@ export default function ListCustomThrottlingPolicies() {
         </RouterLink>
     );
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            DeleteComponent={Delete}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Edit Policy',
-                routeTo: '/throttling/custom/',
-            }}
-            addButtonOverride={addButtonOverride}
-        />
-    );
+    if (!hasListCustomThrottlingPoliciesPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'Throttling.Custom.Policy.List.title.custom.rate.limiting.policies',
+                        defaultMessage: 'Custom Rate Limiting Policies',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='Throttling.Custom.Policy.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Throttling.Custom.Policy.List.permission.denied.content'
+                        defaultMessage={'You dont have enough permission to view Custom Rate Limiting Policies.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                DeleteComponent={Delete}
+                editComponentProps={{
+                    icon: <EditIcon/>,
+                    title: 'Edit Policy',
+                    routeTo: '/throttling/custom/',
+                }}
+                addButtonOverride={addButtonOverride}
+            />
+        );
+    }
 }
