@@ -56,6 +56,10 @@ public class SOAPToRESTConstants {
     public static final String ATTR_CONTENT_KEYWORD = "_attr";
     public static final String SOAP_RPC_MESSAGE_TYPE = "rpc";
     public static final String SOAP_DOCUMENT_MESSAGE_TYPE = "document";
+    public static final String REPOSITORY = "repository";
+    public static final String REP_RESOURCES = "resources";
+    public static final String XSDS = "xsds";
+    public static final String XSD = "xsd";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";
