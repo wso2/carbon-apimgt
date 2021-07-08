@@ -156,6 +156,7 @@ public class SystemApplicationDAO {
 
             while (resultSet.next()) {
                 systemApplicationDTO = new SystemApplicationDTO();
+                systemApplicationDTO.setName(resultSet.getString("NAME"));
                 systemApplicationDTO.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 systemApplicationDTO.setConsumerSecret(resultSet.getString("CONSUMER_SECRET"));
                 systemApplicationDTOS.add(systemApplicationDTO);
