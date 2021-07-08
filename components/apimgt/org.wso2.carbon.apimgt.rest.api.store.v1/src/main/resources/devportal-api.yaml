@@ -1519,6 +1519,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/If-Match'
+        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
