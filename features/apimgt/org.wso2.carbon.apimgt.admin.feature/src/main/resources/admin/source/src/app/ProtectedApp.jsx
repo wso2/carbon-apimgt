@@ -99,7 +99,7 @@ class Protected extends Component {
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
-            api.getTenantInformation(user.name)
+            api.getTenantInformation(btoa(user.name))
                 .then((result) => {
                     const { tenantDomain } = result.body;
                     if (tenantDomain === 'carbon.super') {

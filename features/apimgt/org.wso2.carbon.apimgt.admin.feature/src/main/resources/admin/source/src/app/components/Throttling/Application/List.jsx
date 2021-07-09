@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -32,6 +32,7 @@ import AddEdit from 'AppComponents/Throttling/Application/AddEdit';
 import Delete from 'AppComponents/Throttling/Application/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list
@@ -40,6 +41,7 @@ import EditIcon from '@material-ui/icons/Edit';
 export default function ListApplicationThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
+    const [hasListApplicationThrottlingPoliciesPermission, setHasListApplicationThrottlingPoliciesPermission] = useState(true);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -204,6 +206,9 @@ export default function ListApplicationThrottlingPolicies() {
             return (applicationThrottlingvalues);
         }).catch((error) => {
             const { response } = error;
+            if (error.statusCode === 401) {
+                setHasListApplicationThrottlingPoliciesPermission(false);
+            }
             if (response.body) {
                 throw (response.body.description);
             }
@@ -211,20 +216,49 @@ export default function ListApplicationThrottlingPolicies() {
         });
     }
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Edit Application Policy',
-            }}
-            DeleteComponent={Delete}
-            EditComponent={AddEdit}
-        />
-    );
+    if (!hasListApplicationThrottlingPoliciesPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'Throttling.Application.Policy.List.title.applications',
+                        defaultMessage: 'Application Rate Limiting Policies',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='Throttling.Application.Policy.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Throttling.Application.Policy.List.permission.denied.content'
+                        defaultMessage={'You don\'t have sufficient permission to view Application Rate Limiting Policies.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                editComponentProps={{
+                    icon: <EditIcon/>,
+                    title: 'Edit Application Policy',
+                }}
+                DeleteComponent={Delete}
+                EditComponent={AddEdit}
+            />
+        );
+    }
 }

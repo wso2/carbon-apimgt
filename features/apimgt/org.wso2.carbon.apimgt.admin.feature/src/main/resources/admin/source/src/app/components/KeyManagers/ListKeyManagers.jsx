@@ -26,22 +26,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Alert from 'AppComponents/Shared/Alert';
 import Switch from '@material-ui/core/Switch';
-
-/**
- * API call to get microgateway labels
- * @returns {Promise}.
- */
-function apiCall() {
-    const restApi = new API();
-    return restApi
-        .getKeyManagersList()
-        .then((result) => {
-            return result.body.list;
-        })
-        .catch((error) => {
-            throw error;
-        });
-}
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list
@@ -51,6 +36,27 @@ export default function ListKeyManagers() {
     // eslint-disable-next-line no-unused-vars
     const [saving, setSaving] = useState(false);
     const intl = useIntl();
+    const [hasListKeyManagersPermission, setHasListKeyManagersPermission] = useState(true);
+
+    /**
+     * API call to get microgateway labels
+     * @returns {Promise}.
+     */
+    function apiCall() {
+        const restApi = new API();
+        return restApi
+            .getKeyManagersList()
+            .then((result) => {
+                return result.body.list;
+            })
+            .catch((error) => {
+                if (error.statusCode === 401) {
+                    setHasListKeyManagersPermission(false);
+                }
+                throw error;
+            });
+    }
+
     const columProps = [
         {
             name: 'name',
@@ -186,16 +192,46 @@ export default function ListKeyManagers() {
             );
         },
     ];
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            addButtonOverride={addButtonOverride}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            DeleteComponent={Delete}
-            addedActions={addedActions}
-        />
-    );
+
+    if (!hasListKeyManagersPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'KeyManagers.ListKeyManagers.title.keyManagers',
+                        defaultMessage: 'Key Managers',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='KeyManagers.ListKeyManagers.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='KeyManagers.ListKeyManagers.permission.denied.content'
+                        defaultMessage={'You don\'t have sufficient permission to view Key Managers.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                addButtonOverride={addButtonOverride}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                DeleteComponent={Delete}
+                addedActions={addedActions}
+            />
+        );
+    }
 }

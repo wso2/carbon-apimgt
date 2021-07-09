@@ -34,6 +34,7 @@ import Delete from 'AppComponents/Throttling/Blacklist/Delete';
 import API from 'AppData/api';
 import cloneDeep from 'lodash.clonedeep';
 import Alert from 'AppComponents/Shared/Alert';
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list
@@ -43,6 +44,7 @@ export default function ListBlacklistThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
     const [blacklistPolicyList, setBlacklistPolicyList] = useState([]);
+    const [hasListBlacklistThrottlingPoliciesPermission, setHasListBlacklistThrottlingPoliciesPermission] = useState(true);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -138,6 +140,9 @@ export default function ListBlacklistThrottlingPolicies() {
             })
             .catch((error) => {
                 const { response } = error;
+                if (error.statusCode === 401) {
+                    setHasListBlacklistThrottlingPoliciesPermission(false);
+                }
                 if (response.body) {
                     throw (response.body.description);
                 }
@@ -248,17 +253,46 @@ export default function ListBlacklistThrottlingPolicies() {
             </Typography>),
     };
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            DeleteComponent={Delete}
-            EditComponent={AddEdit}
-            isBlacklist
-        />
-    );
+    if (!hasListBlacklistThrottlingPoliciesPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'Throttling.Blacklist.Policy.List.title.deny.policies',
+                        defaultMessage: 'Deny Policies',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='Throttling.Blacklist.Policy.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Throttling.Blacklist.Policy.List.permission.denied.content'
+                        defaultMessage={'You don\'t have sufficient permission to view Deny Policies.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                DeleteComponent={Delete}
+                EditComponent={AddEdit}
+                isBlacklist
+            />
+        );
+    }
 }

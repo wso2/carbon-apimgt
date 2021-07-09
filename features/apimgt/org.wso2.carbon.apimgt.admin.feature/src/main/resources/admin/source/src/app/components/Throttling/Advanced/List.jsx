@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
@@ -27,37 +27,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
 import Button from '@material-ui/core/Button';
 import API from 'AppData/api';
-
-/**
- * Fetch policy list from backend
- * @returns {Promise}.
- */
-function apiCall() {
-    const restApi = new API();
-    return restApi
-        .getThrottlingPoliciesAdvanced()
-        .then((result) => {
-            const { body: { list } } = result;
-            list.forEach((item) => {
-                if (item.defaultLimit.bandwidth) {
-                    item.quotaPolicy = 'Bandwidth Volume';
-                    item.quota = item.defaultLimit.bandwidth.dataAmount
-                    + item.defaultLimit.bandwidth.dataUnit;
-                    item.unitTime = item.defaultLimit.bandwidth.unitTime
-                    + item.defaultLimit.bandwidth.timeUnit;
-                } else {
-                    item.quotaPolicy = 'Request Count';
-                    item.quota = item.defaultLimit.requestCount.requestCount;
-                    item.unitTime = item.defaultLimit.requestCount.unitTime
-                    + item.defaultLimit.requestCount.timeUnit;
-                }
-            });
-            return list;
-        })
-        .catch((error) => {
-            throw error;
-        });
-}
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list
@@ -65,6 +35,42 @@ function apiCall() {
  */
 export default function ListMG() {
     const intl = useIntl();
+    const [hasListAdvancedThrottlingPoliciesPermission, setHasListAdvancedThrottlingPoliciesPermission] = useState(true);
+
+    /**
+     * Fetch policy list from backend
+     * @returns {Promise}.
+     */
+    function apiCall() {
+        const restApi = new API();
+        return restApi
+            .getThrottlingPoliciesAdvanced()
+            .then((result) => {
+                const { body: { list } } = result;
+                list.forEach((item) => {
+                    if (item.defaultLimit.bandwidth) {
+                        item.quotaPolicy = 'Bandwidth Volume';
+                        item.quota = item.defaultLimit.bandwidth.dataAmount
+                            + item.defaultLimit.bandwidth.dataUnit;
+                        item.unitTime = item.defaultLimit.bandwidth.unitTime
+                            + item.defaultLimit.bandwidth.timeUnit;
+                    } else {
+                        item.quotaPolicy = 'Request Count';
+                        item.quota = item.defaultLimit.requestCount.requestCount;
+                        item.unitTime = item.defaultLimit.requestCount.unitTime
+                            + item.defaultLimit.requestCount.timeUnit;
+                    }
+                });
+                return list;
+            })
+            .catch((error) => {
+                if (error.statusCode === 401) {
+                    setHasListAdvancedThrottlingPoliciesPermission(false);
+                }
+                throw error;
+            });
+    }
+
     const columProps = [
         {
             name: 'policyName',
@@ -250,22 +256,52 @@ export default function ListMG() {
             </Button>
         </RouterLink>
     );
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Edit Policy',
-                routeTo: '/throttling/advanced/',
-            }}
-            DeleteComponent={Delete}
-            addButtonOverride={addButtonOverride}
-            // addedActions={addedActions}
-        />
-    );
+
+    if (!hasListAdvancedThrottlingPoliciesPermission) {
+        return (
+            <WarningBase
+                pageProps={{
+                    help: null,
+
+                    pageStyle: 'half',
+                    title: intl.formatMessage({
+                        id: 'Throttling.Advanced.List.title.advanced.rate.limiting.policies',
+                        defaultMessage: 'Advanced Rate Limiting Policies',
+                    }),
+                }}
+                title={(
+                    <FormattedMessage
+                        id='Throttling.Advanced.List.permission.denied.title'
+                        defaultMessage='Permission Denied'
+                    />
+                )}
+                content={(
+                    <FormattedMessage
+                        id='Throttling.Advanced.List.permission.denied.content'
+                        defaultMessage={'You don\'t have sufficient permission to view Advanced Rate Limiting Policies.'
+                        + ' Please contact the site administrator.'}
+                    />
+                )}
+            />
+        );
+    } else {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                editComponentProps={{
+                    icon: <EditIcon/>,
+                    title: 'Edit Policy',
+                    routeTo: '/throttling/advanced/',
+                }}
+                DeleteComponent={Delete}
+                addButtonOverride={addButtonOverride}
+                // addedActions={addedActions}
+            />
+        );
+    }
 }
