@@ -276,10 +276,14 @@ export default function ListSubscriptionThrottlingPolicies() {
                 .map(Object.values);
             return (subscriptionThrottlingvalues);
         }).catch((error) => {
+            const { response } = error;
             if (error.statusCode === 401) {
                 setHasListSubscriptionThrottlingPoliciesPermission(false);
             }
-            throw error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
         });
     }
 

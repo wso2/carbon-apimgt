@@ -179,10 +179,14 @@ export default function ListCustomThrottlingPolicies() {
             });
             return (customPolicies);
         }).catch((error) => {
+            const { response } = error;
             if (error.statusCode === 401) {
                 setHasListCustomThrottlingPoliciesPermission(false);
             }
-            throw error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
         });
     }
 

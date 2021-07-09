@@ -139,10 +139,14 @@ export default function ListBlacklistThrottlingPolicies() {
                 return (blacklistPolicies);
             })
             .catch((error) => {
+                const { response } = error;
                 if (error.statusCode === 401) {
                     setHasListBlacklistThrottlingPoliciesPermission(false);
                 }
-                throw error;
+                if (response.body) {
+                    throw (response.body.description);
+                }
+                return null;
             });
     }
 

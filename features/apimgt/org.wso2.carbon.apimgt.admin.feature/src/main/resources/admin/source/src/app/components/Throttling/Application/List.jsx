@@ -205,10 +205,14 @@ export default function ListApplicationThrottlingPolicies() {
                 });
             return (applicationThrottlingvalues);
         }).catch((error) => {
+            const { response } = error;
             if (error.statusCode === 401) {
                 setHasListApplicationThrottlingPoliciesPermission(false);
             }
-            throw error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
         });
     }
 
