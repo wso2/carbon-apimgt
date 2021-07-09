@@ -392,22 +392,16 @@ public class GatewayArtifactsMgtDAO {
         int apiIdListSize = apiIds.size();
         int apiIdArrayIndex = 0;
         int apiIdsChunkSize = SQLConstants.API_ID_CHUNK_SIZE;
-        while (apiIdsChunkSize < apiIdListSize) {
-            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, apiIdsChunkSize));
-            apiIdListSize = apiIdListSize - SQLConstants.API_ID_CHUNK_SIZE;
-            apiIdArrayIndex = apiIdArrayIndex + SQLConstants.API_ID_CHUNK_SIZE;
-            apiIdsChunkSize = apiIdsChunkSize + SQLConstants.API_ID_CHUNK_SIZE;
-        }
-        if (apiIdListSize > 0) {
-            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, apiIdArrayIndex + apiIdListSize));
+        while (apiIdArrayIndex < apiIdListSize) {
+            apiIdsChunk.add(apiIds.subList(apiIdArrayIndex, Math.min(apiIdArrayIndex + apiIdsChunkSize, apiIdListSize)));
+            apiIdArrayIndex += apiIdsChunkSize;
         }
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
 
         for (List<String> apiIdList: apiIdsChunk) {
-            apiRuntimeArtifactDtoList = new ArrayList<>(apiRuntimeArtifactDtoList);
             String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_MULTIPLE_APIIDs_AND_LABEL;
             query = query.replaceAll(SQLConstants.GATEWAY_LABEL_REGEX, String.join(",",Collections.nCopies(labels.length, "?")));
-            query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIds.size(), "?")));
+            query = query.replaceAll(SQLConstants.API_ID_REGEX, String.join(",",Collections.nCopies(apiIdList.size(), "?")));
 
             try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(query)) {
