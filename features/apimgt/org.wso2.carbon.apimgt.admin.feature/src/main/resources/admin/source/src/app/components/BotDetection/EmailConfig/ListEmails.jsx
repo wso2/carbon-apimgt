@@ -257,17 +257,17 @@ export default function ListEmails() {
         );
     } else {
         return (isAnalyticsEnabled ? (
-                <ListBase
-                    columProps={columProps}
-                    pageProps={pageProps}
-                    addButtonProps={addButtonProps}
-                    searchProps={searchProps}
-                    emptyBoxProps={emptyBoxProps}
-                    apiCall={apiCall}
-                    EditComponent={AddEmails}
-                    DeleteComponent={DeleteEmail}
-                />
-            )
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                EditComponent={AddEmails}
+                DeleteComponent={DeleteEmail}
+            />
+        )
             : (
                 <ContentBase
                     {...pageProps}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
@@ -35,7 +35,8 @@ import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
  */
 export default function ListMG() {
     const intl = useIntl();
-    const [hasListAdvancedThrottlingPoliciesPermission, setHasListAdvancedThrottlingPoliciesPermission] = useState(true);
+    const [hasListAdvancedThrottlingPoliciesPermission,
+        setHasListAdvancedThrottlingPoliciesPermission] = useState(true);
 
     /**
      * Fetch policy list from backend
@@ -294,7 +295,7 @@ export default function ListMG() {
                 emptyBoxProps={emptyBoxProps}
                 apiCall={apiCall}
                 editComponentProps={{
-                    icon: <EditIcon/>,
+                    icon: <EditIcon />,
                     title: 'Edit Policy',
                     routeTo: '/throttling/advanced/',
                 }}

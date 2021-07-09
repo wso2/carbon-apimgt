@@ -44,7 +44,8 @@ export default function ListBlacklistThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
     const [blacklistPolicyList, setBlacklistPolicyList] = useState([]);
-    const [hasListBlacklistThrottlingPoliciesPermission, setHasListBlacklistThrottlingPoliciesPermission] = useState(true);
+    const [hasListBlacklistThrottlingPoliciesPermission,
+        setHasListBlacklistThrottlingPoliciesPermission] = useState(true);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
