@@ -232,6 +232,7 @@ public class APIFileUtil {
      *
      * @param folder    folder that include files
      * @param extension file extension
+     * @param recursive recursion of extensions
      * @return collection of files for the extension
      */
     public static Collection<File> searchFilesWithMatchingExtension(File folder, String extension, boolean recursive) {
