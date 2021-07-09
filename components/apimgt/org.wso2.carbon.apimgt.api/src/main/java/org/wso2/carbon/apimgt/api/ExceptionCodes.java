@@ -310,6 +310,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot add client certificates to this server"),
     THROTTLING_POLICY_CANNOT_BE_NULL(900989,
             "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
+    ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR(900971, "Cannot delete the advanced throttling policy", 403,
+            "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
