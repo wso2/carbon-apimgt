@@ -181,10 +181,8 @@ export default function ListCustomThrottlingPolicies() {
         }).catch((error) => {
             if (error.statusCode === 401) {
                 setHasListCustomThrottlingPoliciesPermission(false);
-            } else {
-                setHasListCustomThrottlingPoliciesPermission(true);
-                throw error;
             }
+            throw error;
         });
     }
 

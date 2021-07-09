@@ -207,10 +207,8 @@ export default function ListApplicationThrottlingPolicies() {
         }).catch((error) => {
             if (error.statusCode === 401) {
                 setHasListApplicationThrottlingPoliciesPermission(false);
-            } else {
-                setHasListApplicationThrottlingPoliciesPermission(true);
-                throw error;
             }
+            throw error;
         });
     }
 

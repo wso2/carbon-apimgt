@@ -81,10 +81,8 @@ export default function ListApplications() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListApplicationsPermission(false);
-                } else {
-                    setHasListApplicationsPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

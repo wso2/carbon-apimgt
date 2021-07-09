@@ -60,10 +60,8 @@ export default function ListDetectedBotData() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListBotDetectionDataPermission(false);
-                } else {
-                    setHasListBotDetectionDataPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

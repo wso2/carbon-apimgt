@@ -56,10 +56,8 @@ export default function ListApiCategories() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListApiCategoriesPermission(false);
-                } else {
-                    setHasListApiCategoriesPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

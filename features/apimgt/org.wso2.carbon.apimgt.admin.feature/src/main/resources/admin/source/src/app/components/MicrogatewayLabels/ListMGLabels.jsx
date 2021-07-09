@@ -56,10 +56,8 @@ export default function ListMGLabels() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListMGLabelsPermission(false);
-                } else {
-                    setHasListMGLabelsPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

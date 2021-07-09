@@ -52,10 +52,8 @@ export default function ListKeyManagers() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListKeyManagersPermission(false);
-                } else {
-                    setHasListKeyManagersPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

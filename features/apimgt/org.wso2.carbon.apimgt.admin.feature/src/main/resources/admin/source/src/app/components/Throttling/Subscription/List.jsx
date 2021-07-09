@@ -278,10 +278,8 @@ export default function ListSubscriptionThrottlingPolicies() {
         }).catch((error) => {
             if (error.statusCode === 401) {
                 setHasListSubscriptionThrottlingPoliciesPermission(false);
-            } else {
-                setHasListSubscriptionThrottlingPoliciesPermission(true);
-                throw error;
             }
+            throw error;
         });
     }
 

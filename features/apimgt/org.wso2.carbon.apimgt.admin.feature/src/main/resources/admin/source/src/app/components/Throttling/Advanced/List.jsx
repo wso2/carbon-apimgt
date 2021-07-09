@@ -66,10 +66,8 @@ export default function ListMG() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListAdvancedThrottlingPoliciesPermission(false);
-                } else {
-                    setHasListAdvancedThrottlingPoliciesPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

@@ -64,10 +64,8 @@ export default function ListEmails() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListBotDetectionEmailsPermission(false);
-                } else {
-                    setHasListBotDetectionEmailsPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 

@@ -141,10 +141,8 @@ export default function ListBlacklistThrottlingPolicies() {
             .catch((error) => {
                 if (error.statusCode === 401) {
                     setHasListBlacklistThrottlingPoliciesPermission(false);
-                } else {
-                    setHasListBlacklistThrottlingPoliciesPermission(true);
-                    throw error;
                 }
+                throw error;
             });
     }
 
