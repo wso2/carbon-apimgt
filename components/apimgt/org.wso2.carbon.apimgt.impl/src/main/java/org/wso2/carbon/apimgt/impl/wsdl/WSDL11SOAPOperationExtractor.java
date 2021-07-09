@@ -307,7 +307,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                         traverseTypeElement(node, null, model, currentProperty);
                     } catch (APIManagementException e) {
                         throw new APIMgtWSDLException(e);
-                    }                    if (StringUtils.isNotBlank(model.getName())) {
+                    }
+                    if (StringUtils.isNotBlank(model.getName())) {
                         parameterModelMap.put(model.getName(), model);
                     }
                     if (wsdlParamDefinition.getDefinitionName() != null) {
