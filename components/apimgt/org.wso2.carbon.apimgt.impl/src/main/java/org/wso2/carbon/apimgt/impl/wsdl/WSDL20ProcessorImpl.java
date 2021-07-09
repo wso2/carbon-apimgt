@@ -260,7 +260,6 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         throw new UnsupportedOperationException("This method is not implemented");
     }
 
-
     @Override
     public void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
         if (Mode.SINGLE.equals(getMode())) {
