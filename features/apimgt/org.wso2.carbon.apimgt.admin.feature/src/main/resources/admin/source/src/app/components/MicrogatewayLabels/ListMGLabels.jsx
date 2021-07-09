@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -249,7 +249,7 @@ export default function ListMGLabels() {
                 apiCall={apiCall}
                 EditComponent={AddEdit}
                 editComponentProps={{
-                    icon: <EditIcon/>,
+                    icon: <EditIcon />,
                     title: 'Edit Gateway Label',
                 }}
                 DeleteComponent={Delete}

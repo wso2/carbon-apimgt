@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -216,18 +216,18 @@ export default function ListApplications() {
             <ListBase
                 columProps={columProps}
                 pageProps={pageProps}
-                addButtonProps={() => <span/>}
+                addButtonProps={() => <span />}
                 searchProps={searchProps}
                 emptyBoxProps={emptyBoxProps}
                 apiCall={apiCall}
                 EditComponent={EditApplication}
                 editComponentProps={{
-                    icon: <EditIcon/>,
+                    icon: <EditIcon />,
                     title: 'Change Application Owner',
                     applicationList,
                 }}
-                DeleteComponent={() => <span/>}
-                muiDataTableOptions={{pagination: false}}
+                DeleteComponent={() => <span />}
+                muiDataTableOptions={{ pagination: false }}
                 loadNextFeature={
                     {
                         active: false,

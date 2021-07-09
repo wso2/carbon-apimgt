@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -42,7 +42,8 @@ import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 export default function ListSubscriptionThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
-    const [hasListSubscriptionThrottlingPoliciesPermission, setHasListSubscriptionThrottlingPoliciesPermission] = useState(true);
+    const [hasListSubscriptionThrottlingPoliciesPermission,
+        setHasListSubscriptionThrottlingPoliciesPermission] = useState(true);
 
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
@@ -308,8 +309,8 @@ export default function ListSubscriptionThrottlingPolicies() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Subscription.Policy.List.permission.denied.content'
-                        defaultMessage={'You don\'t have sufficient permission to view Subscription Rate Limiting Policies.'
-                        + ' Please contact the site administrator.'}
+                        defaultMessage={'You don\'t have sufficient permission to view'
+                            + ' Subscription Rate Limiting Policies. Please contact the site administrator.'}
                     />
                 )}
             />
@@ -324,7 +325,7 @@ export default function ListSubscriptionThrottlingPolicies() {
                 emptyBoxProps={emptyBoxProps}
                 apiCall={apiCall}
                 editComponentProps={{
-                    icon: <EditIcon/>,
+                    icon: <EditIcon />,
                     title: 'Edit Subscription Policy',
                     routeTo: '/throttling/subscription/',
                 }}

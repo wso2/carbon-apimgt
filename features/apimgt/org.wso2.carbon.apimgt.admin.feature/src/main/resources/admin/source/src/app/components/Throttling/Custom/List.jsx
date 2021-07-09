@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
@@ -239,7 +239,7 @@ export default function ListCustomThrottlingPolicies() {
                 apiCall={apiCall}
                 DeleteComponent={Delete}
                 editComponentProps={{
-                    icon: <EditIcon/>,
+                    icon: <EditIcon />,
                     title: 'Edit Policy',
                     routeTo: '/throttling/custom/',
                 }}

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
@@ -34,7 +34,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Configurations from 'Config';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
-import WarningBase from "AppComponents/AdminPages/Addons/WarningBase";
+import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 
 /**
  * Render a list

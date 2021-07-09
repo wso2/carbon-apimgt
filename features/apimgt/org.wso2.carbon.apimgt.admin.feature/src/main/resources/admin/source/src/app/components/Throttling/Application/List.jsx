@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -41,7 +41,8 @@ import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
 export default function ListApplicationThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
-    const [hasListApplicationThrottlingPoliciesPermission, setHasListApplicationThrottlingPoliciesPermission] = useState(true);
+    const [hasListApplicationThrottlingPoliciesPermission,
+        setHasListApplicationThrottlingPoliciesPermission] = useState(true);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -237,8 +238,8 @@ export default function ListApplicationThrottlingPolicies() {
                 content={(
                     <FormattedMessage
                         id='Throttling.Application.Policy.List.permission.denied.content'
-                        defaultMessage={'You don\'t have sufficient permission to view Application Rate Limiting Policies.'
-                        + ' Please contact the site administrator.'}
+                        defaultMessage={'You don\'t have sufficient permission to view'
+                            + ' Application Rate Limiting Policies. Please contact the site administrator.'}
                     />
                 )}
             />
@@ -253,7 +254,7 @@ export default function ListApplicationThrottlingPolicies() {
                 emptyBoxProps={emptyBoxProps}
                 apiCall={apiCall}
                 editComponentProps={{
-                    icon: <EditIcon/>,
+                    icon: <EditIcon />,
                     title: 'Edit Application Policy',
                 }}
                 DeleteComponent={Delete}
