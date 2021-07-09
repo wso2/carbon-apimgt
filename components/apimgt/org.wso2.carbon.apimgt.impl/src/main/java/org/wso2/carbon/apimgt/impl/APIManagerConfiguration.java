@@ -63,7 +63,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -1297,10 +1296,12 @@ public class APIManagerConfiguration {
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
             }
-            OMElement jwtUserClaimsElement =omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
+            OMElement jwtUserClaimsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
             if (jwtUserClaimsElement != null ){
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
             }
+
             OMElement gatewayJWTConfigurationElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
             if (gatewayJWTConfigurationElement != null) {
@@ -1323,6 +1324,11 @@ public class APIManagerConfiguration {
                                 jwtConfigurationDto.getJWTExcludedClaims().add(claim.getText());
                             }
                         }
+                    }
+                    OMElement claimRetrievalElement =
+                            configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
+                    if (claimRetrievalElement != null) {
+                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
                     }
                 }
             }

@@ -47,7 +47,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     public static final String FORMAT_JSON_ARRAY_PROPERTY = "formatJWTJsonArray";
 
     private static volatile long ttl = -1L;
-    private String dialectURI;
+    protected String dialectURI;
 
     private String signatureAlgorithm;
     private boolean tenantBasedSigningEnabled;
