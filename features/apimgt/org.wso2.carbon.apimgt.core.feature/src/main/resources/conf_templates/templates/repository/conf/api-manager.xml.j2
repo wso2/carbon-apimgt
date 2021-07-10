@@ -101,6 +101,7 @@
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
             </ExcludedClaims>
+            <EnableUserClaimRetrievalFromKeyManager>{{apim.jwt.gateway_generator.enable_claim_retrieval}}</EnableUserClaimRetrievalFromKeyManager>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>

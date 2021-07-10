@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class JWTValidatorImpl implements JWTValidator {
@@ -167,7 +168,7 @@ public class JWTValidatorImpl implements JWTValidator {
 
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
-        jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());
+        jwtValidationInfo.setClaims(new HashMap<>(jwtClaimsSet.getClaims()));
         if (jwtClaimsSet.getExpirationTime() != null){
             jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
         }

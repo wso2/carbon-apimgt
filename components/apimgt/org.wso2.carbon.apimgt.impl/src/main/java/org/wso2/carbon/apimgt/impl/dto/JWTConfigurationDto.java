@@ -32,10 +32,10 @@ public class JWTConfigurationDto {
     private String claimRetrieverImplClass;
     private boolean enableUserClaims;
     private String gatewayJWTGeneratorImpl;
-    private Map<String,TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
+    private Map<String, TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
     private Set<String> jwtExcludedClaims = new HashSet<>();
     private boolean tenantBasedSigningEnabled = false;
-
+    private boolean enableUserClaimRetrievalFromUserStore;
     public boolean isTenantBasedSigningEnabled() {
 
         return tenantBasedSigningEnabled;
@@ -144,5 +144,15 @@ public class JWTConfigurationDto {
     public void setEnableUserClaims(boolean enableUserClaims) {
 
         this.enableUserClaims = enableUserClaims;
+    }
+
+    public boolean isEnableUserClaimRetrievalFromUserStore() {
+
+        return enableUserClaimRetrievalFromUserStore;
+    }
+
+    public void setEnableUserClaimRetrievalFromUserStore(boolean enableUserClaimRetrievalFromUserStore) {
+
+        this.enableUserClaimRetrievalFromUserStore = enableUserClaimRetrievalFromUserStore;
     }
 }

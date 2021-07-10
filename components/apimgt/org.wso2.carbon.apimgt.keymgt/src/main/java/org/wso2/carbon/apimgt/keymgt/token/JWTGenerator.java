@@ -157,7 +157,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
             }
             String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
             KeyManager keymanager = KeyManagerHolder
-                    .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
+                    .getKeyManagerInstance(validationContext.getTenantDomain(), keymanagerName);
             if (keymanager != null) {
                 customClaims = keymanager.getUserClaims(username, properties);
                 if (log.isDebugEnabled()) {
