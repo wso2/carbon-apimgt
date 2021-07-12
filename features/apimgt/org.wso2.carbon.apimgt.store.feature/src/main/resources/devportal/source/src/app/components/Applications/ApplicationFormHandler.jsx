@@ -266,15 +266,17 @@ class ApplicationFormHandler extends React.Component {
         const { applicationRequest, allAppAttributes } = this.state;
         const { intl, history } = this.props;
         const api = new API();
+
         // Set default values to application attributes if the value is empty
-        const validCases = allAppAttributes.filter( a => a.hidden !== 'true' && a.required === 'true' && a.default);
-        if(validCases.length > 0) {
+        const validCases = allAppAttributes.filter(a => a.hidden !== 'true' && a.required === 'true' && a.default);
+        if (validCases.length > 0) {
             for (const validCase of validCases) {
-                if(!applicationRequest.attributes[validCase.attribute]){
-                    applicationRequest.attributes[validCase.attribute] = validCase.default;  
+                if (!applicationRequest.attributes[validCase.attribute]) {
+                    applicationRequest.attributes[validCase.attribute] = validCase.default;
                 }
             }
         }
+        
         this.validateName(applicationRequest.name)
             .then(() => this.validateDescription(applicationRequest.description))
             .then(() => this.validateAttributes(applicationRequest.attributes))
@@ -320,6 +322,17 @@ class ApplicationFormHandler extends React.Component {
         const {
             history, intl,
         } = this.props;
+
+        // Set default values to application attributes if the value is empty
+        const validCases = allAppAttributes.filter(a => a.hidden !== 'true' && a.required === 'true' && a.default);
+        if (validCases.length > 0) {
+            for (const validCase of validCases) {
+                if (!applicationRequest.attributes[validCase.attribute]) {
+                    applicationRequest.attributes[validCase.attribute] = validCase.default;
+                }
+            }
+        }
+
         const api = new API();
         this.validateName(applicationRequest.name)
             .then(() => this.validateDescription(applicationRequest.description))
