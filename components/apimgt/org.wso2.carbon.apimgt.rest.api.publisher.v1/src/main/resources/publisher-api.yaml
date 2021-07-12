@@ -184,6 +184,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -251,6 +252,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -311,6 +313,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
       x-code-samples:
@@ -382,6 +385,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -415,6 +419,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_delete
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -507,6 +512,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -561,6 +567,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -634,6 +641,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -690,6 +698,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -745,6 +754,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -814,6 +824,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -872,6 +883,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -938,6 +950,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -990,6 +1003,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1059,6 +1073,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1113,6 +1128,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1169,6 +1185,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1260,6 +1277,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -1308,6 +1326,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1363,6 +1382,7 @@ paths:
         - OAuth2Security:
             - apim:api_publish
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1391,6 +1411,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1432,6 +1453,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1473,6 +1495,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1513,6 +1536,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1550,6 +1574,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1584,6 +1609,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1624,6 +1650,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1670,6 +1697,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1725,6 +1753,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
@@ -1761,6 +1790,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -1815,6 +1845,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2202,6 +2233,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2291,6 +2323,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2363,6 +2396,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2424,6 +2458,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2472,6 +2507,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2523,6 +2559,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2573,6 +2610,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2621,6 +2659,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2676,6 +2715,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2741,6 +2781,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2784,6 +2825,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2823,6 +2865,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2853,6 +2896,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2902,6 +2946,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2952,6 +2997,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3008,6 +3054,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_create
       x-code-samples:
         - lang: Curl
@@ -3065,6 +3112,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3129,6 +3177,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_manage
       x-code-samples:
         - lang: Curl
@@ -3159,6 +3208,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_manage
       x-code-samples:
         - lang: Curl
@@ -3238,6 +3288,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3312,6 +3363,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_create
       x-code-samples:
         - lang: Curl
@@ -3351,6 +3403,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:document_create
       x-code-samples:
         - lang: Curl
@@ -3407,6 +3460,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage 
             - apim:mediation_policy_view
       x-code-samples:
         - lang: Curl
@@ -3484,6 +3538,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:mediation_policy_create
       x-code-samples:
         - lang: Curl
@@ -3544,6 +3599,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
       x-code-samples:
         - lang: Curl
@@ -3578,6 +3634,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:mediation_policy_manage
       x-code-samples:
         - lang: Curl
@@ -3632,6 +3689,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
       x-code-samples:
         - lang: Curl
@@ -3711,6 +3769,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:mediation_policy_manage
       x-code-samples:
         - lang: Curl
@@ -3746,6 +3805,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3796,6 +3856,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3866,6 +3927,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3903,6 +3965,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -3936,6 +3999,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3972,6 +4036,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -4030,6 +4095,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4067,6 +4133,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4113,6 +4180,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4166,6 +4234,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4199,6 +4268,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_generate_key
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4287,6 +4357,7 @@ paths:
         - OAuth2Security:
             - apim:api_publish
             - apim:api_create
+            - apim:api_manage
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
@@ -4351,6 +4422,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_import_export
+            - apim:api_manage
             - apim:admin
       x-code-samples:
         - lang: Curl
@@ -4416,6 +4488,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_view
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4474,6 +4547,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_view
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4503,6 +4577,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_view
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4560,6 +4635,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_block
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4604,6 +4680,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscription_block
+            - apim:subscription_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4658,6 +4735,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4708,6 +4786,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4767,6 +4846,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4822,6 +4902,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
       x-code-samples:
         - lang: Curl
@@ -4878,6 +4959,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:mediation_policy_view
       x-code-samples:
         - lang: Curl
@@ -4922,6 +5004,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:client_certificates_view
       x-code-samples:
         - lang: Curl
@@ -4986,6 +5069,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:client_certificates_add
       x-code-samples:
         - lang: Curl
@@ -5031,6 +5115,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:client_certificates_view
       x-code-samples:
         - lang: Curl
@@ -5095,6 +5180,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:client_certificates_update
       x-code-samples:
         - lang: Curl
@@ -5139,6 +5225,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:client_certificates_update
       x-code-samples:
         - lang: Curl
@@ -5180,6 +5267,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:client_certificates_view
       x-code-samples:
         - lang: Curl
@@ -5234,6 +5322,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:ep_certificates_view
       x-code-samples:
         - lang: Curl
@@ -5296,6 +5385,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:ep_certificates_add
       x-code-samples:
         - lang: Curl
@@ -5340,6 +5430,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:ep_certificates_view
       x-code-samples:
         - lang: Curl
@@ -5403,6 +5494,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:ep_certificates_update
       x-code-samples:
         - lang: Curl
@@ -5445,6 +5537,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:ep_certificates_update
       x-code-samples:
         - lang: Curl
@@ -5485,6 +5578,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:ep_certificates_view
       x-code-samples:
         - lang: Curl
@@ -5544,6 +5638,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
             - apim:api_import_export
             - apim:api_product_import_export
       x-code-samples:
@@ -5605,6 +5700,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5657,6 +5753,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5715,6 +5812,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5780,6 +5878,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5811,6 +5910,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -5865,6 +5965,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5934,6 +6035,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -5986,6 +6088,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6041,6 +6144,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       operationId: getIsAPIProductOutdated
 
   /api-products/{apiProductId}/documents:
@@ -6088,6 +6192,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6143,6 +6248,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6200,6 +6306,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6264,6 +6371,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6293,6 +6401,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6369,6 +6478,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6443,6 +6553,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6484,6 +6595,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_product_import_export
       x-code-samples:
@@ -6525,6 +6637,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6564,6 +6677,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6601,6 +6715,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6634,6 +6749,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6674,6 +6790,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6723,6 +6840,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6778,6 +6896,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
             - apim:api_product_import_export
       x-code-samples:
@@ -6814,6 +6933,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6897,6 +7017,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_import_export
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6973,6 +7094,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_product_import_export
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7001,6 +7123,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -7026,6 +7149,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7056,6 +7180,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7140,6 +7265,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7164,6 +7290,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7193,6 +7320,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7233,6 +7361,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7309,6 +7438,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7400,6 +7530,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -7436,6 +7567,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7463,6 +7595,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7521,6 +7654,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
 
   /apis/import-asyncapi:
     post:
@@ -7580,6 +7714,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
 
   /apis/{apiId}/asyncapi:
     get:
@@ -7630,6 +7765,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_manage
 
     put:
       tags:
@@ -7698,6 +7834,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+            - apim:api_manage
 
 components:
   schemas:
@@ -7970,6 +8107,7 @@ components:
           example: CREATED
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         wsdlInfo:
           $ref: '#/components/schemas/WSDLInfo'
         wsdlUrl:
@@ -8043,6 +8181,7 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         policies:
           type: array
           example:
@@ -8051,6 +8190,7 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         apiThrottlingPolicy:
           type: string
           description: The API level throttling policy selected for the particular
@@ -8058,6 +8198,7 @@ components:
           example: Unlimited
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         authorizationHeader:
           type: string
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
@@ -8088,6 +8229,7 @@ components:
             - RESTRICTED
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         visibleRoles:
           type: array
           description: The user roles that are able to access the API in Developer Portal
@@ -8096,6 +8238,7 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         visibleTenants:
           type: array
           example: []
@@ -8124,6 +8267,7 @@ components:
             - SPECIFIC_TENANTS
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         subscriptionAvailableTenants:
           type: array
           example: []
@@ -8143,6 +8287,7 @@ components:
                 type: boolean
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         additionalPropertiesMap:
           type: object
           additionalProperties:
@@ -8157,6 +8302,7 @@ components:
                 default: false
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
         accessControl:
@@ -8182,6 +8328,7 @@ components:
             - $ref: '#/components/schemas/APIBusinessInformation'
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         corsConfiguration:
           $ref: '#/components/schemas/APICorsConfiguration'
         websubSubscriptionConfiguration:
@@ -8195,6 +8342,7 @@ components:
           type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         endpointConfig:
           type: object
           properties: {}
@@ -8336,6 +8484,7 @@ components:
             example: ""
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         keyManagers:
           type: object
           properties: {}
@@ -8713,6 +8862,7 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
+            - apim:api_manage
         additionalProperties:
           type: array
           items:
@@ -10720,6 +10870,7 @@ components:
           type: array
           example:
             - apim:api_create
+            - apim:api_manage
             - apim:api_publish
           items:
             type: string
@@ -11517,8 +11668,10 @@ components:
             apim:api_create: Create API
             apim:api_delete: Delete API
             apim:api_publish: Publish API
+            apim:api_manage: Manage all API related operations
             apim:subscription_view: View Subscription
             apim:subscription_block: Block Subscription
+            apim:subscription_manage: Manage all Subscription related operations
             apim:threat_protection_policy_create: Create threat protection policies
             apim:threat_protection_policy_manage: Update and delete threat protection policies
             apim:document_create: Create API documents

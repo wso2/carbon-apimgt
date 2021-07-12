@@ -47,6 +47,10 @@
         "Roles": "admin,Internal/creator"
       },
       {
+        "Name": "apim:api_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:subscribe",
         "Roles": "admin,Internal/subscriber,Internal/devops"
       },
@@ -72,6 +76,10 @@
       },
       {
         "Name": "apim:subscription_block",
+        "Roles": "admin,Internal/publisher"
+      },
+      {
+        "Name": "apim:subscription_manage",
         "Roles": "admin,Internal/publisher"
       },
       {
