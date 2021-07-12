@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 
 import javax.cache.Cache;
@@ -23,7 +24,7 @@ public class JWTValidatorWrapper extends JWTValidator {
     public JWTValidatorWrapper(String apiLevelPolicy, boolean isGatewayTokenCacheEnabled,
                                APIKeyValidator apiKeyValidator, boolean jwtGenerationEnabled,
                                AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator,
-                               JWTConfigurationDto jwtConfigurationDto,
+                               ExtendedJWTConfigurationDto jwtConfigurationDto,
                                JWTValidationService jwtValidationService, Cache invalidTokenCache,
                                Cache gatewayTokenCache, Cache gatewayKeyCache, Cache gatewayJWTTokenCache) {
 

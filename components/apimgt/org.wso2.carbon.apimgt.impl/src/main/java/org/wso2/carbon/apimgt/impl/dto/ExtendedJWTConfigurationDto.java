@@ -6,6 +6,7 @@ public class ExtendedJWTConfigurationDto extends JWTConfigurationDto {
     private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";
     private String claimRetrieverImplClass;
     private boolean tenantBasedSigningEnabled;
+    private boolean enableUserClaimRetrievalFromUserStore;
 
     public String getClaimRetrieverImplClass() {
 
@@ -35,5 +36,15 @@ public class ExtendedJWTConfigurationDto extends JWTConfigurationDto {
     public void setTenantBasedSigningEnabled(boolean tenantBasedSigningEnabled) {
 
         this.tenantBasedSigningEnabled = tenantBasedSigningEnabled;
+    }
+
+    public void setEnableUserClaimRetrievalFromUserStore(boolean enableUserClaimRetrievalFromUserStore) {
+
+        this.enableUserClaimRetrievalFromUserStore = enableUserClaimRetrievalFromUserStore;
+    }
+
+    public boolean isEnableUserClaimRetrievalFromUserStore() {
+
+        return enableUserClaimRetrievalFromUserStore;
     }
 }

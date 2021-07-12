@@ -27,7 +27,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
@@ -48,18 +48,22 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
 import javax.security.cert.X509Certificate;
@@ -74,7 +78,7 @@ public class JWTValidator {
     private APIKeyValidator apiKeyValidator;
     private boolean jwtGenerationEnabled;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
-    JWTConfigurationDto jwtConfigurationDto;
+    ExtendedJWTConfigurationDto jwtConfigurationDto;
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
 
@@ -82,16 +86,15 @@ public class JWTValidator {
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.apiKeyValidator = apiKeyValidator;
-        ExtendedJWTConfigurationDto extendedJWTConfigurationDto =
+        this.jwtConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
-        this.jwtConfigurationDto = new JWTConfigurationDto(extendedJWTConfigurationDto);
-        jwtGenerationEnabled = extendedJWTConfigurationDto.isEnabled();
+        jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
         apiMgtGatewayJWTGenerator =
                 ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(this.jwtConfigurationDto.getGatewayJWTGeneratorImpl());
         if (jwtGenerationEnabled) {
             // Set certificate to jwtConfigurationDto
-            if (extendedJWTConfigurationDto.isTenantBasedSigningEnabled()) {
+            if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
                 this.jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
                 this.jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
             } else {
@@ -114,7 +117,7 @@ public class JWTValidator {
     protected JWTValidator(String apiLevelPolicy, boolean isGatewayTokenCacheEnabled,
                            APIKeyValidator apiKeyValidator, boolean jwtGenerationEnabled,
                            AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator,
-                           JWTConfigurationDto jwtConfigurationDto,
+                           ExtendedJWTConfigurationDto jwtConfigurationDto,
                            JWTValidationService jwtValidationService) {
 
         this.isGatewayTokenCacheEnabled = isGatewayTokenCacheEnabled;
@@ -282,6 +285,7 @@ public class JWTValidator {
             }
             if (StringUtils.isEmpty(endUserToken) || !valid) {
                 try {
+                    includeUserStoreClaimsIntoClaims(jwtInfoDto);
                     endUserToken = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
                     getGatewayJWTTokenCache().put(jwtTokenCacheKey, endUserToken);
                 } catch (JWTGeneratorException e) {
@@ -292,6 +296,7 @@ public class JWTValidator {
             }
         } else {
             try {
+                includeUserStoreClaimsIntoClaims(jwtInfoDto);
                 endUserToken = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
             } catch (JWTGeneratorException e) {
                 log.error("Error while Generating Backend JWT", e);
@@ -300,6 +305,16 @@ public class JWTValidator {
             }
         }
         return endUserToken;
+    }
+
+    private void includeUserStoreClaimsIntoClaims(JWTInfoDto jwtInfoDto) {
+
+        JWTInfoDto localJWTInfoDto = new JWTInfoDto(jwtInfoDto);
+        Map<String, String> userClaimsFromKeyManager = getUserClaimsFromKeyManager(localJWTInfoDto);
+        JWTValidationInfo jwtValidationInfo = localJWTInfoDto.getJwtValidationInfo();
+        if (jwtValidationInfo != null && jwtValidationInfo.getClaims() != null) {
+            jwtValidationInfo.getClaims().putAll(userClaimsFromKeyManager);
+        }
     }
 
     private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(MessageContext synCtx,
@@ -587,5 +602,32 @@ public class JWTValidator {
 
         return CacheProvider.getGatewayJWTTokenCache();
     }
+    private Map<String, String> getUserClaimsFromKeyManager(JWTInfoDto jwtInfoDto) {
 
+        if (jwtConfigurationDto.isEnableUserClaimRetrievalFromUserStore()) {
+            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            JWTValidationInfo jwtValidationInfo = jwtInfoDto.getJwtValidationInfo();
+            if (jwtValidationInfo != null) {
+                KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain,
+                        jwtValidationInfo.getKeyManager());
+                if (keyManagerInstance != null) {
+                    Map<String, Object> properties = new HashMap<>();
+                    if (jwtValidationInfo.getRawPayload() != null) {
+                        properties.put(APIConstants.KeyManager.ACCESS_TOKEN, jwtValidationInfo.getRawPayload());
+                    }
+                    if (!StringUtils.isEmpty(jwtConfigurationDto.getConsumerDialectUri())) {
+                        properties.put(APIConstants.KeyManager.CLAIM_DIALECT,
+                                jwtConfigurationDto.getConsumerDialectUri());
+                    }
+                    try {
+                        return keyManagerInstance.getUserClaims(jwtInfoDto.getEndUser(), properties);
+                    } catch (APIManagementException e) {
+                        log.error("Error while retrieving User claims from Key Manager ", e);
+                    }
+                }
+            }
+        }
+
+        return new HashMap<>();
+    }
 }
