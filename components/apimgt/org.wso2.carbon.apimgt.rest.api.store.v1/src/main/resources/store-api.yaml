@@ -5569,6 +5569,10 @@ definitions:
         type: string
         description: whether this is a hidden attribute
         example: "false"
+      default:
+        type: string
+        description: default attribute value
+        example: "Default Value"
 
   #-----------------------------------------------------
   # The Application Attribute List resource

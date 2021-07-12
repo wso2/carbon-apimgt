@@ -222,6 +222,7 @@ public class ApplicationMappingUtil {
         applicationAttributeDTO.setDescription((String) attribute.get(APIConstants.ApplicationAttributes.DESCRIPTION));
         applicationAttributeDTO.setRequired(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.REQUIRED)));
         applicationAttributeDTO.setHidden(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.HIDDEN)));
+        applicationAttributeDTO.setDefault(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.DEFAULT)));
         return applicationAttributeDTO;
     }
 
