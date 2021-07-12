@@ -95,7 +95,7 @@ public class APILogMessageHandler extends AbstractHandler {
         if (logID != null) {
             logMessage = logMessage + " , transactionId=" + logID;
         }
-        String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+        String userAgent = (String) ((Map<String, Object>) axisMC.getProperty(org.apache.axis2.context.MessageContext
                 .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
         if (userAgent != null) {
             logMessage = logMessage + " , userAgent=" + userAgent;
@@ -113,7 +113,7 @@ public class APILogMessageHandler extends AbstractHandler {
         Date incomingReqTime = new Date(reqIncomingTimestamp);
         logMessage = logMessage + " , requestTime=" + incomingReqTime;
 
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+        String remoteIP = (String) ((Map<String, Object>) axisMC.getProperty(org.apache.axis2.context.MessageContext
                 .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null) {
             if (remoteIP.indexOf(',') > 0) {
