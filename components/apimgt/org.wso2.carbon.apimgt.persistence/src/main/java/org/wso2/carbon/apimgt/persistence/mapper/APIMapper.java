@@ -92,7 +92,7 @@ public interface APIMapper {
     @Mapping(source = "apiName", target = "id.apiName")
     @Mapping(source = "version", target = "id.version")
     @Mapping(source = "id", target = "uuid")
-    //@Mapping(source = "thumbnail", target = "thumbnailUrl")
+    @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "availableTierNames", target = "availableTiers")
     //@Mapping(source = "visibleOrganizations", target = "visibleTenants")
     @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
