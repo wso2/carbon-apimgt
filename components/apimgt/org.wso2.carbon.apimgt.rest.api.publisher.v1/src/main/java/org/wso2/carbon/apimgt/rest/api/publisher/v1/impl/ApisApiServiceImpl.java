@@ -4866,10 +4866,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException(errorDTO);
         }
 
-        // Only HTTP type APIs should be allowed
-        if (!APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())) {
-            throw RestApiUtil.buildBadRequestException("The API's type should only be HTTP when " +
-                    "importing an OpenAPI definition");
+        // Only HTTP or WEBHOOK type APIs should be allowed
+        if (!(APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())
+                || APIDTO.TypeEnum.WEBHOOK.equals(apiDTOFromProperties.getType()))) {
+            throw RestApiUtil.buildBadRequestException(
+                    "The API's type is not supported when importing an OpenAPI definition");
         }
         // Import the API and Definition
         try {
