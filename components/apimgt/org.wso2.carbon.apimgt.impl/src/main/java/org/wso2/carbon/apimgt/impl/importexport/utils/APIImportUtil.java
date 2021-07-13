@@ -187,6 +187,8 @@ public final class APIImportUtil {
                 APIAndAPIProductCommonUtil.setCurrentProviderToAPIProperties(apiTypeWrapper, currentTenantDomain, prevTenantDomain);
             }
 
+            handleEndpointSecurityConfigs(importedApi);
+
             // Store imported API status
             targetStatus = importedApi.getStatus();
             if (Boolean.TRUE.equals(overwrite)) {
@@ -370,6 +372,47 @@ public final class APIImportUtil {
                         + ": " + importedApi.getId().getVersion();
             }
             throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    private static void handleEndpointSecurityConfigs(API importedApi) {
+        Boolean isEndpointSecured = importedApi.isEndpointSecured();
+        String endpointUsername = importedApi.getEndpointUTUsername();
+        String endpointPassword = importedApi.getEndpointUTPassword();
+        String endpointSecurityType = (importedApi.isEndpointAuthDigest() ?
+                APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST :
+                APIConstants.ENDPOINT_SECURITY_TYPE_BASIC).toUpperCase();
+
+        if (isEndpointSecured && StringUtils.isNotBlank(endpointUsername) && StringUtils.isNotBlank(endpointPassword)) {
+            String endpointConfig = importedApi.getEndpointConfig();
+            if (StringUtils.isNotBlank(endpointConfig)) {
+                JsonObject endpointConfigObject = new JsonParser().parse(endpointConfig).getAsJsonObject();
+
+                // Remove existing endpoint security in order to override from the params file related properties
+                if (endpointConfigObject.has(APIConstants.ENDPOINT_SECURITY)) {
+                    endpointConfigObject.remove(APIConstants.ENDPOINT_SECURITY);
+                }
+
+                JsonObject endpointSecurityConfig = new JsonObject();
+                String[] endpointTypes = { APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                        APIConstants.ENDPOINT_SECURITY_SANDBOX };
+                for (String endpointType : endpointTypes) {
+                    JsonObject endpointSecurityForEndpointType = new JsonObject();
+                    endpointSecurityForEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.TRUE);
+                    endpointSecurityForEndpointType
+                            .addProperty(APIConstants.ENDPOINT_SECURITY_TYPE, endpointSecurityType);
+                    endpointSecurityForEndpointType
+                            .addProperty(APIConstants.ENDPOINT_SECURITY_USERNAME, endpointUsername);
+                    endpointSecurityForEndpointType
+                            .addProperty(APIConstants.ENDPOINT_SECURITY_PASSWORD, endpointPassword);
+                    endpointSecurityForEndpointType.addProperty(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                            new JsonObject().toString());
+                    endpointSecurityConfig.add(endpointType, endpointSecurityForEndpointType);
+                }
+
+                endpointConfigObject.add(APIConstants.ENDPOINT_SECURITY, endpointSecurityConfig);
+                importedApi.setEndpointConfig(endpointConfigObject.toString());
+            }
         }
     }
 
