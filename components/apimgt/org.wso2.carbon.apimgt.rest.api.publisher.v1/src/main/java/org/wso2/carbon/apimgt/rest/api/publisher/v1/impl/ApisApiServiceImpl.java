@@ -3185,7 +3185,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating API : " + apiId;
+            String faultGatewayString = e.getFaultMap();
+            String errorMessage = "Error while updating API : " + apiId ;
+            if (faultGatewayString.contains(APIConstants.INVALID_URI_TEMPLATE_ERROR)) {
+                errorMessage = errorMessage + ". API contains invalid URI template/s. Save the correct URI Templates" +
+                        " and make sure the gateway environment/s are selected in the Environments tab.";
+            }
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
