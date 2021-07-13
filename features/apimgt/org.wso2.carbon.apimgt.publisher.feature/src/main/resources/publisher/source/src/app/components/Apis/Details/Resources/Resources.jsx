@@ -354,6 +354,7 @@ export default function Resources(props) {
                 console.error(error);
                 if (error.response) {
                     setPageError(error.response.body);
+                    Alert.error('Error while updating the API');
                 } else {
                     Alert.error('Error while updating the definition');
                 }
