@@ -326,6 +326,9 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
+      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
+      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% endif %}
     </APIKeyValidator>
 
 

@@ -539,6 +539,24 @@ public class APIKeyValidationService {
         return keyValidationHandler.validateScopes(tokenValidationContext);
     }
 
+    /**
+     * Validates the subscriptions of a particular API.
+     *
+     * @param context     Requested context
+     * @param version Version of the API
+     * @param appId Application ID
+     * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
+     * authorized, tier information will be <pre>null</pre>
+     */
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
+                                                        String tenantDomain)
+            throws APIKeyMgtException, APIManagementException {
+
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        return keyValidationHandler.validateSubscription(context, version, appId);
+    }
+
     public Map<String, Scope> retrieveScopes(String tenantDomain) {
 
         SubscriptionDataStore subscriptionDataStore =
