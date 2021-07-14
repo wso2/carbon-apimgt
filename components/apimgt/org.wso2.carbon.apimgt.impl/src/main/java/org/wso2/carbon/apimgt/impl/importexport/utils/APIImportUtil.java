@@ -375,6 +375,12 @@ public final class APIImportUtil {
         }
     }
 
+    /**
+     * This method gives priority to the endpoint security configurations defined using the params file and
+     * override the endpointConfig if needed
+     *
+     * @param importedApi the imported API object
+     */
     private static void handleEndpointSecurityConfigs(API importedApi) {
         Boolean isEndpointSecured = importedApi.isEndpointSecured();
         String endpointUsername = importedApi.getEndpointUTUsername();
