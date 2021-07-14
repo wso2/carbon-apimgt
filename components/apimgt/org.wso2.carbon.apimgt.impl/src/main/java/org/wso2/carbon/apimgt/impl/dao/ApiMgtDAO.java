@@ -3931,6 +3931,69 @@ public class ApiMgtDAO {
         return false;
     }
 
+    public boolean isApplicationGroupCombinationExists(String appName, String username, String groupId)
+            throws APIManagementException {
+        if (username == null) {
+            return false;
+        }
+
+        Subscriber subscriber = getSubscriber(username);
+
+        int appId = 0;
+
+        String sqlQuery = SQLConstants.GET_APPLICATION_ID_PREFIX_FOR_GROUP_COMPARISON;
+        String whereClauseWithGroupId = " AND APP.GROUP_ID = ?";
+        String whereClauseWithMultiGroupId = " AND (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
+                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))";
+
+        try(Connection connection = APIMgtDBUtil.getConnection();) {
+            if (!StringUtils.isEmpty(groupId)) {
+                if (multiGroupAppSharingEnabled) {
+                    sqlQuery += whereClauseWithMultiGroupId;
+                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                    String[] grpIdArray = groupId.split(",");
+                    int noOfParams = grpIdArray.length;
+                    try (PreparedStatement preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);){
+                        preparedStatement.setString(1, appName);
+                        int paramIndex = noOfParams + 1;
+                        preparedStatement.setString(++paramIndex, tenantDomain);
+
+                        try (ResultSet resultSet = preparedStatement.executeQuery();) {
+                            if (resultSet.next()) {
+                                appId = resultSet.getInt("APPLICATION_ID");
+                            }
+
+                            if (appId > 0) {
+                                return true;
+                            }
+                        }
+                    }
+                } else {
+                    sqlQuery += whereClauseWithGroupId;
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);) {
+                        preparedStatement.setString(1, appName);
+                        preparedStatement.setString(2, groupId);
+
+                        try (ResultSet resultSet = preparedStatement.executeQuery();) {
+                            if (resultSet.next()) {
+                                appId = resultSet.getInt("APPLICATION_ID");
+                            }
+
+                            if (appId > 0) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while getting the id  of " + appName + " from the persistence store.", e);
+        }
+        return false;
+
+    }
+
     /**
      * Check whether the new user has an application
      *
