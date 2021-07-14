@@ -124,7 +124,7 @@ public class RestApiAdminUtils {
     public static void validateThrottlePolicyNameProperty(String policyName)
             throws APIManagementException {
         String propertyName = "policyName";
-        Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+        Pattern pattern = Pattern.compile("[^A-Za-z0-9_]");//. represents single character
         Matcher matcher = pattern.matcher(policyName);
         if (StringUtils.isBlank(policyName)) {
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",

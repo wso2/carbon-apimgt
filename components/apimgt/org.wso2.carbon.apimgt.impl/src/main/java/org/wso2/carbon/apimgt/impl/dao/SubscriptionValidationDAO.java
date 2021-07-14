@@ -1171,20 +1171,14 @@ public class SubscriptionValidationDAO {
 
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-            sql = sql.concat("AND AM_API.CONTEXT NOT LIKE /t/%");
+            sql = sql.concat("AND AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
-            sql = sql.concat("AND AM_API.CONTEXT LIKE /t/" + organization + "%");
+            sql = sql.concat("AND AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, apiId);
                 preparedStatement.setString(2, deployment);
-                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                    preparedStatement.setString(3, "");
-                } else {
-                    preparedStatement.setString(3, "/t/" + organization);
-                }
-
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");

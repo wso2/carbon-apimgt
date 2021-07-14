@@ -604,6 +604,51 @@
         }
       }
     },
+    "/retrieve-api-artifacts" : {
+      "post" : {
+        "tags" : [ "Retrieve API artifacts" ],
+        "summary" : "Get API runtime artifacts from ID list",
+        "description" : "This will provide access to API runtime artifacts in database for a given API UUID list.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "type of gateway\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "uuidList",
+          "description" : "API UUID list payload",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/UUIDList"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of runtime Artifacts"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/runtime-metadata" : {
       "get" : {
         "tags" : [ "Retrieving Runtime artifacts" ],
@@ -860,6 +905,16 @@
           }
         },
         "subscription" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "UUIDList" : {
+      "properties" : {
+        "uuids" : {
           "type" : "array",
           "items" : {
             "type" : "string"

@@ -8006,7 +8006,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
           example: HTTP
           default: HTTP
           enum:
@@ -8017,6 +8017,7 @@ components:
             - GRAPHQL
             - WEBSUB
             - SSE
+            - WEBHOOK
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
