@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -857,6 +858,56 @@ public class APIMgtDAOTest {
         apiMgtDAO.deleteApplication(application);
         apiMgtDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, "testCreateApplicationRegistrationEntry",
                 -1234);
+        deleteSubscriber(subscriber.getId());
+    }
+
+    @Test
+    public void testGetKeyMappings() throws Exception {
+
+        Subscriber subscriber = new Subscriber("testGetKeyMappings");
+        subscriber.setTenantId(-1234);
+        subscriber.setEmail("abc@wso2.com");
+        subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("testGetKeyMappings", subscriber);
+        application.setDescription("Test Get Key Mappings");
+        application.setTier("testGetKeyMappings");
+        application.setId(apiMgtDAO.addApplication(application, "testGetKeyMappings"));
+        assertEquals(apiMgtDAO.getApplicationById(application.getId()).getDescription(), "Test Get Key Mappings");
+
+        String clientIdProduction = UUID.randomUUID().toString();
+        String clientIdSandbox = UUID.randomUUID().toString();
+        String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
+        String keyManagerID = UUID.randomUUID().toString();
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
+                .getId(), clientIdProduction, keyManagerName, UUID.randomUUID().toString());
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
+                .getId(), clientIdSandbox, keyManagerID, UUID.randomUUID().toString());
+        apiMgtDAO.updateApplicationKeyTypeMapping(application, APIConstants.API_KEY_TYPE_PRODUCTION, keyManagerID);
+        apiMgtDAO.updateApplicationKeyTypeMapping(application, APIConstants.API_KEY_TYPE_SANDBOX, keyManagerID);
+
+        APIKey productionAPIKey = apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId(),
+                keyManagerName, keyManagerID, APIConstants.API_KEY_TYPE_PRODUCTION);
+        assertNotNull(productionAPIKey);
+        assertEquals(productionAPIKey.getConsumerKey(), clientIdProduction);
+        assertEquals(productionAPIKey.getKeyManager(), keyManagerName);
+        assertEquals(productionAPIKey.getType(), APIConstants.API_KEY_TYPE_PRODUCTION);
+        assertEquals(productionAPIKey.getState(), APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+        assertEquals(productionAPIKey.getCreateMode(), APIConstants.OAuthAppMode.MAPPED.name());
+
+        APIKey sandboxAPIKey = apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId(),
+                keyManagerName, keyManagerID, APIConstants.API_KEY_TYPE_SANDBOX);
+        assertNotNull(sandboxAPIKey);
+        assertEquals(sandboxAPIKey.getConsumerKey(), clientIdSandbox);
+        assertEquals(sandboxAPIKey.getKeyManager(), keyManagerID);
+        assertEquals(sandboxAPIKey.getType(), APIConstants.API_KEY_TYPE_SANDBOX);
+        assertEquals(sandboxAPIKey.getState(), APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+        assertEquals(productionAPIKey.getCreateMode(), APIConstants.OAuthAppMode.MAPPED.name());
+
+        apiMgtDAO.deleteApplication(application);
+        apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(clientIdProduction);
+        apiMgtDAO.deleteApplicationMappingByConsumerKey(clientIdSandbox);
         deleteSubscriber(subscriber.getId());
     }
 
