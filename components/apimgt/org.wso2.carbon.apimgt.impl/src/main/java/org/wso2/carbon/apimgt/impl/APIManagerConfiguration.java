@@ -1488,6 +1488,11 @@ public class APIManagerConfiguration {
                             }
                         }
                     }
+                    OMElement claimRetrievalElement =
+                            configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
+                    if (claimRetrievalElement != null) {
+                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                    }
                 }
             }
         }
