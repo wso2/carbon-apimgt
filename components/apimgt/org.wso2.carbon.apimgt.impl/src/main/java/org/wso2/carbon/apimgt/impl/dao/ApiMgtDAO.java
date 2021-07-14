@@ -3882,7 +3882,7 @@ public class ApiMgtDAO {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupId.split(",");
                     int noOfParams = grpIdArray.length;
-                    preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);
+                    preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 3);
                     preparedStatement.setString(1, appName);
                     preparedStatement.setString(2, organization);
                     int paramIndex = noOfParams + 2;
