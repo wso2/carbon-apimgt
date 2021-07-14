@@ -367,6 +367,7 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                     apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                     apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                    apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                     InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                     if (artifact != null) {
                         byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -436,6 +437,7 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                         apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                         apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                         InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                         if (artifact != null) {
                             byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -489,6 +491,7 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                         apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                         apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                         InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                         if (artifact != null) {
                             byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -546,6 +549,7 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                         apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                         apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                         InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                         if (artifact != null) {
                             byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -642,42 +646,6 @@ public class GatewayArtifactsMgtDAO {
         } catch (SQLException | IOException e) {
             handleException("Failed to Add Artifact to Database", e);
         }
-    }
-
-    public String retrieveAPIContextFromApiId(String apiId) throws APIManagementException {
-
-        String query = SQLConstants.GET_API_CONTEXT_BY_API_UUID_SQL;
-        String context =  null;
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, apiId);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    context = resultSet.getString("CONTEXT");
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve Api context for ApiId : " + apiId + "", e);
-        }
-        return context;
-    }
-
-
-    public Map<String, String> retrieveAllAPIContext() throws APIManagementException {
-
-        Map<String, String> contextUuidMap = new HashMap<>();
-        String query = SQLConstants.GET_ALL_CONTEXT_AND_UUID_SQL;
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    contextUuidMap.put(resultSet.getString("API_UUID"),resultSet.getString("CONTEXT"));
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve API Contexts for all APIs", e);
-        }
-        return contextUuidMap;
     }
 
 }

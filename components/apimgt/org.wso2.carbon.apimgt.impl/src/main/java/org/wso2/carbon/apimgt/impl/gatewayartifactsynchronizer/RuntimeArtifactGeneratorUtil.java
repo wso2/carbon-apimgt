@@ -64,19 +64,11 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateMetadataArtifact(String apiId, String name, String version,
-                                                              String gatewayLabel, String tenantDomain)
+    public static RuntimeArtifactDto generateMetadataArtifact(String tenantDomain)
             throws APIManagementException {
 
-        List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
-        Map<String, String> contextUuidMap = new HashMap<>();
+        List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(null, null, tenantDomain);
         if (gatewayArtifacts != null) {
-
-            if (StringUtils.isNotEmpty(apiId)) {
-                contextUuidMap.put(apiId, gatewayArtifactsMgtDAO.retrieveAPIContextFromApiId(apiId));
-            } else {
-                contextUuidMap = gatewayArtifactsMgtDAO.retrieveAllAPIContext();
-            }
 
             try {
                 MetadataDescriptorDto metadataDescriptorDto = new MetadataDescriptorDto();
@@ -97,7 +89,7 @@ public class RuntimeArtifactGeneratorUtil {
                             apiProjectDto.setEnvironments(new HashSet<>());
                             apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                             apiProjectDto.setVersion(apiRuntimeArtifactDto.getVersion());
-                            apiProjectDto.setApiContext(contextUuidMap.get(apiRuntimeArtifactDto.getApiId()));
+                            apiProjectDto.setApiContext(apiRuntimeArtifactDto.getContext());
                         }
 
                         EnvironmentDto environment = new EnvironmentDto();
