@@ -1318,4 +1318,13 @@ public class GatewayUtils {
             }
         }
     }
+
+    public static boolean isImmediateSubscriptionUpdateEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (config != null && config.getThrottleProperties() != null) {
+            return config.getThrottleProperties().isEnableImmediateSubscriptionUpdate();
+        }
+        return false;
+    }
 }

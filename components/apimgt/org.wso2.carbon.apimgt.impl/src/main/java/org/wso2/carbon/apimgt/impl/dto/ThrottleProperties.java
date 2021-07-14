@@ -45,7 +45,8 @@ public class ThrottleProperties {
     private BlockCondition blockCondition;
     private boolean enableHeaderConditions = false;
     private boolean enableJwtConditions = false;
-    private boolean enableQueryParamConditions =false;
+    private boolean enableQueryParamConditions = false;
+    private boolean enableImmediateSubscriptionUpdate = false;
     private String[] skipRedeployingPolicies = new String[]{};
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
     private TrafficManager trafficManager;
@@ -168,6 +169,16 @@ public class ThrottleProperties {
 
     public void setDefaultThrottleTierLimits(Map<String, Long> defaultThrottleTierLimits) {
         this.defaultThrottleTierLimits = defaultThrottleTierLimits;
+    }
+
+    public boolean isEnableImmediateSubscriptionUpdate() {
+
+        return enableImmediateSubscriptionUpdate;
+    }
+
+    public void setEnableImmediateSubscriptionUpdate(boolean enableImmediateSubscriptionUpdate) {
+
+        this.enableImmediateSubscriptionUpdate = enableImmediateSubscriptionUpdate;
     }
 
     public static class DataPublisher {

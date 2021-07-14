@@ -1016,6 +1016,13 @@ public class APIManagerConfiguration {
                         (enabledSubscriptionLevelSpikeArrestElement
                                 .getText()));
             }
+            // Check Immediate SubscriptionPolicyUpdate
+            OMElement enableImmediateSubscriptionPolicyUpdateElement =
+                    throttleConfigurationElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_IMMEDIATE_SUBSCRIPTION_POLICY_UPDATE));
+            if (enableImmediateSubscriptionPolicyUpdateElement != null) {
+                throttleProperties.setEnableImmediateSubscriptionUpdate(JavaUtils.isTrueExplicitly
+                        (enableImmediateSubscriptionPolicyUpdateElement.getText()));
+            }
                 // Reading TrafficManager configuration
                 OMElement trafficManagerConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.TRAFFIC_MANAGER));
