@@ -7361,7 +7361,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage
+            - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
