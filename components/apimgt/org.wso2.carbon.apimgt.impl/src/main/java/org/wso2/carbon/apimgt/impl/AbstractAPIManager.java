@@ -743,7 +743,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 if (artifactId == null) {
                     throw new APIManagementException("artifact id is null for : " + apiPath);
                 }
-                GenericArtifactManager artifactManager = getAPIGenericArtifactManager(identifier, registry);
+                GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry, APIConstants.API_KEY);
                 GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
                 return getApiInformation(registry,apiArtifact);
             } else {
