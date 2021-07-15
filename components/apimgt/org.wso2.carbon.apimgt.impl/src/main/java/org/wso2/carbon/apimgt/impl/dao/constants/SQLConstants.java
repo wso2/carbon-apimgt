@@ -1007,6 +1007,16 @@ public class SQLConstants {
             "   AND ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
+    public static final String GET_APPLICATION_ID_PREFIX_FOR_GROUP_COMPARISON =
+            " SELECT " +
+                    "   APP.APPLICATION_ID " +
+                    " FROM " + "   " +
+                    "   AM_APPLICATION APP," +
+                    "   AM_SUBSCRIBER SUB " +
+                    " WHERE " +
+                    "   LOWER(APP.NAME) = LOWER(?)" + "   " +
+                    "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+
     public static final String GET_APPLICATION_ID_SQL =
             "SELECT APPLICATION_ID FROM AM_APPLICATION WHERE  SUBSCRIBER_ID  = ? AND NAME= ?";
 

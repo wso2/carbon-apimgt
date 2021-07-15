@@ -3575,6 +3575,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "cannot contain leading or trailing white spaces");
         }
 
+        String processedIds;
+
+        if (!existingApp.getName().equals(application.getName())) {
+            processedIds = application.getGroupId();
+        } else {
+            processedIds = processGroupIds(existingApp.getGroupId(), application.getGroupId());
+        }
+
+        if (application.getGroupId()!= null &&
+                APIUtil.isApplicationGroupCombinationExist(application.getSubscriber().getName(), application.getName(),
+                        processedIds)) {
+            handleResourceAlreadyExistsException("A duplicate application already exists by the name - "
+                    + application.getName()); }
+
         Subscriber subscriber = application.getSubscriber();
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(subscriber.getName());
@@ -3673,6 +3687,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
                 existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+    }
+
+    private String processGroupIds(String existing, String updated) {
+        if (updated == null || updated.isEmpty()) {
+            return updated;
+        }
+
+        Set<String> existingSet = new HashSet<>();
+        if (existing != null && !existing.isEmpty()) {
+            existingSet.addAll(Arrays.asList(existing.split(",")));
+        }
+        Set<String> updatedSet = new HashSet<>();
+        updatedSet.addAll(Arrays.asList(updated.split(",")));
+
+        updatedSet.removeAll(existingSet);
+
+        updated = String.join(",", updatedSet);
+        return updated;
     }
 
     /**
