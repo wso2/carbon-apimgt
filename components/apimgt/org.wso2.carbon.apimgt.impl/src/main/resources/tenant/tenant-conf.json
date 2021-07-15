@@ -317,6 +317,10 @@
       {
         "Name": "apim:comment_write",
         "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:throttling_policy_manage",
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
       }
     ]
   },
