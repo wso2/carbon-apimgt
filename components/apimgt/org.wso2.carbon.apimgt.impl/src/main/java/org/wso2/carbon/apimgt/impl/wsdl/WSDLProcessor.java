@@ -19,8 +19,10 @@ package org.wso2.carbon.apimgt.impl.wsdl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 
@@ -106,4 +108,6 @@ public interface WSDLProcessor {
     ErrorHandler getError();
 
     Mode getMode();
+
+    void loadXSDs(APIMWSDLReader wsdlReader, String url) throws APIManagementException;
 }
