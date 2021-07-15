@@ -243,7 +243,9 @@ class TestConsole extends React.Component {
                         };
                         return env;
                     });
-                    basePath = apiData.context + '/' + apiData.version;
+                    if (swagger.openapi) {
+                        basePath = apiData.context + '/' + apiData.version;
+                    }
                 }
                 this.setState({
                     settings: urls,
