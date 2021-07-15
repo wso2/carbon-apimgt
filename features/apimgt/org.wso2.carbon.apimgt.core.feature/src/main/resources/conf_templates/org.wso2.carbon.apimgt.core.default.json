@@ -174,5 +174,6 @@
   "apim.cache_invalidation.username":"${admin.username}",
   "apim.cache_invalidation.password":"${admin.password}",
   "apim.cache_invalidation.topic_name":"globalCacheInvalidation",
-  "apim.auth_manager.check_permissions_remotely": false
+  "apim.auth_manager.check_permissions_remotely": false,
+  "apim.velocity_logger": "VELOCITY"
 }
