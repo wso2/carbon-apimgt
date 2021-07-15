@@ -7531,6 +7531,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:shared_scope_manage
             - apim:api_publish
       x-code-samples:
         - lang: Curl
