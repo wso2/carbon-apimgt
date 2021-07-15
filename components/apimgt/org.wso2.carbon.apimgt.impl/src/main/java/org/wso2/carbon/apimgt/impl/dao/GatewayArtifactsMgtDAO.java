@@ -12,13 +12,18 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -362,6 +367,7 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                     apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                     apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                    apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                     InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                     if (artifact != null) {
                         byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -431,6 +437,7 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                         apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                         apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                         InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                         if (artifact != null) {
                             byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -484,6 +491,7 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                         apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                         apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                         InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                         if (artifact != null) {
                             byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -541,6 +549,7 @@ public class GatewayArtifactsMgtDAO {
                         apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                         apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                         apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                        apiRuntimeArtifactDto.setContext(resultSet.getString("CONTEXT"));
                         InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                         if (artifact != null) {
                             byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
@@ -620,7 +629,6 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
-
     public void addGatewayAPIArtifactAndMetaData(String apiUUID, String apiName, String version, String revisionUUID,
                                                  String organization, String apiType, File artifact)
             throws APIManagementException {
@@ -639,4 +647,5 @@ public class GatewayArtifactsMgtDAO {
             handleException("Failed to Add Artifact to Database", e);
         }
     }
+
 }

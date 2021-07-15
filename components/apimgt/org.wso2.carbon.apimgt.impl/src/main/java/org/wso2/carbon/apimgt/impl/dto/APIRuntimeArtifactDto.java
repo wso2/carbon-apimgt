@@ -11,6 +11,7 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String vhost;
     private String type;
     private String organization;
+    private String context;
 
     public String getType() {
 
@@ -109,5 +110,15 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
 
     public void setVhost(String vhost) {
         this.vhost = vhost;
+    }
+
+    public String getContext() {
+
+        return context;
+    }
+
+    public void setContext(String context) {
+
+        this.context = context;
     }
 }
