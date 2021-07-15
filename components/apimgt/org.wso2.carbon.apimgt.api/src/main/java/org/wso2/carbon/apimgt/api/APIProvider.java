@@ -1774,12 +1774,23 @@ public interface APIProvider extends APIManager {
      * Adds a new APIRevisionDeployment to an existing API
      *
      * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionUUID API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment>
+    void addAPIRevisionDeployment(String apiId, String apiRevisionUUID, List<APIRevisionDeployment>
             apiRevisionDeployments, String organizationId) throws APIManagementException;
+
+    /**
+     * Adds a new DeployedAPIRevision to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param deployedAPIRevisions List of DeployedAPIRevision objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void addDeployedAPIRevision(String apiId, String apiRevisionUUID, List<DeployedAPIRevision>
+            deployedAPIRevisions) throws APIManagementException;
 
     /**
      * Update the displayOnDevportal field in an existing deployments of an API
@@ -1920,4 +1931,6 @@ public interface APIProvider extends APIManager {
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
 
     String generateApiKey(String apiId) throws APIManagementException;
+
+    List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 }

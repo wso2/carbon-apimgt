@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -123,7 +124,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-    import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -187,8 +188,6 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -215,6 +214,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
@@ -4308,7 +4309,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         apiProvider.addAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments, organizationId);
-        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
@@ -4327,15 +4328,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
-        List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
-        for (APIRevision apiRevision : apiRevisions) {
-            List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
-                    apiProvider.getAPIRevisionDeploymentList(apiRevision.getRevisionUUID());
-            for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
-                apiRevisionDeploymentsList.add(apiRevisionDeployment);
-            }
-        }
+        List<APIRevisionDeployment> apiRevisionDeploymentsList = apiProvider.getAPIRevisionsDeploymentList(apiId);
+
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsList) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));

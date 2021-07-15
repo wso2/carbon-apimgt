@@ -25,6 +25,7 @@ public class APIRevisionDeploymentDTO   {
     private String vhost = null;
     private Boolean displayOnDevportal = null;
     private java.util.Date deployedTime = null;
+    private java.util.Date successDeployedTime = null;
 
   /**
    **/
@@ -111,6 +112,23 @@ public class APIRevisionDeploymentDTO   {
     this.deployedTime = deployedTime;
   }
 
+  /**
+   **/
+  public APIRevisionDeploymentDTO successDeployedTime(java.util.Date successDeployedTime) {
+    this.successDeployedTime = successDeployedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("successDeployedTime")
+  public java.util.Date getSuccessDeployedTime() {
+    return successDeployedTime;
+  }
+  public void setSuccessDeployedTime(java.util.Date successDeployedTime) {
+    this.successDeployedTime = successDeployedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -125,12 +143,13 @@ public class APIRevisionDeploymentDTO   {
         Objects.equals(name, apIRevisionDeployment.name) &&
         Objects.equals(vhost, apIRevisionDeployment.vhost) &&
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
-        Objects.equals(deployedTime, apIRevisionDeployment.deployedTime);
+        Objects.equals(deployedTime, apIRevisionDeployment.deployedTime) &&
+        Objects.equals(successDeployedTime, apIRevisionDeployment.successDeployedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, name, vhost, displayOnDevportal, deployedTime);
+    return Objects.hash(revisionUuid, name, vhost, displayOnDevportal, deployedTime, successDeployedTime);
   }
 
   @Override
@@ -143,6 +162,7 @@ public class APIRevisionDeploymentDTO   {
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
+    sb.append("    successDeployedTime: ").append(toIndentedString(successDeployedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }
