@@ -4735,7 +4735,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage
+            - apim:throttling_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4786,7 +4786,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage
+            - apim:throttling_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4846,7 +4846,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage
+            - apim:throttling_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11695,3 +11695,4 @@ components:
             apim:admin: Manage all admin operations
             apim:comment_view: Read permission to comments
             apim:comment_write: Write permission to comments
+            apim:throttling_policy_manage: Manage throttling policy related operations
