@@ -1005,7 +1005,7 @@ public class SQLConstants {
             "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   LOWER(APP.NAME) = LOWER(?)" + "   " +
-            "   AND ORGANIZATION = ? " +
+            "   AND APP.ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
     public static final String GET_APPLICATION_ID_SQL =
