@@ -352,12 +352,12 @@ public class RestApiPublisherUtils {
     /**
      * This method will encrypt the OAuth 2.0 API Key and API Secret
      *
-     * @param endpointConfig
-     * @param cryptoUtil
-     * @param oldProductionApiSecret
-     * @param oldSandboxApiSecret
-     * @param apidto
-     * @throws CryptoException
+     * @param endpointConfig         endpoint configuration of API
+     * @param cryptoUtil             cryptography util
+     * @param oldProductionApiSecret existing production API secret
+     * @param oldSandboxApiSecret    existing sandbox API secret
+     * @param apidto                 API DTO
+     * @throws CryptoException if an error occurs while encrypting and base64 encode
      */
     public static void encryptEndpointSecurityOAuthCredentials(LinkedHashMap endpointConfig, CryptoUtil cryptoUtil,
             String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto) throws CryptoException {
