@@ -280,7 +280,7 @@ public class APIMgtDAOTest {
         subscriber1.setEmail("laf@wso2.com");
         subscriber1.setSubscribedDate(new Date());
         subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber1, "");
+        apiMgtDAO.addSubscriber(subscriber1, "", "org1");
         assertTrue(subscriber1.getId() > 0);
         Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
         this.checkSubscribersEqual(subscriber1, subscriber2);
@@ -291,7 +291,7 @@ public class APIMgtDAOTest {
         subscriber1.setEmail("laf@wso2.com");
         subscriber1.setSubscribedDate(new Date());
         subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber1, "1");
+        apiMgtDAO.addSubscriber(subscriber1, "1", "org2");
         assertTrue(subscriber1.getId() > 0);
         Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
         this.checkSubscribersEqual(subscriber1, subscriber2);
@@ -302,7 +302,7 @@ public class APIMgtDAOTest {
         subscriber1.setEmail("laf@wso2.com");
         subscriber1.setSubscribedDate(new Date());
         subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber1, null);
+        apiMgtDAO.addSubscriber(subscriber1, null, "org3");
         assertTrue(subscriber1.getId() > 0);
         Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
         this.checkSubscribersEqual(subscriber1, subscriber2);
@@ -313,12 +313,12 @@ public class APIMgtDAOTest {
         subscriber1.setEmail("laf@wso2.com");
         subscriber1.setSubscribedDate(new Date());
         subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber1, "2");
+        apiMgtDAO.addSubscriber(subscriber1, "2", "org4");
         assertTrue(subscriber1.getId() > 0);
         subscriber1.setEmail("laf2@wso2.com");
         subscriber1.setSubscribedDate(new Date());
         subscriber1.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.updateSubscriber(subscriber1);
+        apiMgtDAO.updateSubscriber(subscriber1, "org4");
         Subscriber subscriber2 = apiMgtDAO.getSubscriber(subscriber1.getId());
         this.checkSubscribersEqual(subscriber1, subscriber2);
     }
@@ -328,7 +328,7 @@ public class APIMgtDAOTest {
         subscriber.setEmail("laf@wso2.com");
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber, null);
+        apiMgtDAO.addSubscriber(subscriber, null, "org5");
         Application application = new Application("testApplication", subscriber);
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
@@ -343,7 +343,7 @@ public class APIMgtDAOTest {
         subscriber.setEmail("laf@wso2.com");
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber, "org1");
+        apiMgtDAO.addSubscriber(subscriber, "org1", "org6");
         Application application = new Application("testApplication3", subscriber);
         application.setGroupId("org1");
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
@@ -359,7 +359,7 @@ public class APIMgtDAOTest {
         subscriber.setEmail("laf@wso2.com");
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber, "org2");
+        apiMgtDAO.addSubscriber(subscriber, "org2", "org7");
         Application application = new Application("testApplication3", subscriber);
         application.setGroupId("org2");
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
@@ -375,7 +375,7 @@ public class APIMgtDAOTest {
         subscriber.setEmail("laf@wso2.com");
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber, null);
+        apiMgtDAO.addSubscriber(subscriber, null, "org8");
         Application application = new Application("testApplication2", subscriber);
         application.setUUID(UUID.randomUUID().toString());
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
@@ -408,7 +408,7 @@ public class APIMgtDAOTest {
         subscriber.setEmail("newuser1@wso2.com");
         subscriber.setSubscribedDate(new Date());
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        apiMgtDAO.addSubscriber(subscriber, null);
+        apiMgtDAO.addSubscriber(subscriber, null, "org9");
 
         Application application = new Application("SUB_FORWARD_APP", subscriber);
         int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "org1");
@@ -816,7 +816,7 @@ public class APIMgtDAOTest {
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
         subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
-        apiMgtDAO.addSubscriber(subscriber, null);
+        apiMgtDAO.addSubscriber(subscriber, null, "org10");
         Policy applicationPolicy = getApplicationPolicy("testCreateApplicationRegistrationEntry");
         applicationPolicy.setTenantId(-1234);
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
@@ -904,7 +904,7 @@ public class APIMgtDAOTest {
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
         subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
-        apiMgtDAO.addSubscriber(subscriber, null);
+        apiMgtDAO.addSubscriber(subscriber, null, organization);
         Policy applicationPolicy = getApplicationPolicy("testCreateApplicationRegistrationEntry");
         SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) getSubscriptionPolicy
                 ("testCreateApplicationRegistrationEntry");
@@ -1086,7 +1086,7 @@ public class APIMgtDAOTest {
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
         subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
-        apiMgtDAO.addSubscriber(subscriber, null);
+        apiMgtDAO.addSubscriber(subscriber, null, "org12");
         Policy applicationPolicy = getApplicationPolicy("testAddUpdateDeleteBlockCondition");
         applicationPolicy.setTenantId(-1234);
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
