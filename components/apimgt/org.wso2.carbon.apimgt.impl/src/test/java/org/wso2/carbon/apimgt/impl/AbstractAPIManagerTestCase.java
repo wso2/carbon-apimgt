@@ -141,6 +141,7 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_RESOURCE_ID = "xyz";
     public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
+    public static final String SAMPLE_ORGANIZATION = "testOrg";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
@@ -1028,31 +1029,33 @@ public class AbstractAPIManagerTestCase {
         int tenantId = -1234;
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, tenantManager,
                 apiMgtDAO);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
-                .thenReturn(tenantId);
+//        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(APIManagementException.class)
+//                .thenReturn(tenantId);
         PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenThrow(APIManagementException.class)
+                .thenReturn(tenantId);
         SortedMap<String, String> claimValues = new TreeMap<String, String>();
         claimValues.put("admin@wso2.om", APIConstants.EMAIL_CLAIM);
         PowerMockito.when(APIUtil.getClaims(API_PROVIDER, tenantId, DEFAULT_DIALECT_URI)).thenReturn(claimValues);
         try {
-            abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID, SAMPLE_ORGANIZATION);
             Assert.fail("User store exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error while adding the subscriber"));
         }
 
         Mockito.doThrow(APIManagementException.class).doNothing().when(apiMgtDAO)
-                .addSubscriber((Subscriber) Mockito.any(), Mockito.anyString());
+                .addSubscriber((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyString());
         try {
-            abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
+            abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID, SAMPLE_ORGANIZATION);
             Assert.fail("APIM exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error while adding the subscriber"));
         }
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.isEnabledUnlimitedTier()).thenReturn(true, false);
-        Mockito.doNothing().when(apiMgtDAO).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString());
-        abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
+        Mockito.doNothing().when(apiMgtDAO).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID, SAMPLE_ORGANIZATION);
         List<Tier> tierValues = new ArrayList<Tier>();
         tierValues.add(new Tier("Gold"));
         tierValues.add(new Tier("Silver"));
@@ -1061,8 +1064,9 @@ public class AbstractAPIManagerTestCase {
         tierMap.put("Silver", new Tier("Silver"));
         PowerMockito.when(APIUtil.getTiers(Mockito.anyInt(), Mockito.anyString())).thenReturn(tierMap);
         PowerMockito.when(APIUtil.sortTiers(Mockito.anySet())).thenReturn(tierValues);
-        abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
-        Mockito.verify(apiMgtDAO, Mockito.times(3)).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString());
+        abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID, SAMPLE_ORGANIZATION);
+        Mockito.verify(apiMgtDAO, Mockito.times(3)).addSubscriber((Subscriber) Mockito.any(),
+                Mockito.anyString(), Mockito.anyString());
 
     }
 
@@ -1070,9 +1074,9 @@ public class AbstractAPIManagerTestCase {
     public void testUpdateSubscriber() throws APIManagementException {
         Subscriber subscriber = new Subscriber("sub1");
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Mockito.doNothing().when(apiMgtDAO).updateSubscriber((Subscriber) Mockito.any());
-        abstractAPIManager.updateSubscriber(subscriber);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriber(subscriber);
+        Mockito.doNothing().when(apiMgtDAO).updateSubscriber((Subscriber) Mockito.any(), Mockito.any());
+        abstractAPIManager.updateSubscriber(subscriber, "org1");
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriber(subscriber, "org1");
     }
 
     @Test
