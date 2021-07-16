@@ -75,6 +75,20 @@ public class APIKeyValidatorClient {
         }
     }
 
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
+                                                        String tenantDomain)
+            throws APISecurityException {
+
+        try {
+            return apiKeyValidationService
+                    .validateSubscription(context, version, appId, tenantDomain);
+        } catch (APIKeyMgtException | APIManagementException e) {
+            log.error("Error while  validate subscriptions", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API subscription validation", e);
+        }
+    }
+
     public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException {
 
