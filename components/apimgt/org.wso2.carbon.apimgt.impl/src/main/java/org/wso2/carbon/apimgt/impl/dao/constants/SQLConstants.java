@@ -203,8 +203,8 @@ public class SQLConstants {
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
             "   INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, CREATED_BY, CREATED_TIME, " +
-                    "UPDATED_TIME) " +
-            " VALUES (?,?,?,?,?,?,?)";
+                    "UPDATED_TIME, ORGANIZATION) " +
+            " VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String ADD_MONETIZATION_USAGE_PUBLISH_INFO =
             " INSERT INTO AM_MONETIZATION_USAGE (ID, STATE, STATUS, STARTED_TIME, PUBLISHED_TIME) VALUES (?,?,?,?,?)";
@@ -226,7 +226,8 @@ public class SQLConstants {
             "   UPDATED_BY=?," +
             "   UPDATED_TIME=? " +
             " WHERE" +
-            "   SUBSCRIBER_ID=?";
+            "   SUBSCRIBER_ID=?" +
+            "   AND ORGANIZATION = ?";
 
     public static final String GET_SUBSCRIBER_SQL =
             " SELECT " +

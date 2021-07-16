@@ -47,14 +47,15 @@ public class ApplicationImportExportManager {
      *
      * @param userId  username of the Owner
      * @param groupId the groupId to which the target subscriber belongs to
+     * @param organization the organization to which the target subscriber belongs to
      * @throws APIManagementException if an error occurs while checking the validity of user
      */
-    public void validateOwner(String userId, String groupId) throws APIManagementException {
+    public void validateOwner(String userId, String groupId, String organization) throws APIManagementException {
         Subscriber subscriber = apiConsumer.getSubscriber(userId);
         try {
             if (subscriber == null && !APIUtil.isPermissionCheckDisabled()) {
                 APIUtil.checkPermission(userId, APIConstants.Permissions.API_SUBSCRIBE);
-                apiConsumer.addSubscriber(userId, groupId);
+                apiConsumer.addSubscriber(userId, groupId, organization);
             }
         } catch (APIManagementException e) {
             String errorMsg = "Provided Application Owner is Invalid";

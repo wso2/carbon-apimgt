@@ -402,7 +402,7 @@ public class ApiMgtDAO {
         return isAnyContentAware;
     }
 
-    public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException {
+    public void addSubscriber(Subscriber subscriber, String groupingId, String organization) throws APIManagementException {
 
         Connection conn = null;
         ResultSet rs = null;
@@ -423,6 +423,7 @@ public class ApiMgtDAO {
             ps.setString(5, subscriber.getName());
             ps.setTimestamp(6, timestamp);
             ps.setTimestamp(7, timestamp);
+            ps.setString(8, organization);
             ps.executeUpdate();
 
             int subscriberId = 0;
@@ -599,7 +600,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateSubscriber(Subscriber subscriber) throws APIManagementException {
+    public void updateSubscriber(Subscriber subscriber, String organization) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -617,6 +618,7 @@ public class ApiMgtDAO {
             ps.setString(5, subscriber.getName());
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setInt(7, subscriber.getId());
+            ps.setString(8, organization);
             ps.executeUpdate();
 
             conn.commit();
