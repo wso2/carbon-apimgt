@@ -99,13 +99,13 @@ public class ImportUtils {
      * @param apiConsumer API Consumer
      * @throws APIManagementException if an error occurs while checking the validity of user
      */
-    public static void validateOwner(String userId, String groupId, APIConsumer apiConsumer)
+    public static void validateOwner(String userId, String groupId, String organization, APIConsumer apiConsumer)
             throws APIManagementException {
         Subscriber subscriber = apiConsumer.getSubscriber(userId);
         try {
             if (subscriber == null && !APIUtil.isPermissionCheckDisabled()) {
                 APIUtil.checkPermission(userId, APIConstants.Permissions.API_SUBSCRIBE);
-                apiConsumer.addSubscriber(userId, groupId);
+                apiConsumer.addSubscriber(userId, groupId, organization);
             }
         } catch (APIManagementException e) {
             throw new APIManagementException("Provided Application Owner is Invalid", e);

@@ -211,12 +211,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
 
             String applicationGroupId = String.join(",", applicationDTO.getGroups());
+            String organization = RestApiUtil.getOrganization(messageContext);
 
             if (applicationDTO.getGroups() != null && applicationDTO.getGroups().size() > 0) {
-                ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
+                ImportUtils.validateOwner(username, applicationGroupId, organization, apiConsumer);
             }
-
-            String organization = RestApiUtil.getOrganization(messageContext);
 
             if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organization) && update != null
                     && update) {

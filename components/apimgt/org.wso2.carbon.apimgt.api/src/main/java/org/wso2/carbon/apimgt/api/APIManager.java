@@ -340,9 +340,10 @@ public interface APIManager {
      *
      * @param username   Username of the subscriber to be added
      * @param groupingId - the groupId to which the subscriber belongs to
+     * @param organization - the organization to which the subscriber belongs to
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
-    void addSubscriber(String username, String groupingId) throws APIManagementException;
+    void addSubscriber(String username, String groupingId, String organization) throws APIManagementException;
 
     /**
      * Updates the details of the given subscriber.
@@ -350,7 +351,7 @@ public interface APIManager {
      * @param subscriber The subscriber to be updated
      * @throws APIManagementException if failed to update subscriber
      */
-    void updateSubscriber(Subscriber subscriber) throws APIManagementException;
+    void updateSubscriber(Subscriber subscriber, String organization) throws APIManagementException;
 
     /**
      * Returns the subscriber for the given subscriber id.

@@ -1713,14 +1713,14 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
     }
 
-    public void addSubscriber(String username, String groupingId)
+    public void addSubscriber(String username, String groupingId, String organization)
             throws APIManagementException {
 
         Subscriber subscriber = new Subscriber(username);
         subscriber.setSubscribedDate(new Date());
         try {
-            int tenantId = getTenantManager()
-                    .getTenantId(getTenantDomain(username));
+            int tenantId = APIUtil.getTenantId(username);
+//            int tenantId = APIUtil.getTenantId(username);
             SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
                     .DEFAULT_DIALECT_URI);
             String email = claims.get(APIConstants.EMAIL_CLAIM);
@@ -1730,16 +1730,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 subscriber.setEmail(StringUtils.EMPTY);
             }
             subscriber.setTenantId(tenantId);
-            apiMgtDAO.addSubscriber(subscriber, groupingId);
+            apiMgtDAO.addSubscriber(subscriber, groupingId, organization);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
                     !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
                 // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
         } catch (APIManagementException e) {
-            String msg = "Error while adding the subscriber " + subscriber.getName();
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
         }
@@ -1784,10 +1781,10 @@ public abstract class AbstractAPIManager implements APIManager {
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
-    public void updateSubscriber(Subscriber subscriber)
+    public void updateSubscriber(Subscriber subscriber, String organization)
             throws APIManagementException {
 
-        apiMgtDAO.updateSubscriber(subscriber);
+        apiMgtDAO.updateSubscriber(subscriber, organization);
     }
 
     public Subscriber getSubscriber(int subscriberId)
