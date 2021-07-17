@@ -174,4 +174,34 @@ public class GatewayArtifactsMgtDAOTest {
         artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);
     }
+
+    @Test
+    public void testGetAPIContextForMetaData() throws APIManagementException{
+        String uuid = UUID.randomUUID().toString();
+        String name = "contextapiname";
+        String version = "1.0.0";
+        String revision = UUID.randomUUID().toString();
+        String context = "/context2";
+        URL resource = getClass().getClassLoader().getResource("admin-PizzaShackAPI-1.0.0.zip");
+        File file = new File(resource.getPath());
+        gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(uuid, name, version, revision, "carbon.super",
+                APIConstants.HTTP_PROTOCOL, file);
+
+        API api = new API(new APIIdentifier("test-provider", name, version));
+        api.setContext(context);
+        api.setContextTemplate("/context2/{version}");
+        api.setUUID(uuid);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+
+        Map<String, String> gatewayVhosts = new HashMap<>();
+        gatewayVhosts.put("label1", "dev.wso2.com");
+        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"),
+                gatewayVhosts);
+        List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
+                new String[]{"label1"}, "carbon.super");
+        Assert.assertEquals(artifacts.size(), 1);
+        RuntimeArtifactDto artifact = artifacts.get(0);
+        Assert.assertNotNull(artifact);
+        Assert.assertEquals(context, artifacts.get(0).getContext());
+    }
 }
