@@ -31,15 +31,19 @@ import org.junit.runners.MethodSorters;
 import org.mapstruct.ap.internal.util.Collections;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
@@ -62,6 +66,7 @@ import java.util.UUID;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
+    public static ApiMgtDAO apiMgtDAO;
 
     @Before
     public void setUp() throws Exception {
@@ -75,6 +80,8 @@ public class GatewayArtifactsMgtDAOTest {
                 setArtifactSynchronizerDataSource("java:/comp/env/jdbc/WSO2AM_DB");
         GatewayArtifactsMgtDBUtil.initialize();
         gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
+        APIMgtDBUtil.initialize();
+        apiMgtDAO = ApiMgtDAO.getInstance();
     }
 
 
@@ -134,6 +141,13 @@ public class GatewayArtifactsMgtDAOTest {
         File file = new File(resource.getPath());
         gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(uuid, name, version, revision, "carbon.super",
                 APIConstants.HTTP_PROTOCOL, file);
+
+        API api = new API(new APIIdentifier("test-provider", name, version));
+        api.setContext("/context1");
+        api.setContextTemplate("/context1/{version}");
+        api.setUUID(uuid);
+        apiMgtDAO.addAPI(api, -1234, "testOrg");
+
         String gatewayAPIId = gatewayArtifactsMgtDAO.getGatewayAPIId(name, version, "carbon.super");
         Assert.assertEquals(gatewayAPIId, uuid);
         Map<String, String> gatewayVhosts = new HashMap<>();
