@@ -344,7 +344,7 @@ public class PublisherCommonUtils {
     private static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
             String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto) throws CryptoException {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
-        String customParametersString = "{}";
+        String customParametersString;
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
                 Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
@@ -357,10 +357,15 @@ public class PublisherCommonUtils {
                     // Change default value of customParameters JSONObject to String
                     if (!(endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
-                        LinkedHashMap<String, String> customParametersHashMap =
-                                (LinkedHashMap<String, String>) endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
+                                endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    } else if (endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                            != null) {
+                        customParametersString = (String) endpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    } else {
+                        customParametersString = "{}";
                     }
 
                     endpointSecurityProduction
@@ -401,6 +406,12 @@ public class PublisherCommonUtils {
                         Map<String, String> customParametersHashMap = (Map<String, String>) endpointSecuritySandbox
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    } else if (endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                            != null) {
+                        customParametersString = (String) endpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    } else {
+                        customParametersString = "{}";
                     }
                     endpointSecuritySandbox
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
