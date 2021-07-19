@@ -102,6 +102,14 @@ function Operation(props) {
                 zIndex: theme.zIndex.operationDeleteUndo,
                 right: '10%',
             },
+            targetText: {
+                maxWidth: 180,
+                margin: '0px 20px',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
+            },
         };
     });
     const apiOperation = api.operations[target] && api.operations[target][verb.toUpperCase()];
@@ -161,8 +169,13 @@ function Operation(props) {
                     classes={{ content: classes.contentNoMargin }}
                 >
                     <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
-                        <Grid item md={4}>
-                            <Badge invisible={!operation['x-wso2-new']} color='error' variant='dot'>
+                        <Grid item md={4} style={{ display: 'flex', alignItems: 'center' }}>
+                            <Badge
+                                invisible={!operation['x-wso2-new']}
+                                color='error'
+                                variant='dot'
+                                style={{ display: 'inline-block' }}
+                            >
                                 <Button
                                     disableFocusRipple
                                     variant='contained'
@@ -172,16 +185,24 @@ function Operation(props) {
                                     {verb}
                                 </Button>
                             </Badge>
-                            <Typography display='inline' style={{ margin: '0px 30px' }} variant='h6' gutterBottom>
+                            <Typography
+                                display='inline-block'
+                                variant='h6'
+                                gutterBottom
+                                className={classes.targetText}
+                                title={target}
+                            >
                                 {target}
-                                <Typography
-                                    display='inline'
-                                    style={{ margin: '0px 30px' }}
-                                    variant='caption'
-                                    gutterBottom
-                                >
-                                    {operation.summary}
-                                </Typography>
+                                {(operation.summary && operation.summary !== '') && (
+                                    <Typography
+                                        display='inline-block'
+                                        style={{ margin: '0px 30px' }}
+                                        variant='caption'
+                                        gutterBottom
+                                    >
+                                        {operation.summary}
+                                    </Typography>
+                                )}
                             </Typography>
                         </Grid>
                         {(isUsedInAPIProduct) ? (
