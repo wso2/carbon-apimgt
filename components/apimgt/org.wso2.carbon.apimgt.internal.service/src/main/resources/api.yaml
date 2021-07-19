@@ -546,6 +546,31 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # Deploy a revision
+  #--------------------------------------------
+  /apis/deployed-revision:
+    post:
+      tags:
+        - API Revisions
+      summary: Deploy Revision
+      description: |
+        Deploy a revision
+      operationId: deployedAPIRevision
+      parameters:
+        - name: deployedAPIRevisionDTOList
+          in: body
+          description: 'Notification event payload'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DeployedAPIRevision'
+      responses:
+        200:
+          description: |
+            Created.
+        default:
+          $ref: '#/definitions/Error'
   /ga-config:
     get:
       summary: Get Google analytics config related to tenant.
@@ -778,6 +803,36 @@ definitions:
           $ref: '#/definitions/API'
       pagination:
         $ref: '#/definitions/Pagination'
+  DeployedAPIRevision:
+    title: Deployed revision information
+    properties:
+      apiID:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+      revisionID:
+        type: integer
+        example: 1
+      envInfo:
+        type: array
+        items:
+          $ref: '#/definitions/DeployedEnvInfo'
+  DeployedEnvInfo:
+    title: Environment information
+    properties:
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+        example: default
+      vhost:
+        maxLength: 255
+        minLength: 1
+        # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
+        pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+        type: string
+        example: mg.wso2.com
   #-----------------------------------------------------
   # The API resource
   #-----------------------------------------------------

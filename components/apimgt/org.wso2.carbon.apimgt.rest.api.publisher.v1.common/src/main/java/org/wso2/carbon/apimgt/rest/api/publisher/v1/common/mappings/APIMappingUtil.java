@@ -3052,6 +3052,18 @@ public class APIMappingUtil {
             Timestamp timestamp = new Timestamp(parsedDate.getTime());
             apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         }
+        if (model.getSuccessDeployedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getSuccessDeployedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the deployed time:"
+                        + model.getSuccessDeployedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            apiRevisionDeploymentDTO.setSuccessDeployedTime(timestamp);
+        }
         return apiRevisionDeploymentDTO;
     }
 

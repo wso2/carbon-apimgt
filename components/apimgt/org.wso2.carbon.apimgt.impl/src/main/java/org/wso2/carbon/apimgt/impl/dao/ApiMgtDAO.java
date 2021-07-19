@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -16285,7 +16286,7 @@ public class ApiMgtDAO {
                         revisionList.remove(previousRevision);
                     }
                     apiRevision.setId(rs.getInt("ID"));
-                    apiRevision.setApiUUID(rs.getString("API_UUID"));
+                    apiRevision.setApiUUID(apiUUID);
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
                     apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
@@ -16295,9 +16296,10 @@ public class ApiMgtDAO {
                         apiRevisionDeployment.setDeployment(environmentName);
                         String vhost = rs.getString("VHOST");
                         apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
-                        //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
+                        apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                         apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                        apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                        apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                        apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
                         apiRevisionDeploymentList.add(apiRevisionDeployment);
                     }
                     apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
@@ -16377,6 +16379,43 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Adds an deployed API revision to the database
+     *
+     * @param deployedAPIRevisionList content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void addDeployedAPIRevision(String apiRevisionId, List<DeployedAPIRevision> deployedAPIRevisionList)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Adding to AM_DEPLOYED_REVISION table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_DEPLOYED_API_REVISION);
+                for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
+                    String envName = deployedAPIRevision.getDeployment();
+                    String vhost = deployedAPIRevision.getVhost();
+                    // set VHost as null, if it is the default vhost of the read only environment
+                    statement.setString(1, deployedAPIRevision.getDeployment());
+                    statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
+                    statement.setString(3, apiRevisionId);
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add deployed API Revision for Revision UUID "
+                        + apiRevisionId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add deployed API Revision for Revision UUID " + apiRevisionId,
+                    e);
+        }
+    }
+
+    /**
      * Get APIRevisionDeployment details by providing deployment name and revision uuid
      *
      * @return APIRevisionDeployment object
@@ -16442,6 +16481,40 @@ public class ApiMgtDAO {
         return apiRevisionDeploymentList;
     }
 
+//    /**
+//     * Get APIRevisionDeployment details by providing revision uuid
+//     *
+//     * @return List<APIRevisionDeployment> object
+//     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+//     */
+//    public List<APIRevisionDeployment> getAllAPIRevisionDeploymentsByRevisionUUID(String revisionUUID) throws APIManagementException {
+//
+//        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection
+//                     .prepareStatement(SQLConstants.
+//                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID)) {
+//            statement.setString(1, revisionUUID);
+//            try (ResultSet rs = statement.executeQuery()) {
+//                while (rs.next()) {
+//                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+//                    String environmentName = rs.getString("NAME");
+//                    String vhost = rs.getString("VHOST");
+//                    apiRevisionDeployment.setDeployment(environmentName);
+//                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
+//                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+//                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+//                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+//                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+//                }
+//            }
+//        } catch (SQLException e) {
+//            handleException("Failed to get API Revision deployment mapping details for revision uuid: " +
+//                    revisionUUID, e);
+//        }
+//        return apiRevisionDeploymentList;
+//    }
+
     /**
      * Get APIRevisionDeployment details by providing API uuid
      *
@@ -16454,7 +16527,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_API_UUID)) {
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -16465,7 +16538,8 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -16534,6 +16608,39 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get DeployedAPIRevision details by providing ApiUUID
+     *
+     * @return List<DeployedAPIRevision> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<DeployedAPIRevision> getDeployedAPIRevisionByApiUUID(String apiUUID) throws APIManagementException {
+
+        List<DeployedAPIRevision> deployedAPIRevisionList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_DEPLOYED_REVISION_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
+                    String environmentName = rs.getString("NAME");
+                    String vhost = rs.getString("VHOST");
+                    deployedAPIRevision.setDeployment(environmentName);
+                    deployedAPIRevision.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
+                    deployedAPIRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    deployedAPIRevision.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    deployedAPIRevisionList.add(deployedAPIRevision);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get deployed API Revision details for api uuid: " +
+                    apiUUID, e);
+        }
+        return deployedAPIRevisionList;
+    }
+
+    /**
      * Remove an API revision Deployment mapping record to the database
      *
      * @param apiRevisionId          uuid of the revision
@@ -16596,6 +16703,39 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to remove API Revision Deployment Mapping entry for API UUID "
+                    + apiUUID, e);
+        }
+    }
+
+    /**
+     * Remove an deployed API revision in the database
+     *
+     * @param apiUUID     uuid of the revision
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeDeployedAPIRevision(String apiUUID, Set<DeployedAPIRevision> deployments)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYED_REVISION table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_DEPLOYED_API_REVISION);
+                for (DeployedAPIRevision deployment : deployments) {
+                    statement.setString(1, deployment.getDeployment());
+                    statement.setString(2, deployment.getRevisionUUID());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove deployed API Revision entry for API UUID "
                     + apiUUID, e);
         }
     }
