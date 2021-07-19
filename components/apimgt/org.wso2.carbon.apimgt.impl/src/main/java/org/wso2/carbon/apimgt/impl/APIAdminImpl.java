@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,11 +62,18 @@ import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -81,15 +89,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * This class provides the core API admin functionality.
@@ -571,11 +570,24 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public void deleteKeyManagerConfigurationById(String organization, String id) throws APIManagementException {
-
-        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                apiMgtDAO.getKeyManagerConfigurationByID(organization, id);
+    public void deleteKeyManagerConfigurationById(String organization, String id, String username)
+            throws APIManagementException {
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = getKeyManagerConfigurationById(organization, id);
         if (keyManagerConfigurationDTO != null) {
+            if (org.apache.commons.lang3.StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType())) {
+                try {
+                    if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
+                        IdentityProviderManager.getInstance()
+                                .deleteIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
+                                        APIUtil.getInternalOrganizationDomain(organization));
+                    }
+                } catch (IdentityProviderManagementException e) {
+                    throw new APIManagementException("IdP deletion failed. " + e.getMessage(), e,
+                            ExceptionCodes.IDP_DELETION_FAILED);
+                }
+            }
+
             if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
                 apiMgtDAO.deleteKeyManagerConfigurationById(id, organization);
                 new KeyMgtNotificationSender()
@@ -584,6 +596,8 @@ public class APIAdminImpl implements APIAdmin {
                 throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
                         ExceptionCodes.INTERNAL_ERROR);
             }
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                    new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED, username);
         }
     }
 

@@ -3484,6 +3484,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to delete api " + api.getUuid(), e);
         }
     }
+
+    @Override
+    public void deleteOrganizationAPIList(String orgId) throws APIManagementException {
+
+        List<APIIdentifier> apiIdentifierList = apiMgtDAO.getAPIIdList(orgId);
+
+        // delete APIData from DB
+        apiMgtDAO.deleteOrganizationAPIList(apiIdentifierList);
+
+        // remove artifacts
+        if (artifactSaver != null) {
+            try {
+                for (APIIdentifier apiIdentifier : apiIdentifierList) {
+                    artifactSaver.removeArtifact(apiIdentifier.getUUID(), apiIdentifier.getApiName(),
+                            apiIdentifier.getVersion(), orgId);
+                }
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error while deleting Runtime artifacts in organization" + orgId +
+                        "from artifact Store", e);
+            }
+        }
+
+        // delete gateway artifacts
+        GatewayArtifactsMgtDAO.getInstance().removeOrganizationGatewayArtifacts(apiIdentifierList);
+
+        try {
+            apiPersistenceInstance.deleteAPIs(new Organization(orgId));
+        } catch (APIPersistenceException e) {
+            handleException("Failed to delete organization data " + orgId, e);
+        }
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API,
+                new Gson().toJson(apiIdentifierList), APIConstants.AuditLogConstants.DELETED, username);
+    }
+
     /**
      * Deletes API from the database and delete local scopes and resource scope attachments from KM.
      *

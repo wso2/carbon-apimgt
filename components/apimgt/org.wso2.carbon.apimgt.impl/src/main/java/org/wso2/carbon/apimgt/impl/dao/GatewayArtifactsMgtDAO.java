@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
@@ -23,10 +24,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GatewayArtifactsMgtDAO {
 
@@ -626,6 +627,31 @@ public class GatewayArtifactsMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to delete and add  Gateway environments ", e);
+        }
+    }
+
+    /**
+     *
+     * @param apiIdentifierList
+     * @throws APIManagementException
+     */
+    public void removeOrganizationGatewayArtifacts(List<APIIdentifier> apiIdentifierList)
+            throws APIManagementException {
+        String apiIdList = apiIdentifierList.stream().map(APIIdentifier::getUUID).
+                collect(Collectors.joining("','", "'", "'"));
+        try (Connection artifactSynchronizerConn = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
+            // Delete gateway Artifacts from AM_GW_PUBLISHED_API_DETAILS, FK->AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS
+            try (PreparedStatement preparedStatement = artifactSynchronizerConn.
+                    prepareStatement(SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS)) {
+                artifactSynchronizerConn.setAutoCommit(false);
+                preparedStatement.setString(1, apiIdList);
+                preparedStatement.executeUpdate();
+                artifactSynchronizerConn.commit();
+            } catch (SQLException e) {
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to Delete Artifact from Database", e);
         }
     }
 
