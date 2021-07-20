@@ -59,6 +59,8 @@ public class AWSLambdaMediator extends AbstractMediator {
     private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
     private static final String PATH_PARAMETERS = "pathParameters";
     private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
+    private static final String HEADER_PARAMETER = "headers";
+    private static final String BODY_PARAMETER = "body";
 
     public AWSLambdaMediator() {
 
@@ -83,11 +85,11 @@ public class AWSLambdaMediator extends AbstractMediator {
             String value = (String) transportHeaders.get(keyObj);
             headers.addProperty(key, value);
         }
-        payload.add("headers", headers);
+        payload.add(HEADER_PARAMETER, headers);
 
         // set path/query parameters
         JsonObject pathParameters = new JsonObject();
-        JsonObject queryParameters = new JsonObject();
+        JsonObject queryStringParameters = new JsonObject();
         Set propertySet = messageContext.getPropertyKeySet();
         for (Object key : propertySet) {
             if (key != null) {
@@ -96,13 +98,13 @@ public class AWSLambdaMediator extends AbstractMediator {
                     pathParameters.addProperty(propertyKey.substring(RESTConstants.REST_URI_VARIABLE_PREFIX.length()),
                             (String) messageContext.getProperty(propertyKey));
                 } else if (propertyKey.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
-                    queryParameters.addProperty(propertyKey.substring(RESTConstants.REST_QUERY_PARAM_PREFIX.length()),
+                    queryStringParameters.addProperty(propertyKey.substring(RESTConstants.REST_QUERY_PARAM_PREFIX.length()),
                             (String) messageContext.getProperty(propertyKey));
                 }
             }
         }
         payload.add(PATH_PARAMETERS, pathParameters);
-        payload.add(QUERY_STRING_PARAMETERS, queryParameters);
+        payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
 
         String body;
         if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
@@ -110,8 +112,12 @@ public class AWSLambdaMediator extends AbstractMediator {
         } else {
             body = "{}";
         }
-        payload.addProperty("body", body);
+        payload.addProperty(BODY_PARAMETER, body);
 
+        if (log.isDebugEnabled()) {
+            log.debug("Passing the payload " + payload.toString() + " to AWS Lambda function with resource name "
+                    + resourceName);
+        }
         InvokeResult invokeResult = invokeLambda(payload.toString());
 
         if (invokeResult != null) {
