@@ -170,8 +170,7 @@ public class APIMWSDLReader {
         }
         APIFileUtil.extractSingleWSDLFile(inputStream, path, wsdlFilePath);
         String finalPath = APIConstants.FILE_URI_PREFIX + wsdlFilePath;
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(finalPath);
-        WSDL11SOAPOperationExtractor soapProcessor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
+
         try {
             WSDLProcessor processor = getWSDLProcessor(finalPath);
             wsdlValidationResponse = new WSDLValidationResponse();
@@ -179,11 +178,7 @@ public class APIMWSDLReader {
                 wsdlValidationResponse.setValid(false);
                 wsdlValidationResponse.setError(processor.getError());
             } else {
-                wsdlValidationResponse.setValid(true);
-                WSDLArchiveInfo wsdlArchiveInfo = new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE,
-                        soapProcessor.getWsdlInfo());
-                wsdlValidationResponse.setWsdlArchiveInfo(wsdlArchiveInfo);
-                wsdlValidationResponse.setWsdlInfo(soapProcessor.getWsdlInfo());
+                wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
                 wsdlValidationResponse.setWsdlProcessor(processor);
             }
             return wsdlValidationResponse;
@@ -269,7 +264,7 @@ public class APIMWSDLReader {
         if (wsdlPath.endsWith(".wsdl") || wsdlPath.endsWith("?wsdl")) {
             wsdlReader = new APIMWSDLReader(wsdlPath);
             wsdlContent = wsdlReader.getWSDL();
-            getWSDLProcessor(wsdlContent);
+            return getWSDLProcessor(wsdlContent);
         } else {
             try {
                 if (wsdl11Processor.canProcess(wsdlPath)) {
@@ -287,7 +282,6 @@ public class APIMWSDLReader {
                 throw new APIManagementException("Error while instantiating wsdl processor class", e);
             }
         }
-        return wsdl11Processor;
     }
 
     /**
