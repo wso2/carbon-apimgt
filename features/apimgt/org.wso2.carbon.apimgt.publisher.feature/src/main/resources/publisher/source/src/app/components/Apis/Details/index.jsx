@@ -109,8 +109,10 @@ const styles = (theme) => ({
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
         paddingBottom: theme.spacing(3),
+        overflow: 'auto',
     },
     contentInside: {
+        width: 'calc(100% - 56px)',
         paddingLeft: theme.spacing(3),
         paddingRight: theme.spacing(3),
         paddingTop: theme.spacing(2),
