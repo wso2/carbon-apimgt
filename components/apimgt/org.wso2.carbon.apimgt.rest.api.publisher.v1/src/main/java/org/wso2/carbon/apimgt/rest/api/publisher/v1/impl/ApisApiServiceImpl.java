@@ -3617,8 +3617,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String filename = fileDetail.getContentDisposition().getFilename();
             try {
                 if (filename.endsWith(".zip")) {
-                    validationResponse =
-                            APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
+                    validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
                 } else if (filename.endsWith(".wsdl")) {
                     validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
                 } else {
@@ -3678,7 +3677,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
-                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
+                createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url, apiToAdd);
             } else if (isSoapToRestConvertedAPI) {
                 String wsdlArchiveExtractedPath = null;
                 if (validationResponse.getWsdlArchiveInfo() != null) {

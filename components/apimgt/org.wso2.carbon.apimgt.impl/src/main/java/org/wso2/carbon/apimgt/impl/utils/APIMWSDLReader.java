@@ -178,6 +178,7 @@ public class APIMWSDLReader {
                 wsdlValidationResponse.setValid(false);
                 wsdlValidationResponse.setError(processor.getError());
             } else {
+                wsdlValidationResponse.setValid(true);
                 wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
                 wsdlValidationResponse.setWsdlProcessor(processor);
             }
