@@ -43,7 +43,7 @@ RuntimeMetadataApiService delegate = new RuntimeMetadataApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Json file of runtime metadata", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response runtimeMetadataGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.runtimeMetadataGet(xWSO2Tenant, securityContext);
+    public Response runtimeMetadataGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel) throws APIManagementException{
+        return delegate.runtimeMetadataGet(xWSO2Tenant, apiId, gatewayLabel, securityContext);
     }
 }

@@ -64,10 +64,10 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateMetadataArtifact(String tenantDomain)
+    public static RuntimeArtifactDto generateMetadataArtifact(String tenantDomain, String apiId, String gatewayLabel)
             throws APIManagementException {
 
-        List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(null, null, tenantDomain);
+        List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
         if (gatewayArtifacts != null) {
 
             try {

@@ -515,6 +515,18 @@ paths:
         This will provide access to the deployment metadata in json format
       parameters:
       - $ref: '#/parameters/requestedTenant'
+      - name: apiId
+        in: query
+        description: |
+          **Search condition**.
+            Api ID
+        type: string
+      - name: gatewayLabel
+        in: query
+        description: |
+          **Search condition**.
+           label associated with the APIs
+        type: string
       tags:
       - Retrieving Runtime artifacts
       responses:
