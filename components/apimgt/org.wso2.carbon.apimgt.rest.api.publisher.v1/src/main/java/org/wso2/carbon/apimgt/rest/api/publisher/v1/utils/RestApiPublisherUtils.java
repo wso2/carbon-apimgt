@@ -30,6 +30,7 @@ import org.json.simple.JSONObject;
 import org.netbeans.lib.cvsclient.commandLine.command.log;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -357,10 +358,12 @@ public class RestApiPublisherUtils {
      * @param oldProductionApiSecret existing production API secret
      * @param oldSandboxApiSecret    existing sandbox API secret
      * @param apidto                 API DTO
-     * @throws CryptoException if an error occurs while encrypting and base64 encode
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
     public static void encryptEndpointSecurityOAuthCredentials(LinkedHashMap endpointConfig, CryptoUtil cryptoUtil,
-            String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto) throws CryptoException {
+            String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto)
+            throws CryptoException, APIManagementException {
         String customParametersString;
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
@@ -377,8 +380,8 @@ public class RestApiPublisherUtils {
                         LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
                                 endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
-                    } else if (endpointSecurityProduction
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null){
+                    } else if (endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                            != null) {
                         customParametersString = (String) endpointSecurityProduction
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                     } else {
@@ -388,21 +391,23 @@ public class RestApiPublisherUtils {
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
                     if (APIConstants.OAuthConstants.OAUTH.equals(productionEndpointType)) {
-                        String apiSecret = endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
 
-                        if (!apiSecret.equals("")) {
+                        if (endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                                && StringUtils.isNotBlank(
+                                endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                                        .toString())) {
+                            String apiSecret = endpointSecurityProduction
+                                    .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecurityProduction
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                        } else if (StringUtils.isNotBlank(oldProductionApiSecret)) {
+                            endpointSecurityProduction
+                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldProductionApiSecret);
                         } else {
-                            if (!oldProductionApiSecret.isEmpty()) {
-                                endpointSecurityProduction
-                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldProductionApiSecret);
-                            } else {
-                                endpointSecurityProduction.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET,
-                                        cryptoUtil.encryptAndBase64Encode(StringUtils.EMPTY.getBytes()));
-                            }
+                            throw new APIManagementException(
+                                    "Client secret is not provided for production endpoint security",
+                                    ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS);
                         }
                     }
                     endpointSecurity
@@ -422,8 +427,8 @@ public class RestApiPublisherUtils {
                         LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
                                 endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
-                    } else if (endpointSecuritySandbox
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                    } else if (endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                            != null) {
                         customParametersString = (String) endpointSecuritySandbox
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                     } else {
@@ -433,21 +438,22 @@ public class RestApiPublisherUtils {
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
                     if (APIConstants.OAuthConstants.OAUTH.equals(sandboxEndpointType)) {
-                        String apiSecret = endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
-                                .toString();
 
-                        if (!apiSecret.equals("")) {
+                        if (endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                                && StringUtils.isNotBlank(
+                                endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                                        .toString())) {
+                            String apiSecret = endpointSecuritySandbox
+                                    .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecuritySandbox
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                        } else if (StringUtils.isNotBlank(oldSandboxApiSecret)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiSecret);
                         } else {
-                            if (!oldSandboxApiSecret.isEmpty()) {
-                                endpointSecuritySandbox
-                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiSecret);
-                            } else {
-                                endpointSecuritySandbox.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET,
-                                        cryptoUtil.encryptAndBase64Encode(StringUtils.EMPTY.getBytes()));
-                            }
+                            String message = "Client secret is not provided for sandbox endpoint security";
+                            throw new APIManagementException(message, ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS);
                         }
                     }
                     endpointSecurity
