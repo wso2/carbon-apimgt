@@ -339,10 +339,12 @@ public class PublisherCommonUtils {
      * @param oldProductionApiSecret existing production API secret
      * @param oldSandboxApiSecret    existing sandbox API secret
      * @param apidto                 API DTO
-     * @throws CryptoException if an error occurs while encrypting and base64 encode
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
     private static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
-            String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto) throws CryptoException {
+            String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto)
+            throws CryptoException, APIManagementException {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         String customParametersString;
         if (endpointConfig != null) {
@@ -372,21 +374,22 @@ public class PublisherCommonUtils {
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
                     if (APIConstants.OAuthConstants.OAUTH.equals(productionEndpointType)) {
-                        String apiSecret = endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
-
-                        if (StringUtils.isNotEmpty(apiSecret)) {
+                        if (endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                                && StringUtils.isNotBlank(
+                                endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                                        .toString())) {
+                            String apiSecret = endpointSecurityProduction
+                                    .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecurityProduction
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                        } else if (StringUtils.isNotBlank(oldProductionApiSecret)) {
+                            endpointSecurityProduction
+                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldProductionApiSecret);
                         } else {
-                            if (!oldProductionApiSecret.isEmpty()) {
-                                endpointSecurityProduction
-                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldProductionApiSecret);
-                            } else {
-                                endpointSecurityProduction
-                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, StringUtils.EMPTY);
-                            }
+                            String errorMessage = "Client secret is not provided for production endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
                         }
                     }
                     endpointSecurity
@@ -417,21 +420,22 @@ public class PublisherCommonUtils {
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
                     if (APIConstants.OAuthConstants.OAUTH.equals(sandboxEndpointType)) {
-                        String apiSecret = endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
-                                .toString();
-
-                        if (StringUtils.isNotEmpty(apiSecret)) {
+                        if (endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                                && StringUtils.isNotBlank(
+                                endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                                        .toString())) {
+                            String apiSecret = endpointSecuritySandbox
+                                    .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecuritySandbox
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                        } else if (StringUtils.isNotBlank(oldSandboxApiSecret)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiSecret);
                         } else {
-                            if (!oldSandboxApiSecret.isEmpty()) {
-                                endpointSecuritySandbox
-                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiSecret);
-                            } else {
-                                endpointSecuritySandbox
-                                        .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, StringUtils.EMPTY);
-                            }
+                            String errorMessage = "Client secret is not provided for sandbox endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
                         }
                     }
                     endpointSecurity
