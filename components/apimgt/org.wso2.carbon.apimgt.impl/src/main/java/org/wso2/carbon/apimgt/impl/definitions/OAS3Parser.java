@@ -705,7 +705,7 @@ public class OAS3Parser extends APIDefinition {
      * @return APIDefinitionValidationResponse object with validation information
      */
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String host, boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
@@ -727,11 +727,27 @@ public class OAS3Parser extends APIDefinition {
         } else {
             OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
             io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
+            List<String> endpoints;
+            String endpointNew = "";
+            if (openAPI.getServers() == null || openAPI.getServers().isEmpty()) {
+                endpoints = null;
+            } else {
+                endpoints = openAPI.getServers().stream().map(url -> url.getUrl()).collect(Collectors.toList());
+                for (String endpoint : endpoints) {
+                    if (endpoint.startsWith("/")) {
+                        if (host.equals("")) {
+                            endpointNew = "http://api.yourdomain.com" + endpoint;
+                        } else {
+                            endpointNew = host + endpoint;
+                        }
+                       endpoints.set(endpoints.indexOf(endpoint), endpointNew);
+                    }
+                }
+            }
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
-                    info.getTitle(), info.getVersion(), null, info.getDescription(),
-                    (openAPI.getServers()==null || openAPI.getServers().isEmpty() ) ? null :
-                            openAPI.getServers().stream().map(url -> url.getUrl()).collect(Collectors.toList())
+                    info.getTitle(), info.getVersion(), info.getTitle().replaceAll("\\s","").toLowerCase(),
+                    info.getDescription(), endpoints
             );
             validationResponse.setParser(this);
             if (returnJsonContent) {

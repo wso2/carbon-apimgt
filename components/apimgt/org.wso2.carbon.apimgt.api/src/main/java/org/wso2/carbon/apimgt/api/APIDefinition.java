@@ -133,7 +133,7 @@ public abstract class APIDefinition {
      * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
      * @return APIDefinitionValidationResponse object with validation information
      */
-    public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
+    public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url,
             boolean returnJsonContent) throws APIManagementException;
 
     /**

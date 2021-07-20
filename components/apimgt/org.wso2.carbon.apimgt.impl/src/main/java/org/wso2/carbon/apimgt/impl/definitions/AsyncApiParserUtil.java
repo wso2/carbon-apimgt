@@ -42,7 +42,8 @@ public class AsyncApiParserUtil {
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
 
-        APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated, returnJSONContent);
+        APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated,
+                "", returnJSONContent);
         final String asyncAPIKeyNotFound = "#: required key [asyncapi] not found";
 
         if (!validationResponse.isValid()) {

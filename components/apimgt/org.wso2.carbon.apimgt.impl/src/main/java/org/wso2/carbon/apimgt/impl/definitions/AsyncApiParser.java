@@ -1545,7 +1545,7 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
 

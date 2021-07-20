@@ -855,7 +855,7 @@ public class OASParserUtil {
             }
         }
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
-        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, "",returnContent);
         return apiDefinitionValidationResponse;
     }
 
@@ -867,10 +867,11 @@ public class OASParserUtil {
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
+                                                                        boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse =
-                oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
+                oas3Parser.validateAPIDefinition(apiDefinition, url, returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -892,7 +893,7 @@ public class OASParserUtil {
     private static APIDefinitionValidationResponse tryOAS2Validation(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse =
-                oas2Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
+                oas2Parser.validateAPIDefinition(apiDefinition, "", returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -987,6 +988,7 @@ public class OASParserUtil {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
             URL urlObj = new URL(url);
+            String host = urlObj.getHost();
             HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
 
@@ -994,7 +996,7 @@ public class OASParserUtil {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
-                validationResponse = validateAPIDefinition(responseStr, returnJsonContent);
+                validationResponse = validateAPIDefinition(responseStr, host, returnJsonContent);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);

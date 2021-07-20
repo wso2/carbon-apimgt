@@ -1091,7 +1091,7 @@ public class ImportUtils {
         try {
             String swaggerContent = loadSwaggerFile(pathToArchive);
             APIDefinitionValidationResponse validationResponse = OASParserUtil
-                    .validateAPIDefinition(swaggerContent, Boolean.TRUE);
+                    .validateAPIDefinition(swaggerContent, "", Boolean.TRUE);
             if (!validationResponse.isValid()) {
                 throw new APIManagementException(
                         "Error occurred while importing the API. Invalid Swagger definition found. "
