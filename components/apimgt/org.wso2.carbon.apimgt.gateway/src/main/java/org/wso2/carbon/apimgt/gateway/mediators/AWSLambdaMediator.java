@@ -17,29 +17,34 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * This @AWSLambdaMediator mediator invokes AWS Lambda functions when
@@ -52,6 +57,8 @@ public class AWSLambdaMediator extends AbstractMediator {
     private String region = "";
     private String resourceName = "";
     private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
+    private static final String PATH_PARAMETERS = "pathParameters";
+    private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
 
     public AWSLambdaMediator() {
 
@@ -65,15 +72,47 @@ public class AWSLambdaMediator extends AbstractMediator {
     public boolean mediate(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
+        JsonObject payload = new JsonObject();
 
-        String payload;
-        if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-            payload = JsonUtil.jsonPayloadToString(axis2MessageContext);
-        } else {
-            payload = "{}";
+        // set headers
+        JsonObject headers = new JsonObject();
+        TreeMap transportHeaders =
+                (TreeMap) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        for (Object keyObj : transportHeaders.keySet()) {
+            String key = (String) keyObj;
+            String value = (String) transportHeaders.get(keyObj);
+            headers.addProperty(key, value);
         }
+        payload.add("headers", headers);
 
-        InvokeResult invokeResult = invokeLambda(payload);
+        // set path/query parameters
+        JsonObject pathParameters = new JsonObject();
+        JsonObject queryParameters = new JsonObject();
+        Set propertySet = messageContext.getPropertyKeySet();
+        for (Object key : propertySet) {
+            if (key != null) {
+                String propertyKey = key.toString();
+                if (propertyKey.startsWith(RESTConstants.REST_URI_VARIABLE_PREFIX)) {
+                    pathParameters.addProperty(propertyKey.substring(RESTConstants.REST_URI_VARIABLE_PREFIX.length()),
+                            (String) messageContext.getProperty(propertyKey));
+                } else if (propertyKey.startsWith(RESTConstants.REST_QUERY_PARAM_PREFIX)) {
+                    queryParameters.addProperty(propertyKey.substring(RESTConstants.REST_QUERY_PARAM_PREFIX.length()),
+                            (String) messageContext.getProperty(propertyKey));
+                }
+            }
+        }
+        payload.add(PATH_PARAMETERS, pathParameters);
+        payload.add(QUERY_STRING_PARAMETERS, queryParameters);
+
+        String body;
+        if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+            body = JsonUtil.jsonPayloadToString(axis2MessageContext);
+        } else {
+            body = "{}";
+        }
+        payload.addProperty("body", body);
+
+        InvokeResult invokeResult = invokeLambda(payload.toString());
 
         if (invokeResult != null) {
             if (log.isDebugEnabled()) {
