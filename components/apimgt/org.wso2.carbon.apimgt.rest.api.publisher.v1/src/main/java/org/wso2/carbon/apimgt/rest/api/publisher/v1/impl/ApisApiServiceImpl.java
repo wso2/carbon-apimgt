@@ -4913,12 +4913,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            if (apiDTOFromProperties.getAdditionalPropertiesMap() != null) {
-                for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : apiDTOFromProperties
-                        .getAdditionalPropertiesMap().entrySet()) {
-                    apiToAdd.addProperty(entry.getKey(), entry.getValue().getValue());
-                }
-            }
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
