@@ -15067,6 +15067,9 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Workflow workflow = new Workflow();
         String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE;
+        InputStream targetStream = null;
+        InputStream propertiesTargetStream = null;
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             try {
@@ -15087,13 +15090,34 @@ public class ApiMgtDAO {
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    Blob metadataBlob = rs.getBlob("WF_METADATA");
-                    Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
 
-                    byte[] metadataByte;
-                    if (metadataBlob != null) {
-                        metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
-                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
+                    boolean isPostgres =  connection.getMetaData().getDriverName().contains("PostgreSQL");
+
+                    if (isPostgres) {
+                        targetStream = rs.getBinaryStream("WF_METADATA");
+                        propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
+                    } else {
+                        Blob metadataBlob = rs.getBlob("WF_METADATA");
+                        Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
+
+                        if (metadataBlob != null) {
+                            byte[] metadataByte;
+                            metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
+                            targetStream = new ByteArrayInputStream(metadataByte);
+                        } else {
+                            targetStream = null;
+                        }
+
+                        if (propertiesBlob != null) {
+                            byte[] propertiesByte;
+                            propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
+                            propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
+                        } else {
+                            propertiesTargetStream = null;
+                        }
+                    }
+
+                    if (targetStream != null) {
                         String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
                         Gson metadataGson = new Gson();
                         JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
@@ -15103,10 +15127,7 @@ public class ApiMgtDAO {
                         workflow.setMetadata(metadataJson);
                     }
 
-                    byte[] propertiesByte;
-                    if (propertiesBlob != null) {
-                        propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
-                        InputStream propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
+                    if (propertiesTargetStream != null) {
                         String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
                         Gson propertiesGson = new Gson();
                         JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
