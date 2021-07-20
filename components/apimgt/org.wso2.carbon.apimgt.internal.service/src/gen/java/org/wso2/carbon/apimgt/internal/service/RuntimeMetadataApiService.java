@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RuntimeMetadataApiService {
-      public Response runtimeMetadataGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, MessageContext messageContext) throws APIManagementException;
 }
