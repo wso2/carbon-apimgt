@@ -105,23 +105,8 @@ public class SOAPOperationBindingUtils {
      * @return swagger json string with the soap operation mapping
      * @throws APIManagementException if an error occurs when generating swagger
      */
-    public static String getSoapOperationMapping(String path, String url) throws APIManagementException {
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
-        WSDLInfo wsdlInfo = processor.getWsdlInfo();
-        return getGeneratedSwaggerFromWSDL(wsdlInfo);
-    }
-
-    /**
-     * Gets soap operations to rest resources mapping for a wsdl archive path
-     *
-     * @param path Path of the extracted WSDL archive
-     * @return swagger json string with the soap operation mapping
-     * @throws APIManagementException if an error occurs when generating swagger
-     */
-    public static String getSoapOperationMapping(String path, String url, byte [] wsdlContent)
-            throws APIManagementException {
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+    public static String getSoapOperationMapping(String path) throws APIManagementException {
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(path);
         WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
         WSDLInfo wsdlInfo = processor.getWsdlInfo();
         return getGeneratedSwaggerFromWSDL(wsdlInfo);
