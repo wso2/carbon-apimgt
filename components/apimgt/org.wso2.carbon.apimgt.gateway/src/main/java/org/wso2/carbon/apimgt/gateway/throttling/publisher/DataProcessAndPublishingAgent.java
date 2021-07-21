@@ -29,6 +29,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.stream.XMLStreamException;
@@ -65,6 +66,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String appId;
     String ipAddress;
     Map<String, String> headersMap;
+    Map<String, Object> customPropertyMap;
     private AuthenticationContext authenticationContext;
 
     private long messageSizeInBytes;
@@ -99,6 +101,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.ipAddress = null;
         this.headersMap = null;
         this.messageSizeInBytes = 0;
+        this.customPropertyMap = Collections.emptyMap();
     }
 
     /**
@@ -148,6 +151,16 @@ public class DataProcessAndPublishingAgent implements Runnable {
         if (transportHeaderMap != null) {
             this.headersMap = new HashMap<>(transportHeaderMap);
         }
+
+        if (messageContext.getProperty(APIThrottleConstants.CUSTOM_PROPERTY) != null) {
+            HashMap<String, Object> propertyFromMsgCtx = (HashMap<String, Object>) messageContext.getProperty(
+                    APIThrottleConstants.CUSTOM_PROPERTY);
+
+            if (propertyFromMsgCtx != null) {
+                this.customPropertyMap = (Map<String, Object>) propertyFromMsgCtx.clone();
+            }
+        }
+
         this.ipAddress = GatewayUtils.getIp(axis2MessageContext);
         if (log.isDebugEnabled()) {
             log.debug("Remote IP address : " + ipAddress);
@@ -211,6 +224,11 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 jsonObMap.putAll(this.headersMap);
             }
         }
+        //adding any custom property if available to stream's property map
+        if (this.customPropertyMap != null) {
+            jsonObMap.putAll(this.customPropertyMap);
+        }
+
 
         //Setting query parameters
         if (getThrottleProperties().isEnableQueryParamConditions()) {
