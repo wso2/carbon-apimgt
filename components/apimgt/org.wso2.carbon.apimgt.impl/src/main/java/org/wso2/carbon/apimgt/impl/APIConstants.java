@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -846,6 +845,11 @@ public final class APIConstants {
 
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
+
+    public static final String LAMBDA_MEDIATOR_CONFIG = "LambdaMediatorConfig.";
+
+    public static final String PASS_REQUEST_PARAMS_TO_LAMBDA_FUNCTION = LAMBDA_MEDIATOR_CONFIG
+            + "PassRequestParamsToLambdaFunction";
 
     public static final String API_KEY_TYPE = "AM_KEY_TYPE";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
