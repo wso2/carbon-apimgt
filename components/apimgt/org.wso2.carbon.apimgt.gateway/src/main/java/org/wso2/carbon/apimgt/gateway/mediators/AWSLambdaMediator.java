@@ -64,6 +64,8 @@ public class AWSLambdaMediator extends AbstractMediator {
     private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
     private static final String HEADER_PARAMETER = "headers";
     private static final String BODY_PARAMETER = "body";
+    private static final String PATH = "path";
+    private static final String HTTP_METHOD = "httpMethod";
 
     public AWSLambdaMediator() {
 
@@ -119,6 +121,8 @@ public class AWSLambdaMediator extends AbstractMediator {
             payload.add(PATH_PARAMETERS, pathParameters);
             payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
             payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
+            payload.addProperty(HTTP_METHOD, (String) messageContext.getProperty(APIConstants.REST_METHOD));
+            payload.addProperty(PATH, (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
             if (log.isDebugEnabled()) {
                 log.debug("Passing the payload " + payload.toString() + " to AWS Lambda function with resource name "
                         + resourceName);
