@@ -42,15 +42,21 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.net.URL;
+import java.text.ParseException;
+import java.net.MalformedURLException;
 
 import com.nimbusds.jwt.util.DateUtils;
 import org.wso2.carbon.apimgt.impl.jwt.*;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
+
+import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
 public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
 
@@ -59,12 +65,13 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private boolean isRESTApiTokenCacheEnabled;
     private JWTValidator jwtValidator;
-    private TokenIssuerDto tokenIssuerDto;
+    private Map<String, TokenIssuerDto> tokenIssuers;
+    private java.util.Map<String, String> audiencesList;
 
     public OAuthJwtAuthenticatorImpl() {
         jwtValidator = new JWTValidatorImpl();
-        tokenIssuerDto = getTokenIssuerDto();
-        jwtValidator.loadTokenIssuerConfiguration(tokenIssuerDto);
+        tokenIssuers = getTokenIssuers();
+        audiencesList = getRestApiJWTAuthAudiences();
     }
 
     /**
@@ -83,56 +90,47 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
             return false;
         }
         try {
-            SignedJWTInfo signedJWTInfo;
+            SignedJWTInfo signedJWTInfo = getSignedJwt(accessToken);
+            String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
+            String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
+            URL basePath = new URL(message.get("http.base.path").toString());
 
-            if (isRESTApiTokenCacheEnabled) {
-                signedJWTInfo = (SignedJWTInfo) getRESTAPITokenCache().get(accessToken);
-                if (signedJWTInfo != null) {
-                    Boolean isExpired = checkTokenExpiration(signedJWTInfo.getJwtClaimsSet().getExpirationTime());
-                    if (isExpired) {
-                        getRESTAPITokenCache().remove(accessToken);
-                        getRESTAPIInvalidTokenCache().put(accessToken, signedJWTInfo);
-                        return false;
+            //Validate token
+            log.info("Starting JWT token validation");
+            JWTValidationInfo jwtValidationInfo =
+                    validateJWTToken(signedJWTInfo, jwtTokenIdentifier, accessToken, jwtHeader, basePath);
+            if (jwtValidationInfo != null) {
+                if (jwtValidationInfo.isValid()) {
+                    if (isRESTApiTokenCacheEnabled) {
+                        getRESTAPITokenCache().put(jwtTokenIdentifier, jwtValidationInfo);
                     }
+                    //Validating scopes
+                    log.info("JWT token validation success. starting scope validation");
                     return handleScopeValidation(message, signedJWTInfo, accessToken);
-
-                } else if (getRESTAPIInvalidTokenCache().get(accessToken) != null) {
-                    log.debug("Invalid JWT token. ");
-                    return false;
                 } else {
-                    signedJWTInfo = getSignedJwt(accessToken);
+                    log.error("Invalid JWT token :" + getMaskedToken(jwtHeader));
+                    return false;
                 }
+
             } else {
-                signedJWTInfo = getSignedJwt(accessToken);
-            }
-            if (validateJWTToken(signedJWTInfo, accessToken)) {
-                if (isRESTApiTokenCacheEnabled) {
-                    getRESTAPITokenCache().put(accessToken, signedJWTInfo);
-                }
-                log.info("validating scopes");
-                //Validating scopes
-                return handleScopeValidation(message, signedJWTInfo, accessToken);
-            } else {
-                //put the obj into invalid cache
-                if (isRESTApiTokenCacheEnabled) {
-                    getRESTAPIInvalidTokenCache().put(accessToken, signedJWTInfo);
-                }
-                log.error("Invalid JWT token");
+                log.error("Invalid JWT token :" + getMaskedToken(jwtHeader));
                 return false;
             }
         } catch (ParseException e) {
             log.error("Not a JWT token. Failed to decode the token. Reason: " + e.getMessage());
+        } catch (MalformedURLException e) {
+            log.error("Malformed URL found in request path.Reason: " + e.getMessage());
         }
         return false;
     }
 
     /**
-     * Handle scope validation and .
+     * Handle scope validation
      *
      * @param accessToken   JWT token
      * @param signedJWTInfo : Signed token info
+     * @param message       : cxf Message
      */
-    //take message as 1st para
     private boolean handleScopeValidation(Message message, SignedJWTInfo signedJWTInfo, String accessToken)
             throws ParseException {
 
@@ -159,7 +157,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
                 try {
-                    String username = oauthTokenInfo.getEndUserName();
+                    String username = oauthTokenInfo.getEndUserName(); //
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                         //when the username is an email in supertenant, it has at least 2 occurrences of '@'
                         long count = username.chars().filter(ch -> ch == '@').count();
@@ -184,6 +182,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
                 } catch (UserStoreException e) {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
                 }
+                log.info("Scope validation success");
                 return true;
             }
             log.error("scopes validation failed");
@@ -209,67 +208,99 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
     /**
      * Validate the JWT token.
      *
-     * @param accessToken   JWT token
+     * @param jti           jwtTokenIdentifier
      * @param signedJWTInfo signed jwt info object
      * @return JWTValidationInfo : token validated info
      */
-    private boolean validateJWTToken(SignedJWTInfo signedJWTInfo, String accessToken) throws APIManagementException {
+    private JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo, String jti, String accessToken,
+                                               String jwtHeader, URL basePath) throws APIManagementException {
 
         JWTValidationInfo jwtValidationInfo;
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
 
         if (StringUtils.isNotEmpty(issuer)) {
             //validate Issuer
-            if (tokenIssuerDto.getIssuer() != null && issuer.equals(tokenIssuerDto.getIssuer())) {
-                //validate aud
-                if (signedJWTInfo.getJwtClaimsSet().getAudience() != null) {
-                    if (signedJWTInfo.getJwtClaimsSet().getAudience().contains(tokenIssuerDto.getAudience())) {
-                        //validate signature and exp with JWTValidator
-                        jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
-                        return jwtValidationInfo.isValid();
-                    } else {
-                        //invalid audience
-                        log.error("JWT token audience validation failed. Reason: Non of the aud present "
-                                + "in the JWT (" + signedJWTInfo.getJwtClaimsSet().getAudience().toString() +
-                                ") matches the intended audience. (" + tokenIssuerDto.getAudience() + ")");
-                        return false;
+            List<String> audiences = signedJWTInfo.getJwtClaimsSet().getAudience();
+            if (tokenIssuers != null && tokenIssuers.containsKey(issuer)) {
+                jwtValidator.loadTokenIssuerConfiguration(tokenIssuers.get(issuer));
+                //validate audience
+                if (audiencesList != null && audiences.contains(audiencesList.get(basePath.getPath()))) {
+                    if (isRESTApiTokenCacheEnabled) {
+                        JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getRESTAPITokenCache().get(jti);
+                        if (tempJWTValidationInfo != null) {
+                            Boolean isExpired = checkTokenExpiration(new Date(tempJWTValidationInfo.getExpiryTime()));
+                            if (isExpired) {
+                                tempJWTValidationInfo.setValid(false);
+                                getRESTAPITokenCache().remove(jti);
+                                getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
+                                log.error("JWT token validation failed. Reason: Expired Token. "
+                                        + getMaskedToken(jwtHeader));
+                                return tempJWTValidationInfo;
+                            }
+                            //check accessToken
+                            if (!tempJWTValidationInfo.getRawPayload().equals(accessToken)) {
+                                tempJWTValidationInfo.setValid(false);
+                                getRESTAPITokenCache().remove(jti);
+                                getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
+                                log.error("JWT token validation failed. Reason: Invalid Token. "
+                                        + getMaskedToken(jwtHeader));
+                                return tempJWTValidationInfo;
+                            }
+                            return tempJWTValidationInfo;
+
+                        } else if (getRESTAPIInvalidTokenCache().get(jti) != null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Token retrieved from the invalid token cache. Token: "
+                                        + getMaskedToken(jwtHeader));
+                            }
+                            return (JWTValidationInfo) getRESTAPIInvalidTokenCache().get(jti);
+                        }
                     }
+                    //info not in cache
+                    //validate signature and exp
+                    jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+                    if (jwtValidationInfo.isValid()) {
+                        //valid token
+                        if (isRESTApiTokenCacheEnabled) {
+                            getRESTAPITokenCache().put(jti, jwtValidationInfo);
+                        }
+                    } else {
+                        //put in invalid cache
+                        if (isRESTApiTokenCacheEnabled) {
+                            getRESTAPIInvalidTokenCache().put(jti, jwtValidationInfo);
+                        }
+                        //invalid credentials : 900901 error code
+                        log.error("JWT token validation failed. Reason: Invalid Credentials. " +
+                                "Make sure you have provided the correct security credentials in the token :"
+                                + getMaskedToken(jwtHeader));
+                    }
+                } else {
+                    log.error("JWT token audience validation failed. Reason: Non of the aud present "
+                            + "in the JWT (" + signedJWTInfo.getJwtClaimsSet().getAudience().toString() +
+                            ") matches the intended audience. (" + audiencesList.values().toString() + ")");
+                    return null;
                 }
             } else {
                 //invalid issuer. invalid token
                 log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
-                        + ") does not match with the token issuer (" + tokenIssuerDto.getIssuer() + ")");
-                return false;
+                        + ") does not match with the token issuer (" + tokenIssuers.keySet().toString() + ")");
+                return null;
             }
+        } else {
+            log.error("Issuer is not found in the token");
+            return null;
         }
-        log.error("Issuer is not found in the token");
-        return false;
+        return jwtValidationInfo;
     }
 
     /**
      * Retrieve token issuer details from deployment.toml file.
      *
-     * @return TokenIssuerDto
+     * @return Map<String, TokenIssuerDto>
      */
-    private TokenIssuerDto getTokenIssuerDto() {
-        TokenIssuerDto tokenIssuerDto = new TokenIssuerDto();
-        APIManagerConfiguration apiManagerConfiguration = getApiManagerConfiguration();
-        if (apiManagerConfiguration != null) {
-            tokenIssuerDto.setIssuer(apiManagerConfiguration.getFirstProperty(APIConstants.API_RESTAPI
-                    + APIConstants.JWT_ISSUER));
-            tokenIssuerDto.setAudience(apiManagerConfiguration.getFirstProperty(APIConstants.API_RESTAPI
-                    + APIConstants.JWT_AUDIENCE));
-            tokenIssuerDto.setAlias(apiManagerConfiguration.getFirstProperty(APIConstants.API_RESTAPI
-                    + APIConstants.JWT_CERT_ALIAS));
-        }
-        return tokenIssuerDto;
-    }
+    private Map<String, TokenIssuerDto> getTokenIssuers() {
+        return APIMConfigUtil.getTokenIssuerMap();
 
-    /**
-     * @return APIManagerConfiguration
-     */
-    private static APIManagerConfiguration getApiManagerConfiguration() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 
     /**
@@ -281,5 +312,36 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
     private boolean checkTokenExpiration(Date tokenExp) {
         Date now = new Date();
         return DateUtils.isBefore(tokenExp, now, RestApiConstants.TIMESTAMP_SKEW_INSECONDS);
+    }
+
+    /**
+     * Get jti information.
+     *
+     * @param signedJWTInfo
+     * @return String : jti
+     */
+    private String getJWTTokenIdentifier(SignedJWTInfo signedJWTInfo) {
+
+        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
+        String jwtid = jwtClaimsSet.getJWTID();
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(jwtid)) {
+            return jwtid;
+        }
+        return signedJWTInfo.getSignedJWT().getSignature().toString();
+    }
+
+    /**
+     * Get masked JWT token.
+     *
+     * @param token The JWT token
+     * @return String : maskedtoken
+     */
+    public static String getMaskedToken(String token) {
+
+        if (token.length() >= 10) {
+            return "XXXXX" + token.substring(token.length() - 10);
+        } else {
+            return "XXXXX" + token.substring(token.length() / 2);
+        }
     }
 }

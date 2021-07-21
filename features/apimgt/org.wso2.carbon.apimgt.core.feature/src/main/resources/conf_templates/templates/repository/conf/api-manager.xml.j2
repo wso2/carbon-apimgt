@@ -820,17 +820,16 @@
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
         </ETagSkipList>
-        <JwtAuth>
-         {% if apim.rest_api.jwt.issuer is defined %}
-            <iss>{{apim.rest_api.jwt.issuer}}</iss>
-         {% endif %}
-         {% if apim.rest_api.jwt.audience is defined %}
-            <aud>{{apim.rest_api.jwt.audience}}</aud>
-          {% endif %}
-         {% if apim.rest_api.jwt.alias is defined %}
-            <alias>{{apim.rest_api.jwt.alias}}</alias>
-         {% endif %}
-        </JwtAuth>
+        {% if apim.rest_api.jwt.audience is defined %}
+        <JWTAudiences>
+        {%- for aud in apim.rest_api.jwt.audience -%}
+            <JWTAudience>
+                <Audience>{{aud.audience}}</Audience>
+                <Basepath>{{aud.basepath}}</Basepath>
+            </JWTAudience>
+         {%- endfor -%}
+        </JWTAudiences>
+        {% endif %}
     </RESTAPI>
     <ThrottlingConfigurations>
         <TrafficManager>

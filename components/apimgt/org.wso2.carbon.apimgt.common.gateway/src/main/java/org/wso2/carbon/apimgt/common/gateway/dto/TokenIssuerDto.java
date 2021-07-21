@@ -34,7 +34,6 @@ public class TokenIssuerDto {
     private String consumerKeyClaim;
     private String scopesClaim;
     private String audience;
-    private String alias;
 
     public TokenIssuerDto() {
     }
@@ -126,13 +125,5 @@ public class TokenIssuerDto {
 
     public void setAudience(String audience) {
         this.audience = audience;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
     }
 }

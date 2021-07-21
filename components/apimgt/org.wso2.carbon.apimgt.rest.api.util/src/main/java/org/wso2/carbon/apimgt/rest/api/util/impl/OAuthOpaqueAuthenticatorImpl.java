@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
 
 /**
  * This web app authenticator class specifically implemented for API Manager store and publisher rest APIs
@@ -180,7 +180,6 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
         if (!responseDTO.isValid()) {
             tokenInfo.setTokenValid(responseDTO.isValid());
             log.error("Invalid OAuth Token : " + responseDTO.getErrorMsg());
-//            tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
             return tokenInfo;
         }
 
@@ -197,16 +196,6 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
 
         tokenInfo.setIssuedTime(System.currentTimeMillis());
         tokenInfo.setScopes(responseDTO.getScope());
-
-        // If token has am_application_scope, consider the token as an Application token.
-//        String[] scopes = responseDTO.getScope();
-//        String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
-
-//        if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
-//            if (Arrays.asList(scopes).contains(applicationTokenScope)) {
-//                tokenInfo.setApplicationToken(true);
-//            }
-//        }
 
         return tokenInfo;
     }

@@ -134,10 +134,7 @@ public class JWTValidatorImpl implements JWTValidator {
 
     protected boolean validateSignature(SignedJWT signedJWT) throws APIManagementException {
 
-        String certificateAlias = tokenIssuer.getAlias();
-        if(certificateAlias == null){
-            certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
-        }
+        String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         try {
             String keyID = signedJWT.getHeader().getKeyID();
             if (StringUtils.isNotEmpty(keyID)) {
