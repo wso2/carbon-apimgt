@@ -229,7 +229,6 @@ public class DataProcessAndPublishingAgent implements Runnable {
             jsonObMap.putAll(this.customPropertyMap);
         }
 
-
         //Setting query parameters
         if (getThrottleProperties().isEnableQueryParamConditions()) {
             Map<String, String> queryParams = GatewayUtils.getQueryParams(axis2MessageContext);
