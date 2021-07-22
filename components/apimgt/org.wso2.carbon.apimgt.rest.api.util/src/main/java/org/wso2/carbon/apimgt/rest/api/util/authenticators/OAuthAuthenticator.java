@@ -26,10 +26,13 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -88,7 +91,7 @@ public interface OAuthAuthenticator {
 
         for (Object template : uriTemplates.toArray()) {
             org.wso2.uri.template.URITemplate templateToValidate = null;
-            java.util.Map<String, String> var = new java.util.HashMap<String, String>();
+            Map<String, String> var = new HashMap<String, String>();
             //check scopes with what we have
             String templateString = ((URITemplate) template).getUriTemplate();
             try {

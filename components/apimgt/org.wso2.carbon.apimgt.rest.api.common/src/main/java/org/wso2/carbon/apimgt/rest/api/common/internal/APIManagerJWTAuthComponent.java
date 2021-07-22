@@ -23,6 +23,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.osgi.service.component.ComponentContext;
 
 @Component(
         name = "org.wso2.apimgt.rest.api.common",
@@ -32,7 +33,7 @@ public class APIManagerJWTAuthComponent {
     private static final Log log = LogFactory.getLog(APIManagerJWTAuthComponent.class);
 
     @Activate
-    protected void activate(org.osgi.service.component.ComponentContext context) {
+    protected void activate(ComponentContext context) {
     }
 
     @Reference(
@@ -42,6 +43,7 @@ public class APIManagerJWTAuthComponent {
             policy = org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC,
             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
+
         log.debug("Setting APIM Configuration Service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(configurationService);
     }

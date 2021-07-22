@@ -780,6 +780,7 @@ public final class APIConstants {
     public static final String AUDIENCE = "Audience";
     public static final String BASEPATH = "Basepath";
     public static final String URN_CHOREO = "urn:choreo:";
+    public static final String BASE_PATH = "http.base.path";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
 

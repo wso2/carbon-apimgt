@@ -75,7 +75,6 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (accessToken.contains(RestApiConstants.DOT)) {
             inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.JWT_AUTHENTICATION);
         } else {
-            inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OPAQUE_AUTHENTICATION);
         }
 
         try {

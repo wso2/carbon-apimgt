@@ -28,6 +28,7 @@ public class APIMConfigUtil {
     private static APIManagerConfiguration configuration = getApiManagerConfiguration();
 
     /**
+     * This is to get JWT audiences with basepaths from deployment.toml file
      * @return List of Audiences with basepath
      */
     public static Map<String, String> getRestApiJWTAuthAudiences() {
@@ -35,6 +36,7 @@ public class APIMConfigUtil {
     }
 
     /**
+     * This is to get JWT issuer details from deployment.toml file
      * @return Map<issuer, tokenIssuerDto>
      */
     public static Map<String, TokenIssuerDto> getTokenIssuerMap() {

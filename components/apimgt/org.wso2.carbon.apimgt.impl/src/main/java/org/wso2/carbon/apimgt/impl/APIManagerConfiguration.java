@@ -122,7 +122,7 @@ public class APIManagerConfiguration {
     private RedisConfig redisConfig = new RedisConfig();
     private Map<String, String> restApiJWTAuthAudiences = new HashMap<>();
 
-    public java.util.Map<String, String> getRestApiJWTAuthAudiences() {
+    public Map<String, String> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
     }
 
@@ -1972,7 +1972,7 @@ public class APIManagerConfiguration {
         }
     }
 
-    public void setRestApiJWTAuthAudiences(OMElement omElement){
+    private void setRestApiJWTAuthAudiences(OMElement omElement){
 
         Iterator jwtAudiencesElement =
                 omElement.getChildrenWithLocalName(APIConstants.JWT_AUDIENCE);

@@ -49,7 +49,8 @@ import java.text.ParseException;
 import java.net.MalformedURLException;
 
 import com.nimbusds.jwt.util.DateUtils;
-import org.wso2.carbon.apimgt.impl.jwt.*;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
@@ -93,7 +94,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
             SignedJWTInfo signedJWTInfo = getSignedJwt(accessToken);
             String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
             String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-            URL basePath = new URL(message.get("http.base.path").toString());
+            URL basePath = new URL(message.get(APIConstants.BASE_PATH).toString());
 
             //Validate token
             log.info("Starting JWT token validation");
@@ -256,8 +257,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
                             return (JWTValidationInfo) getRESTAPIInvalidTokenCache().get(jti);
                         }
                     }
-                    //info not in cache
-                    //validate signature and exp
+                    //info not in cache. validate signature and exp
                     jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
                     if (jwtValidationInfo.isValid()) {
                         //valid token
@@ -300,7 +300,6 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
      */
     private Map<String, TokenIssuerDto> getTokenIssuers() {
         return APIMConfigUtil.getTokenIssuerMap();
-
     }
 
     /**
@@ -323,9 +322,9 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
     private String getJWTTokenIdentifier(SignedJWTInfo signedJWTInfo) {
 
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        String jwtid = jwtClaimsSet.getJWTID();
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(jwtid)) {
-            return jwtid;
+        String jwtID = jwtClaimsSet.getJWTID();
+        if (StringUtils.isNotEmpty(jwtID)) {
+            return jwtID;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
     }
