@@ -855,7 +855,7 @@ public class OASParserUtil {
             }
         }
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
-        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, "",returnContent);
+        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, "", returnContent);
         return apiDefinitionValidationResponse;
     }
 
