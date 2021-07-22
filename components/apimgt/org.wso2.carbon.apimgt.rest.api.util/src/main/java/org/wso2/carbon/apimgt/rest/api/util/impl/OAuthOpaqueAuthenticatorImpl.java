@@ -160,7 +160,7 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
         return APIUtil.isAccessTokenExpired(infoDTO);
     }
 
-    public static OAuthTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
+    public OAuthTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         OAuthTokenInfo tokenInfo = new OAuthTokenInfo();
         OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
@@ -205,7 +205,7 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
      * @param requestDTO Token validation request
      * @return
      */
-    protected static OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
+    protected OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
         OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);
     }
