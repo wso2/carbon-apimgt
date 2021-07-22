@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.quotaLimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -986,6 +987,19 @@ public class APIManagerComponent {
     protected void removeOrganizationResolver(OrganizationResolver resolver) {
         ServiceReferenceHolder.getInstance().setOrganizationResolver(null);
     }
-    
+
+    @Reference(
+            name = "resourceQuotaLimiter.service",
+            service = ResourceQuotaLimiter.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeQuotaLimiter")
+    protected void addQuotaLimiter(ResourceQuotaLimiter rateLimiter) {
+        ServiceReferenceHolder.getInstance().setResourceQuotaLimiter(rateLimiter);
+    }
+
+    protected void removeQuotaLimiter(ResourceQuotaLimiter rateLimiter) {
+        ServiceReferenceHolder.getInstance().setResourceQuotaLimiter(null);
+    }
 }
 

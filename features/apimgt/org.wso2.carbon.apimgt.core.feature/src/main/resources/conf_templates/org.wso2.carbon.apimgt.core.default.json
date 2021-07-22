@@ -42,6 +42,7 @@
   "apim.cache.restapi_token.expiry_time" : "300s",
   "apim.cache.restapi_cache_control_headers.max_age" : "86400s",
   "apim.analytics.enable": false,
+  "apim.api_quota_limit.enable": true,
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",
   "apim.key_manager.service_url": "https://localhost:${mgt.transport.https.port}${carbon.context}services/",

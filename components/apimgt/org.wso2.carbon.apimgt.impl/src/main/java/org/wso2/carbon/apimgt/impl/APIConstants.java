@@ -605,6 +605,10 @@ public final class APIConstants {
     public static final String DEFAULT_WEBSUB_SIGNATURE_HEADER = "x-hub-signature";
     public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
 
+    // Constants for for api quota limit feature
+    public static final String API_QUOTA_LIMIT = "ResourceQuotaLimit.";
+    public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "Enabled";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";

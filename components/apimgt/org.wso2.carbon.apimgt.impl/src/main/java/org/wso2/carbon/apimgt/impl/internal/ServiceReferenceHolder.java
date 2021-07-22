@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.quotaLimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
@@ -62,6 +63,7 @@ public class ServiceReferenceHolder {
     private ImportExportAPI importExportService;
     private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
     private OrganizationResolver organizationResolver;
+    private ResourceQuotaLimiter resourceQuotaLimiter;
 
     private ServiceReferenceHolder() {
 
@@ -285,5 +287,10 @@ public class ServiceReferenceHolder {
 
     public void setOrganizationResolver(OrganizationResolver organizationResolver) {
         this.organizationResolver = organizationResolver;
+    }
+    public ResourceQuotaLimiter getResourceQuotaLimiter() { return resourceQuotaLimiter;}
+
+    public void setResourceQuotaLimiter(ResourceQuotaLimiter resourceQuotaLimiter) {
+        this.resourceQuotaLimiter = resourceQuotaLimiter;
     }
 }
