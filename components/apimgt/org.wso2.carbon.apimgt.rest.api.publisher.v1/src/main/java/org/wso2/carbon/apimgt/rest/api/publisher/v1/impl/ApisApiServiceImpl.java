@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -4400,15 +4401,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
-        List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
-        for (APIRevision apiRevision : apiRevisions) {
-            List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
-                    apiProvider.getAPIRevisionDeploymentList(apiRevision.getRevisionUUID());
-            for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
-                apiRevisionDeploymentsList.add(apiRevisionDeployment);
-            }
-        }
+        List<APIRevisionDeployment> apiRevisionDeploymentsList = apiProvider.getAPIRevisionsDeploymentList(apiId);
+
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsList) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
