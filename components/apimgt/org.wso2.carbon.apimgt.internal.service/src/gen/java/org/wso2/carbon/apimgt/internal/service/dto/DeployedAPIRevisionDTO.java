@@ -19,42 +19,42 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class DeployedAPIRevisionDTO   {
   
-    private String apiID = null;
-    private Integer revisionID = null;
+    private String apiId = null;
+    private Integer revisionId = null;
     private List<DeployedEnvInfoDTO> envInfo = new ArrayList<>();
 
   /**
    **/
-  public DeployedAPIRevisionDTO apiID(String apiID) {
-    this.apiID = apiID;
+  public DeployedAPIRevisionDTO apiId(String apiId) {
+    this.apiId = apiId;
     return this;
   }
 
   
   @ApiModelProperty(example = "c26b2b9b-4632-4ca4-b6f3-521c8863990c", value = "")
-  @JsonProperty("apiID")
- @Size(min=0,max=255)  public String getApiID() {
-    return apiID;
+  @JsonProperty("apiId")
+ @Size(min=0,max=255)  public String getApiId() {
+    return apiId;
   }
-  public void setApiID(String apiID) {
-    this.apiID = apiID;
+  public void setApiId(String apiId) {
+    this.apiId = apiId;
   }
 
   /**
    **/
-  public DeployedAPIRevisionDTO revisionID(Integer revisionID) {
-    this.revisionID = revisionID;
+  public DeployedAPIRevisionDTO revisionId(Integer revisionId) {
+    this.revisionId = revisionId;
     return this;
   }
 
   
   @ApiModelProperty(example = "1", value = "")
-  @JsonProperty("revisionID")
-  public Integer getRevisionID() {
-    return revisionID;
+  @JsonProperty("revisionId")
+  public Integer getRevisionId() {
+    return revisionId;
   }
-  public void setRevisionID(Integer revisionID) {
-    this.revisionID = revisionID;
+  public void setRevisionId(Integer revisionId) {
+    this.revisionId = revisionId;
   }
 
   /**
@@ -84,14 +84,14 @@ public class DeployedAPIRevisionDTO   {
       return false;
     }
     DeployedAPIRevisionDTO deployedAPIRevision = (DeployedAPIRevisionDTO) o;
-    return Objects.equals(apiID, deployedAPIRevision.apiID) &&
-        Objects.equals(revisionID, deployedAPIRevision.revisionID) &&
+    return Objects.equals(apiId, deployedAPIRevision.apiId) &&
+        Objects.equals(revisionId, deployedAPIRevision.revisionId) &&
         Objects.equals(envInfo, deployedAPIRevision.envInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiID, revisionID, envInfo);
+    return Objects.hash(apiId, revisionId, envInfo);
   }
 
   @Override
@@ -99,8 +99,8 @@ public class DeployedAPIRevisionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class DeployedAPIRevisionDTO {\n");
     
-    sb.append("    apiID: ").append(toIndentedString(apiID)).append("\n");
-    sb.append("    revisionID: ").append(toIndentedString(revisionID)).append("\n");
+    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    envInfo: ").append(toIndentedString(envInfo)).append("\n");
     sb.append("}");
     return sb.toString();

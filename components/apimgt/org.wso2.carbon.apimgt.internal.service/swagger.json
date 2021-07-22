@@ -1014,13 +1014,13 @@
     },
     "DeployedAPIRevision" : {
       "properties" : {
-        "apiID" : {
+        "apiId" : {
           "type" : "string",
           "example" : "c26b2b9b-4632-4ca4-b6f3-521c8863990c",
           "minLength" : 0,
           "maxLength" : 255
         },
-        "revisionID" : {
+        "revisionId" : {
           "type" : "integer",
           "example" : 1
         },
@@ -1225,8 +1225,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.",
-          "default" : "ORIGINAL",
-          "enum" : [ "EXCHANGED", "ORIGINAL" ]
+          "enum" : [ "EXCHANGED", "ORIGINAL" ],
+          "default" : "ORIGINAL"
         }
       }
     },

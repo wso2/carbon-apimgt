@@ -36,11 +36,11 @@ RuntimeMetadataApiService delegate = new RuntimeMetadataApiServiceImpl();
 
 
     @GET
-
-
+    
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Metadata information for API runtimes", notes = "This will provide access to the deployment metadata in json format ", response = Void.class, tags={ "Retrieving Runtime artifacts" })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Json file of runtime metadata", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response runtimeMetadataGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{

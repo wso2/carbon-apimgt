@@ -94,8 +94,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
             // get revision uuid
-            String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionID()),
-                    deployedAPIRevisionDTO.getApiID());
+            String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
+                    deployedAPIRevisionDTO.getApiId());
             if (revisionUUID == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
@@ -118,7 +118,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 deployedAPIRevisions.add(deployedAPIRevision);
             }
-            apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiID(), revisionUUID, deployedAPIRevisions);
+            apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiId(), revisionUUID, deployedAPIRevisions);
         }
 
         Response.Status status = Response.Status.CREATED;

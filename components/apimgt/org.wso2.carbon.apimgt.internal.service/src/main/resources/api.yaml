@@ -547,7 +547,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   #--------------------------------------------
-  # Deploy a revision
+  # Deployed revision information
   #--------------------------------------------
   /apis/deployed-revision:
     post:
@@ -806,12 +806,12 @@ definitions:
   DeployedAPIRevision:
     title: Deployed revision information
     properties:
-      apiID:
+      apiId:
         maxLength: 255
         minLength: 0
         type: string
         example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-      revisionID:
+      revisionId:
         type: integer
         example: 1
       envInfo:

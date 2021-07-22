@@ -3418,10 +3418,10 @@ public class SQLConstants {
                 "FROM " +
                 "(SELECT NAME, VHOST, REVISION_UUID, DEPLOYED_TIME, NULL AS DISPLAY_ON_DEVPORTAL, NULL AS DEPLOY_TIME " +
                 "FROM " +
-                "AM_DEPLOYED_REVISION t1 " +
+                "AM_DEPLOYED_REVISION DR " +
                 "UNION " +
                 "SELECT NAME, VHOST, REVISION_UUID, NULL AS DEPLOYED_TIME, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME as DEPLOY_TIME " +
-                "FROM AM_DEPLOYMENT_REVISION_MAPPING t2) AS t3 " +
+                "FROM AM_DEPLOYMENT_REVISION_MAPPING DRM) AS t3 " +
                 "GROUP BY t3.NAME, t3.REVISION_UUID, t3.VHOST)";
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, AR.REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
                 "CREATED_BY, NAME, VHOST, DISPLAY_ON_DEVPORTAL, DEPLOY_TIME, DEPLOYED_TIME " +
@@ -3444,7 +3444,6 @@ public class SQLConstants {
                 "WHERE t4.REVISION_UUID " +
                 "IN " +
                 "(SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ?)";
-
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING ADRM LEFT JOIN AM_REVISION AR ON " +
                 "ADRM.REVISION_UUID = AR.REVISION_UUID WHERE AR.API_UUID = ?";
