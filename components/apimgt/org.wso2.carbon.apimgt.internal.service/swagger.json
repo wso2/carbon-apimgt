@@ -717,6 +717,34 @@
         }
       }
     },
+    "/apis/deployed-revision" : {
+      "post" : {
+        "tags" : [ "API Revisions" ],
+        "summary" : "Deploy Revision",
+        "description" : "Deploy a revision\n",
+        "operationId" : "deployedAPIRevision",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "deployedAPIRevisionDTOList",
+          "description" : "Notification event payload",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/DeployedAPIRevision"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Created.\n"
+          },
+          "default" : {
+            "$ref" : "#/definitions/Error"
+          }
+        }
+      }
+    },
     "/ga-config" : {
       "get" : {
         "tags" : [ "Retrieving Runtime artifacts" ],
@@ -996,6 +1024,45 @@
       },
       "title" : "API List"
     },
+    "DeployedAPIRevision" : {
+      "properties" : {
+        "apiId" : {
+          "type" : "string",
+          "example" : "c26b2b9b-4632-4ca4-b6f3-521c8863990c",
+          "minLength" : 0,
+          "maxLength" : 255
+        },
+        "revisionId" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "envInfo" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/DeployedEnvInfo"
+          }
+        }
+      },
+      "title" : "Deployed revision information"
+    },
+    "DeployedEnvInfo" : {
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "default",
+          "minLength" : 1,
+          "maxLength" : 255
+        },
+        "vhost" : {
+          "type" : "string",
+          "example" : "mg.wso2.com",
+          "minLength" : 1,
+          "maxLength" : 255,
+          "pattern" : "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+        }
+      },
+      "title" : "Environment information"
+    },
     "API" : {
       "properties" : {
         "uuid" : {
@@ -1170,8 +1237,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.",
-          "default" : "ORIGINAL",
-          "enum" : [ "EXCHANGED", "ORIGINAL" ]
+          "enum" : [ "EXCHANGED", "ORIGINAL" ],
+          "default" : "ORIGINAL"
         }
       }
     },

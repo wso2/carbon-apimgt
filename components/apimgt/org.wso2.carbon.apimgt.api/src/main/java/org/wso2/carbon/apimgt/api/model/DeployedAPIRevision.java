@@ -20,15 +20,13 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
 
-public class APIRevisionDeployment implements Serializable {
+public class DeployedAPIRevision implements Serializable {
     private static final long serialVersionUID = 1L;
     private int id;
     private String revisionUUID;
     private String deployment;
     private String vhost;
-    private boolean isDisplayOnDevportal;
     private String deployedTime;
-    private String successDeployedTime;
 
     public int getId() {
         return id;
@@ -62,27 +60,11 @@ public class APIRevisionDeployment implements Serializable {
         this.vhost = vhost;
     }
 
-    public boolean isDisplayOnDevportal() {
-        return isDisplayOnDevportal;
-    }
-
-    public void setDisplayOnDevportal(boolean displayOnDevportal) {
-        isDisplayOnDevportal = displayOnDevportal;
-    }
-
     public String getDeployedTime() {
         return deployedTime;
     }
 
     public void setDeployedTime(String deployedTime) {
         this.deployedTime = deployedTime;
-    }
-
-    public String getSuccessDeployedTime() {
-        return successDeployedTime;
-    }
-
-    public void setSuccessDeployedTime(String successDeployedTime) {
-        this.successDeployedTime = successDeployedTime;
     }
 }
