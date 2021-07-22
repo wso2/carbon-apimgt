@@ -735,7 +735,7 @@ public class OAS3Parser extends APIDefinition {
                 endpoints = openAPI.getServers().stream().map(url -> url.getUrl()).collect(Collectors.toList());
                 for (String endpoint : endpoints) {
                     if (endpoint.startsWith("/")) {
-                        if (host.equals("")) {
+                        if (StringUtils.isEmpty(host)) {
                             endpointNew = "http://api.yourdomain.com" + endpoint;
                         } else {
                             endpointNew = host + endpoint;
