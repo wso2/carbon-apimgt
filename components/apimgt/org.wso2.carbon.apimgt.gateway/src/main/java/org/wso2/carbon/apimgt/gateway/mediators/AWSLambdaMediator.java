@@ -28,6 +28,7 @@ import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -57,6 +58,8 @@ public class AWSLambdaMediator extends AbstractMediator {
     private static final String PATH_PARAMETERS = "pathParameters";
     private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
     private static final String BODY_PARAMETER = "body";
+    private static final String PATH = "path";
+    private static final String HTTP_METHOD = "httpMethod";
 
     public AWSLambdaMediator() {
 
@@ -102,6 +105,8 @@ public class AWSLambdaMediator extends AbstractMediator {
         }
         payload.add(PATH_PARAMETERS, pathParameters);
         payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
+        payload.addProperty(HTTP_METHOD, (String) messageContext.getProperty(APIConstants.REST_METHOD));
+        payload.addProperty(PATH, (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
 
         // Set lambda backend invocation start time for analytics
         messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
@@ -112,7 +117,7 @@ public class AWSLambdaMediator extends AbstractMediator {
         } else {
             body = "{}";
         }
-        payload.addProperty(BODY_PARAMETER, body);
+        payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
 
         if (log.isDebugEnabled()) {
             log.debug("Passing the payload " + payload.toString() + " to AWS Lambda function with resource name "
