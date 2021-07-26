@@ -185,7 +185,7 @@ public class OASTestBase {
         api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost)));
 
         String definition = parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResources);
-        APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition,false);
+        APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
 
@@ -205,7 +205,7 @@ public class OASTestBase {
         String extraResourcesInDefinition = jsonObject.getJSONObject("extraResourcesInDefinition").toString();
         api.setUriTemplates(new HashSet<>(Arrays.asList(itemGet, itemPost)));
         definition = parser.generateAPIDefinition(new SwaggerData(api), extraResourcesInDefinition);
-        response = parser.validateAPIDefinition(definition,false);
+        response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
         uriTemplates = parser.getURITemplates(definition);
@@ -271,7 +271,7 @@ public class OASTestBase {
         api.setUriTemplates(new HashSet<>(Arrays.asList(petPost, updatedItemGet)));
 
         String definition = parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResourcesWithExtension);
-        APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition,false);
+        APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         return definition;
     }
