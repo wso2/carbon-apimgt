@@ -1237,11 +1237,11 @@ public class APIConsumerImplTest {
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
-        Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString(),Mockito.anyString())).thenReturn(true, false);
+        Mockito.when(apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(Mockito.anyInt(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
         keyManagerConfigurationsDto.setUuid(UUID.randomUUID().toString());
         keyManagerConfigurationsDto.setEnabled(true);
@@ -1256,14 +1256,15 @@ public class APIConsumerImplTest {
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT", "default", "carbon" +
-                    ".super");
+            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1",
+                    "refresh", "DEFAULT", "Resident Key Manager", "carbon.super");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("is used for another Application"));
+            Assert.assertTrue(e.getMessage().contains("Key Mappings already exists for application"));
         }
         Assert.assertEquals(8, apiConsumer.mapExistingOAuthClient("", "admin", "1",
-                "app1", "refresh", "DEFAULT", "default", "carbon.super").size());
+                "app1", "PRODUCTION", "DEFAULT", "Resident Key Manager",
+                "carbon.super").size());
     }
 
     @Test

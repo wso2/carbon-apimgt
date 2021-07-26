@@ -2469,22 +2469,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
-        // Checking if clientId is mapped with another application.
-        if (apiMgtDAO.isMappingExistsforConsumerKey(keyManagerId, clientId)) {
-            String message = "Consumer Key " + clientId + " is used for another Application.";
-            log.error(message);
-            throw new APIManagementException(message);
-        }
-        log.debug("Client ID not mapped previously with another application.");
 
+        //Get application ID
+        int applicationId = apiMgtDAO.getApplicationId(applicationName, userName);
+
+        // Checking if clientId is mapped with another application.
+        if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(applicationId, keyManagerName, keyManagerId,
+                keyType, clientId)) {
+            throw new APIManagementException("Key Mappings already exists for application " + applicationName
+                    + " or consumer key " + clientId, ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Client ID " + clientId + " not mapped previously with another application. No existing "
+                    + "key mappings available for application " + applicationName);
+        }
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = isOauthAppValidation() ?
                 keyManager.mapOAuthApplication(oauthAppRequest) : oauthAppRequest.getOAuthApplicationInfo();
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId,
-                keyManagerId, keyMappingId);
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
+                keyMappingId);
         Object enableTokenGeneration =
                 keyManager.getKeyManagerConfiguration().getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
 
@@ -3965,6 +3971,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
             }
+
+            //check if there are any existing key mappings set for the application and the key manager.
+            if (apiMgtDAO.isKeyMappingExistsForApplication(application.getId(), keyManagerName, keyManagerId,
+                    tokenType)) {
+                throw new APIManagementException("Key Mappings already exists for application " + application.getName(),
+                        ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+            }
+
             // initiate WorkflowExecutor
             WorkflowExecutor appRegistrationWorkflow = null;
             // initiate ApplicationRegistrationWorkflowDTO
