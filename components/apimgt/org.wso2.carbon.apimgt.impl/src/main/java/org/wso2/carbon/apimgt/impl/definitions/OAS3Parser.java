@@ -586,6 +586,11 @@ public class OAS3Parser extends APIDefinition {
         return generateAPIDefinition(swaggerData, openAPI);
     }
 
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, "", returnJsonContent);
+    }
+
     /**
      * This method generates API definition using the given api's URI templates and the swagger.
      * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
@@ -701,6 +706,7 @@ public class OAS3Parser extends APIDefinition {
      * This method validates the given OpenAPI definition by content
      *
      * @param apiDefinition     OpenAPI Definition content
+     * @param host OpenAPI Definition url
      * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
      * @return APIDefinitionValidationResponse object with validation information
      */

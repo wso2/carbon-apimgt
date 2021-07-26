@@ -643,7 +643,7 @@ public class OAS2Parser extends APIDefinition {
      * @return APIDefinitionValidationResponse object with validation information
      */
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url, boolean returnJsonContent)
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         SwaggerParser parser = new SwaggerParser();
@@ -686,6 +686,11 @@ public class OAS2Parser extends APIDefinition {
             }
         }
         return validationResponse;
+    }
+
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
+        return null;
     }
 
     /**

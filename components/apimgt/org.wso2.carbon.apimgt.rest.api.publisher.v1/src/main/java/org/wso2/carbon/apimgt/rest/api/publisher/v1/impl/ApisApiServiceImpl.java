@@ -2983,7 +2983,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
         APIDefinitionValidationResponse response = OASParserUtil
-                .validateAPIDefinition(apiDefinition, "",true);
+                .validateAPIDefinition(apiDefinition, true);
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
@@ -4042,17 +4042,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 OASParserUtil.extractAndValidateOpenAPIArchive(fileInputStream, returnContent);
                     } else {
                         String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, "", returnContent);
+                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
                     }
                 } else {
                     String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, "", returnContent);
+                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
                 }
             }  catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }
         } else if (apiDefinition != null) {
-            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, "", returnContent);
+            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, returnContent);
         }
         responseDTO = APIMappingUtil.getOpenAPIDefinitionValidationResponseFromModel(validationResponse,
                 returnContent);

@@ -468,7 +468,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (definitionContent != null) {
-            validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, "",true);
+            validationResponse = OASParserUtil.validateAPIDefinition(definitionContent,true);
         } else if (url != null) {
             validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, true);
         }

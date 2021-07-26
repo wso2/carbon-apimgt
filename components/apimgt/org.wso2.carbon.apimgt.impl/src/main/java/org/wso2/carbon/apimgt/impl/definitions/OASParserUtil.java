@@ -855,7 +855,7 @@ public class OASParserUtil {
             }
         }
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
-        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, "", returnContent);
+        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
         return apiDefinitionValidationResponse;
     }
 
@@ -863,6 +863,29 @@ public class OASParserUtil {
      * Try to validate a give openAPI definition using OpenAPI 3 parser
      *
      * @param apiDefinition     definition
+     * @param returnJsonContent whether to return definition as a json content
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+            throws APIManagementException {
+        APIDefinitionValidationResponse validationResponse =
+                oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
+        if (!validationResponse.isValid()) {
+            for (ErrorHandler handler : validationResponse.getErrorItems()) {
+                if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
+                    return tryOAS2Validation(apiDefinition, returnJsonContent);
+                }
+            }
+        }
+        return validationResponse;
+    }
+
+    /**
+     * Try to validate a give openAPI definition using OpenAPI 3 parser
+     *
+     * @param apiDefinition     definition
+     * @param url OpenAPI definition url
      * @param returnJsonContent whether to return definition as a json content
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
@@ -881,7 +904,6 @@ public class OASParserUtil {
         }
         return validationResponse;
     }
-
     /**
      * Try to validate a give openAPI definition using swagger parser
      *
@@ -893,7 +915,7 @@ public class OASParserUtil {
     private static APIDefinitionValidationResponse tryOAS2Validation(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse =
-                oas2Parser.validateAPIDefinition(apiDefinition, "", returnJsonContent);
+                oas2Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode() == handler.getErrorCode()) {
