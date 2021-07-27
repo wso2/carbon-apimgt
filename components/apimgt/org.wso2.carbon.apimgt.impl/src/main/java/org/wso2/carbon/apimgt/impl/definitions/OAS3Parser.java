@@ -734,7 +734,7 @@ public class OAS3Parser extends APIDefinition {
             OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
             io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
             List<String> endpoints;
-            String endpointNew = "";
+            String endpointWithHost = "";
             if (openAPI.getServers() == null || openAPI.getServers().isEmpty()) {
                 endpoints = null;
             } else {
@@ -742,11 +742,11 @@ public class OAS3Parser extends APIDefinition {
                 for (String endpoint : endpoints) {
                     if (endpoint.startsWith("/")) {
                         if (StringUtils.isEmpty(host)) {
-                            endpointNew = "http://api.yourdomain.com" + endpoint;
+                            endpointWithHost = "http://api.yourdomain.com" + endpoint;
                         } else {
-                            endpointNew = host + endpoint;
+                            endpointWithHost = host + endpoint;
                         }
-                       endpoints.set(endpoints.indexOf(endpoint), endpointNew);
+                       endpoints.set(endpoints.indexOf(endpoint), endpointWithHost);
                     }
                 }
             }
