@@ -740,7 +740,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
-            apiProvider.saveToGateway(createdProduct);
+            // Added along with the requirement to selectively publish api products to gateways
+            String lifeCycleState = productToBeAdded.getState();
+            if (StringUtils.isNotEmpty(lifeCycleState) && lifeCycleState
+                    .equalsIgnoreCase(APIStatus.PUBLISHED.toString())) {
+                apiProvider.saveToGateway(createdProduct);
+            }
 
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(

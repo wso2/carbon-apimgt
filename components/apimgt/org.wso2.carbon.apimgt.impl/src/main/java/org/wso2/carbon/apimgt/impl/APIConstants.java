@@ -508,6 +508,7 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String RETIRED = "RETIRED";
     public static final String BLOCKED = "BLOCKED";
+    public static final String UNPUBLISHED = "UNPUBLISHED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
     public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
     public static final String GOVERNANCE = "governance";
