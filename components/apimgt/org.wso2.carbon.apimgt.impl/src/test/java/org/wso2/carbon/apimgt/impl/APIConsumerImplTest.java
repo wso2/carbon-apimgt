@@ -187,6 +187,8 @@ public class APIConsumerImplTest {
         });
 
         PowerMockito.when(keyManagerConfigurationDTO.getOrganization()).thenReturn("carbon.super");
+        PowerMockito.when(keyManagerConfigurationDTO.getUuid()).thenReturn("kmv72L9T0oGtQcBwvgROZWCqd7oa");
+        PowerMockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
     }
 
     @Test
