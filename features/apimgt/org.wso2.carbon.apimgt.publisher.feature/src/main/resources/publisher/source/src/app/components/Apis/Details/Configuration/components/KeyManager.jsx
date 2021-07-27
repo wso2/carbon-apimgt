@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -31,6 +31,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import API from 'AppData/api';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from '../../components/ApiContext';
 
 const useStyles = makeStyles((theme) => ({
     expansionPanel: {
@@ -83,8 +85,11 @@ export default function KeyManager(props) {
             value: newKeyManagers,
         });
     };
+    const { api } = useContext(APIContext);
     useEffect(() => {
-        API.keyManagers().then((response) => setKeyManagersConfigured(response.body.list));
+        if (!isRestricted(['apim:api_create'], api)) {
+            API.keyManagers().then((response) => setKeyManagersConfigured(response.body.list));
+        }
     }, []);
     if (!securityScheme.includes('oauth2')) {
         return (
