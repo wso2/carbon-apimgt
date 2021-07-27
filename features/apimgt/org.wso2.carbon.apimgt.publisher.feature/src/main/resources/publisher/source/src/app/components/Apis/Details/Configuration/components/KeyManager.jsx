@@ -130,7 +130,7 @@ export default function KeyManager(props) {
                 >
                     <FormControlLabel
                         value='all'
-                        control={<Radio />}
+                        control={<Radio disabled={isRestricted(['apim:api_create'], api)} />}
                         label={(
                             <FormattedMessage
                                 id='Apis.Details.Configuration.components.KeyManager.allow.all'
@@ -140,7 +140,7 @@ export default function KeyManager(props) {
                     />
                     <FormControlLabel
                         value='selected'
-                        control={<Radio />}
+                        control={<Radio disabled={isRestricted(['apim:api_create'], api)} />}
                         label={(
                             <FormattedMessage
                                 id='Apis.Details.Configuration.components.KeyManager.allow.selected'
