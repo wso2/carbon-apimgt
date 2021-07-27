@@ -74,6 +74,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -455,10 +456,19 @@ public class TemplateBuilderUtil {
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
 
+        JSONObject originalProperties = api.getAdditionalProperties();
+        // add new property for entires that has a __display suffix
+        JSONObject modifiedProperties = getModifiedProperties(originalProperties);
+        api.setAdditionalProperties(modifiedProperties);
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
-        return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
+        GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
                 extractedFolderPath, apidto, clientCertificatesDTOList);
+        // Reset the additional properties to the original values
+        if (originalProperties != null) {
+            api.setAdditionalProperties(originalProperties);
+        }
+        return gatewaAPIDto;
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -1254,6 +1264,21 @@ public class TemplateBuilderUtil {
             }
         }
         return "";
+    }
+    
+    public static JSONObject getModifiedProperties(JSONObject originalProperties) {
+        JSONObject modifiedProperties = new JSONObject();
+        if (originalProperties.size() > 0) {
+            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext();) {
+                String key = (String) iterator.next();
+                String val = (String) originalProperties.get(key);
+                if (key.endsWith("__display")) {
+                    modifiedProperties.put(key.replace("__display", ""), val);
+                }
+                modifiedProperties.put(key, val);
+            }
+        }
+        return modifiedProperties;
     }
 
 }
