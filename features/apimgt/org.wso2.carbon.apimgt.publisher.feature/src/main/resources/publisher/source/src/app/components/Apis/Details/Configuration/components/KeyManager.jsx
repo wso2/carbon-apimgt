@@ -32,7 +32,7 @@ import API from 'AppData/api';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { isRestricted } from 'AppData/AuthManager';
-import APIContext from '../../components/ApiContext';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const useStyles = makeStyles((theme) => ({
     expansionPanel: {
