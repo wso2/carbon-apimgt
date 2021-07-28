@@ -236,12 +236,11 @@ export default function Environments() {
                         {isUpdating && <CircularProgress size={20} />}
                     </Button>
                 </Grid>
-                {isAPIProduct && (
+                {isAPIProduct && api.state !== 'PUBLISHED' && (
                     <Grid item>
                         <Button
                             className={classes.saveButton}
-                            disabled={isRestricted(['apim:api_publish'], api) || isPublishing
-                            || api.state === 'PUBLISHED'}
+                            disabled={isRestricted(['apim:api_publish'], api) || isPublishing}
                             type='submit'
                             variant='contained'
                             color='primary'
