@@ -160,8 +160,39 @@ export default function ApiProductCreateWrapper(props) {
     }
 
     const [isCreating, setCreating] = useState();
+    const [isPublishing, setPublishing] = useState();
     const classes = useStyles();
     const steps = getSteps();
+
+    const publishAPIProduct = () => {
+        setPublishing(true);
+        const {
+            name, context, policies,
+        } = apiInputs;
+        const apiData = {
+            name,
+            context,
+            policies,
+            apis: apiResources,
+        };
+        apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
+        apiData.transport = ['http', 'https'];
+        const newAPIProduct = new APIProduct(apiData);
+        newAPIProduct
+            .saveProduct(apiData)
+            .then((apiProduct) => {
+                Alert.info('API Product created successfully');
+                history.push(`/api-products/${apiProduct.id}/overview`);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API Product');
+                }
+            })
+            .finally(() => setPublishing(false));
+    };
 
     const createAPIProduct = () => {
         setCreating(true);
@@ -173,6 +204,7 @@ export default function ApiProductCreateWrapper(props) {
             context,
             policies,
             apis: apiResources,
+            state: 'CREATED',
         };
         apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
         apiData.transport = ['http', 'https'];
@@ -282,10 +314,26 @@ export default function ApiProductCreateWrapper(props) {
                                         onClick={createAPIProduct}
                                     >
                                         <FormattedMessage
-                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.publish'
-                                            defaultMessage='Publish'
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.create'
+                                            defaultMessage='Create'
                                         />
                                         {isCreating && <CircularProgress size={24} />}
+                                    </Button>
+                                )}
+                            </Grid>
+                            <Grid item>
+                                {wizardStep === 1 && (
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        disabled={!apiInputs.isFormValid || isPublishing || (apiResources.length === 0)}
+                                        onClick={publishAPIProduct}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Create.APIProduct.APIProductCreateWrapper.publish'
+                                            defaultMessage='Create & Publish'
+                                        />
+                                        {isPublishing && <CircularProgress size={24} />}
                                     </Button>
                                 )}
                                 {wizardStep === 0 && (

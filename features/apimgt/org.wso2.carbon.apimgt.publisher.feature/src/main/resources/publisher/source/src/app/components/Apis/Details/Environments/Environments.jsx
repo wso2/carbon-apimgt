@@ -57,13 +57,13 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
-    const { api, updateAPI } = useContext(APIContext);
+    const { api, updateAPI, isAPIProduct } = useContext(APIContext);
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
-    const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
+    const [selectedMgLabel, setSelectedMgLabel] = isAPIProduct ? [] : useState([...api.labels]);
     const [isUpdating, setUpdating] = useState(false);
-    const [selectedDeployments, setSelectedDeployments] = useState([...api.deploymentEnvironments]);
-
+    const [selectedDeployments, setSelectedDeployments] = isAPIProduct ? [] : useState([...api.deploymentEnvironments]);
+    const [isPublishing, setPublishing] = useState(false);
     const restApi = new API();
     const [allDeployments, setAllDeployments] = useState([]);
     useEffect(() => {
@@ -94,6 +94,27 @@ export default function Environments() {
                 console.error(error);
             })
             .finally(() => setUpdating(false));
+    }
+
+    /**
+     *
+     * Handle the Environments publish button action
+     */
+    function addEnvironmentsAndPublish() {
+        setPublishing(true);
+        updateAPI({
+            gatewayEnvironments,
+            state: 'PUBLISHED',
+        })
+            .then(() => Alert.info('API Product Update Successfully'))
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while updating the environments');
+                }
+            })
+            .finally(() => setPublishing(false));
     }
 
     return (
@@ -171,7 +192,7 @@ export default function Environments() {
                 </Table>
             </Paper>
 
-            {!api.isWebSocket()
+            {(!api.isWebSocket() && !isAPIProduct)
                 && (
                     <MicroGateway
                         selectedMgLabel={selectedMgLabel}
@@ -215,6 +236,25 @@ export default function Environments() {
                         {isUpdating && <CircularProgress size={20} />}
                     </Button>
                 </Grid>
+                {isAPIProduct && (
+                    <Grid item>
+                        <Button
+                            className={classes.saveButton}
+                            disabled={isRestricted(['apim:api_publish'], api) || isPublishing
+                            || api.state === 'PUBLISHED'}
+                            type='submit'
+                            variant='contained'
+                            color='primary'
+                            onClick={addEnvironmentsAndPublish}
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.Environments.Environments.publish'
+                                defaultMessage='Publish'
+                            />
+                            {isPublishing && <CircularProgress size={20} />}
+                        </Button>
+                    </Grid>
+                )}
                 <Grid item>
                     <Link to={'/apis/' + api.id + '/overview'}>
                         <Button className={classes.saveButton}>

@@ -588,17 +588,15 @@ class Details extends Component {
                             />
                         )}
                         {this.getLeftMenuItemForDefinitionByType(api.type)}
-                        {!isAPIProduct && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.environments',
-                                    defaultMessage: 'environments',
-                                })}
-                                route='environments'
-                                to={pathPrefix + 'environments'}
-                                Icon={<PersonPinCircleOutlinedIcon />}
-                            />
-                        )}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.environments',
+                                defaultMessage: 'environments',
+                            })}
+                            route='environments'
+                            to={pathPrefix + 'environments'}
+                            Icon={<PersonPinCircleOutlinedIcon />}
+                        />
                         {!api.isWebSocket() && !isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -720,6 +718,10 @@ class Details extends Component {
                                     component={() => <Environments api={api} />}
                                 />
                                 <Route
+                                    path={Details.subPaths.ENVIRONMENTS_PRODUCT}
+                                    component={() => <Environments api={api} />}
+                                />
+                                <Route
                                     path={Details.subPaths.OPERATIONS}
                                     component={() => <Operations api={api} updateAPI={this.updateAPI} />}
                                 />
@@ -811,6 +813,7 @@ Details.subPaths = {
     RUNTIME_CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/runtime-configuration',
     RUNTIME_CONFIGURATION_WEBSOCKET: '/apis/:api_uuid/runtime-configuration-websocket',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    ENVIRONMENTS_PRODUCT: '/api-products/:apiprod_uuid/environments',
     ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
