@@ -295,20 +295,22 @@ export default function RuntimeConfiguration() {
     const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'FAULT')[0]);
     const intl = useIntl();
     useEffect(() => {
-        Api.keyManagers().then((response) => {
-            const kmNameList = [];
-            if (response.body.list) {
-                response.body.list.forEach((km) => kmNameList.push(km.name));
-            }
-            setKeyManagersConfigured(kmNameList);
-        })
-            .catch((error) => {
-                const { response } = error;
-                if (response.body) {
-                    const { description } = response.body;
-                    Alert.error(description);
+        if (!isRestricted(['apim:api_create'], api)) {
+            Api.keyManagers().then((response) => {
+                const kmNameList = [];
+                if (response.body.list) {
+                    response.body.list.forEach((km) => kmNameList.push(km.name));
                 }
-            });
+                setKeyManagersConfigured(kmNameList);
+            })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        const { description } = response.body;
+                        Alert.error(description);
+                    }
+                });
+        }
     }, []);
 
     const getMediationPoliciesToSave = () => {

@@ -163,25 +163,27 @@ const APIDetailsTopMenu = (props) => {
             <div className={classes.dateWrapper} />
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
-            {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
-            {(isVisibleInStore || isAPIProduct) && (
-                <a
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    href={devportalUrl}
-                    className={classes.viewInStoreLauncher}
-                    style={{ minWidth: 90 }}
-                >
-                    <div>
-                        <LaunchIcon />
-                    </div>
-                    <Typography variant='caption'>
-                        <FormattedMessage
-                            id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
-                            defaultMessage='View in Dev Portal'
-                        />
-                    </Typography>
-                </a>
+            {(isVisibleInStore || isAPIProduct) && api.enableStore && (
+                <>
+                    <VerticalDivider height={70} />
+                    <a
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        href={devportalUrl}
+                        className={classes.viewInStoreLauncher}
+                        style={{ minWidth: 90 }}
+                    >
+                        <div>
+                            <LaunchIcon />
+                        </div>
+                        <Typography variant='caption'>
+                            <FormattedMessage
+                                id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
+                                defaultMessage='View in Dev Portal'
+                            />
+                        </Typography>
+                    </a>
+                </>
             )}
             {/* Page error banner */}
             {/* end of Page error banner */}
