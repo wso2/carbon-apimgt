@@ -34,6 +34,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
+import Tooltip from '@material-ui/core/Tooltip';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
@@ -238,20 +239,31 @@ export default function Environments() {
                 </Grid>
                 {isAPIProduct && api.state !== 'PUBLISHED' && (
                     <Grid item>
-                        <Button
-                            className={classes.saveButton}
-                            disabled={isRestricted(['apim:api_publish'], api) || isPublishing}
-                            type='submit'
-                            variant='contained'
-                            color='primary'
-                            onClick={addEnvironmentsAndPublish}
+                        <Tooltip
+                            title={(
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.publish.tooltip'
+                                    defaultMessage='Publish to Gateways and Developer Portal'
+                                />
+                            )}
+                            placement='bottom'
+                            interactive
                         >
-                            <FormattedMessage
-                                id='Apis.Details.Environments.Environments.publish'
-                                defaultMessage='Publish'
-                            />
-                            {isPublishing && <CircularProgress size={20} />}
-                        </Button>
+                            <Button
+                                className={classes.saveButton}
+                                disabled={isRestricted(['apim:api_publish'], api) || isPublishing}
+                                type='submit'
+                                variant='contained'
+                                color='primary'
+                                onClick={addEnvironmentsAndPublish}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.publish'
+                                    defaultMessage='Publish'
+                                />
+                                {isPublishing && <CircularProgress size={20} />}
+                            </Button>
+                        </Tooltip>
                     </Grid>
                 )}
                 <Grid item>

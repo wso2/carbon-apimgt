@@ -509,6 +509,7 @@
   "Apis.Details.Environments.Environments.Kubernetes": "Kubernetes",
   "Apis.Details.Environments.Environments.cancel": "Cancel",
   "Apis.Details.Environments.Environments.publish": "Publish",
+  "Apis.Details.Environments.Environments.publish.tooltip": "Publish to Gateways and Developer Portal",
   "Apis.Details.Environments.Environments.save": "Save",
   "Apis.Details.Environments.Environments.update.not.allowed": "* You are not authorized to update particular fields of the API due to insufficient permissions",
   "Apis.Details.Environments.Gateway.labels.emptym1": "Gateway labels are not available.",

@@ -509,6 +509,7 @@
   "Apis.Details.Environments.Environments.Kubernetes": "",
   "Apis.Details.Environments.Environments.cancel": "",
   "Apis.Details.Environments.Environments.publish": "",
+  "Apis.Details.Environments.Environments.publish.tooltip": "",
   "Apis.Details.Environments.Environments.save": "",
   "Apis.Details.Environments.Environments.update.not.allowed": "",
   "Apis.Details.Environments.Gateway.labels.emptym1": "",
