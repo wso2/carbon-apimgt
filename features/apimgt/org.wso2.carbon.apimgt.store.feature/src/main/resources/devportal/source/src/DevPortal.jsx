@@ -337,7 +337,7 @@ class DevPortal extends React.Component {
                                 <Suspense fallback={<Progress />}>
                                     <IntlProvider locale={language} messages={messages}>
                                         <Switch>
-                                            <Route path='/logout' component={Logout} />
+                                            <Route path='/logout' render={() => (<Logout theme={theme} />)} />
                                             <Route component={protectedApp} />
                                         </Switch>
                                     </IntlProvider>
