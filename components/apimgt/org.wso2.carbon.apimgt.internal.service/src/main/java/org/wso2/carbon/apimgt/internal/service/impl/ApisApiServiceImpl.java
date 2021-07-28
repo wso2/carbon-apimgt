@@ -113,7 +113,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     deployedAPIRevision.setDeployment(environment);
                     deployedAPIRevision.setVhost(deployedEnvInfoDTO.getVhost());
-                    if (org.apache.commons.lang3.StringUtils.isEmpty(deployedEnvInfoDTO.getVhost())) {
+                    if (StringUtils.isEmpty(deployedEnvInfoDTO.getVhost())) {
                         RestApiUtil.handleBadRequest(
                                 "Required field 'vhost' not found in deployment", log
                         );
