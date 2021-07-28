@@ -3431,7 +3431,7 @@ public class SQLConstants {
                 " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL)" +
                         " VALUES (?,?,?,?)";
         public static final String ADD_DEPLOYED_API_REVISION =
-                " INSERT INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID)" +
+                " REPLACE INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID)" +
                         " VALUES (?,?,?)";
         public static final String DELETE_API_REVISION_DEPLOYMENTS_MAPPING_BY_REVISION_UUID =
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";

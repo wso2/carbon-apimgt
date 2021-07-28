@@ -550,7 +550,7 @@ paths:
   # Deployed revision information
   #--------------------------------------------
   /apis/deployed-revision:
-    post:
+    put:
       tags:
         - API Revisions
       summary: Deploy Revision

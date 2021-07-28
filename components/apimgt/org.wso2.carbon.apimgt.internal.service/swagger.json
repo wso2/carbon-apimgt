@@ -706,7 +706,7 @@
       }
     },
     "/apis/deployed-revision" : {
-      "post" : {
+      "put" : {
         "tags" : [ "API Revisions" ],
         "summary" : "Deploy Revision",
         "description" : "Deploy a revision\n",

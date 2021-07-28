@@ -50,7 +50,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisGet(xWSO2Tenant, apiId, context, version, gatewayLabel, accept, securityContext);
     }
 
-    @POST
+    @PUT
     @Path("/deployed-revision")
     
     @Produces({ "application/json" })
