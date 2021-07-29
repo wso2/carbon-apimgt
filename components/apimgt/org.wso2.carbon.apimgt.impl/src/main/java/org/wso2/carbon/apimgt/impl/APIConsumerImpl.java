@@ -270,6 +270,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscriber;
     }
 
+    @Override
+    public boolean subscriberOrganizationCombinationExists(Subscriber subscriber, String organization) throws APIManagementException {
+        boolean exists = false;
+        try {
+            exists = apiMgtDAO.isSubscriberOrganizationCombinationExists(subscriber.getId(), organization);
+        } catch (APIManagementException e) {
+            handleException("Failed to get Subscriber Organization Combination", e);
+        }
+        return exists;
+    }
+
 
     /**
      * Returns the set of APIs with the given tag from the taggedAPIs Map

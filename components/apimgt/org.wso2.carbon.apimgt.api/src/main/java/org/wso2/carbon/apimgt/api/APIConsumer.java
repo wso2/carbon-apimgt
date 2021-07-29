@@ -61,6 +61,15 @@ public interface APIConsumer extends APIManager {
     Subscriber getSubscriber(String subscriberId) throws APIManagementException;
 
     /**
+     * @param subscriber subscriber
+     * @param organization organization
+     * @return Subscriber
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    boolean subscriberOrganizationCombinationExists(Subscriber subscriber, String organization)
+            throws APIManagementException;
+
+    /**
      * Returns a list of #{@link org.wso2.carbon.apimgt.api.model.API} bearing the selected tag
      *
      * @param tag name of the tag

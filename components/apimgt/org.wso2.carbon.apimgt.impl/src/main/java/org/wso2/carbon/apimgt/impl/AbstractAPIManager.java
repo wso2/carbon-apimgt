@@ -1713,10 +1713,20 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
     }
 
-    public void addSubscriber(String username, String groupingId, String organization)
+    public void addOrganizationSubscriberMapping(String organization, int subscriberId) throws APIManagementException {
+        try {
+            apiMgtDAO.addOrganizationSubscriberMapping(organization, subscriberId);
+        } catch (APIManagementException e) {
+            handleException("Error while adding subscriber organization mapping for subscriber: "+subscriberId+
+                    ", organization:"+organization, e);
+        }
+    }
+
+    public Subscriber addSubscriber(String username, String groupingId, String organization)
             throws APIManagementException {
 
         Subscriber subscriber = new Subscriber(username);
+        Subscriber addedSubscriber = null;
         subscriber.setSubscribedDate(new Date());
         try {
             int tenantId = APIUtil.getTenantId(username);
@@ -1730,7 +1740,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 subscriber.setEmail(StringUtils.EMPTY);
             }
             subscriber.setTenantId(tenantId);
-            apiMgtDAO.addSubscriber(subscriber, groupingId, organization);
+            addedSubscriber = apiMgtDAO.addSubscriber(subscriber, groupingId, organization);
+
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
                     !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
                 // Add a default application once subscriber is added
@@ -1740,6 +1751,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
         }
+        return addedSubscriber;
     }
 
     protected String getTenantDomain(String username) {

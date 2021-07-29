@@ -402,7 +402,7 @@ public class ApiMgtDAO {
         return isAnyContentAware;
     }
 
-    public void addSubscriber(Subscriber subscriber, String groupingId, String organization) throws APIManagementException {
+    public Subscriber addSubscriber(Subscriber subscriber, String groupingId, String organization) throws APIManagementException {
 
         Connection conn = null;
         ResultSet rs = null;
@@ -445,6 +445,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
+        return  subscriber;
     }
 
     /**
@@ -17430,6 +17431,48 @@ public class ApiMgtDAO {
             preparedStatement.setString(3, apiUUID);
             preparedStatement.executeUpdate();
         }
+    }
+
+    public void addOrganizationSubscriberMapping(String organization, int subscriberId) throws APIManagementException {
+        String query = "INSERT INTO AM_SUBSCRIBER_ORG_MAPPING (SUBSCRIBER_ID, ORGANIZATION) VALUES (?,?)";
+        try (
+                Connection connection = APIMgtDBUtil.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(query)
+        ){
+            preparedStatement.setInt(1,subscriberId);
+            preparedStatement.setString(2, organization);
+
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            handleException("Failed to add Subscriber Organization Combination for subscriber:" + subscriberId +
+                    " organization: "+ organization, e);
+        }
+    }
+
+    public boolean isSubscriberOrganizationCombinationExists(int subscriberId, String organization)
+            throws APIManagementException {
+        String query = "SELECT * FROM AM_SUBSCRIBER_ORG_MAPPING WHERE ORGANIZATION = ? AND SUBSCRIBER_ID = ?";
+        boolean isExists = false;
+        try (
+                Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ){
+            preparedStatement.setString(1, organization);
+            preparedStatement.setInt(2, subscriberId);
+
+            try (ResultSet rs = preparedStatement.executeQuery();){
+                while (rs.next()) {
+                    isExists = true;
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get Subscriber Organization Combination for subscriber:" + subscriberId +
+                            " organization: "+ organization, e);
+        }
+
+        return isExists;
     }
 
     private class SubscriptionInfo {

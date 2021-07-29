@@ -335,6 +335,8 @@ public interface APIManager {
      */
     SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
 
+    void addOrganizationSubscriberMapping(String organization, int subscriberId) throws APIManagementException;
+
     /**
      * Creates a new subscriber given the username and the grouping Id
      *
@@ -343,7 +345,7 @@ public interface APIManager {
      * @param organization - the organization to which the subscriber belongs to
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
-    void addSubscriber(String username, String groupingId, String organization) throws APIManagementException;
+    Subscriber addSubscriber(String username, String groupingId, String organization) throws APIManagementException;
 
     /**
      * Updates the details of the given subscriber.
