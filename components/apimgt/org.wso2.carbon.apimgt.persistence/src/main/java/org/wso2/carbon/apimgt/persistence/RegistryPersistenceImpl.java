@@ -877,7 +877,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteAllAPIs(Organization org) throws APIPersistenceException {
-
+        throw new UnsupportedOperationException("This method is not supported on this instance");
     }
 
     @Override

@@ -145,7 +145,7 @@ public interface APIPersistence {
     void deleteAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
-     * Delete APIs
+     * Delete all APIs
      *
      * @param org   Organization the API is owned by
      * @throws APIPersistenceException
