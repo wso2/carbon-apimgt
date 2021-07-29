@@ -36,7 +36,7 @@ class Logout extends Component {
         this.authManager = new AuthManager();
         this.state = {
             logoutSuccess: false,
-            referrer: landingPage.active ? `/home` : `/apis`,
+            referrer: landingPage.active ? '/home' : '/apis',
         };
     }
 
