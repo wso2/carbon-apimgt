@@ -549,8 +549,8 @@ paths:
   #--------------------------------------------
   # Deployed revision information
   #--------------------------------------------
-  /apis/deployed-revision:
-    put:
+  /apis/deployed-revisions:
+    patch:
       tags:
         - API Revisions
       summary: Deploy Revision
