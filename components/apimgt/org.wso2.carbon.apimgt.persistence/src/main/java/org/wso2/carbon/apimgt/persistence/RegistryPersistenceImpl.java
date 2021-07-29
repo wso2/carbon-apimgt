@@ -876,7 +876,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void deleteAPIs(Organization org) throws APIPersistenceException {
+    public void deleteAllAPIs(Organization org) throws APIPersistenceException {
 
     }
 

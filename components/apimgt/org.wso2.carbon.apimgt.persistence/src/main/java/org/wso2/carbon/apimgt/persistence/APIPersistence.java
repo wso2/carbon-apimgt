@@ -150,7 +150,7 @@ public interface APIPersistence {
      * @param org   Organization the API is owned by
      * @throws APIPersistenceException
      */
-    void deleteAPIs(Organization org) throws APIPersistenceException;
+    void deleteAllAPIs(Organization org) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Publisher API listing
