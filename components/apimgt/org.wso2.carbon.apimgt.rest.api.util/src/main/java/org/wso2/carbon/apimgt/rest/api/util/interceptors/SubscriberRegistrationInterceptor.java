@@ -98,7 +98,8 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                         }
 
                         String organization = (String)message.get(RestApiConstants.ORGANIZATION);
-                        apiConsumer.addSubscriber(username, groupId, organization);
+                        Subscriber addedSubscriber = apiConsumer.addSubscriber(username, groupId, organization);
+                        apiConsumer.addOrganizationSubscriberMapping(organization,addedSubscriber.getId());
 
                         // The subscriber object added here is not a complete subscriber object. It will only contain
                         //  username
@@ -110,6 +111,11 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                 }
             } else {
                 subscriberCache.put(username, subscriber);
+                String organization = (String)message.get(RestApiConstants.ORGANIZATION);
+                if (!apiConsumer.subscriberOrganizationCombinationExists(subscriber, organization)) {
+                    apiConsumer.addOrganizationSubscriberMapping(organization,subscriber.getId());
+                }
+
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Unable to add the subscriber " + username, e, logger);
