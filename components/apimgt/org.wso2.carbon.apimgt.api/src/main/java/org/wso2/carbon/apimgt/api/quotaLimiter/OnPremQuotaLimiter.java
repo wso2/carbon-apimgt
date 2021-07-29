@@ -32,7 +32,7 @@ public class OnPremQuotaLimiter implements ResourceQuotaLimiter {
      * not available.
      */
     @Override
-    public boolean getAPIRateLimitStatus(String orgID, String userId, String resourceType) {
+    public boolean getAPIQuotaLimitStatus(String orgID, String userId, String resourceType) {
         return false;
     }
 }

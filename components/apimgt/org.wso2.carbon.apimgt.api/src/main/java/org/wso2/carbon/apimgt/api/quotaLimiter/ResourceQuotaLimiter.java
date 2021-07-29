@@ -33,5 +33,5 @@ public interface ResourceQuotaLimiter {
      * @param resourceType Resource type (APIs) used to check quota status.
      * @return A boolean value is returned to indicate API creation allowed or not.
      */
-    boolean getAPIRateLimitStatus(String orgID, String userId, String resourceType);
+    boolean getAPIQuotaLimitStatus(String orgID, String userId, String resourceType);
 }
