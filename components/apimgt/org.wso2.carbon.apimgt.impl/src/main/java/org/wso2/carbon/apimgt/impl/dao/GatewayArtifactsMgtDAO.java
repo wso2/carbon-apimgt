@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class GatewayArtifactsMgtDAO {
@@ -637,14 +637,23 @@ public class GatewayArtifactsMgtDAO {
      */
     public void removeOrganizationGatewayArtifacts(List<APIIdentifier> apiIdentifierList)
             throws APIManagementException {
-        String apiIdList = apiIdentifierList.stream().map(APIIdentifier::getUUID).
-                collect(Collectors.joining("','", "'", "'"));
+        List<String> apiIdList = apiIdentifierList.stream().map(APIIdentifier::getUUID).collect(Collectors.toList());
+        List<String> collectionList = Collections.nCopies(apiIdList.size(), "?");
+
+        String deleteGWApiDetails = SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS;
+        deleteGWApiDetails = deleteGWApiDetails.replaceAll(SQLConstants.API_UUID_REGEX,
+                String.join(",", collectionList));
+
         try (Connection artifactSynchronizerConn = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             // Delete gateway Artifacts from AM_GW_PUBLISHED_API_DETAILS, FK->AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS
             try (PreparedStatement preparedStatement = artifactSynchronizerConn.
-                    prepareStatement(SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS)) {
+                    prepareStatement(deleteGWApiDetails)) {
                 artifactSynchronizerConn.setAutoCommit(false);
-                preparedStatement.setString(1, apiIdList);
+                int index = 1;
+                for (String uuid : apiIdList) {
+                    preparedStatement.setString(index, uuid);
+                    index++;
+                }
                 preparedStatement.executeUpdate();
                 artifactSynchronizerConn.commit();
             } catch (SQLException e) {

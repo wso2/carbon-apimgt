@@ -7047,10 +7047,16 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
-        String apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).collect(Collectors.
-                joining("','", "'", "'"));
+        List<String> apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).collect(Collectors.toList());
+        List<String> collectionList = Collections.nCopies(apiUUIdList.size(), "?");
+
         String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
+        deleteAPIQuery = deleteAPIQuery.replaceAll(SQLConstants.API_UUID_REGEX,
+                String.join(",", collectionList));
+
         String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
+        deleteCleanUpTasksQuery = deleteCleanUpTasksQuery.replaceAll(SQLConstants.API_UUID_REGEX,
+                String.join(",", collectionList));
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7058,7 +7064,11 @@ public class ApiMgtDAO {
 
             // Delete records from AM_API table and associated data from cascade delete
             prepStmt = connection.prepareStatement(deleteAPIQuery);
-            prepStmt.setString(1, apiUUIdList);
+            int index = 1;
+            for (String uuid : apiUUIdList) {
+                prepStmt.setString(index, uuid);
+                index++;
+            }
             prepStmt.execute();
             prepStmt.close();
 
@@ -7067,7 +7077,11 @@ public class ApiMgtDAO {
 
             //Delete Cleanup tasks
             prepStmt = connection.prepareStatement(deleteCleanUpTasksQuery);
-            prepStmt.setString(1, apiUUIdList);
+            index = 1;
+            for (String uuid : apiUUIdList) {
+                prepStmt.setString(index, uuid);
+                index++;
+            }
             prepStmt.executeUpdate();
             prepStmt.close();
 

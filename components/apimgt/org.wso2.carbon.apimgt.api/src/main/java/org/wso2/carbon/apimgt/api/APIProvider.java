@@ -1515,12 +1515,6 @@ public interface APIProvider extends APIManager {
     void deleteAPI(API api) throws APIManagementException;
 
     /**
-     *
-     * @param organization Organization to delete
-     * @throws APIManagementException
-     */
-    void deleteOrganizationAPIList(String organization) throws APIManagementException;
-    /**
      * Checks whether the given document already exists for the given api/product
      *
      * @param uuid       API/Product id
