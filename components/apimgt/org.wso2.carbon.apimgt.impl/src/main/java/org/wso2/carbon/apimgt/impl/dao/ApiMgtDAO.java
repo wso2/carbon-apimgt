@@ -2509,6 +2509,60 @@ public class ApiMgtDAO {
         }
     }
 
+    public List<String> getPendingRegistrationsForApplicationList(int[] applicationIdList, String keyType)
+            throws APIManagementException {
+        List<String> pendingRegistrationsList = new ArrayList<>();
+
+        String query = SQLConstants.GET_PENDING_REGISTRATIONS_FOR_APPLICATION_LIST.
+                replaceAll("_APPLICATION_IDS_",String.join(",",Collections.
+                        nCopies(applicationIdList.length, "?")));
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            for (int i = 0; i < applicationIdList.length; i++) {
+                preparedStatement.setInt(i+1, applicationIdList[i]);
+            }
+            preparedStatement.setString(applicationIdList.length+1,keyType);
+
+            try (ResultSet rs = preparedStatement.executeQuery();){
+                while (rs.next()) {
+                    pendingRegistrationsList.add(rs.getString("KEY_MANAGER"));
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while fetching pending application registrations ", e);
+        }
+        return pendingRegistrationsList;
+    }
+
+    public void deleteApplicationRegistrationsWorkflowsForKeyManager(int[] applicationIdList, String km, String tokenType) {
+
+        String query = SQLConstants.DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER.
+                replaceAll("_APPLICATION_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);){
+
+            connection.setAutoCommit(false);
+
+            for (int i = 0; i < applicationIdList.length; i++) {
+                preparedStatement.setInt(i+1, applicationIdList[i]);
+            }
+
+            preparedStatement.setString(applicationIdList.length+1, tokenType);
+            preparedStatement.setString(applicationIdList.length+2, km);
+
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+    }
+
     public Map<String, String> getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
 
         Map<String, String> keyManagerWiseApprovalState = new HashMap<>();
@@ -4685,6 +4739,81 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
+    public List<Application> getApplicationsByOrgId(String orgId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        List<Application> applicationList = new ArrayList<>();
+
+        String query = SQLConstants.GET_APPLICATION_LIST_BY_ORG_ID_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1,orgId);
+
+            rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                int applicationId = rs.getInt("APPLICATION_ID");
+
+                Application application = new Application(applicationId);
+
+                application.setName(rs.getString("NAME"));
+                application.setOwner(rs.getString("CREATED_BY"));
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setUUID(rs.getString("UUID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setOwner(rs.getString("CREATED_BY"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+
+                applicationList.add(application);
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, rs);
+        }
+        return applicationList;
+    }
+
+    public void removePendingSubscriptions(int[] applicationIds) throws APIManagementException {
+
+        String removePendingSubscriptionsQuery = "DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE IN ( " +
+                "SELECT DISTINCT WF_EXTERNAL_REFERENCE " +
+                "FROM AM_WORKFLOWS WHERE WF_REFERENCE IN " +
+                "(SELECT DISTINCT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION " +
+                "WHERE APPLICATION_ID IN (_APPLICATION_IDS_) " +
+                "AND SUB_STATUS = 'ON_HOLD')) " +
+                "AND WF_TYPE = 'AM_SUBSCRIPTION_CREATION'";
+
+        String query = removePendingSubscriptionsQuery.replaceAll("_APPLICATION_IDS_",
+                String.join(",", Collections.nCopies(applicationIds.length, "?")));
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);){
+
+            connection.setAutoCommit(false);
+
+            for (int i = 0; i < applicationIds.length; i++) {
+                preparedStatement.setInt(i+1, applicationIds[i]);
+            }
+
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing pending subscriptions";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+
+    }
+
     /**
      * Deletes an Application along with subscriptions, keys and registration data
      *
@@ -4813,6 +4942,190 @@ public class ApiMgtDAO {
 
             if (log.isDebugEnabled()) {
                 log.debug("Application " + application.getName() + " is deleted successfully.");
+            }
+
+            if (transactionCompleted) {
+                connection.commit();
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while removing application details from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteMappingQuery, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteRegistrationQuery, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteSubscription, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
+
+        }
+    }
+
+    private String modifyQueryForList(List<Object> list, String query, String replaceSubString) {
+        return query.replaceAll(replaceSubString,
+                String.join(",", Collections.nCopies(list.size(), "?")));
+    }
+
+    /**
+     * Deletes an Application along with subscriptions, keys and registration data
+     *
+     * @param applicationIdList Application id list to be deleted from the database
+     * @throws APIManagementException
+     */
+    public void deleteApplicationList(int[] applicationIdList)
+            throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement deleteMappingQuery = null;
+        PreparedStatement prepStmt = null;
+        PreparedStatement prepStmtGetConsumerKey = null;
+        PreparedStatement deleteRegistrationQuery = null;
+        PreparedStatement deleteSubscription = null;
+        PreparedStatement deleteDomainApp = null;
+        PreparedStatement deleteAppKey = null;
+        PreparedStatement deleteApp = null;
+        ResultSet rs = null;
+
+        String getSubscriptionsQuery = SQLConstants.GET_SUBSCRIPTION_IDS_OF_APPLICATION_LIST_SQL
+                .replaceAll("_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL
+                .replaceAll("_IDS_",
+                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        String deleteSubscriptionsQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL
+                .replaceAll("_IDS_",
+                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        String deleteApplicationKeyQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL
+                .replaceAll("_IDS_",
+                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
+
+        String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL
+                .replaceAll("_IDS_",
+                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL
+                .replaceAll("_IDS_",
+                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        boolean transactionCompleted = true;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(getSubscriptionsQuery);
+
+            for (int i = 0; i < applicationIdList.length; i++) {
+                prepStmt.setInt(i+1, applicationIdList[i]);
+            }
+
+            rs = prepStmt.executeQuery();
+
+            List<Integer> subscriptions = new ArrayList<Integer>();
+
+            while (rs.next()) {
+                subscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            }
+
+            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+
+            for (int i = 0; i < applicationIdList.length; i++) {
+                prepStmtGetConsumerKey.setInt(i+1, applicationIdList[i]);
+            }
+
+            rs = prepStmtGetConsumerKey.executeQuery();
+
+            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
+
+            while (rs.next()) {
+                String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
+                String keyManagerName = rs.getString("NAME");
+                String keyManagerOrganization = rs.getString("ORGANIZATION");
+                // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
+                String mode = rs.getString("CREATE_MODE");
+                if (consumerKey != null) {
+                    deleteDomainApp.setString(1, consumerKey);
+                    deleteDomainApp.addBatch();
+                    KeyManager keyManager =
+                            KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization, keyManagerName);
+                    if (keyManager != null) {
+                        try {
+                            keyManager.deleteMappedApplication(consumerKey);
+                        } catch (APIManagementException e) {
+                            log.error("Error while Deleting Client Application", e);
+                        }
+                    }
+                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                    // call delete.
+                    if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
+                        //delete on oAuthorization server.
+                        if (log.isDebugEnabled()) {
+                            log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the " +
+                                    "Oauth server");
+                        }
+                        if (keyManager != null) {
+                            try {
+                                keyManager.deleteApplication(consumerKey);
+                            } catch (APIManagementException e) {
+                                log.error("Error while Deleting Client Application", e);
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription Key mapping details are deleted successfully for Applications");
+            }
+
+            deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
+            for (int i = 0; i < applicationIdList.length; i++) {
+                deleteRegistrationQuery.setInt(i+1, applicationIdList[i]);
+            }
+            deleteRegistrationQuery.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Application Registration details are deleted successfully for Applications");
+            }
+
+            deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
+            for (int i = 0; i < applicationIdList.length; i++) {
+                deleteSubscription.setInt(i+1, applicationIdList[i]);
+            }
+            deleteSubscription.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription details are deleted successfully for Applications");
+            }
+
+            deleteDomainApp.executeBatch();
+
+            deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
+            for (int i = 0; i < applicationIdList.length; i++) {
+                deleteAppKey.setInt(i+1, applicationIdList[i]);
+            }
+            deleteAppKey.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Application Key Mapping details are deleted successfully for Application");
+            }
+
+            deleteApp = connection.prepareStatement(deleteApplicationQuery);
+            for (int i = 0; i < applicationIdList.length; i++) {
+                deleteApp.setInt(i+1, applicationIdList[i]);
+            }
+            deleteApp.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Applications are deleted successfully.");
             }
 
             if (transactionCompleted) {
@@ -8724,6 +9037,43 @@ public class ApiMgtDAO {
         return workflowExtRef;
     }
 
+    public Set<String> getExternalWorkflowReferenceListForSubscriptions(int[] subscriptionIds) throws APIManagementException {
+
+        Set<String> workflowExtRefs = new HashSet<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String subscriptionIdListString = String.join(",",Collections.nCopies(subscriptionIds.length, "?"));
+        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_LIST_FOR_SUBSCRIPTIONS_SQL.
+                replaceAll("_WF_REFERENCES_",subscriptionIdListString);
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            // setting subscriptionId as string to prevent error when db finds string type IDs for
+            // ApplicationRegistration workflows
+
+            for (int i = 1; i < subscriptionIds.length+1; i++) {
+                ps.setString(i,String.valueOf(subscriptionIds[i-1]));
+            }
+
+            ps.setString(subscriptionIds.length+1, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                workflowExtRefs.add(rs.getString("WF_EXTERNAL_REFERENCE"));
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Subscriptions : " + subscriptionIdListString, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return workflowExtRefs;
+    }
+
     /**
      * Retries the WorkflowExternalReference for an user signup by DOMAIN/username.
      *
@@ -8757,6 +9107,41 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return workflowExtRef;
+    }
+
+    public Set<Integer> getPendingSubscriptionsByApplicationIdList(List<Integer> appIdList)
+            throws APIManagementException {
+        Set<Integer> pendingSubscriptionList = new HashSet<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String appIdListString = String.join(",",Collections.nCopies(appIdList.size(), "?"));
+        String getSubscriptionDataQuery = SQLConstants.GET_PAGINATED_SUBSCRIPTIONS_BY_APPLICATIONS_SQL.
+                replaceAll("_APPLICATION_IDS_",appIdListString);
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getSubscriptionDataQuery);
+
+            for (int i = 1; i < appIdList.size()+1; i++) {
+                ps.setInt(i,appIdList.get(i-1));
+            }
+
+            ps.setString(appIdList.size()+1, APIConstants.SubscriptionStatus.ON_HOLD);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                pendingSubscriptionList.add(rs.getInt("SUBSCRIPTION_ID"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entries for " +
+                    "Applications : " + appIdListString, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return pendingSubscriptionList;
     }
 
     /**
