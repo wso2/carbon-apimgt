@@ -40,13 +40,13 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 /**
  * This web app authenticator class specifically implemented for API Manager store and publisher rest APIs
  * This will not be able to use as generic authenticator.
  */
-public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
+public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
     private static final Log log = LogFactory.getLog(OAuthOpaqueAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
@@ -57,7 +57,8 @@ public class OAuthOpaqueAuthenticatorImpl implements OAuthAuthenticator {
      * @return true if authentication was successful else false
      * @throws APIManagementException when error in authentication process
      */
-    public boolean authenticate(Message message) throws APIManagementException {
+    @Override
+     public boolean authenticate(Message message) throws APIManagementException {
         boolean retrievedFromInvalidTokenCache = false;
         boolean retrievedFromTokenCache = false;
         String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message,

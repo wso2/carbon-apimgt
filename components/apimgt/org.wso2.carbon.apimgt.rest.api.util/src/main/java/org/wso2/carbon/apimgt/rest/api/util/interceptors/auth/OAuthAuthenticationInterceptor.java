@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 import java.util.regex.Pattern;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
     private static final String OAUTH_AUTHENTICATOR = "OAuth";
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
-    private Map<String, OAuthAuthenticator> authenticatorMap = new HashMap<>();
+    private Map<String, AbstractOAuthAuthenticator> authenticatorMap = new HashMap<>();
 
     {
         authenticatorMap.put(RestApiConstants.JWT_AUTHENTICATION, new OAuthJwtAuthenticatorImpl());
@@ -79,6 +79,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (accessToken.contains(RestApiConstants.DOT)) {
             inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.JWT_AUTHENTICATION);
         } else {
+            inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OPAQUE_AUTHENTICATION);
         }
 
         try {

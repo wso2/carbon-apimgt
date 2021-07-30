@@ -45,7 +45,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.net.URL;
-import java.text.ParseException;
 import java.net.MalformedURLException;
 
 import com.nimbusds.jwt.util.DateUtils;
@@ -54,12 +53,13 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
-public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
+public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
     private static final Log log = LogFactory.getLog(OAuthJwtAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
@@ -79,6 +79,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
      * @param message cxf message to be authenticated
      * @return true if authentication was successful else false
      */
+    @Override
     public boolean authenticate(Message message) throws APIManagementException {
 
         RESTAPICacheConfiguration cacheConfiguration = APIUtil.getRESTAPICacheConfig();
@@ -199,6 +200,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
      * @param accessToken JWT token
      * @return SignedJWTInfo : Signed token info
      */
+    @MethodStats
     private SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
 
         SignedJWT signedJWT = SignedJWT.parse(accessToken);
@@ -213,6 +215,7 @@ public class OAuthJwtAuthenticatorImpl implements OAuthAuthenticator {
      * @param signedJWTInfo signed jwt info object
      * @return JWTValidationInfo : token validated info
      */
+    @MethodStats
     private JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo, String jti, String accessToken,
                                                String jwtHeader, URL basePath) throws APIManagementException {
 

@@ -17,48 +17,45 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.authenticators;
 
-import org.apache.cxf.message.Message;
-
-import javax.cache.Cache;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import javax.cache.Cache;
+import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.uri.template.URITemplateException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public interface OAuthAuthenticator {
-    Log log = LogFactory.getLog(OAuthAuthenticator.class);
+public abstract class AbstractOAuthAuthenticator {
+    Log log = LogFactory.getLog(AbstractOAuthAuthenticator.class);
 
     /**
      * @param message cxf message to be authenticated
      * @return true if authentication was successful else false
      * @throws APIManagementException when error in authentication process
      */
-    boolean authenticate(Message message) throws APIManagementException;
+    public abstract boolean authenticate(Message message) throws APIManagementException;
 
     /**
      * @return rest API token cache
      */
-    default Cache getRESTAPITokenCache() {
+    public Cache getRESTAPITokenCache() {
         return CacheProvider.getRESTAPITokenCache();
     }
 
     /**
      * @return rest API invalid token cache
      */
-    default Cache getRESTAPIInvalidTokenCache() {
+     public Cache getRESTAPIInvalidTokenCache() {
         return CacheProvider.getRESTAPIInvalidTokenCache();
     }
 
@@ -68,7 +65,8 @@ public interface OAuthAuthenticator {
      * @return return true if we found matching scope in resource and token information
      * else false(means scope validation failed).
      */
-    default boolean validateScopes(Message message, OAuthTokenInfo tokenInfo) {
+    @MethodStats
+    public boolean validateScopes(Message message, OAuthTokenInfo tokenInfo) {
         String basePath = (String) message.get(Message.BASE_PATH);
         // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
         // decoded values of request parameters
