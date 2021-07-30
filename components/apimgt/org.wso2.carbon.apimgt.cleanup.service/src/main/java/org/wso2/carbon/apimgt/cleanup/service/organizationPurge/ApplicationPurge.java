@@ -24,13 +24,10 @@ public class ApplicationPurge implements OrganizationPurge{
         try {
             //removing pending subscriptions
             removePendingSubscriptions(applicationIdList);
-
             // removing pending application registrations
             deletePendingApplicationRegistrations(applicationIdList);
-
             // removing applications list
             deleteApplicationList(applicationIdList);
-
             // removing subscribers
             //TODO
             deleteSubscribers();
