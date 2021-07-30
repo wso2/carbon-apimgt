@@ -876,11 +876,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void deleteAPIs(Organization org) throws APIPersistenceException {
-
-    }
-
-    @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
