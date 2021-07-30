@@ -3484,6 +3484,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to delete api " + api.getUuid(), e);
         }
     }
+
     /**
      * Deletes API from the database and delete local scopes and resource scope attachments from KM.
      *

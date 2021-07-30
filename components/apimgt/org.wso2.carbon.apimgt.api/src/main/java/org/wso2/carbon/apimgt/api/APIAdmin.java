@@ -316,7 +316,7 @@ public interface APIAdmin  {
      * @param id uuid of key manager
      * @throws APIManagementException
      */
-    void deleteKeyManagerConfigurationById(String organization,String id) throws APIManagementException;
+    void deleteKeyManagerConfigurationById(String organization,String id, String username) throws APIManagementException;
 
     /**
      * This method used to retrieve key manager from name

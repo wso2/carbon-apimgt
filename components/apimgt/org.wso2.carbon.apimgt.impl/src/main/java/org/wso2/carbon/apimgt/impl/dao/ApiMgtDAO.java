@@ -122,6 +122,7 @@ import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,6 +153,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -5778,23 +5780,30 @@ public class ApiMgtDAO {
      * If the api's version is the same as the published version, then the whole entry will be removed.
      * Otherwise only the default version attribute is set to null.
      *
-     * @param apiId
+     * @param apiIdList
      * @param connection
      * @return
      * @throws APIManagementException
      */
-    public void removeAPIFromDefaultVersion(APIIdentifier apiId, Connection connection) throws APIManagementException {
+    public void removeAPIFromDefaultVersion(List<APIIdentifier> apiIdList, Connection connection) throws
+            APIManagementException {
 
         String queryDefaultVersionDelete = SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL;
 
         PreparedStatement prepStmtDefVersionDelete = null;
         try {
             prepStmtDefVersionDelete = connection.prepareStatement(queryDefaultVersionDelete);
-            prepStmtDefVersionDelete.setString(1, apiId.getApiName());
-            prepStmtDefVersionDelete.setString(2, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmtDefVersionDelete.execute();
+
+            for (APIIdentifier apiId: apiIdList) {
+                prepStmtDefVersionDelete.setString(1, apiId.getApiName());
+                prepStmtDefVersionDelete.setString(2, APIUtil.
+                        replaceEmailDomainBack(apiId.getProviderName()));
+                prepStmtDefVersionDelete.addBatch();
+            }
+            prepStmtDefVersionDelete.executeBatch();
         } catch (SQLException e) {
-            handleException("Error while deleting the API default version entry: " + apiId.getApiName() + " from the " +
+            handleException("Error while deleting the API default version entry: " + apiIdList.stream().
+                    map(APIIdentifier::getApiName).collect(Collectors.joining(",")) + " from the " +
                     "database", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtDefVersionDelete, null, null);
@@ -5832,7 +5841,10 @@ public class ApiMgtDAO {
 
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         boolean deploymentAvailable = isDeploymentAvailableByAPIUUID(connection, api.getUuid());
-        removeAPIFromDefaultVersion(api.getId(), connection);
+        ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+            add(api.getId());
+        }};
+        removeAPIFromDefaultVersion(apiIdList, connection);
 
         PreparedStatement prepStmtDefVersionAdd = null;
         String queryDefaultVersionAdd = SQLConstants.ADD_API_DEFAULT_VERSION_SQL;
@@ -6881,7 +6893,11 @@ public class ApiMgtDAO {
                 if (api.isDefaultVersion()) {
                     addUpdateAPIAsDefaultVersion(api, connection);
                 } else { //tick is removed
-                    removeAPIFromDefaultVersion(api.getId(), connection);
+                    ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                        add(api.getId());
+                    }};
+
+                    removeAPIFromDefaultVersion(apiIdList, connection);
                 }
             }
             String serviceKey = api.getServiceInfo("key");
@@ -6915,6 +6931,30 @@ public class ApiMgtDAO {
             handleException("Error while locating API with UUID : " + uuid + " from the database", e);
         }
         return id;
+    }
+
+    public ArrayList<APIIdentifier> getAPIIdList(String orgId) throws APIManagementException {
+        ArrayList<APIIdentifier> apiList = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_API_LIST_SQL_BY_ORG)) {
+            ps.setString(1, orgId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int apiId = rs.getInt("API_ID");
+                    String apiUuid = rs.getString("API_UUID");
+                    String apiName = rs.getString("API_Name");
+                    String apiProvider = rs.getString("API_Provider");
+                    String apiVersion = rs.getString("API_Version");
+
+                    APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion, apiUuid);
+                    apiIdentifier.setId(apiId);
+                    apiList.add(apiIdentifier);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API apiUuid Templates of API with UUID " + orgId, e);
+        }
+        return apiList;
     }
 
     public int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
@@ -7003,6 +7043,57 @@ public class ApiMgtDAO {
         }
     }
 
+    public void deleteOrganizationAPIList(List<APIIdentifier> apiIdentifiers) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        List<String> apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).collect(Collectors.toList());
+        List<String> collectionList = Collections.nCopies(apiUUIdList.size(), "?");
+
+        String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
+        deleteAPIQuery = deleteAPIQuery.replaceAll(SQLConstants.API_UUID_REGEX,
+                String.join(",", collectionList));
+
+        String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
+        deleteCleanUpTasksQuery = deleteCleanUpTasksQuery.replaceAll(SQLConstants.API_UUID_REGEX,
+                String.join(",", collectionList));
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            // Delete records from AM_API table and associated data from cascade delete
+            prepStmt = connection.prepareStatement(deleteAPIQuery);
+            int index = 1;
+            for (String uuid : apiUUIdList) {
+                prepStmt.setString(index, uuid);
+                index++;
+            }
+            prepStmt.execute();
+            prepStmt.close();
+
+            //Remove from API default version table
+            removeAPIFromDefaultVersion(apiIdentifiers, connection);
+
+            //Delete Cleanup tasks
+            prepStmt = connection.prepareStatement(deleteCleanUpTasksQuery);
+            index = 1;
+            for (String uuid : apiUUIdList) {
+                prepStmt.setString(index, uuid);
+                index++;
+            }
+            prepStmt.executeUpdate();
+            prepStmt.close();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing the organization API data with : " + apiUUIdList +
+                    " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
     public void deleteAPI(String uuid) throws APIManagementException {
 
         Connection connection = null;
@@ -7061,11 +7152,6 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-            prepStmt = connection.prepareStatement(deleteAPIQuery);
-            prepStmt.setString(1, uuid);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
-
             //Delete resource scope mappings of the API
             prepStmt = connection.prepareStatement(deleteResourceScopeMappingsQuery);
             prepStmt.setInt(1, id);
@@ -7077,10 +7163,18 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, id);
             prepStmt.execute();
 
+            prepStmt = connection.prepareStatement(deleteAPIQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
             String curDefaultVersion = getDefaultVersion(identifier);
             String pubDefaultVersion = getPublishedDefaultVersion(identifier);
             if (identifier.getVersion().equals(curDefaultVersion)) {
-                removeAPIFromDefaultVersion(identifier, connection);
+                ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                    add(identifier);
+                }};
+                removeAPIFromDefaultVersion(apiIdList, connection);
             } else if (identifier.getVersion().equals(pubDefaultVersion)) {
                 setPublishedDefVersion(identifier, connection, null);
             }

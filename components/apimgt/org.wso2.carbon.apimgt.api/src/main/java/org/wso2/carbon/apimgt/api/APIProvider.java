@@ -1507,13 +1507,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     List<APIResource> getUsedProductResources(String uuid) throws APIManagementException ;
-
     /**
      * Delete API
      * @param api API to delete
      * @throws APIManagementException
      */
     void deleteAPI(API api) throws APIManagementException;
+
     /**
      * Checks whether the given document already exists for the given api/product
      *
