@@ -61,5 +61,6 @@
         <module>org.wso2.carbon.apimgt.common.gateway</module>
         <module>org.wso2.carbon.apimgt.common.jms</module>
         <module>org.wso2.carbon.apimgt.common.analytics</module>
+        <module>org.wso2.carbon.apimgt.cleanup.service</module>
     </modules>
 </project>

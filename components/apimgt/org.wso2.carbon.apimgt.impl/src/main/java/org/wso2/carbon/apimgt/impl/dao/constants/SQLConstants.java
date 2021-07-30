@@ -1215,24 +1215,51 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_ID_OF_APPLICATION_SQL =
             "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
 
+    public static final String GET_SUBSCRIPTION_IDS_OF_APPLICATION_LIST_SQL =
+            "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE APPLICATION_ID IN (_IDS_)";
+
     public static final String GET_CONSUMER_KEY_OF_APPLICATION_SQL =
             "SELECT MAP.CONSUMER_KEY, MAP.CREATE_MODE, KM.NAME, KM.ORGANIZATION FROM AM_APPLICATION_KEY_MAPPING MAP,"
                     + " AM_KEY_MANAGER KM WHERE MAP.APPLICATION_ID = ? AND MAP.KEY_MANAGER = KM.UUID";
 
+    public static final String GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL =
+            "SELECT MAP.CONSUMER_KEY, MAP.CREATE_MODE, KM.NAME, KM.ORGANIZATION " +
+                    "FROM " +
+                    "AM_APPLICATION_KEY_MAPPING MAP, AM_KEY_MANAGER KM " +
+                    "WHERE " +
+                    "MAP.APPLICATION_ID IN (_IDS_) " +
+                    "AND " +
+                    "MAP.KEY_MANAGER = KM.UUID";
+
     public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTIONS_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
+
+    public static final String REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL =
+            "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID IN (_IDS_)";
 
     public static final String REMOVE_APPLICATION_FROM_APPLICATION_KEY_MAPPINGS_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
+    public static final String REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL =
+            "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID IN (_IDS_)";
+
     public static final String REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL =
             "DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY = ?";
+
+    public static final String REMOVE_APPLICATION_LIST_FROM_DOMAIN_MAPPINGS_SQL =
+            "DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY IN (_KEYS_)";
 
     public static final String REMOVE_APPLICATION_FROM_APPLICATIONS_SQL =
             "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
 
+    public static final String REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL =
+            "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID IN (_IDS_)";
+
     public static final String REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL =
             "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
+
+    public static final String REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL =
+            "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID IN (_IDS_)";
 
     public static final String GET_CONSUMER_KEY_WITH_MODE_SLQ =
             " SELECT" +
@@ -1527,6 +1554,23 @@ public class SQLConstants {
                     "   APP.VALUE" +
                     " FROM " +
                     "   AM_APPLICATION_ATTRIBUTES APP WHERE APPLICATION_ID = ?";
+
+    public static final String GET_APPLICATION_LIST_BY_ORG_ID_SQL =
+            " SELECT " +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.APPLICATION_TIER," +
+                    "   APP.CALLBACK_URL," +
+                    "   APP.DESCRIPTION, " +
+                    "   APP.APPLICATION_STATUS, " +
+                    "   APP.GROUP_ID," +
+                    "   APP.CREATED_BY," +
+                    "   APP.UUID, " +
+                    "   APP.TOKEN_TYPE " +
+                    " FROM " +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "   APP.ORGANIZATION = ?";
 
     public static final String GET_APPLICATION_BY_ID_SQL =
             " SELECT " +
@@ -1977,6 +2021,15 @@ public class SQLConstants {
             "   WF_REFERENCE=?" +
             "   AND WF_TYPE=?";
 
+    public static final String GET_EXTERNAL_WORKFLOW_LIST_FOR_SUBSCRIPTIONS_SQL =
+            " SELECT " +
+                    "   WF_EXTERNAL_REFERENCE" +
+                    " FROM " +
+                    "   AM_WORKFLOWS" +
+                    " WHERE " +
+                    "   WF_REFERENCE IN (_WF_REFERENCES_)" +
+                    "   AND WF_TYPE=?";
+
     public static final String GET_EXTERNAL_WORKFLOW_FOR_SIGNUP_SQL =
             "SELECT " +
             "   WF_EXTERNAL_REFERENCE" +
@@ -1993,6 +2046,15 @@ public class SQLConstants {
             " WHERE " +
             "   APPLICATION_ID=? " +
             "   AND SUB_STATUS=?";
+
+    public static final String GET_PAGINATED_SUBSCRIPTIONS_BY_APPLICATIONS_SQL =
+            "SELECT" +
+                    "   SUBSCRIPTION_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION " +
+                    " WHERE " +
+                    "   APPLICATION_ID IN (_APPLICATION_IDS_) " +
+                    "   AND SUB_STATUS=?";
 
     public static final String GET_SUBSCRIPTIONS_BY_API_SQL =
             "SELECT" +
@@ -3570,4 +3632,15 @@ public class SQLConstants {
                 "   UUID = ? AND TENANT_ID = ?";
 
     }
+
+    public static final String GET_PENDING_REGISTRATIONS_FOR_APPLICATION_LIST =
+            "SELECT KEY_MANAGER " +
+                    "FROM AM_APPLICATION_KEY_MAPPING " +
+                    "WHERE APPLICATION_ID IN (_APPLICATION_IDS_) AND KEY_TYPE = ? AND STATE = 'CREATED'";
+
+    public static final String DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER =
+            "DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE IN " +
+                    "( SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID IN (_APPLICATION_IDS_) " +
+                    "                                                     AND TOKEN_TYPE = ? " +
+                    "                                                     AND KEY_MANAGER = ?)";
 }
