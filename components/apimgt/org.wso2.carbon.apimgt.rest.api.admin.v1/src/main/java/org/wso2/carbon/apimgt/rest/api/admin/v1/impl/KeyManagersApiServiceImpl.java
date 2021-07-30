@@ -115,25 +115,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
-        if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfigurationDTO.getTokenType())) {
-            try {
-                if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
-                    IdentityProviderManager.getInstance()
-                            .deleteIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                    APIUtil.getInternalOrganizationDomain(organization));
-                }
-            } catch (IdentityProviderManagementException e) {
-                throw new APIManagementException("IdP deletion failed. " + e.getMessage(), e,
-                        ExceptionCodes.IDP_DELETION_FAILED);
-            }
-        }
-        apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId);
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
-                new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
-                RestApiCommonUtil.getLoggedInUsername());
+        apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId, RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 
