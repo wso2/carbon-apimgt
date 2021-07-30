@@ -35,13 +35,12 @@ import javax.ws.rs.core.StreamingOutput;
 
 public class RuntimeMetadataApiServiceImpl implements RuntimeMetadataApiService {
 
-    public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, String name,
-                                       String version, MessageContext messageContext)
+    public Response runtimeMetadataGet(String xWSO2Tenant, String apiId, String gatewayLabel, MessageContext messageContext)
             throws APIManagementException {
 
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         RuntimeArtifactDto runtimeArtifactDto =
-                RuntimeArtifactGeneratorUtil.generateMetadataArtifact(apiId, name, version, gatewayLabel, xWSO2Tenant);
+                RuntimeArtifactGeneratorUtil.generateMetadataArtifact(xWSO2Tenant, apiId, gatewayLabel);
         if (runtimeArtifactDto != null) {
             File artifact = (File) runtimeArtifactDto.getArtifact();
             StreamingOutput streamingOutput = (outputStream) -> {

@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -8760,6 +8761,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId                   API UUID
+     * @param apiRevisionUUID         API Revision UUID
+     * @param deployedAPIRevisionList List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Override
+    public void addDeployedAPIRevision(String apiId, String apiRevisionUUID,
+                                       List<DeployedAPIRevision> deployedAPIRevisionList)
+            throws APIManagementException {
+
+        List<DeployedAPIRevision> currentDeployedApiRevisionList =
+                apiMgtDAO.getDeployedAPIRevisionByApiUUID(apiId);
+        Set<DeployedAPIRevision> environmentsToRemove = new HashSet<>();
+
+        // Deployments to add
+        List<DeployedAPIRevision> environmentsToAdd = new ArrayList<>();
+
+        List<String> envNames = new ArrayList<>();
+
+        for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
+            // Remove duplicate entries for same revision uuid and env from incoming list
+            if (!envNames.contains(deployedAPIRevision.getDeployment())) {
+                envNames.add(deployedAPIRevision.getDeployment());
+                environmentsToAdd.add(deployedAPIRevision);
+                // Remove old deployed-revision entries of same env and apiid from existing db records
+                for (DeployedAPIRevision currentapiRevisionDeployment : currentDeployedApiRevisionList) {
+                    if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                            deployedAPIRevision.getDeployment())) {
+                        environmentsToRemove.add(currentapiRevisionDeployment);
+                    }
+                }
+            }
+        }
+        // Discard old deployment info
+        if (environmentsToRemove.size() > 0) {
+            apiMgtDAO.removeDeployedAPIRevision(apiId, environmentsToRemove);
+        }
+        // Add new deployed revision update to db
+        if (deployedAPIRevisionList.size() > 0) {
+            apiMgtDAO.addDeployedAPIRevision(apiRevisionUUID, environmentsToAdd);
+        }
+    }
+
     @Override
     public void updateAPIDisplayOnDevportal(String apiId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment)
             throws APIManagementException {
@@ -9171,5 +9218,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         jwtTokenInfoDTO.setExpirationTime(60 * 1000);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+    }
+
+    @Override
+    public List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException {
+        return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
     }
 }

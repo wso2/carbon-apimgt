@@ -25,8 +25,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiMetadataProjectDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.MetadataDescriptorDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -64,15 +64,15 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateMetadataArtifact(String apiId, String name, String version,
-                                                              String gatewayLabel, String tenantDomain)
+    public static RuntimeArtifactDto generateMetadataArtifact(String tenantDomain, String apiId, String gatewayLabel)
             throws APIManagementException {
 
         List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
         if (gatewayArtifacts != null) {
+
             try {
-                DeploymentDescriptorDto descriptorDto = new DeploymentDescriptorDto();
-                Map<String, ApiProjectDto> deploymentsMap = new HashMap<>();
+                MetadataDescriptorDto metadataDescriptorDto = new MetadataDescriptorDto();
+                Map<String, ApiMetadataProjectDto> deploymentsMap = new HashMap<>();
 
                 // "tempDirectory" is the root artifact directory
                 File tempDirectory = CommonUtil.createTempDirectory(null);
@@ -81,14 +81,15 @@ public class RuntimeArtifactGeneratorUtil {
                         String fileName =
                                 apiRuntimeArtifactDto.getApiId().concat("-")
                                         .concat(apiRuntimeArtifactDto.getRevision());
-
-                        ApiProjectDto apiProjectDto = deploymentsMap.get(fileName);
+                        ApiMetadataProjectDto apiProjectDto = deploymentsMap.get(fileName);
                         if (apiProjectDto == null) {
-                            apiProjectDto = new ApiProjectDto();
+                            apiProjectDto = new ApiMetadataProjectDto();
                             deploymentsMap.put(fileName, apiProjectDto);
                             apiProjectDto.setApiFile(fileName);
                             apiProjectDto.setEnvironments(new HashSet<>());
                             apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
+                            apiProjectDto.setVersion(apiRuntimeArtifactDto.getVersion());
+                            apiProjectDto.setApiContext(apiRuntimeArtifactDto.getContext());
                         }
 
                         EnvironmentDto environment = new EnvironmentDto();
@@ -97,11 +98,11 @@ public class RuntimeArtifactGeneratorUtil {
                         apiProjectDto.getEnvironments().add(environment);
                     }
                 }
-                descriptorDto.setDeployments(new HashSet<>(deploymentsMap.values()));
+                metadataDescriptorDto.setMetadataDescriptor(new HashSet<>(deploymentsMap.values()));
                 String descriptorFile = Paths.get(tempDirectory.getAbsolutePath(),
                         APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE).toString();
                 CommonUtil.writeDtoToFile(descriptorFile, ExportFormat.JSON,
-                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, descriptorDto);
+                        APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, metadataDescriptorDto);
 
                 RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
                 runtimeArtifactDto.setArtifact(new File(descriptorFile.concat(APIConstants.JSON_FILE_EXTENSION)));

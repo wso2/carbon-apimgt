@@ -585,6 +585,7 @@ public final class APIConstants {
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
+    public static final String ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER = "EnableUserClaimRetrievalFromKeyManager";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
@@ -737,6 +738,8 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
+    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -1240,6 +1243,7 @@ public final class APIConstants {
 
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";
@@ -2237,7 +2241,7 @@ public final class APIConstants {
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
 
-    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "InternalKeyStore";
+    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "KeyStore";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String DEFAULT_API_KEY_GENERATOR_IMPL = "org.wso2.carbon.apimgt.impl.token" +
             ".DefaultApiKeyGenerator";

@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -3331,8 +3332,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String filename = fileDetail.getContentDisposition().getFilename();
             try {
                 if (filename.endsWith(".zip")) {
-                    validationResponse =
-                            APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
+                    validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
                 } else if (filename.endsWith(".wsdl")) {
                     validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
                 } else {
@@ -3396,7 +3396,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
-                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd, organization);
+                createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
+                        apiToAdd, organization);
             } else if (isSoapToRestConvertedAPI) {
                 String wsdlArchiveExtractedPath = null;
                 if (validationResponse.getWsdlArchiveInfo() != null) {
@@ -4381,7 +4382,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
-        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
@@ -4400,15 +4401,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
-        List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
-        for (APIRevision apiRevision : apiRevisions) {
-            List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
-                    apiProvider.getAPIRevisionDeploymentList(apiRevision.getRevisionUUID());
-            for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
-                apiRevisionDeploymentsList.add(apiRevisionDeployment);
-            }
-        }
+        List<APIRevisionDeployment> apiRevisionDeploymentsList = apiProvider.getAPIRevisionsDeploymentList(apiId);
+
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsList) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
@@ -4866,10 +4860,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException(errorDTO);
         }
 
-        // Only HTTP type APIs should be allowed
-        if (!APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())) {
-            throw RestApiUtil.buildBadRequestException("The API's type should only be HTTP when " +
-                    "importing an OpenAPI definition");
+        // Only HTTP or WEBHOOK type APIs should be allowed
+        if (!(APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())
+                || APIDTO.TypeEnum.WEBHOOK.equals(apiDTOFromProperties.getType()))) {
+            throw RestApiUtil.buildBadRequestException(
+                    "The API's type is not supported when importing an OpenAPI definition");
         }
         // Import the API and Definition
         try {
@@ -4912,12 +4907,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            if (apiDTOFromProperties.getAdditionalPropertiesMap() != null) {
-                for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : apiDTOFromProperties
-                        .getAdditionalPropertiesMap().entrySet()) {
-                    apiToAdd.addProperty(entry.getKey(), entry.getValue().getValue());
-                }
-            }
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
@@ -4981,12 +4970,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
             apiToAdd.setOrganization(organization);
             apiToAdd.setAsyncApiDefinition(definitionToAdd);
-            if (apiDTOFromProperties.getAdditionalPropertiesMap() != null) {
-                for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : apiDTOFromProperties
-                        .getAdditionalPropertiesMap().entrySet()) {
-                    apiToAdd.addProperty(entry.getKey(), entry.getValue().getValue());
-                }
-            }
 
             apiProvider.addAPI(apiToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));

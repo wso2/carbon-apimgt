@@ -318,6 +318,18 @@ public class APIMappingUtil {
             }
         }
 
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = dto.getAdditionalPropertiesMap();
+        if (additionalPropertiesMap != null && !additionalPropertiesMap.isEmpty()) {
+            for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : additionalPropertiesMap.entrySet()) {
+                if (entry.getValue().isDisplay()) {
+                    model.addProperty(entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX,
+                            entry.getValue().getValue());
+                } else {
+                    model.addProperty(entry.getKey(), entry.getValue().getValue());
+                }
+            }
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
         APIBusinessInformationDTO apiBusinessInformationDTO = objectMapper.convertValue(dto.getBusinessInformation(),
                 APIBusinessInformationDTO.class);
@@ -3051,6 +3063,18 @@ public class APIMappingUtil {
             }
             Timestamp timestamp = new Timestamp(parsedDate.getTime());
             apiRevisionDeploymentDTO.setDeployedTime(timestamp);
+        }
+        if (model.getSuccessDeployedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getSuccessDeployedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the deployed time:"
+                        + model.getSuccessDeployedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            apiRevisionDeploymentDTO.setSuccessDeployedTime(timestamp);
         }
         return apiRevisionDeploymentDTO;
     }

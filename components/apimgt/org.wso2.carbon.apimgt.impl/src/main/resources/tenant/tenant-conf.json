@@ -321,6 +321,10 @@
       {
         "Name": "apim:throttling_policy_manage",
         "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
+      },
+      {
+        "Name": "apim:admin_application_view",
+        "Roles": "admin"
       }
     ]
   },

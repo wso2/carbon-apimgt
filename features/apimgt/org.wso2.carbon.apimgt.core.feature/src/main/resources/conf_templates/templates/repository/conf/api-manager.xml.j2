@@ -101,6 +101,7 @@
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
             </ExcludedClaims>
+            <EnableUserClaimRetrievalFromKeyManager>{{apim.jwt.gateway_generator.enable_claim_retrieval}}</EnableUserClaimRetrievalFromKeyManager>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -325,6 +326,9 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
+      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
+      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% endif %}
     </APIKeyValidator>
 
 
@@ -517,7 +521,7 @@
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
-    <!-- VelocityLogger>VELOCITY</VelocityLogger -->
+    <!--VelocityLogger>{{apim.velocity_logger}}</VelocityLogger-->
 
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->

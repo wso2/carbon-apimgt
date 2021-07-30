@@ -29,6 +29,7 @@
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
   "apim.jwt.enable_tenant_based_signing": false,
+  "apim.jwt.gateway_generator.enable_claim_retrieval": false,
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
   "apim.cache.km_token.enable": false,
@@ -175,5 +176,6 @@
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
   "apim.sync_runtime_artifacts.gateway.data_retrieval_mode": "async",
   "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000",
-  "apim.sync_runtime_artifacts.gateway.enable": true
+  "apim.sync_runtime_artifacts.gateway.enable": true,
+  "apim.velocity_logger": "VELOCITY"
 }
