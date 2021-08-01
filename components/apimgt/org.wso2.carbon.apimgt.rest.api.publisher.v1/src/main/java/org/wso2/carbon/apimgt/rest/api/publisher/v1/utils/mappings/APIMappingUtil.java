@@ -2230,7 +2230,11 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        product.setState(APIStatus.PUBLISHED.toString());
+        if (dto.getState() != null && StringUtils.isNotEmpty(dto.getState().value())) {
+            product.setState(dto.getState().value());
+        } else {
+            product.setState(APIStatus.PUBLISHED.toString());
+        }
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 

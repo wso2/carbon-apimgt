@@ -34,6 +34,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
+import Tooltip from '@material-ui/core/Tooltip';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
@@ -57,13 +58,13 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
-    const { api, updateAPI } = useContext(APIContext);
+    const { api, updateAPI, isAPIProduct } = useContext(APIContext);
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
-    const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
+    const [selectedMgLabel, setSelectedMgLabel] = isAPIProduct ? [] : useState([...api.labels]);
     const [isUpdating, setUpdating] = useState(false);
-    const [selectedDeployments, setSelectedDeployments] = useState([...api.deploymentEnvironments]);
-
+    const [selectedDeployments, setSelectedDeployments] = isAPIProduct ? [] : useState([...api.deploymentEnvironments]);
+    const [isPublishing, setPublishing] = useState(false);
     const restApi = new API();
     const [allDeployments, setAllDeployments] = useState([]);
     useEffect(() => {
@@ -94,6 +95,27 @@ export default function Environments() {
                 console.error(error);
             })
             .finally(() => setUpdating(false));
+    }
+
+    /**
+     *
+     * Handle the Environments publish button action
+     */
+    function addEnvironmentsAndPublish() {
+        setPublishing(true);
+        updateAPI({
+            gatewayEnvironments,
+            state: 'PUBLISHED',
+        })
+            .then(() => Alert.info('API Product Update Successfully'))
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while updating the environments');
+                }
+            })
+            .finally(() => setPublishing(false));
     }
 
     return (
@@ -171,7 +193,7 @@ export default function Environments() {
                 </Table>
             </Paper>
 
-            {!api.isWebSocket()
+            {(!api.isWebSocket() && !isAPIProduct)
                 && (
                     <MicroGateway
                         selectedMgLabel={selectedMgLabel}
@@ -215,6 +237,35 @@ export default function Environments() {
                         {isUpdating && <CircularProgress size={20} />}
                     </Button>
                 </Grid>
+                {isAPIProduct && api.state !== 'PUBLISHED' && (
+                    <Grid item>
+                        <Tooltip
+                            title={(
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.publish.tooltip'
+                                    defaultMessage='Publish to Gateways and Developer Portal'
+                                />
+                            )}
+                            placement='bottom'
+                            interactive
+                        >
+                            <Button
+                                className={classes.saveButton}
+                                disabled={isRestricted(['apim:api_publish'], api) || isPublishing}
+                                type='submit'
+                                variant='contained'
+                                color='primary'
+                                onClick={addEnvironmentsAndPublish}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.publish'
+                                    defaultMessage='Publish'
+                                />
+                                {isPublishing && <CircularProgress size={20} />}
+                            </Button>
+                        </Tooltip>
+                    </Grid>
+                )}
                 <Grid item>
                     <Link to={'/apis/' + api.id + '/overview'}>
                         <Button className={classes.saveButton}>
