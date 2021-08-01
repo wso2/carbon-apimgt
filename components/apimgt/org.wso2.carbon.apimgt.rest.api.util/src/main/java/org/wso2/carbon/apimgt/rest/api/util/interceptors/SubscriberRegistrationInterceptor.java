@@ -68,6 +68,15 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.API_SUBSCRIBER_CACHE);
         if (subscriberCache.get(username) != null) {
+            try {
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+                String organization = (String)message.get(RestApiConstants.ORGANIZATION);
+                Subscriber subscriber = subscriberCache.get(username);
+                insertOrganizationSubscriberMapping(apiConsumer, subscriber, organization);
+            } catch (APIManagementException e) {
+                e.printStackTrace();
+            }
+
             return;
         }
 
@@ -99,7 +108,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
 
                         String organization = (String)message.get(RestApiConstants.ORGANIZATION);
                         Subscriber addedSubscriber = apiConsumer.addSubscriber(username, groupId, organization);
-                        apiConsumer.addOrganizationSubscriberMapping(organization,addedSubscriber.getId());
+                        insertOrganizationSubscriberMapping(apiConsumer, addedSubscriber, organization);
 
                         // The subscriber object added here is not a complete subscriber object. It will only contain
                         //  username
@@ -112,9 +121,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             } else {
                 subscriberCache.put(username, subscriber);
                 String organization = (String)message.get(RestApiConstants.ORGANIZATION);
-                if (!apiConsumer.subscriberOrganizationCombinationExists(subscriber, organization)) {
-                    apiConsumer.addOrganizationSubscriberMapping(organization,subscriber.getId());
-                }
+                insertOrganizationSubscriberMapping(apiConsumer, subscriber, organization);
 
             }
         } catch (APIManagementException e) {
@@ -144,5 +151,12 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             return Arrays.asList(scopes).contains(APIM_SUBSCRIBE_SCOPE);
         }
         return false;
+    }
+
+    private void insertOrganizationSubscriberMapping(APIConsumer apiConsumer, Subscriber subscriber,
+                                                     String organization) throws APIManagementException {
+        if (!apiConsumer.subscriberOrganizationCombinationExists(subscriber, organization)) {
+            apiConsumer.addOrganizationSubscriberMapping(organization,subscriber.getId());
+        }
     }
 }
