@@ -2598,10 +2598,14 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(query)){
-            for (int i = 0; i < applicationIdList.length; i++) {
-                preparedStatement.setInt(i+1, applicationIdList[i]);
+
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                preparedStatement.setInt(index, applicationId);
             }
-            preparedStatement.setString(applicationIdList.length+1,keyType);
+
+            preparedStatement.setString(index+1,keyType);
 
             try (ResultSet rs = preparedStatement.executeQuery();){
                 while (rs.next()) {
@@ -2627,12 +2631,14 @@ public class ApiMgtDAO {
 
             connection.setAutoCommit(false);
 
-            for (int i = 0; i < length; i++) {
-                preparedStatement.setInt(i+1, applicationIdList[i]);
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                preparedStatement.setInt(index, applicationId);
             }
 
-            preparedStatement.setString(length +1, tokenType);
-            preparedStatement.setString(length +2, km);
+            preparedStatement.setString(index +1, tokenType);
+            preparedStatement.setString(index +2, km);
 
             preparedStatement.executeUpdate();
             connection.commit();
@@ -5125,8 +5131,10 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
 
-            for (int i = 0; i < applicationIdList.length; i++) {
-                prepStmt.setInt(i+1, applicationIdList[i]);
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                prepStmt.setInt(index, applicationId);
             }
 
             rs = prepStmt.executeQuery();
@@ -5139,8 +5147,10 @@ public class ApiMgtDAO {
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
 
-            for (int i = 0; i < applicationIdList.length; i++) {
-                prepStmtGetConsumerKey.setInt(i+1, applicationIdList[i]);
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                prepStmtGetConsumerKey.setInt(index, applicationId);
             }
 
             rs = prepStmtGetConsumerKey.executeQuery();
@@ -5190,9 +5200,13 @@ public class ApiMgtDAO {
             }
 
             deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
-            for (int i = 0; i < applicationIdList.length; i++) {
-                deleteRegistrationQuery.setInt(i+1, applicationIdList[i]);
+
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                deleteRegistrationQuery.setInt(index, applicationId);
             }
+
             deleteRegistrationQuery.execute();
 
             if (log.isDebugEnabled()) {
@@ -5200,9 +5214,13 @@ public class ApiMgtDAO {
             }
 
             deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
-            for (int i = 0; i < applicationIdList.length; i++) {
-                deleteSubscription.setInt(i+1, applicationIdList[i]);
+
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                deleteSubscription.setInt(index, applicationId);
             }
+
             deleteSubscription.execute();
 
             if (log.isDebugEnabled()) {
@@ -5212,9 +5230,13 @@ public class ApiMgtDAO {
             deleteDomainApp.executeBatch();
 
             deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
-            for (int i = 0; i < applicationIdList.length; i++) {
-                deleteAppKey.setInt(i+1, applicationIdList[i]);
+
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                deleteAppKey.setInt(index, applicationId);
             }
+
             deleteAppKey.execute();
 
             if (log.isDebugEnabled()) {
@@ -5222,9 +5244,13 @@ public class ApiMgtDAO {
             }
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
-            for (int i = 0; i < applicationIdList.length; i++) {
-                deleteApp.setInt(i+1, applicationIdList[i]);
+
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                deleteApp.setInt(index, applicationId);
             }
+
             deleteApp.execute();
 
             if (log.isDebugEnabled()) {
