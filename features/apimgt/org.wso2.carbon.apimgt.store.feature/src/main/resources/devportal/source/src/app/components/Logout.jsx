@@ -31,10 +31,12 @@ import Utils from '../data/Utils';
 class Logout extends Component {
     constructor(props) {
         super(props);
+        const { theme } = props;
+        const { custom: { landingPage } } = theme;
         this.authManager = new AuthManager();
         this.state = {
             logoutSuccess: false,
-            referrer: '/apis',
+            referrer: landingPage.active ? '/home' : '/apis',
         };
     }
 

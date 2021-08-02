@@ -413,12 +413,16 @@ class Listing extends React.Component {
                                 />
                             </Typography>
                             <div className={classes.actions}>
-                                <Link to={url}>
+                                <Link
+                                    to={!isRestricted(['apim:shared_scope_manage']) && url}
+                                    className={isRestricted(['apim:shared_scope_manage']) ? classes.disableLink : ''}
+                                >
                                     <Button
                                         size='small'
                                         variant='contained'
                                         color='primary'
                                         className={classes.button}
+                                        disabled={isRestricted(['apim:shared_scope_manage'])}
                                     >
                                         <Create />
                                         <FormattedMessage

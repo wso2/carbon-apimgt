@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -509,6 +508,7 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String RETIRED = "RETIRED";
     public static final String BLOCKED = "BLOCKED";
+    public static final String UNPUBLISHED = "UNPUBLISHED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
     public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
     public static final String GOVERNANCE = "governance";
@@ -709,6 +709,8 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
+    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -844,6 +846,11 @@ public final class APIConstants {
 
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
+
+    public static final String LAMBDA_MEDIATOR_CONFIG = "LambdaMediatorConfig.";
+
+    public static final String PASS_REQUEST_PARAMS_TO_LAMBDA_FUNCTION = LAMBDA_MEDIATOR_CONFIG
+            + "PassRequestParamsToLambdaFunction";
 
     public static final String API_KEY_TYPE = "AM_KEY_TYPE";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
@@ -1189,6 +1196,7 @@ public final class APIConstants {
 
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";

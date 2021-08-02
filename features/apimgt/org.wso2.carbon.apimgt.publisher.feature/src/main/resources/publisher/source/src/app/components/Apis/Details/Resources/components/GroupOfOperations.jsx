@@ -17,12 +17,27 @@
  */
 
 import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import PropTypes from 'prop-types';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
+const useStyles = makeStyles((theme) => ({
+    tagClass: {
+        maxWidth: 1000,
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        [theme.breakpoints.down('md')]: {
+            maxWidth: 800,
+        },
+    },
+}
+));
+
 /**
  *
  * Return a group container , User should provide the operations list as the child component
@@ -31,19 +46,24 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
  * @returns {React.Component} @inheritdoc
  */
 export default function GroupOfOperations(props) {
+    const classes = useStyles();
     const { openAPI, children, tag } = props;
     const currentTagInfo = openAPI.tags && openAPI.tags.find((tagInfo) => tagInfo.name === tag);
     return (
         <ExpansionPanel defaultExpanded>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel1a-content' id='panel1a-header'>
-                <Typography variant='h4'>
+                <Typography
+                    variant='h4'
+                    className={classes.tagClass}
+                    title={tag}
+                >
                     {tag}
-                    {currentTagInfo && (
-                        <Typography style={{ margin: '0px 30px' }} variant='caption'>
-                            {currentTagInfo.description}
-                        </Typography>
-                    )}
                 </Typography>
+                {currentTagInfo && (
+                    <Typography style={{ margin: '0px 30px' }} variant='caption'>
+                        {currentTagInfo.description}
+                    </Typography>
+                )}
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>{children}</ExpansionPanelDetails>
         </ExpansionPanel>

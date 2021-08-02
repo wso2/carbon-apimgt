@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.StringWriter;
 import java.lang.String;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -85,12 +86,16 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     @Override
     public String getConfigStringForTemplate(Environment environment) throws APITemplateException {
         StringWriter writer = new StringWriter();
-
+        JSONObject originalProperties = null;
         try {
             // build the context for template and apply the necessary decorators
             ConfigContext configcontext = null;
 
             if (api != null) {
+                originalProperties = api.getAdditionalProperties();
+                // add new property for entires that has a __display suffix
+                JSONObject modifiedProperties = getModifiedProperties(originalProperties);
+                api.setAdditionalProperties(modifiedProperties);
                 configcontext = createConfigContext(api, environment);
             } else { // API Product scenario
                 configcontext = createConfigContext(apiProduct, environment);
@@ -124,6 +129,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             }
 
             t.merge(context, writer);
+            // Reset the additional properties to the original values
+            if (api != null && originalProperties != null) {
+                api.setAdditionalProperties(originalProperties);
+            }
 
         } catch (Exception e) {
             log.error("Velocity Error", e);
@@ -410,5 +419,20 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         } finally {
             thread.setContextClassLoader(loader);
         }
+    }
+    
+    public JSONObject getModifiedProperties(JSONObject originalProperties) {
+        JSONObject modifiedProperties = new JSONObject();
+        if (originalProperties.size() > 0) {
+            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext();) {
+                String key = (String) iterator.next();
+                String val = (String) originalProperties.get(key);
+                if (key.endsWith("__display")) {
+                    modifiedProperties.put(key.replace("__display", ""), val);
+                }
+                modifiedProperties.put(key, val);
+            }
+        }
+        return modifiedProperties;
     }
 }

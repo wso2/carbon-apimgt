@@ -30,6 +30,18 @@ const suggestions = {
             route: 'runtime-configuration',
         },
         {
+            label: 'API Gateways',
+            route: 'environments',
+        },
+        {
+            label: 'Microgateway Labels',
+            route: 'environments',
+        },
+        {
+            label: 'Environments',
+            route: 'environments',
+        },
+        {
             label: 'Transport Level Security',
             route: 'runtime-configuration',
         },
@@ -179,18 +191,6 @@ const suggestions = {
         },
     ],
     apiOnly: [
-        {
-            label: 'API Gateways',
-            route: 'environments',
-        },
-        {
-            label: 'Microgateway Labels',
-            route: 'environments',
-        },
-        {
-            label: 'Environments',
-            route: 'environments',
-        },
         {
             label: 'Lifecycle',
             route: 'lifecycle',
@@ -486,18 +486,6 @@ const suggestions = {
         {
             label: 'Endpoints',
             route: 'runtime-configuration',
-        },
-        {
-            label: 'Environments',
-            route: 'environments',
-        },
-        {
-            label: 'API Gateways',
-            route: 'environments',
-        },
-        {
-            label: 'Microgateway Labels',
-            route: 'environments',
         },
         {
             label: 'Lifecycle',

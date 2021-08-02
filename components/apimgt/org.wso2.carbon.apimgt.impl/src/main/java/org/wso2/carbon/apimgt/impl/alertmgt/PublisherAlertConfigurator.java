@@ -90,9 +90,8 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
     @Override
     public List<Map<String, String>> getAlertConfiguration(String userName, String alertName)
             throws APIManagementException {
-        String domainName = MultitenantUtils.getTenantDomain(userName);
         String configPropertyName = AlertMgtConstants.alertTypeConfigMap.get(alertName);
-        String query = "from ApiCreatorAlertConfiguration on apiCreatorTenantDomain=='" + domainName + "' and "
+        String query = "from ApiCreatorAlertConfiguration on apiCreator=='" + userName + "' and "
                 + configPropertyName + "!=0 select apiName,apiVersion,apiCreator,apiCreatorTenantDomain, "
                 + configPropertyName + "; ";
         JSONObject result = APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_CONFIG_APP, query);
@@ -158,6 +157,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
                 + "0L as " + alertConfigKey +" update ApiCreatorAlertConfiguration "
                 + "set ApiCreatorAlertConfiguration." + alertConfigKey + " = " + alertConfigKey + " "
                 + "on ApiCreatorAlertConfiguration.apiName == apiName "
-                + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion";
+                + "and ApiCreatorAlertConfiguration.apiVersion == apiVersion "
+                + "and ApiCreatorAlertConfiguration.apiCreator == apiCreator";
     }
 }

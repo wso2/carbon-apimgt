@@ -106,6 +106,22 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
     }
 
     @Override
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
+                                                        String tenantDomain)
+            throws APISecurityException {
+        APIKeyValidatorClient client = new APIKeyValidatorClient();
+        try {
+            return client.validateSubscription(context, version, appId, tenantDomain);
+        } catch (APISecurityException ex) {
+            throw new APISecurityException(ex.getErrorCode(),
+                    "Resource forbidden", ex);
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing in-memory store for subscription validation", e);
+        }
+    }
+
+    @Override
     public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException {
 

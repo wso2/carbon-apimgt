@@ -204,14 +204,8 @@ public class UploadedUsageFileInfoDAO {
             statement.setString(2, dto.getFileName());
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                //Postgres bytea data doesn't support getBlob operation
-                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-                    fileContentInputStream = resultSet
-                            .getBinaryStream(MicroGatewayAPIUsageConstants.API_USAGE_FILE_CONTENT);
-                } else {
-                    Blob content = resultSet.getBlob(MicroGatewayAPIUsageConstants.API_USAGE_FILE_CONTENT);
-                    fileContentInputStream = content.getBinaryStream();
-                }
+                fileContentInputStream = resultSet
+                        .getBinaryStream(MicroGatewayAPIUsageConstants.API_USAGE_FILE_CONTENT);
                 if (log.isDebugEnabled()) {
                     log.debug("Added File to list : " + dto.toString());
                 }
