@@ -4874,8 +4874,10 @@ public class ApiMgtDAO {
 
             connection.setAutoCommit(false);
 
-            for (int i = 0; i < applicationIds.length; i++) {
-                preparedStatement.setInt(i+1, applicationIds[i]);
+            int index = 1;
+            for (int applicationId: applicationIds) {
+                preparedStatement.setInt(index, applicationId);
+                index++;
             }
 
             preparedStatement.executeUpdate();
@@ -4898,8 +4900,10 @@ public class ApiMgtDAO {
 
             connection.setAutoCommit(false);
 
-            for (int i = 0; i < applicationIds.length; i++) {
-                preparedStatement.setInt(i+1, applicationIds[i]);
+            int index = 1;
+            for (int applicationId: applicationIds) {
+                preparedStatement.setInt(index, applicationId);
+                index++;
             }
 
             preparedStatement.executeUpdate();
