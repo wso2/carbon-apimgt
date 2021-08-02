@@ -1,8 +1,13 @@
 package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.api.model.Application;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.util.List;
 
 public class ApplicationPurge implements OrganizationPurge{
@@ -25,6 +30,9 @@ public class ApplicationPurge implements OrganizationPurge{
             //removing pending subscriptions
             removePendingSubscriptions(applicationIdList);
 
+            //remove application registration workflows
+            removeApplicationCreationWorkflows(applicationIdList);
+
             // removing pending application registrations
             deletePendingApplicationRegistrations(applicationIdList);
 
@@ -32,11 +40,15 @@ public class ApplicationPurge implements OrganizationPurge{
             deleteApplicationList(applicationIdList);
 
             // removing subscribers
-            //TODO
-            deleteSubscribers();
+            deleteSubscribers(organizationId);
+
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
+    }
+
+    private void removeApplicationCreationWorkflows(int[] applicationIdList) throws APIManagementException {
+        apiMgtDAO.removeApplicationCreationWorkflows(applicationIdList);
     }
 
 
@@ -65,9 +77,25 @@ public class ApplicationPurge implements OrganizationPurge{
         }
     }
 
-    //TODO
-    private void deleteSubscribers() {
+    private void deleteSubscribers(String organization) throws APIManagementException {
+        //select subscribers for the organization
+        List<Integer> subscriberIdList = apiMgtDAO.getSubscribersForOrganizationId(organization);
+        if (subscriberIdList.size() > 0) {
+            for (int subscriberId : subscriberIdList) {
+                List<String> mappedOrganizations = apiMgtDAO.getMappedOrganizationListForSubscriber(subscriberId);
+                apiMgtDAO.removeSubscriberOrganizationMapping(subscriberId, organization);
+                if (!(mappedOrganizations.size() > 1 && mappedOrganizations.contains(organization))) {
+                    Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                            .getCache(APIConstants.API_SUBSCRIBER_CACHE);
+                    Subscriber subscriber = apiMgtDAO.getSubscriber(subscriberId);
+                    if (subscriberCache.get(subscriber.getName()) != null) {
+                        subscriberCache.remove(subscriber.getName());
+                    }
 
+                    apiMgtDAO.removeSubscriber(subscriberId);
+                }
+            }
+        }
     }
 
 }
