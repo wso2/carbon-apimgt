@@ -34,9 +34,8 @@ public class ApplicationPurge implements OrganizationPurge{
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
 
-    @Override
-    public void deleteOrganization(String organizationId) throws APIManagementException{
-        List<Application> applicationList = apiMgtDAO.getApplicationsByOrgId(organizationId);
+    @Override public void deleteOrganization(String organization) throws APIManagementException {
+        List<Application> applicationList = apiMgtDAO.getApplicationsByOrganization(organization);
         int[] applicationIdList = new int[applicationList.size()];
 
         for (int i = 0; i < applicationList.size(); i++) {
@@ -57,10 +56,10 @@ public class ApplicationPurge implements OrganizationPurge{
             deleteApplicationList(applicationIdList);
 
             // removing subscribers
-            deleteSubscribers(organizationId);
+            deleteSubscribers(organization);
 
         } catch (APIManagementException e) {
-            String message = "Error while deleting the application data related to the organization: "+organizationId;
+            String message = "Error while deleting the application data related to the organization: " + organization;
             log.error(message, t);
             throw new APIManagementException(message, t);
         }
@@ -69,7 +68,6 @@ public class ApplicationPurge implements OrganizationPurge{
     private void removeApplicationCreationWorkflows(int[] applicationIdList) throws APIManagementException {
         apiMgtDAO.removeApplicationCreationWorkflows(applicationIdList);
     }
-
 
     private void removePendingSubscriptions(int[] applicationIdList) throws APIManagementException {
         apiMgtDAO.removePendingSubscriptions(applicationIdList);
@@ -81,32 +79,39 @@ public class ApplicationPurge implements OrganizationPurge{
 
     // cleanup pending application regs
     private void deletePendingApplicationRegistrations(int[] applicationIdList) throws APIManagementException {
-        List<String> keyManagerViseProductionKeyState = apiMgtDAO.
-                getPendingRegistrationsForApplicationList(applicationIdList, "PRODUCTION");
+        List<String> keyManagerViseProductionKeyState = apiMgtDAO.getPendingRegistrationsForApplicationList(
+                applicationIdList, "PRODUCTION");
 
         for (String km : keyManagerViseProductionKeyState) {
-            apiMgtDAO.deleteApplicationRegistrationsWorkflowsForKeyManager(applicationIdList,km,"PRODUCTION");
+            apiMgtDAO.deleteApplicationRegistrationsWorkflowsForKeyManager(applicationIdList, km, "PRODUCTION");
         }
 
-        List<String> keyManagerViseSandboxKeyState = apiMgtDAO.
-                getPendingRegistrationsForApplicationList(applicationIdList, "SANDBOX");
+        List<String> keyManagerViseSandboxKeyState = apiMgtDAO.getPendingRegistrationsForApplicationList(
+                applicationIdList, "SANDBOX");
 
         for (String km : keyManagerViseSandboxKeyState) {
-            apiMgtDAO.deleteApplicationRegistrationsWorkflowsForKeyManager(applicationIdList,km,"SANDBOX");
+            apiMgtDAO.deleteApplicationRegistrationsWorkflowsForKeyManager(applicationIdList, km, "SANDBOX");
         }
     }
 
     private void deleteSubscribers(String organization) throws APIManagementException {
+
         //select subscribers for the organization
         List<Integer> subscriberIdList = apiMgtDAO.getSubscribersForOrganizationId(organization);
+
         if (subscriberIdList.size() > 0) {
             for (int subscriberId : subscriberIdList) {
+
                 List<String> mappedOrganizations = apiMgtDAO.getMappedOrganizationListForSubscriber(subscriberId);
                 apiMgtDAO.removeSubscriberOrganizationMapping(subscriberId, organization);
+
                 if (!(mappedOrganizations.size() > 1 && mappedOrganizations.contains(organization))) {
-                    Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                            .getCache(APIConstants.API_SUBSCRIBER_CACHE);
+
+                    Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(
+                            APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.API_SUBSCRIBER_CACHE);
+
                     Subscriber subscriber = apiMgtDAO.getSubscriber(subscriberId);
+
                     if (subscriberCache.get(subscriber.getName()) != null) {
                         subscriberCache.remove(subscriber.getName());
                     }
