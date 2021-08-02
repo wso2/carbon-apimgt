@@ -2544,9 +2544,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while retrieving organizations for subscriber id " +subscriberId, e);
         }
-
         return organizationList;
-
     }
 
     public void removeSubscriber(int subscriberId) throws APIManagementException {
@@ -2566,19 +2564,25 @@ public class ApiMgtDAO {
         }
     }
 
-    public void removeSubscriberOrganizationMapping(int subscriberId, String organization) throws APIManagementException{
+    public void removeSubscriberOrganizationMapping(int subscriberId, String organization)
+            throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         String query = SQLConstants.DELETE_SUBSCRIBER_ORGANIZATION_MAPPING;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             preparedStatement = connection.prepareStatement(query);
+
             preparedStatement.setInt(1, subscriberId);
             preparedStatement.setString(2, organization);
+
             preparedStatement.executeUpdate();
 
             connection.close();
             preparedStatement.close();
+
         } catch (SQLException e) {
             handleException("Error while removing subscriber with subscriber id " +subscriberId, e);
         }
@@ -2632,8 +2636,8 @@ public class ApiMgtDAO {
             preparedStatement.executeUpdate();
             connection.commit();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            handleException("Error while deleting application registration workflows for key manager", e);
         }
 
     }
@@ -4815,16 +4819,19 @@ public class ApiMgtDAO {
     }
 
     public List<Application> getApplicationsByOrgId(String orgId) {
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         List<Application> applicationList = new ArrayList<>();
 
         String query = SQLConstants.GET_APPLICATION_LIST_BY_ORG_ID_SQL;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(query);
+
             preparedStatement.setString(1,orgId);
 
             rs = preparedStatement.executeQuery();
@@ -4849,7 +4856,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            handleException("Error while getting getting application by organization: "+orgId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, rs);
         }
