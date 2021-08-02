@@ -2061,15 +2061,6 @@ public class SQLConstants {
             "   APPLICATION_ID=? " +
             "   AND SUB_STATUS=?";
 
-    public static final String GET_PAGINATED_SUBSCRIPTIONS_BY_APPLICATIONS_SQL =
-            "SELECT" +
-                    "   SUBSCRIPTION_ID " +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION " +
-                    " WHERE " +
-                    "   APPLICATION_ID IN (_APPLICATION_IDS_) " +
-                    "   AND SUB_STATUS=?";
-
     public static final String GET_SUBSCRIPTIONS_BY_API_SQL =
             "SELECT" +
                     "   SUBSCRIPTION_ID" +
