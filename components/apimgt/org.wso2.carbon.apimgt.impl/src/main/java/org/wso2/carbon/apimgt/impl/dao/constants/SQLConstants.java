@@ -3706,7 +3706,4 @@ public class SQLConstants {
 
     public static final String DELETE_SUBSCRIBER =
             "DELETE FROM AM_SUBSCRIBER WHERE SUBSCRIBER_ID = ?";
-
-
-
 }
