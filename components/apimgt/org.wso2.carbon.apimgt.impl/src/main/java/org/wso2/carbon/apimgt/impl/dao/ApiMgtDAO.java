@@ -2508,6 +2508,82 @@ public class ApiMgtDAO {
         }
     }
 
+    public List<Integer> getSubscribersForOrganizationId(String organization) throws APIManagementException {
+        List<Integer> subscriberIdList = new ArrayList<>();
+        String query = "SELECT SUBSCRIBER_ID FROM AM_SUBSCRIBER_ORG_MAPPING WHERE ORGANIZATION = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ){
+            preparedStatement.setString(1, organization);
+            try (ResultSet rs = preparedStatement.executeQuery();){
+                while (rs.next()) {
+                    subscriberIdList.add(rs.getInt("SUBSCRIBER_ID"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving subscribers for organization " +organization, e);
+        }
+
+        return subscriberIdList;
+    }
+
+    public List<String> getMappedOrganizationListForSubscriber(int subscriberId) throws APIManagementException {
+        List<String> organizationList = new ArrayList<>();
+        String query = "SELECT ORGANIZATION FROM AM_SUBSCRIBER_ORG_MAPPING WHERE SUBSCRIBER_ID = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ){
+            preparedStatement.setInt(1, subscriberId);
+            try (ResultSet rs = preparedStatement.executeQuery();){
+                while (rs.next()) {
+                    organizationList.add(rs.getString("ORGANIZATION"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving organizations for subscriber id " +subscriberId, e);
+        }
+
+        return organizationList;
+
+    }
+
+    public void removeSubscriber(int subscriberId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String query = "DELETE FROM AM_SUBSCRIBER WHERE SUBSCRIBER_ID = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, subscriberId);
+            preparedStatement.executeUpdate();
+
+            connection.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            handleException("Error while removing subscriber with subscriber id " +subscriberId, e);
+        }
+    }
+
+    public void removeSubscriberOrganizationMapping(int subscriberId, String organization) throws APIManagementException{
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String query = "DELETE FROM AM_SUBSCRIBER_ORG_MAPPING WHERE SUBSCRIBER_ID = ? AND ORGANIZATION = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, subscriberId);
+            preparedStatement.setString(2, organization);
+            preparedStatement.executeUpdate();
+
+            connection.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            handleException("Error while removing subscriber with subscriber id " +subscriberId, e);
+        }
+    }
+
     public List<String> getPendingRegistrationsForApplicationList(int[] applicationIdList, String keyType)
             throws APIManagementException {
         List<String> pendingRegistrationsList = new ArrayList<>();
@@ -4780,15 +4856,45 @@ public class ApiMgtDAO {
         return applicationList;
     }
 
+    public void removeApplicationCreationWorkflows(int[] applicationIds) throws APIManagementException {
+
+        String removePendingSubscriptionsQuery = "DELETE FROM AM_WORKFLOWS WHERE WF_REFERENCE IN (_APPLICATION_IDS_) " +
+                "AND WF_TYPE = 'AM_APPLICATION_CREATION'";
+
+        String query = removePendingSubscriptionsQuery.replaceAll("_APPLICATION_IDS_",
+                String.join(",", Collections.nCopies(applicationIds.length, "?")));
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);){
+
+            connection.setAutoCommit(false);
+
+            for (int i = 0; i < applicationIds.length; i++) {
+                preparedStatement.setInt(i+1, applicationIds[i]);
+            }
+
+            preparedStatement.executeUpdate();
+            connection.commit();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing pending subscriptions";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+
+    }
+
     public void removePendingSubscriptions(int[] applicationIds) throws APIManagementException {
 
-        String removePendingSubscriptionsQuery = "DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE IN ( " +
-                "SELECT DISTINCT WF_EXTERNAL_REFERENCE " +
-                "FROM AM_WORKFLOWS WHERE WF_REFERENCE IN " +
+        String removePendingSubscriptionsQuery = "DELETE FROM AM_WORKFLOWS AM_WF_1 WHERE AM_WF_1.WF_EXTERNAL_REFERENCE " +
+                "IN ( " +
+                "SELECT DISTINCT AM_WF_2.WF_EXTERNAL_REFERENCE " +
+                "FROM ((SELECT WF_EXTERNAL_REFERENCE, WF_REFERENCE FROM AM_WORKFLOWS)) " +
+                "AM_WF_2 WHERE AM_WF_2.WF_REFERENCE IN " +
                 "(SELECT DISTINCT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION " +
                 "WHERE APPLICATION_ID IN (_APPLICATION_IDS_) " +
                 "AND SUB_STATUS = 'ON_HOLD')) " +
-                "AND WF_TYPE = 'AM_SUBSCRIPTION_CREATION'";
+                "AND AM_WF_1.WF_TYPE = 'AM_SUBSCRIPTION_CREATION'";
 
         String query = removePendingSubscriptionsQuery.replaceAll("_APPLICATION_IDS_",
                 String.join(",", Collections.nCopies(applicationIds.length, "?")));
