@@ -2508,7 +2508,13 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<Integer> getSubscribersForOrganizationId(String organization) throws APIManagementException {
+    /**
+     * This method is used to obtain subscribers for a given organization
+     *
+     * @param organization Organization
+     * @throws APIManagementException if failed to obtain subscribers
+     */
+    public List<Integer> getSubscribersForOrganization(String organization) throws APIManagementException {
         List<Integer> subscriberIdList = new ArrayList<>();
         String query = SQLConstants.GET_SUBSCRIBERS_FOR_ORG_ID;
 
@@ -2529,6 +2535,13 @@ public class ApiMgtDAO {
         return subscriberIdList;
     }
 
+    /**
+     * This method is used to obtain mapped organization list for a particular subscriber
+     *
+     * @param subscriberId Subscriber id
+     * @return list of mapped organizations
+     * @throws APIManagementException if failed to obtain mapped organizations
+     */
     public List<String> getMappedOrganizationListForSubscriber(int subscriberId) throws APIManagementException {
         List<String> organizationList = new ArrayList<>();
         String query = SQLConstants.GET_MAPPED_ORGANIZATIONS_FOR_SUBSCRIBER_ID;
@@ -2550,6 +2563,12 @@ public class ApiMgtDAO {
         return organizationList;
     }
 
+    /**
+     * Remove a subscriber, given the subscriber id
+     *
+     * @param subscriberId Subscriber id
+     * @throws APIManagementException if failed to remove the subscriber
+     */
     public void removeSubscriber(int subscriberId) throws APIManagementException {
 
         Connection connection = null;
@@ -2572,6 +2591,13 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Remove subscriber organization mapping
+     *
+     * @param subscriberId Subscriber id
+     * @param organization Organization
+     * @throws APIManagementException if failed to remove subscriber organization mapping
+     */
     public void removeSubscriberOrganizationMapping(int subscriberId, String organization)
             throws APIManagementException {
 
@@ -2596,6 +2622,14 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Obtain pending registrations for a given application list
+     *
+     * @param applicationIdList Application id list
+     * @param keyType Key type
+     * @return List of pending registrations
+     * @throws APIManagementException if failed to obtain pending registrations for application id list
+     */
     public List<String> getPendingRegistrationsForApplicationList(int[] applicationIdList, String keyType)
             throws APIManagementException {
         List<String> pendingRegistrationsList = new ArrayList<>();
@@ -2626,8 +2660,16 @@ public class ApiMgtDAO {
         return pendingRegistrationsList;
     }
 
+    /**
+     * Remove application registration workflows for a particular key manager
+     *
+     * @param applicationIdList Application id list
+     * @param keyManager Key Manager uuid
+     * @param tokenType Token type
+     * @throws APIManagementException if failed to remove application registration workflows
+     */
     public void deleteApplicationRegistrationsWorkflowsForKeyManager(int[] applicationIdList, String keyManager,
-            String tokenType) {
+            String tokenType) throws APIManagementException{
 
         String query = SQLConstants.DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER.replaceAll("_APPLICATION_IDS_",
                 String.join(",", Collections.nCopies(applicationIdList.length, "?")));
@@ -4831,7 +4873,14 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
-    public List<Application> getApplicationsByOrganization(String organization) {
+    /**
+     * Obtain applications by organization
+     *
+     * @param organization Organization
+     * @return List of Applications
+     * @throws APIManagementException if failed to obtain applications
+     */
+    public List<Application> getApplicationsByOrganization(String organization) throws APIManagementException{
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -4875,6 +4924,12 @@ public class ApiMgtDAO {
         return applicationList;
     }
 
+    /**
+     * Remove application creation workflows
+     *
+     * @param applicationIds Application id list
+     * @throws APIManagementException if failed to remove application creation workflows
+     */
     public void removeApplicationCreationWorkflows(int[] applicationIds) throws APIManagementException {
 
         String query = SQLConstants.DELETE_APPLICATION_CREATION_WORKFLOWS.replaceAll("_APPLICATION_IDS_",
@@ -4901,6 +4956,12 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Remove pending subscriptions for a given application id list
+     *
+     * @param applicationIds Application id list
+     * @throws APIManagementException if failed to remove pending subscriptions
+     */
     public void removePendingSubscriptions(int[] applicationIds) throws APIManagementException {
 
         String query = SQLConstants.DELETE_PENDING_SUBSCRIPTIONS.replaceAll("_APPLICATION_IDS_",
@@ -5078,10 +5139,10 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Deletes an Application along with subscriptions, keys and registration data
+     * Deletes Applications along with subscriptions, keys and registration data
      *
      * @param applicationIdList Application id list to be deleted from the database
-     * @throws APIManagementException
+     * @throws APIManagementException if failed to delete application list
      */
     public void deleteApplicationList(int[] applicationIdList) throws APIManagementException {
 
@@ -9124,6 +9185,13 @@ public class ApiMgtDAO {
         return workflowExtRef;
     }
 
+    /**
+     * Obtain external workflow reference list for given subscription id list
+     *
+     * @param subscriptionIds Subscription id list
+     * @return Set of External Workflow references
+     * @throws APIManagementException if failed to obtain external workflow references
+     */
     public Set<String> getExternalWorkflowReferenceListForSubscriptions(int[] subscriptionIds) throws APIManagementException {
 
         Set<String> workflowExtRefs = new HashSet<>();
