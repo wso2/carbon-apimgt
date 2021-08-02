@@ -2617,21 +2617,22 @@ public class ApiMgtDAO {
 
     public void deleteApplicationRegistrationsWorkflowsForKeyManager(int[] applicationIdList, String km, String tokenType) {
 
+        int length = applicationIdList.length;
         String query = SQLConstants.DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER.
                 replaceAll("_APPLICATION_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+                String.join(",", Collections.nCopies(length, "?")));
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query);){
 
             connection.setAutoCommit(false);
 
-            for (int i = 0; i < applicationIdList.length; i++) {
+            for (int i = 0; i < length; i++) {
                 preparedStatement.setInt(i+1, applicationIdList[i]);
             }
 
-            preparedStatement.setString(applicationIdList.length+1, tokenType);
-            preparedStatement.setString(applicationIdList.length+2, km);
+            preparedStatement.setString(length +1, tokenType);
+            preparedStatement.setString(length +2, km);
 
             preparedStatement.executeUpdate();
             connection.commit();
@@ -9170,41 +9171,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return workflowExtRef;
-    }
-
-    public Set<Integer> getPendingSubscriptionsByApplicationIdList(List<Integer> appIdList)
-            throws APIManagementException {
-        Set<Integer> pendingSubscriptionList = new HashSet<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String appIdListString = String.join(",",Collections.nCopies(appIdList.size(), "?"));
-        String getSubscriptionDataQuery = SQLConstants.GET_PAGINATED_SUBSCRIPTIONS_BY_APPLICATIONS_SQL.
-                replaceAll("_APPLICATION_IDS_",appIdListString);
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(getSubscriptionDataQuery);
-
-            for (int i = 1; i < appIdList.size()+1; i++) {
-                ps.setInt(i,appIdList.get(i-1));
-            }
-
-            ps.setString(appIdList.size()+1, APIConstants.SubscriptionStatus.ON_HOLD);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                pendingSubscriptionList.add(rs.getInt("SUBSCRIPTION_ID"));
-            }
-
-        } catch (SQLException e) {
-            handleException("Error occurred while getting subscription entries for " +
-                    "Applications : " + appIdListString, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return pendingSubscriptionList;
     }
 
     /**
