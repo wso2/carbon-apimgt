@@ -9183,8 +9183,10 @@ public class ApiMgtDAO {
             // setting subscriptionId as string to prevent error when db finds string type IDs for
             // ApplicationRegistration workflows
 
-            for (int i = 1; i < subscriptionIds.length+1; i++) {
-                ps.setString(i,String.valueOf(subscriptionIds[i-1]));
+            int index = 0;
+            for (int applicationId : subscriptionIds) {
+                index++;
+                ps.setString(index,String.valueOf(applicationId));
             }
 
             ps.setString(subscriptionIds.length+1, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
