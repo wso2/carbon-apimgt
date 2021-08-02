@@ -2513,16 +2513,17 @@ public class ApiMgtDAO {
         String query = SQLConstants.GET_SUBSCRIBERS_FOR_ORG_ID;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query);
-        ){
+                PreparedStatement preparedStatement = connection.prepareStatement(query);) {
             preparedStatement.setString(1, organization);
-            try (ResultSet rs = preparedStatement.executeQuery();){
+
+            try (ResultSet rs = preparedStatement.executeQuery();) {
                 while (rs.next()) {
                     subscriberIdList.add(rs.getInt("SUBSCRIBER_ID"));
                 }
             }
+
         } catch (SQLException e) {
-            handleException("Error while retrieving subscribers for organization " +organization, e);
+            handleException("Error while retrieving subscribers for organization " + organization, e);
         }
 
         return subscriberIdList;
@@ -2533,34 +2534,41 @@ public class ApiMgtDAO {
         String query = SQLConstants.GET_MAPPED_ORGANIZATIONS_FOR_SUBSCRIBER_ID;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query);
-        ){
-            preparedStatement.setInt(1, subscriberId);
-            try (ResultSet rs = preparedStatement.executeQuery();){
+                PreparedStatement preparedStatement = connection.prepareStatement(query);) {
+
+            reparedStatement.setInt(1, subscriberId);
+
+            try (ResultSet rs = preparedStatement.executeQuery();) {
                 while (rs.next()) {
                     organizationList.add(rs.getString("ORGANIZATION"));
                 }
             }
+
         } catch (SQLException e) {
-            handleException("Error while retrieving organizations for subscriber id " +subscriberId, e);
+            handleException("Error while retrieving organizations for subscriber id " + subscriberId, e);
         }
         return organizationList;
     }
 
     public void removeSubscriber(int subscriberId) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
+
         String query = SQLConstants.DELETE_SUBSCRIBER;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             preparedStatement = connection.prepareStatement(query);
+
             preparedStatement.setInt(1, subscriberId);
             preparedStatement.executeUpdate();
 
+        } catch (SQLException e) {
+            handleException("Error while removing subscriber with subscriber id " + subscriberId, e);
+        } finally {
             connection.close();
             preparedStatement.close();
-        } catch (SQLException e) {
-            handleException("Error while removing subscriber with subscriber id " +subscriberId, e);
         }
     }
 
@@ -2580,11 +2588,11 @@ public class ApiMgtDAO {
 
             preparedStatement.executeUpdate();
 
+        } catch (SQLException e) {
+            handleException("Error while removing subscriber with subscriber id " + subscriberId, e);
+        } finally {
             connection.close();
             preparedStatement.close();
-
-        } catch (SQLException e) {
-            handleException("Error while removing subscriber with subscriber id " +subscriberId, e);
         }
     }
 
@@ -2592,12 +2600,11 @@ public class ApiMgtDAO {
             throws APIManagementException {
         List<String> pendingRegistrationsList = new ArrayList<>();
 
-        String query = SQLConstants.GET_PENDING_REGISTRATIONS_FOR_APPLICATION_LIST.
-                replaceAll("_APPLICATION_IDS_",String.join(",",Collections.
-                        nCopies(applicationIdList.length, "?")));
+        String query = SQLConstants.GET_PENDING_REGISTRATIONS_FOR_APPLICATION_LIST.replaceAll("_APPLICATION_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(query)){
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             int index = 0;
             for (int applicationId : applicationIdList) {
@@ -2605,9 +2612,9 @@ public class ApiMgtDAO {
                 preparedStatement.setInt(index, applicationId);
             }
 
-            preparedStatement.setString(index+1,keyType);
+            preparedStatement.setString(index + 1, keyType);
 
-            try (ResultSet rs = preparedStatement.executeQuery();){
+            try (ResultSet rs = preparedStatement.executeQuery();) {
                 while (rs.next()) {
                     pendingRegistrationsList.add(rs.getString("KEY_MANAGER"));
                 }
@@ -2619,15 +2626,14 @@ public class ApiMgtDAO {
         return pendingRegistrationsList;
     }
 
-    public void deleteApplicationRegistrationsWorkflowsForKeyManager(int[] applicationIdList, String km, String tokenType) {
+    public void deleteApplicationRegistrationsWorkflowsForKeyManager(int[] applicationIdList, String keyManager,
+            String tokenType) {
 
-        int length = applicationIdList.length;
-        String query = SQLConstants.DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER.
-                replaceAll("_APPLICATION_IDS_",
-                String.join(",", Collections.nCopies(length, "?")));
+        String query = SQLConstants.DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER.replaceAll("_APPLICATION_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query);){
+                PreparedStatement preparedStatement = connection.prepareStatement(query);) {
 
             connection.setAutoCommit(false);
 
@@ -2637,8 +2643,8 @@ public class ApiMgtDAO {
                 preparedStatement.setInt(index, applicationId);
             }
 
-            preparedStatement.setString(index +1, tokenType);
-            preparedStatement.setString(index +2, km);
+            preparedStatement.setString(index + 1, tokenType);
+            preparedStatement.setString(index + 2, keyManager);
 
             preparedStatement.executeUpdate();
             connection.commit();
@@ -4825,7 +4831,7 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
-    public List<Application> getApplicationsByOrgId(String orgId) {
+    public List<Application> getApplicationsByOrganization(String organization) {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -4839,13 +4845,12 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(query);
 
-            preparedStatement.setString(1,orgId);
+            preparedStatement.setString(1, organization);
 
             rs = preparedStatement.executeQuery();
 
             while (rs.next()) {
                 int applicationId = rs.getInt("APPLICATION_ID");
-
                 Application application = new Application(applicationId);
 
                 application.setName(rs.getString("NAME"));
@@ -4862,8 +4867,8 @@ public class ApiMgtDAO {
                 applicationList.add(application);
             }
 
-        } catch (SQLException throwables) {
-            handleException("Error while getting getting application by organization: "+orgId, e);
+        } catch (SQLException e) {
+            handleException("Error while getting getting application by organization: " + organization, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, rs);
         }
@@ -4876,12 +4881,13 @@ public class ApiMgtDAO {
                 String.join(",", Collections.nCopies(applicationIds.length, "?")));
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query);){
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             connection.setAutoCommit(false);
 
             int index = 1;
-            for (int applicationId: applicationIds) {
+
+            for (int applicationId : applicationIds) {
                 preparedStatement.setInt(index, applicationId);
                 index++;
             }
@@ -4891,23 +4897,22 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             String msg = "Error occurred while removing pending subscriptions";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException(msg, e);
         }
-
     }
 
     public void removePendingSubscriptions(int[] applicationIds) throws APIManagementException {
+
         String query = SQLConstants.DELETE_PENDING_SUBSCRIPTIONS.replaceAll("_APPLICATION_IDS_",
                 String.join(",", Collections.nCopies(applicationIds.length, "?")));
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query);){
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             connection.setAutoCommit(false);
 
             int index = 1;
-            for (int applicationId: applicationIds) {
+            for (int applicationId : applicationIds) {
                 preparedStatement.setInt(index, applicationId);
                 index++;
             }
@@ -4916,9 +4921,7 @@ public class ApiMgtDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            String msg = "Error occurred while removing pending subscriptions";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException(msg, e);
         }
 
     }
@@ -5074,19 +5077,13 @@ public class ApiMgtDAO {
         }
     }
 
-    private String modifyQueryForList(List<Object> list, String query, String replaceSubString) {
-        return query.replaceAll(replaceSubString,
-                String.join(",", Collections.nCopies(list.size(), "?")));
-    }
-
     /**
      * Deletes an Application along with subscriptions, keys and registration data
      *
      * @param applicationIdList Application id list to be deleted from the database
      * @throws APIManagementException
      */
-    public void deleteApplicationList(int[] applicationIdList)
-            throws APIManagementException {
+    public void deleteApplicationList(int[] applicationIdList) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
@@ -5099,31 +5096,25 @@ public class ApiMgtDAO {
         PreparedStatement deleteApp = null;
         ResultSet rs = null;
 
-        String getSubscriptionsQuery = SQLConstants.GET_SUBSCRIPTION_IDS_OF_APPLICATION_LIST_SQL
-                .replaceAll("_IDS_",
+        String getSubscriptionsQuery = SQLConstants.GET_SUBSCRIPTION_IDS_OF_APPLICATION_LIST_SQL.replaceAll("_IDS_",
                 String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
-        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL
-                .replaceAll("_IDS_",
-                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL.replaceAll("_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
-        String deleteSubscriptionsQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL
-                .replaceAll("_IDS_",
-                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteSubscriptionsQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL.replaceAll(
+                "_IDS_", String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
-        String deleteApplicationKeyQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL
-                .replaceAll("_IDS_",
-                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteApplicationKeyQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL.replaceAll(
+                "_IDS_", String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
 
-        String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL
-                .replaceAll("_IDS_",
-                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL.replaceAll("_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
-        String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL
-                .replaceAll("_IDS_",
-                        String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL.replaceAll(
+                "_IDS_", String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
         boolean transactionCompleted = true;
         try {
@@ -5161,33 +5152,37 @@ public class ApiMgtDAO {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 String keyManagerName = rs.getString("NAME");
                 String keyManagerOrganization = rs.getString("ORGANIZATION");
+
                 // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
+
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
-                    KeyManager keyManager =
-                            KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization, keyManagerName);
+                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization,
+                            keyManagerName);
+
                     if (keyManager != null) {
                         try {
                             keyManager.deleteMappedApplication(consumerKey);
                         } catch (APIManagementException e) {
-                            log.error("Error while Deleting Client Application", e);
+                            handleException("Error while Deleting Client Application", e);
                         }
                     }
+
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
                     if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
                         //delete on oAuthorization server.
                         if (log.isDebugEnabled()) {
-                            log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the " +
-                                    "Oauth server");
+                            log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the "
+                                    + "Oauth server");
                         }
                         if (keyManager != null) {
                             try {
                                 keyManager.deleteApplication(consumerKey);
                             } catch (APIManagementException e) {
-                                log.error("Error while Deleting Client Application", e);
+                                handleException("Error while Deleting Client Application", e);
                             }
 
                         }
@@ -5274,7 +5269,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
-
         }
     }
 
