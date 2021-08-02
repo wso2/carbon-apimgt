@@ -239,10 +239,12 @@ public class ApplicationImportExportManager {
      * @param username    User for import application
      * @param application Application used to add key
      * @param apiKey      API key for adding to application
+     * @param update      Whether to update the OAuth Client or not
      * @throws APIManagementException
      */
-    public void addApplicationKey(String username, Application application, APIKey apiKey) throws APIManagementException {
-        String[] accessAllowDomainsArray = {"ALL"};
+    public void addApplicationKey(String username, Application application, APIKey apiKey, Boolean update)
+            throws APIManagementException {
+        String[] accessAllowDomainsArray = { "ALL" };
         JSONObject jsonParamObj = new JSONObject();
         jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
         String grantTypes = apiKey.getGrantTypes();
@@ -267,10 +269,17 @@ public class ApplicationImportExportManager {
         }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
-        apiConsumer.requestApprovalForApplicationRegistration(
-                username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
-                accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
-                jsonParams, apiKey.getKeyManager(), null, true);
-        // TODO: 2020-12-23 get the store domain and pass it as the tenant domain );
+
+        if (!update) {
+            apiConsumer.requestApprovalForApplicationRegistration(
+                    username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
+                    accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
+                    jsonParams, apiKey.getKeyManager(), null, true);
+            // TODO: 2020-12-23 get the store domain and pass it as the tenant domain );
+        } else {
+            apiConsumer
+                    .updateAuthClient(username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(), null,
+                            null, tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager());
+        }
     }
 }
