@@ -34,7 +34,14 @@ public class ApplicationPurge implements OrganizationPurge{
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
 
-    @Override public void deleteOrganization(String organization) throws APIManagementException {
+    /**
+     * Delete organization related application data
+     *
+     * @param organization organization
+     * @throws APIManagementException if failed to cleanup organization
+     */
+    @Override
+    public void deleteOrganization(String organization) throws APIManagementException {
         List<Application> applicationList = apiMgtDAO.getApplicationsByOrganization(organization);
         int[] applicationIdList = new int[applicationList.size()];
 
@@ -97,7 +104,7 @@ public class ApplicationPurge implements OrganizationPurge{
     private void deleteSubscribers(String organization) throws APIManagementException {
 
         //select subscribers for the organization
-        List<Integer> subscriberIdList = apiMgtDAO.getSubscribersForOrganizationId(organization);
+        List<Integer> subscriberIdList = apiMgtDAO.getSubscribersForOrganization(organization);
 
         if (subscriberIdList.size() > 0) {
             for (int subscriberId : subscriberIdList) {
