@@ -3685,4 +3685,34 @@ public class SQLConstants {
                     "( SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID IN (_APPLICATION_IDS_) " +
                     "                                                     AND TOKEN_TYPE = ? " +
                     "                                                     AND KEY_MANAGER = ?)";
+
+    public static final String DELETE_PENDING_SUBSCRIPTIONS =
+            "DELETE FROM AM_WORKFLOWS AM_WF_1 WHERE AM_WF_1.WF_EXTERNAL_REFERENCE " +
+                    "IN ( " +
+                    "SELECT DISTINCT AM_WF_2.WF_EXTERNAL_REFERENCE " +
+                    "FROM ((SELECT WF_EXTERNAL_REFERENCE, WF_REFERENCE FROM AM_WORKFLOWS)) " +
+                    "AM_WF_2 WHERE AM_WF_2.WF_REFERENCE IN " +
+                    "(SELECT DISTINCT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION " +
+                    "WHERE APPLICATION_ID IN (_APPLICATION_IDS_) " +
+                    "AND SUB_STATUS = 'ON_HOLD')) " +
+                    "AND AM_WF_1.WF_TYPE = 'AM_SUBSCRIPTION_CREATION'";
+
+    public static final String DELETE_APPLICATION_CREATION_WORKFLOWS =
+            "DELETE FROM AM_WORKFLOWS WHERE WF_REFERENCE IN (_APPLICATION_IDS_) " +
+                    "AND WF_TYPE = 'AM_APPLICATION_CREATION'";
+
+    public static final String GET_SUBSCRIBERS_FOR_ORG_ID =
+            "SELECT SUBSCRIBER_ID FROM AM_SUBSCRIBER_ORG_MAPPING WHERE ORGANIZATION = ?";
+
+    public static final String GET_MAPPED_ORGANIZATIONS_FOR_SUBSCRIBER_ID =
+            "SELECT ORGANIZATION FROM AM_SUBSCRIBER_ORG_MAPPING WHERE SUBSCRIBER_ID = ?";
+
+    public static final String DELETE_SUBSCRIBER_ORGANIZATION_MAPPING =
+            "DELETE FROM AM_SUBSCRIBER_ORG_MAPPING WHERE SUBSCRIBER_ID = ? AND ORGANIZATION = ?";
+
+    public static final String DELETE_SUBSCRIBER =
+            "DELETE FROM AM_SUBSCRIBER WHERE SUBSCRIBER_ID = ?";
+
+
+
 }
