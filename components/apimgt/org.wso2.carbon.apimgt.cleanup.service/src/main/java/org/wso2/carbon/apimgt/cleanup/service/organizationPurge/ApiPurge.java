@@ -36,6 +36,9 @@ import java.util.List;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
+/**
+ * This class used to remove API data from organization
+ */
 public class ApiPurge implements OrganizationPurge {
 
     private String username;
@@ -51,14 +54,43 @@ public class ApiPurge implements OrganizationPurge {
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
-    public void deleteOrganization(String orgId) throws APIManagementException {
 
+    /**
+     * @param orgId Organization Id
+     * @throws APIManagementException
+     */
+    public void deleteOrganization(String orgId) throws APIManagementException {
+        // get all apiIdentifier list
         List<APIIdentifier> apiIdentifierList = apiMgtDAO.getAPIIdList(orgId);
 
         // delete APIData from DB
         apiMgtDAO.deleteOrganizationAPIList(apiIdentifierList);
 
         // remove artifacts
+        removeArtifactsFromArtifactServer(apiIdentifierList, orgId);
+
+        // delete gateway artifacts
+        gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(apiIdentifierList);
+
+        // delete MongoDB data collection
+        removeAllOrganizationAPIArtifacts(orgId);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, new Gson().toJson(apiIdentifierList),
+                APIConstants.AuditLogConstants.DELETED, username);
+    }
+
+    private void removeAllOrganizationAPIArtifacts(String orgId) throws APIManagementException {
+        try {
+            apiPersistenceInstance.deleteAllAPIs(new Organization(orgId));
+        } catch (APIPersistenceException e) {
+            log.error("Error while deleting api artifacts in organization" + orgId + "from artifact Store", e);
+            handleException("Failed to delete all api artifacts of organization " + orgId, e);
+        }
+    }
+
+    private void removeArtifactsFromArtifactServer(List<APIIdentifier> apiIdentifierList, String orgId)
+            throws APIManagementException {
+
         if (artifactSaver != null) {
             try {
                 for (APIIdentifier apiIdentifier : apiIdentifierList) {
@@ -68,19 +100,8 @@ public class ApiPurge implements OrganizationPurge {
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error while deleting Runtime artifacts in organization" + orgId +
                         "from artifact Store", e);
+                handleException("Failed to delete artifacts of organization " + orgId + " from artifact server.", e);
             }
         }
-
-        // delete gateway artifacts
-        gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(apiIdentifierList);
-
-        try {
-            apiPersistenceInstance.deleteAllAPIs(new Organization(orgId));
-        } catch (APIPersistenceException e) {
-            handleException("Failed to delete organization data " + orgId, e);
-        }
-
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API,
-                new Gson().toJson(apiIdentifierList), APIConstants.AuditLogConstants.DELETED, username);
     }
 }

@@ -660,6 +660,7 @@ public class GatewayArtifactsMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
+            log.error("Error while deleting GW artifacts for " + apiIdentifierList, e);
             handleException("Failed to Delete Artifact from Database", e);
         }
     }
