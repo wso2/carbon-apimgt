@@ -868,7 +868,8 @@ public class PublisherCommonUtils {
     public static boolean validateEndpoints(APIDTO apiDto) {
 
         boolean isValid = true;
-        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
+        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES +
+                UrlValidator.ALLOW_LOCAL_URLS);
 
         if (apiDto.getEndpointConfig() != null) {
             Map endpointConfig = (Map) apiDto.getEndpointConfig();
