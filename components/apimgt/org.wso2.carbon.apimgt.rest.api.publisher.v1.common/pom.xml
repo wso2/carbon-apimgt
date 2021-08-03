@@ -111,6 +111,11 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${commons-validator.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -206,6 +211,7 @@
                         <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             javax.validation.*; version="1.1.0.Final",
+                            org.apache.commons.validator.routines.*;version="${commons-validator.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

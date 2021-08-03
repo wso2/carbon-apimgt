@@ -33,6 +33,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -87,6 +88,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -754,6 +756,12 @@ public class PublisherCommonUtils {
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
+        // validate sandbox and production endpoints
+        if (!PublisherCommonUtils.validateEndpoints(apiDto)) {
+            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                    ExceptionCodes.INVALID_ENDPOINT_URL);
+        }
+
         Map endpointConfig = (Map) apiDto.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
@@ -844,6 +852,45 @@ public class PublisherCommonUtils {
 
             if (isValid) {
                 isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
+            }
+        }
+
+        return isValid;
+    }
+
+    /**
+     * Validate sandbox and production endpoint URLs.
+     *
+     * @param apiDto API DTO of the API
+     * @return validity of URLs found within the endpoint configurations of the DTO
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean validateEndpoints(APIDTO apiDto) {
+
+        boolean isValid = true;
+        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
+
+        if (apiDto.getEndpointConfig() != null) {
+            Map endpointConfig = (Map) apiDto.getEndpointConfig();
+
+            Map<String, String> sandboxEndpointsMap = (Map<String, String>)
+                    endpointConfig.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+            Collection<String> sandboxEndpoints = sandboxEndpointsMap.values();
+            for (String sandboxEndpoint : sandboxEndpoints) {
+                if (!urlValidator.isValid(sandboxEndpoint)) {
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                Map<String, String> productionEndpointsMap = (Map<String, String>)
+                        endpointConfig.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+                Collection<String> productionEndpoints = productionEndpointsMap.values();
+                for (String productionEndpoint : productionEndpoints) {
+                    if (!urlValidator.isValid(productionEndpoint)) {
+                        isValid = false;
+                    }
+                }
             }
         }
 

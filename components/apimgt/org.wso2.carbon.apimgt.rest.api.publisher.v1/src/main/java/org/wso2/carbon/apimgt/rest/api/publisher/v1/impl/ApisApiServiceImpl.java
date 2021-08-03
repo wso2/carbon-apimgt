@@ -784,6 +784,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             validateAPIExistence(apiId);
+
+            // validate sandbox and production endpoints
+            if (!PublisherCommonUtils.validateEndpoints(body)) {
+                throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                        ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
+
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
@@ -3309,6 +3316,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        // validate sandbox and production endpoints
+        if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
+            RestApiUtil.handleBadRequest("Invalid/Malformed endpoint URL(s) detected ", log);
         }
 
         // Import the API and Definition
