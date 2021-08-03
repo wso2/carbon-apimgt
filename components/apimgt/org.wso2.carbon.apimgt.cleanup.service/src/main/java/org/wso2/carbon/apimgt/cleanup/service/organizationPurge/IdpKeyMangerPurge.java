@@ -24,17 +24,22 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 
 import java.util.List;
 
+/**
+ * This class used to remove IDP and KM data
+ */
 public class IdpKeyMangerPurge implements OrganizationPurge {
     protected String username;
+    APIAdmin apiAdmin;
 
     public IdpKeyMangerPurge(String username) {
         this.username = username;
+        this.apiAdmin = new APIAdminImpl();
     }
 
     public void deleteOrganization(String organization) throws APIManagementException {
-        APIAdmin apiAdmin = new APIAdminImpl();
-        List<KeyManagerConfigurationDTO> keyManagerList =
-                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+
+        List<KeyManagerConfigurationDTO> keyManagerList = apiAdmin.
+                getKeyManagerConfigurationsByOrganization(organization);
 
         for (KeyManagerConfigurationDTO keyManager : keyManagerList) {
             apiAdmin.deleteKeyManagerConfigurationById(organization, keyManager.getUuid(), username);
