@@ -2751,6 +2751,14 @@ public final class APIConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
 
+    public static class OrganizationDeletion {
+        public static final String API_RETRIEVER = "APIRetriever";
+        public static final String API_DB_DATA_REMOVER = "APIDataRemover";
+        public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
+        public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
+        public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+    }
+
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";

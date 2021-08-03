@@ -32,6 +32,8 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
@@ -60,20 +62,42 @@ public class ApiPurge implements OrganizationPurge {
      * @throws APIManagementException
      */
     public void deleteOrganization(String orgId) throws APIManagementException {
-        // get all apiIdentifier list
-        List<APIIdentifier> apiIdentifierList = apiMgtDAO.getAPIIdList(orgId);
 
-        // delete APIData from DB
-        apiMgtDAO.deleteOrganizationAPIList(apiIdentifierList);
+        List<APIIdentifier> apiIdentifierList = new ArrayList<>();
+        ArrayList<String> taskListArray = new ArrayList<>(Arrays.asList(APIConstants.OrganizationDeletion.API_RETRIEVER,
+                APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER));
 
-        // remove artifacts
-        removeArtifactsFromArtifactServer(apiIdentifierList, orgId);
-
-        // delete gateway artifacts
-        gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(apiIdentifierList);
-
-        // delete MongoDB data collection
-        removeAllOrganizationAPIArtifacts(orgId);
+        for (String task : taskListArray) {
+            int count = 0;
+            int maxTries = 3;
+            while (true) {
+                try {
+                    switch (task) {
+                    case APIConstants.OrganizationDeletion.API_RETRIEVER:
+                        apiIdentifierList = apiMgtDAO.getAPIIdList(orgId);
+                        break;
+                    case APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER:
+                        apiMgtDAO.deleteOrganizationAPIList(apiIdentifierList);
+                        break;
+                    case APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER:
+                        removeArtifactsFromArtifactServer(apiIdentifierList, orgId);
+                        break;
+                    case APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER:
+                        gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(apiIdentifierList);
+                        break;
+                    case APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER:
+                        removeAllOrganizationAPIArtifacts(orgId);
+                        break;
+                    }
+                } catch (APIManagementException e) {
+                    if (++count == maxTries)
+                        throw e;
+                }
+            }
+        }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, new Gson().toJson(apiIdentifierList),
                 APIConstants.AuditLogConstants.DELETED, username);

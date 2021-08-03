@@ -7055,7 +7055,7 @@ public class ApiMgtDAO {
     public void deleteOrganizationAPIList(List<APIIdentifier> apiIdentifiers) throws APIManagementException {
 
         List<String> apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).collect(Collectors.toList());
-        List<String> deleteList = Collections.nCopies(apiUUIdList.size(), "?");
+        List<String> collectionList = Collections.nCopies(apiUUIdList.size(), "?");
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -7063,7 +7063,7 @@ public class ApiMgtDAO {
             // Remove records from AM_API table and associated data through cascade delete
             String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
             deleteAPIQuery = deleteAPIQuery.replaceAll(SQLConstants.API_UUID_REGEX, String.join(",",
-                    deleteList));
+                    collectionList));
             deleteOrganizationAPIData(connection, deleteAPIQuery, apiUUIdList);
 
             //Remove from API default version table
@@ -7072,7 +7072,7 @@ public class ApiMgtDAO {
             //Remove API Cleanup tasks
             String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
             deleteCleanUpTasksQuery = deleteCleanUpTasksQuery
-                    .replaceAll(SQLConstants.API_UUID_REGEX, String.join(",", deleteList));
+                    .replaceAll(SQLConstants.API_UUID_REGEX, String.join(",", collectionList));
             deleteAPICleanupTasks(connection, deleteCleanUpTasksQuery, apiUUIdList);
 
             connection.commit();
