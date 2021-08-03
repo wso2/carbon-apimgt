@@ -5787,14 +5787,10 @@ public class ApiMgtDAO {
      */
     public void removeAPIFromDefaultVersion(List<APIIdentifier> apiIdList, Connection connection) throws
             APIManagementException {
+        try (PreparedStatement prepStmtDefVersionDelete =
+                     connection.prepareStatement(SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL)) {
 
-        String queryDefaultVersionDelete = SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL;
-
-        PreparedStatement prepStmtDefVersionDelete = null;
-        try {
-            prepStmtDefVersionDelete = connection.prepareStatement(queryDefaultVersionDelete);
-
-            for (APIIdentifier apiId: apiIdList) {
+            for (APIIdentifier apiId : apiIdList) {
                 prepStmtDefVersionDelete.setString(1, apiId.getApiName());
                 prepStmtDefVersionDelete.setString(2, APIUtil.
                         replaceEmailDomainBack(apiId.getProviderName()));
@@ -5805,8 +5801,6 @@ public class ApiMgtDAO {
             handleException("Error while deleting the API default version entry: " + apiIdList.stream().
                     map(APIIdentifier::getApiName).collect(Collectors.joining(",")) + " from the " +
                     "database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtDefVersionDelete, null, null);
         }
     }
 
@@ -6934,7 +6928,15 @@ public class ApiMgtDAO {
         return id;
     }
 
+    /**
+     * Get API data for given organization
+     *
+     * @param orgId organization Id
+     * @return ArrayList<APIIdentifier>
+     * @throws APIManagementException
+     */
     public ArrayList<APIIdentifier> getAPIIdList(String orgId) throws APIManagementException {
+
         ArrayList<APIIdentifier> apiList = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_API_LIST_SQL_BY_ORG)) {
@@ -6953,7 +6955,8 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get API apiUuid Templates of API with UUID " + orgId, e);
+            log.error("Error while getting apiUuid list of organization" + orgId, e);
+            handleException("Failed to get API apiUuid list of organization " + orgId, e);
         }
         return apiList;
     }
@@ -7044,54 +7047,71 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Delete all organization API data
+     *
+     * @param apiIdentifiers apiIdentifiers apiIdentifier list
+     * @throws APIManagementException
+     */
     public void deleteOrganizationAPIList(List<APIIdentifier> apiIdentifiers) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
 
         List<String> apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).collect(Collectors.toList());
-        List<String> collectionList = Collections.nCopies(apiUUIdList.size(), "?");
+        List<String> deleteList = Collections.nCopies(apiUUIdList.size(), "?");
 
-        String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
-        deleteAPIQuery = deleteAPIQuery.replaceAll(SQLConstants.API_UUID_REGEX,
-                String.join(",", collectionList));
-
-        String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
-        deleteCleanUpTasksQuery = deleteCleanUpTasksQuery.replaceAll(SQLConstants.API_UUID_REGEX,
-                String.join(",", collectionList));
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
-            // Delete records from AM_API table and associated data from cascade delete
-            prepStmt = connection.prepareStatement(deleteAPIQuery);
+            // Remove records from AM_API table and associated data through cascade delete
+            String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
+            deleteAPIQuery = deleteAPIQuery.replaceAll(SQLConstants.API_UUID_REGEX, String.join(",",
+                    deleteList));
+            deleteOrganizationAPIData(connection, deleteAPIQuery, apiUUIdList);
+
+            //Remove from API default version table
+            removeAPIFromDefaultVersion(apiIdentifiers, connection);
+
+            //Remove API Cleanup tasks
+            String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
+            deleteCleanUpTasksQuery = deleteCleanUpTasksQuery
+                    .replaceAll(SQLConstants.API_UUID_REGEX, String.join(",", deleteList));
+            deleteAPICleanupTasks(connection, deleteCleanUpTasksQuery, apiUUIdList);
+
+            connection.commit();
+        } catch (SQLException e) {
+            log.error("Error while deleting organization API related data of " + apiUUIdList, e);
+            handleException("Error while removing the organization API data: " + apiUUIdList + " from the database", e);
+        }
+    }
+
+    private void deleteOrganizationAPIData(Connection conn, String deleteAPIQuery, List<String> apiUUIdList)
+            throws APIManagementException {
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(deleteAPIQuery)) {
             int index = 1;
             for (String uuid : apiUUIdList) {
                 prepStmt.setString(index, uuid);
                 index++;
             }
             prepStmt.execute();
-            prepStmt.close();
+        } catch (SQLException e) {
+            log.error("Error while deleting API data of apiUuid list " + apiUUIdList, e);
+            handleException("Failed to remove API data of " + apiUUIdList + " from the database", e);
+        }
+    }
 
-            //Remove from API default version table
-            removeAPIFromDefaultVersion(apiIdentifiers, connection);
+    private void deleteAPICleanupTasks(Connection conn, String deleteCleanUpTasksQuery, List<String> apiUUIdList)
+            throws APIManagementException {
 
-            //Delete Cleanup tasks
-            prepStmt = connection.prepareStatement(deleteCleanUpTasksQuery);
-            index = 1;
+        try (PreparedStatement prepStmt = conn.prepareStatement(deleteCleanUpTasksQuery)) {
+            int index = 1;
             for (String uuid : apiUUIdList) {
                 prepStmt.setString(index, uuid);
                 index++;
             }
             prepStmt.executeUpdate();
-            prepStmt.close();
-
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Error while removing the organization API data with : " + apiUUIdList +
-                    " from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+            log.error("Error while deleting cleanup tasks of apiUuid list " + apiUUIdList, e);
+            handleException("Failed to remove cleanup tasks of " + apiUUIdList + " from the database", e);
         }
     }
 
