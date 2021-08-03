@@ -297,7 +297,6 @@ public class SQLConstantsMSSQL extends SQLConstants{
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL " +
                 "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
 }
 
 
