@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
+package org.wso2.carbon.apimgt.cleanup.service;
 
 public class ApplicationPurge implements OrganizationPurge {
     public void deleteOrganization(String organization) {
