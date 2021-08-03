@@ -39,6 +39,7 @@ public class KeyManagerDTO   {
     private String authorizeEndpoint = null;
     private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
+    private String alias = null;
     private String scopeManagementEndpoint = null;
     private List<String> availableGrantTypes = new ArrayList<String>();
     private Boolean enableTokenGeneration = null;
@@ -53,6 +54,38 @@ public class KeyManagerDTO   {
     private List<TokenValidationDTO> tokenValidation = new ArrayList<TokenValidationDTO>();
     private Boolean enabled = null;
     private Object additionalProperties = null;
+
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        EXCHANGED("EXCHANGED"),
+        ORIGINAL("ORIGINAL");
+        private String value;
+
+        TokenTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private TokenTypeEnum tokenType = TokenTypeEnum.ORIGINAL;
 
   /**
    **/
@@ -298,6 +331,24 @@ public class KeyManagerDTO   {
   }
 
   /**
+   * The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token 
+   **/
+  public KeyManagerDTO alias(String alias) {
+    this.alias = alias;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9443/oauth2/token", value = "The alias of Identity Provider. If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token ")
+  @JsonProperty("alias")
+  public String getAlias() {
+    return alias;
+  }
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+
+  /**
    **/
   public KeyManagerDTO scopeManagementEndpoint(String scopeManagementEndpoint) {
     this.scopeManagementEndpoint = scopeManagementEndpoint;
@@ -538,6 +589,24 @@ public class KeyManagerDTO   {
     this.additionalProperties = additionalProperties;
   }
 
+  /**
+   * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.
+   **/
+  public KeyManagerDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "EXCHANGED", value = "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -562,6 +631,7 @@ public class KeyManagerDTO   {
         Objects.equals(authorizeEndpoint, keyManager.authorizeEndpoint) &&
         Objects.equals(certificates, keyManager.certificates) &&
         Objects.equals(issuer, keyManager.issuer) &&
+        Objects.equals(alias, keyManager.alias) &&
         Objects.equals(scopeManagementEndpoint, keyManager.scopeManagementEndpoint) &&
         Objects.equals(availableGrantTypes, keyManager.availableGrantTypes) &&
         Objects.equals(enableTokenGeneration, keyManager.enableTokenGeneration) &&
@@ -575,12 +645,13 @@ public class KeyManagerDTO   {
         Objects.equals(scopesClaim, keyManager.scopesClaim) &&
         Objects.equals(tokenValidation, keyManager.tokenValidation) &&
         Objects.equals(enabled, keyManager.enabled) &&
-        Objects.equals(additionalProperties, keyManager.additionalProperties);
+        Objects.equals(additionalProperties, keyManager.additionalProperties) &&
+        Objects.equals(tokenType, keyManager.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
   }
 
   @Override
@@ -602,6 +673,7 @@ public class KeyManagerDTO   {
     sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
     sb.append("    certificates: ").append(toIndentedString(certificates)).append("\n");
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
+    sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    scopeManagementEndpoint: ").append(toIndentedString(scopeManagementEndpoint)).append("\n");
     sb.append("    availableGrantTypes: ").append(toIndentedString(availableGrantTypes)).append("\n");
     sb.append("    enableTokenGeneration: ").append(toIndentedString(enableTokenGeneration)).append("\n");
@@ -616,6 +688,7 @@ public class KeyManagerDTO   {
     sb.append("    tokenValidation: ").append(toIndentedString(tokenValidation)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -29,8 +29,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -63,7 +64,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String apiTenant;
     String apiName;
     String appId;
+    String ipAddress;
     Map<String, String> headersMap;
+    Map<String, Object> customPropertyMap;
     private AuthenticationContext authenticationContext;
 
     private long messageSizeInBytes;
@@ -95,7 +98,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiTenant = null;
         this.appId = null;
         this.apiName = null;
+        this.ipAddress = null;
+        this.headersMap = null;
         this.messageSizeInBytes = 0;
+        this.customPropertyMap = Collections.emptyMap();
     }
 
     /**
@@ -138,11 +144,29 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
         //Build the message if needed from here since it cannot be done from the run() method because content 
         //in axis2MessageContext is modified.
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        Map<String, String> transportHeaderMap = (Map<String, String>) axis2MessageContext
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (transportHeaderMap != null) {
+            this.headersMap = new HashMap<>(transportHeaderMap);
+        }
+
+        if (messageContext.getProperty(APIThrottleConstants.CUSTOM_PROPERTY) != null) {
+            HashMap<String, Object> propertyFromMsgCtx = (HashMap<String, Object>) messageContext.getProperty(
+                    APIThrottleConstants.CUSTOM_PROPERTY);
+
+            if (propertyFromMsgCtx != null) {
+                this.customPropertyMap = (Map<String, Object>) propertyFromMsgCtx.clone();
+            }
+        }
+
+        this.ipAddress = GatewayUtils.getIp(axis2MessageContext);
+        if (log.isDebugEnabled()) {
+            log.debug("Remote IP address : " + ipAddress);
+        }
+
         if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext();
-            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
-                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             Object contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
             if (contentLength != null) {
                 log.debug("Content lenght found in the request. Using it as the message size..");
@@ -165,58 +189,44 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 } 
             }
         }
-
-        if (getThrottleProperties().isEnableHeaderConditions()) {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext();
-            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
-                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-            //Set transport headers of the message. Header Map will be put to the JSON Map which gets transferred
-            // to CEP. Since this operation runs asynchronously if we are to get the header Map present in the
-            // messageContext a ConcurrentModificationException will be thrown. Reason is at the time of sending the
-            // request out, header map is modified by the Synapse layer. It's to avoid this problem a clone of the
-            // map is used.
-            if (transportHeaderMap != null) {
-                this.headersMap = (Map<String, String>) transportHeaderMap.clone();
-            }
-        }
     }
 
     public void run() {
         JSONObject jsonObMap = new JSONObject();
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
-        String remoteIP = GatewayUtils.getIp(axis2MessageContext);
-        if (log.isDebugEnabled()) {
-            log.debug("Remote IP address : " + remoteIP);
-        }
 
-        if (remoteIP != null && remoteIP.length() > 0) {
-            if (remoteIP.contains(":") && remoteIP.split(":").length == 2) {
-                log.warn("Client port will be ignored and only the IP address (IPV4) will concern from " + remoteIP);
-                remoteIP = remoteIP.split(":")[0];
+        if (ipAddress != null && ipAddress.length() > 0) {
+            if (ipAddress.contains(":") && ipAddress.split(":").length == 2) {
+                log.warn("Client port will be ignored and only the IP address (IPV4) will concern from " + ipAddress);
+                ipAddress = ipAddress.split(":")[0];
             }
             try {
-                InetAddress address = APIUtil.getAddress(remoteIP);
+                InetAddress address = APIUtil.getAddress(ipAddress);
                 if (address instanceof Inet4Address) {
-                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
+                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(ipAddress));
                     jsonObMap.put(APIThrottleConstants.IPv6, 0);
                 } else if (address instanceof Inet6Address) {
-                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(remoteIP));
+                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(ipAddress));
                     jsonObMap.put(APIThrottleConstants.IP, 0);
                 }
             } catch (UnknownHostException e) {
                 //send empty value as ip
-                log.error("Error while parsing host IP " + remoteIP, e);
+                log.error("Error while parsing host IP " + ipAddress, e);
                 jsonObMap.put(APIThrottleConstants.IPv6, 0);
                 jsonObMap.put(APIThrottleConstants.IP, 0);
             }
         }
 
         //HeaderMap will only be set if the Header Publishing has been enabled.
-        if (this.headersMap != null) {
-            jsonObMap.putAll(this.headersMap);
+        if (getThrottleProperties().isEnableHeaderConditions()) {
+            if (this.headersMap != null) {
+                jsonObMap.putAll(this.headersMap);
+            }
+        }
+        //adding any custom property if available to stream's property map
+        if (this.customPropertyMap != null) {
+            jsonObMap.putAll(this.customPropertyMap);
         }
 
         //Setting query parameters

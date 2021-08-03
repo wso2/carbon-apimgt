@@ -143,13 +143,14 @@ public class ImportUtils {
      * @param application    Application
      * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
+     * @param organization   Organization
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update,
-                                                          APIConsumer apiConsumer) throws APIManagementException,
+            Application application, Boolean update, APIConsumer apiConsumer, String organization)
+            throws APIManagementException,
             UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -182,12 +183,12 @@ public class ImportUtils {
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiOrApiProductUuid = apiConsumer.getAPIProduct(apiProduct.getId()).getUuid();
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(apiProduct.getId(), organization);
                     } else {
                         API api = (API) apiSet.iterator().next();
-                        apiOrApiProductUuid = apiConsumer.getAPI(api.getId()).getUuid();
+                        apiOrApiProductUuid = APIUtil.getUUIDFromIdentifier(api.getId(), organization);
                     }
-                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, tenantDomain);
+                    apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiOrApiProductUuid, organization);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -298,8 +299,8 @@ public class ImportUtils {
         }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
-        apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
+        apiConsumer.requestApprovalForApplicationRegistration(username, application, apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null, true);
+                tokenScopes, jsonParams, apiKey.getKeyManager(), null, true);
     }
 }

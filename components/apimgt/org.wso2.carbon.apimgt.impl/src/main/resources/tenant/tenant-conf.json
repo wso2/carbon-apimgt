@@ -309,6 +309,10 @@
       {
         "Name": "apim:comment_write",
         "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:admin_application_view",
+        "Roles": "admin"
       }
     ]
   },

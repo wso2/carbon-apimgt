@@ -53,6 +53,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBLE_ROLES = "overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS = "overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
+    public static final String API_OVERVIEW_AUDIENCE = "overview_audience";
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
@@ -179,6 +180,8 @@ public final class APIConstants {
 
     public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
+    public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
+
     public static final String DOCUMENTATION_KEY = "document";
 
     public static final String DOC_NAME = "overview_name";
@@ -302,7 +305,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static final String[] API_SUPPORTED_TYPE_LIST =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB"};
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";

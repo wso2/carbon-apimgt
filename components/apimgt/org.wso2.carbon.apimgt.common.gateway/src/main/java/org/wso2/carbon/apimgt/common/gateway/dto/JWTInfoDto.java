@@ -41,6 +41,28 @@ public class JWTInfoDto {
     private JWTValidationInfo jwtValidationInfo;
     private Map<String, String> appAttributes = new HashMap<>();
 
+    public JWTInfoDto() {
+
+    }
+
+    public JWTInfoDto(JWTInfoDto jwtInfoDto) {
+
+        this.applicationId = jwtInfoDto.getApplicationId();
+        this.keyType = jwtInfoDto.getKeyType();
+        this.version = jwtInfoDto.getVersion();
+        this.applicationName = jwtInfoDto.getApplicationName();
+        this.endUser = jwtInfoDto.getEndUser();
+        this.endUserTenantId = jwtInfoDto.getEndUserTenantId();
+        this.applicationUUId = jwtInfoDto.getApplicationUUId();
+        this.subscriber = jwtInfoDto.getSubscriber();
+        this.subscriptionTier = jwtInfoDto.getSubscriptionTier();
+        this.applicationTier = jwtInfoDto.getApplicationTier();
+        this.apiContext = jwtInfoDto.getApiContext();
+        this.apiName = jwtInfoDto.getApiName();
+        this.jwtValidationInfo = new JWTValidationInfo(jwtInfoDto.getJwtValidationInfo());
+        this.appAttributes = jwtInfoDto.getAppAttributes();
+    }
+
     public String getApplicationTier() {
 
         return applicationTier;

@@ -98,10 +98,9 @@ public class SequenceGenerator {
      * Generates in/out sequences from the swagger given
      *
      * @param swaggerStr swagger string
-     * @param apiIdentifier api identifier object
      * @throws APIManagementException
      */
-    public static List<SOAPToRestSequence> generateSequencesFromSwagger(String swaggerStr, APIIdentifier apiIdentifier)
+    public static List<SOAPToRestSequence> generateSequencesFromSwagger(String swaggerStr)
             throws APIManagementException {
         List<SOAPToRestSequence> sequences = new ArrayList<SOAPToRestSequence>();
         Swagger swagger = new SwaggerParser().parse(swaggerStr);

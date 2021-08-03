@@ -192,6 +192,12 @@ public enum ExceptionCodes implements ErrorHandler {
     MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
             "users with the same username exist in the system"),
     INVALID_USER_ROLES(900610, "Invalid user roles found", 400, "Invalid user roles found"),
+    IDP_ADDING_FAILED(900611, "Unable to add the identity provider", 400, "Error while adding the identity provider"),
+    IDP_RETRIEVAL_FAILED(900612, "Unable to retrieve the identity provider", 400, "Error while retrieving the "
+            + "identity provider details"),
+    IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
+            + "identity provider"),
+    INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
 
 
     // Labels related codes
@@ -304,6 +310,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot add client certificates to this server"),
     THROTTLING_POLICY_CANNOT_BE_NULL(900989,
             "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
+    ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR(900971, "Cannot delete the advanced throttling policy", 403,
+            "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
@@ -392,6 +400,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required application properties are missing"),
     KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
+    INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
+            "Invalid additional properties given for application"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
@@ -463,7 +473,9 @@ public enum ExceptionCodes implements ErrorHandler {
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
 
     //Service Catalog related error codes
-    SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version");
+    SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
+    INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
+            "Invalid Endpoint Security credentials. %s", false);
 
     private final long errorCode;
     private final String errorMessage;

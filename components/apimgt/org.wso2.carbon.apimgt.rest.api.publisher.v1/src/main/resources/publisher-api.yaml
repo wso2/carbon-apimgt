@@ -7820,6 +7820,30 @@ components:
         context:
           type: string
           example: CalculatorAPI
+        additionalProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+          description: Map of custom properties of API
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
         version:
           type: string
           example: 1.0.0
@@ -7831,6 +7855,13 @@ components:
         type:
           type: string
           example: HTTP
+        audience:
+          type: string
+          description: The audience of the API. Accepted values are PUBLIC, SINGLE
+          example: PUBLIC
+          enum:
+            - PUBLIC
+            - SINGLE
         lifeCycleStatus:
           type: string
           example: CREATED
@@ -7910,7 +7941,7 @@ components:
         name:
           maxLength: 50
           minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+\[\]\/]*$)'
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
         description:
@@ -7918,7 +7949,7 @@ components:
           type: string
           example: This is a simple API for Pizza Shack online pizza delivery store.
         context:
-          maxLength: 82
+          maxLength: 232
           minLength: 1
           type: string
           example: pizza
@@ -7975,7 +8006,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
           example: HTTP
           default: HTTP
           enum:
@@ -7986,6 +8017,14 @@ components:
             - GRAPHQL
             - WEBSUB
             - SSE
+            - WEBHOOK
+        audience:
+          type: string
+          description: The audience of the API. Accepted values are PUBLIC, SINGLE
+          example: PUBLIC
+          enum:
+            - PUBLIC
+            - SINGLE
         transport:
           type: array
           description: |
@@ -8102,6 +8141,20 @@ components:
                 type: string
               display:
                 type: boolean
+          x-otherScopes:
+            - apim:api_publish
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
           x-otherScopes:
             - apim:api_publish
         monetization:
@@ -8407,7 +8460,10 @@ components:
           readOnly: true
           type: string
           format: date-time
-
+        successDeployedTime:
+          readOnly: true
+          type: string
+          format: date-time
     AuditReport:
       title: Resource for Audit Report
       type: object
@@ -8672,6 +8728,18 @@ components:
               display:
                 type: boolean
           description: Map of custom properties of API
+        additionalPropertiesMap:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              display:
+                type: boolean
+                default: false
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
         businessInformation:

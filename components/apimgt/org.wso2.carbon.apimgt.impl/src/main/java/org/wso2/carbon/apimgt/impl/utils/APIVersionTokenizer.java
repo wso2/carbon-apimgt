@@ -62,7 +62,7 @@ public class APIVersionTokenizer {
         int suffixStart = position;
         while (position < length) {
             char c = versionString.charAt(position);
-            if (c == '.') {
+            if (isCharToSkip(c) || (c >= '0' && c <= '9')) {
                 break;
             }
             position++;
@@ -71,9 +71,13 @@ public class APIVersionTokenizer {
         if (suffixStart < position) {
             suffix = versionString.substring(suffixStart, position);
         }
-        if (position < length) {
+        if (position < length && isCharToSkip(versionString.charAt(position))) {
             position++;
         }
         return true;
+    }
+
+    private boolean isCharToSkip(char c) {
+        return c == '.';
     }
 }

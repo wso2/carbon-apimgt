@@ -40,6 +40,7 @@ public class OAuthApplicationInfo {
     private String jsonString;
     private Map<String, String> appAttributes = new HashMap<>();
     private String jsonAppAttribute;
+    private String applicationUUID;
 
     private String tokenType;
 
@@ -189,4 +190,11 @@ public class OAuthApplicationInfo {
         this.tokenType = tokenType;
     }
 
+    public String getApplicationUUID() {
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+        this.applicationUUID = applicationUUID;
+    }
 }

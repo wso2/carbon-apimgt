@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -65,7 +68,8 @@ public class APIDTO   {
         SOAP("SOAP"),
         GRAPHQL("GRAPHQL"),
         WEBSUB("WEBSUB"),
-        SSE("SSE");
+        SSE("SSE"),
+        WEBHOOK("WEBHOOK");
         private String value;
 
         TypeEnum (String v) {
@@ -92,6 +96,38 @@ return null;
         }
     }
     private TypeEnum type = TypeEnum.HTTP;
+
+    @XmlType(name="AudienceEnum")
+    @XmlEnum(String.class)
+    public enum AudienceEnum {
+        PUBLIC("PUBLIC"),
+        SINGLE("SINGLE");
+        private String value;
+
+        AudienceEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AudienceEnum fromValue(String v) {
+            for (AudienceEnum b : AudienceEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private AudienceEnum audience = null;
     private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> tags = new ArrayList<String>();
@@ -176,7 +212,9 @@ return null;
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
 
     @XmlType(name="AccessControlEnum")
@@ -290,7 +328,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+\\[\\]/]*$)") @Size(min=1,max=50)  public String getName() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\[\\]/]*$)") @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -325,7 +363,7 @@ return null;
   @ApiModelProperty(example = "pizza", required = true, value = "")
   @JsonProperty("context")
   @NotNull
- @Size(min=1,max=82)  public String getContext() {
+ @Size(min=1,max=232)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
@@ -558,7 +596,7 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -566,13 +604,31 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
   }
   public void setType(TypeEnum type) {
     this.type = type;
+  }
+
+  /**
+   * The audience of the API. Accepted values are PUBLIC, SINGLE
+   **/
+  public APIDTO audience(AudienceEnum audience) {
+    this.audience = audience;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, SINGLE")
+  @JsonProperty("audience")
+  public AudienceEnum getAudience() {
+    return audience;
+  }
+  public void setAudience(AudienceEnum audience) {
+    this.audience = audience;
   }
 
   /**
@@ -808,7 +864,7 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public APIDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public APIDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -817,11 +873,29 @@ return null;
   @ApiModelProperty(value = "Map of custom properties of API")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIInfoAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
@@ -1174,6 +1248,7 @@ return null;
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(type, API.type) &&
+        Objects.equals(audience, API.audience) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
         Objects.equals(policies, API.policies) &&
@@ -1188,6 +1263,7 @@ return null;
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, API.additionalPropertiesMap) &&
         Objects.equals(monetization, API.monetization) &&
         Objects.equals(accessControl, API.accessControl) &&
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
@@ -1210,7 +1286,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
   }
 
   @Override
@@ -1236,6 +1312,7 @@ return null;
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
@@ -1250,6 +1327,7 @@ return null;
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");

@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.persistence;
 
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -44,6 +45,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceExcepti
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This Interface defines the interface methods related to API operations and functionalities which incorporate with
@@ -85,20 +87,24 @@ public interface APIPersistence {
      *
      * @param org          Organization the API is owned by
      * @param apiUUID API UUID
+     * @param revisionId uuid
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
-    void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+    void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
+            throws APIPersistenceException;
 
     /**
      * Add API Revision to the persistence layer
      *
      * @param org          Organization the API is owned by
      * @param apiUUID API UUID
+     * @param revisionUUID API revisionUUID
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
-    void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+    void deleteAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId)
+            throws APIPersistenceException;
 
     /**
      * Update API in the persistence layer
@@ -137,6 +143,14 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     void deleteAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Delete all APIs
+     *
+     * @param org   Organization the API is owned by
+     * @throws APIPersistenceException
+     */
+    void deleteAllAPIs(Organization org) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Publisher API listing
@@ -250,6 +264,16 @@ public interface APIPersistence {
     ============================================= */
 
     /**
+     * Save Async API definition
+     *
+     * @param org           Organization the Async API definition is owned by
+     * @param apiId         API ID
+     * @param apiDefinition Async API definition
+     * @throws AsyncSpecPersistenceException
+     */
+    void saveAsyncDefinition(Organization org, String apiId, String apiDefinition) throws AsyncSpecPersistenceException;
+
+    /**
      * Get Async API definition
      *
      * @param org   Organization the definition is owned by
@@ -335,10 +359,10 @@ public interface APIPersistence {
     /**
      * Add the content (Inline text/Markdown content text/ Resource file) of API documentation
      *
-     * @param org   Organization the documentation is owned by
-     * @param apiId API ID
-     * @param docId Documentation ID
-     * @param Documentation Content
+     * @param org       Organization the documentation is owned by
+     * @param apiId     API ID
+     * @param docId     Documentation ID
+     * @param content   Content
      * @return Documentation Content
      * @throws DocumentationPersistenceException
      */
@@ -507,5 +531,14 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
+    
+    /**
+     * Get a list of all the tagscategories of an organization
+     *
+     * @param org   Organization the tags are owned by
+     * @param ctx   UserContext the tags are visible to
+     * @return list of all the tags of an organization
+     */
+    Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
 }

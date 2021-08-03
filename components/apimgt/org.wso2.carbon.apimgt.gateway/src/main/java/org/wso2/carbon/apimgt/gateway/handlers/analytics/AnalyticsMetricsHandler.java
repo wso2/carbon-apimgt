@@ -48,14 +48,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-
-
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
         if (!messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
-            if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-                return true;
-            }
             String userAgent = getUserAgent(messageContext);
             String userIp = DataPublisherUtil.getEndUserIP(messageContext);
             messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
@@ -84,6 +79,12 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
+            return true;
+        }
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+            if (log.isDebugEnabled()){
+                log.debug("Skipping prototype APIs as analytics does not support this type of API");
+            }
             return true;
         }
         AnalyticsDataProvider provider;

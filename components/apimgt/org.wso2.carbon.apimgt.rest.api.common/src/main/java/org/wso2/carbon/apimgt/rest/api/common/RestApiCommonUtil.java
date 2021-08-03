@@ -1,5 +1,17 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.Extension;
+import io.swagger.v3.core.util.Json;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.servers.Server;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,12 +32,22 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
+import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_AUTH_HEADER;
+import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_BASEPATH;
+import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_DISABLE_SECURITY;
+import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_PRODUCTION_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_SANDBOX_ENDPOINTS;
 
 public class RestApiCommonUtil {
 
@@ -407,12 +429,10 @@ public class RestApiCommonUtil {
             throws APIManagementException {
 
         String apiSwagger = null;
-        String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
         if (api.getUuid() != null) {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), providerTenantDomain);
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), api.getOrganization());
         } else {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), providerTenantDomain);
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), api.getOrganization());
         }
 
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
@@ -464,7 +484,7 @@ public class RestApiCommonUtil {
     public static String retrieveAsyncAPIDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
 
-        return apiProvider.getAsyncAPIDefinition(api.getId());
+        return apiProvider.getAsyncAPIDefinition(api.getId().getUUID(), api.getOrganization());
     }
 
     public static String getValidateTenantDomain(String xWSO2Tenant) {
@@ -480,6 +500,54 @@ public class RestApiCommonUtil {
             }
         }
 
+    }
+
+    /**
+     * Generate a basic OpenAPI definition with given details.
+     *
+     * @param name             name of the API.
+     * @param version          version of the API.
+     * @param context          context of the API.
+     * @param callbackEndpoint callback URL of the async API.
+     * @return OpenAPI definition as String.
+     * @throws JsonProcessingException Error occurred while generating the OpenAPI.
+     */
+    public static String generateOpenAPIForAsync(String name, String version, String context, String callbackEndpoint)
+            throws JsonProcessingException {
+
+        OpenAPI openAPI = new OpenAPI();
+        Info info = new Info();
+        info.setTitle(name);
+        info.setDescription("API Definition of " + name);
+        info.setVersion(version);
+        openAPI.setInfo(info);
+        ArrayList<Server> servers = new ArrayList<>();
+        Server server = new Server();
+        server.setUrl("/");
+        servers.add(server);
+        openAPI.setServers(Arrays.asList(server));
+        Paths paths = new Paths();
+        PathItem pathItem = new PathItem();
+        Operation operation = new Operation();
+        ApiResponses apiResponses = new ApiResponses();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setDescription("Default response");
+        apiResponses.addApiResponse("default", apiResponse);
+        operation.setResponses(apiResponses);
+        pathItem.setPost(operation);
+        paths.addPathItem("/*", pathItem);
+        openAPI.paths(paths);
+        List<String> urls = new ArrayList<>();
+        urls.add(callbackEndpoint);
+        Map<String, Object> tempMap = new HashMap();
+        tempMap.put("type", "http");
+        tempMap.put("urls", urls);
+        openAPI.addExtension(X_WSO2_PRODUCTION_ENDPOINTS, tempMap);
+        openAPI.addExtension(X_WSO2_SANDBOX_ENDPOINTS, tempMap);
+        openAPI.addExtension(X_WSO2_AUTH_HEADER, "Authorization");
+        openAPI.addExtension(X_WSO2_BASEPATH, context + "/" + version);
+        openAPI.addExtension(X_WSO2_DISABLE_SECURITY, true);
+        return Json.mapper().writeValueAsString(openAPI);
     }
 
 }

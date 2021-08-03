@@ -34,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
@@ -106,7 +107,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         String applicationName = oAuthApplicationInfo.getClientName();
-        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
+        String oauthClientName = oauthAppRequest.getOAuthApplicationInfo().getApplicationUUID();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
@@ -159,7 +160,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws JSONException for errors in parsing the OAuthApplicationInfo json string
      */
     private ClientInfo createClientInfo(OAuthApplicationInfo info, String applicationName, boolean isUpdate)
-            throws JSONException {
+            throws JSONException, APIManagementException {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
@@ -227,6 +228,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
+                        if (expiry < 0) {
+                            throw new APIManagementException("Invalid application access token expiry time given for "
+                                    + applicationName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                        }
                         clientInfo.setApplicationAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
@@ -241,6 +246,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                     try {
                         long expiry = Long.parseLong((String) expiryTimeObject);
+                        if (expiry < 0) {
+                            throw new APIManagementException("Invalid user access token expiry time given for "
+                                    + applicationName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                        }
                         clientInfo.setUserAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
@@ -287,7 +296,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
-        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
+        String oauthClientName = oAuthApplicationInfo.getApplicationUUID();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
@@ -398,10 +407,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         TokenInfo tokenResponse;
 
         try {
-            tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
-                    GRANT_TYPE_VALUE, scopes);
+            if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(tokenRequest.getGrantType())) {
+                tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                        tokenRequest.getGrantType(), scopes, (String) tokenRequest.getRequestParam(APIConstants
+                                .OAuthConstants.SUBJECT_TOKEN), APIConstants.OAuthConstants.JWT_TOKEN_TYPE);
+            } else {
+                tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                        GRANT_TYPE_VALUE, scopes);
+            }
         } catch (KeyManagerClientException e) {
-            throw new APIManagementException("Error occurred while calling token endpoint!", e);
+            throw new APIManagementException("Error occurred while calling token endpoint - " + e.getReason(), e);
         }
 
         tokenInfo = new AccessTokenInfo();

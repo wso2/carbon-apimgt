@@ -101,6 +101,7 @@
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
             </ExcludedClaims>
+            <EnableUserClaimRetrievalFromKeyManager>{{apim.jwt.gateway_generator.enable_claim_retrieval}}</EnableUserClaimRetrievalFromKeyManager>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -325,6 +326,9 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
+      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
+      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% endif %}
     </APIKeyValidator>
 
 
@@ -456,6 +460,9 @@
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
         <EnableCrossTenantSubscription>{{apim.devportal.enable_cross_tenant_subscriptions}}</EnableCrossTenantSubscription>
         <DefaultReservedUsername>{{apim.devportal.default_reserved_username}}</DefaultReservedUsername>
+        {% if apim.devportal.create_default_application is defined %}
+        <CreateDefaultApplication>{{apim.devportal.create_default_application}}</CreateDefaultApplication>
+        {% endif %}
     </APIStore>
 
     <APIPublisher>
@@ -514,7 +521,9 @@
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
-    <!-- VelocityLogger>VELOCITY</VelocityLogger -->
+    {% if apim.velocity_log.enabled %}
+        <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
+    {% endif %}
 
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
@@ -1364,6 +1373,7 @@
         <Username>{{apim.proxy_config.username}}</Username>
         <Password>{{apim.proxy_config.password}}</Password>
         <NonProxyHosts>{{apim.proxy_config.nonProxyHosts}}</NonProxyHosts>
+        <Protocol>{{apim.proxy_config.protocol}}</Protocol>
     </ProxyConfig>
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
@@ -1379,4 +1389,14 @@
         {% endfor %}
     </ExtensionListeners>
     {% endif %}
+
+     {% if apim.persistence.properties is defined %}
+     <PersistenceConfigs>
+        <Properties>
+            {% for key,value in apim.persistence.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
+     </PersistenceConfigs>
+     {% endif %}
 </APIManager>

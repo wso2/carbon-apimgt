@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
@@ -39,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -107,6 +107,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         } catch (CertificateManagementException e) {
             log.error("Error while Backup Truststore", e);
         }
+        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         cleanDeployment(CarbonUtils.getCarbonRepository());
     }
 
@@ -143,8 +146,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 log.error(e);
             }
         }).start();
-        SubscriptionDataHolder.getInstance()
-                .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveBlockConditionsAndKeyTemplates();
@@ -291,7 +293,12 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
+        log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
+        log.debug("Initializing ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
+        SubscriptionDataHolder.getInstance().initializeSubscriptionStore(tenantDomain);
+        log.debug("Initialized ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
 
         cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
@@ -312,7 +319,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         ServiceReferenceHolder.getInstance().removeUnloadedTenant(tenantDomain);
+        log.debug("UNRegistering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
+        log.debug("UNRegistered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         WebhooksDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
     }
 

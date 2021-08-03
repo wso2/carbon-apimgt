@@ -35,6 +35,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -971,5 +972,20 @@ public class APIManagerComponent {
             throw new APIManagementException("Error while Reading and set truststore", e);
         }
     }
+    
+    @Reference(
+            name = "organizationResolver.service",
+            service = OrganizationResolver.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeOrganizationResolver")
+    protected void addOrganizationResolver(OrganizationResolver resolver) {
+        ServiceReferenceHolder.getInstance().setOrganizationResolver(resolver);
+    }
+
+    protected void removeOrganizationResolver(OrganizationResolver resolver) {
+        ServiceReferenceHolder.getInstance().setOrganizationResolver(null);
+    }
+    
 }
 

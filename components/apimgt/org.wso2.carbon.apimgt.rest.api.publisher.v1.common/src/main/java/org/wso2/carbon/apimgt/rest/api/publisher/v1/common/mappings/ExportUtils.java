@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -77,9 +79,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_DEFAULT_SUBSCRIBER;
 
 /**
  * This class uses for Export API functionality.
@@ -144,12 +152,13 @@ public class ExportUtils {
      * @param preserveDocs         Preserve documentation on Export.
      * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
      *                             (This is used for advertise only APIs).
+     * @param organization          Organization
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
                                  String userName, ExportFormat exportFormat, boolean preserveStatus,
-                                 boolean preserveDocs, String originalDevPortalUrl)
+                                 boolean preserveDocs, String originalDevPortalUrl, String organization)
             throws APIManagementException, APIImportExportException {
 
         int tenantId;
@@ -202,9 +211,11 @@ public class ExportUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
-            addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
+            addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
+                    organization);
         }
-        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
+        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
+                organization);
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -237,13 +248,13 @@ public class ExportUtils {
      * @param userName              Username
      * @param exportFormat          Format of output documents. Can be YAML or JSON
      * @param preserveStatus        Preserve API Product status on export
+     * @param organization          Organization Identifier
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
-                                        APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat,
-                                        Boolean preserveStatus,
-                                        boolean preserveDocs, boolean preserveCredentials)
+            APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat, Boolean preserveStatus,
+            boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
@@ -265,13 +276,14 @@ public class ExportUtils {
         addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                preserveStatus, preserveDocs, preserveCredentials);
+                preserveStatus, preserveDocs, preserveCredentials, organization);
 
         // Export mTLS authentication related certificates
         if (log.isDebugEnabled()) {
             log.debug("Mutual SSL enabled. Exporting client certificates.");
         }
-        addClientCertificatesToArchive(archivePath, apiProductIdentifier, tenantId, apiProvider, exportFormat);
+        addClientCertificatesToArchive(archivePath, apiProductIdentifier, tenantId, apiProvider, exportFormat,
+                organization);
 
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
@@ -668,9 +680,9 @@ public class ExportUtils {
         try {
             JSONTokener tokener = new JSONTokener(endpointConfigString);
             JSONObject endpointConfig = new JSONObject(tokener);
-            productionEndpoints = getEndpointURLs(endpointConfig, APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
+            productionEndpoints = getEndpointURLs(endpointConfig, API_DATA_PRODUCTION_ENDPOINTS,
                     apiDto.getName());
-            sandboxEndpoints = getEndpointURLs(endpointConfig, APIConstants.API_DATA_SANDBOX_ENDPOINTS,
+            sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS,
                     apiDto.getName());
             uniqueEndpointURLs.addAll(productionEndpoints); // Remove duplicate and append result
             uniqueEndpointURLs.addAll(sandboxEndpoints);
@@ -845,11 +857,11 @@ public class ExportUtils {
      * @param exportFormat   Export format of file
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
+     * @param organization   Organization Identifier
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-                                                      ExportFormat exportFormat, APIProvider apiProvider,
-                                                      APIIdentifier apiIdentifier)
+            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization)
             throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
@@ -858,13 +870,17 @@ public class ExportUtils {
             // If a streaming API is exported, it does not contain a swagger file.
             // Therefore swagger export is only required for REST or SOAP based APIs
             String apiType = apiDtoToReturn.getType().toString();
+            API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
+            api.setOrganization(organization);
+            api.setId(apiIdentifier);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
                     String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
-                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
+                            .getComplexityDetails(apiDtoToReturn.getId());
                     if (graphqlComplexityInfo.getList().size() != 0) {
                         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
                                 GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
@@ -874,8 +890,7 @@ public class ExportUtils {
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
-                            APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
+                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
                             exportFormat,
                             formattedSwaggerJson);
@@ -885,13 +900,46 @@ public class ExportUtils {
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
                 }
             } else {
-                String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(
-                        APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
+                String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
+                // fetching the callback URL from asyncAPI definition.
+                JsonParser jsonParser = new JsonParser();
+                JsonObject parsedObject = jsonParser.parse(asyncApiJson).getAsJsonObject();
+                if (parsedObject.has(ASYNC_DEFAULT_SUBSCRIBER)) {
+                    String callBackEndpoint = parsedObject.get(ASYNC_DEFAULT_SUBSCRIBER).getAsString();
+                    if (!StringUtils.isEmpty(callBackEndpoint)) {
+                        // add openAPI definition to asyncAPI
+                        String formattedSwaggerJson = RestApiCommonUtil
+                                .generateOpenAPIForAsync(apiDtoToReturn.getName(), apiDtoToReturn.getVersion(),
+                                        apiDtoToReturn.getContext(), callBackEndpoint);
+                        CommonUtil
+                                .writeToYamlOrJson(
+                                        archivePath + ImportExportConstants.OPENAPI_FOR_ASYNCAPI_DEFINITION_LOCATION,
+                                        exportFormat, formattedSwaggerJson);
+                        // Adding endpoint config since adapter validates api.json for endpoint urls.
+                        HashMap<String, Object> endpointConfig = new HashMap<>();
+                        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+                        endpointConfig.put("failOver", "false");
+                        HashMap<String, Object> productionEndpoint = new HashMap<>();
+                        productionEndpoint.put("template_not_supported", "false");
+                        productionEndpoint.put("url", callBackEndpoint);
+                        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+                        sandboxEndpoint.put("template_not_supported", "false");
+                        sandboxEndpoint.put("url", callBackEndpoint);
+                        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+                        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+                        apiDtoToReturn.setEndpointConfig(endpointConfig);
+                    }
+                }
                 CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
                         exportFormat, asyncApiJson);
             }
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
+            JsonObject apiJson = (JsonObject) apiObj;
+            apiJson.addProperty("organizationId", organization);
+            
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
-                    ImportExportConstants.TYPE_API, apiDtoToReturn);
+                    ImportExportConstants.TYPE_API, apiJson);
         } catch (APIManagementException e) {
             throw new APIImportExportException(
                     "Error while retrieving Swagger definition for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
@@ -911,19 +959,21 @@ public class ExportUtils {
      * @param tenantId     Tenant id of the user
      * @param provider     Api Provider
      * @param exportFormat Export format of file
+     * @param organization Organization
      * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
      */
     public static void addClientCertificatesToArchive(String archivePath, Identifier identifier, int tenantId,
-                                                      APIProvider provider, ExportFormat exportFormat)
+            APIProvider provider, ExportFormat exportFormat, String organization)
             throws APIImportExportException {
 
         List<ClientCertificateDTO> certificateMetadataDTOs;
         try {
             if (identifier instanceof APIProductIdentifier) {
                 certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier);
+                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier, organization);
             } else {
-                certificateMetadataDTOs = provider.searchClientCertificates(tenantId, null, (APIIdentifier) identifier);
+                certificateMetadataDTOs = provider
+                        .searchClientCertificates(tenantId, null, (APIIdentifier) identifier, organization);
             }
             if (!certificateMetadataDTOs.isEmpty()) {
                 String clientCertsDirectoryPath =
@@ -1024,13 +1074,14 @@ public class ExportUtils {
      * @param provider              API Product Provider
      * @param exportFormat          Export format of the API meta data, could be yaml or json
      * @param isStatusPreserved     Whether API status is preserved while export
+     * @param organization          Organization
      * @throws APIImportExportException If an error occurs while creating the directory or extracting the archive
      * @throws APIManagementException   If an error occurs while retrieving API related resources
      */
     public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
                                                  ExportFormat exportFormat, APIProvider provider, String userName,
                                                  Boolean isStatusPreserved, boolean preserveDocs,
-                                                 boolean preserveCredentials)
+                                                 boolean preserveCredentials, String organization)
             throws APIImportExportException, APIManagementException {
 
         String apisDirectoryPath = archivePath + File.separator + ImportExportConstants.APIS_DIRECTORY;
@@ -1042,7 +1093,7 @@ public class ExportUtils {
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
-                    isStatusPreserved, preserveDocs, StringUtils.EMPTY);
+                    isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }

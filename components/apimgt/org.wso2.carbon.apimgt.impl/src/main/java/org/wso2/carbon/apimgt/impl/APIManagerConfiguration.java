@@ -115,6 +115,7 @@ public class APIManagerConfiguration {
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
+    private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
@@ -336,6 +337,18 @@ public class APIManagerConfiguration {
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
                 analyticsProps.put("auth.api.token", resolvedAuthToken);
                 analyticsProperties = analyticsProps;
+            } else if ("PersistenceConfigs".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> persistenceProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    persistenceProps.put(name, value);
+                }
+                
+                persistenceProperties = persistenceProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
                 OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
@@ -1475,6 +1488,11 @@ public class APIManagerConfiguration {
                             }
                         }
                     }
+                    OMElement claimRetrievalElement =
+                            configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
+                    if (claimRetrievalElement != null) {
+                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                    }
                 }
             }
         }
@@ -1874,6 +1892,10 @@ public class APIManagerConfiguration {
 
     public static Map<String, String> getAnalyticsProperties() {
         return analyticsProperties;
+    }
+    
+    public static Map<String, String> getPersistenceProperties() {
+        return persistenceProperties;
     }
 
     /**

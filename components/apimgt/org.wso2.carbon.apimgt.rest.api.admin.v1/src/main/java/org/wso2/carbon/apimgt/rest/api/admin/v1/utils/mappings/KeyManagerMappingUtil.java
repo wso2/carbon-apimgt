@@ -59,6 +59,8 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setDescription(keyManagerConfigurationDTO.getDescription());
         keyManagerDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
+        keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.valueOf(keyManagerConfigurationDTO.getTokenType()));
+        keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
         JsonElement clientRegistrationElement = jsonObject.get(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         if (clientRegistrationElement != null) {
@@ -180,7 +182,7 @@ public class KeyManagerMappingUtil {
     }
 
     public static KeyManagerConfigurationDTO toKeyManagerConfigurationDTO(String tenantDomain,
-                                                                          KeyManagerDTO keyManagerDTO) {
+            KeyManagerDTO keyManagerDTO) {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
         keyManagerConfigurationDTO.setName(keyManagerDTO.getName());
@@ -188,7 +190,9 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setDescription(keyManagerDTO.getDescription());
         keyManagerConfigurationDTO.setEnabled(keyManagerDTO.isEnabled());
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
-        keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+        keyManagerConfigurationDTO.setOrganization(tenantDomain);
+        keyManagerConfigurationDTO.setTokenType(keyManagerDTO.getTokenType().toString());
+        keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());

@@ -585,6 +585,7 @@ public final class APIConstants {
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
+    public static final String ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER = "EnableUserClaimRetrievalFromKeyManager";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
@@ -737,6 +738,8 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
+    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -805,6 +808,7 @@ public final class APIConstants {
             "EnableCrossTenantSubscription";
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";
+    public static final String API_STORE_CREATE_DEFAULT_APPLICATION = API_STORE + "CreateDefaultApplication";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -858,6 +862,8 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
     public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
     public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
+    
+    public static final String ORG_RESOLVER = "OrganizationResolver";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
     public static final String OBSERVER = STATUS_OBSERVERS + "Observer";
@@ -1237,6 +1243,7 @@ public final class APIConstants {
 
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";
@@ -1334,6 +1341,10 @@ public final class APIConstants {
         public static final String OAUTH_CUSTOM_PARAMETERS = "customParameters";
         public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
         public static final String PASSWORD = "PASSWORD";
+        public static final String TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange";
+        public static final String SUBJECT_TOKEN = "subject_token";
+        public static final String SUBJECT_TOKEN_TYPE = "subject_token_type";
+        public static final String JWT_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
         public static final String AUTHORIZATION_HEADER = "Authorization";
         public static final String CONTENT_TYPE_HEADER = "Content-Type";
@@ -1403,6 +1414,7 @@ public final class APIConstants {
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
     public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
+    public static final String PROXY_PROTOCOL = "ProxyConfig.Protocol";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -1940,6 +1952,7 @@ public final class APIConstants {
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
+        public static final String KEY_MANAGER = "KeyManager/IdP";
 
         public static final String NAME = "name";
         public static final String VERSION = "version";
@@ -2031,7 +2044,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL, WEBSUB, SSE
+        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK
     }
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
@@ -2228,7 +2241,7 @@ public final class APIConstants {
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
 
-    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "InternalKeyStore";
+    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "KeyStore";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String DEFAULT_API_KEY_GENERATOR_IMPL = "org.wso2.carbon.apimgt.impl.token" +
             ".DefaultApiKeyGenerator";
@@ -2268,7 +2281,7 @@ public final class APIConstants {
     public static final int MAX_LENGTH_API_NAME = 50;
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
-    public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50
+    public static final int MAX_LENGTH_CONTEXT = 232; //context becomes context + version + two '/'. Max context is 200
     public static final int MAX_LENGTH_MEDIATION_POLICY_NAME = 255;
 
     /**
@@ -2467,11 +2480,12 @@ public final class APIConstants {
             public static final String NAME = "name";
             public static final String ENABLED = "enabled";
             public static final String VALUE = "value";
-            public static final String TENANT_DOMAIN = "tenantDomain";
+            public static final String ORGANIZATION = "organization";
             public static final String ACTION_ADD = "add";
             public static final String ACTION_UPDATE = "update";
             public static final String ACTION_DELETE = "delete";
             public static final String TYPE = "type";
+            public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
     }
@@ -2565,6 +2579,7 @@ public final class APIConstants {
     public static class AsyncApi {
         public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
         public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
+        public static final String ASYNC_DEFAULT_SUBSCRIBER = "x-default-subscriber";
     }
 
     public static class TopicNames {
@@ -2736,4 +2751,8 @@ public final class APIConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
+
+    public static final String  PROPERTY_QUERY_KEY = "query";
+    public static final String  PROPERTY_HEADERS_KEY = "headers";
+    public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 }

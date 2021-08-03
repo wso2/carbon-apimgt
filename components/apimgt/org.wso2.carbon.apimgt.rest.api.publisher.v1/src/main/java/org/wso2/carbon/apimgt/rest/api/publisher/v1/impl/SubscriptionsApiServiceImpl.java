@@ -67,6 +67,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response blockSubscription(String subscriptionId, String blockState, String ifMatch,
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
@@ -91,8 +92,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 String apiContext = "";
                 String apiVersion = "";
+
                 if (apiId instanceof APIIdentifier) {
-                    apiContext = apiProvider.getAPIContext((APIIdentifier) apiId);
+                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId, organization);
+                    apiContext = apiProvider.getAPIContext(uuid);
                     apiVersion = apiId.getVersion();
                 } else if (apiId instanceof APIProductIdentifier) {
                     APIProduct product = apiProvider.getAPIProduct((APIProductIdentifier) apiId);
@@ -161,21 +164,19 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+            String organization = (String) messageContext.get(RestApiConstants.ORGANIZATION);
             SubscriptionListDTO subscriptionListDTO;
             List<SubscribedAPI> apiUsages;
 
             if (apiId != null) {
-                APIIdentifier apiIdentifier;
+                String apiUuid = apiId;
                 APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
                 if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
-                } else {
-                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                    apiUuid = apiRevision.getApiUUID();
                 }
-                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+                apiUsages = apiProvider.getAPIUsageByAPIId(apiUuid, organization);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 apiUsages = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToSubscribedAPIList(allApiUsage);
@@ -255,6 +256,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response unBlockSubscription(String subscriptionId, String ifMatch,
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = RestApiUtil.getOrganization(messageContext);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -280,7 +282,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 String apiContext = "";
                 String apiVersion = "";
                 if (apiId instanceof APIIdentifier) {
-                    apiContext = apiProvider.getAPIContext((APIIdentifier) apiId);
+                    String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier((APIIdentifier) apiId, organization);
+                    apiContext = apiProvider.getAPIContext(uuid);
                     apiVersion = apiId.getVersion();
                 } else if (apiId instanceof  APIProductIdentifier) {
                     APIProduct product = apiProvider.getAPIProduct((APIProductIdentifier) apiId);
