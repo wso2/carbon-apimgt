@@ -9207,6 +9207,37 @@ public class ApiMgtDAO {
 
     }
 
+    public void deleteKeyManagerConfigurationList(List<KeyManagerConfigurationDTO> kmList, String organization)
+            throws APIManagementException {
+
+        List<String> kmIdList = kmList.stream().map(KeyManagerConfigurationDTO::getUuid).collect(Collectors.toList());
+        List<String> collectionList = Collections.nCopies(kmIdList.size(), "?");
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            String deleteKMQuery = SQLConstants.KeyManagerSqlConstants.DELETE_BULK_KEY_MANAGER_LIST;
+            deleteKMQuery = deleteKMQuery.replaceAll(SQLConstants.KM_UUID_REGEX, String.join(",",
+                    collectionList));
+            try (PreparedStatement preparedStatement = conn.prepareStatement(deleteKMQuery)) {
+                preparedStatement.setString(1, organization);
+                int index = 1;
+                for (String uuid : kmIdList) {
+                    preparedStatement.setString(index + 1, uuid);
+                    index++;
+                }
+                preparedStatement.execute();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while deleting key managers:  " + kmIdList + " in organization "
+                    + organization,e);
+        }
+
+    }
+
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();

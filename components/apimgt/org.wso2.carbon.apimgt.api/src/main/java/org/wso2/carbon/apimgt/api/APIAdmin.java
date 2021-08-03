@@ -311,12 +311,22 @@ public interface APIAdmin  {
             throws APIManagementException;
 
     /**
-     * This method used to delete key manager
+     * hTis method used to delete IDP mapped with key manager
      * @param organization organization requested
-     * @param id uuid of key manager
+     * @param keyManagerConfigurationDTO key manager data
      * @throws APIManagementException
      */
-    void deleteKeyManagerConfigurationById(String organization,String id, String username) throws APIManagementException;
+    void deleteIdentityProvider(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+
+    /**
+     * This method used to delete key manager
+     * @param organization organization requested
+     * @param keyManagerConfigurationDTO  key manager data
+     * @throws APIManagementException
+     */
+    void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
 
     /**
      * This method used to retrieve key manager from name

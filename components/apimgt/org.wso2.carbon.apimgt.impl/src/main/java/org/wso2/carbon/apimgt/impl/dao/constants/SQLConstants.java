@@ -2842,6 +2842,7 @@ public class SQLConstants {
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String API_ID_REGEX = "_API_IDS_";
     public static final String API_UUID_REGEX = "_API_UUIDS_";
+    public static final String KM_UUID_REGEX = "_KM_UUIDS_";
     public static final int API_ID_CHUNK_SIZE = 25;
 
     /** Throttle related constants**/
@@ -3363,6 +3364,9 @@ public class SQLConstants {
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
+
+        public static final String DELETE_BULK_KEY_MANAGER_LIST = "DELETE FROM AM_KEY_MANAGER WHERE ORGANIZATION = ?"
+                + "AND UUID IN (_KM_UUIDS_)";
     }
 
     /**

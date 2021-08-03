@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.cleanup.service;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.util.LinkedHashMap;
+
 public interface OrganizationPurge {
-      void deleteOrganization (String organization) throws APIManagementException;
+      LinkedHashMap<String, String> deleteOrganization (String organization) throws APIManagementException;
 }

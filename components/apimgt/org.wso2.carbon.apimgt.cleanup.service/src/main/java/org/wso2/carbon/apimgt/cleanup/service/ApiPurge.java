@@ -33,8 +33,9 @@ import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
@@ -47,6 +48,7 @@ public class ApiPurge implements OrganizationPurge {
     private ArtifactSaver artifactSaver;
     private ApiMgtDAO apiMgtDAO;
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
+    LinkedHashMap<String, String> apiPurgeTaskMap;
     APIPersistence apiPersistenceInstance;
     private static final Log log = LogFactory.getLog(ApiPurge.class);
 
@@ -55,52 +57,65 @@ public class ApiPurge implements OrganizationPurge {
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
     }
 
     /**
-     * @param orgId Organization Id
-     * @throws APIManagementException
+     * delete API data in given organization
+     * @param organization Organization Id
      */
-    public void deleteOrganization(String orgId) throws APIManagementException {
-
+    public LinkedHashMap<String, String> deleteOrganization(String organization) {
         List<APIIdentifier> apiIdentifierList = new ArrayList<>();
-        ArrayList<String> taskListArray = new ArrayList<>(Arrays.asList(APIConstants.OrganizationDeletion.API_RETRIEVER,
-                APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
-                APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER,
-                APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER,
-                APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER));
 
-        for (String task : taskListArray) {
+        for (Map.Entry<String, String> task : apiPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
-                    switch (task) {
+                    switch (task.getKey()) {
                     case APIConstants.OrganizationDeletion.API_RETRIEVER:
-                        apiIdentifierList = apiMgtDAO.getAPIIdList(orgId);
+                        apiIdentifierList = apiMgtDAO.getAPIIdList(organization);
                         break;
                     case APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER:
                         apiMgtDAO.deleteOrganizationAPIList(apiIdentifierList);
                         break;
                     case APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER:
-                        removeArtifactsFromArtifactServer(apiIdentifierList, orgId);
+                        removeArtifactsFromArtifactServer(apiIdentifierList, organization);
                         break;
                     case APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER:
                         gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(apiIdentifierList);
                         break;
                     case APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER:
-                        removeAllOrganizationAPIArtifacts(orgId);
+                        removeAllOrganizationAPIArtifacts(organization);
                         break;
                     }
+                    apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
                 } catch (APIManagementException e) {
-                    if (++count == maxTries)
-                        throw e;
+                    log.error("Error while deleting API Data in organization " + organization, e);
+                    apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
+                    log.info("Re-trying to execute " + task.getKey() + " process for organization" +
+                            organization, e);
+
+                    if (++count == maxTries) {
+                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        apiPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        return apiPurgeTaskMap;
+                    }
                 }
             }
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, new Gson().toJson(apiIdentifierList),
                 APIConstants.AuditLogConstants.DELETED, username);
+        return apiPurgeTaskMap;
     }
 
     private void removeAllOrganizationAPIArtifacts(String orgId) throws APIManagementException {

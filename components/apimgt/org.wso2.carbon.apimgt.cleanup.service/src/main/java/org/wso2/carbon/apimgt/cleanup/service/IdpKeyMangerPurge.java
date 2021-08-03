@@ -17,12 +17,26 @@
  */
 package org.wso2.carbon.apimgt.cleanup.service;
 
+import com.google.gson.Gson;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
+import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class used to remove IDP and KM data
@@ -30,19 +44,61 @@ import java.util.List;
 public class IdpKeyMangerPurge implements OrganizationPurge {
     protected String username;
     APIAdmin apiAdmin;
+    LinkedHashMap<String, String> IdpKeyMangerPurgeTaskMap;
+    ApiMgtDAO apiMgtDAO;
+    private static final Log log = LogFactory.getLog(IdpKeyMangerPurge.class);
 
     public IdpKeyMangerPurge(String username) {
         this.username = username;
+        apiMgtDAO = ApiMgtDAO.getInstance();
         this.apiAdmin = new APIAdminImpl();
+        IdpKeyMangerPurgeTaskMap
+                .put(APIConstants.OrganizationDeletion.KM_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap
+                .put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap
+                .put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
     }
 
-    public void deleteOrganization(String organization) throws APIManagementException {
+    public LinkedHashMap<String, String> deleteOrganization(String organization) {
 
-        List<KeyManagerConfigurationDTO> keyManagerList = apiAdmin.
-                getKeyManagerConfigurationsByOrganization(organization);
+        List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
+        for (Map.Entry<String, String> task : IdpKeyMangerPurgeTaskMap.entrySet()) {
+            int count = 0;
+            int maxTries = 3;
+            while (true) {
+                try {
+                    switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.KM_RETRIEVER:
+                        keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
+                        break;
 
-        for (KeyManagerConfigurationDTO keyManager : keyManagerList) {
-            apiAdmin.deleteKeyManagerConfigurationById(organization, keyManager.getUuid(), username);
+                    case APIConstants.OrganizationDeletion.IDP_DATA_REMOVER:
+                        for (KeyManagerConfigurationDTO keyManager : keyManagerList) {
+                            apiAdmin.deleteIdentityProvider(organization, keyManager);
+                            IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
+                        }
+                    case APIConstants.OrganizationDeletion.KM_DATA_REMOVER:
+                        apiMgtDAO.deleteKeyManagerConfigurationList(keyManagerList, organization);
+                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while deleting IDP-KeyManager Data in organization " + organization, e);
+                    IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
+                    log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
+
+                    if (++count == maxTries) {
+                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        return IdpKeyMangerPurgeTaskMap;
+                    }
+                }
+            }
         }
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER, new Gson().toJson(keyManagerList),
+                APIConstants.AuditLogConstants.DELETED, username);
+        return IdpKeyMangerPurgeTaskMap;
     }
 }
