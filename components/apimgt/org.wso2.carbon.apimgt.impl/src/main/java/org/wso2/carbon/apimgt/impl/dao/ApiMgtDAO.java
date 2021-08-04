@@ -5798,6 +5798,13 @@ public class ApiMgtDAO {
             }
             prepStmtDefVersionDelete.executeBatch();
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            }
             handleException("Error while deleting the API default version entry: " + apiIdList.stream().
                     map(APIIdentifier::getApiName).collect(Collectors.joining(",")) + " from the " +
                     "database", e);
@@ -7093,6 +7100,11 @@ public class ApiMgtDAO {
             }
             prepStmt.execute();
         } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                log.error("Error while rolling back the failed operation", e1);
+            }
             log.error("Error while deleting API data of apiUuid list " + apiUUIdList, e);
             handleException("Failed to remove API data of " + apiUUIdList + " from the database", e);
         }
@@ -7109,6 +7121,11 @@ public class ApiMgtDAO {
             }
             prepStmt.executeUpdate();
         } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                log.error("Error while rolling back the failed operation", e1);
+            }
             log.error("Error while deleting cleanup tasks of apiUuid list " + apiUUIdList, e);
             handleException("Failed to remove cleanup tasks of " + apiUUIdList + " from the database", e);
         }

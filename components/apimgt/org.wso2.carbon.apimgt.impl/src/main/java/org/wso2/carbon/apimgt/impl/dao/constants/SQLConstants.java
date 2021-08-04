@@ -3365,7 +3365,7 @@ public class SQLConstants {
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
 
-        public static final String DELETE_BULK_KEY_MANAGER_LIST = "DELETE FROM AM_KEY_MANAGER WHERE ORGANIZATION = ?"
+        public static final String DELETE_BULK_KEY_MANAGER_LIST = "DELETE FROM AM_KEY_MANAGER WHERE ORGANIZATION = ? "
                 + "AND UUID IN (_KM_UUIDS_)";
     }
 
