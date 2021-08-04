@@ -229,14 +229,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 update = Boolean.FALSE;
             }
 
-            // Get keys to import
-            List<ApplicationKeyDTO> applicationKeys = applicationDTO.getKeys();
-            for (ApplicationKeyDTO applicationKey : applicationKeys) {
-                application.addKey(ImportUtils.getAPIKeyFromApplicationKeyDTO(applicationKey));
-            }
-            // Update the application to add keys
-            apiConsumer.updateApplication(application);
-
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = ImportUtils
