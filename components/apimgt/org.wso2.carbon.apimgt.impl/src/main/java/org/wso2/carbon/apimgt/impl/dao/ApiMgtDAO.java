@@ -4867,47 +4867,43 @@ public class ApiMgtDAO {
      * @return List of Applications
      * @throws APIManagementException if failed to obtain applications
      */
-    public List<Application> getApplicationsByOrganization(String organization) throws APIManagementException{
+    public List<Application> getApplicationsByOrganization(String organization) throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         List<Application> applicationList = new ArrayList<>();
 
         String query = SQLConstants.GET_APPLICATION_LIST_BY_ORG_ID_SQL;
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            connection.setAutoCommit(false);;
 
             preparedStatement.setString(1, organization);
 
-            rs = preparedStatement.executeQuery();
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    int applicationId = rs.getInt("APPLICATION_ID");
+                    Application application = new Application(applicationId);
 
-            while (rs.next()) {
-                int applicationId = rs.getInt("APPLICATION_ID");
-                Application application = new Application(applicationId);
+                    application.setName(rs.getString("NAME"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    application.setDescription(rs.getString("DESCRIPTION"));
+                    application.setStatus(rs.getString("APPLICATION_STATUS"));
+                    application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                    application.setTier(rs.getString("APPLICATION_TIER"));
+                    application.setUUID(rs.getString("UUID"));
+                    application.setGroupId(rs.getString("GROUP_ID"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    application.setTokenType(rs.getString("TOKEN_TYPE"));
 
-                application.setName(rs.getString("NAME"));
-                application.setOwner(rs.getString("CREATED_BY"));
-                application.setDescription(rs.getString("DESCRIPTION"));
-                application.setStatus(rs.getString("APPLICATION_STATUS"));
-                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                application.setTier(rs.getString("APPLICATION_TIER"));
-                application.setUUID(rs.getString("UUID"));
-                application.setGroupId(rs.getString("GROUP_ID"));
-                application.setOwner(rs.getString("CREATED_BY"));
-                application.setTokenType(rs.getString("TOKEN_TYPE"));
-
-                applicationList.add(application);
+                    applicationList.add(application);
+                }
             }
 
         } catch (SQLException e) {
             handleException("Error while getting getting application by organization: " + organization, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, rs);
         }
+
         return applicationList;
     }
 
