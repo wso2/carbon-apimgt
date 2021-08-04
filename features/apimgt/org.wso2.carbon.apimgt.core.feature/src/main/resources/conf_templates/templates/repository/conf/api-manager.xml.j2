@@ -326,6 +326,9 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
+      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
+      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% endif %}
     </APIKeyValidator>
 
 
@@ -518,7 +521,9 @@
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
-    <!--VelocityLogger>{{apim.velocity_logger}}</VelocityLogger-->
+    {% if apim.velocity_log.enabled %}
+        <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
+    {% endif %}
 
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->

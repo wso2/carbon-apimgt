@@ -8159,6 +8159,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
                 }
+                api.setOrganization(organization);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -8778,20 +8779,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.getDeployedAPIRevisionByApiUUID(apiId);
         Set<DeployedAPIRevision> environmentsToRemove = new HashSet<>();
 
-        // Remove old deployed-revision entries of same env and apiid
+        // Deployments to add
+        List<DeployedAPIRevision> environmentsToAdd = new ArrayList<>();
+
+        List<String> envNames = new ArrayList<>();
+
         for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
-            for (DeployedAPIRevision currentapiRevisionDeployment : currentDeployedApiRevisionList) {
-                if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
-                        deployedAPIRevision.getDeployment())) {
-                    environmentsToRemove.add(currentapiRevisionDeployment);
+            // Remove duplicate entries for same revision uuid and env from incoming list
+            if (!envNames.contains(deployedAPIRevision.getDeployment())) {
+                envNames.add(deployedAPIRevision.getDeployment());
+                environmentsToAdd.add(deployedAPIRevision);
+                // Remove old deployed-revision entries of same env and apiid from existing db records
+                for (DeployedAPIRevision currentapiRevisionDeployment : currentDeployedApiRevisionList) {
+                    if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                            deployedAPIRevision.getDeployment())) {
+                        environmentsToRemove.add(currentapiRevisionDeployment);
+                    }
                 }
             }
         }
+        // Discard old deployment info
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeDeployedAPIRevision(apiId, environmentsToRemove);
         }
         // Add new deployed revision update to db
-        apiMgtDAO.addDeployedAPIRevision(apiRevisionUUID, deployedAPIRevisionList);
+        if (deployedAPIRevisionList.size() > 0) {
+            apiMgtDAO.addDeployedAPIRevision(apiRevisionUUID, environmentsToAdd);
+        }
     }
 
     @Override

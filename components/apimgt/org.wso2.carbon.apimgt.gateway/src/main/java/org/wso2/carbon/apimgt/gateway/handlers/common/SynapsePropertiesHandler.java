@@ -93,7 +93,9 @@ public class SynapsePropertiesHandler extends AbstractHandler {
                     .equals(APIMgtGatewayConstants.AUTHORIZE_CONTEXT) || messageContext
                     .getProperty(RESTConstants.REST_API_CONTEXT).equals(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT)
                     || messageContext.getProperty(RESTConstants.REST_API_CONTEXT)
-                    .equals(APIMgtGatewayConstants.OIDC_CONTEXT)) {
+                    .equals(APIMgtGatewayConstants.OIDC_CONTEXT) ||
+                    messageContext.getProperty(RESTConstants.REST_API_CONTEXT)
+                            .equals(APIMgtGatewayConstants.OIDC_LOGOUT)) {
                 if (302 == (Integer) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                         .getProperty(SynapseConstants.HTTP_SC)) {
                     // Retrieve the transport headers in the response and identify the location header

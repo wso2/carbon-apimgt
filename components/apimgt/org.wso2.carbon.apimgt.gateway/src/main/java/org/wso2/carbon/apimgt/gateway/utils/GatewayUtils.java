@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -67,6 +68,7 @@ import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -779,6 +781,21 @@ public class GatewayUtils {
             throws APISecurityException {
 
         JSONObject api = null;
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+        boolean apiKeySubValidationEnabled = isAPIKeySubscriptionValidationEnabled();
+        JSONObject application;
+        int appId = 0;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
+            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+        }
+        // validate subscription
+        // if the appId is equal to 0 then it's a internal key
+        if (apiKeySubValidationEnabled && appId != 0) {
+            apiKeyValidationInfoDTO =
+                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain());
+        }
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
@@ -791,10 +808,21 @@ public class GatewayUtils {
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
                                 )) {
-                    api = subscribedAPIsJSONObject;
-                    if (log.isDebugEnabled()) {
-                        log.debug("User is subscribed to the API: " + apiContext + ", " +
-                                "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken[0]));
+                    // check whether the subscription is authorized
+                    if (apiKeySubValidationEnabled && appId != 0) {
+                        if (apiKeyValidationInfoDTO.isAuthorized()) {
+                            api = subscribedAPIsJSONObject;
+                            if (log.isDebugEnabled()) {
+                                log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                        "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken[0]));
+                            }
+                        }
+                    } else {
+                        api = subscribedAPIsJSONObject;
+                        if (log.isDebugEnabled()) {
+                            log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                    "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken[0]));
+                        }
                     }
                     break;
                 }
@@ -906,6 +934,18 @@ public class GatewayUtils {
                     "Use default configuration.", e);
         }
         return true;
+    }
+
+    public static boolean isAPIKeySubscriptionValidationEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String subscriptionValidationEnabled = config.getFirstProperty(APIConstants.API_KEY_SUBSCRIPTION_VALIDATION_ENABLED);
+            return Boolean.parseBoolean(subscriptionValidationEnabled);
+        } catch (Exception e) {
+            log.error("Did not find valid API Key Subscription Validation Enabled configuration. " +
+                    "Use default configuration.", e);
+        }
+        return false;
     }
 
     /**
@@ -1317,5 +1357,9 @@ public class GatewayUtils {
                 }
             }
         }
+    }
+
+    public static TracingTracer getTracingTracer() {
+        return ServiceReferenceHolder.getInstance().getTracer();
     }
 }

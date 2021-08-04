@@ -876,6 +876,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public void deleteAllAPIs(Organization org) throws APIPersistenceException {
+        throw new UnsupportedOperationException("This method is not supported on this instance");
+    }
+
+    @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
