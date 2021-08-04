@@ -752,7 +752,9 @@ public class OAS3Parser extends APIDefinition {
             }
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
-                    info.getTitle(), info.getVersion(), info.getTitle().replaceAll("\\s","").toLowerCase(),
+                    info.getTitle(), info.getVersion(),
+                    (info.getTitle() == null || info.getTitle().isEmpty() ? null :
+                            info.getTitle().replaceAll("\\s", "").toLowerCase()),
                     info.getDescription(), endpoints
             );
             validationResponse.setParser(this);
