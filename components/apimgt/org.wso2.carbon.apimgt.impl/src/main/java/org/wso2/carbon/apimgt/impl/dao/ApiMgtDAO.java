@@ -3933,13 +3933,13 @@ public class ApiMgtDAO {
 
     /**
      *
-     * @param appName application name
+     * @param applicationName application name
      * @param username username
      * @param groupId group id
      * @return whether a certain application group combination exists or not
      * @throws APIManagementException if failed to assess whether a certain application group combination exists or not
      */
-    public boolean isApplicationGroupCombinationExists(String appName, String username, String groupId)
+    public boolean isApplicationGroupCombinationExists(String applicationName, String username, String groupId)
             throws APIManagementException {
         if (username == null) {
             return false;
@@ -3960,9 +3960,13 @@ public class ApiMgtDAO {
                     sqlQuery += whereClauseWithMultiGroupId;
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupId.split(",");
+
                     int noOfParams = grpIdArray.length;
-                    try (PreparedStatement preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);) {
-                        preparedStatement.setString(1, appName);
+
+                    try (PreparedStatement preparedStatement = fillQueryParams(connection, sqlQuery,
+                            grpIdArray, 2)) {
+
+                        preparedStatement.setString(1, applicationName);
                         int paramIndex = noOfParams + 1;
                         preparedStatement.setString(++paramIndex, tenantDomain);
 
@@ -3979,7 +3983,7 @@ public class ApiMgtDAO {
                 } else {
                     sqlQuery += whereClauseWithGroupId;
                     try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);) {
-                        preparedStatement.setString(1, appName);
+                        preparedStatement.setString(1, applicationName);
                         preparedStatement.setString(2, groupId);
 
                         try (ResultSet resultSet = preparedStatement.executeQuery();) {
@@ -3996,7 +4000,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error while getting the id  of " + appName + " from the persistence store.", e);
+            handleException("Error while getting application group combination data for application: "+applicationName, e);
         }
         return false;
 
