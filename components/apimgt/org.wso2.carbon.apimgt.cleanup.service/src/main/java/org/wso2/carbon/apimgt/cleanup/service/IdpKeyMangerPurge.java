@@ -52,6 +52,10 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
         this.username = username;
         apiMgtDAO = ApiMgtDAO.getInstance();
         this.apiAdmin = new APIAdminImpl();
+        initTaskList();
+    }
+
+    private void initTaskList() {
         IdpKeyMangerPurgeTaskMap
                 .put(APIConstants.OrganizationDeletion.KM_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
         IdpKeyMangerPurgeTaskMap
@@ -91,14 +95,14 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
                         IdpKeyMangerPurgeTaskMap.put(task.getKey(), e.getMessage());
-                        return IdpKeyMangerPurgeTaskMap;
+                        break;
                     }
                 }
             }
         }
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER, new Gson().toJson(keyManagerList),
-                APIConstants.AuditLogConstants.DELETED, username);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
+                new Gson().toJson(IdpKeyMangerPurgeTaskMap), APIConstants.AuditLogConstants.DELETED, username);
         return IdpKeyMangerPurgeTaskMap;
     }
 }

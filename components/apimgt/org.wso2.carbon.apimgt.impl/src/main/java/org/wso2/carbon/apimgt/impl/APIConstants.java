@@ -1948,6 +1948,7 @@ public final class APIConstants {
         public static final String DELETED = "deleted";
 
         public static final String API = "API";
+        public static final String ORGANIZATION = "Organization";
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";

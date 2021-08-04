@@ -57,6 +57,10 @@ public class ApiPurge implements OrganizationPurge {
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
+        initTaskList();
+    }
+
+    private void initTaskList() {
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
                 APIConstants.OrganizationDeletion.PENDING);
@@ -107,13 +111,13 @@ public class ApiPurge implements OrganizationPurge {
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
                         apiPurgeTaskMap.put(task.getKey(), e.getMessage());
-                        return apiPurgeTaskMap;
+                        break;
                     }
                 }
             }
         }
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, new Gson().toJson(apiIdentifierList),
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(apiPurgeTaskMap),
                 APIConstants.AuditLogConstants.DELETED, username);
         return apiPurgeTaskMap;
     }
