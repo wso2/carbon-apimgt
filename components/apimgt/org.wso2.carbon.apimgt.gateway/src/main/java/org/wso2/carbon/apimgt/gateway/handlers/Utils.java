@@ -441,7 +441,7 @@ public class Utils {
                     X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
                     if (isClientCertificateValidationEnabled() && !APIUtil
                             .isCertificateExistsInListenerTrustStore(x509Certificate)) {
-                        log.debug("Certificate in Header didn't exist in truststore");
+                        log.debug("Certificate in request header needs to exist in truststore when client certificate validation is enabled");
                         return null;
                     }
                     // If valid client certificate is sent via header give it priority over the transport level cert
