@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -25,13 +27,35 @@ import org.wso2.carbon.apimgt.api.model.Application;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import java.util.List;
+import java.util.*;
 
 public class ApplicationPurge implements OrganizationPurge{
     protected ApiMgtDAO apiMgtDAO;
+    private static final Log log = LogFactory.getLog(ApplicationPurge.class);
+    private Map<String, String> taskList;
+
+    private final int MAX_TRIES = 5;
+
+    public ApplicationPurge() {
+        apiMgtDAO = ApiMgtDAO.getInstance();
+        init();
+    }
 
     public ApplicationPurge(ApiMgtDAO apiMgtDAO) {
-        apiMgtDAO = ApiMgtDAO.getInstance();
+        this.apiMgtDAO = apiMgtDAO;
+        init();
+    }
+
+    private void init() {
+        taskList = new LinkedHashMap<>();
+
+        taskList.put("ApplicationRetrieval",null);
+        taskList.put("PendingSubscriptionRemoval",null);
+        taskList.put("ApplicationCreationWFRemoval",null);
+        taskList.put("ApplicationRegistrationRemoval",null);
+        taskList.put("ApplicationRemoval",null);
+        taskList.put("SubscriberRemoval",null);
+
     }
 
     /**
@@ -42,34 +66,74 @@ public class ApplicationPurge implements OrganizationPurge{
      */
     @Override
     public void deleteOrganization(String organization) throws APIManagementException {
+        int[] applicationIdList = null;
+        for (String task : taskList.keySet()) {
+
+            int count = 0;
+            int maxTries = MAX_TRIES;
+
+            while (true) {
+                try {
+                    switch (task) {
+                    case "ApplicationRetrieval":
+                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                            applicationIdList = getApplicationsByOrganization(organization);
+                            taskList.put(task, "Successful");
+                        }
+                        break;
+                    case "PendingSubscriptionRemoval":
+                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                            removePendingSubscriptions(applicationIdList);
+                            taskList.put(task, "Successful");
+                        }
+                        break;
+                    case "ApplicationCreationWFRemoval":
+                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                            removeApplicationCreationWorkflows(applicationIdList);
+                            taskList.put(task, "Successful");
+                        }
+                        break;
+                    case "ApplicationRegistrationRemoval":
+                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                            deletePendingApplicationRegistrations(applicationIdList);
+                            taskList.put(task, "Successful");
+                        }
+                        break;
+                    case "ApplicationRemoval":
+                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                            deleteApplicationList(applicationIdList);
+                            taskList.put(task, "Successful");
+                        }
+                        break;
+                    case "SubscriberRemoval":
+                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                            deleteSubscribers(organization);
+                            taskList.put(task, "Successful");
+                        }
+                        break;
+                    }
+                    break;
+                } catch (APIManagementException e) {
+                    log.error("Error in " + task + " in application deletion sub component", e);
+                    String msg = "Failed to execute application deletion of organization: " + organization;
+
+                    if (++count == maxTries) {
+                        taskList.put(task, "Failed");
+                        throw new APIManagementException(msg, e);
+                    }
+                }
+            }
+        }
+    }
+
+    private int[] getApplicationsByOrganization(String organization) throws APIManagementException {
         List<Application> applicationList = apiMgtDAO.getApplicationsByOrganization(organization);
         int[] applicationIdList = new int[applicationList.size()];
 
         for (int i = 0; i < applicationList.size(); i++) {
             applicationIdList[i] = applicationList.get(i).getId();
         }
-
-        try {
-            //removing pending subscriptions
-            removePendingSubscriptions(applicationIdList);
-
-            //remove application registration workflows
-            removeApplicationCreationWorkflows(applicationIdList);
-
-            // removing pending application registrations
-            deletePendingApplicationRegistrations(applicationIdList);
-
-            // removing applications list
-            deleteApplicationList(applicationIdList);
-
-            // removing subscribers
-            deleteSubscribers(organization);
-
-        } catch (APIManagementException e) {
-            String message = "Error while deleting the application data related to the organization: " + organization;
-            log.error(message, t);
-            throw new APIManagementException(message, t);
-        }
+        return applicationIdList;
     }
 
     private void removeApplicationCreationWorkflows(int[] applicationIdList) throws APIManagementException {

@@ -2549,7 +2549,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query);) {
 
-            reparedStatement.setInt(1, subscriberId);
+            preparedStatement.setInt(1, subscriberId);
 
             try (ResultSet rs = preparedStatement.executeQuery();) {
                 while (rs.next()) {
@@ -2571,23 +2571,16 @@ public class ApiMgtDAO {
      */
     public void removeSubscriber(int subscriberId) throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
         String query = SQLConstants.DELETE_SUBSCRIBER;
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            preparedStatement = connection.prepareStatement(query);
-
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ){
             preparedStatement.setInt(1, subscriberId);
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
             handleException("Error while removing subscriber with subscriber id " + subscriberId, e);
-        } finally {
-            connection.close();
-            preparedStatement.close();
         }
     }
 
@@ -2601,13 +2594,10 @@ public class ApiMgtDAO {
     public void removeSubscriberOrganizationMapping(int subscriberId, String organization)
             throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
         String query = SQLConstants.DELETE_SUBSCRIBER_ORGANIZATION_MAPPING;
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query);){
 
             preparedStatement.setInt(1, subscriberId);
             preparedStatement.setString(2, organization);
@@ -2616,9 +2606,6 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             handleException("Error while removing subscriber with subscriber id " + subscriberId, e);
-        } finally {
-            connection.close();
-            preparedStatement.close();
         }
     }
 
@@ -4951,7 +4938,7 @@ public class ApiMgtDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            String msg = "Error occurred while removing pending subscriptions";
+            String msg = "Error occurred while removing application creation workflows";
             handleException(msg, e);
         }
     }
@@ -4982,6 +4969,7 @@ public class ApiMgtDAO {
             connection.commit();
 
         } catch (SQLException e) {
+            String msg = "Error occurred while removing pending subscriptions";
             handleException(msg, e);
         }
 
@@ -5183,6 +5171,12 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
 
+            if (multiGroupAppSharingEnabled) {
+                for (int applicationId : applicationIdList) {
+                    transactionCompleted = updateGroupIDMappings(connection, applicationId, null, null);
+                }
+            }
+
             int index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
@@ -5199,7 +5193,7 @@ public class ApiMgtDAO {
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
 
-            int index = 0;
+            index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
                 prepStmtGetConsumerKey.setInt(index, applicationId);
@@ -5257,7 +5251,7 @@ public class ApiMgtDAO {
 
             deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
 
-            int index = 0;
+            index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
                 deleteRegistrationQuery.setInt(index, applicationId);
@@ -5271,7 +5265,7 @@ public class ApiMgtDAO {
 
             deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
 
-            int index = 0;
+            index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
                 deleteSubscription.setInt(index, applicationId);
@@ -5287,7 +5281,7 @@ public class ApiMgtDAO {
 
             deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
 
-            int index = 0;
+            index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
                 deleteAppKey.setInt(index, applicationId);
@@ -5301,7 +5295,7 @@ public class ApiMgtDAO {
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
 
-            int index = 0;
+            index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
                 deleteApp.setInt(index, applicationId);
