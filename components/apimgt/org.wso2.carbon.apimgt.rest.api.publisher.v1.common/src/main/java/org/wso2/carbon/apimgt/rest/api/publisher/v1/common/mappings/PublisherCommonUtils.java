@@ -86,6 +86,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -874,21 +876,39 @@ public class PublisherCommonUtils {
         if (apiDto.getEndpointConfig() != null) {
             Map endpointConfig = (Map) apiDto.getEndpointConfig();
 
+            // Validate sandbox endpoints
             Map<String, String> sandboxEndpointsMap = (Map<String, String>)
                     endpointConfig.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
             Collection<String> sandboxEndpoints = sandboxEndpointsMap.values();
             for (String sandboxEndpoint : sandboxEndpoints) {
-                if (!urlValidator.isValid(sandboxEndpoint)) {
+                try {
+                    URI uri = new URI(sandboxEndpoint);
+                    // If the provided url is a JMS connection url, validation is skipped since we already have
+                    // this validation in place
+                    if (!uri.getScheme().equals("jms") && !urlValidator.isValid(sandboxEndpoint)) {
+                        isValid = false;
+                    }
+                } catch (URISyntaxException e) {
+                    log.error("Error while parsing the endpoint url " + sandboxEndpoint);
                     isValid = false;
                 }
             }
 
+            // Validate production endpoints
             if (isValid) {
                 Map<String, String> productionEndpointsMap = (Map<String, String>)
                         endpointConfig.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
                 Collection<String> productionEndpoints = productionEndpointsMap.values();
                 for (String productionEndpoint : productionEndpoints) {
-                    if (!urlValidator.isValid(productionEndpoint)) {
+                    try {
+                        URI uri = new URI(productionEndpoint);
+                        // If the provided url is a JMS connection url, validation is skipped since we already have
+                        // this validation in place
+                        if (!uri.getScheme().equals("jms") && !urlValidator.isValid(productionEndpoint)) {
+                            isValid = false;
+                        }
+                    } catch (URISyntaxException e) {
+                        log.error("Error while parsing the endpoint url " + productionEndpoint);
                         isValid = false;
                     }
                 }
