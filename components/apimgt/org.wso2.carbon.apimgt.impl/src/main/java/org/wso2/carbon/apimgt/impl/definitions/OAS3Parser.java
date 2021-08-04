@@ -750,12 +750,9 @@ public class OAS3Parser extends APIDefinition {
                     }
                 }
             }
-            String title = "";
-            String context = "";
-            if (StringUtils.isBlank(info.getTitle())) {
-                title = null;
-                context = null;
-            } else {
+            String title = null;
+            String context = null;
+            if (!StringUtils.isBlank(info.getTitle())) {
                 title = info.getTitle();
                 context = info.getTitle().replaceAll("\\s", "").toLowerCase();
             }
