@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -128,6 +129,15 @@ public class OAS3ParserTest extends OASTestBase {
         expectedTemplates.add(getUriTemplate("GET", "Application", "/item"));
         Set<URITemplate> actualTemplates = oas3Parser.getURITemplates(openApi);
         Assert.assertEquals(actualTemplates, expectedTemplates);
+    }
+
+    @Test
+    public void testValidateOpenAPIDefinitionWithBlankTitle() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_blank_title.yaml";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        APIDefinitionValidationResponse response = oas3Parser.validateAPIDefinition(openApi, false);
+        Assert.assertTrue(response.isValid());
+        Assert.assertTrue(response.getParser().getClass().equals(oas3Parser.getClass()));
     }
 
 }
