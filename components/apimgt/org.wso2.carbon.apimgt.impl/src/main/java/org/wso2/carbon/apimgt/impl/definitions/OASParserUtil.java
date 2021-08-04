@@ -421,13 +421,16 @@ public class OASParserUtil {
                     if (parameters != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
-                            Content content = parameter.getContent();
-                            if (content != null) {
-                                extractReferenceFromContent(content, context);
-                            } else {
-                                String ref = parameter.get$ref();
-                                if (ref != null) {
-                                    extractReferenceWithoutSchema(ref, context);
+                            //Extract the parameter reference only if it exists in the source definition
+                            if(parameter != null) {
+                                Content content = parameter.getContent();
+                                if (content != null) {
+                                    extractReferenceFromContent(content, context);
+                                } else {
+                                    String ref = parameter.get$ref();
+                                    if (ref != null) {
+                                        extractReferenceWithoutSchema(ref, context);
+                                    }
                                 }
                             }
                         }
@@ -440,8 +443,11 @@ public class OASParserUtil {
                     if (responses != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             ApiResponse response = responses.get(refKey);
-                            Content content = response.getContent();
-                            extractReferenceFromContent(content, context);
+                            //Extract the response reference only if it exists in the source definition
+                            if(response != null) {
+                                Content content = response.getContent();
+                                extractReferenceFromContent(content, context);
+                            }
                         }
                     }
                 }
