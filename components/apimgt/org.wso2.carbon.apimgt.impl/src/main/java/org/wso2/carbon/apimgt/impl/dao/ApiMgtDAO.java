@@ -3931,6 +3931,14 @@ public class ApiMgtDAO {
         return false;
     }
 
+    /**
+     *
+     * @param appName application name
+     * @param username username
+     * @param groupId group id
+     * @return whether a certain application group combination exists or not
+     * @throws APIManagementException if failed to assess whether a certain application group combination exists or not
+     */
     public boolean isApplicationGroupCombinationExists(String appName, String username, String groupId)
             throws APIManagementException {
         if (username == null) {
@@ -3943,17 +3951,17 @@ public class ApiMgtDAO {
 
         String sqlQuery = SQLConstants.GET_APPLICATION_ID_PREFIX_FOR_GROUP_COMPARISON;
         String whereClauseWithGroupId = " AND APP.GROUP_ID = ?";
-        String whereClauseWithMultiGroupId = " AND (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))";
+        String whereClauseWithMultiGroupId = " AND (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
+                + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))";
 
-        try(Connection connection = APIMgtDBUtil.getConnection();) {
+        try (Connection connection = APIMgtDBUtil.getConnection();) {
             if (!StringUtils.isEmpty(groupId)) {
                 if (multiGroupAppSharingEnabled) {
                     sqlQuery += whereClauseWithMultiGroupId;
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupId.split(",");
                     int noOfParams = grpIdArray.length;
-                    try (PreparedStatement preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);){
+                    try (PreparedStatement preparedStatement = fillQueryParams(connection, sqlQuery, grpIdArray, 2);) {
                         preparedStatement.setString(1, appName);
                         int paramIndex = noOfParams + 1;
                         preparedStatement.setString(++paramIndex, tenantDomain);

@@ -3583,11 +3583,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             processedIds = processGroupIds(existingApp.getGroupId(), application.getGroupId());
         }
 
-        if (application.getGroupId()!= null &&
-                APIUtil.isApplicationGroupCombinationExist(application.getSubscriber().getName(), application.getName(),
-                        processedIds)) {
-            handleResourceAlreadyExistsException("A duplicate application already exists by the name - "
-                    + application.getName()); }
+        if (application.getGroupId() != null && APIUtil.isApplicationGroupCombinationExist(
+                application.getSubscriber().getName(), application.getName(), processedIds)) {
+            handleResourceAlreadyExistsException(
+                    "A duplicate application already exists by the name - " + application.getName());
+        }
 
         Subscriber subscriber = application.getSubscriber();
 
