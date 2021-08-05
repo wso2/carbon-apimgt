@@ -90,7 +90,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -866,7 +865,6 @@ public class PublisherCommonUtils {
      * @param apiDto API DTO of the API
      * @return validity of URLs found within the endpoint configurations of the DTO
      */
-    @SuppressWarnings("unchecked")
     public static boolean validateEndpoints(APIDTO apiDto) {
 
         boolean isValid = true;
@@ -877,40 +875,34 @@ public class PublisherCommonUtils {
             Map endpointConfig = (Map) apiDto.getEndpointConfig();
 
             // Validate sandbox endpoints
-            Map<String, String> sandboxEndpointsMap = (Map<String, String>)
-                    endpointConfig.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
-            Collection<String> sandboxEndpoints = sandboxEndpointsMap.values();
-            for (String sandboxEndpoint : sandboxEndpoints) {
+            String sandboxEndpointUrl = String
+                    .valueOf(((Map) endpointConfig.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS)).get("url"));
+            try {
+                URI sandboxEndpointUri = new URI(sandboxEndpointUrl);
+                // If the provided url is a JMS connection url, validation is skipped since we already have
+                // this validation in place
+                if (!sandboxEndpointUri.getScheme().equals("jms") && !urlValidator.isValid(sandboxEndpointUrl)) {
+                    isValid = false;
+                }
+            } catch (URISyntaxException e) {
+                log.error("Error while parsing the sandbox endpoint url " + sandboxEndpointUrl);
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Validate production endpoints
+                String prodEndpointUrl = String
+                        .valueOf(((Map) endpointConfig.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)).get("url"));
                 try {
-                    URI uri = new URI(sandboxEndpoint);
+                    URI prodEndpointUri = new URI(prodEndpointUrl);
                     // If the provided url is a JMS connection url, validation is skipped since we already have
                     // this validation in place
-                    if (!uri.getScheme().equals("jms") && !urlValidator.isValid(sandboxEndpoint)) {
+                    if (!prodEndpointUri.getScheme().equals("jms") && !urlValidator.isValid(prodEndpointUrl)) {
                         isValid = false;
                     }
                 } catch (URISyntaxException e) {
-                    log.error("Error while parsing the endpoint url " + sandboxEndpoint);
-                    isValid = false;
-                }
-            }
-
-            // Validate production endpoints
-            if (isValid) {
-                Map<String, String> productionEndpointsMap = (Map<String, String>)
-                        endpointConfig.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
-                Collection<String> productionEndpoints = productionEndpointsMap.values();
-                for (String productionEndpoint : productionEndpoints) {
-                    try {
-                        URI uri = new URI(productionEndpoint);
-                        // If the provided url is a JMS connection url, validation is skipped since we already have
-                        // this validation in place
-                        if (!uri.getScheme().equals("jms") && !urlValidator.isValid(productionEndpoint)) {
-                            isValid = false;
-                        }
-                    } catch (URISyntaxException e) {
-                        log.error("Error while parsing the endpoint url " + productionEndpoint);
+                        log.error("Error while parsing the production endpoint url " + prodEndpointUrl);
                         isValid = false;
-                    }
                 }
             }
         }
