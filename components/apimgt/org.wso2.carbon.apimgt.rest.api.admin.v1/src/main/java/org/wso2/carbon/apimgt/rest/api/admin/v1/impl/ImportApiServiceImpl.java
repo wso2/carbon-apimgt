@@ -280,6 +280,7 @@ public class ImportApiServiceImpl implements ImportApiService {
                 consumer.updateApplication(applicationDetails);
             } else {
                 appId = consumer.addApplication(applicationDetails, ownerId);
+                update = Boolean.FALSE;
             }
 
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
@@ -295,10 +296,16 @@ public class ImportApiServiceImpl implements ImportApiService {
 
             // check whether keys need to be skipped while import
             if (skipApplicationKeys == null || !skipApplicationKeys) {
+                // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
+                if (update) {
+                    if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() > 0) {
+                        importedApplication.getKeys().clear();
+                    }
+                }
                 // Add application keys if present and keys does not exists in the current application
                 if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
                     for (APIKey apiKey : applicationDetails.getKeys()) {
-                        importExportManager.addApplicationKey(ownerId, importedApplication, apiKey);
+                        importExportManager.addApplicationKey(ownerId, importedApplication, apiKey, update);
                     }
                 }
             }
