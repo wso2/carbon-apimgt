@@ -49,12 +49,18 @@ public class ApplicationPurge implements OrganizationPurge{
     private void init() {
         taskList = new LinkedHashMap<>();
 
-        taskList.put("ApplicationRetrieval",null);
-        taskList.put("PendingSubscriptionRemoval",null);
-        taskList.put("ApplicationCreationWFRemoval",null);
-        taskList.put("ApplicationRegistrationRemoval",null);
-        taskList.put("ApplicationRemoval",null);
-        taskList.put("SubscriberRemoval",null);
+        taskList.put(APIConstants.ApplicationPurgeConstants.APPLICATION_RETRIEVAL,
+                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
+        taskList.put(APIConstants.ApplicationPurgeConstants.PENDING_SUBSCRIPTION_REMOVAL,
+                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
+        taskList.put(APIConstants.ApplicationPurgeConstants.APPLICATION_CREATION_WF_REMOVAL,
+                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
+        taskList.put(APIConstants.ApplicationPurgeConstants.APPLICATION_REGISTRATION_REMOVAL,
+                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
+        taskList.put(APIConstants.ApplicationPurgeConstants.APPLICATION_REMOVAL,
+                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
+        taskList.put(APIConstants.ApplicationPurgeConstants.SUBSCRIPTION_REMOVAL,
+                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
 
     }
 
@@ -75,40 +81,46 @@ public class ApplicationPurge implements OrganizationPurge{
             while (true) {
                 try {
                     switch (task) {
-                    case "ApplicationRetrieval":
-                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                    case APIConstants.ApplicationPurgeConstants.APPLICATION_RETRIEVAL:
+                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
+                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
                             applicationIdList = getApplicationsByOrganization(organization);
-                            taskList.put(task, "Successful");
+                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
-                    case "PendingSubscriptionRemoval":
-                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                    case APIConstants.ApplicationPurgeConstants.PENDING_SUBSCRIPTION_REMOVAL:
+                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
+                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
                             removePendingSubscriptions(applicationIdList);
-                            taskList.put(task, "Successful");
+                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
-                    case "ApplicationCreationWFRemoval":
-                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                    case APIConstants.ApplicationPurgeConstants.APPLICATION_CREATION_WF_REMOVAL:
+                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
+                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
                             removeApplicationCreationWorkflows(applicationIdList);
-                            taskList.put(task, "Successful");
+                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
-                    case "ApplicationRegistrationRemoval":
-                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                    case APIConstants.ApplicationPurgeConstants.APPLICATION_REGISTRATION_REMOVAL:
+                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
+                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
                             deletePendingApplicationRegistrations(applicationIdList);
-                            taskList.put(task, "Successful");
+                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
-                    case "ApplicationRemoval":
-                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                    case APIConstants.ApplicationPurgeConstants.APPLICATION_REMOVAL:
+                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
+                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
                             deleteApplicationList(applicationIdList);
-                            taskList.put(task, "Successful");
+                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
-                    case "SubscriberRemoval":
-                        if (taskList.get(task) == null || taskList.get(task).equals("Failed")) {
+                    case APIConstants.ApplicationPurgeConstants.SUBSCRIPTION_REMOVAL:
+                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
+                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
                             deleteSubscribers(organization);
-                            taskList.put(task, "Successful");
+                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
                     }
@@ -116,9 +128,8 @@ public class ApplicationPurge implements OrganizationPurge{
                 } catch (APIManagementException e) {
                     log.error("Error in " + task + " in application deletion sub component", e);
                     String msg = "Failed to execute application deletion of organization: " + organization;
-
+                    taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_FAILED);
                     if (++count == maxTries) {
-                        taskList.put(task, "Failed");
                         throw new APIManagementException(msg, e);
                     }
                 }
