@@ -91,6 +91,10 @@
         "Roles": "admin,Internal/creator"
       },
       {
+        "Name": "apim:api_mediation_policy_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim:api_workflow_view",
         "Roles": "admin"
       },
@@ -155,6 +159,10 @@
         "Roles": "admin,Internal/creator"
       },
       {
+        "Name": "apim:client_certificates_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim:threat_protection_policy_manage",
         "Roles": "admin,Internal/creator"
       },
@@ -196,6 +204,10 @@
       },
       {
         "Name": "apim:ep_certificates_view",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:ep_certificates_manage",
         "Roles": "admin,Internal/creator"
       },
       {
@@ -316,6 +328,10 @@
       },
       {
         "Name": "apim:comment_write",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:comment_manage",
         "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
