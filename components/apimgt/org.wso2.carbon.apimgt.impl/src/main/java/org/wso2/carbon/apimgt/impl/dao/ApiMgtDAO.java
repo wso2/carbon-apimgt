@@ -4901,7 +4901,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error while getting getting application by organization: " + organization, e);
+            handleException("Error while getting getting applications by organization: " + organization, e);
         }
 
         return applicationList;
@@ -5132,7 +5132,6 @@ public class ApiMgtDAO {
 
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
-        PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConsumerKey = null;
         PreparedStatement deleteRegistrationQuery = null;
         PreparedStatement deleteSubscription = null;
@@ -5140,9 +5139,6 @@ public class ApiMgtDAO {
         PreparedStatement deleteAppKey = null;
         PreparedStatement deleteApp = null;
         ResultSet rs = null;
-
-        String getSubscriptionsQuery = SQLConstants.GET_SUBSCRIPTION_IDS_OF_APPLICATION_LIST_SQL.replaceAll("_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
 
         String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL.replaceAll("_IDS_",
                 String.join(",", Collections.nCopies(applicationIdList.length, "?")));
@@ -5165,31 +5161,14 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(getSubscriptionsQuery);
 
             if (multiGroupAppSharingEnabled) {
-                for (int applicationId : applicationIdList) {
-                    transactionCompleted = updateGroupIDMappings(connection, applicationId, null, null);
-                }
-            }
-
-            int index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                prepStmt.setInt(index, applicationId);
-            }
-
-            rs = prepStmt.executeQuery();
-
-            List<Integer> subscriptions = new ArrayList<Integer>();
-
-            while (rs.next()) {
-                subscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+                transactionCompleted = updateGroupIDMappingsBulk(connection, applicationIdList);
             }
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
 
-            index = 0;
+            int index = 0;
             for (int applicationId : applicationIdList) {
                 index++;
                 prepStmtGetConsumerKey.setInt(index, applicationId);
@@ -5311,7 +5290,6 @@ public class ApiMgtDAO {
             handleException("Error while removing application details from the database", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
-            APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
             APIMgtDBUtil.closeAllConnections(deleteMappingQuery, null, null);
@@ -14233,6 +14211,57 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
             APIMgtDBUtil.closeAllConnections(insertStatement, null, null);
+        }
+        return updateSuccessful;
+    }
+
+    /**
+     * Adds a new record in AM_APPLICATION_GROUP_MAPPING for each group
+     *
+     * @param conn connection
+     * @param applicationIdList application id list
+     * @return
+     * @throws APIManagementException when failed to execute the application groups update
+     */
+    private boolean updateGroupIDMappingsBulk(Connection conn, int[] applicationIdList)
+            throws APIManagementException {
+
+        boolean updateSuccessful = false;
+
+        PreparedStatement removeMigratedGroupIdsStatement = null;
+        PreparedStatement deleteStatement = null;
+
+        String deleteQuery = SQLConstants.REMOVE_GROUP_ID_MAPPING_BULK_SQL.replaceAll("_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String removeGroupIdsQuery = SQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL_BULK.replaceAll("_IDS_",
+                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+
+        try {
+            removeMigratedGroupIdsStatement = conn.prepareStatement(removeGroupIdsQuery);
+
+            int index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                removeMigratedGroupIdsStatement.setInt(index, applicationId);
+            }
+            removeMigratedGroupIdsStatement.executeUpdate();
+
+            deleteStatement = conn.prepareStatement(deleteQuery);
+
+            index = 0;
+            for (int applicationId : applicationIdList) {
+                index++;
+                deleteStatement.setInt(index, applicationId);
+            }
+            deleteStatement.executeUpdate();
+
+            updateSuccessful = true;
+        } catch (SQLException e) {
+            updateSuccessful = false;
+            handleException("Failed to update GroupId mappings ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
         }
         return updateSuccessful;
     }
