@@ -2766,6 +2766,19 @@ public final class APIConstants {
         public static final String KM_DATA_REMOVER = "KMDataRemover";
     }
 
+    public static class ApplicationPurgeConstants {
+        public static final String APPLICATION_RETRIEVAL = "ApplicationRetrieval";
+        public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
+        public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
+        public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
+        public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+        public static final String SUBSCRIPTION_REMOVAL = "SubscriberRemoval";
+
+        public static final String STATUS_FAILED = "Failed";
+        public static final String STATUS_PENDING = "Pending";
+        public static final String STATUS_SUCCESSFUL = "Successful";
+    }
+
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
