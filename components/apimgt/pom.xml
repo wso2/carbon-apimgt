@@ -29,6 +29,7 @@
     <name>API Management</name>
 
     <modules>
+        <module>org.wso2.carbon.apimgt.eventing</module>
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.persistence</module>
         <module>org.wso2.carbon.apimgt.impl</module>
