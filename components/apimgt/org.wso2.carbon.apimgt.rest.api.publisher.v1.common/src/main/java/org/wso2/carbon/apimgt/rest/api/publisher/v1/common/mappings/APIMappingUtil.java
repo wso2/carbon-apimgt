@@ -87,7 +87,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
@@ -664,12 +663,10 @@ public class APIMappingUtil {
                     .valueOf(api.getAudience()));
         }
         if (api.getCreatedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
             apiInfoDTO.setCreatedTime(String.valueOf(createdTime.getTime()));
         }
         if (api.getLastUpdated() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
@@ -2995,15 +2992,11 @@ public class APIMappingUtil {
         apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
         if (model.getCreatedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date parsedDate;
             try {
-                parsedDate = dateFormat.parse(model.getCreatedTime());
+                apiRevisionDTO.setCreatedTime(parseStringToDate(model.getCreatedTime()));
             } catch (java.text.ParseException e) {
                 throw new APIManagementException("Error while parsing the created time:" + model.getCreatedTime(), e);
             }
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            apiRevisionDTO.setCreatedTime(timestamp);
         }
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
@@ -3042,41 +3035,25 @@ public class APIMappingUtil {
         }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
         if (model.getDeployedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date parsedDate;
             try {
-                parsedDate = dateFormat.parse(model.getDeployedTime());
+                apiRevisionDeploymentDTO.setDeployedTime(parseStringToDate(model.getDeployedTime()));
             } catch (java.text.ParseException e) {
                 throw new APIManagementException("Error while parsing the created time:" + model.getDeployedTime(), e);
             }
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         }
         if (model.getSuccessDeployedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date parsedDate;
             try {
-                parsedDate = dateFormat.parse(model.getSuccessDeployedTime());
+                apiRevisionDeploymentDTO.setSuccessDeployedTime(parseStringToDate(model.getSuccessDeployedTime()));
             } catch (java.text.ParseException e) {
                 throw new APIManagementException("Error while parsing the deployed time:"
                         + model.getSuccessDeployedTime(), e);
             }
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            apiRevisionDeploymentDTO.setSuccessDeployedTime(timestamp);
         }
         return apiRevisionDeploymentDTO;
     }
 
-    public static APIRevisionDeploymentListDTO fromListAPIRevisionDeploymentToDTO(
-            List<APIRevisionDeployment> apiRevisionDeploymentList)
-            throws APIManagementException {
-
-        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTO = new APIRevisionDeploymentListDTO();
-        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentList) {
-            apiRevisionDeploymentDTOS.add(fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
-        }
-        apiRevisionDeploymentListDTO.setList(apiRevisionDeploymentDTOS);
-        return apiRevisionDeploymentListDTO;
+    private static Date parseStringToDate(String time) throws java.text.ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.parse(time);
     }
 }
