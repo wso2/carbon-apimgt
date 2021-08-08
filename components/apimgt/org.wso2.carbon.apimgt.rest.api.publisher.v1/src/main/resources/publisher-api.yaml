@@ -4449,7 +4449,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_import_export
-            - apim:api_manage
             - apim:admin
       x-code-samples:
         - lang: Curl
