@@ -43,7 +43,9 @@ MediationPoliciesApiService delegate = new MediationPoliciesApiServiceImpl();
     @ApiOperation(value = "Get all global level mediation policies ", notes = "This operation provides you a list of available all global level mediation policies. ", response = MediationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies")
         })
     }, tags={ "Global Mediation Policies",  })
     @ApiResponses(value = { 
@@ -61,7 +63,9 @@ MediationPoliciesApiService delegate = new MediationPoliciesApiServiceImpl();
     @ApiOperation(value = "Download a Global Mediation Policy", notes = "This operation can be used to download a particular global mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies")
         })
     }, tags={ "Global Mediation Policy" })
     @ApiResponses(value = { 

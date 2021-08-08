@@ -85,7 +85,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Upload a New Certificate", notes = "This operation can be used to upload a new certificate for an endpoint. ", response = ClientCertMetadataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -103,7 +105,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Add a New Document to an API", notes = "This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -121,7 +125,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Upload the Content of an API Document", notes = "Thid operation can be used to upload a file or add inline content to an API document.  **IMPORTANT:** * Either **file** or **inlineContent** form data parameters should be specified at one time. * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter. * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -140,7 +146,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Add an API Specific Mediation Policy", notes = "This operation can be used to add an API specifc mediation policy. ", response = MediationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
     }, tags={ "API Mediation Policies",  })
     @ApiResponses(value = { 
@@ -158,7 +167,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Configure Monetization for a Given API", notes = "This operation can be used to configure monetization for a given API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Monetization",  })
     @ApiResponses(value = { 
@@ -176,7 +186,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add an API Comment", notes = "", response = CommentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:comment_write", description = "Write permission to comments")
+            @AuthorizationScope(scope = "apim:comment_write", description = "Write permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
@@ -196,7 +207,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get AsyncAPI definition", notes = "This operation can be used to retrieve the AsyncAPI definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -214,7 +226,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update AsyncAPI definition", notes = "This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -234,6 +247,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Change API Status", notes = "This operation is used to change the lifecycle of an API. Eg: Publish an API which is in `CREATED` state. In order to change the lifecycle, we need to provide the lifecycle `action` as a query parameter.  For example, to Publish an API, `action` should be `Publish`. Note that the `Re-publish` action is available only after calling `Block`.  Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information. ", response = WorkflowResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Lifecycle",  })
@@ -254,7 +268,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a New API", notes = "This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.  There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `\"provider\" : \"some_other_user\"` in the payload so that the API's creator will be shown as `some_other_user` in the UI. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -272,6 +287,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Create API Revision", notes = "Create a new API revision ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
@@ -290,7 +306,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a New API Version", notes = "This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -308,6 +325,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete an API", notes = "This operation can be used to delete an existing API proving the Id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_delete", description = "Delete API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
@@ -328,6 +346,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete a Certificate", notes = "This operation can be used to delete an uploaded certificate. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
         })
     }, tags={ "Client Certificates",  })
@@ -347,7 +366,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete a Document of an API", notes = "This operation can be used to delete a document associated with an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Update and delete API documents")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -364,7 +384,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete Pending Lifecycle State Change Tasks", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Lifecycle",  })
     @ApiResponses(value = { 
@@ -382,7 +403,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete an API Specific Mediation Policy", notes = "This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
     }, tags={ "API Mediation Policy",  })
     @ApiResponses(value = { 
@@ -401,6 +424,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete Revision", notes = "Delete a revision of an API ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
@@ -420,6 +444,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete an API Comment", notes = "Remove a Comment ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:comment_write", description = "Write permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments"),
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Comments",  })
@@ -441,6 +466,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Deploy Revision", notes = "Deploy a revision ", response = APIRevisionDeploymentDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
@@ -458,7 +484,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Edit a comment", notes = "Edit the individual comment ", response = CommentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:comment_write", description = "Write permission to comments")
+            @AuthorizationScope(scope = "apim:comment_write", description = "Write permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
@@ -481,7 +508,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
@@ -498,7 +526,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate internal API Key to invoke APIS.", notes = "This operation can be used to generate internal api key which used to invoke API. ", response = APIKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_generate_key", description = "Generate Internal Key")
+            @AuthorizationScope(scope = "apim:api_generate_key", description = "Generate Internal Key"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -515,7 +544,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate Mock Response Payloads", notes = "This operation can be used to generate mock responses from examples of swagger definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -534,6 +564,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get Details of an API", notes = "Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
@@ -554,7 +585,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get the Certificate Information", notes = "This operation can be used to get the information about a certificate. ", response = CertificateInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -573,7 +606,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Download a Certificate", notes = "This operation can be used to download a certificate which matches the given alias. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -592,7 +627,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Retrieve/ Search Uploaded Client Certificates", notes = "This operation can be used to retrieve and search the uploaded client certificates. ", response = ClientCertificatesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -609,7 +646,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Document of an API", notes = "This operation can be used to retrieve a particular document's metadata associated with an API. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -627,7 +666,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/octet-stream", "application/json" })
     @ApiOperation(value = "Get the Content of an API Document", notes = "This operation can be used to retrive the content of an API's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type     _Sample cURL_ : `curl -k -H \"Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51\" -F inlineContent=@\"docs.txt\" -X POST \"https://localhost:9443/api/am/publisher/v2/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content` 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -646,7 +687,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a List of Documents of an API", notes = "This operation can be used to retrieve a list of documents belonging to an API by providing the id of the API. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -664,7 +707,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Schema of a GraphQL API", notes = "This operation can be used to retrieve the Schema definition of a GraphQL API. ", response = GraphQLSchemaDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "GraphQL Schema (Individual)",  })
     @ApiResponses(value = { 
@@ -682,7 +726,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Lifecycle State Change History of the API.", notes = "This operation can be used to retrieve Lifecycle state change history of the API. ", response = LifecycleHistoryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Lifecycle",  })
     @ApiResponses(value = { 
@@ -700,7 +745,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get Lifecycle State Data of the API.", notes = "This operation can be used to retrieve Lifecycle state data of the API. ", response = LifecycleStateDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Lifecycle",  })
     @ApiResponses(value = { 
@@ -719,7 +765,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get an API Specific Mediation Policy", notes = "This operation can be used to retrieve a particular API specific mediation policy. ", response = MediationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
     }, tags={ "API Mediation Policy",  })
     @ApiResponses(value = { 
@@ -738,7 +787,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Download an API Specific Mediation Policy", notes = "This operation can be used to download a particular API specific mediation policy. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
     }, tags={ "API Mediation Policy",  })
     @ApiResponses(value = { 
@@ -755,7 +807,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Monetization Status for each Tier in a Given API", notes = "This operation can be used to get monetization status for each tier in a given API ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Monetization",  })
     @ApiResponses(value = { 
@@ -773,7 +826,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Resource Paths of an API", notes = "This operation can be used to retrieve resource paths defined for a specific api. ", response = ResourcePathListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -791,7 +845,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Resource Policy(inflow/outflow) Definitions", notes = "This operation can be used to retrieve conversion policy resource definitions of an API. ", response = ResourcePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Resource Policies",  })
     @ApiResponses(value = { 
@@ -809,7 +864,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Resource Policy(inflow/outflow) Definition for a Given Resource Identifier.", notes = "This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier. ", response = ResourcePolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Resource Policies",  })
     @ApiResponses(value = { 
@@ -828,7 +884,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Total Revenue Details of a Given Monetized API with Meterd Billing", notes = "This operation can be used to get details of total revenue details of a given monetized API with meterd billing. ", response = APIRevenueDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Monetization",  })
     @ApiResponses(value = { 
@@ -846,6 +903,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
@@ -863,6 +921,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "List Deployments", notes = "List available deployed revision deployment details of an API ", response = APIRevisionDeploymentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
@@ -880,6 +939,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "List Revisions", notes = "List available revisions of an API ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
@@ -897,7 +957,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of the Subscription Throttling Policies of an API ", notes = "This operation can be used to retrieve details of the subscription throttling policy of an API by specifying the API Id.  `X-WSO2-Tenant` header can be used to retrive API subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -915,7 +976,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Swagger Definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -933,7 +995,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Thumbnail Image", notes = "This operation can be used to download a thumbnail image of an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -952,7 +1015,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get All Mediation Policies of an API ", notes = "This operation provides you a list of available mediation policies of an API. ", response = MediationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
     }, tags={ "API Mediation Policies",  })
     @ApiResponses(value = { 
@@ -970,6 +1036,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Retrieve/Search APIs ", notes = "This operation provides you a list of available APIs qualifying under a given search condition.  Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation. ", response = APIListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
@@ -987,7 +1054,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve API Comments", notes = "Get a list of Comments that are already added to APIs ", response = CommentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments")
+            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
@@ -1004,7 +1072,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the List of External Stores to which an API is Published", notes = "This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "External Stores",  })
     @ApiResponses(value = { 
@@ -1021,7 +1090,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve the ARNs of AWS Lambda Functions", notes = "This operation can be use to retrieve ARNs of AWS Lambda function for a given AWS credentials. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "AWS Lambda (Individual)",  })
     @ApiResponses(value = { 
@@ -1037,7 +1107,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve the Security Audit Report of the Audit API", notes = "Retrieve the Security Audit Report of the Audit API ", response = AuditReportDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Audit",  })
     @ApiResponses(value = { 
@@ -1053,7 +1124,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of an API Comment", notes = "Get the individual comment given by a username for a certain API. ", response = CommentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments")
+            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
@@ -1072,7 +1144,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Generated Mock Response Payloads", notes = "This operation can be used to get generated mock responses from examples of swagger definition of an API. ", response = MockResponsePayloadListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1091,6 +1164,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = GraphQLQueryComplexityInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "GraphQL Policies",  })
@@ -1108,6 +1182,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Retrieve Types and Fields of a GraphQL Schema", notes = "This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id. ", response = GraphQLSchemaTypeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "GraphQL Policies",  })
@@ -1124,7 +1199,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get replies of a comment", notes = "Get replies of a comment ", response = CommentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments")
+            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
         })
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
@@ -1143,7 +1219,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get WSDL Meta Information", notes = "This operation can be used to retrieve the WSDL meta information of an API. It states whether the API is a SOAP API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive. ", response = WSDLInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1160,7 +1237,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.  The type of the WSDL of the API is indicated at the \"wsdlInfo\" element of the API payload definition. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1198,7 +1276,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "import an AsyncAPI Specification", notes = "This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file' to specify the definition. Specify additionalProperties with **at least** API's name, version, context and endpointConfig.", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1215,7 +1294,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a GraphQL SDL", notes = "This operation can be used to create api from api definition.APIMgtDAOTest  API definition is GraphQL Schema ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1232,7 +1312,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an OpenAPI Definition", notes = "This operation can be used to create an API from an OpenAPI definition. Provide either `url` or `file` to specify the definition.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1249,7 +1330,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a Service from Service Catalog", notes = "This operation can be used to create an API from a Service from Service Catalog", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1266,7 +1348,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a WSDL Definition", notes = "This operation can be used to create an API using a WSDL definition. Provide either `url` or `file` to specify the definition.  WSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc. Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1283,7 +1366,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Publish an API to External Stores", notes = "This operation can be used to publish an API to a list of external stores. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "External Stores",  })
     @ApiResponses(value = { 
@@ -1300,7 +1384,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update the Service that is used to create the API", notes = "This operation can be used to re-import the Service used to create the API", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1318,6 +1403,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Restore API Revision", notes = "Restore a revision to the current API of the API ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
@@ -1335,6 +1421,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "UnDeploy Revision", notes = "UnDeploy a revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
@@ -1355,6 +1442,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Update an API", notes = "This operation can be used to update an existing API. But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "APIs",  })
@@ -1376,7 +1464,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Update a Certificate", notes = "This operation can be used to update an uploaded certificate. ", response = ClientCertMetadataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
@@ -1395,6 +1485,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Update Deployment", notes = "Update deployment devportal visibility ", response = APIRevisionDeploymentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
@@ -1412,7 +1503,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Update a Document of an API", notes = "This operation can be used to update metadata of an API's document. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:document_manage", description = "Update and delete API documents")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
@@ -1430,7 +1522,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a Schema to a GraphQL API", notes = "This operation can be used to add a GraphQL Schema definition to an existing GraphQL API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "GraphQL Schema",  })
     @ApiResponses(value = { 
@@ -1450,7 +1543,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Update an API Specific Mediation Policy", notes = "This operation can be used to update an existing mediation policy of an API. ", response = MediationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies"),
+            @AuthorizationScope(scope = "apim:api_mediation_policy_manage", description = "View, create, update and remove API specific mediation policies")
         })
     }, tags={ "API Mediation Policy",  })
     @ApiResponses(value = { 
@@ -1469,7 +1564,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update the Resource Policy(inflow/outflow) Definition for the Given Resource Identifier", notes = "This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter `content`. ", response = ResourcePolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Resource Policies",  })
     @ApiResponses(value = { 
@@ -1488,7 +1584,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update Swagger Definition", notes = "This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1508,6 +1605,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Upload a Thumbnail Image", notes = "This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`. ", response = FileInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "APIs",  })
@@ -1526,7 +1624,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update Complexity Related Details of an API", notes = "This operation can be used to update complexity details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "GraphQL Policies",  })
     @ApiResponses(value = { 
@@ -1542,7 +1641,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update Topics", notes = "This operation can be used to update topics of an existing API.", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1557,7 +1658,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update WSDL Definition", notes = "This operation can be used to update the WSDL definition of an existing API. WSDL to be updated can be passed as either \"url\" or \"file\". Only one of \"url\" or \"file\" can be used at the same time. \"file\" can be specified as a single WSDL file or as a zip file which has a WSDL and its dependencies (eg: XSDs) ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
@@ -1576,7 +1678,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Given API Context Name already Exists", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1593,7 +1696,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate an AsyncAPI Specification", notes = "This operation can be used to validate and AsyncAPI Specification and retrieve a summary. Provide either 'url' or 'file' to specify the definition.", response = AsyncAPISpecificationValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1611,6 +1715,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Check Whether a Document with the Provided Name Exist", notes = "This operation can be used to verify the document name exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
             @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
         })
     }, tags={ "API Documents",  })
@@ -1628,7 +1734,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Whether Given Endpoint URL is Valid", notes = "Using this operation, it is possible check whether the given API endpoint url is a valid url ", response = ApiEndpointValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1645,7 +1752,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate a GraphQL SDL", notes = "This operation can be used to validate a graphQL definition and retrieve a summary. ", response = GraphQLValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1662,7 +1770,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate an OpenAPI Definition", notes = "This operation can be used to validate an OpenAPI definition and retrieve a summary. Provide either `url` or `file` to specify the definition. ", response = OpenAPIDefinitionValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Validation",  })
     @ApiResponses(value = { 
@@ -1679,7 +1788,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate a WSDL Definition", notes = "This operation can be used to validate a WSDL definition and retrieve a summary. Provide either `url` or `file` to specify the definition. ", response = WSDLValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Validation" })
     @ApiResponses(value = { 
