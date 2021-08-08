@@ -1101,7 +1101,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-            - apim:admin
+            - apim:admin # special scope added to moderate comments
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2267,7 +2267,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:app_import_export
-            - apim:app_manage
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2355,7 +2354,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:app_import_export
-            - apim:app_manage
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
