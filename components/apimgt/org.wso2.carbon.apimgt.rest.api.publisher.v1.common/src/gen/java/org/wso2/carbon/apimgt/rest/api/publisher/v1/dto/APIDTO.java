@@ -38,6 +38,7 @@ import javax.validation.Valid;
 
 @Scope(name = "apim:api_create", description="", value ="")
 @Scope(name = "apim:api_import_export", description="", value ="")
+@Scope(name = "apim:api_manage", description="", value ="")
 public class APIDTO   {
   
     private String id = null;
@@ -47,6 +48,7 @@ public class APIDTO   {
     private String version = null;
     private String provider = null;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private String lifeCycleStatus = null;
     private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;
@@ -130,10 +132,13 @@ return null;
     private AudienceEnum audience = null;
     private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> tags = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> policies = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
@@ -171,8 +176,10 @@ return null;
         }
     }
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
@@ -209,11 +216,14 @@ return null;
         }
     }
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
 
@@ -250,12 +260,14 @@ return null;
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private String lastUpdatedTime = null;
     private Object endpointConfig = null;
 
