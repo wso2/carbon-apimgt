@@ -26,7 +26,7 @@ public interface ResourceQuotaLimiter {
 
     /**
      * This method used to check API creation quota achieved or not using the API-quota-limiter extension.
-     * In normal scenarios API creation is quota is not checked and this interface implemented by
+     * In normal scenarios (product-apim) API creation quota is not checked and this interface implemented by
      * OnPremQuotaLimiter class to handle scenarios for not having API-quota-limiter extension.
      * @param orgID Organization ID relevant for the API creation.
      * @param userId User ID value relevant for API creation.

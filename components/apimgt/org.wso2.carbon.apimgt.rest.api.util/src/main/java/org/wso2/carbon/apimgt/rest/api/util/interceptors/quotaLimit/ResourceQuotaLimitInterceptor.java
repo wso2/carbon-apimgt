@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.quotaLimit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.common.util.UrlUtils;
 import org.apache.cxf.attachment.DelegatingInputStream;
 import org.apache.cxf.message.Message;
@@ -27,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -38,6 +41,8 @@ import java.util.Map;
  * This class handles API creations considering specified quotas.
  */
 public class ResourceQuotaLimitInterceptor extends AbstractPhaseInterceptor {
+
+    private static final Log log = LogFactory.getLog(BasicAuthenticationInterceptor.class);
 
     public ResourceQuotaLimitInterceptor() {
         super(Phase.PRE_INVOKE);
@@ -52,9 +57,8 @@ public class ResourceQuotaLimitInterceptor extends AbstractPhaseInterceptor {
      */
     @Override
     public void handleMessage(Message message) {
-        Message message1 = message;
         try {
-            if (getQuotaLimitEnabled() && getToBeQuotaLimited(message) && getIsRegularAPICreation(message)) {
+            if (getQuotaLimitEnabled() && getToBeQuotaLimited(message)) {
                 Map<String, String> queryParamsMap = UrlUtils.parseQueryString(
                         (String) message.get(QuotaLimitInterceptorConstants.QUERY_PARAM_STRING));
                 if (queryParamsMap.containsKey(QuotaLimitInterceptorConstants.QUERY_PARAM_ORGANIZATION_ID)) {
@@ -68,45 +72,36 @@ public class ResourceQuotaLimitInterceptor extends AbstractPhaseInterceptor {
                             message.getExchange().put(Response.class, response);
                         }
                     } catch (APIManagementException e) {
-                        e.printStackTrace();
+                        log.error("Error occurred while getting response from ResourceQuotaLimiter:" + e.getMessage());
                     }
                 }
-                return;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Invalid cxf message received to ResourceQuotaLimitInterceptor. " + e.getMessage());
         }
-    }
-
-    private boolean getIsRegularAPICreation(Message message) {
-        boolean isRegularAPICreation = message.containsKey(QuotaLimitInterceptorConstants.APPLICATION_KEY);
-        return !isRegularAPICreation;
     }
 
     private boolean getQuotaLimitEnabled() {
         APIManagerConfiguration configurations = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean isQuotaLimitEnabled = Boolean.parseBoolean(configurations.getFirstProperty(APIConstants.API_QUOTA_LIMIT_ENABLE));
-        return isQuotaLimitEnabled;
+        return Boolean.parseBoolean(configurations.getFirstProperty(APIConstants.API_QUOTA_LIMIT_ENABLE));
     }
 
     private boolean getToBeQuotaLimited(Message message) throws IOException {
         String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String matchingPath = (String) message.get(QuotaLimitInterceptorConstants.PATH_TO_MATCH_SLASH);
+        boolean isPOSTRequest = QuotaLimitInterceptorConstants.HTTP_POST.equals(httpMethod);
 
-        boolean isCreateAPI = QuotaLimitInterceptorConstants.HTTP_POST.equals(httpMethod) &&
-                QuotaLimitInterceptorConstants.API_FROM_SCRATCH_PATH.equals(matchingPath);
-        boolean isCreateVersion = QuotaLimitInterceptorConstants.HTTP_POST.equals(httpMethod) &&
-                QuotaLimitInterceptorConstants.NEW_API_VERSION_PATH.equals(matchingPath);
-        boolean isImportAPI = QuotaLimitInterceptorConstants.HTTP_POST.equals(httpMethod) &&
-                QuotaLimitInterceptorConstants.IMPORT_OPENAPI_PATH.equals(matchingPath);
+        boolean isCreateAPI =  isPOSTRequest && QuotaLimitInterceptorConstants.API_FROM_SCRATCH_PATH.equals(matchingPath);
+        boolean isCreateVersion = isPOSTRequest && QuotaLimitInterceptorConstants.NEW_API_VERSION_PATH.equals(matchingPath);
+        boolean isImportAPI = isPOSTRequest && QuotaLimitInterceptorConstants.IMPORT_OPENAPI_PATH.equals(matchingPath);
 
-//      Checks for regular API creations when using Swagger definitions
+        //Checks for regular API creations when using Swagger definitions
         boolean isRegularTypeAPI = true;
         if (isImportAPI) {
             InputStream in = message.getContent(InputStream.class);
             String delegatedINStream = ((DelegatingInputStream) in).getInputStream().toString();
-            if (delegatedINStream.contains("additionalPropertiesMap")) {
+            if (delegatedINStream.contains("apiDefinitionHash") && delegatedINStream.contains("applicationId")) {
                 isRegularTypeAPI = false;
             }
         }
