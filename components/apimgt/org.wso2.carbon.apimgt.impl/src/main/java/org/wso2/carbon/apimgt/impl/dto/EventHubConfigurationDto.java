@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.dto;
 
+import java.util.Map;
 import java.util.Properties;
 
 public class EventHubConfigurationDto {
@@ -120,6 +121,7 @@ public class EventHubConfigurationDto {
         private String type = "Binary";
         private String receiverUrlGroup = "tcp://localhost:9611";
         private String authUrlGroup = "ssl://localhost:9711";
+        private Map<String, String> properties;
 
         public String getType() {
 
@@ -149,6 +151,14 @@ public class EventHubConfigurationDto {
         public void setAuthUrlGroup(String authUrlGroup) {
 
             this.authUrlGroup = authUrlGroup;
+        }
+
+        public void setProperties(Map properties){
+            this.properties = properties;
+        }
+
+        public Map<String, String> getProperties() {
+            return properties;
         }
     }
 
