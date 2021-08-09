@@ -86,8 +86,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -867,47 +869,39 @@ public class PublisherCommonUtils {
      */
     public static boolean validateEndpoints(APIDTO apiDto) {
 
-        boolean isValid = true;
+        ArrayList<String> endpoints = new ArrayList<>();
         UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES +
                 UrlValidator.ALLOW_LOCAL_URLS);
 
         if (apiDto.getEndpointConfig() != null) {
             Map endpointConfig = (Map) apiDto.getEndpointConfig();
+            endpoints.add(String.valueOf(((Map) endpointConfig
+                    .get(APIConstants.API_DATA_SANDBOX_ENDPOINTS)).get(APIConstants.API_DATA_URL)));
+            endpoints.add(String.valueOf(((Map) endpointConfig
+                    .get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)).get(APIConstants.API_DATA_URL)));
 
-            // Validate sandbox endpoints
-            String sandboxEndpointUrl = String
-                    .valueOf(((Map) endpointConfig.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS)).get("url"));
-            try {
-                URI sandboxEndpointUri = new URI(sandboxEndpointUrl);
-                // If the provided url is a JMS connection url, validation is skipped since we already have
-                // this validation in place
-                if (!sandboxEndpointUri.getScheme().equals("jms") && !urlValidator.isValid(sandboxEndpointUrl)) {
-                    isValid = false;
-                }
-            } catch (URISyntaxException e) {
-                log.error("Error while parsing the sandbox endpoint url " + sandboxEndpointUrl);
-                isValid = false;
-            }
+            for (String endpoint : endpoints) {
+                // If url is a JMS connection url, validation is skipped. If not, validity is checked.
+                if (!endpoint.startsWith("jms:") && !urlValidator.isValid(endpoint)) {
+                    try {
+                        // If the url is not identified as valid from the above check,
+                        // next step is determine the validity of the encoded url (done through the URI constructor).
+                        URL endpointUrl = new URL(endpoint);
+                        URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                                endpointUrl.getPath(), endpointUrl.getQuery(), null);
 
-            if (isValid) {
-                // Validate production endpoints
-                String prodEndpointUrl = String
-                        .valueOf(((Map) endpointConfig.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)).get("url"));
-                try {
-                    URI prodEndpointUri = new URI(prodEndpointUrl);
-                    // If the provided url is a JMS connection url, validation is skipped since we already have
-                    // this validation in place
-                    if (!prodEndpointUri.getScheme().equals("jms") && !urlValidator.isValid(prodEndpointUrl)) {
-                        isValid = false;
+                        if (!urlValidator.isValid(endpointUri.toString())) {
+                            log.error("Invalid endpoint url " + endpointUrl);
+                            return false;
+                        }
+                    } catch (URISyntaxException | MalformedURLException e) {
+                        log.error("Error while parsing the endpoint url " + endpoint);
+                        return false;
                     }
-                } catch (URISyntaxException e) {
-                        log.error("Error while parsing the production endpoint url " + prodEndpointUrl);
-                        isValid = false;
                 }
             }
         }
-
-        return isValid;
+        return true;
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
