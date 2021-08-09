@@ -1247,6 +1247,7 @@ public final class APIConstants {
 
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";

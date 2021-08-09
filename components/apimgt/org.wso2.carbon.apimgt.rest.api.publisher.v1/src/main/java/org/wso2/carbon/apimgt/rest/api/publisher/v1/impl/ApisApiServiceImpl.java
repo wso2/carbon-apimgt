@@ -2820,6 +2820,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     API originalAPI = provider.getAPIbyUUID(apiId, organization);
                     provider.updateAPI(api, originalAPI);
+                    SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
+                            body.getContent());
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
@@ -4382,7 +4384,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
-        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));

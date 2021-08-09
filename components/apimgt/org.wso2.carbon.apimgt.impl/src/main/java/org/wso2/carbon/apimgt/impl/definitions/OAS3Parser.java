@@ -586,6 +586,11 @@ public class OAS3Parser extends APIDefinition {
         return generateAPIDefinition(swaggerData, openAPI);
     }
 
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, "", returnJsonContent);
+    }
+
     /**
      * This method generates API definition using the given api's URI templates and the swagger.
      * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
@@ -701,11 +706,12 @@ public class OAS3Parser extends APIDefinition {
      * This method validates the given OpenAPI definition by content
      *
      * @param apiDefinition     OpenAPI Definition content
+     * @param host OpenAPI Definition url
      * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
      * @return APIDefinitionValidationResponse object with validation information
      */
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String host, boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
@@ -727,11 +733,33 @@ public class OAS3Parser extends APIDefinition {
         } else {
             OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
             io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
+            List<String> endpoints;
+            String endpointWithHost = "";
+            if (openAPI.getServers() == null || openAPI.getServers().isEmpty()) {
+                endpoints = null;
+            } else {
+                endpoints = openAPI.getServers().stream().map(url -> url.getUrl()).collect(Collectors.toList());
+                for (String endpoint : endpoints) {
+                    if (endpoint.startsWith("/")) {
+                        if (StringUtils.isEmpty(host)) {
+                            endpointWithHost = "http://api.yourdomain.com" + endpoint;
+                        } else {
+                            endpointWithHost = host + endpoint;
+                        }
+                       endpoints.set(endpoints.indexOf(endpoint), endpointWithHost);
+                    }
+                }
+            }
+            String title = null;
+            String context = null;
+            if (!StringUtils.isBlank(info.getTitle())) {
+                title = info.getTitle();
+                context = info.getTitle().replaceAll("\\s", "").toLowerCase();
+            }
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
-                    info.getTitle(), info.getVersion(), null, info.getDescription(),
-                    (openAPI.getServers()==null || openAPI.getServers().isEmpty() ) ? null :
-                            openAPI.getServers().stream().map(url -> url.getUrl()).collect(Collectors.toList())
+                    title, info.getVersion(), context,
+                    info.getDescription(), endpoints
             );
             validationResponse.setParser(this);
             if (returnJsonContent) {

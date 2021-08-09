@@ -226,15 +226,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         oldApplication.getUUID());
             } else {
                 application = preProcessAndAddApplication(ownerId, applicationDTO, organization);
+                update = Boolean.FALSE;
             }
-
-            // Get keys to import
-            List<ApplicationKeyDTO> applicationKeys = applicationDTO.getKeys();
-            for (ApplicationKeyDTO applicationKey : applicationKeys) {
-                application.addKey(ImportUtils.getAPIKeyFromApplicationKeyDTO(applicationKey));
-            }
-            // Update the application to add keys
-            apiConsumer.updateApplication(application);
 
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
@@ -251,10 +244,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             // check whether keys need to be skipped while import
             if (skipApplicationKeys == null || !skipApplicationKeys) {
+                // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
+                if (update) {
+                    if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() > 0) {
+                        importedApplication.getKeys().clear();
+                    }
+                }
                 // Add application keys if present and keys does not exists in the current application
-                if (application.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
-                    for (APIKey apiKey : application.getKeys()) {
-                        ImportUtils.addApplicationKey(ownerId, importedApplication, apiKey, apiConsumer);
+                if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
+                    for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
+                        ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
+                                update);
                     }
                 }
             }

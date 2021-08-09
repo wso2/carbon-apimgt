@@ -421,13 +421,16 @@ public class OASParserUtil {
                     if (parameters != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
-                            Content content = parameter.getContent();
-                            if (content != null) {
-                                extractReferenceFromContent(content, context);
-                            } else {
-                                String ref = parameter.get$ref();
-                                if (ref != null) {
-                                    extractReferenceWithoutSchema(ref, context);
+                            //Extract the parameter reference only if it exists in the source definition
+                            if(parameter != null) {
+                                Content content = parameter.getContent();
+                                if (content != null) {
+                                    extractReferenceFromContent(content, context);
+                                } else {
+                                    String ref = parameter.get$ref();
+                                    if (ref != null) {
+                                        extractReferenceWithoutSchema(ref, context);
+                                    }
                                 }
                             }
                         }
@@ -440,8 +443,11 @@ public class OASParserUtil {
                     if (responses != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             ApiResponse response = responses.get(refKey);
-                            Content content = response.getContent();
-                            extractReferenceFromContent(content, context);
+                            //Extract the response reference only if it exists in the source definition
+                            if(response != null) {
+                                Content content = response.getContent();
+                                extractReferenceFromContent(content, context);
+                            }
                         }
                     }
                 }
@@ -882,6 +888,29 @@ public class OASParserUtil {
     }
 
     /**
+     * Try to validate a give openAPI definition using OpenAPI 3 parser
+     *
+     * @param apiDefinition     definition
+     * @param url OpenAPI definition url
+     * @param returnJsonContent whether to return definition as a json content
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
+                                                                        boolean returnJsonContent)
+            throws APIManagementException {
+        APIDefinitionValidationResponse validationResponse =
+                oas3Parser.validateAPIDefinition(apiDefinition, url, returnJsonContent);
+        if (!validationResponse.isValid()) {
+            for (ErrorHandler handler : validationResponse.getErrorItems()) {
+                if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
+                    return tryOAS2Validation(apiDefinition, returnJsonContent);
+                }
+            }
+        }
+        return validationResponse;
+    }
+    /**
      * Try to validate a give openAPI definition using swagger parser
      *
      * @param apiDefinition     definition
@@ -987,6 +1016,7 @@ public class OASParserUtil {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
             URL urlObj = new URL(url);
+            String host = urlObj.getHost();
             HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
 
@@ -994,7 +1024,7 @@ public class OASParserUtil {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
-                validationResponse = validateAPIDefinition(responseStr, returnJsonContent);
+                validationResponse = validateAPIDefinition(responseStr, host, returnJsonContent);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);

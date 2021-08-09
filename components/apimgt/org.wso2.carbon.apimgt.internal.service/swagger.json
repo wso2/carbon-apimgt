@@ -717,8 +717,8 @@
         }
       }
     },
-    "/apis/deployed-revision" : {
-      "post" : {
+    "/apis/deployed-revisions" : {
+      "patch" : {
         "tags" : [ "API Revisions" ],
         "summary" : "Deploy Revision",
         "description" : "Deploy a revision\n",
@@ -1237,8 +1237,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED and ORIGINAL.",
-          "enum" : [ "EXCHANGED", "ORIGINAL" ],
-          "default" : "ORIGINAL"
+          "default" : "ORIGINAL",
+          "enum" : [ "EXCHANGED", "ORIGINAL" ]
         }
       }
     },
