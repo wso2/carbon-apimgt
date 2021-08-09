@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.274-SNAPSHOT</version>
+        <version>9.0.281-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -29,6 +29,7 @@
     <name>API Management</name>
 
     <modules>
+        <module>org.wso2.carbon.apimgt.eventing</module>
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.persistence</module>
         <module>org.wso2.carbon.apimgt.impl</module>

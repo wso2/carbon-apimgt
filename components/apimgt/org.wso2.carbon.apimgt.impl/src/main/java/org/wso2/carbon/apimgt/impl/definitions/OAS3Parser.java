@@ -750,9 +750,15 @@ public class OAS3Parser extends APIDefinition {
                     }
                 }
             }
+            String title = null;
+            String context = null;
+            if (!StringUtils.isBlank(info.getTitle())) {
+                title = info.getTitle();
+                context = info.getTitle().replaceAll("\\s", "").toLowerCase();
+            }
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
-                    info.getTitle(), info.getVersion(), info.getTitle().replaceAll("\\s","").toLowerCase(),
+                    title, info.getVersion(), context,
                     info.getDescription(), endpoints
             );
             validationResponse.setParser(this);
