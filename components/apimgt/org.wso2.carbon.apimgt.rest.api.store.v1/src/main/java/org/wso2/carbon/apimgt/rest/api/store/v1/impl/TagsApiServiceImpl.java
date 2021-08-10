@@ -53,7 +53,7 @@ public class TagsApiServiceImpl implements TagsApiService {
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {
-            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             tagSet = apiConsumer.getAllTags(organization);

@@ -1402,12 +1402,12 @@ public class RestApiUtil {
     }
 
     /**
-     * Method to extract the organization with validation
+     * Method to extract the validated organization
      * @param ctx MessageContext
      * @return organization
      */
 
-    public static String getOrganizationWithValidation(MessageContext ctx) throws APIManagementException{
+    public static String getValidatedOrganization(MessageContext ctx) throws APIManagementException{
         String organization = (String) ctx.get(RestApiConstants.ORGANIZATION);
         if (organization == null) {
             throw new APIManagementException(

@@ -68,7 +68,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
@@ -166,7 +166,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             SubscriptionListDTO subscriptionListDTO;
             List<SubscribedAPI> apiUsages;
 
@@ -257,7 +257,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             // validates the subscriptionId if it exists

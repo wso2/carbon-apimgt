@@ -45,7 +45,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
 
     public Response apiCategoriesGet(String xWSO2Tenant, MessageContext messageContext) {
         try {
-            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfOrganization(organization);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();

@@ -45,7 +45,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
     private static final Log log = LogFactory.getLog(RecommendationsApiService.class);
 
     public Response recommendationsGet(MessageContext messageContext) throws APIManagementException {
-        String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();
