@@ -3413,21 +3413,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void deleteAPI(API api) throws APIManagementException {
+        boolean error = false;
 
+        int apiId = -1;
+        // DB delete operations
         try {
-            int apiId = apiMgtDAO.getAPIID(api.getUuid());
-
-            // gatewayType check is required when API Management is deployed on
-            // other servers to avoid synapse
-            //Check if there are already published external APIStores.If yes,removing APIs from them.
-            Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getUuid());
-            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
-                for (APIStore store : apiStoreSet) {
-                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
-                }
-            }
-
+            apiId = apiMgtDAO.getAPIID(api.getUuid());
             deleteAPIRevisions(api.getUuid(), api.getOrganization());
             deleteAPIFromDB(api);
             if (log.isDebugEnabled()) {
@@ -3436,52 +3427,92 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " successfully removed from the database.";
                 log.debug(logMessage);
             }
+        } catch (APIManagementException e) {
+            log.error("Error while executing API delete operations on DB", e);
+            error = true;
+        }
 
-            JSONObject apiLogObject = new JSONObject();
-            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+        // gatewayType check is required when API Management is deployed on
+        // other servers to avoid synapse
+        //Check if there are already published external APIStores.If yes,removing APIs from them.
+        Set<APIStore> apiStoreSet;
+        try {
+            apiStoreSet = getPublishedExternalAPIStores(api.getUuid());
+            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
+            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
+                for (APIStore store : apiStoreSet) {
+                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while executing API delete operation on external API stores", e);
+            error = true;
+        }
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                    APIConstants.AuditLogConstants.DELETED, this.username);
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-            cleanUpPendingAPIStateChangeTask(apiId);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.DELETED, this.username);
 
-            if (api.getId().toString() != null) {
-                Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
-                for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
-                    KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
-                    if (keyManager != null) {
-                        try {
-                            keyManager.deleteRegisteredResourceByAPIId(api.getId().toString());
-                        } catch (APIManagementException e) {
-                            log.error("Error while deleting Resource Registration for API " + api.getId().toString() +
-                                    " in Key Manager " + keyManagerDtoEntry.getKey(), e);
-                        }
+        if (apiId != -1) {
+            try {
+                cleanUpPendingAPIStateChangeTask(apiId);
+            } catch (WorkflowException | APIManagementException e) {
+                log.error("Error while executing API delete operation on cleanup workflow tasks", e);
+                error = true;
+            }
+        }
+        if (api.getId().toString() != null) {
+            Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+            for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+                KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+                if (keyManager != null) {
+                    try {
+                        keyManager.deleteRegisteredResourceByAPIId(api.getId().toString());
+                    } catch (APIManagementException e) {
+                        log.error("Error while deleting Resource Registration for API " + api.getId().toString() +
+                                " in Key Manager " + keyManagerDtoEntry.getKey(), e);
                     }
                 }
             }
+        }
+
+        try {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(api.getUuid());
+        } catch (APIManagementException e) {
+            log.error("Error while executing API delete operation on gateway artifacts", e);
+            error = true;
+        }
+
+        try {
             apiPersistenceInstance.deleteAPI(new Organization(api.getOrganization()), api.getUuid());
-            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus());
-            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-
-            // Extracting API details for the recommendation system
-            if (recommendationEnvironment != null) {
-                RecommenderEventPublisher
-                        extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
-                Thread recommendationThread = new Thread(extractor);
-                recommendationThread.start();
-            }
-
-        } catch (WorkflowException e) {
-            handleException("Failed to execute workflow cleanup task ", e);
         } catch (APIPersistenceException e) {
-            handleException("Failed to delete api " + api.getUuid(), e);
+            log.error("Error while executing API delete operation on persistence instance", e);
+            error = true;
+        }
+
+        // if one of the above has failed throw an error
+        if (error) {
+            throw new APIManagementException("Error while deleting the API " + api.getUuid());
+        }
+
+        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
+                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                api.getStatus());
+        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher
+                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
         }
     }
     /**
