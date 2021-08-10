@@ -81,7 +81,6 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -271,10 +270,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public boolean subscriberOrganizationCombinationExists(Subscriber subscriber, String organization) throws APIManagementException {
+    public boolean isExistsSubscriberOrgMapping(Subscriber subscriber, String organization) throws APIManagementException {
         boolean exists = false;
         try {
-            exists = apiMgtDAO.isSubscriberOrganizationCombinationExists(subscriber.getId(), organization);
+            exists = apiMgtDAO.isExistsSubscriberOrgMapping(subscriber.getId(), organization);
         } catch (APIManagementException e) {
             handleException("Failed to get Subscriber Organization Combination", e);
         }

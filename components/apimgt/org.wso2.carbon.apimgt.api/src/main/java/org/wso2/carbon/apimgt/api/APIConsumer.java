@@ -66,7 +66,7 @@ public interface APIConsumer extends APIManager {
      * @return Subscriber
      * @throws APIManagementException if failed to get Subscriber
      */
-    boolean subscriberOrganizationCombinationExists(Subscriber subscriber, String organization)
+    boolean isExistsSubscriberOrgMapping(Subscriber subscriber, String organization)
             throws APIManagementException;
 
     /**

@@ -17434,7 +17434,7 @@ public class ApiMgtDAO {
     }
 
     public void addOrganizationSubscriberMapping(String organization, int subscriberId) throws APIManagementException {
-        String query = "INSERT INTO AM_SUBSCRIBER_ORG_MAPPING (SUBSCRIBER_ID, ORGANIZATION) VALUES (?,?)";
+        String query = SQLConstants.INSERT_SUBSCRIBER_ORG_MAPPING;
         try (
                 Connection connection = APIMgtDBUtil.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(query)
@@ -17450,9 +17450,9 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isSubscriberOrganizationCombinationExists(int subscriberId, String organization)
-            throws APIManagementException {
-        String query = "SELECT * FROM AM_SUBSCRIBER_ORG_MAPPING WHERE ORGANIZATION = ? AND SUBSCRIBER_ID = ?";
+    public boolean isExistsSubscriberOrgMapping(int subscriberId, String organization)
+        throws APIManagementException {
+        String query = SQLConstants.SELECT_SUBSCRIBER_ORG_MAPPING;
         boolean isExists = false;
         try (
                 Connection connection = APIMgtDBUtil.getConnection();

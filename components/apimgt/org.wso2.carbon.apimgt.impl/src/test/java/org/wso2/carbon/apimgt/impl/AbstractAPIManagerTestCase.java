@@ -1044,7 +1044,9 @@ public class AbstractAPIManagerTestCase {
             Assert.assertTrue(e.getMessage().contains("Error while adding the subscriber"));
         }
 
-        Mockito.doThrow(APIManagementException.class).doNothing().when(apiMgtDAO)
+        Subscriber subscriber = Mockito.mock(Subscriber.class);
+
+        Mockito.doThrow(APIManagementException.class).doReturn(subscriber).when(apiMgtDAO)
                 .addSubscriber((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyString());
         try {
             abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID, SAMPLE_ORGANIZATION);
@@ -1054,7 +1056,8 @@ public class AbstractAPIManagerTestCase {
         }
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.isEnabledUnlimitedTier()).thenReturn(true, false);
-        Mockito.doNothing().when(apiMgtDAO).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyString());
+
+        Mockito.doReturn(subscriber).when(apiMgtDAO).addSubscriber((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyString());
         abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID, SAMPLE_ORGANIZATION);
         List<Tier> tierValues = new ArrayList<Tier>();
         tierValues.add(new Tier("Gold"));

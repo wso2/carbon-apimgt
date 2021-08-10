@@ -2832,6 +2832,9 @@ public class SQLConstants {
     public static final String API_ID_REGEX = "_API_IDS_";
     public static final int API_ID_CHUNK_SIZE = 25;
 
+    public static final String SELECT_SUBSCRIBER_ORG_MAPPING = "SELECT * FROM AM_SUBSCRIBER_ORG_MAPPING WHERE ORGANIZATION = ? AND SUBSCRIBER_ID = ?";
+    public static final String INSERT_SUBSCRIBER_ORG_MAPPING = "INSERT INTO AM_SUBSCRIBER_ORG_MAPPING (SUBSCRIBER_ID, ORGANIZATION) VALUES (?,?)";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

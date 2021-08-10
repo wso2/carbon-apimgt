@@ -1730,7 +1730,6 @@ public abstract class AbstractAPIManager implements APIManager {
         subscriber.setSubscribedDate(new Date());
         try {
             int tenantId = APIUtil.getTenantId(username);
-//            int tenantId = APIUtil.getTenantId(username);
             SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
                     .DEFAULT_DIALECT_URI);
             String email = claims.get(APIConstants.EMAIL_CLAIM);

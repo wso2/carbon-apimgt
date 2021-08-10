@@ -70,11 +70,12 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         if (subscriberCache.get(username) != null) {
             try {
                 APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-                String organization = (String)message.get(RestApiConstants.ORGANIZATION);
+                String organization = (String) message.get(RestApiConstants.ORGANIZATION);
                 Subscriber subscriber = subscriberCache.get(username);
                 insertOrganizationSubscriberMapping(apiConsumer, subscriber, organization);
             } catch (APIManagementException e) {
-                e.printStackTrace();
+                RestApiUtil.handleInternalServerError("Unable to add the subscriber organization mapping" + username, e,
+                        logger);
             }
 
             return;
@@ -120,7 +121,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                 }
             } else {
                 subscriberCache.put(username, subscriber);
-                String organization = (String)message.get(RestApiConstants.ORGANIZATION);
+                String organization = (String) message.get(RestApiConstants.ORGANIZATION);
                 insertOrganizationSubscriberMapping(apiConsumer, subscriber, organization);
 
             }
@@ -155,7 +156,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
 
     private void insertOrganizationSubscriberMapping(APIConsumer apiConsumer, Subscriber subscriber,
                                                      String organization) throws APIManagementException {
-        if (!apiConsumer.subscriberOrganizationCombinationExists(subscriber, organization)) {
+        if (!apiConsumer.isExistsSubscriberOrgMapping(subscriber, organization)) {
             apiConsumer.addOrganizationSubscriberMapping(organization,subscriber.getId());
         }
     }
