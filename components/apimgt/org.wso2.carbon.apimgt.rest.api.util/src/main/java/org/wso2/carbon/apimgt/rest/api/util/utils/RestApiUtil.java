@@ -1411,7 +1411,7 @@ public class RestApiUtil {
         String organization = (String) ctx.get(RestApiConstants.ORGANIZATION);
         if (organization == null) {
             throw new APIManagementException(
-                    "Organization of the API is not found", ExceptionCodes.ORGANIZATION_NOT_FOUND);
+                    "Organization is not found in the request", ExceptionCodes.ORGANIZATION_NOT_FOUND);
         }
         return organization;
     }
