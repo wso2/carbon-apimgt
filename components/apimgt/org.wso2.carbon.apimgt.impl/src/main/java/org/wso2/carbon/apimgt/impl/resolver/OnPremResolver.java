@@ -61,7 +61,10 @@ public class OnPremResolver implements OrganizationResolver {
         if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-
+        // Set "carbon.super" if tenantDomain is still not resolved.
+        if (StringUtils.isEmpty(tenantDomain)) {
+            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
+        }
         return tenantDomain;
     }
 

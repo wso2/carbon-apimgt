@@ -1400,4 +1400,19 @@ public class RestApiUtil {
     public static String getOrganization(MessageContext ctx) {
         return (String) ctx.get(RestApiConstants.ORGANIZATION);
     }
+
+    /**
+     * Method to extract the organization with validation
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static String getOrganizationWithValidation(MessageContext ctx) throws APIManagementException{
+        String organization = (String) ctx.get(RestApiConstants.ORGANIZATION);
+        if (organization == null) {
+            throw new APIManagementException(
+                    "Organization of the API is not found", ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        }
+        return organization;
+    }
 }

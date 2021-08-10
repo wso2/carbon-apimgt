@@ -50,11 +50,10 @@ public class TagsApiServiceImpl implements TagsApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        String organization = RestApiUtil.getOrganization(messageContext);
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {
-
+            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             tagSet = apiConsumer.getAllTags(organization);

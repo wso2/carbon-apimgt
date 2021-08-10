@@ -86,7 +86,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                                      String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
                                      MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
         List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
@@ -100,6 +99,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
+            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
@@ -177,10 +177,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer;
 
         try {
+            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
 
@@ -270,10 +270,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String xWSO2Tenant,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer;
 
         try {
+            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             String currentThrottlingPolicy = body.getThrottlingPolicy();
@@ -375,9 +375,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String xWSO2Tenant,
-                                              MessageContext messageContext) {
+                                              MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
             try {
@@ -458,9 +458,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
         APIConsumer apiConsumer;
         try {
+            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
             SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI,
@@ -516,7 +516,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getOrganizationWithValidation(messageContext);
             apiConsumer.removeSubscription(subscribedAPI, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
