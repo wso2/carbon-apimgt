@@ -1238,6 +1238,11 @@
                     <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
                 {% endif %}
             {% endif %}
+        <Properties>
+            {% for key,value in apim.event_hub.publish.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
         </EventPublisherConfiguration>
          <EventReceiverConfiguration>
              <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>

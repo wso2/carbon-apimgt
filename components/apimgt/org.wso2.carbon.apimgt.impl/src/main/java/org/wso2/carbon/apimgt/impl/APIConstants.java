@@ -1869,6 +1869,7 @@ public final class APIConstants {
 
         public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
         public static final String DATA_PUBLISHER_CONFIGURAION_TYPE = "Type";
+        public static final String PROPERTIES_CONFIGURATION = "Properties";
         public static final String DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP = "ReceiverUrlGroup";
         public static final String DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP = "AuthUrlGroup";
         public static final String USERNAME = "Username";
