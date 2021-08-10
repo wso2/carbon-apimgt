@@ -15,16 +15,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.eventing.internal;
+package org.wso2.carbon.apimgt.eventing.hub.internal;
 
-import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 /**
- * Service reference holder for event hub publishing.
+ * Service reference holder for eventing hub.
  */
 public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-    private EventPublisherFactory eventPublisherFactory;
+    private OutputEventAdapterService outputEventAdapterService;
 
     private ServiceReferenceHolder() {
 
@@ -34,11 +34,11 @@ public class ServiceReferenceHolder {
         return instance;
     }
 
-    public void setEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
-        this.eventPublisherFactory = eventPublisherFactory;
+    public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        this.outputEventAdapterService = outputEventAdapterService;
     }
 
-    public EventPublisherFactory getEventPublisherFactory() {
-        return eventPublisherFactory;
+    public OutputEventAdapterService getOutputEventAdapterService() {
+        return outputEventAdapterService;
     }
 }

@@ -17,15 +17,24 @@
  */
 package org.wso2.carbon.apimgt.eventing;
 
+import java.util.Map;
+
 /**
  * Interface for event publisher factories.
  */
 public interface EventPublisherFactory {
 
     /**
+     * Configure event publisher configuration.
+     *
+     * @param configuration event publisher configuration
+     */
+    void configure(Map<String, String> configuration);
+
+    /**
      * Get event publisher.
      *
      * @return event publisher
      */
-    EventPublisher getEventPublisher();
+    EventPublisher getEventPublisher(EventPublisherType eventPublisherType);
 }

@@ -17,26 +17,17 @@
  */
 package org.wso2.carbon.apimgt.eventing;
 
-import org.wso2.carbon.apimgt.eventing.internal.ServiceReferenceHolder;
-
 /**
- * Factory producer for getting an event publisher factory.
+ * Enum for event publisher types.
  */
-public class EventPublisherFactoryProducer {
-
-    /**
-     * Private constructor.
-     */
-    private EventPublisherFactoryProducer() {
-
-    }
-
-    /**
-     * Get event publisher factory.
-     *
-     * @return event publisher factory
-     */
-    public static EventPublisherFactory getEventPublisherFactory() {
-        return ServiceReferenceHolder.getInstance().getEventPublisherFactory();
-    }
+public enum EventPublisherType {
+    HTTP_RECOMMENDATION,
+    BLOCKING_EVENT,
+    KEY_TEMPLATE,
+    KEYMGT_EVENT,
+    NOTIFICATION,
+    CACHE_INVALIDATION,
+    GLOBAL_CACHE_INVALIDATION,
+    TOKEN_REVOCATION,
+    ASYNC_WEBHOOKS
 }
