@@ -53,7 +53,7 @@ function AddEmail(props) {
         if (email === undefined) {
             return false;
         }
-        const schema = Joi.string().email().empty();
+        const schema = Joi.string().email({ tlds: false }).empty();
         const validationError = schema.validate(email).error;
         if (validationError) {
             const errorType = validationError.details[0].type;
