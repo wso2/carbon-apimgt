@@ -11179,11 +11179,14 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement deleteStatement = null;
         String query = null;
+        String deleteTierPermissionsQuery = null;
 
         if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             query = SQLConstants.DELETE_APPLICATION_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            //in case of a subscription policy delete we have to remove throttle tier permissions as well
             query = SQLConstants.DELETE_SUBSCRIPTION_POLICY_SQL;
+            deleteTierPermissionsQuery = SQLConstants.DELETE_THROTTLE_TIER_PERMISSION_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             query = SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
@@ -11197,6 +11200,12 @@ public class ApiMgtDAO {
             deleteStatement.setInt(1, tenantId);
             deleteStatement.setString(2, policyName);
             deleteStatement.executeUpdate();
+            if (deleteTierPermissionsQuery != null) {
+                deleteStatement = connection.prepareStatement(deleteTierPermissionsQuery);
+                deleteStatement.setString(1, policyName);
+                deleteStatement.setInt(2, tenantId);
+                deleteStatement.executeUpdate();
+            }
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
