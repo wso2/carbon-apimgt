@@ -780,7 +780,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
         String username = RestApiCommonUtil.getLoggedInUsername();
-        // String organization = RestApiUtil.getOrganization(messageContext);
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
