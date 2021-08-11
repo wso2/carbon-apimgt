@@ -604,6 +604,11 @@ public class SQLConstants {
                     " FROM AM_THROTTLE_TIER_PERMISSIONS " +
                     " WHERE TIER = ? AND TENANT_ID = ?";
 
+    public static final String DELETE_THROTTLE_TIER_BY_NAME_PERMISSION_SQL =
+            " DELETE FROM " +
+            " AM_THROTTLE_TIER_PERMISSIONS " +
+            " WHERE TIER = ? AND TENANT_ID = ?";
+
   //--------------------
 
     public static final String GET_TIER_PERMISSION_ID_SQL =
