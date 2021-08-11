@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 
@@ -36,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Properties;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
@@ -44,11 +48,11 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
  */
 public class ApiPurge implements OrganizationPurge {
 
-    private String username;
-    private ArtifactSaver artifactSaver;
-    private ApiMgtDAO apiMgtDAO;
-    private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
-    LinkedHashMap<String, String> apiPurgeTaskMap;
+    private final String username;
+    private final ArtifactSaver artifactSaver;
+    private final ApiMgtDAO apiMgtDAO;
+    private final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
+    LinkedHashMap<String, String> apiPurgeTaskMap = new LinkedHashMap<>();
     APIPersistence apiPersistenceInstance;
     private static final Log log = LogFactory.getLog(ApiPurge.class);
 
@@ -57,6 +61,7 @@ public class ApiPurge implements OrganizationPurge {
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
+        setupPersistenceManager();
         initTaskList();
     }
 
@@ -70,6 +75,20 @@ public class ApiPurge implements OrganizationPurge {
                 APIConstants.OrganizationDeletion.PENDING);
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER,
                 APIConstants.OrganizationDeletion.PENDING);
+    }
+
+    private void setupPersistenceManager(){
+        Map<String, String> configMap = new HashMap<>();
+        Map<String, String> configs = APIManagerConfiguration.getPersistenceProperties();
+        if (configs != null && !configs.isEmpty()) {
+            configMap.putAll(configs);
+        }
+        configMap.put(APIConstants.ALLOW_MULTIPLE_STATUS,
+                Boolean.toString(APIUtil.isAllowDisplayAPIsWithMultipleStatus()));
+
+        Properties properties = new Properties();
+        properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
     }
 
     /**
@@ -89,19 +108,20 @@ public class ApiPurge implements OrganizationPurge {
                         apiIdentifierList = apiMgtDAO.getAPIIdList(organization);
                         break;
                     case APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER:
-                        apiMgtDAO.deleteOrganizationAPIList(apiIdentifierList);
+                        apiMgtDAO.deleteOrganizationAPIList(organization);
                         break;
                     case APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER:
                         removeArtifactsFromArtifactServer(apiIdentifierList, organization);
                         break;
                     case APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER:
-                        gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(apiIdentifierList);
+                        gatewayArtifactsMgtDAO.removeOrganizationGatewayArtifacts(organization);
                         break;
                     case APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER:
                         removeAllOrganizationAPIArtifacts(organization);
                         break;
                     }
-                    apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
+                    apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    break;
                 } catch (APIManagementException e) {
                     log.error("Error while deleting API Data in organization " + organization, e);
                     apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
@@ -122,12 +142,15 @@ public class ApiPurge implements OrganizationPurge {
         return apiPurgeTaskMap;
     }
 
+    @Override public int getPriority() {
+        return 0;
+    }
+
     private void removeAllOrganizationAPIArtifacts(String orgId) throws APIManagementException {
         try {
             apiPersistenceInstance.deleteAllAPIs(new Organization(orgId));
         } catch (APIPersistenceException e) {
-            log.error("Error while deleting api artifacts in organization" + orgId + "from artifact Store", e);
-            handleException("Failed to delete all api artifacts of organization " + orgId, e);
+            handleException("Failed to delete all api artifacts of organization " + orgId + "from artifact Store", e);
         }
     }
 

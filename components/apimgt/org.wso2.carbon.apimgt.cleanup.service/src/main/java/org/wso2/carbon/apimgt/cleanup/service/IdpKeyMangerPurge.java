@@ -44,7 +44,7 @@ import java.util.Map;
 public class IdpKeyMangerPurge implements OrganizationPurge {
     protected String username;
     APIAdmin apiAdmin;
-    LinkedHashMap<String, String> IdpKeyMangerPurgeTaskMap;
+    LinkedHashMap<String, String> IdpKeyMangerPurgeTaskMap = new LinkedHashMap<>();
     ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(IdpKeyMangerPurge.class);
 
@@ -75,18 +75,16 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                     switch (task.getKey()) {
                     case APIConstants.OrganizationDeletion.KM_RETRIEVER:
                         keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
-                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
                         break;
-
                     case APIConstants.OrganizationDeletion.IDP_DATA_REMOVER:
-                        for (KeyManagerConfigurationDTO keyManager : keyManagerList) {
-                            apiAdmin.deleteIdentityProvider(organization, keyManager);
-                            IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
-                        }
+                        deleteIdpList(organization, keyManagerList);
+                        break;
                     case APIConstants.OrganizationDeletion.KM_DATA_REMOVER:
                         apiMgtDAO.deleteKeyManagerConfigurationList(keyManagerList, organization);
-                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.DONE);
+                        break;
                     }
+                    IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    break;
                 } catch (APIManagementException e) {
                     log.error("Error while deleting IDP-KeyManager Data in organization " + organization, e);
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
@@ -104,5 +102,20 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
                 new Gson().toJson(IdpKeyMangerPurgeTaskMap), APIConstants.AuditLogConstants.DELETED, username);
         return IdpKeyMangerPurgeTaskMap;
+    }
+
+    private void deleteIdpList(String organization, List<KeyManagerConfigurationDTO> keyManagerList)
+            throws APIManagementException {
+        for (KeyManagerConfigurationDTO keyManager : keyManagerList) {
+            try {
+                apiAdmin.deleteIdentityProvider(organization, keyManager);
+            } catch (APIManagementException e) {
+                throw e;
+            }
+        }
+    }
+
+    @Override public int getPriority() {
+        return 10;
     }
 }

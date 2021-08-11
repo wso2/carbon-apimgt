@@ -23,4 +23,8 @@ public class ApplicationPurge implements OrganizationPurge {
     public LinkedHashMap<String, String> deleteOrganization(String organization) {
         return null;
     }
+
+    @Override public int getPriority() {
+        return -10;
+    }
 }
