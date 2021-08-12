@@ -3413,7 +3413,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void deleteAPI(API api) throws APIManagementException {
-        boolean error = false;
+        boolean isError = false;
 
         int apiId = -1;
         // DB delete operations
@@ -3429,7 +3429,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (APIManagementException e) {
             log.error("Error while executing API delete operations on DB for API " + api.getUuid(), e);
-            error = true;
+            isError = true;
         }
 
         // gatewayType check is required when API Management is deployed on
@@ -3447,7 +3447,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             log.error("Error while executing API delete operation on external API stores for API "
                     + api.getUuid(), e);
-            error = true;
+            isError = true;
         }
 
         JSONObject apiLogObject = new JSONObject();
@@ -3464,7 +3464,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (WorkflowException | APIManagementException e) {
                 log.error("Error while executing API delete operation on cleanup workflow tasks for API "
                         + api.getUuid(), e);
-                error = true;
+                isError = true;
             }
         }
         if (api.getId().toString() != null) {
@@ -3486,7 +3486,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(api.getUuid());
         } catch (APIManagementException e) {
             log.error("Error while executing API delete operation on gateway artifacts for API " + api.getUuid(), e);
-            error = true;
+            isError = true;
         }
 
         try {
@@ -3494,7 +3494,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             log.error("Error while executing API delete operation on persistence instance for API "
                     + api.getUuid(), e);
-            error = true;
+            isError = true;
         }
 
         if (apiId != -1) {
@@ -3517,7 +3517,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             recommendationThread.start();
         }
         // if one of the above has failed throw an error
-        if (error) {
+        if (isError) {
             throw new APIManagementException("Error while deleting the API " + api.getUuid());
         }
     }
