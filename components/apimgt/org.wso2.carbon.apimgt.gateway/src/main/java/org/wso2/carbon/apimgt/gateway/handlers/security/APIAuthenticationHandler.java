@@ -481,7 +481,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return error;
     }
 
-    private String getAuthenticatorsChallengeString() {
+    protected String getAuthenticatorsChallengeString() {
         StringBuilder challengeString = new StringBuilder();
         if (authenticators != null) {
             for (Authenticator authenticator : authenticators) {
