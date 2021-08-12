@@ -3410,8 +3410,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     wsdlArchiveExtractedPath = validationResponse.getWsdlArchiveInfo().getLocation()
                             + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY;
                 }
-                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, wsdlArchiveExtractedPath, apiToAdd,
-                        organization);
+                createdApi = importSOAPToRESTAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
+                        wsdlArchiveExtractedPath, apiToAdd, organization);
             } else {
                 RestApiUtil.handleBadRequest("Invalid implementationType parameter", log);
             }
