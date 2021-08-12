@@ -3428,7 +3428,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug(logMessage);
             }
         } catch (APIManagementException e) {
-            log.error("Error while executing API delete operations on DB", e);
+            log.error("Error while executing API delete operations on DB for API " + api.getUuid(), e);
             error = true;
         }
 
@@ -3445,7 +3445,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         } catch (APIManagementException e) {
-            log.error("Error while executing API delete operation on external API stores", e);
+            log.error("Error while executing API delete operation on external API stores for API "
+                    + api.getUuid(), e);
             error = true;
         }
 
@@ -3461,7 +3462,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 cleanUpPendingAPIStateChangeTask(apiId);
             } catch (WorkflowException | APIManagementException e) {
-                log.error("Error while executing API delete operation on cleanup workflow tasks", e);
+                log.error("Error while executing API delete operation on cleanup workflow tasks for API "
+                        + api.getUuid(), e);
                 error = true;
             }
         }
@@ -3483,29 +3485,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(api.getUuid());
         } catch (APIManagementException e) {
-            log.error("Error while executing API delete operation on gateway artifacts", e);
+            log.error("Error while executing API delete operation on gateway artifacts for API " + api.getUuid(), e);
             error = true;
         }
 
         try {
             apiPersistenceInstance.deleteAPI(new Organization(api.getOrganization()), api.getUuid());
         } catch (APIPersistenceException e) {
-            log.error("Error while executing API delete operation on persistence instance", e);
+            log.error("Error while executing API delete operation on persistence instance for API "
+                    + api.getUuid(), e);
             error = true;
         }
 
-        // if one of the above has failed throw an error
-        if (error) {
-            throw new APIManagementException("Error while deleting the API " + api.getUuid());
+        if (apiId != -1) {
+            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
+                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                    api.getStatus());
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        } else {
+            log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
+                    + api.getUuid());
         }
-
-        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                api.getStatus());
-        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
@@ -3513,6 +3515,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
+        }
+        // if one of the above has failed throw an error
+        if (error) {
+            throw new APIManagementException("Error while deleting the API " + api.getUuid());
         }
     }
     /**
