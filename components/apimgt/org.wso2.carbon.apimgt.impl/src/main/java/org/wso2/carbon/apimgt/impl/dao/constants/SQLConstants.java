@@ -1497,8 +1497,8 @@ public class SQLConstants {
 
     public static final String ADD_API_DEFAULT_VERSION_SQL =
             " INSERT INTO " +
-            " AM_API_DEFAULT_VERSION(API_NAME,API_PROVIDER,DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION)" +
-            " VALUES (?,?,?,?)";
+            " AM_API_DEFAULT_VERSION(API_NAME,API_PROVIDER,DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION,"
+                    + "ORGANIZATION) VALUES (?,?,?,?,?)";
 
     public static final String ADD_URL_MAPPING_SQL =
             " INSERT INTO " +

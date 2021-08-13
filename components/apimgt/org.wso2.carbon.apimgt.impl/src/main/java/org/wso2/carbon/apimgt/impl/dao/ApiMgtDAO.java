@@ -5841,13 +5841,14 @@ public class ApiMgtDAO {
             prepStmtDefVersionAdd.setString(1, api.getId().getApiName());
             prepStmtDefVersionAdd.setString(2, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmtDefVersionAdd.setString(3, api.getId().getVersion());
+
             if (deploymentAvailable) {
                 prepStmtDefVersionAdd.setString(4, api.getId().getVersion());
                 api.setAsPublishedDefaultVersion(true);
             } else {
                 prepStmtDefVersionAdd.setString(4, publishedDefaultVersion);
             }
-
+            prepStmtDefVersionAdd.setString(5, api.getOrganization());
             prepStmtDefVersionAdd.execute();
         } catch (SQLException e) {
             handleException("Error while adding the API default version entry: " + api.getId().getApiName() + " to " +
