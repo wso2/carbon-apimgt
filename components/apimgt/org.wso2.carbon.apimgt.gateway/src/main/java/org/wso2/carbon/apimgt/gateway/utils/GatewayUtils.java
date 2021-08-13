@@ -78,6 +78,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -983,6 +984,11 @@ public class GatewayUtils {
         if (jwtInfoDto.getJwtValidationInfo() != null) {
             jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
                     apiKeyValidationInfoDTO));
+            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
+                    && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
+                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
+                jwtInfoDto.setSub(MultitenantUtils.getTenantAwareUsername(sub));
+            }
         }
 
         if (apiKeyValidationInfoDTO != null) {
