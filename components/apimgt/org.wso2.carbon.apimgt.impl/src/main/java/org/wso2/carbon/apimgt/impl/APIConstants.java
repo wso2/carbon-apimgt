@@ -2752,7 +2752,6 @@ public final class APIConstants {
     }
 
     public static class ApplicationPurgeConstants {
-        public static final String APPLICATION_RETRIEVAL = "ApplicationRetrieval";
         public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
         public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
         public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";

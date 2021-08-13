@@ -49,8 +49,6 @@ public class ApplicationPurge implements OrganizationPurge{
     private void init() {
         taskList = new LinkedHashMap<>();
 
-        taskList.put(APIConstants.ApplicationPurgeConstants.APPLICATION_RETRIEVAL,
-                APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
         taskList.put(APIConstants.ApplicationPurgeConstants.PENDING_SUBSCRIPTION_REMOVAL,
                 APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
         taskList.put(APIConstants.ApplicationPurgeConstants.APPLICATION_CREATION_WF_REMOVAL,
@@ -61,14 +59,13 @@ public class ApplicationPurge implements OrganizationPurge{
                 APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
         taskList.put(APIConstants.ApplicationPurgeConstants.SUBSCRIPTION_REMOVAL,
                 APIConstants.ApplicationPurgeConstants.STATUS_PENDING);
-
     }
 
     /**
      * Delete organization related application data
      *
      * @param organization organization
-     * @throws APIManagementException if failed to cleanup organization
+     * @throws APIManagementException if failed to clean up organization
      */
     @Override
     public void deleteOrganization(String organization) throws APIManagementException {
@@ -81,38 +78,31 @@ public class ApplicationPurge implements OrganizationPurge{
             while (true) {
                 try {
                     switch (task) {
-                    case APIConstants.ApplicationPurgeConstants.APPLICATION_RETRIEVAL:
-                        if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
-                                || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
-                            applicationIdList = getApplicationsByOrganization(organization);
-                            taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
-                        }
-                        break;
                     case APIConstants.ApplicationPurgeConstants.PENDING_SUBSCRIPTION_REMOVAL:
                         if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
                                 || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
-                            removePendingSubscriptions(applicationIdList);
+                            removePendingSubscriptions(organization);
                             taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
                     case APIConstants.ApplicationPurgeConstants.APPLICATION_CREATION_WF_REMOVAL:
                         if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
                                 || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
-                            removeApplicationCreationWorkflows(applicationIdList);
+                            removeApplicationCreationWorkflows(organization);
                             taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
                     case APIConstants.ApplicationPurgeConstants.APPLICATION_REGISTRATION_REMOVAL:
                         if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
                                 || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
-                            deletePendingApplicationRegistrations(applicationIdList);
+                            deletePendingApplicationRegistrations(organization);
                             taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
                     case APIConstants.ApplicationPurgeConstants.APPLICATION_REMOVAL:
                         if (taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_PENDING)
                                 || taskList.get(task).equals(APIConstants.ApplicationPurgeConstants.STATUS_FAILED)) {
-                            deleteApplicationList(applicationIdList);
+                            deleteApplicationList(organization);
                             taskList.put(task, APIConstants.ApplicationPurgeConstants.STATUS_SUCCESSFUL);
                         }
                         break;
@@ -137,43 +127,21 @@ public class ApplicationPurge implements OrganizationPurge{
         }
     }
 
-    private int[] getApplicationsByOrganization(String organization) throws APIManagementException {
-        List<Application> applicationList = apiMgtDAO.getApplicationsByOrganization(organization);
-        int[] applicationIdList = new int[applicationList.size()];
-
-        for (int i = 0; i < applicationList.size(); i++) {
-            applicationIdList[i] = applicationList.get(i).getId();
-        }
-        return applicationIdList;
+    private void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
+        apiMgtDAO.removeApplicationCreationWorkflows(organization);
     }
 
-    private void removeApplicationCreationWorkflows(int[] applicationIdList) throws APIManagementException {
-        apiMgtDAO.removeApplicationCreationWorkflows(applicationIdList);
+    private void removePendingSubscriptions(String organization) throws APIManagementException {
+        apiMgtDAO.removePendingSubscriptions(organization);
     }
 
-    private void removePendingSubscriptions(int[] applicationIdList) throws APIManagementException {
-        apiMgtDAO.removePendingSubscriptions(applicationIdList);
-    }
-
-    private void deleteApplicationList(int[] applicationIdList) throws APIManagementException {
-        apiMgtDAO.deleteApplicationList(applicationIdList);
+    private void deleteApplicationList(String organization) throws APIManagementException {
+        apiMgtDAO.deleteApplicationList(organization);
     }
 
     // cleanup pending application regs
-    private void deletePendingApplicationRegistrations(int[] applicationIdList) throws APIManagementException {
-        List<String> keyManagerViseProductionKeyState = apiMgtDAO.getPendingRegistrationsForApplicationList(
-                applicationIdList, "PRODUCTION");
-
-        for (String km : keyManagerViseProductionKeyState) {
-            apiMgtDAO.deleteApplicationRegistrationsWorkflowsForKeyManager(applicationIdList, km, "PRODUCTION");
-        }
-
-        List<String> keyManagerViseSandboxKeyState = apiMgtDAO.getPendingRegistrationsForApplicationList(
-                applicationIdList, "SANDBOX");
-
-        for (String km : keyManagerViseSandboxKeyState) {
-            apiMgtDAO.deleteApplicationRegistrationsWorkflowsForKeyManager(applicationIdList, km, "SANDBOX");
-        }
+    private void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
+        apiMgtDAO.deletePendingApplicationRegistrations(organization);
     }
 
     private void deleteSubscribers(String organization) throws APIManagementException {
