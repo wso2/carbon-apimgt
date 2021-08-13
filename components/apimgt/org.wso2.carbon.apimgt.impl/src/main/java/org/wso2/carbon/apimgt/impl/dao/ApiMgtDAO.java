@@ -2610,6 +2610,27 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Remove pending Application Registrations
+     *
+     * @param organization Organization
+     * @throws APIManagementException when failed to delete pending application registrations
+     */
+    public void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
+        String query = SQLConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, organization);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            handleException("Error while deleting pending application registrations for organization: " + organization,
+                    e);
+        }
+    }
+
+    /**
      * Obtain pending registrations for a given application list
      *
      * @param applicationIdList Application id list
@@ -4861,74 +4882,21 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Obtain applications by organization
-     *
-     * @param organization Organization
-     * @return List of Applications
-     * @throws APIManagementException if failed to obtain applications
-     */
-    public List<Application> getApplicationsByOrganization(String organization) throws APIManagementException {
-
-        List<Application> applicationList = new ArrayList<>();
-
-        String query = SQLConstants.GET_APPLICATION_LIST_BY_ORG_ID_SQL;
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            connection.setAutoCommit(false);;
-
-            preparedStatement.setString(1, organization);
-
-            try (ResultSet rs = preparedStatement.executeQuery()) {
-                while (rs.next()) {
-                    int applicationId = rs.getInt("APPLICATION_ID");
-                    Application application = new Application(applicationId);
-
-                    application.setName(rs.getString("NAME"));
-                    application.setOwner(rs.getString("CREATED_BY"));
-                    application.setDescription(rs.getString("DESCRIPTION"));
-                    application.setStatus(rs.getString("APPLICATION_STATUS"));
-                    application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                    application.setTier(rs.getString("APPLICATION_TIER"));
-                    application.setUUID(rs.getString("UUID"));
-                    application.setGroupId(rs.getString("GROUP_ID"));
-                    application.setOwner(rs.getString("CREATED_BY"));
-                    application.setTokenType(rs.getString("TOKEN_TYPE"));
-
-                    applicationList.add(application);
-                }
-            }
-
-        } catch (SQLException e) {
-            handleException("Error while getting getting applications by organization: " + organization, e);
-        }
-
-        return applicationList;
-    }
-
-    /**
      * Remove application creation workflows
      *
-     * @param applicationIds Application id list
+     * @param organization Organization
      * @throws APIManagementException if failed to remove application creation workflows
      */
-    public void removeApplicationCreationWorkflows(int[] applicationIds) throws APIManagementException {
+    public void removeApplicationCreationWorkflows(String organization)
+            throws APIManagementException {
 
-        String query = SQLConstants.DELETE_APPLICATION_CREATION_WORKFLOWS.replaceAll("_APPLICATION_IDS_",
-                String.join(",", Collections.nCopies(applicationIds.length, "?")));
+        String query = SQLConstants.DELETE_APPLICATION_CREATION_WORKFLOWS;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             connection.setAutoCommit(false);
-
-            int index = 1;
-
-            for (int applicationId : applicationIds) {
-                preparedStatement.setInt(index, applicationId);
-                index++;
-            }
+            preparedStatement.setString(1, organization);
 
             preparedStatement.executeUpdate();
             connection.commit();
@@ -4942,24 +4910,19 @@ public class ApiMgtDAO {
     /**
      * Remove pending subscriptions for a given application id list
      *
-     * @param applicationIds Application id list
+     * @param organization Organization
      * @throws APIManagementException if failed to remove pending subscriptions
      */
-    public void removePendingSubscriptions(int[] applicationIds) throws APIManagementException {
+    public void removePendingSubscriptions(String organization) throws APIManagementException {
 
-        String query = SQLConstants.DELETE_PENDING_SUBSCRIPTIONS.replaceAll("_APPLICATION_IDS_",
-                String.join(",", Collections.nCopies(applicationIds.length, "?")));
+        String query = SQLConstants.DELETE_PENDING_SUBSCRIPTIONS;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             connection.setAutoCommit(false);
 
-            int index = 1;
-            for (int applicationId : applicationIds) {
-                preparedStatement.setInt(index, applicationId);
-                index++;
-            }
+            preparedStatement.setString(1, organization);
 
             preparedStatement.executeUpdate();
             connection.commit();
@@ -5126,9 +5089,10 @@ public class ApiMgtDAO {
      * Deletes Applications along with subscriptions, keys and registration data
      *
      * @param applicationIdList Application id list to be deleted from the database
+     * @param organization Organization
      * @throws APIManagementException if failed to delete application list
      */
-    public void deleteApplicationList(int[] applicationIdList) throws APIManagementException {
+    public void deleteApplicationList(String organization) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
@@ -5140,22 +5104,17 @@ public class ApiMgtDAO {
         PreparedStatement deleteApp = null;
         ResultSet rs = null;
 
-        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL.replaceAll("_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL;
 
-        String deleteSubscriptionsQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL.replaceAll(
-                "_IDS_", String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteSubscriptionsQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL;
 
-        String deleteApplicationKeyQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL.replaceAll(
-                "_IDS_", String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteApplicationKeyQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL;
 
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
 
-        String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL.replaceAll("_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL;
 
-        String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL.replaceAll(
-                "_IDS_", String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL;
 
         boolean transactionCompleted = true;
         try {
@@ -5163,16 +5122,11 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
 
             if (multiGroupAppSharingEnabled) {
-                transactionCompleted = updateGroupIDMappingsBulk(connection, applicationIdList);
+                transactionCompleted = updateGroupIDMappingsBulk(connection, organization);
             }
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
-
-            int index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                prepStmtGetConsumerKey.setInt(index, applicationId);
-            }
+            prepStmtGetConsumerKey.setString(1, organization);
 
             rs = prepStmtGetConsumerKey.executeQuery();
 
@@ -5225,12 +5179,7 @@ public class ApiMgtDAO {
             }
 
             deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
-
-            index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                deleteRegistrationQuery.setInt(index, applicationId);
-            }
+            deleteRegistrationQuery.setString(1, organization);
 
             deleteRegistrationQuery.execute();
 
@@ -5239,12 +5188,7 @@ public class ApiMgtDAO {
             }
 
             deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
-
-            index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                deleteSubscription.setInt(index, applicationId);
-            }
+            deleteSubscription.setString(1, organization);
 
             deleteSubscription.execute();
 
@@ -5255,12 +5199,7 @@ public class ApiMgtDAO {
             deleteDomainApp.executeBatch();
 
             deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
-
-            index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                deleteAppKey.setInt(index, applicationId);
-            }
+            deleteAppKey.setString(1, organization);
 
             deleteAppKey.execute();
 
@@ -5269,12 +5208,7 @@ public class ApiMgtDAO {
             }
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
-
-            index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                deleteApp.setInt(index, applicationId);
-            }
+            deleteApp.setString(1, organization);
 
             deleteApp.execute();
 
@@ -14174,7 +14108,7 @@ public class ApiMgtDAO {
      * @return
      * @throws APIManagementException when failed to execute the application groups update
      */
-    private boolean updateGroupIDMappingsBulk(Connection conn, int[] applicationIdList)
+    private boolean updateGroupIDMappingsBulk(Connection conn, String organization)
             throws APIManagementException {
 
         boolean updateSuccessful = false;
@@ -14182,28 +14116,18 @@ public class ApiMgtDAO {
         PreparedStatement removeMigratedGroupIdsStatement = null;
         PreparedStatement deleteStatement = null;
 
-        String deleteQuery = SQLConstants.REMOVE_GROUP_ID_MAPPING_BULK_SQL.replaceAll("_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
-        String removeGroupIdsQuery = SQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL_BULK.replaceAll("_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
+        String deleteQuery = SQLConstants.REMOVE_GROUP_ID_MAPPING_BULK_SQL;
+        String removeGroupIdsQuery = SQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL_BULK;
 
         try {
             removeMigratedGroupIdsStatement = conn.prepareStatement(removeGroupIdsQuery);
 
-            int index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                removeMigratedGroupIdsStatement.setInt(index, applicationId);
-            }
+            removeMigratedGroupIdsStatement.setString(1, organization);
             removeMigratedGroupIdsStatement.executeUpdate();
 
             deleteStatement = conn.prepareStatement(deleteQuery);
 
-            index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                deleteStatement.setInt(index, applicationId);
-            }
+            deleteStatement.setString(1, organization);
             deleteStatement.executeUpdate();
 
             updateSuccessful = true;
