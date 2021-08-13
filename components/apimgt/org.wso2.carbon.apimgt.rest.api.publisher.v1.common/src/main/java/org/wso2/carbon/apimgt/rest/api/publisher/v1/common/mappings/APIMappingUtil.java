@@ -3050,14 +3050,14 @@ public class APIMappingUtil {
             try {
                 apiRevisionDeploymentDTO.setDeployedTime(parseStringToDate(model.getDeployedTime()));
             } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the created time:" + model.getDeployedTime(), e);
+                throw new APIManagementException("Error while parsing the deployed time:" + model.getDeployedTime(), e);
             }
         }
         if (model.getSuccessDeployedTime() != null) {
             try {
                 apiRevisionDeploymentDTO.setSuccessDeployedTime(parseStringToDate(model.getSuccessDeployedTime()));
             } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the deployed time:"
+                throw new APIManagementException("Error while parsing the successfully deployed time:"
                         + model.getSuccessDeployedTime(), e);
             }
         }
