@@ -3375,8 +3375,8 @@ public class SQLConstants {
 
     public static class APIRevisionSqlConstants {
         public static final String ADD_API_REVISION =
-                " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY)" +
-                        " VALUES (?,?,?,?,?)";
+                " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +
+                        " VALUES (?,?,?,?,?,?)";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
                 "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
@@ -3433,11 +3433,11 @@ public class SQLConstants {
                 "FROM AM_REVISION AR LEFT JOIN " + GET_API_REVISION_DEPLOYMENTS + "AD " +
                 "ON AR.REVISION_UUID = AD.REVISION_UUID WHERE AR.API_UUID = ?";
         public static final String ADD_API_REVISION_DEPLOYMENT_MAPPING =
-                " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL)" +
-                        " VALUES (?,?,?,?)";
+                " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME)" +
+                        " VALUES (?,?,?,?,?)";
         public static final String ADD_DEPLOYED_API_REVISION =
-                "INSERT INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID)" +
-                        " VALUES (?,?,?)";
+                "INSERT INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID, DEPLOYED_TIME)" +
+                        " VALUES (?,?,?,?)";
         public static final String DELETE_API_REVISION_DEPLOYMENTS_MAPPING_BY_REVISION_UUID =
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID

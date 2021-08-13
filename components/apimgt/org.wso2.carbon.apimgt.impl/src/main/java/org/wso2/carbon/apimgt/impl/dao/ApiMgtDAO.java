@@ -15993,6 +15993,7 @@ public class ApiMgtDAO {
                 statement.setString(3, apiRevision.getRevisionUUID());
                 statement.setString(4, apiRevision.getDescription());
                 statement.setString(5, apiRevision.getCreatedBy());
+                statement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 statement.executeUpdate();
 
                 // Retrieve API ID
@@ -16373,6 +16374,7 @@ public class ApiMgtDAO {
                     statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
                     statement.setString(3, apiRevisionId);
                     statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
+                    statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -16409,6 +16411,7 @@ public class ApiMgtDAO {
                         statement.setString(1, deployedAPIRevision.getDeployment());
                         statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
                         statement.setString(3, apiRevisionId);
+                        statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
                         statement.addBatch();
                     }
                     statement.executeBatch();
@@ -17042,6 +17045,7 @@ public class ApiMgtDAO {
                 statement.setString(3, apiRevision.getRevisionUUID());
                 statement.setString(4, apiRevision.getDescription());
                 statement.setString(5, apiRevision.getCreatedBy());
+                statement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 statement.executeUpdate();
 
                 // Retrieve API Product ID
