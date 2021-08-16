@@ -45,7 +45,7 @@ public class ApplicationPurge implements OrganizationPurge{
      * @param organization organization
      * @throws APIManagementException if failed to clean up organization
      */
-    @Override public void deleteOrganization(String organization) throws APIManagementException {
+    @Override public void purge(String organization) throws APIManagementException {
         try {
 
             removePendingSubscriptions(organization);
@@ -60,7 +60,6 @@ public class ApplicationPurge implements OrganizationPurge{
 
         } catch (APIManagementException e) {
             String message = "Error while deleting application data related to organization: "+organization;
-            log.error(message, e);
             throw new APIManagementException(message, e);
         }
     }
@@ -91,8 +90,8 @@ public class ApplicationPurge implements OrganizationPurge{
         if (subscriberIdList.size() > 0) {
             for (int subscriberId : subscriberIdList) {
 
-                List<String> mappedOrganizations = apiMgtDAO.getMappedOrganizationListForSubscriber(subscriberId);
-                apiMgtDAO.removeSubscriberOrganizationMapping(subscriberId, organization);
+                List<String> mappedOrganizations = apiMgtDAO.getOrganizationsOfSubscriber(subscriberId);
+                apiMgtDAO.removeOrganizationFromSubscriber(subscriberId, organization);
 
                 if (!(mappedOrganizations.size() > 1 && mappedOrganizations.contains(organization))) {
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -78,8 +78,8 @@ public class ApplicationPurgeTest {
         List<String> mappedOrganizations = new ArrayList<>();
         mappedOrganizations.add("testOrg");
 
-        Mockito.doReturn(mappedOrganizations).when(apiMgtDAO).getMappedOrganizationListForSubscriber(Mockito.anyInt());
-        Mockito.doNothing().when(apiMgtDAO).removeSubscriberOrganizationMapping(Mockito.anyInt(), Mockito.anyString());
+        Mockito.doReturn(mappedOrganizations).when(apiMgtDAO).getOrganizationsOfSubscriber(Mockito.anyInt());
+        Mockito.doNothing().when(apiMgtDAO).removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
 
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.doReturn(subscriber).when(apiMgtDAO).getSubscriber(Mockito.anyInt());
@@ -101,7 +101,7 @@ public class ApplicationPurgeTest {
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(apiMgtDAO);
         applicationPurge.apiMgtDAO = apiMgtDAO;
 
-        applicationPurge.deleteOrganization("testOrg");
+        applicationPurge.purge("testOrg");
 
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationsByOrganization("testOrg");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.any());
@@ -113,8 +113,8 @@ public class ApplicationPurgeTest {
                         Mockito.anyString());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).deleteApplicationList(Mockito.any());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getSubscribersForOrganization(Mockito.any());
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getMappedOrganizationListForSubscriber(Mockito.anyInt());
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriberOrganizationMapping(Mockito.anyInt(), Mockito.anyString());
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getOrganizationsOfSubscriber(Mockito.anyInt());
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getSubscriber(Mockito.anyInt());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriber(Mockito.anyInt());
 
@@ -150,8 +150,8 @@ public class ApplicationPurgeTest {
         List<String> mappedOrganizations = new ArrayList<>();
         mappedOrganizations.add("testOrg");
 
-        Mockito.doReturn(mappedOrganizations).when(apiMgtDAO).getMappedOrganizationListForSubscriber(Mockito.anyInt());
-        Mockito.doNothing().when(apiMgtDAO).removeSubscriberOrganizationMapping(Mockito.anyInt(), Mockito.anyString());
+        Mockito.doReturn(mappedOrganizations).when(apiMgtDAO).getOrganizationsOfSubscriber(Mockito.anyInt());
+        Mockito.doNothing().when(apiMgtDAO).removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
 
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.doReturn(subscriber).when(apiMgtDAO).getSubscriber(Mockito.anyInt());
@@ -173,7 +173,7 @@ public class ApplicationPurgeTest {
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(apiMgtDAO);
         applicationPurge.apiMgtDAO = apiMgtDAO;
 
-        applicationPurge.deleteOrganization("testOrg");
+        applicationPurge.purge("testOrg");
 
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationsByOrganization("testOrg");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.any());
@@ -186,8 +186,8 @@ public class ApplicationPurgeTest {
         Mockito.verify(apiMgtDAO, Mockito.times(1)).deleteApplicationList(Mockito.any());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getSubscribersForOrganization(Mockito.any());
 
-        Mockito.verify(apiMgtDAO, Mockito.never()).getMappedOrganizationListForSubscriber(Mockito.anyInt());
-        Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriberOrganizationMapping(Mockito.anyInt(), Mockito.anyString());
+        Mockito.verify(apiMgtDAO, Mockito.never()).getOrganizationsOfSubscriber(Mockito.anyInt());
+        Mockito.verify(apiMgtDAO, Mockito.never()).removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
         Mockito.verify(apiMgtDAO, Mockito.never()).getSubscriber(Mockito.anyInt());
         Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriber(Mockito.anyInt());
 
@@ -225,8 +225,8 @@ public class ApplicationPurgeTest {
         mappedOrganizations.add("testOrg");
         mappedOrganizations.add("testOrg2");
 
-        Mockito.doReturn(mappedOrganizations).when(apiMgtDAO).getMappedOrganizationListForSubscriber(Mockito.anyInt());
-        Mockito.doNothing().when(apiMgtDAO).removeSubscriberOrganizationMapping(Mockito.anyInt(), Mockito.anyString());
+        Mockito.doReturn(mappedOrganizations).when(apiMgtDAO).getOrganizationsOfSubscriber(Mockito.anyInt());
+        Mockito.doNothing().when(apiMgtDAO).removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
 
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.doReturn(subscriber).when(apiMgtDAO).getSubscriber(Mockito.anyInt());
@@ -248,7 +248,7 @@ public class ApplicationPurgeTest {
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(apiMgtDAO);
         applicationPurge.apiMgtDAO = apiMgtDAO;
 
-        applicationPurge.deleteOrganization("testOrg");
+        applicationPurge.purge("testOrg");
 
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationsByOrganization("testOrg");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.any());
@@ -261,8 +261,8 @@ public class ApplicationPurgeTest {
         Mockito.verify(apiMgtDAO, Mockito.times(1)).deleteApplicationList(Mockito.any());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getSubscribersForOrganization(Mockito.any());
 
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getMappedOrganizationListForSubscriber(Mockito.anyInt());
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeSubscriberOrganizationMapping(Mockito.anyInt(), Mockito.anyString());
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getOrganizationsOfSubscriber(Mockito.anyInt());
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
 
         Mockito.verify(apiMgtDAO, Mockito.never()).getSubscriber(Mockito.anyInt());
         Mockito.verify(apiMgtDAO, Mockito.never()).removeSubscriber(Mockito.anyInt());
