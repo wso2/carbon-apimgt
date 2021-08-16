@@ -51,7 +51,7 @@ public class ApiPurge implements OrganizationPurge {
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
-    public void deleteOrganization(String orgId) throws APIManagementException {
+    public void purge(String orgId) throws APIManagementException {
 
         List<APIIdentifier> apiIdentifierList = apiMgtDAO.getAPIIdList(orgId);
 

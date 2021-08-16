@@ -2542,7 +2542,7 @@ public class ApiMgtDAO {
      * @return list of mapped organizations
      * @throws APIManagementException if failed to obtain mapped organizations
      */
-    public List<String> getMappedOrganizationListForSubscriber(int subscriberId) throws APIManagementException {
+    public List<String> getOrganizationsOfSubscriber(int subscriberId) throws APIManagementException {
         List<String> organizationList = new ArrayList<>();
         String query = SQLConstants.GET_MAPPED_ORGANIZATIONS_FOR_SUBSCRIBER_ID;
 
@@ -2591,7 +2591,7 @@ public class ApiMgtDAO {
      * @param organization Organization
      * @throws APIManagementException if failed to remove subscriber organization mapping
      */
-    public void removeSubscriberOrganizationMapping(int subscriberId, String organization)
+    public void removeOrganizationFromSubscriber(int subscriberId, String organization)
             throws APIManagementException {
 
         String query = SQLConstants.DELETE_SUBSCRIBER_ORGANIZATION_MAPPING;
@@ -2628,81 +2628,6 @@ public class ApiMgtDAO {
             handleException("Error while deleting pending application registrations for organization: " + organization,
                     e);
         }
-    }
-
-    /**
-     * Obtain pending registrations for a given application list
-     *
-     * @param applicationIdList Application id list
-     * @param keyType Key type
-     * @return List of pending registrations
-     * @throws APIManagementException if failed to obtain pending registrations for application id list
-     */
-    public List<String> getPendingRegistrationsForApplicationList(int[] applicationIdList, String keyType)
-            throws APIManagementException {
-        List<String> pendingRegistrationsList = new ArrayList<>();
-
-        String query = SQLConstants.GET_PENDING_REGISTRATIONS_FOR_APPLICATION_LIST.replaceAll("_APPLICATION_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            int index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                preparedStatement.setInt(index, applicationId);
-            }
-
-            preparedStatement.setString(index + 1, keyType);
-
-            try (ResultSet rs = preparedStatement.executeQuery();) {
-                while (rs.next()) {
-                    pendingRegistrationsList.add(rs.getString("KEY_MANAGER"));
-                }
-            }
-
-        } catch (SQLException e) {
-            handleException("Error while fetching pending application registrations ", e);
-        }
-        return pendingRegistrationsList;
-    }
-
-    /**
-     * Remove application registration workflows for a particular key manager
-     *
-     * @param applicationIdList Application id list
-     * @param keyManager Key Manager uuid
-     * @param tokenType Token type
-     * @throws APIManagementException if failed to remove application registration workflows
-     */
-    public void deleteApplicationRegistrationsWorkflowsForKeyManager(int[] applicationIdList, String keyManager,
-            String tokenType) throws APIManagementException{
-
-        String query = SQLConstants.DELETE_APPLICATION_REGISTRATION_WF_FOR_KEY_MANAGER.replaceAll("_APPLICATION_IDS_",
-                String.join(",", Collections.nCopies(applicationIdList.length, "?")));
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query);) {
-
-            connection.setAutoCommit(false);
-
-            int index = 0;
-            for (int applicationId : applicationIdList) {
-                index++;
-                preparedStatement.setInt(index, applicationId);
-            }
-
-            preparedStatement.setString(index + 1, tokenType);
-            preparedStatement.setString(index + 2, keyManager);
-
-            preparedStatement.executeUpdate();
-            connection.commit();
-
-        } catch (SQLException e) {
-            handleException("Error while deleting application registration workflows for key manager", e);
-        }
-
     }
 
     public Map<String, String> getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
@@ -5088,9 +5013,8 @@ public class ApiMgtDAO {
     /**
      * Deletes Applications along with subscriptions, keys and registration data
      *
-     * @param applicationIdList Application id list to be deleted from the database
      * @param organization Organization
-     * @throws APIManagementException if failed to delete application list
+     * @throws APIManagementException if failed to delete applications for organization
      */
     public void deleteApplicationList(String organization) throws APIManagementException {
 
@@ -5116,13 +5040,12 @@ public class ApiMgtDAO {
 
         String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL;
 
-        boolean transactionCompleted = true;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
 
             if (multiGroupAppSharingEnabled) {
-                transactionCompleted = updateGroupIDMappingsBulk(connection, organization);
+                updateGroupIDMappingsBulk(connection, organization);
             }
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
@@ -5216,9 +5139,7 @@ public class ApiMgtDAO {
                 log.debug("Applications are deleted successfully.");
             }
 
-            if (transactionCompleted) {
-                connection.commit();
-            }
+            connection.commit();
 
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
@@ -9088,52 +9009,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Obtain external workflow reference list for given subscription id list
-     *
-     * @param subscriptionIds Subscription id list
-     * @return Set of External Workflow references
-     * @throws APIManagementException if failed to obtain external workflow references
-     */
-    public Set<String> getExternalWorkflowReferenceListForSubscriptions(int[] subscriptionIds) throws APIManagementException {
-
-        Set<String> workflowExtRefs = new HashSet<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String subscriptionIdListString = String.join(",",Collections.nCopies(subscriptionIds.length, "?"));
-        String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_LIST_FOR_SUBSCRIPTIONS_SQL.
-                replaceAll("_WF_REFERENCES_",subscriptionIdListString);
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            // setting subscriptionId as string to prevent error when db finds string type IDs for
-            // ApplicationRegistration workflows
-
-            int index = 0;
-            for (int applicationId : subscriptionIds) {
-                index++;
-                ps.setString(index,String.valueOf(applicationId));
-            }
-
-            ps.setString(subscriptionIds.length+1, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            rs = ps.executeQuery();
-
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRefs.add(rs.getString("WF_EXTERNAL_REFERENCE"));
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting workflow entry for " +
-                    "Subscriptions : " + subscriptionIdListString, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return workflowExtRefs;
-    }
-
-    /**
      * Retries the WorkflowExternalReference for an user signup by DOMAIN/username.
      *
      * @param usernameWithDomain username of the signed up user inthe format of DOMAIN/username
@@ -9212,24 +9087,20 @@ public class ApiMgtDAO {
     public Set<Integer> getPendingSubscriptionsByAPIId(String uuid) throws APIManagementException {
 
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
+
             ps.setString(1, uuid);
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            try (ResultSet rs = ps.executeQuery();) {
+                while (rs.next()) {
+                    pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
             }
+
         } catch (SQLException e) {
             handleException("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return pendingSubscriptions;
     }
@@ -9243,31 +9114,27 @@ public class ApiMgtDAO {
      * @return workflow reference of the registration
      * @throws APIManagementException
      */
-    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName) throws APIManagementException {
+    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
+            throws APIManagementException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String reference = null;
 
         String sqlQuery = SQLConstants.GET_REGISTRATION_WORKFLOW_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, applicationId);
             ps.setString(2, keyType);
             ps.setString(3, keyManagerName);
-            rs = ps.executeQuery();
 
-            // returns only one row
-            if (rs.next()) {
-                reference = rs.getString("WF_REF");
+            try (ResultSet rs = ps.executeQuery()) {
+                // returns only one row
+                if (rs.next()) {
+                    reference = rs.getString("WF_REF");
+                }
             }
+
         } catch (SQLException e) {
-            handleException("Error occurred while getting registration entry for " +
-                    "Application : " + applicationId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error occurred while getting registration entry for " + "Application : " + applicationId,
+                    e);
         }
         return reference;
     }
@@ -14091,17 +13958,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Adds a new record in AM_APPLICATION_GROUP_MAPPING for each group
+     * Purge records in Application Group Mappings
      *
-     * @param conn connection
-     * @param applicationIdList application id list
+     * @param conn Connection
+     * @param organization Organization
      * @return
      * @throws APIManagementException when failed to execute the application groups update
      */
-    private boolean updateGroupIDMappingsBulk(Connection conn, String organization)
+    private void updateGroupIDMappingsBulk(Connection conn, String organization)
             throws APIManagementException {
-
-        boolean updateSuccessful = false;
 
         PreparedStatement removeMigratedGroupIdsStatement = null;
         PreparedStatement deleteStatement = null;
@@ -14120,15 +13985,12 @@ public class ApiMgtDAO {
             deleteStatement.setString(1, organization);
             deleteStatement.executeUpdate();
 
-            updateSuccessful = true;
         } catch (SQLException e) {
-            updateSuccessful = false;
             handleException("Failed to update GroupId mappings ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
         }
-        return updateSuccessful;
     }
 
     public String getGroupId(int applicationId) throws APIManagementException {

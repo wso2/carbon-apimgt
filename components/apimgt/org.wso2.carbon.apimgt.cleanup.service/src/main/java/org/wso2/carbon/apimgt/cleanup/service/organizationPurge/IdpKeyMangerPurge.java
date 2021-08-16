@@ -31,7 +31,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
         this.username = username;
     }
 
-    public void deleteOrganization(String organization) throws APIManagementException {
+    public void purge(String organization) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerList =
                 apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
