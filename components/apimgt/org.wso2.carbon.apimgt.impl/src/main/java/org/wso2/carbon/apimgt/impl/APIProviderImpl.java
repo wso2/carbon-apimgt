@@ -3432,24 +3432,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             isError = true;
         }
 
-        // gatewayType check is required when API Management is deployed on
-        // other servers to avoid synapse
-        //Check if there are already published external APIStores.If yes,removing APIs from them.
-        Set<APIStore> apiStoreSet;
-        try {
-            apiStoreSet = getPublishedExternalAPIStores(api.getUuid());
-            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
-                for (APIStore store : apiStoreSet) {
-                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
-                }
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while executing API delete operation on external API stores for API "
-                    + api.getUuid(), e);
-            isError = true;
-        }
-
         JSONObject apiLogObject = new JSONObject();
         apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
         apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
@@ -3458,15 +3440,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.DELETED, this.username);
 
-        if (apiId != -1) {
-            try {
-                cleanUpPendingAPIStateChangeTask(apiId);
-            } catch (WorkflowException | APIManagementException e) {
-                log.error("Error while executing API delete operation on cleanup workflow tasks for API "
-                        + api.getUuid(), e);
-                isError = true;
-            }
-        }
         if (api.getId().toString() != null) {
             Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -3498,6 +3471,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (apiId != -1) {
+            try {
+                cleanUpPendingAPIStateChangeTask(apiId);
+            } catch (WorkflowException | APIManagementException e) {
+                log.error("Error while executing API delete operation on cleanup workflow tasks for API "
+                        + api.getUuid(), e);
+                isError = true;
+            }
+
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -3507,6 +3488,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
                     + api.getUuid());
+        }
+
+        // gatewayType check is required when API Management is deployed on
+        // other servers to avoid synapse
+        //Check if there are already published external APIStores.If yes,removing APIs from them.
+        Set<APIStore> apiStoreSet;
+        try {
+            apiStoreSet = getPublishedExternalAPIStores(api.getUuid());
+            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
+            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
+                for (APIStore store : apiStoreSet) {
+                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while executing API delete operation on external API stores for API "
+                    + api.getUuid(), e);
+            isError = true;
         }
 
         // Extracting API details for the recommendation system
