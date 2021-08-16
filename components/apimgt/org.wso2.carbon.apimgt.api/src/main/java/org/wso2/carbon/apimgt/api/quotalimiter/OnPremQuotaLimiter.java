@@ -16,7 +16,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.api.quotaLimiter;
+package org.wso2.carbon.apimgt.api.quotalimiter;
+
+import java.util.Map;
 
 /**
  * This class handles API creation if API Quota Limit Extension not available.
@@ -26,13 +28,13 @@ public class OnPremQuotaLimiter implements ResourceQuotaLimiter {
     /**
      *
      * @param orgID Organization ID relevant for the API creation.
-     * @param userId User ID value relevant for API creation.
-     * @param resourceType Resource type (APIs) used to check quota status.
-     * @return Returns false since carbon-apimgt should allow to APIs create APIs if quota-limit extension
-     * not available.
+     * @param httpMethod HTTP method receiving for API creation.
+     * @param pathToMatch API type determining path in the request.
+     * @param payload Payload attributes coming with the request.
+     * @return Returns false since product-apim should allow to API creations since quota-limit extension not available there.
      */
     @Override
-    public boolean getAPIQuotaLimitStatus(String orgID, String userId, String resourceType) {
+    public boolean getQuotaLimitStatus(String orgID, String httpMethod, String pathToMatch, Map<String, Object> payload) {
         return false;
     }
 }

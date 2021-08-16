@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.quotaLimiter.ResourceQuotaLimiter;
+import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;

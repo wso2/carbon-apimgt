@@ -78,7 +78,7 @@
                       systemProperties['rest.api.publisher.allowed.origins'].split(',') : {}}"/>
     </bean>
     <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
-    <bean id="ResourceQuotaLimitInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.quotaLimit.ResourceQuotaLimitInterceptor"/>
+    <bean id="ResourceQuotaLimitInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.quotalimit.ResourceQuotaLimitInterceptor"/>
 
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
