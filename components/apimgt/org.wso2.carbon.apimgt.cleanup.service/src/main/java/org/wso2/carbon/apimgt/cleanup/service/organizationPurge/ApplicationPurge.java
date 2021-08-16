@@ -30,14 +30,16 @@ import java.util.*;
 
 public class ApplicationPurge implements OrganizationPurge{
     protected ApiMgtDAO apiMgtDAO;
+    protected OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(ApplicationPurge.class);
 
     public ApplicationPurge() {
         apiMgtDAO = ApiMgtDAO.getInstance();
+        organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
     }
 
-    public ApplicationPurge(ApiMgtDAO apiMgtDAO) {
-        this.apiMgtDAO = apiMgtDAO;
+    public ApplicationPurge(ApiMgtDAO apiMgtDAO, OrganizationPurgeDAO organizationPurgeDAO) {
+        this.organizationPurgeDAO = organizationPurgeDAO;
     }
     /**
      * Delete organization related application data
@@ -66,32 +68,32 @@ public class ApplicationPurge implements OrganizationPurge{
 
 
     private void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
-        apiMgtDAO.removeApplicationCreationWorkflows(organization);
+        organizationPurgeDAO.removeApplicationCreationWorkflows(organization);
     }
 
     private void removePendingSubscriptions(String organization) throws APIManagementException {
-        apiMgtDAO.removePendingSubscriptions(organization);
+        organizationPurgeDAO.removePendingSubscriptions(organization);
     }
 
     private void deleteApplicationList(String organization) throws APIManagementException {
-        apiMgtDAO.deleteApplicationList(organization);
+        organizationPurgeDAO.deleteApplicationList(organization);
     }
 
     // cleanup pending application regs
     private void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
-        apiMgtDAO.deletePendingApplicationRegistrations(organization);
+        organizationPurgeDAO.deletePendingApplicationRegistrations(organization);
     }
 
     private void deleteSubscribers(String organization) throws APIManagementException {
 
         //select subscribers for the organization
-        List<Integer> subscriberIdList = apiMgtDAO.getSubscribersForOrganization(organization);
+        List<Integer> subscriberIdList = organizationPurgeDAO.getSubscribersForOrganization(organization);
 
         if (subscriberIdList.size() > 0) {
             for (int subscriberId : subscriberIdList) {
 
-                List<String> mappedOrganizations = apiMgtDAO.getOrganizationsOfSubscriber(subscriberId);
-                apiMgtDAO.removeOrganizationFromSubscriber(subscriberId, organization);
+                List<String> mappedOrganizations = organizationPurgeDAO.getOrganizationsOfSubscriber(subscriberId);
+                organizationPurgeDAO.removeOrganizationFromSubscriber(subscriberId, organization);
 
                 if (!(mappedOrganizations.size() > 1 && mappedOrganizations.contains(organization))) {
 
@@ -104,7 +106,7 @@ public class ApplicationPurge implements OrganizationPurge{
                         subscriberCache.remove(subscriber.getName());
                     }
 
-                    apiMgtDAO.removeSubscriber(subscriberId);
+                    organizationPurgeDAO.removeSubscriber(subscriberId);
                 }
             }
         }
