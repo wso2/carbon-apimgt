@@ -17,22 +17,35 @@
  */
 package org.wso2.carbon.apimgt.cleanup.service;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
+
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class ApplicationPurge implements OrganizationPurge{
+public class ApplicationPurge implements OrganizationPurge {
+    private final String username = "";
     protected ApiMgtDAO apiMgtDAO;
     protected OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(ApplicationPurge.class);
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
+
+    private void initTaskList() {
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL,
+                APIConstants.OrganizationDeletion.PENDING);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL,
+                APIConstants.OrganizationDeletion.PENDING);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_REGISTRATION_REMOVAL,
+                APIConstants.OrganizationDeletion.PENDING);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_REMOVAL,
+                APIConstants.OrganizationDeletion.PENDING);
+    }
 
     public ApplicationPurge() {
         apiMgtDAO = ApiMgtDAO.getInstance();
@@ -42,6 +55,7 @@ public class ApplicationPurge implements OrganizationPurge{
     public ApplicationPurge(ApiMgtDAO apiMgtDAO, OrganizationPurgeDAO organizationPurgeDAO) {
         this.organizationPurgeDAO = organizationPurgeDAO;
     }
+
     /**
      * Delete organization related application data
      *
@@ -49,23 +63,48 @@ public class ApplicationPurge implements OrganizationPurge{
      */
     @Override
     public LinkedHashMap<String, String> deleteOrganization(String organization) {
-        try {
-            removePendingSubscriptions(organization);
+        for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
+            int count = 0;
+            int maxTries = 3;
+            while (true) {
+                try {
+                    switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL:
+                        removePendingSubscriptions(organization);
+                        break;
+                    case APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL:
+                        removeApplicationCreationWorkflows(organization);
+                        break;
+                    case APIConstants.OrganizationDeletion.APPLICATION_REGISTRATION_REMOVAL:
+                        deletePendingApplicationRegistrations(organization);
+                        break;
+                    case APIConstants.OrganizationDeletion.APPLICATION_REMOVAL:
+                        deleteApplicationList(organization);
+                        break;
+                    }
+                    applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                } catch (APIManagementException e) {
+                    log.error("Error while deleting Application Data in organization " + organization, e);
+                    applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
+                    log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
 
-            removeApplicationCreationWorkflows(organization);
+                    if (++count == maxTries) {
+                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        applicationPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        break;
+                    }
 
-            deletePendingApplicationRegistrations(organization);
-
-            deleteApplicationList(organization);
-
-            deleteSubscribers(organization);
-        } catch (APIManagementException e) {
-            log.error(e);
+                }
+            }
         }
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(applicationPurgeTaskMap),
+                APIConstants.AuditLogConstants.DELETED, username);
         return applicationPurgeTaskMap;
     }
 
-    @Override public int getPriority() {
+    @Override
+    public int getPriority() {
         return 0;
     }
 
@@ -81,37 +120,7 @@ public class ApplicationPurge implements OrganizationPurge{
         organizationPurgeDAO.deleteApplicationList(organization);
     }
 
-    // cleanup pending application regs
     private void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
         organizationPurgeDAO.deletePendingApplicationRegistrations(organization);
     }
-
-    private void deleteSubscribers(String organization) throws APIManagementException {
-
-        //select subscribers for the organization
-        List<Integer> subscriberIdList = organizationPurgeDAO.getSubscribersForOrganization(organization);
-
-        if (subscriberIdList.size() > 0) {
-            for (int subscriberId : subscriberIdList) {
-
-                List<String> mappedOrganizations = organizationPurgeDAO.getOrganizationsOfSubscriber(subscriberId);
-                organizationPurgeDAO.removeOrganizationFromSubscriber(subscriberId, organization);
-
-                if (!(mappedOrganizations.size() > 1 && mappedOrganizations.contains(organization))) {
-
-                    Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(
-                            APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.API_SUBSCRIBER_CACHE);
-
-                    Subscriber subscriber = apiMgtDAO.getSubscriber(subscriberId);
-
-                    if (subscriberCache.get(subscriber.getName()) != null) {
-                        subscriberCache.remove(subscriber.getName());
-                    }
-
-                    organizationPurgeDAO.removeSubscriber(subscriberId);
-                }
-            }
-        }
-    }
-
 }

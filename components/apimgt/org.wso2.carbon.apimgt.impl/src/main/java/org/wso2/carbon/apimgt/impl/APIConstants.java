@@ -2758,24 +2758,18 @@ public final class APIConstants {
         public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
         public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
         public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+
+        public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
+        public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
+        public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
+        public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+
         public static final String PENDING = "Pending";
         public static final String COMPLETED = "Completed";
         public static final String FAIL = "Fail";
         public static final String KM_RETRIEVER = "KMRetriever";
         public static final String IDP_DATA_REMOVER = "IDPDataRemover";
         public static final String KM_DATA_REMOVER = "KMDataRemover";
-    }
-
-    public static class ApplicationPurgeConstants {
-        public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
-        public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
-        public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
-        public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
-        public static final String SUBSCRIPTION_REMOVAL = "SubscriberRemoval";
-
-        public static final String STATUS_FAILED = "Failed";
-        public static final String STATUS_PENDING = "Pending";
-        public static final String STATUS_SUCCESSFUL = "Successful";
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";
