@@ -3421,8 +3421,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             api = getAPIbyUUID(apiUuid, organization);
         } catch (APIManagementException e) {
-            log.error("Error while getting API by uuid for deleting API " + apiUuid);
-            log.debug("Following steps will be skipped while deleting API " + apiUuid + " due to api being null. " +
+            log.error("Error while getting API by uuid for deleting API " + apiUuid + " on organization "
+                    + organization);
+            log.debug("Following steps will be skipped while deleting API " + apiUuid + "on organization "
+                    + organization + " due to api being null. " +
                     "deleting Resource Registration from key managers, deleting on external API stores, " +
                     "event publishing to gateways, logging audit message, extracting API details for " +
                     "the recommendation system. "
@@ -3434,9 +3436,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiId = apiMgtDAO.getAPIID(apiUuid);
         } catch (APIManagementException e) {
-            log.error("Error while getting API ID from DB for deleting API " + apiUuid, e);
-            log.debug("Following steps will be skipped while deleting the API " + apiUuid +
-                    "due to api id being null. cleanup workflow tasks of the API, delete event publishing to gateways");
+            log.error("Error while getting API ID from DB for deleting API " + apiUuid + " on organization "
+                    + organization, e);
+            log.debug("Following steps will be skipped while deleting the API " + apiUuid + " on organization "
+                    + organization + "due to api id being null. cleanup workflow tasks of the API, " +
+                    "delete event publishing to gateways");
             isError = true;
         }
 
@@ -3453,7 +3457,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
             } catch (APIManagementException e) {
-                log.error("Error while executing API delete operations on DB for API " + apiUuid, e);
+                log.error("Error while executing API delete operations on DB for API " + apiUuid +
+                        " on organization " + organization, e);
                 isError = true;
             }
         }
@@ -3478,7 +3483,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
-            log.debug("API " + apiUuid + " has successfully removed from the gateway artifacts.");
+            log.debug("API " + apiUuid + " on organization " + organization +
+                    " has successfully removed from the gateway artifacts.");
         } catch (APIManagementException e) {
             log.error("Error while executing API delete operation on gateway artifacts for API " + apiUuid, e);
             isError = true;
@@ -3486,10 +3492,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
-            log.debug("API " + apiUuid + " has successfully removed from the persistence instance.");
+            log.debug("API " + apiUuid + " on organization " + organization +
+                    " has successfully removed from the persistence instance.");
         } catch (APIPersistenceException e) {
             log.error("Error while executing API delete operation on persistence instance for API "
-                    + apiUuid, e);
+                    + apiUuid + " on organization " + organization, e);
             isError = true;
         }
 
@@ -3509,7 +3516,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } catch (APIManagementException e) {
                 log.error("Error while executing API delete operation on external API stores for API "
-                        + apiUuid, e);
+                        + apiUuid + " on organization " + organization, e);
                 isError = true;
             }
         }
@@ -3519,7 +3526,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 cleanUpPendingAPIStateChangeTask(apiId);
             } catch (WorkflowException | APIManagementException e) {
                 log.error("Error while executing API delete operation on cleanup workflow tasks for API "
-                        + apiUuid, e);
+                        + apiUuid + " on organization " + organization, e);
                 isError = true;
             }
         }
@@ -3534,7 +3541,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
-                    + apiUuid);
+                    + apiUuid + " on organization " + organization);
         }
 
         // Logging audit message for API delete
@@ -3558,7 +3565,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // if one of the above has failed throw an error
         if (isError) {
-            throw new APIManagementException("Error while deleting the API " + apiUuid);
+            throw new APIManagementException("Error while deleting the API " + apiUuid + " on organization "
+                    + organization);
         }
     }
     /**

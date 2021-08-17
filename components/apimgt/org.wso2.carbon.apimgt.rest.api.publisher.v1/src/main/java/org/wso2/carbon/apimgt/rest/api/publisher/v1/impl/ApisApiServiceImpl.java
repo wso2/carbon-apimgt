@@ -1551,7 +1551,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiInfo = validateAPIExistence(apiId);
                 isAPIExistDB = true;
             } catch (APIManagementException e) {
-                log.error("Error while validating API existence for deleting API " + apiId);
+                log.error("Error while validating API existence for deleting API " + apiId + " on organization "
+                        + organization);
                 isError = true;
             }
 
@@ -1568,7 +1569,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
                 }
             } catch (APIManagementException e) {
-                log.error("Error while checking active subscriptions for deleting API " + apiId);
+                log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
+                        + organization);
                 isError = true;
             }
 
@@ -1580,7 +1582,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             usedProductResources.toString() + " are used by one or more API Products", log);
                 }
             } catch (APIManagementException e) {
-                log.error("Error while checking API products using same resources for deleting API " + apiId);
+                log.error("Error while checking API products using same resources for deleting API " + apiId +
+                        " on organization " + organization);
                 isError = true;
             }
 
@@ -1588,7 +1591,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.deleteAPI(apiId, organization);
 
             if (isError) {
-                RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId, log);
+                RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
+                        + organization, log);
                 return null;
             }
             return Response.ok().build();
