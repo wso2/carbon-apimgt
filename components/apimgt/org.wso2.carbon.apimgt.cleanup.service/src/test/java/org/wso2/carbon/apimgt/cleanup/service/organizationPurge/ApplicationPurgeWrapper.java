@@ -22,8 +22,8 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 public class ApplicationPurgeWrapper extends ApplicationPurge{
 
-    public ApplicationPurgeWrapper(ApiMgtDAO apiMgtDAO) {
-        super(apiMgtDAO);
+    public ApplicationPurgeWrapper(ApiMgtDAO apiMgtDAO, OrganizationPurgeDAO organizationPurgeDAO) {
+        super(apiMgtDAO, organizationPurgeDAO);
     }
 
 }
