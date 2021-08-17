@@ -67,7 +67,7 @@ public class OrganizationPurgeDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            String msg = "Error occurred while removing pending subscriptions";
+            String msg = "Error occurred while removing pending subscriptions for organization: "+organization;
             handleException(msg, e);
         }
     }
@@ -93,7 +93,7 @@ public class OrganizationPurgeDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            String msg = "Error occurred while removing application creation workflows";
+            String msg = "Error occurred while removing application creation workflows for organization: "+organization;
             handleException(msg, e);
         }
     }
@@ -140,7 +140,7 @@ public class OrganizationPurgeDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error while retrieving subscribers for organization " + organization, e);
+            handleException("Error while retrieving subscribers for organization: " + organization, e);
         }
 
         return subscriberIdList;
@@ -195,7 +195,8 @@ public class OrganizationPurgeDAO {
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            handleException("Error while removing subscriber with subscriber id " + subscriberId, e);
+            handleException("Error while removing subscriber with subscriber id " + subscriberId+ " for organization: "
+                    +organization, e);
         }
     }
 
@@ -283,8 +284,11 @@ public class OrganizationPurgeDAO {
                     if (keyManager != null) {
                         try {
                             keyManager.deleteMappedApplication(consumerKey);
+                            log.info("Mapped application deleted for consumer key: " + consumerKey
+                                    + " and organization: " + organization);
                         } catch (APIManagementException e) {
-                            handleException("Error while Deleting Client Application", e);
+                            handleException("Error while Deleting Client Application for consumer key: " + consumerKey
+                                    + " and organization: " + organization, e);
                         }
                     }
 
@@ -294,13 +298,16 @@ public class OrganizationPurgeDAO {
                         //delete on oAuthorization server.
                         if (log.isDebugEnabled()) {
                             log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the "
-                                    + "Oauth server");
+                                    + "Oauth server for organization: " + organization);
                         }
                         if (keyManager != null) {
                             try {
                                 keyManager.deleteApplication(consumerKey);
+                                log.info("Client application deleted for consumer key: " + consumerKey
+                                        + " and organization: " + organization);
                             } catch (APIManagementException e) {
-                                handleException("Error while Deleting Client Application", e);
+                                handleException(
+                                        "Error while Deleting Client Application for organization: " + organization, e);
                             }
 
                         }
@@ -309,7 +316,8 @@ public class OrganizationPurgeDAO {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("Subscription Key mapping details are deleted successfully for Applications");
+                log.debug("Subscription Key mapping details are deleted successfully for Applications for "
+                        + "organization: " + organization);
             }
 
             deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
@@ -318,7 +326,8 @@ public class OrganizationPurgeDAO {
             deleteRegistrationQuery.execute();
 
             if (log.isDebugEnabled()) {
-                log.debug("Application Registration details are deleted successfully for Applications");
+                log.debug("Application Registration details are deleted successfully for Applications for "
+                        + "organization: " + organization);
             }
 
             deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
@@ -327,7 +336,8 @@ public class OrganizationPurgeDAO {
             deleteSubscription.execute();
 
             if (log.isDebugEnabled()) {
-                log.debug("Subscription details are deleted successfully for Applications");
+                log.debug("Subscription details are deleted successfully for Applications for organization: "
+                        + organization);
             }
 
             deleteDomainApp.executeBatch();
@@ -338,7 +348,8 @@ public class OrganizationPurgeDAO {
             deleteAppKey.execute();
 
             if (log.isDebugEnabled()) {
-                log.debug("Application Key Mapping details are deleted successfully for Application");
+                log.debug("Application Key Mapping details are deleted successfully for Application for "
+                        + "organization: " + organization);
             }
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
@@ -347,13 +358,14 @@ public class OrganizationPurgeDAO {
             deleteApp.execute();
 
             if (log.isDebugEnabled()) {
-                log.debug("Applications are deleted successfully.");
+                log.debug("Applications are deleted successfully for organization: " + organization);
             }
 
             connection.commit();
 
         } catch (SQLException e) {
-            handleException("Error while removing application details from the database", e);
+            handleException(
+                    "Error while removing application details from the database for organization: " + organization, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
@@ -396,7 +408,7 @@ public class OrganizationPurgeDAO {
             deleteStatement.executeUpdate();
 
         } catch (SQLException e) {
-            handleException("Failed to update GroupId mappings ", e);
+            handleException("Failed to update bulk groupId mappings for organization: "+organization, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
@@ -404,7 +416,6 @@ public class OrganizationPurgeDAO {
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
-
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
