@@ -3424,7 +3424,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error("Error while getting API by uuid for deleting API " + apiUuid);
             log.debug("Following steps will be skipped while deleting API " + apiUuid + " due to api being null. " +
                     "deleting Resource Registration from key managers, deleting on external API stores, " +
-                    "event publishing to gateways, logging audit message. "
+                    "event publishing to gateways, logging audit message, extracting API details for " +
+                    "the recommendation system. "
             );
             isError = true;
         }
@@ -3548,7 +3549,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
+        if (api != null && recommendationEnvironment != null) {
             RecommenderEventPublisher
                     extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
             Thread recommendationThread = new Thread(extractor);
