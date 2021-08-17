@@ -54,7 +54,7 @@ public class OrganizationPurgeDAO {
      */
     public void removePendingSubscriptions(String organization) throws APIManagementException {
 
-        String query = SQLConstants.DELETE_PENDING_SUBSCRIPTIONS;
+        String query = OrganizationPurgeSQLConstants.DELETE_PENDING_SUBSCRIPTIONS;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -81,7 +81,7 @@ public class OrganizationPurgeDAO {
     public void removeApplicationCreationWorkflows(String organization)
             throws APIManagementException {
 
-        String query = SQLConstants.DELETE_APPLICATION_CREATION_WORKFLOWS;
+        String query = OrganizationPurgeSQLConstants.DELETE_APPLICATION_CREATION_WORKFLOWS;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -105,7 +105,7 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException when failed to delete pending application registrations
      */
     public void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
-        String query = SQLConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS;
+        String query = OrganizationPurgeSQLConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -133,11 +133,11 @@ public class OrganizationPurgeDAO {
         PreparedStatement deleteApp = null;
         ResultSet rs = null;
 
-        String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL;
+        String getConsumerKeyQuery = OrganizationPurgeSQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL;
 
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
 
-        String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL;
+        String deleteApplicationQuery = OrganizationPurgeSQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
