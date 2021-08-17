@@ -408,7 +408,11 @@ public class OrganizationPurgeDAO {
             deleteStatement.executeUpdate();
 
         } catch (SQLException e) {
+<<<<<<< HEAD
             handleException("Failed to update bulk groupId mappings for organization: "+organization, e);
+=======
+            handleException("Failed to update GroupId mappings ", e);
+>>>>>>> origin/application-deletion
         } finally {
             APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
@@ -416,6 +420,10 @@ public class OrganizationPurgeDAO {
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/application-deletion
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
