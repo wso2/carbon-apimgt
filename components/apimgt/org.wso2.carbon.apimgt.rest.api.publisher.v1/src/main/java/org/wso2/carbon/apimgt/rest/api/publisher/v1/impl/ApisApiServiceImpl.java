@@ -1560,15 +1560,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             }
 
-            API api = null;
-            try {
-                api = apiProvider.getAPIbyUUID(apiId, organization);
-                api.setOrganization(organization);
-            } catch (APIManagementException e) {
-                log.error("Error while checking active subscriptions for deleting API " + apiId);
-                isError = true;
-            }
-
             try {
                 //check if the API has subscriptions
                 //Todo : need to optimize this check. This method seems too costly to check if subscription exists
@@ -1594,7 +1585,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //deletes the API
-            apiProvider.deleteAPI(api, apiId, organization);
+            apiProvider.deleteAPI(apiId, organization);
 
             if (isError) {
                 RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId, log);

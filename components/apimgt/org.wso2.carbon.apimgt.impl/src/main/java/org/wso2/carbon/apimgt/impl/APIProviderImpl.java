@@ -3412,20 +3412,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
-    public void deleteAPI(API api, String apiUuid, String organization) throws APIManagementException {
+    public void deleteAPI(String apiUuid, String organization) throws APIManagementException {
         boolean isError = false;
-
         int apiId = -1;
-        // DB delete operations
+        API api = null;
+
+        // get api object by uuid
+        try {
+            api = getAPIbyUUID(apiUuid, organization);
+        } catch (APIManagementException e) {
+            log.error("Error while getting API by uuid for deleting API " + apiUuid);
+            log.debug("Following steps will be skipped while deleting API " + apiUuid + " due to api being null. " +
+                    "deleting Resource Registration from key managers, deleting on external API stores, " +
+                    "event publishing to gateways, logging audit message. "
+            );
+            isError = true;
+        }
+
+        // get api id from db
         try {
             apiId = apiMgtDAO.getAPIID(apiUuid);
-            deleteAPIRevisions(apiUuid, organization);
-            deleteAPIFromDB(api);
-            log.debug("API " + apiUuid + " has successfully removed from the database.");
-
         } catch (APIManagementException e) {
-            log.error("Error while executing API delete operations on DB for API " + apiUuid, e);
+            log.error("Error while getting API ID from DB for deleting API " + apiUuid, e);
+            log.debug("Following steps will be skipped while deleting the API " + apiUuid +
+                    "due to api id being null. cleanup workflow tasks of the API, delete event publishing to gateways");
             isError = true;
+        }
+
+        // DB delete operations
+        if (!isError && api != null) {
+            try {
+                deleteAPIRevisions(apiUuid, organization);
+                deleteAPIFromDB(api);
+                if (log.isDebugEnabled()) {
+                    String logMessage =
+                            "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                    + " successfully removed from the database.";
+                    log.debug(logMessage);
+                }
+
+            } catch (APIManagementException e) {
+                log.error("Error while executing API delete operations on DB for API " + apiUuid, e);
+                isError = true;
+            }
         }
 
         // Deleting Resource Registration from key managers
@@ -3524,13 +3553,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
-        }
-
-        if (api == null) {
-            log.error("Following steps were skipped while deleting API " + apiUuid + " due to api being null. " +
-                    "deleting Resource Registration from key managers, deleting on external API stores, " +
-                    "event publishing to gateways, logging audit message. "
-            );
         }
 
         // if one of the above has failed throw an error
