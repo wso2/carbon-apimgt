@@ -128,26 +128,16 @@ public class OrganizationPurgeDAO {
     public void deleteApplicationList(String organization) throws APIManagementException {
 
         Connection connection = null;
-        PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmtGetConsumerKey = null;
-        PreparedStatement deleteRegistrationQuery = null;
-        PreparedStatement deleteSubscription = null;
         PreparedStatement deleteDomainApp = null;
-        PreparedStatement deleteAppKey = null;
         PreparedStatement deleteApp = null;
         ResultSet rs = null;
 
         String getConsumerKeyQuery = SQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL;
 
-        String deleteSubscriptionsQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_SUBSCRIPTIONS_SQL;
-
-        String deleteApplicationKeyQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_KEY_MAPPINGS_SQL;
-
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
 
         String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL;
-
-        String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATION_REGISTRATIONS_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -217,37 +207,7 @@ public class OrganizationPurgeDAO {
                         + "organization: " + organization);
             }
 
-            deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
-            deleteRegistrationQuery.setString(1, organization);
-
-            deleteRegistrationQuery.execute();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Application Registration details are deleted successfully for Applications for "
-                        + "organization: " + organization);
-            }
-
-            deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
-            deleteSubscription.setString(1, organization);
-
-            deleteSubscription.execute();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Subscription details are deleted successfully for Applications for organization: "
-                        + organization);
-            }
-
             deleteDomainApp.executeBatch();
-
-            deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
-            deleteAppKey.setString(1, organization);
-
-            deleteAppKey.execute();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Application Key Mapping details are deleted successfully for Application for "
-                        + "organization: " + organization);
-            }
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
             deleteApp.setString(1, organization);
@@ -266,12 +226,7 @@ public class OrganizationPurgeDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteMappingQuery, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteRegistrationQuery, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteSubscription, null, null);
             APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
         }
     }
