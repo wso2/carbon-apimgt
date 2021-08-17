@@ -1539,32 +1539,60 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) {
         try {
+            boolean isError = false;
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            //check if the API has subscriptions
-            //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
-            if (apiUsages != null && apiUsages.size() > 0) {
-                RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+            boolean isAPIExistDB = false;
+            APIInfo apiInfo = null;
+            try {
+                //validate if api exists
+                apiInfo = validateAPIExistence(apiId);
+                isAPIExistDB = true;
+            } catch (APIManagementException e) {
+                log.error("Error while validating API existence for deleting API " + apiId);
+                isError = true;
             }
 
-            List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
+            if (isAPIExistDB) {
+                //validate API update operation permitted based on the LC state
+                validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+            }
 
-            if (!usedProductResources.isEmpty()) {
-                RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
-                        usedProductResources.toString() + " are used by one or more API Products", log);
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            try {
+                //check if the API has subscriptions
+                //Todo : need to optimize this check. This method seems too costly to check if subscription exists
+                List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
+                if (apiUsages != null && apiUsages.size() > 0) {
+                    RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while checking active subscriptions for deleting API " + apiId);
+                isError = true;
+            }
+
+            try {
+                List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
+
+                if (!usedProductResources.isEmpty()) {
+                    RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
+                            usedProductResources.toString() + " are used by one or more API Products", log);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while checking API products using same resources for deleting API " + apiId);
+                isError = true;
             }
 
             api.setOrganization(organization);
             //deletes the API
             apiProvider.deleteAPI(api);
+
+            if (isError) {
+                RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId, log);
+                return null;
+            }
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
