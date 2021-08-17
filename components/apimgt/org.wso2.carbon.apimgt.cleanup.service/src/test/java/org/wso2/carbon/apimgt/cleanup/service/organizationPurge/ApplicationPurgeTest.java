@@ -63,18 +63,11 @@ public class ApplicationPurgeTest {
         List<Integer> subscriberIdList = new ArrayList<>();
         subscriberIdList.add(1);
 
-        Mockito.doReturn(subscriberIdList).when(organizationPurgeDAO).getSubscribersForOrganization(Mockito.any());
-
         List<String> mappedOrganizations = new ArrayList<>();
         mappedOrganizations.add("testOrg");
 
-        Mockito.doReturn(mappedOrganizations).when(organizationPurgeDAO).getOrganizationsOfSubscriber(Mockito.anyInt());
-        Mockito.doNothing().when(organizationPurgeDAO)
-                .removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
-
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.doReturn(subscriber).when(apiMgtDAO).getSubscriber(Mockito.anyInt());
-        Mockito.doNothing().when(organizationPurgeDAO).removeSubscriber(Mockito.anyInt());
 
         Cache cache = Mockito.mock(Cache.class);
         CacheManager cacheManager = Mockito.mock(CacheManager.class);
@@ -87,9 +80,8 @@ public class ApplicationPurgeTest {
 
         PowerMockito.doReturn(cachedSubscriber).when(cache).get(Mockito.any());
         PowerMockito.doReturn(true).when(cache).remove(Mockito.any());
-        Mockito.doNothing().when(organizationPurgeDAO).removeSubscriber(Mockito.anyInt());
 
-        ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(apiMgtDAO, organizationPurgeDAO);
+        ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(organizationPurgeDAO);
         applicationPurge.deleteOrganization("testOrg");
 
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.anyString());
@@ -97,12 +89,7 @@ public class ApplicationPurgeTest {
         Mockito.verify(organizationPurgeDAO, Mockito.times(1))
                 .deletePendingApplicationRegistrations(Mockito.anyString());
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).deleteApplicationList(Mockito.anyString());
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).getSubscribersForOrganization(Mockito.anyString());
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).getOrganizationsOfSubscriber(Mockito.anyInt());
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1))
-                .removeOrganizationFromSubscriber(Mockito.anyInt(), Mockito.anyString());
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getSubscriber(Mockito.anyInt());
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removeSubscriber(Mockito.anyInt());
 
     }
 }

@@ -23,15 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ApplicationPurge implements OrganizationPurge {
-    private final String username = "";
-    protected ApiMgtDAO apiMgtDAO;
+    private String username;
     protected OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(ApplicationPurge.class);
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
@@ -47,13 +45,16 @@ public class ApplicationPurge implements OrganizationPurge {
                 APIConstants.OrganizationDeletion.PENDING);
     }
 
-    public ApplicationPurge() {
-        apiMgtDAO = ApiMgtDAO.getInstance();
+    public ApplicationPurge(String username) {
+        this.username = username;
         organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
+        initTaskList();
     }
 
-    public ApplicationPurge(ApiMgtDAO apiMgtDAO, OrganizationPurgeDAO organizationPurgeDAO) {
+    public ApplicationPurge(OrganizationPurgeDAO organizationPurgeDAO, String username) {
         this.organizationPurgeDAO = organizationPurgeDAO;
+        this.username = username;
+        initTaskList();
     }
 
     /**
