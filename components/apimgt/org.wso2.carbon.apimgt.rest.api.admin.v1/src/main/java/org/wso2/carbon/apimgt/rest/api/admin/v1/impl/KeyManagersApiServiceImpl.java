@@ -115,7 +115,14 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId, RestApiCommonUtil.getLoggedInUsername());
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
+        apiAdmin.deleteIdentityProvider(organization, keyManagerConfigurationDTO);
+        apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerConfigurationDTO);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
+                RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 

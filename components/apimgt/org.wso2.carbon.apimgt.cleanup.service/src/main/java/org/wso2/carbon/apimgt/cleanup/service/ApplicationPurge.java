@@ -17,7 +17,14 @@
  */
 package org.wso2.carbon.apimgt.cleanup.service;
 
+import java.util.LinkedHashMap;
+
 public class ApplicationPurge implements OrganizationPurge {
-    public void deleteOrganization(String organization) {
+    public LinkedHashMap<String, String> deleteOrganization(String organization) {
+        return null;
+    }
+
+    @Override public int getPriority() {
+        return -10;
     }
 }

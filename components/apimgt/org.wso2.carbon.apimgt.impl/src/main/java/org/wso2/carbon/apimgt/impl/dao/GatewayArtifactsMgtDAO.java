@@ -632,36 +632,25 @@ public class GatewayArtifactsMgtDAO {
 
     /**
      *
-     * @param apiIdentifierList
+     * @param organization
      * @throws APIManagementException
      */
-    public void removeOrganizationGatewayArtifacts(List<APIIdentifier> apiIdentifierList)
+    public void removeOrganizationGatewayArtifacts(String organization)
             throws APIManagementException {
-        List<String> apiIdList = apiIdentifierList.stream().map(APIIdentifier::getUUID).collect(Collectors.toList());
-        List<String> collectionList = Collections.nCopies(apiIdList.size(), "?");
 
         String deleteGWApiDetails = SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS;
-        deleteGWApiDetails = deleteGWApiDetails.replaceAll(SQLConstants.API_UUID_REGEX,
-                String.join(",", collectionList));
 
         try (Connection artifactSynchronizerConn = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             // Delete gateway Artifacts from AM_GW_PUBLISHED_API_DETAILS, FK->AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS
-            try (PreparedStatement preparedStatement = artifactSynchronizerConn.
-                    prepareStatement(deleteGWApiDetails)) {
-                artifactSynchronizerConn.setAutoCommit(false);
-                int index = 1;
-                for (String uuid : apiIdList) {
-                    preparedStatement.setString(index, uuid);
-                    index++;
-                }
+            try (PreparedStatement preparedStatement = artifactSynchronizerConn.prepareStatement(deleteGWApiDetails)) {
+                preparedStatement.setString(1, organization);
                 preparedStatement.executeUpdate();
                 artifactSynchronizerConn.commit();
             } catch (SQLException e) {
                 throw e;
             }
         } catch (SQLException e) {
-            log.error("Error while deleting GW artifacts for " + apiIdentifierList, e);
-            handleException("Failed to Delete Artifact from Database", e);
+            handleException("Failed to Delete API GW Artifact of organization "  + organization + " from Database", e);
         }
     }
 

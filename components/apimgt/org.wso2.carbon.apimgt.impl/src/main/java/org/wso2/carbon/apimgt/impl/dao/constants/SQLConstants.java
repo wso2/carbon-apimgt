@@ -1484,16 +1484,15 @@ public class SQLConstants {
             "   API_NAME = ? " +
             "   AND API_PROVIDER = ?";
 
-    public static final String REMOVE_API_DEFAULT_VERSION_SQL =
-            "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER = ?";
+    public static final String REMOVE_API_DEFAULT_VERSION_SQL = "DELETE FROM AM_API_DEFAULT_VERSION WHERE API_NAME "
+            + "= ? AND API_PROVIDER = ?";
 
     public static final String GET_PUBLISHED_DEFAULT_VERSION_SQL =
             "SELECT PUBLISHED_DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
 
     public static final String ADD_API_DEFAULT_VERSION_SQL =
-            " INSERT INTO " +
-            " AM_API_DEFAULT_VERSION(API_NAME,API_PROVIDER,DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION)" +
-            " VALUES (?,?,?,?)";
+            " INSERT INTO AM_API_DEFAULT_VERSION(API_NAME,API_PROVIDER,DEFAULT_API_VERSION, "
+                    + "PUBLISHED_DEFAULT_API_VERSION, ORGANIZATION) VALUES (?,?,?,?,?)";
 
     public static final String ADD_URL_MAPPING_SQL =
             " INSERT INTO " +
@@ -1662,16 +1661,19 @@ public class SQLConstants {
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
     public static final String GET_API_LIST_SQL_BY_ORG = "SELECT API.API_ID, API.API_UUID,API.API_NAME," +
-            "API.API_VERSION,API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
+            "API.API_VERSION, API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
 
-    public static final String REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL = "DELETE FROM AM_API WHERE API_UUID IN (_API_UUIDS_)";
+    public static final String REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL = "DELETE FROM AM_API WHERE ORGANIZATION = ?";
+
+    public static final String REMOVE_BULK_APIS_DEFAULT_VERSION_SQL = "DELETE FROM AM_API_DEFAULT_VERSION WHERE "
+            + "ORGANIZATION = ?";
 
     public static final String DELETE_BULK_API_WORKFLOWS_REQUEST_SQL = "DELETE FROM AM_WORKFLOWS WHERE " +
             "WF_TYPE=\"AM_API_STATE\" AND WF_REFERENCE IN (SELECT CONVERT(API.API_ID, CHAR) FROM AM_API API " +
-            "WHERE API.API_UUID IN (_API_UUIDS_))";
+            "WHERE API.ORGANIZATION = ?";
 
     public static final String DELETE_BULK_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
-            "API_ID IN (_API_UUIDS_)";
+            "TENANT_DOMAIN = ?";
 
     public static final String GET_APPLICATION_BY_TIER_SQL =
             " SELECT DISTINCT AMS.APPLICATION_ID,NAME,SUBSCRIBER_ID " +
@@ -2842,6 +2844,7 @@ public class SQLConstants {
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String API_ID_REGEX = "_API_IDS_";
     public static final String API_UUID_REGEX = "_API_UUIDS_";
+    public static final String KM_UUID_REGEX = "_KM_UUIDS_";
     public static final int API_ID_CHUNK_SIZE = 25;
 
     /** Throttle related constants**/
@@ -3363,6 +3366,9 @@ public class SQLConstants {
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
+
+        public static final String DELETE_BULK_KEY_MANAGER_LIST = "DELETE FROM AM_KEY_MANAGER WHERE ORGANIZATION = ? "
+                + "AND UUID IN (_KM_UUIDS_)";
     }
 
     /**

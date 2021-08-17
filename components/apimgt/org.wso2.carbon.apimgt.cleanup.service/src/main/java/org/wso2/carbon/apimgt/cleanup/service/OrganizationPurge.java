@@ -19,6 +19,24 @@ package org.wso2.carbon.apimgt.cleanup.service;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.util.LinkedHashMap;
+
 public interface OrganizationPurge {
-      void deleteOrganization (String organization) throws APIManagementException;
+
+      /**
+       * Returns a linkedHashMap with the Purging result.
+       *
+       * @param organization organization
+       * @return linkedHashMap
+       * @throws APIManagementException
+       */
+      LinkedHashMap<String, String> deleteOrganization (String organization);
+
+      /**
+       * Returns an integer with the Purging priority.
+       * Purging with the lowest value will have the highest priority
+       *
+       * @return An integer with the Purging priority
+       */
+      int getPriority();
 }

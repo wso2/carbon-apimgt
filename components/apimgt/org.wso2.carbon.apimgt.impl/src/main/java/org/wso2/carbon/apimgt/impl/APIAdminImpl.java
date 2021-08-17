@@ -571,17 +571,16 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfigurationDTO;
     }
 
+
     @Override
-    public void deleteKeyManagerConfigurationById(String organization, String id, String username)
+    public void deleteIdentityProvider(String organization, KeyManagerConfigurationDTO kmConfig)
             throws APIManagementException {
-        KeyManagerConfigurationDTO keyManagerConfigurationDTO = getKeyManagerConfigurationById(organization, id);
-        if (keyManagerConfigurationDTO != null) {
+        if (kmConfig != null) {
             if (org.apache.commons.lang3.StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                    keyManagerConfigurationDTO.getTokenType())) {
+                    kmConfig.getTokenType())) {
                 try {
-                    if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
-                        IdentityProviderManager.getInstance()
-                                .deleteIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
+                    if (kmConfig.getExternalReferenceId() != null) {
+                        IdentityProviderManager.getInstance().deleteIdPByResourceId(kmConfig.getExternalReferenceId(),
                                         APIUtil.getInternalOrganizationDomain(organization));
                     }
                 } catch (IdentityProviderManagementException e) {
@@ -589,17 +588,22 @@ public class APIAdminImpl implements APIAdmin {
                             ExceptionCodes.IDP_DELETION_FAILED);
                 }
             }
+        }
+    }
 
-            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
-                apiMgtDAO.deleteKeyManagerConfigurationById(id, organization);
+
+    @Override
+    public void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO kmConfig)
+            throws APIManagementException {
+        if (kmConfig != null) {
+            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
+                apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
                 new KeyMgtNotificationSender()
-                        .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+                        .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
             } else {
                 throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
                         ExceptionCodes.INTERNAL_ERROR);
             }
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
-                    new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED, username);
         }
     }
 
