@@ -26,6 +26,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.cleanup.service.ApplicationPurge;
+import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -88,9 +90,7 @@ public class ApplicationPurgeTest {
         Mockito.doNothing().when(organizationPurgeDAO).removeSubscriber(Mockito.anyInt());
 
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(apiMgtDAO, organizationPurgeDAO);
-        applicationPurge.organizationPurgeDAO = organizationPurgeDAO;
-        applicationPurge.apiMgtDAO = apiMgtDAO;
-        applicationPurge.purge("testOrg");
+        applicationPurge.deleteOrganization("testOrg");
 
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.anyString());
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removeApplicationCreationWorkflows(Mockito.anyString());

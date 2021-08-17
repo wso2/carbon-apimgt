@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
+package org.wso2.carbon.apimgt.cleanup.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +32,7 @@ public class ApplicationPurge implements OrganizationPurge{
     protected ApiMgtDAO apiMgtDAO;
     protected OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(ApplicationPurge.class);
+    LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
 
     public ApplicationPurge() {
         apiMgtDAO = ApiMgtDAO.getInstance();
@@ -45,11 +46,10 @@ public class ApplicationPurge implements OrganizationPurge{
      * Delete organization related application data
      *
      * @param organization organization
-     * @throws APIManagementException if failed to clean up organization
      */
-    @Override public void purge(String organization) throws APIManagementException {
+    @Override
+    public LinkedHashMap<String, String> deleteOrganization(String organization) {
         try {
-
             removePendingSubscriptions(organization);
 
             removeApplicationCreationWorkflows(organization);
@@ -59,13 +59,15 @@ public class ApplicationPurge implements OrganizationPurge{
             deleteApplicationList(organization);
 
             deleteSubscribers(organization);
-
         } catch (APIManagementException e) {
-            String message = "Error while deleting application data related to organization: "+organization;
-            throw new APIManagementException(message, e);
+            log.error(e);
         }
+        return applicationPurgeTaskMap;
     }
 
+    @Override public int getPriority() {
+        return 0;
+    }
 
     private void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
         organizationPurgeDAO.removeApplicationCreationWorkflows(organization);

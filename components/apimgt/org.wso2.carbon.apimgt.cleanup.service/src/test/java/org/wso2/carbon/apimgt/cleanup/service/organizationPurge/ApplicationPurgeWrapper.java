@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
 
+import org.wso2.carbon.apimgt.cleanup.service.ApplicationPurge;
+import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
-public class ApplicationPurgeWrapper extends ApplicationPurge{
+public class ApplicationPurgeWrapper extends ApplicationPurge {
 
     public ApplicationPurgeWrapper(ApiMgtDAO apiMgtDAO, OrganizationPurgeDAO organizationPurgeDAO) {
         super(apiMgtDAO, organizationPurgeDAO);

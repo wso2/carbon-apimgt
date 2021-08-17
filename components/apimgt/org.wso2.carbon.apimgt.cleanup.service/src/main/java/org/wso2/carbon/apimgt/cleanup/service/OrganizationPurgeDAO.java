@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
+package org.wso2.carbon.apimgt.cleanup.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

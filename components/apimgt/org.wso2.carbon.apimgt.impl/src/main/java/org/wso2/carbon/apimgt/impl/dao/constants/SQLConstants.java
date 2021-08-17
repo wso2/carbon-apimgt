@@ -2003,15 +2003,6 @@ public class SQLConstants {
             "   WF_REFERENCE=?" +
             "   AND WF_TYPE=?";
 
-    public static final String GET_EXTERNAL_WORKFLOW_LIST_FOR_SUBSCRIPTIONS_SQL =
-            " SELECT " +
-                    "   WF_EXTERNAL_REFERENCE" +
-                    " FROM " +
-                    "   AM_WORKFLOWS" +
-                    " WHERE " +
-                    "   WF_REFERENCE IN (_WF_REFERENCES_)" +
-                    "   AND WF_TYPE=?";
-
     public static final String GET_EXTERNAL_WORKFLOW_FOR_SIGNUP_SQL =
             "SELECT " +
             "   WF_EXTERNAL_REFERENCE" +
