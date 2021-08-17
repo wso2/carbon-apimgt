@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
+package organization.purge;
 
 import org.junit.Before;
 import org.junit.Test;
