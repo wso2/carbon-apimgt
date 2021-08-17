@@ -20,7 +20,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.0.281-SNAPSHOT</version>
+        <version>9.0.291-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -33,10 +33,6 @@
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.databridge.agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
         </dependency>
     </dependencies>
 
@@ -54,18 +50,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Private-Package>
-                            org.wso2.carbon.apimgt.eventing.internal.*
-                        </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.apimgt.eventing.internal.*,
                             org.wso2.carbon.apimgt.eventing.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging.*;version="${import.package.version.commons.logging}",
-                            org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
-                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

@@ -41,7 +41,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all API categories", notes = "Get all API categories ", response = APICategoryListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Category (Collection)" })
     @ApiResponses(value = { 
