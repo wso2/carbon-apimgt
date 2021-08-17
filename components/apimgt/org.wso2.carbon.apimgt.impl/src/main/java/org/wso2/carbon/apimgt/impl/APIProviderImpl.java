@@ -3412,33 +3412,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
-    public void deleteAPI(API api) throws APIManagementException {
+    public void deleteAPI(API api, String apiUuid, String organization) throws APIManagementException {
         boolean isError = false;
 
         int apiId = -1;
         // DB delete operations
         try {
-            apiId = apiMgtDAO.getAPIID(api.getUuid());
-            deleteAPIRevisions(api.getUuid(), api.getOrganization());
+            apiId = apiMgtDAO.getAPIID(apiUuid);
+            deleteAPIRevisions(apiUuid, organization);
             deleteAPIFromDB(api);
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
-                                + " successfully removed from the database.";
-                log.debug(logMessage);
-            }
+            log.debug("API " + apiUuid + " has successfully removed from the database.");
+
         } catch (APIManagementException e) {
-            log.error("Error while executing API delete operations on DB for API " + api.getUuid(), e);
+            log.error("Error while executing API delete operations on DB for API " + apiUuid, e);
             isError = true;
         }
 
-        if (api.getId().toString() != null) {
+        // Deleting Resource Registration from key managers
+        if (api != null && api.getId() != null && api.getId().toString() != null) {
             Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
                 KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
                 if (keyManager != null) {
                     try {
                         keyManager.deleteRegisteredResourceByAPIId(api.getId().toString());
+                        log.debug("API " + apiUuid + " has successfully removed from the Key Manager "
+                                + keyManagerDtoEntry.getKey());
                     } catch (APIManagementException e) {
                         log.error("Error while deleting Resource Registration for API " + api.getId().toString() +
                                 " in Key Manager " + keyManagerDtoEntry.getKey(), e);
@@ -3448,36 +3447,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(api.getUuid());
+            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
+            log.debug("API " + apiUuid + " has successfully removed from the gateway artifacts.");
         } catch (APIManagementException e) {
-            log.error("Error while executing API delete operation on gateway artifacts for API " + api.getUuid(), e);
+            log.error("Error while executing API delete operation on gateway artifacts for API " + apiUuid, e);
             isError = true;
         }
 
         try {
-            apiPersistenceInstance.deleteAPI(new Organization(api.getOrganization()), api.getUuid());
+            apiPersistenceInstance.deleteAPI(new Organization(organization), apiUuid);
+            log.debug("API " + apiUuid + " has successfully removed from the persistence instance.");
         } catch (APIPersistenceException e) {
             log.error("Error while executing API delete operation on persistence instance for API "
-                    + api.getUuid(), e);
+                    + apiUuid, e);
             isError = true;
         }
 
-        // gatewayType check is required when API Management is deployed on
-        // other servers to avoid synapse
-        //Check if there are already published external APIStores.If yes,removing APIs from them.
-        Set<APIStore> apiStoreSet;
-        try {
-            apiStoreSet = getPublishedExternalAPIStores(api.getUuid());
-            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
-                for (APIStore store : apiStoreSet) {
-                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+        // Deleting on external API stores
+        if (api != null) {
+            // gatewayType check is required when API Management is deployed on
+            // other servers to avoid synapse
+            //Check if there are already published external APIStores.If yes,removing APIs from them.
+            Set<APIStore> apiStoreSet;
+            try {
+                apiStoreSet = getPublishedExternalAPIStores(apiUuid);
+                WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
+                if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
+                    for (APIStore store : apiStoreSet) {
+                        wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                    }
                 }
+            } catch (APIManagementException e) {
+                log.error("Error while executing API delete operation on external API stores for API "
+                        + apiUuid, e);
+                isError = true;
             }
-        } catch (APIManagementException e) {
-            log.error("Error while executing API delete operation on external API stores for API "
-                    + api.getUuid(), e);
-            isError = true;
         }
 
         if (apiId != -1) {
@@ -3485,10 +3489,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 cleanUpPendingAPIStateChangeTask(apiId);
             } catch (WorkflowException | APIManagementException e) {
                 log.error("Error while executing API delete operation on cleanup workflow tasks for API "
-                        + api.getUuid(), e);
+                        + apiUuid, e);
                 isError = true;
             }
+        }
 
+        // Delete event publishing to gateways
+        if (api != null && apiId != -1) {
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -3497,16 +3504,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
-                    + api.getUuid());
+                    + apiUuid);
         }
 
-        JSONObject apiLogObject = new JSONObject();
-        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+        // Logging audit message for API delete
+        if (api != null) {
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                APIConstants.AuditLogConstants.DELETED, this.username);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+        }
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
@@ -3515,9 +3525,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
+
+        if (api == null) {
+            log.error("Following steps were skipped while deleting API " + apiUuid + " due to api being null. " +
+                    "deleting Resource Registration from key managers, deleting on external API stores, " +
+                    "event publishing to gateways, logging audit message. "
+            );
+        }
+
         // if one of the above has failed throw an error
         if (isError) {
-            throw new APIManagementException("Error while deleting the API " + api.getUuid());
+            throw new APIManagementException("Error while deleting the API " + apiUuid);
         }
     }
     /**
