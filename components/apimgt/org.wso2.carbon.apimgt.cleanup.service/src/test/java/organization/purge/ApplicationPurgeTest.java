@@ -20,27 +20,13 @@ package organization.purge;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.cleanup.service.ApplicationPurge;
 import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.mockito.Mockito;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import java.util.ArrayList;
-import java.util.List;
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Caching.class, Cache.class, CacheProvider.class, Cache.class })
 public class ApplicationPurgeTest {
 
     private OrganizationPurgeDAO organizationPurgeDAO;
@@ -60,26 +46,8 @@ public class ApplicationPurgeTest {
         Mockito.doNothing().when(organizationPurgeDAO).deletePendingApplicationRegistrations(Mockito.anyString());
         Mockito.doNothing().when(organizationPurgeDAO).deleteApplicationList(Mockito.anyString());
 
-        List<Integer> subscriberIdList = new ArrayList<>();
-        subscriberIdList.add(1);
-
-        List<String> mappedOrganizations = new ArrayList<>();
-        mappedOrganizations.add("testOrg");
-
         Subscriber subscriber = Mockito.mock(Subscriber.class);
         Mockito.doReturn(subscriber).when(apiMgtDAO).getSubscriber(Mockito.anyInt());
-
-        Cache cache = Mockito.mock(Cache.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        PowerMockito.mockStatic(Caching.class);
-
-        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
-        Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
-
-        Subscriber cachedSubscriber = new Subscriber("application-purge-sub");
-
-        PowerMockito.doReturn(cachedSubscriber).when(cache).get(Mockito.any());
-        PowerMockito.doReturn(true).when(cache).remove(Mockito.any());
 
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(organizationPurgeDAO);
         applicationPurge.deleteOrganization("testOrg");
@@ -89,7 +57,6 @@ public class ApplicationPurgeTest {
         Mockito.verify(organizationPurgeDAO, Mockito.times(1))
                 .deletePendingApplicationRegistrations(Mockito.anyString());
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).deleteApplicationList(Mockito.anyString());
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getSubscriber(Mockito.anyInt());
 
     }
 }
