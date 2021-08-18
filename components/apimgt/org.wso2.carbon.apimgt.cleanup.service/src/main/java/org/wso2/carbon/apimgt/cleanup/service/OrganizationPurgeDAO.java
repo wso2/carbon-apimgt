@@ -263,8 +263,8 @@ public class OrganizationPurgeDAO {
         PreparedStatement removeMigratedGroupIdsStatement = null;
         PreparedStatement deleteStatement = null;
 
-        String deleteQuery = SQLConstants.REMOVE_GROUP_ID_MAPPING_BULK_SQL;
-        String removeGroupIdsQuery = SQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL_BULK;
+        String deleteQuery = OrganizationPurgeSQLConstants.REMOVE_GROUP_ID_MAPPING_BULK_SQL;
+        String removeGroupIdsQuery = OrganizationPurgeSQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL_BULK;
 
         try {
             removeMigratedGroupIdsStatement = conn.prepareStatement(removeGroupIdsQuery);

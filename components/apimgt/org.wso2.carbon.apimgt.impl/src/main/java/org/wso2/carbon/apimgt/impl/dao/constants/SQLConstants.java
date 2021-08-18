@@ -1004,7 +1004,7 @@ public class SQLConstants {
             "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   LOWER(APP.NAME) = LOWER(?)" + "   " +
-            "   AND APP.ORGANIZATION = ? " +
+            "   AND ORGANIZATION = ? " +
             "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
     public static final String GET_APPLICATION_ID_SQL =
@@ -2561,10 +2561,6 @@ public class SQLConstants {
     public static final String REMOVE_GROUP_ID_MAPPING_SQL =
             "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
 
-    public static final String REMOVE_GROUP_ID_MAPPING_BULK_SQL =
-            "DELETE APP_GROUP FROM AM_APPLICATION_GROUP_MAPPING APP_GROUP JOIN AM_APPLICATION APP on "
-                    + "APP_GROUP.APPLICATION_ID = APP.APPLICATION_ID";
-
     public static final String ADD_GROUP_ID_MAPPING_SQL =
             "INSERT INTO AM_APPLICATION_GROUP_MAPPING (APPLICATION_ID, GROUP_ID, TENANT) VALUES (?,?,?)";
 
@@ -2573,9 +2569,6 @@ public class SQLConstants {
 
     public static final String REMOVE_MIGRATED_GROUP_ID_SQL =
             "UPDATE AM_APPLICATION SET GROUP_ID = '' WHERE APPLICATION_ID = ?";
-
-    public static final String REMOVE_MIGRATED_GROUP_ID_SQL_BULK =
-            "UPDATE AM_APPLICATION APP SET APP.GROUP_ID = '' WHERE APP.ORGANIZATION = ?";
 
     /** Environment related constants **/
 
