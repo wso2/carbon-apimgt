@@ -84,6 +84,7 @@ public class ApplicationPurge implements OrganizationPurge {
                         break;
                     }
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    break;
                 } catch (APIManagementException e) {
                     log.error("Error while deleting Application Data in organization " + organization, e);
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);

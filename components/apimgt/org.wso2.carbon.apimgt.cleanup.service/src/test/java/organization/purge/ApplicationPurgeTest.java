@@ -18,24 +18,25 @@
 
 package organization.purge;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.cleanup.service.ApplicationPurge;
 import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ApplicationPurgeTest {
 
     private OrganizationPurgeDAO organizationPurgeDAO;
-    private ApiMgtDAO apiMgtDAO;
 
     @Before
     public void init() {
         organizationPurgeDAO = Mockito.mock(OrganizationPurgeDAO.class);
-        apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
     }
 
     @Test
@@ -46,11 +47,13 @@ public class ApplicationPurgeTest {
         Mockito.doNothing().when(organizationPurgeDAO).deletePendingApplicationRegistrations(Mockito.anyString());
         Mockito.doNothing().when(organizationPurgeDAO).deleteApplicationList(Mockito.anyString());
 
-        Subscriber subscriber = Mockito.mock(Subscriber.class);
-        Mockito.doReturn(subscriber).when(apiMgtDAO).getSubscriber(Mockito.anyInt());
-
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(organizationPurgeDAO);
-        applicationPurge.deleteOrganization("testOrg");
+        LinkedHashMap<String, String> subtaskResult = applicationPurge.deleteOrganization("testOrg");
+
+        for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {
+            Assert.assertEquals(entry.getKey() + " is not successful",
+                    APIConstants.OrganizationDeletion.COMPLETED, entry.getValue());
+        }
 
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.anyString());
         Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removeApplicationCreationWorkflows(Mockito.anyString());
