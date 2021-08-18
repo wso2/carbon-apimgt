@@ -1559,32 +1559,32 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isAPIExistDB) {
                 //validate API update operation permitted based on the LC state
                 validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-            }
 
-            try {
-                //check if the API has subscriptions
-                //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-                List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
-                if (apiUsages != null && apiUsages.size() > 0) {
-                    RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+                try {
+                    //check if the API has subscriptions
+                    //Todo : need to optimize this check. This method seems too costly to check if subscription exists
+                    List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
+                    if (apiUsages != null && apiUsages.size() > 0) {
+                        RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
+                            + organization);
+                    isError = true;
                 }
-            } catch (APIManagementException e) {
-                log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
-                        + organization);
-                isError = true;
-            }
 
-            try {
-                List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
+                try {
+                    List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
 
-                if (!usedProductResources.isEmpty()) {
-                    RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
-                            usedProductResources.toString() + " are used by one or more API Products", log);
+                    if (!usedProductResources.isEmpty()) {
+                        RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
+                                usedProductResources.toString() + " are used by one or more API Products", log);
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while checking API products using same resources for deleting API " + apiId +
+                            " on organization " + organization);
+                    isError = true;
                 }
-            } catch (APIManagementException e) {
-                log.error("Error while checking API products using same resources for deleting API " + apiId +
-                        " on organization " + organization);
-                isError = true;
             }
 
             //deletes the API

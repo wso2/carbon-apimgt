@@ -3473,11 +3473,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (keyManager != null) {
                     try {
                         keyManager.deleteRegisteredResourceByAPIId(api.getId().toString());
-                        log.debug("API " + apiUuid + " has successfully removed from the Key Manager "
-                                + keyManagerDtoEntry.getKey());
+                        log.debug("API " + apiUuid + " on organization " + organization +
+                                " has successfully removed from the Key Manager " + keyManagerDtoEntry.getKey());
                     } catch (APIManagementException e) {
-                        log.error("Error while deleting Resource Registration for API " + api.getId().toString() +
-                                " in Key Manager " + keyManagerDtoEntry.getKey(), e);
+                        log.error("Error while deleting Resource Registration for API " + apiUuid +
+                                " on organization " + organization + " in Key Manager "
+                                + keyManagerDtoEntry.getKey(), e);
                     }
                 }
             }
