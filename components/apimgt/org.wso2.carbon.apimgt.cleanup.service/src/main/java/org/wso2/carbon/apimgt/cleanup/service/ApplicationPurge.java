@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.cleanup.service;
 import java.util.LinkedHashMap;
 
 public class ApplicationPurge implements OrganizationPurge {
-    public LinkedHashMap<String, String> deleteOrganization(String organization) {
+    public LinkedHashMap<String, String> purge(String organization) {
         return null;
     }
 
