@@ -477,18 +477,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<SubscribedAPI> getAPIUsageByAPIId(String uuid, String organization)
             throws APIManagementException {
         APIIdentifier identifier = apiMgtDAO.getAPIIdentifierFromUUID(uuid);
-        APIIdentifier apiIdEmailReplaced = new APIIdentifier(APIUtil.replaceEmailDomain(identifier.getProviderName()),
-                identifier.getApiName(), identifier.getVersion());
-        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(uuid, organization);
-        List<SubscribedAPI> subscribedAPIs = new ArrayList<SubscribedAPI>();
-        for (UserApplicationAPIUsage usage : allApiResult) {
-            for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
-                APIIdentifier subsApiId = apiSubscription.getApiId();
-                APIIdentifier subsApiIdEmailReplaced = new APIIdentifier(
-                        APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
-                        subsApiId.getVersion());
-                if (subsApiIdEmailReplaced.equals(apiIdEmailReplaced)) {
-                    subscribedAPIs.add(apiSubscription);
+        List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
+        if (identifier != null) {
+            APIIdentifier apiIdEmailReplaced = new APIIdentifier(APIUtil.replaceEmailDomain(identifier.getProviderName()),
+                    identifier.getApiName(), identifier.getVersion());
+            UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(uuid, organization);
+            for (UserApplicationAPIUsage usage : allApiResult) {
+                for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
+                    APIIdentifier subsApiId = apiSubscription.getApiId();
+                    APIIdentifier subsApiIdEmailReplaced = new APIIdentifier(
+                            APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
+                            subsApiId.getVersion());
+                    if (subsApiIdEmailReplaced.equals(apiIdEmailReplaced)) {
+                        subscribedAPIs.add(apiSubscription);
+                    }
                 }
             }
         }
