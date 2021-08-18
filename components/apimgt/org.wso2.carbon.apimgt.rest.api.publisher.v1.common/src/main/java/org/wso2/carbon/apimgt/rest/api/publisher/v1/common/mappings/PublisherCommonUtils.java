@@ -33,7 +33,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -86,10 +85,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -870,38 +865,19 @@ public class PublisherCommonUtils {
     public static boolean validateEndpoints(APIDTO apiDto) {
 
         ArrayList<String> endpoints = new ArrayList<>();
-        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES +
-                UrlValidator.ALLOW_LOCAL_URLS);
+        org.json.JSONObject endpointConfiguration = new org.json.JSONObject((Map) apiDto.getEndpointConfig());
 
-        if (apiDto.getEndpointConfig() != null) {
-            Map endpointConfig = (Map) apiDto.getEndpointConfig();
-            endpoints.add(String.valueOf(((Map) endpointConfig
-                    .get(APIConstants.API_DATA_SANDBOX_ENDPOINTS)).get(APIConstants.API_DATA_URL)));
-            endpoints.add(String.valueOf(((Map) endpointConfig
-                    .get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)).get(APIConstants.API_DATA_URL)));
-
-            for (String endpoint : endpoints) {
-                // If url is a JMS connection url, validation is skipped. If not, validity is checked.
-                if (!endpoint.startsWith("jms:") && !urlValidator.isValid(endpoint)) {
-                    try {
-                        // If the url is not identified as valid from the above check,
-                        // next step is determine the validity of the encoded url (done through the URI constructor).
-                        URL endpointUrl = new URL(endpoint);
-                        URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
-                                endpointUrl.getPath(), endpointUrl.getQuery(), null);
-
-                        if (!urlValidator.isValid(endpointUri.toString())) {
-                            log.error("Invalid endpoint url " + endpointUrl);
-                            return false;
-                        }
-                    } catch (URISyntaxException | MalformedURLException e) {
-                        log.error("Error while parsing the endpoint url " + endpoint);
-                        return false;
-                    }
-                }
-            }
+        // extract sandbox endpoint URL
+        if (!endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
+                    .getString(APIConstants.API_DATA_URL));
         }
-        return true;
+        // extract production endpoint URL
+        if (!endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                    .getString(APIConstants.API_DATA_URL));
+        }
+        return APIUtil.validateEndpointURLs(endpoints);
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {

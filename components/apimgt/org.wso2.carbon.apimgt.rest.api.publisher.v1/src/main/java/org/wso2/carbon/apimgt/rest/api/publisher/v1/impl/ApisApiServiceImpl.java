@@ -3298,11 +3298,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param inlineApiDefinition Swagger API definition String
      * @param messageContext CXF message context
      * @return API Import using OpenAPI definition response
+     * @throws APIManagementException when error occurs while importing the OpenAPI definition
      */
     @Override
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
-                                            MessageContext messageContext) {
+                                            MessageContext messageContext) throws APIManagementException {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
@@ -3320,7 +3321,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // validate sandbox and production endpoints
         if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
-            RestApiUtil.handleBadRequest("Invalid/Malformed endpoint URL(s) detected ", log);
+            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                    ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
         // Import the API and Definition

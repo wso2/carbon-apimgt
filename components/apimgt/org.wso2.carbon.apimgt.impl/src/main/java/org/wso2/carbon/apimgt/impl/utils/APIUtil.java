@@ -50,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -264,6 +265,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
@@ -11808,6 +11811,39 @@ public final class APIUtil {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
+    }
+
+    /**
+     * Validate sandbox and production endpoint URLs.
+     *
+     * @param endpoints sandbox and production endpoint URLs inclusive list
+     * @return validity of given URLs
+     */
+    public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
+        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES +
+                UrlValidator.ALLOW_LOCAL_URLS);
+
+        for (String endpoint : endpoints) {
+            // If url is a JMS connection url, validation is skipped. If not, validity is checked.
+            if (!endpoint.startsWith("jms:") && !urlValidator.isValid(endpoint)) {
+                try {
+                    // If the url is not identified as valid from the above check,
+                    // next step is determine the validity of the encoded url (done through the URI constructor).
+                    URL endpointUrl = new URL(endpoint);
+                    URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                            endpointUrl.getPath(), endpointUrl.getQuery(), null);
+
+                    if (!urlValidator.isValid(endpointUri.toString())) {
+                        log.error("Invalid endpoint url " + endpointUrl);
+                        return false;
+                    }
+                } catch (URISyntaxException | MalformedURLException e) {
+                    log.error("Error while parsing the endpoint url " + endpoint);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
     /**
