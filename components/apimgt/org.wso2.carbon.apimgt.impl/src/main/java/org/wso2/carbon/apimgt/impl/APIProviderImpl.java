@@ -893,7 +893,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                api.getUUID(), api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
@@ -1589,7 +1589,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                api.getUUID(),api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
@@ -2534,7 +2534,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 API otherApi = getAPI(new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version));
                 APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, otherApi.getId().getApiName(),
-                        0, version, api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
+                        0,null, version, api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
                         otherApi.getStatus());
                 APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
             }
@@ -4404,9 +4404,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                    api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
-                    api.getStatus());
+                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId
+                    ,api.getUUID(),api.getId().getVersion(), api.getType(), api.getContext(),
+                    api.getId().getProviderName(),api.getStatus());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         } catch (RegistryException e) {
@@ -5820,8 +5820,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         log.debug(logMessage);
                     }
                     APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, tenantDomain, apiName, apiId,
-                            apiVersion, apiType, apiContext, providerName, targetStatus);
+                            APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, tenantDomain, apiName,
+                            apiId,apiArtifact.getId(), apiVersion, apiType, apiContext, providerName, targetStatus);
                     APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
                     /**

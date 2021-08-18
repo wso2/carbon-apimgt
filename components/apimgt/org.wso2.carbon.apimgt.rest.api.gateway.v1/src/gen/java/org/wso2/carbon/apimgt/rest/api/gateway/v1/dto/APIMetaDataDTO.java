@@ -1,10 +1,10 @@
-package org.wso2.carbon.apimgt.internal.service.dto;
+package org.wso2.carbon.apimgt.rest.api.gateway.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.URLMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -16,9 +16,9 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class APIDTO   {
+public class APIMetaDataDTO   {
   
-    private String uuid = null;
+    private String apiUUID = null;
     private Integer apiId = null;
     private String provider = null;
     private String name = null;
@@ -30,25 +30,26 @@ public class APIDTO   {
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
 
   /**
+   * UUID of API.
    **/
-  public APIDTO uuid(String uuid) {
-    this.uuid = uuid;
+  public APIMetaDataDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("uuid")
-  public String getUuid() {
-    return uuid;
+  @ApiModelProperty(value = "UUID of API.")
+  @JsonProperty("apiUUID")
+  public String getApiUUID() {
+    return apiUUID;
   }
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
   }
 
   /**
    **/
-  public APIDTO apiId(Integer apiId) {
+  public APIMetaDataDTO apiId(Integer apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -66,7 +67,7 @@ public class APIDTO   {
   /**
    * API Provider name.
    **/
-  public APIDTO provider(String provider) {
+  public APIMetaDataDTO provider(String provider) {
     this.provider = provider;
     return this;
   }
@@ -84,7 +85,7 @@ public class APIDTO   {
   /**
    * Name of the API
    **/
-  public APIDTO name(String name) {
+  public APIMetaDataDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -102,7 +103,7 @@ public class APIDTO   {
   /**
    * Version of the API.
    **/
-  public APIDTO version(String version) {
+  public APIMetaDataDTO version(String version) {
     this.version = version;
     return this;
   }
@@ -120,7 +121,7 @@ public class APIDTO   {
   /**
    * Context of the API.
    **/
-  public APIDTO context(String context) {
+  public APIMetaDataDTO context(String context) {
     this.context = context;
     return this;
   }
@@ -138,7 +139,7 @@ public class APIDTO   {
   /**
    * API level throttling policy.
    **/
-  public APIDTO policy(String policy) {
+  public APIMetaDataDTO policy(String policy) {
     this.policy = policy;
     return this;
   }
@@ -156,7 +157,7 @@ public class APIDTO   {
   /**
    * Type of the API.
    **/
-  public APIDTO apiType(String apiType) {
+  public APIMetaDataDTO apiType(String apiType) {
     this.apiType = apiType;
     return this;
   }
@@ -174,7 +175,7 @@ public class APIDTO   {
   /**
    * Whether this is the default version of the API.
    **/
-  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
+  public APIMetaDataDTO isDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
     return this;
   }
@@ -191,7 +192,7 @@ public class APIDTO   {
 
   /**
    **/
-  public APIDTO urlMappings(List<URLMappingDTO> urlMappings) {
+  public APIMetaDataDTO urlMappings(List<URLMappingDTO> urlMappings) {
     this.urlMappings = urlMappings;
     return this;
   }
@@ -215,30 +216,30 @@ public class APIDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIDTO API = (APIDTO) o;
-    return Objects.equals(uuid, API.uuid) &&
-        Objects.equals(apiId, API.apiId) &&
-        Objects.equals(provider, API.provider) &&
-        Objects.equals(name, API.name) &&
-        Objects.equals(version, API.version) &&
-        Objects.equals(context, API.context) &&
-        Objects.equals(policy, API.policy) &&
-        Objects.equals(apiType, API.apiType) &&
-        Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(urlMappings, API.urlMappings);
+    APIMetaDataDTO apIMetaData = (APIMetaDataDTO) o;
+    return Objects.equals(apiUUID, apIMetaData.apiUUID) &&
+        Objects.equals(apiId, apIMetaData.apiId) &&
+        Objects.equals(provider, apIMetaData.provider) &&
+        Objects.equals(name, apIMetaData.name) &&
+        Objects.equals(version, apIMetaData.version) &&
+        Objects.equals(context, apIMetaData.context) &&
+        Objects.equals(policy, apIMetaData.policy) &&
+        Objects.equals(apiType, apIMetaData.apiType) &&
+        Objects.equals(isDefaultVersion, apIMetaData.isDefaultVersion) &&
+        Objects.equals(urlMappings, apIMetaData.urlMappings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
+    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIDTO {\n");
+    sb.append("class APIMetaDataDTO {\n");
     
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");

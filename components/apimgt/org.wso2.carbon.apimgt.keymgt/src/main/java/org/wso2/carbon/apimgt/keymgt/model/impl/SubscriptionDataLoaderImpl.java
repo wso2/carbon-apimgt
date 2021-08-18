@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.io.IOException;
 import java.net.URL;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -291,14 +290,14 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
-    public API getApi(String context, String version) throws DataLoadingException {
+    public API getApi(String context, String version,String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
                 "&version=" + version;
         API api = new API();
         String responseString;
         try {
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);

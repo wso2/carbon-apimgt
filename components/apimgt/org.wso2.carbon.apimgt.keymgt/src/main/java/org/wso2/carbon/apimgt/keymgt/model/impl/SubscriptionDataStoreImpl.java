@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -154,8 +155,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return applicationKeyMapping;
                 }
                 try {
-                    applicationKeyMapping = new SubscriptionDataLoaderImpl()
-                            .getKeyMapping(key, keyManager, tenantDomain);
+                    applicationKeyMapping = new SubscriptionDataLoaderImpl().getKeyMapping(key, keyManager,
+                            tenantDomain);
                 } catch (DataLoadingException e) {
                     log.error("Error while Loading KeyMapping Information from Internal API.", e);
                 }
@@ -193,7 +194,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return api;
                 }
                 try {
-                    api = new SubscriptionDataLoaderImpl().getApi(context, version);
+                    api = new SubscriptionDataLoaderImpl().getApi(context, version, tenantDomain);
                 } catch (DataLoadingException e) {
                     log.error("Error while Retrieving Data From Internal Rest API", e);
                 }
@@ -545,7 +546,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public void addOrUpdateAPIWithUrlTemplates(API api) {
         try {
-            API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
+            API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion(), tenantDomain);
             apiMap.put(api.getCacheKey(), newAPI);
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
@@ -637,6 +638,87 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public boolean isScopesInitialized() {
 
         return scopesInitialized;
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsByAPIId(int apiId) {
+
+        List<Subscription> subscriptionList = new ArrayList<>();
+        for (Subscription subscription : subscriptionMap.values()) {
+            if (subscription.getApiId() == apiId) {
+                subscriptionList.add(subscription);
+            }
+        }
+        return subscriptionList;
+    }
+
+    @Override
+    public List<ApplicationKeyMapping> getKeyMappingByApplicationId(int applicationId) {
+
+        List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
+        for (ApplicationKeyMapping applicationKeyMapping : applicationKeyMappingMap.values()) {
+            if (applicationKeyMapping.getApplicationId() == applicationId) {
+                applicationKeyMappings.add(applicationKeyMapping);
+            }
+        }
+        return applicationKeyMappings;
+    }
+
+    @Override
+    public API getApiByNameAndVersion(String name, String version) {
+
+        for (API api : apiMap.values()) {
+            if (name.equals(api.getApiName()) && version.equals(api.getApiVersion())) {
+                return api;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<Application> getApplicationsByName(String name) {
+        List<Application> applicationList = new ArrayList<>();
+        for (Application app : applicationMap.values()) {
+            if (name.equals(app.getName())){
+                applicationList.add(app);
+            }
+        }
+        return applicationList;
+    }
+
+    @Override
+    public Application getApplicationByUUID(String uuid) {
+
+        for (Application application : applicationMap.values()) {
+            if (uuid.equals(application.getUUID())){
+                return application;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Subscription getSubscriptionByUUID(String apiUUID, String appUUID) {
+
+        API api = getAPIByUUID(apiUUID);
+        if (api == null){
+            return null;
+        }
+        Application application = getApplicationByUUID(appUUID);
+        if (application == null){
+            return null;
+        }
+        return getSubscriptionById(application.getId(), api.getApiId());
+    }
+
+    private API getAPIByUUID(String apiUUID) {
+
+        for (API api : apiMap.values()) {
+            if (api.getUuid().equals(apiUUID)){
+                return api;
+            }
+        }
+        return null;
     }
 
     @Override

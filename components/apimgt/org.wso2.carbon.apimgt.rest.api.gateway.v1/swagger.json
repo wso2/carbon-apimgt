@@ -427,9 +427,527 @@
           "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
+    },
+    "/api/info" : {
+      "get" : {
+        "tags" : [ "Get API Info" ],
+        "summary" : "Get the subscription information of an api by providing the api name, version and context.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "context",
+          "in" : "query",
+          "description" : "Context of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/APIInfo"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/api/info?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/apis" : {
+      "get" : {
+        "tags" : [ "Get API Info" ],
+        "summary" : "Get the API meta information of an api by providing the api name, version and context.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "Context of the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/APIList"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/apis?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/applications" : {
+      "get" : {
+        "tags" : [ "Get Application Info" ],
+        "summary" : "Get the Application meta information of an api by providing the api name, version and context.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "description" : "Name of the Application\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "uuid",
+          "in" : "query",
+          "description" : "UUID of the Application\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the Application\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/ApplicationList"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/applications?name=PizzaAPpp&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/subscriptions" : {
+      "get" : {
+        "tags" : [ "Get Subscription Info" ],
+        "summary" : "Get the subscriptions meta information of an api by providing the api name, version and context.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "apiUUID",
+          "in" : "query",
+          "description" : "UUID of the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "appUUID",
+          "in" : "query",
+          "description" : "UUID of the Application\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the Application\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Subscription"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
     }
   },
   "definitions" : {
+    "APIInfo" : {
+      "properties" : {
+        "apiUUID" : {
+          "type" : "string",
+          "description" : "UUID of API."
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "provider" : {
+          "type" : "string",
+          "description" : "API Provider name."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Name of the API"
+        },
+        "version" : {
+          "type" : "string",
+          "description" : "Version of the API."
+        },
+        "context" : {
+          "type" : "string",
+          "description" : "Context of the API."
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "API level throttling policy."
+        },
+        "apiType" : {
+          "type" : "string",
+          "example" : "APIProduct",
+          "description" : "Type of the API."
+        },
+        "isDefaultVersion" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether this is the default version of the API."
+        },
+        "urlMappings" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/URLMapping"
+          }
+        },
+        "subscripitons" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SubscriptionInfo"
+          }
+        }
+      },
+      "title" : "Subscription Information for API."
+    },
+    "SubscriptionInfo" : {
+      "properties" : {
+        "subscriptionUUID" : {
+          "type" : "string"
+        },
+        "subscriptionPolicy" : {
+          "type" : "string"
+        },
+        "status" : {
+          "type" : "string"
+        },
+        "application" : {
+          "$ref" : "#/definitions/ApplicationInfo"
+        }
+      }
+    },
+    "ApplicationInfo" : {
+      "properties" : {
+        "uuid" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "integer"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "subName" : {
+          "type" : "string"
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "Application level throtting policy."
+        },
+        "tokenType" : {
+          "type" : "string",
+          "example" : "JWT",
+          "description" : "type of the token."
+        },
+        "attributes" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        },
+        "keys" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationKeyMapping"
+          }
+        }
+      }
+    },
+    "ApplicationKeyMapping" : {
+      "properties" : {
+        "consumerKey" : {
+          "type" : "string"
+        },
+        "keyType" : {
+          "type" : "string"
+        },
+        "keyManager" : {
+          "type" : "string"
+        }
+      }
+    },
+    "URLMapping" : {
+      "properties" : {
+        "authScheme" : {
+          "type" : "string"
+        },
+        "throttlingPolicy" : {
+          "type" : "string"
+        },
+        "httpMethod" : {
+          "type" : "string"
+        },
+        "urlPattern" : {
+          "type" : "string"
+        },
+        "scopes" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "APIList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of APIs returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/APIMetaData"
+          }
+        }
+      },
+      "title" : "API List"
+    },
+    "APIMetaData" : {
+      "properties" : {
+        "apiUUID" : {
+          "type" : "string",
+          "description" : "UUID of API."
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "provider" : {
+          "type" : "string",
+          "description" : "API Provider name."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Name of the API"
+        },
+        "version" : {
+          "type" : "string",
+          "description" : "Version of the API."
+        },
+        "context" : {
+          "type" : "string",
+          "description" : "Context of the API."
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "API level throttling policy."
+        },
+        "apiType" : {
+          "type" : "string",
+          "example" : "APIProduct",
+          "description" : "Type of the API."
+        },
+        "isDefaultVersion" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether this is the default version of the API."
+        },
+        "urlMappings" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/URLMapping"
+          }
+        }
+      }
+    },
+    "ApplicationList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Applications returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationInfo"
+          }
+        }
+      },
+      "title" : "Application List"
+    },
+    "Subscription" : {
+      "properties" : {
+        "subscriptionId" : {
+          "type" : "integer"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "appId" : {
+          "type" : "integer"
+        },
+        "subscriptionState" : {
+          "type" : "string"
+        }
+      }
+    },
     "DeployResponse" : {
       "required" : [ "deployStatus" ],
       "properties" : {

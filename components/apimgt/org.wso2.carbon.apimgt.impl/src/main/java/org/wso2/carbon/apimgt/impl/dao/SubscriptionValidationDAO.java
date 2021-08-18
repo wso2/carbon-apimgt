@@ -335,6 +335,7 @@ public class SubscriptionValidationDAO {
                         String apiVersionFromDB = resultSet.getString("API_VERSION");
                         api.setVersion(apiVersionFromDB);
                         api.setContext(resultSet.getString("CONTEXT"));
+                        api.setApiType(resultSet.getString("API_TYPE"));
                         String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         if (apiVersionFromDB != null) {
                             api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));

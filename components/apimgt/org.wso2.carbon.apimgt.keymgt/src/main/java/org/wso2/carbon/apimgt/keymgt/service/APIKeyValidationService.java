@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
@@ -319,7 +318,7 @@ public class APIKeyValidationService {
         if (api == null) {
             log.debug("SubscriptionDataStore didn't contains API metadata reading from rest api context: " + context +
                     " And version " + version);
-            api = new SubscriptionDataLoaderImpl().getApi(context, version);
+            api = new SubscriptionDataLoaderImpl().getApi(context, version, tenantDomain);
             if (api != null) {
                 store.addOrUpdateAPI(api);
                 if (log.isDebugEnabled()) {

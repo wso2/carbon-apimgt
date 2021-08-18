@@ -132,10 +132,11 @@ public interface SubscriptionDataLoader {
      *
      * @param context context of the API
      * @param version Version of the API
+     * @param tenantDomain tenantDomain of th API
      * @return An {@link API}
      * @throws DataLoadingException If any error
      */
-    public API getApi(String context, String version) throws DataLoadingException;
+    public API getApi(String context, String version,String tenantDomain) throws DataLoadingException;
 
     /**
      * Retrieve Subscription Throttling Policy.
