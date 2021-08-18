@@ -30,7 +30,7 @@ public interface OrganizationPurge {
        * @return linkedHashMap
        * @throws APIManagementException
        */
-      LinkedHashMap<String, String> deleteOrganization (String organization);
+      LinkedHashMap<String, String> purge(String organization);
 
       /**
        * Returns an integer with the Purging priority.

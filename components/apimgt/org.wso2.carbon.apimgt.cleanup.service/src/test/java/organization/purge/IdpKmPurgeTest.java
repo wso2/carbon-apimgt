@@ -74,7 +74,7 @@ public class IdpKmPurgeTest {
 
         Mockito.when(APIUtil.isInternalOrganization("testOrg")).thenReturn(true);
         IdpKeyMangerPurge kmPurge = new IdpKeyMangerPurge("test-username");
-        LinkedHashMap<String, String> subtaskResult =  kmPurge.deleteOrganization("testOrg");
+        LinkedHashMap<String, String> subtaskResult =  kmPurge.purge("testOrg");
 
         for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {
             Assert.assertEquals(entry.getKey() + " is not successful",

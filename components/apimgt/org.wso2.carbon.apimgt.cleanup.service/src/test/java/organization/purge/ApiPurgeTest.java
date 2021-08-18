@@ -91,7 +91,7 @@ public class ApiPurgeTest {
 
         ApiPurge apiPurge = new ApiPurge("test-username");
 
-        LinkedHashMap<String, String> subtaskResult =   apiPurge.deleteOrganization("testOrg");
+        LinkedHashMap<String, String> subtaskResult =   apiPurge.purge("testOrg");
         for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {
             Assert.assertEquals(entry.getKey() + " is not successful",
                     APIConstants.OrganizationDeletion.COMPLETED, entry.getValue());

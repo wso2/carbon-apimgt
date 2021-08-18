@@ -64,7 +64,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                 .put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
     }
 
-    public LinkedHashMap<String, String> deleteOrganization(String organization) {
+    public LinkedHashMap<String, String> purge(String organization) {
 
         List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
         for (Map.Entry<String, String> task : IdpKeyMangerPurgeTaskMap.entrySet()) {

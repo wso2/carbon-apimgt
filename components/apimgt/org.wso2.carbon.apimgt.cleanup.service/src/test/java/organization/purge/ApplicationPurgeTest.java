@@ -48,7 +48,7 @@ public class ApplicationPurgeTest {
         Mockito.doNothing().when(organizationPurgeDAO).deleteApplicationList(Mockito.anyString());
 
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(organizationPurgeDAO);
-        LinkedHashMap<String, String> subtaskResult = applicationPurge.deleteOrganization("testOrg");
+        LinkedHashMap<String, String> subtaskResult = applicationPurge.purge("testOrg");
 
         for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {
             Assert.assertEquals(entry.getKey() + " is not successful",

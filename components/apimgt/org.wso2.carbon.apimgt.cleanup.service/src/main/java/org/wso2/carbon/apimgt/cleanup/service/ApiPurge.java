@@ -95,7 +95,7 @@ public class ApiPurge implements OrganizationPurge {
      * delete API data in given organization
      * @param organization Organization Id
      */
-    public LinkedHashMap<String, String> deleteOrganization(String organization) {
+    public LinkedHashMap<String, String> purge(String organization) {
         List<APIIdentifier> apiIdentifierList = new ArrayList<>();
 
         for (Map.Entry<String, String> task : apiPurgeTaskMap.entrySet()) {

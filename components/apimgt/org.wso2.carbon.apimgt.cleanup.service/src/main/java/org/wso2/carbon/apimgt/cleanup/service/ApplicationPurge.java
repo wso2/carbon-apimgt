@@ -64,7 +64,7 @@ public class ApplicationPurge implements OrganizationPurge {
      * @param organization organization
      */
     @Override
-    public LinkedHashMap<String, String> deleteOrganization(String organization) {
+    public LinkedHashMap<String, String> purge(String organization) {
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
