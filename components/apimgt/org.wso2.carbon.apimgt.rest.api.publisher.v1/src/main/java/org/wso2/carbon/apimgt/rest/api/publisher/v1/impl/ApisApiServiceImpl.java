@@ -1539,12 +1539,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) {
         try {
-            boolean isError = false;
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             boolean isAPIExistDB = false;
+            APIManagementException error = null;
             APIInfo apiInfo = null;
             try {
                 //validate if api exists
@@ -1553,7 +1553,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (APIManagementException e) {
                 log.error("Error while validating API existence for deleting API " + apiId + " on organization "
                         + organization);
-                isError = true;
+                error = e;
             }
 
             if (isAPIExistDB) {
@@ -1570,7 +1570,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } catch (APIManagementException e) {
                     log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
                             + organization);
-                    isError = true;
+                    error = e;
                 }
 
                 try {
@@ -1583,14 +1583,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } catch (APIManagementException e) {
                     log.error("Error while checking API products using same resources for deleting API " + apiId +
                             " on organization " + organization);
-                    isError = true;
+                    error = e;
                 }
             }
 
-            //deletes the API
-            apiProvider.deleteAPI(apiId, organization);
+            // Delete the API
+            boolean isDeleted = false;
+            try {
+                apiProvider.deleteAPI(apiId, organization);
+                isDeleted = true;
+            } catch (APIManagementException e) {
+                log.error("Error while deleting API " + apiId + "on organization " + organization, e);
+            }
 
-            if (isError) {
+            if (error != null) {
+                throw error;
+            } else if (!isDeleted) {
                 RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
                         + organization, log);
                 return null;
