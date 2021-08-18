@@ -1669,6 +1669,9 @@ public class SQLConstants {
             "   AMS.TIER_ID=? " +
             "   AND AMS.APPLICATION_ID=AMA.APPLICATION_ID";
 
+    public static final String DELETE_BULK_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
+            "TENANT_DOMAIN = ?";
+
     public static final String GET_URL_TEMPLATES_SQL =
             " SELECT " +
             "   URL_PATTERN," +
