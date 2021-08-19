@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class GatewayUtils {
@@ -139,24 +138,27 @@ public class GatewayUtils {
         return urlMappingDTOList;
     }
 
-    public static APIListDTO generateAPIListDTO(API api) {
+    public static APIListDTO generateAPIListDTO(List<API> apiList) {
 
         APIListDTO apiListDTO = new APIListDTO();
-        APIMetaDataDTO apiMetaDataDTO = new APIMetaDataDTO()
-                .apiId(api.getApiId())
-                .name(api.getApiName())
-                .version(api.getApiVersion())
-                .apiUUID(api.getUuid())
-                .apiType(api.getApiType())
-                .provider(api.getApiProvider())
-                .context(api.getContext())
-                .isDefaultVersion(api.isDefaultVersion())
-                .name(api.getApiName())
-                .policy(api.getApiTier())
-                .apiType(api.getApiType())
-                .urlMappings(convertUriTemplate(api.getResources()));
-        apiListDTO.setList(Collections.singletonList(apiMetaDataDTO));
-        apiListDTO.count(1);
+        List<APIMetaDataDTO> apiMetaDataDTOList = new ArrayList<>();
+        for (API api : apiList) {
+            APIMetaDataDTO apiMetaDataDTO = new APIMetaDataDTO()
+                    .apiId(api.getApiId())
+                    .name(api.getApiName())
+                    .version(api.getApiVersion())
+                    .apiUUID(api.getUuid())
+                    .apiType(api.getApiType())
+                    .provider(api.getApiProvider())
+                    .context(api.getContext())
+                    .isDefaultVersion(api.isDefaultVersion())
+                    .name(api.getApiName())
+                    .policy(api.getApiTier())
+                    .apiType(api.getApiType());
+            apiMetaDataDTOList.add(apiMetaDataDTO);
+        }
+        apiListDTO.setList(apiMetaDataDTOList);
+        apiListDTO.count(apiMetaDataDTOList.size());
         return apiListDTO;
     }
 

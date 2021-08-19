@@ -329,7 +329,7 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  /api/info:
+  /apis:
 
     #-----------------------------------------------------
     # Get the subscription information of an api by providing the api name, version and context.
@@ -337,7 +337,7 @@ paths:
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/api/info?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/apis?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get the subscription information of an api by providing the api name, version and context.
 
@@ -370,43 +370,34 @@ paths:
             OK.
             End-points successfully retrieved from the storage for the API.
           schema:
-            $ref: '#/definitions/APIInfo'
+            $ref: '#/definitions/APIList'
         400:
           $ref: '#/responses/BadRequest'
         404:
           $ref: '#/responses/NotFound'
 
-  /apis:
+  /apis/{apiId}:
 
     #-----------------------------------------------------
-    # Get the api information of an api by providing the api name, version and context.
+    # Get the subscription information of an api by providing the api name, version and context.
     #-----------------------------------------------------
     get:
       x-code-samples:
         - lang: Curl
-          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/apis?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com\"
              -H "Authorization: Basic YWRtaW46YWRtaW4="'
-      summary: Get the API meta information of an api by providing the api name, version and context.
+      summary: Get the subscription information of an api by providing the api name, version and context.
 
       description: |
         This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided
         carbon.super will be picked as the Tenant domain.
       parameters:
-        - name: name
+        - name: apiId
           description: |
-            Name of the API
-          in: query
+            API ID of the API
+          in: path
           type: string
-        - name: context
-          description: |
-            Context of the API
-          in: query
-          type: string
-        - name: version
-          description: |
-            version of the API
-          in: query
-          type: string
+          required: true
         - name: tenantDomain
           description: |
             Tenant Domain of the API
@@ -420,7 +411,7 @@ paths:
             OK.
             End-points successfully retrieved from the storage for the API.
           schema:
-            $ref: '#/definitions/APIList'
+            $ref: '#/definitions/APIInfo'
         400:
           $ref: '#/responses/BadRequest'
         404:
@@ -713,10 +704,6 @@ definitions:
         type: boolean
         description: Whether this is the default version of the API.
         example: false
-      urlMappings:
-        type: array
-        items:
-          $ref: '#/definitions/URLMapping'
 
   #-----------------------------------------------------
   # The Application List resource

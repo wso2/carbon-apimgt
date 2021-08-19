@@ -2,9 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.gateway.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.URLMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,7 +24,6 @@ public class APIMetaDataDTO   {
     private String policy = null;
     private String apiType = null;
     private Boolean isDefaultVersion = null;
-    private List<URLMappingDTO> urlMappings = new ArrayList<>();
 
   /**
    * UUID of API.
@@ -190,23 +186,6 @@ public class APIMetaDataDTO   {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-  /**
-   **/
-  public APIMetaDataDTO urlMappings(List<URLMappingDTO> urlMappings) {
-    this.urlMappings = urlMappings;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("urlMappings")
-  public List<URLMappingDTO> getUrlMappings() {
-    return urlMappings;
-  }
-  public void setUrlMappings(List<URLMappingDTO> urlMappings) {
-    this.urlMappings = urlMappings;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -225,13 +204,12 @@ public class APIMetaDataDTO   {
         Objects.equals(context, apIMetaData.context) &&
         Objects.equals(policy, apIMetaData.policy) &&
         Objects.equals(apiType, apIMetaData.apiType) &&
-        Objects.equals(isDefaultVersion, apIMetaData.isDefaultVersion) &&
-        Objects.equals(urlMappings, apIMetaData.urlMappings);
+        Objects.equals(isDefaultVersion, apIMetaData.isDefaultVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
+    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion);
   }
 
   @Override
@@ -248,7 +226,6 @@ public class APIMetaDataDTO   {
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
-    sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("}");
     return sb.toString();
   }

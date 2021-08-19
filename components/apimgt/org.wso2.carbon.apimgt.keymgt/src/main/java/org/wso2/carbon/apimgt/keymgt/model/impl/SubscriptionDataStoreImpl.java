@@ -711,7 +711,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return getSubscriptionById(application.getId(), api.getApiId());
     }
 
-    private API getAPIByUUID(String apiUUID) {
+    public API getAPIByUUID(String apiUUID) {
 
         for (API api : apiMap.values()) {
             if (api.getUuid().equals(apiUUID)){
@@ -719,6 +719,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<API> getAPIs() {
+
+        return new ArrayList<>(apiMap.values());
     }
 
     @Override

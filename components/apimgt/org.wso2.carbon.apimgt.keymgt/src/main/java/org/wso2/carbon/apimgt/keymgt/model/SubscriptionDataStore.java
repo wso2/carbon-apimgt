@@ -155,5 +155,10 @@ public interface SubscriptionDataStore {
     Application getApplicationByUUID(String uuid);
 
     Subscription getSubscriptionByUUID(String apiUUID, String appUUID);
+
+    API getAPIByUUID(String apiId);
+
+    List<API> getAPIs();
+
 }
 

@@ -428,7 +428,7 @@
         } ]
       }
     },
-    "/api/info" : {
+    "/apis" : {
       "get" : {
         "tags" : [ "Get API Info" ],
         "summary" : "Get the subscription information of an api by providing the api name, version and context.",
@@ -444,80 +444,6 @@
           "in" : "query",
           "description" : "version of the API\n",
           "required" : true,
-          "type" : "string"
-        }, {
-          "name" : "tenantDomain",
-          "in" : "query",
-          "description" : "Tenant Domain of the API\n",
-          "required" : false,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
-            "schema" : {
-              "$ref" : "#/definitions/APIInfo"
-            }
-          },
-          "400" : {
-            "description" : "Bad Request. Invalid request or validation error.",
-            "examples" : {
-              "application/json" : {
-                "code" : 400,
-                "message" : "Bad Request",
-                "description" : "Invalid request or validation error",
-                "moreInfo" : "",
-                "error" : [ ]
-              }
-            },
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "404" : {
-            "description" : "Not Found. The specified resource does not exist.",
-            "examples" : {
-              "application/json" : {
-                "code" : 404,
-                "message" : "Not Found",
-                "description" : "The specified resource does not exist",
-                "moreInfo" : "",
-                "error" : [ ]
-              }
-            },
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        },
-        "x-code-samples" : [ {
-          "lang" : "Curl",
-          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/api/info?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
-        } ]
-      }
-    },
-    "/apis" : {
-      "get" : {
-        "tags" : [ "Get API Info" ],
-        "summary" : "Get the API meta information of an api by providing the api name, version and context.",
-        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "query",
-          "description" : "Name of the API\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "context",
-          "in" : "query",
-          "description" : "Context of the API\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "version",
-          "in" : "query",
-          "description" : "version of the API\n",
-          "required" : false,
           "type" : "string"
         }, {
           "name" : "tenantDomain",
@@ -567,6 +493,68 @@
         "x-code-samples" : [ {
           "lang" : "Curl",
           "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/apis?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/apis/{apiId}" : {
+      "get" : {
+        "tags" : [ "Get API Info" ],
+        "summary" : "Get the subscription information of an api by providing the api name, version and context.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "path",
+          "description" : "API ID of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/APIInfo"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
         } ]
       }
     },
@@ -904,12 +892,6 @@
           "type" : "boolean",
           "example" : false,
           "description" : "Whether this is the default version of the API."
-        },
-        "urlMappings" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/URLMapping"
-          }
         }
       }
     },
