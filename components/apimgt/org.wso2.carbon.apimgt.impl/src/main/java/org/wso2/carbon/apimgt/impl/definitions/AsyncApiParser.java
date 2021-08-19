@@ -20,6 +20,8 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -31,6 +33,8 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +48,82 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AsyncApiParser extends APIDefinition {
+
+    String metaSchema = "{\n" + "    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n"
+            + "    \"$id\": \"http://json-schema.org/draft-07/schema#\",\n"
+            + "    \"title\": \"Core schema meta-schema\",\n" + "    \"definitions\": {\n"
+            + "        \"schemaArray\": {\n" + "            \"type\": \"array\",\n" + "            \"minItems\": 1,\n"
+            + "            \"items\": { \"$ref\": \"#\" }\n" + "        },\n" + "        \"nonNegativeInteger\": {\n"
+            + "            \"type\": \"integer\",\n" + "            \"minimum\": 0\n" + "        },\n"
+            + "        \"nonNegativeIntegerDefault0\": {\n" + "            \"allOf\": [\n"
+            + "                { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n"
+            + "                { \"default\": 0 }\n" + "            ]\n" + "        },\n"
+            + "        \"simpleTypes\": {\n" + "            \"enum\": [\n" + "                \"array\",\n"
+            + "                \"boolean\",\n" + "                \"integer\",\n" + "                \"null\",\n"
+            + "                \"number\",\n" + "                \"object\",\n" + "                \"string\"\n"
+            + "            ]\n" + "        },\n" + "        \"stringArray\": {\n" + "            \"type\": \"array\",\n"
+            + "            \"items\": { \"type\": \"string\" },\n" + "            \"uniqueItems\": true,\n"
+            + "            \"default\": []\n" + "        }\n" + "    },\n"
+            + "    \"type\": [\"object\", \"boolean\"],\n" + "    \"properties\": {\n" + "        \"$id\": {\n"
+            + "            \"type\": \"string\",\n" + "            \"format\": \"uri-reference\"\n" + "        },\n"
+            + "        \"$schema\": {\n" + "            \"type\": \"string\",\n" + "            \"format\": \"uri\"\n"
+            + "        },\n" + "        \"$ref\": {\n" + "            \"type\": \"string\",\n"
+            + "            \"format\": \"uri-reference\"\n" + "        },\n" + "        \"$comment\": {\n"
+            + "            \"type\": \"string\"\n" + "        },\n" + "        \"title\": {\n"
+            + "            \"type\": \"string\"\n" + "        },\n" + "        \"description\": {\n"
+            + "            \"type\": \"string\"\n" + "        },\n" + "        \"default\": true,\n"
+            + "        \"readOnly\": {\n" + "            \"type\": \"boolean\",\n" + "            \"default\": false\n"
+            + "        },\n" + "        \"writeOnly\": {\n" + "            \"type\": \"boolean\",\n"
+            + "            \"default\": false\n" + "        },\n" + "        \"examples\": {\n"
+            + "            \"type\": \"array\",\n" + "            \"items\": true\n" + "        },\n"
+            + "        \"multipleOf\": {\n" + "            \"type\": \"number\",\n"
+            + "            \"exclusiveMinimum\": 0\n" + "        },\n" + "        \"maximum\": {\n"
+            + "            \"type\": \"number\"\n" + "        },\n" + "        \"exclusiveMaximum\": {\n"
+            + "            \"type\": \"number\"\n" + "        },\n" + "        \"minimum\": {\n"
+            + "            \"type\": \"number\"\n" + "        },\n" + "        \"exclusiveMinimum\": {\n"
+            + "            \"type\": \"number\"\n" + "        },\n"
+            + "        \"maxLength\": { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n"
+            + "        \"minLength\": { \"$ref\": \"#/definitions/nonNegativeIntegerDefault0\" },\n"
+            + "        \"pattern\": {\n" + "            \"type\": \"string\",\n" + "            \"format\": \"regex\"\n"
+            + "        },\n" + "        \"additionalItems\": { \"$ref\": \"#\" },\n" + "        \"items\": {\n"
+            + "            \"anyOf\": [\n" + "                { \"$ref\": \"#\" },\n"
+            + "                { \"$ref\": \"#/definitions/schemaArray\" }\n" + "            ],\n"
+            + "            \"default\": true\n" + "        },\n"
+            + "        \"maxItems\": { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n"
+            + "        \"minItems\": { \"$ref\": \"#/definitions/nonNegativeIntegerDefault0\" },\n"
+            + "        \"uniqueItems\": {\n" + "            \"type\": \"boolean\",\n"
+            + "            \"default\": false\n" + "        },\n" + "        \"contains\": { \"$ref\": \"#\" },\n"
+            + "        \"maxProperties\": { \"$ref\": \"#/definitions/nonNegativeInteger\" },\n"
+            + "        \"minProperties\": { \"$ref\": \"#/definitions/nonNegativeIntegerDefault0\" },\n"
+            + "        \"required\": { \"$ref\": \"#/definitions/stringArray\" },\n"
+            + "        \"additionalProperties\": { \"$ref\": \"#\" },\n" + "        \"definitions\": {\n"
+            + "            \"type\": \"object\",\n" + "            \"additionalProperties\": { \"$ref\": \"#\" },\n"
+            + "            \"default\": {}\n" + "        },\n" + "        \"properties\": {\n"
+            + "            \"type\": \"object\",\n" + "            \"additionalProperties\": { \"$ref\": \"#\" },\n"
+            + "            \"default\": {}\n" + "        },\n" + "        \"patternProperties\": {\n"
+            + "            \"type\": \"object\",\n" + "            \"additionalProperties\": { \"$ref\": \"#\" },\n"
+            + "            \"propertyNames\": { \"format\": \"regex\" },\n" + "            \"default\": {}\n"
+            + "        },\n" + "        \"dependencies\": {\n" + "            \"type\": \"object\",\n"
+            + "            \"additionalProperties\": {\n" + "                \"anyOf\": [\n"
+            + "                    { \"$ref\": \"#\" },\n"
+            + "                    { \"$ref\": \"#/definitions/stringArray\" }\n" + "                ]\n"
+            + "            }\n" + "        },\n" + "        \"propertyNames\": { \"$ref\": \"#\" },\n"
+            + "        \"const\": true,\n" + "        \"enum\": {\n" + "            \"type\": \"array\",\n"
+            + "            \"items\": true,\n" + "            \"minItems\": 1,\n"
+            + "            \"uniqueItems\": true\n" + "        },\n" + "        \"type\": {\n"
+            + "            \"anyOf\": [\n" + "                { \"$ref\": \"#/definitions/simpleTypes\" },\n"
+            + "                {\n" + "                    \"type\": \"array\",\n"
+            + "                    \"items\": { \"$ref\": \"#/definitions/simpleTypes\" },\n"
+            + "                    \"minItems\": 1,\n" + "                    \"uniqueItems\": true\n"
+            + "                }\n" + "            ]\n" + "        },\n"
+            + "        \"format\": { \"type\": \"string\" },\n"
+            + "        \"contentMediaType\": { \"type\": \"string\" },\n"
+            + "        \"contentEncoding\": { \"type\": \"string\" },\n" + "        \"if\": { \"$ref\": \"#\" },\n"
+            + "        \"then\": { \"$ref\": \"#\" },\n" + "        \"else\": { \"$ref\": \"#\" },\n"
+            + "        \"allOf\": { \"$ref\": \"#/definitions/schemaArray\" },\n"
+            + "        \"anyOf\": { \"$ref\": \"#/definitions/schemaArray\" },\n"
+            + "        \"oneOf\": { \"$ref\": \"#/definitions/schemaArray\" },\n"
+            + "        \"not\": { \"$ref\": \"#\" }\n" + "    },\n" + "    \"default\": true\n" + "}";
 
     private static final String ASYNCAPI_JSON_HYPERSCHEMA = "{\n" +
             "  \"title\": \"AsyncAPI 2.0.0 schema.\",\n" +
@@ -1556,7 +1636,6 @@ public class AsyncApiParser extends APIDefinition {
 
         //import and load AsyncAPI HyperSchema for JSON schema validation
         JSONObject hyperSchema = new JSONObject(ASYNCAPI_JSON_HYPERSCHEMA);
-        Schema schemaValidator = SchemaLoader.load(hyperSchema);
         String protocol = StringUtils.EMPTY;
 
         boolean validationSuccess = false;
@@ -1567,51 +1646,19 @@ public class AsyncApiParser extends APIDefinition {
 
         //validate AsyncAPI using JSON schema validation
         try {
+            JSONParser parser = new JSONParser();
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(metaSchema);
+            SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
+                    (new URI("http://json-schema.org/draft-07/schema#"), json).schemaJson(hyperSchema).build();
+            Schema schemaValidator = schemaLoader.load().build();
             schemaValidator.validate(schemaToBeValidated);
-            /*AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
-            validationErrorMessages = new ArrayList<>();
-            if (asyncApiDocument.getServers().size() == 1) {
-                if (!APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
-                    validationErrorMessages.add("#:The protocol of the server should be 'ws' for websockets");
-                }
-            }
-            if (asyncApiDocument.getServers().size() > 1) {
-                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single server for websockets");
-            }
-            if (asyncApiDocument.getChannels().size() > 1) {
-                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
-            }
-            if (validationErrorMessages.size() == 0) {
-                validationSuccess = true;
-                validationErrorMessages = null;
-            }*/
-
-            //AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
-            /*//Checking whether it is a websocket
-            validationErrorMessages = new ArrayList<>();
-            if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
-                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
-                    isWebSocket = true;
-                }
-            }*/
-
-            //validating channel count for websockets
-            /*if (isWebSocket) {
-                if (asyncApiDocument.getChannels().size() > 1) {
-                    validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
-                }
-            }*/
-
-            /*if (validationErrorMessages.size() == 0) {
-                validationSuccess = true;
-                validationErrorMessages = null;
-            }*/
-
             validationSuccess = true;
-
-        } catch (ValidationException e){
+        } catch(ParseException e) {
             //validation error messages
-            validationErrorMessages = e.getAllMessages();
+            // validationErrorMessages = e.getAllMessages();
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
 
         // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
