@@ -6934,39 +6934,6 @@ public class ApiMgtDAO {
         return id;
     }
 
-    /**
-     * Get API data for given organization
-     *
-     * @param orgId organization Id
-     * @return ArrayList<APIIdentifier>
-     * @throws APIManagementException
-     */
-    public ArrayList<APIIdentifier> getAPIIdList(String orgId) throws APIManagementException {
-
-        ArrayList<APIIdentifier> apiList = new ArrayList<>();
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_API_LIST_SQL_BY_ORG)) {
-            ps.setString(1, orgId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    int apiId = rs.getInt("API_ID");
-                    String apiUuid = rs.getString("API_UUID");
-                    String apiName = rs.getString("API_Name");
-                    String apiProvider = rs.getString("API_Provider");
-                    String apiVersion = rs.getString("API_Version");
-
-                    APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion, apiUuid);
-                    apiIdentifier.setId(apiId);
-                    apiList.add(apiIdentifier);
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Error while getting apiUuid list of organization" + orgId, e);
-            handleException("Failed to get API apiUuid list of organization " + orgId, e);
-        }
-        return apiList;
-    }
-
     public int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
 
         int id = -1;
@@ -7050,84 +7017,6 @@ public class ApiMgtDAO {
             handleException("Error while deleting mapping: consumer key " + consumerKey + " from the database", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    /**
-     * Delete all organization API data
-     *
-     * @param organization organization
-     * @throws APIManagementException
-     */
-    public void deleteOrganizationAPIList(String organization) throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-
-            // Remove records from AM_API table and associated data through cascade delete
-            String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
-            deleteOrganizationAPIData(connection, deleteAPIQuery, organization);
-
-            String deleteAPIDefaultVersionQuery = SQLConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL;
-            deleteAPIsFromDefaultVersion(connection, deleteAPIDefaultVersionQuery, organization);
-
-            //Remove API Cleanup tasks
-            String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
-            deleteAPICleanupTasks(connection, deleteCleanUpTasksQuery, organization);
-
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while removing the  API data of organization " + organization + " from the database",
-                    e);
-        }
-    }
-
-    private void deleteOrganizationAPIData(Connection conn, String deleteAPIQuery, String organization)
-            throws APIManagementException {
-
-        try (PreparedStatement prepStmt = conn.prepareStatement(deleteAPIQuery)) {
-            prepStmt.setString(1, organization);
-            prepStmt.execute();
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error("Error while rolling back the failed operation", e1);
-            }
-            handleException("Failed to remove API data of organization " + organization + " from the database", e);
-        }
-    }
-
-    private void deleteAPICleanupTasks(Connection conn, String deleteCleanUpTasksQuery, String organization)
-            throws APIManagementException {
-
-        try (PreparedStatement prepStmt = conn.prepareStatement(deleteCleanUpTasksQuery)) {
-            prepStmt.setString(1, organization);
-            prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error("Error while rolling back the failed operation", e1);
-            }
-            handleException("Failed to remove API cleanup tasks of organization " + organization + " from the database",
-                    e);
-        }
-    }
-
-    private void deleteAPIsFromDefaultVersion(Connection conn, String deleteAPIDefaultVersionQuery, String organization)
-            throws APIManagementException {
-
-        try (PreparedStatement prepStmt = conn.prepareStatement(deleteAPIDefaultVersionQuery)) {
-            prepStmt.setString(1, organization);
-            prepStmt.execute();
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error("Error while rolling back the failed operation", e1);
-            }
-            handleException("Failed to remove API data of organization " + organization + " from the database", e);
         }
     }
 
@@ -9220,37 +9109,6 @@ public class ApiMgtDAO {
             throw new APIManagementException(
                     "Error while deleting key manager configuration with id " + id + " in organization " + organization,
                     e);
-        }
-
-    }
-
-    public void deleteKeyManagerConfigurationList(List<KeyManagerConfigurationDTO> kmList, String organization)
-            throws APIManagementException {
-
-        List<String> kmIdList = kmList.stream().map(KeyManagerConfigurationDTO::getUuid).collect(Collectors.toList());
-        List<String> collectionList = Collections.nCopies(kmIdList.size(), "?");
-
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            conn.setAutoCommit(false);
-            String deleteKMQuery = SQLConstants.KeyManagerSqlConstants.DELETE_BULK_KEY_MANAGER_LIST;
-            deleteKMQuery = deleteKMQuery.replaceAll(SQLConstants.KM_UUID_REGEX, String.join(",",
-                    collectionList));
-            try (PreparedStatement preparedStatement = conn.prepareStatement(deleteKMQuery)) {
-                preparedStatement.setString(1, organization);
-                int index = 1;
-                for (String uuid : kmIdList) {
-                    preparedStatement.setString(index + 1, uuid);
-                    index++;
-                }
-                preparedStatement.execute();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while deleting key managers:  " + kmIdList + " in organization "
-                    + organization,e);
         }
 
     }
