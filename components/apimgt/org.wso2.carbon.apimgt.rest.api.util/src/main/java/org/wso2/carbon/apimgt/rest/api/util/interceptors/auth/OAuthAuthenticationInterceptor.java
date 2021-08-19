@@ -30,10 +30,10 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.regex.Pattern;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.HashMap;
 
 /**
@@ -72,6 +72,8 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //set the request_authentication_scheme property in the message as oauth2.
         String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
                 RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
+        //add masked token to the Message
+        inMessage.put(RestApiConstants.MASKED_TOKEN, APIUtil.getMaskedToken(accessToken));
         if (accessToken == null) {
             return;
         }
@@ -86,8 +88,10 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             if (logger.isDebugEnabled()) {
                 logger.debug(String.format("Authenticating request: " + inMessage.getId()));
             }
-
-            if (authenticatorMap.get(inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME)).authenticate(inMessage)) {
+            AbstractOAuthAuthenticator abstractOAuthAuthenticator = authenticatorMap
+                    .get(inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME));
+            logger.debug("Selected Authenticator for the token validation" + abstractOAuthAuthenticator);
+            if (abstractOAuthAuthenticator.authenticate(inMessage)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("User logged into Web app using OAuth Authentication");
                 }

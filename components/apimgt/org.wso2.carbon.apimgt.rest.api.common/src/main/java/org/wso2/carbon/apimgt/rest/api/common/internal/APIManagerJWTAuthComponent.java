@@ -25,6 +25,17 @@ import org.osgi.service.component.annotations.Reference;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.osgi.service.component.ComponentContext;
 
+import java.util.Map;
+import java.util.HashMap;
+
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+
+/**
+ * This class implemented for Setting APIM Configuration Service
+ */
 @Component(
         name = "org.wso2.apimgt.rest.api.common",
         immediate = true)
@@ -34,6 +45,15 @@ public class APIManagerJWTAuthComponent {
 
     @Activate
     protected void activate(ComponentContext context) {
+
+        Map<String, JWTValidator> jwtValidatorMap = new HashMap<>();
+        Map<String, TokenIssuerDto> tokenIssuerMap = APIMConfigUtil.getTokenIssuerMap();
+        tokenIssuerMap.forEach((issuer, tokenIssuer) -> {
+            JWTValidator jwtValidator = new JWTValidatorImpl();
+            jwtValidator.loadTokenIssuerConfiguration(tokenIssuer);
+            jwtValidatorMap.put(issuer, jwtValidator);
+        });
+        ServiceReferenceHolder.getInstance().setJwtValidatorMap(jwtValidatorMap);
     }
 
     @Reference(

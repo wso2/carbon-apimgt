@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.common;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 
 import java.util.Map;
 
@@ -48,5 +49,9 @@ public class APIMConfigUtil {
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
         return ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+    }
+
+    public static  Map<String, JWTValidator> getJWTValidatorMap (){
+        return ServiceReferenceHolder.getInstance().getJwtValidatorMap();
     }
 }

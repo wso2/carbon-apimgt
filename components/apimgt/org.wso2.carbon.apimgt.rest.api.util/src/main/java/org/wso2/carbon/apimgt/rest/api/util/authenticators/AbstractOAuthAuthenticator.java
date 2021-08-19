@@ -35,6 +35,9 @@ import org.wso2.uri.template.URITemplateException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * This class implemented for common methods of JWT and Opaque Authentications
+ */
 public abstract class AbstractOAuthAuthenticator {
     Log log = LogFactory.getLog(AbstractOAuthAuthenticator.class);
 
@@ -107,7 +110,7 @@ public abstract class AbstractOAuthAuthenticator {
                             //we found scopes matches
                             if (log.isDebugEnabled()) {
                                 log.debug("Scope validation successful for access token: " +
-                                        tokenInfo.getAccessToken() + " with scope: " + scp.getKey() +
+                                        message.get(RestApiConstants.MASKED_TOKEN) + " with scope: " + scp.getKey() +
                                         " for resource path: " + path + " and verb " + verb);
                             }
                             return true;
@@ -119,7 +122,7 @@ public abstract class AbstractOAuthAuthenticator {
                                 //we found scopes matches
                                 if (log.isDebugEnabled()) {
                                     log.debug("Scope validation successful for access token: " +
-                                            tokenInfo.getAccessToken() + " with scope: " + scpObj.getKey() +
+                                            message.get(RestApiConstants.MASKED_TOKEN) + " with scope: " + scpObj.getKey() +
                                             " for resource path: " + path + " and verb " + verb);
                                 }
                                 return true;

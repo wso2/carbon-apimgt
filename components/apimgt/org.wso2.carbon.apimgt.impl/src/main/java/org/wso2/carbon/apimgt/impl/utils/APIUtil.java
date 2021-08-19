@@ -10461,10 +10461,10 @@ public final class APIUtil {
      */
     public static String getMaskedToken(String token) {
 
-        if (token.length() >= 10) {
-            return "XXXXX" + token.substring(token.length() - 10);
+        if (token.length() >= 40) {
+            return "...XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" + token.substring(token.length() - 10);
         } else {
-            return "XXXXX" + token.substring(token.length() / 2);
+            return "...XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" + token.substring(token.length() / 2);
         }
     }
 

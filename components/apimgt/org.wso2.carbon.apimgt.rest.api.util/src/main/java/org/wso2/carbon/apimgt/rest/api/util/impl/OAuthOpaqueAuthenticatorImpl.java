@@ -43,8 +43,8 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 /**
- * This web app authenticator class specifically implemented for API Manager store and publisher rest APIs
- * This will not be able to use as generic authenticator.
+ * This OAuthOpaqueAuthenticatorImpl class specifically implemented for API Manager store and publisher rest APIs'
+ * opaque token based authentication
  */
 public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
 

@@ -49,7 +49,6 @@ import java.net.MalformedURLException;
 
 import com.nimbusds.jwt.util.DateUtils;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
@@ -59,18 +58,20 @@ import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenti
 
 import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
+/**
+ * This OAuthJwtAuthenticatorImpl class specifically implemented for API Manager store and publisher rest APIs'
+ * JWT based authentication.
+ */
 public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
     private static final Log log = LogFactory.getLog(OAuthJwtAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private boolean isRESTApiTokenCacheEnabled;
-    private JWTValidator jwtValidator;
     private Map<String, TokenIssuerDto> tokenIssuers;
     private java.util.Map<String, String> audiencesList;
 
     public OAuthJwtAuthenticatorImpl() {
-        jwtValidator = new JWTValidatorImpl();
         tokenIssuers = getTokenIssuers();
         audiencesList = getRestApiJWTAuthAudiences();
     }
@@ -94,28 +95,27 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         try {
             SignedJWTInfo signedJWTInfo = getSignedJwt(accessToken);
             String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
-            String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
+            String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
             URL basePath = new URL(message.get(APIConstants.BASE_PATH).toString());
 
             //Validate token
-            log.info("Starting JWT token validation");
+            log.debug("Starting JWT token validation " + maskedToken);
             JWTValidationInfo jwtValidationInfo =
-                    validateJWTToken(signedJWTInfo, jwtTokenIdentifier, accessToken, jwtHeader, basePath);
+                    validateJWTToken(signedJWTInfo, jwtTokenIdentifier, accessToken, maskedToken, basePath);
             if (jwtValidationInfo != null) {
                 if (jwtValidationInfo.isValid()) {
                     if (isRESTApiTokenCacheEnabled) {
                         getRESTAPITokenCache().put(jwtTokenIdentifier, jwtValidationInfo);
                     }
                     //Validating scopes
-                    log.info("JWT token validation success. starting scope validation");
                     return handleScopeValidation(message, signedJWTInfo, accessToken);
                 } else {
-                    log.error("Invalid JWT token :" + getMaskedToken(jwtHeader));
+                    log.error("Invalid JWT token :" + maskedToken);
                     return false;
                 }
 
             } else {
-                log.error("Invalid JWT token :" + getMaskedToken(jwtHeader));
+                log.error("Invalid JWT token :" + maskedToken);
                 return false;
             }
         } catch (ParseException e) {
@@ -136,15 +136,14 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     private boolean handleScopeValidation(Message message, SignedJWTInfo signedJWTInfo, String accessToken)
             throws ParseException {
 
+        String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
         OAuthTokenInfo oauthTokenInfo = new OAuthTokenInfo();
         oauthTokenInfo.setAccessToken(accessToken);
         oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject());
-
-        if (signedJWTInfo.getJwtClaimsSet().getClaim(APIConstants.JwtTokenConstants.SCOPE) != null) {
-
+        String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
+        if (scopeClaim != null) {
             String orgId = message.get(RestApiConstants.ORGANIZATION).toString();
-            String[] scopes = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE)
-                    .split(JwtTokenConstants.SCOPE_DELIMITER);
+            String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
             scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
                     .toArray(size -> new String[size]);
@@ -159,7 +158,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
                 try {
-                    String username = oauthTokenInfo.getEndUserName(); //
+                    String username = oauthTokenInfo.getEndUserName();
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                         //when the username is an email in supertenant, it has at least 2 occurrences of '@'
                         long count = username.chars().filter(ch -> ch == '@').count();
@@ -171,7 +170,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                         }
                     }
                     if (log.isDebugEnabled()) {
-                        log.debug("username = " + username);
+                        log.debug("username = " + username + "masked token " + maskedToken);
                     }
                     tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
                     carbonContext.setTenantDomain(tenantDomain);
@@ -184,13 +183,13 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 } catch (UserStoreException e) {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
                 }
-                log.info("Scope validation success");
+                log.debug("Scope validation success for the token " + maskedToken);
                 return true;
             }
-            log.error("scopes validation failed");
+            log.error("scopes validation failed for the token" + maskedToken);
             return false;
         }
-        log.error("scopes validation failed");
+        log.error("scopes validation failed for the token" + maskedToken);
         return false;
     }
 
@@ -217,7 +216,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
      */
     @MethodStats
     private JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo, String jti, String accessToken,
-                                               String jwtHeader, URL basePath) throws APIManagementException {
+                                               String maskedToken, URL basePath) throws APIManagementException {
 
         JWTValidationInfo jwtValidationInfo;
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
@@ -226,7 +225,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             //validate Issuer
             List<String> audiences = signedJWTInfo.getJwtClaimsSet().getAudience();
             if (tokenIssuers != null && tokenIssuers.containsKey(issuer)) {
-                jwtValidator.loadTokenIssuerConfiguration(tokenIssuers.get(issuer));
                 //validate audience
                 if (audiencesList != null && audiences.contains(audiencesList.get(basePath.getPath()))) {
                     if (isRESTApiTokenCacheEnabled) {
@@ -237,8 +235,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                                 tempJWTValidationInfo.setValid(false);
                                 getRESTAPITokenCache().remove(jti);
                                 getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
-                                log.error("JWT token validation failed. Reason: Expired Token. "
-                                        + getMaskedToken(jwtHeader));
+                                log.error("JWT token validation failed. Reason: Expired Token. " + maskedToken);
                                 return tempJWTValidationInfo;
                             }
                             //check accessToken
@@ -246,21 +243,20 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                                 tempJWTValidationInfo.setValid(false);
                                 getRESTAPITokenCache().remove(jti);
                                 getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
-                                log.error("JWT token validation failed. Reason: Invalid Token. "
-                                        + getMaskedToken(jwtHeader));
+                                log.error("JWT token validation failed. Reason: Invalid Token. " + maskedToken);
                                 return tempJWTValidationInfo;
                             }
                             return tempJWTValidationInfo;
 
                         } else if (getRESTAPIInvalidTokenCache().get(jti) != null) {
                             if (log.isDebugEnabled()) {
-                                log.debug("Token retrieved from the invalid token cache. Token: "
-                                        + getMaskedToken(jwtHeader));
+                                log.debug("Token retrieved from the invalid token cache. Token: " + maskedToken);
                             }
                             return (JWTValidationInfo) getRESTAPIInvalidTokenCache().get(jti);
                         }
                     }
                     //info not in cache. validate signature and exp
+                    JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
                     jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
                     if (jwtValidationInfo.isValid()) {
                         //valid token
@@ -275,7 +271,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                         //invalid credentials : 900901 error code
                         log.error("JWT token validation failed. Reason: Invalid Credentials. " +
                                 "Make sure you have provided the correct security credentials in the token :"
-                                + getMaskedToken(jwtHeader));
+                                + maskedToken);
                     }
                 } else {
                     log.error("JWT token audience validation failed. Reason: Non of the aud present "
@@ -290,7 +286,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 return null;
             }
         } else {
-            log.error("Issuer is not found in the token");
+            log.error("Issuer is not found in the token " + maskedToken);
             return null;
         }
         return jwtValidationInfo;
@@ -330,20 +326,5 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             return jwtID;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
-    }
-
-    /**
-     * Get masked JWT token.
-     *
-     * @param token The JWT token
-     * @return String : maskedtoken
-     */
-    public static String getMaskedToken(String token) {
-
-        if (token.length() >= 10) {
-            return "XXXXX" + token.substring(token.length() - 10);
-        } else {
-            return "XXXXX" + token.substring(token.length() / 2);
-        }
     }
 }
