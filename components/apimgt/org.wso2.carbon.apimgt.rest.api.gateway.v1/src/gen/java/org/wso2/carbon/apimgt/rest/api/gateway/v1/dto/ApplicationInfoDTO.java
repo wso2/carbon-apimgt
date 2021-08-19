@@ -37,7 +37,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "d290f1ee-6c54-4b01-90e6-d701848f0851", value = "")
   @JsonProperty("uuid")
   public String getUuid() {
     return uuid;
@@ -54,7 +54,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "1", value = "")
   @JsonProperty("id")
   public Integer getId() {
     return id;
@@ -71,7 +71,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "PizzaAPP", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -88,7 +88,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("subName")
   public String getSubName() {
     return subName;
@@ -106,7 +106,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Application level throtting policy.")
+  @ApiModelProperty(example = "Gold", value = "Application level throtting policy.")
   @JsonProperty("policy")
   public String getPolicy() {
     return policy;

@@ -40,7 +40,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the subscriptions meta information of an api by providing the api name, version and context.", notes = "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = SubscriptionDTO.class, tags={ "Get Subscription Info" })
+    @ApiOperation(value = "Get the subscriptions meta information of an api by providing the api uuid and application uuid.", notes = "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = SubscriptionDTO.class, tags={ "Get Subscription Info" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. End-points successfully retrieved from the storage for the API. ", response = SubscriptionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

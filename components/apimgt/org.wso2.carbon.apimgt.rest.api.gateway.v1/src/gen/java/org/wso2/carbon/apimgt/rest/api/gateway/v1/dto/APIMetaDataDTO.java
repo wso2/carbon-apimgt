@@ -34,7 +34,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "UUID of API.")
+  @ApiModelProperty(example = "d290f1ee-6c54-4b01-90e6-d701748f0851", value = "UUID of API.")
   @JsonProperty("apiUUID")
   public String getApiUUID() {
     return apiUUID;
@@ -51,7 +51,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "1", value = "")
   @JsonProperty("apiId")
   public Integer getApiId() {
     return apiId;
@@ -69,7 +69,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "API Provider name.")
+  @ApiModelProperty(example = "admin", value = "API Provider name.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -87,7 +87,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "Name of the API")
+  @ApiModelProperty(example = "PizzaAPI", value = "Name of the API")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -105,7 +105,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "Version of the API.")
+  @ApiModelProperty(example = "v1.0.0", value = "Version of the API.")
   @JsonProperty("version")
   public String getVersion() {
     return version;
@@ -123,7 +123,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "Context of the API.")
+  @ApiModelProperty(example = "/pizza/v1.0.0", value = "Context of the API.")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -141,7 +141,7 @@ public class APIMetaDataDTO   {
   }
 
   
-  @ApiModelProperty(value = "API level throttling policy.")
+  @ApiModelProperty(example = "Gold", value = "API level throttling policy.")
   @JsonProperty("policy")
   public String getPolicy() {
     return policy;

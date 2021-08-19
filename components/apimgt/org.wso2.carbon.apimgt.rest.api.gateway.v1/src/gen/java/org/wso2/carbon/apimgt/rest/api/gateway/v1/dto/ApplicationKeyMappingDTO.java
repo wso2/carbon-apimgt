@@ -27,7 +27,7 @@ public class ApplicationKeyMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "d290f1ee-6c54-4b01-90e6-d701848f0851", value = "")
   @JsonProperty("consumerKey")
   public String getConsumerKey() {
     return consumerKey;
@@ -44,7 +44,7 @@ public class ApplicationKeyMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Production", value = "")
   @JsonProperty("keyType")
   public String getKeyType() {
     return keyType;
@@ -61,7 +61,7 @@ public class ApplicationKeyMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Resident Key Manager", value = "")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;

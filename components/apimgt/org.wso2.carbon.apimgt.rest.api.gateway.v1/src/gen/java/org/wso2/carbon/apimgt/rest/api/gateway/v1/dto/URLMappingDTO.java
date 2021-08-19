@@ -31,7 +31,7 @@ public class URLMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Application & Application User", value = "")
   @JsonProperty("authScheme")
   public String getAuthScheme() {
     return authScheme;
@@ -48,7 +48,7 @@ public class URLMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Unlimited", value = "")
   @JsonProperty("throttlingPolicy")
   public String getThrottlingPolicy() {
     return throttlingPolicy;
@@ -65,7 +65,7 @@ public class URLMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "GET", value = "")
   @JsonProperty("httpMethod")
   public String getHttpMethod() {
     return httpMethod;
@@ -82,7 +82,7 @@ public class URLMappingDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "/menu", value = "")
   @JsonProperty("urlPattern")
   public String getUrlPattern() {
     return urlPattern;

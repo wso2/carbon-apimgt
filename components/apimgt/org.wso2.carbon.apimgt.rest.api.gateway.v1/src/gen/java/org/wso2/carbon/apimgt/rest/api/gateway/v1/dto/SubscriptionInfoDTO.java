@@ -29,7 +29,7 @@ public class SubscriptionInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "d290f1ee-6c54-4b01-90e6-d701748f0851", value = "")
   @JsonProperty("subscriptionUUID")
   public String getSubscriptionUUID() {
     return subscriptionUUID;
@@ -46,7 +46,7 @@ public class SubscriptionInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Gold", value = "")
   @JsonProperty("subscriptionPolicy")
   public String getSubscriptionPolicy() {
     return subscriptionPolicy;
@@ -63,7 +63,7 @@ public class SubscriptionInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "UnBlocked", value = "")
   @JsonProperty("status")
   public String getStatus() {
     return status;

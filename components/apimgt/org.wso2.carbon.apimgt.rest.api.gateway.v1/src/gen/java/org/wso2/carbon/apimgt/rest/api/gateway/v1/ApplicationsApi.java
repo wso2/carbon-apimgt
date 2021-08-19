@@ -40,9 +40,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the Application meta information of an api by providing the api name, version and context.", notes = "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = ApplicationListDTO.class, tags={ "Get Application Info" })
+    @ApiOperation(value = "Get the applications information by providing the application name or uuid.", notes = "This operation is used to get the application information from storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = ApplicationListDTO.class, tags={ "Get Application Info" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. End-points successfully retrieved from the storage for the API. ", response = ApplicationListDTO.class),
+        @ApiResponse(code = 200, message = "OK. Applications successfully retrieved from the storage. ", response = ApplicationListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response applicationsGet( @ApiParam(value = "Name of the Application ")  @QueryParam("name") String name,  @ApiParam(value = "UUID of the Application ")  @QueryParam("uuid") String uuid,  @ApiParam(value = "Tenant Domain of the Application ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
