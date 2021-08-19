@@ -4405,8 +4405,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId
-                    ,api.getUUID(),api.getId().getVersion(), api.getType(), api.getContext(),
-                    api.getId().getProviderName(),api.getStatus());
+                    , api.getUUID(), api.getId().getVersion(), api.getType(), api.getContext(),
+                    api.getId().getProviderName(), api.getStatus());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         } catch (RegistryException e) {

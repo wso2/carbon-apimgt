@@ -40,13 +40,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisApiIdGet(String apiId, String tenantDomain, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdGet(String apiId, String tenantDomain, MessageContext messageContext)
+            throws APIManagementException {
 
         tenantDomain = GatewayUtils.validateTenantDomain(tenantDomain, messageContext);
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
-            log.warn("Subscription data store not initialized for " + tenantDomain);
+            log.warn("Subscription data store is not initialized for " + tenantDomain);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         API api;
@@ -54,7 +55,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             api = subscriptionDataStore.getAPIByUUID(apiId);
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO().moreInfo("required parameters " +
-                    "missing")).build();
+                    "are missing")).build();
+
         }
         if (api == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -65,13 +67,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisGet(String context, String version, String tenantDomain, MessageContext messageContext) throws APIManagementException {
+    public Response apisGet(String context, String version, String tenantDomain, MessageContext messageContext)
+            throws APIManagementException {
 
         tenantDomain = GatewayUtils.validateTenantDomain(tenantDomain, messageContext);
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
-            log.warn("Subscription data store not initialized for " + tenantDomain);
+            log.warn("Subscription data store is not initialized for " + tenantDomain);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
@@ -82,9 +85,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIListDTO apiListDTO = GatewayUtils.generateAPIListDTO(Collections.singletonList(api));
             return Response.ok().entity(apiListDTO).build();
-        } else if ((StringUtils.isEmpty(context) && StringUtils.isNotEmpty(version)) || (StringUtils.isNotEmpty(context) && StringUtils.isEmpty(version))) {
+        } else if ((StringUtils.isEmpty(context) && StringUtils.isNotEmpty(version)) ||
+                (StringUtils.isNotEmpty(context) && StringUtils.isEmpty(version))) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO().moreInfo("required parameters " +
-                    "missing")).build();
+                    " are missing")).build();
         } else {
             List<API> apiList = subscriptionDataStore.getAPIs();
             APIListDTO apiListDTO = GatewayUtils.generateAPIListDTO(apiList);

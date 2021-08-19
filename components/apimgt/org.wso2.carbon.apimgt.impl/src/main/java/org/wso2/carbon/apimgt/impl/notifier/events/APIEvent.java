@@ -34,9 +34,10 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
 
-    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,String apiName,
-                    int apiId,String uuid,
-                    String apiVersion, String apiType, String apiContext, String apiProvider, String apiStatus) {
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
+                    int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
+                    String apiStatus) {
+
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -85,63 +86,78 @@ public class APIEvent extends Event {
 
     @Override
     public int hashCode() {
+
         return Objects.hash(getApiName(), getApiId(), getApiVersion(), getApiContext(), getApiStatus(),
                 getApiProvider(), getApiType());
     }
 
     public String getApiName() {
+
         return apiName;
     }
 
     public void setApiName(String apiName) {
+
         this.apiName = apiName;
     }
 
     public int getApiId() {
+
         return apiId;
     }
 
     public void setApiId(int apiId) {
+
         this.apiId = apiId;
     }
 
     public String getApiVersion() {
+
         return apiVersion;
     }
 
     public void setApiVersion(String apiVersion) {
+
         this.apiVersion = apiVersion;
     }
 
     public String getApiContext() {
+
         return apiContext;
     }
 
     public void setApiContext(String apiContext) {
+
         this.apiContext = apiContext;
     }
 
     public String getApiProvider() {
+
         return apiProvider;
     }
 
     public void setApiProvider(String apiProvider) {
+
         this.apiProvider = apiProvider;
     }
 
     public String getApiType() {
+
         return apiType;
     }
 
     public void setApiType(String apiType) {
+
         this.apiType = apiType;
     }
 
     public String getApiStatus() {
+
         return apiStatus;
     }
 
     public void setApiStatus(String apiStatus) {
+
         this.apiStatus = apiStatus;
     }
 

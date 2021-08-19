@@ -60,9 +60,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Utility class for map Dto.
+ */
 public class SubscriptionValidationDataUtil {
 
-    private static APIDTO fromAPItoDTO(API model,String tenantDomain) {
+    private static APIDTO fromAPItoDTO(API model, String tenantDomain) {
 
         APIDTO apidto = null;
         if (model != null) {
@@ -80,7 +83,7 @@ public class SubscriptionValidationDataUtil {
             if (StringUtils.isNotEmpty(uuid)) {
                 apidto.setUuid(uuid);
             }
-            Map<String,URLMapping> urlMappings = model.getAllResources();
+            Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
@@ -113,7 +116,7 @@ public class SubscriptionValidationDataUtil {
             if (StringUtils.isNotEmpty(uuid)) {
                 apidto.setUuid(uuid);
             }
-            Map<String,URLMapping> urlMappings = model.getAllResources();
+            Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
                 URLMappingDTO urlMappingDTO = new URLMappingDTO();
@@ -133,7 +136,7 @@ public class SubscriptionValidationDataUtil {
         return apiListdto;
     }
 
-    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList,String tenantDomain) {
+    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList, String tenantDomain) {
 
         APIListDTO apiListDTO = new APIListDTO();
 
