@@ -159,7 +159,14 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.APPLICATION_DELETION));
-            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+            if (workflowElem == null) {
+                workflowElem = OMAbstractFactory.getOMFactory()
+                        .createOMElement(new QName(WorkflowConstants.API_STATE_CHANGE));
+                executorClass = WorkflowConstants.DEFAULT_EXECUTOR_API_STATE_CHANGE;
+                workflowElem.addAttribute(WorkflowConstants.EXECUTOR, executorClass, null);
+            } else {
+                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+            }
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
