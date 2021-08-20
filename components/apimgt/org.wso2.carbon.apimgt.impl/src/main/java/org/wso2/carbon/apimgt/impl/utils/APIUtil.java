@@ -12023,5 +12023,38 @@ public final class APIUtil {
         }
         return null;
     }
+
+    public static String getUUIDOfAPI(String provider, String name, String version, String tenantDomain) {
+
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            try {
+                APIUtil.loadTenantRegistry(tenantID);
+            } catch (RegistryException e) {
+                log.error("Error while loading tenant registry " + tenantDomain, e);
+                return null;
+            }
+        }
+        UserRegistry governanceSystemRegistry =
+                null;
+        try {
+            governanceSystemRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantID);
+        } catch (RegistryException e) {
+            log.error("Error while retrieving tenant registry "+ tenantDomain, e);
+            return null;
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
+        GenericArtifact apiArtifact = null;
+        try {
+            apiArtifact = getAPIArtifact(apiIdentifier, governanceSystemRegistry);
+        } catch (APIManagementException e) {
+            log.error("Error while retrieving API Artifact "+ tenantDomain, e);
+            return null;
+        }
+        if (apiArtifact != null) {
+            return apiArtifact.getId();
+        }
+        return null;
+    }
 }
 

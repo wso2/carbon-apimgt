@@ -1,10 +1,11 @@
-package org.wso2.carbon.apimgt.internal.service.dto;
+package org.wso2.carbon.apimgt.rest.api.gateway.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.SubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.URLMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -16,9 +17,9 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class APIDTO   {
+public class APIInfoDTO   {
   
-    private String uuid = null;
+    private String apiUUID = null;
     private Integer apiId = null;
     private String provider = null;
     private String name = null;
@@ -28,33 +29,35 @@ public class APIDTO   {
     private String apiType = null;
     private Boolean isDefaultVersion = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
+    private List<SubscriptionInfoDTO> subscripitons = new ArrayList<>();
 
   /**
+   * UUID of API.
    **/
-  public APIDTO uuid(String uuid) {
-    this.uuid = uuid;
+  public APIInfoDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("uuid")
-  public String getUuid() {
-    return uuid;
+  @ApiModelProperty(example = "d290f1ee-6c54-4b01-90e6-d701748f0851", value = "UUID of API.")
+  @JsonProperty("apiUUID")
+  public String getApiUUID() {
+    return apiUUID;
   }
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
   }
 
   /**
    **/
-  public APIDTO apiId(Integer apiId) {
+  public APIInfoDTO apiId(Integer apiId) {
     this.apiId = apiId;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "1", value = "")
   @JsonProperty("apiId")
   public Integer getApiId() {
     return apiId;
@@ -66,13 +69,13 @@ public class APIDTO   {
   /**
    * API Provider name.
    **/
-  public APIDTO provider(String provider) {
+  public APIInfoDTO provider(String provider) {
     this.provider = provider;
     return this;
   }
 
   
-  @ApiModelProperty(value = "API Provider name.")
+  @ApiModelProperty(example = "admin", value = "API Provider name.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -84,13 +87,13 @@ public class APIDTO   {
   /**
    * Name of the API
    **/
-  public APIDTO name(String name) {
+  public APIInfoDTO name(String name) {
     this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Name of the API")
+  @ApiModelProperty(example = "PizzaAPI", value = "Name of the API")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -102,13 +105,13 @@ public class APIDTO   {
   /**
    * Version of the API.
    **/
-  public APIDTO version(String version) {
+  public APIInfoDTO version(String version) {
     this.version = version;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Version of the API.")
+  @ApiModelProperty(example = "v1.0.0", value = "Version of the API.")
   @JsonProperty("version")
   public String getVersion() {
     return version;
@@ -120,13 +123,13 @@ public class APIDTO   {
   /**
    * Context of the API.
    **/
-  public APIDTO context(String context) {
+  public APIInfoDTO context(String context) {
     this.context = context;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Context of the API.")
+  @ApiModelProperty(example = "/pizza/v1.0.0", value = "Context of the API.")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -138,13 +141,13 @@ public class APIDTO   {
   /**
    * API level throttling policy.
    **/
-  public APIDTO policy(String policy) {
+  public APIInfoDTO policy(String policy) {
     this.policy = policy;
     return this;
   }
 
   
-  @ApiModelProperty(value = "API level throttling policy.")
+  @ApiModelProperty(example = "Gold", value = "API level throttling policy.")
   @JsonProperty("policy")
   public String getPolicy() {
     return policy;
@@ -156,7 +159,7 @@ public class APIDTO   {
   /**
    * Type of the API.
    **/
-  public APIDTO apiType(String apiType) {
+  public APIInfoDTO apiType(String apiType) {
     this.apiType = apiType;
     return this;
   }
@@ -174,7 +177,7 @@ public class APIDTO   {
   /**
    * Whether this is the default version of the API.
    **/
-  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
+  public APIInfoDTO isDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
     return this;
   }
@@ -191,7 +194,7 @@ public class APIDTO   {
 
   /**
    **/
-  public APIDTO urlMappings(List<URLMappingDTO> urlMappings) {
+  public APIInfoDTO urlMappings(List<URLMappingDTO> urlMappings) {
     this.urlMappings = urlMappings;
     return this;
   }
@@ -206,6 +209,23 @@ public class APIDTO   {
     this.urlMappings = urlMappings;
   }
 
+  /**
+   **/
+  public APIInfoDTO subscripitons(List<SubscriptionInfoDTO> subscripitons) {
+    this.subscripitons = subscripitons;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscripitons")
+  public List<SubscriptionInfoDTO> getSubscripitons() {
+    return subscripitons;
+  }
+  public void setSubscripitons(List<SubscriptionInfoDTO> subscripitons) {
+    this.subscripitons = subscripitons;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -215,30 +235,31 @@ public class APIDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIDTO API = (APIDTO) o;
-    return Objects.equals(uuid, API.uuid) &&
-        Objects.equals(apiId, API.apiId) &&
-        Objects.equals(provider, API.provider) &&
-        Objects.equals(name, API.name) &&
-        Objects.equals(version, API.version) &&
-        Objects.equals(context, API.context) &&
-        Objects.equals(policy, API.policy) &&
-        Objects.equals(apiType, API.apiType) &&
-        Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(urlMappings, API.urlMappings);
+    APIInfoDTO apIInfo = (APIInfoDTO) o;
+    return Objects.equals(apiUUID, apIInfo.apiUUID) &&
+        Objects.equals(apiId, apIInfo.apiId) &&
+        Objects.equals(provider, apIInfo.provider) &&
+        Objects.equals(name, apIInfo.name) &&
+        Objects.equals(version, apIInfo.version) &&
+        Objects.equals(context, apIInfo.context) &&
+        Objects.equals(policy, apIInfo.policy) &&
+        Objects.equals(apiType, apIInfo.apiType) &&
+        Objects.equals(isDefaultVersion, apIInfo.isDefaultVersion) &&
+        Objects.equals(urlMappings, apIInfo.urlMappings) &&
+        Objects.equals(subscripitons, apIInfo.subscripitons);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
+    return Objects.hash(apiUUID, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings, subscripitons);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIDTO {\n");
+    sb.append("class APIInfoDTO {\n");
     
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
@@ -248,6 +269,7 @@ public class APIDTO   {
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
+    sb.append("    subscripitons: ").append(toIndentedString(subscripitons)).append("\n");
     sb.append("}");
     return sb.toString();
   }

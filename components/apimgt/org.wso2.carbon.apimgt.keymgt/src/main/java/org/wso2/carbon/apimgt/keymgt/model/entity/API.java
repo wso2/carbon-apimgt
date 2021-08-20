@@ -22,15 +22,13 @@ import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Entity for keeping API related information.
  */
 public class API implements CacheableEntity<String> {
-
+    private String uuid;
     private Integer apiId = null;
     private String provider = null;
     private String name = null;
@@ -120,6 +118,16 @@ public class API implements CacheableEntity<String> {
     public String getCacheKey() {
 
         return context + DELEM_PERIOD + version;
+    }
+
+    public String getUuid() {
+
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+
+        this.uuid = uuid;
     }
 
     public String getApiType() {

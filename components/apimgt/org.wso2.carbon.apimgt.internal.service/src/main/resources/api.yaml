@@ -653,6 +653,8 @@ definitions:
   #-----------------------------------------------------
   API:
     properties:
+      uuid:
+        type: string
       apiId:
         type: integer
       provider:

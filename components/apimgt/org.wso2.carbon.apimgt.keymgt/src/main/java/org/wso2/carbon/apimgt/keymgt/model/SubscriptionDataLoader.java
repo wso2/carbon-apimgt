@@ -46,7 +46,7 @@ public interface SubscriptionDataLoader {
     public List<Subscription> loadAllSubscriptions(String tenantDomain) throws DataLoadingException;
 
     /**
-     * Load all Applications from the Database belonging to all Tenants
+     * Load all Applications from the Database belonging to all Tenants.
      *
      * @return A list of all {@link Application}s.
      * @throws DataLoadingException If any error
@@ -55,7 +55,7 @@ public interface SubscriptionDataLoader {
 
     /**
      * Load all Key Mappings (Mapping between the Consumer Key and Application) from the Database
-     * owned by all tenants
+     * owned by all tenants.
      *
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
@@ -111,7 +111,7 @@ public interface SubscriptionDataLoader {
     public Application getApplicationById(int appId) throws DataLoadingException;
 
     /**
-     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database
+     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database.
      *
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
@@ -119,7 +119,7 @@ public interface SubscriptionDataLoader {
     public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException;
 
     /**
-     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database
+     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database.
      *
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
@@ -132,10 +132,11 @@ public interface SubscriptionDataLoader {
      *
      * @param context context of the API
      * @param version Version of the API
+     * @param tenantDomain tenantDomain of th API
      * @return An {@link API}
      * @throws DataLoadingException If any error
      */
-    public API getApi(String context, String version) throws DataLoadingException;
+    public API getApi(String context, String version, String tenantDomain) throws DataLoadingException;
 
     /**
      * Retrieve Subscription Throttling Policy.

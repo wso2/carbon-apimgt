@@ -360,6 +360,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
     private API getAPIFromAPIEvent(APIEvent event) {
 
         API api = new API();
+        api.setUuid(event.getUuid());
         api.setApiId(event.getApiId());
         api.setApiName(event.getApiName());
         api.setApiProvider(event.getApiProvider());

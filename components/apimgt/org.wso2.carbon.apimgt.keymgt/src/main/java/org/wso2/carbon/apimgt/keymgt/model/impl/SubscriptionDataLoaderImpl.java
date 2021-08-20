@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.io.IOException;
 import java.net.URL;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -59,12 +58,11 @@ import java.util.List;
 
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
-    private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
-    private final EventHubConfigurationDto getEventHubConfigurationDto;
-
     public static final int retrievalTimeoutInSeconds = 15;
     public static final int retrievalRetries = 15;
     public static final String UTF8 = "UTF-8";
+    private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
+    private final EventHubConfigurationDto getEventHubConfigurationDto;
 
     public SubscriptionDataLoaderImpl() {
 
@@ -256,12 +254,14 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     @Override
     public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException {
+
         return getKeyMapping(consumerKey, null, null);
     }
 
     @Override
     public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager, String tenantDomain)
             throws DataLoadingException {
+
         ApplicationKeyMapping application = null;
         String responseString;
         String endPoint = null;
@@ -284,21 +284,21 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         if (responseString != null && !responseString.isEmpty()) {
             ApplicationKeyMappingList list = new Gson().fromJson(responseString, ApplicationKeyMappingList.class);
             if (list.getList() != null && !list.getList().isEmpty()) {
-                application = list.getList().get(0); 
+                application = list.getList().get(0);
             }
         }
         return application;
     }
 
     @Override
-    public API getApi(String context, String version) throws DataLoadingException {
+    public API getApi(String context, String version, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
                 "&version=" + version;
         API api = new API();
         String responseString;
         try {
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
@@ -364,7 +364,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         }
         return applicationPolicy;
     }
-    
+
     @Override
     public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
@@ -393,6 +393,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     @Override
     public List<Scope> loadAllScopes(String tenantDomain) throws DataLoadingException {
+
         String scopesEp = APIConstants.SubscriptionValidationResources.SCOPES;
         List<Scope> scopes = new ArrayList<>();
         String responseString;
@@ -415,51 +416,51 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         String serviceURLStr = getEventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
 
-            URL serviceURL = new URL(serviceURLStr + path);
-            byte[] credentials = getServiceCredentials(getEventHubConfigurationDto);
-            int servicePort = serviceURL.getPort();
-            String serviceProtocol = serviceURL.getProtocol();
-            method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                    APIConstants.AUTHORIZATION_BASIC +
-                            new String(credentials, StandardCharsets.UTF_8));
-            if (tenantDomain != null) {
-                method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
-            }
-            HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
+        URL serviceURL = new URL(serviceURLStr + path);
+        byte[] credentials = getServiceCredentials(getEventHubConfigurationDto);
+        int servicePort = serviceURL.getPort();
+        String serviceProtocol = serviceURL.getProtocol();
+        method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                APIConstants.AUTHORIZATION_BASIC +
+                        new String(credentials, StandardCharsets.UTF_8));
+        if (tenantDomain != null) {
+            method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
+        }
+        HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
 
-            HttpResponse httpResponse = null;
-            int retryCount = 0;
-            boolean retry = false;
-            do {
-                try {
-                    httpResponse = httpClient.execute(method);
-                    retry = false;
-                } catch (IOException ex) {
-                    retryCount++;
-                    if (retryCount < retrievalRetries) {
-                        retry = true;
-                        log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
-                                + ". Retrying after " + retrievalTimeoutInSeconds +
-                                " seconds.");
-                        try {
-                            Thread.sleep(retrievalTimeoutInSeconds * 1000);
-                        } catch (InterruptedException e) {
-                            // Ignore
-                        }
-                    } else {
-                        throw ex;
+        HttpResponse httpResponse = null;
+        int retryCount = 0;
+        boolean retry = false;
+        do {
+            try {
+                httpResponse = httpClient.execute(method);
+                retry = false;
+            } catch (IOException ex) {
+                retryCount++;
+                if (retryCount < retrievalRetries) {
+                    retry = true;
+                    log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
+                            + ". Retrying after " + retrievalTimeoutInSeconds +
+                            " seconds.");
+                    try {
+                        Thread.sleep(retrievalTimeoutInSeconds * 1000);
+                    } catch (InterruptedException e) {
+                        // Ignore
                     }
+                } else {
+                    throw ex;
                 }
-            } while (retry);
-            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
-                throw new DataLoadingException("Error while retrieving subscription from " + path);
             }
-            String responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
-            if (log.isDebugEnabled()) {
-                log.debug("Response : " + responseString);
-            }
-            return responseString;
+        } while (retry);
+        if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
+            log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
+            throw new DataLoadingException("Error while retrieving subscription from " + path);
+        }
+        String responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
+        if (log.isDebugEnabled()) {
+            log.debug("Response : " + responseString);
+        }
+        return responseString;
 
     }
 
