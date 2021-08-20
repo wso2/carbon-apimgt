@@ -31,9 +31,9 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.cleanup.service.IdpKeyMangerPurge;
+import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -45,31 +45,30 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ServiceReferenceHolder.class, APIAdmin.class, ApiMgtDAO.class,
+@PrepareForTest({ ServiceReferenceHolder.class, APIAdmin.class, OrganizationPurgeDAO.class,
         GatewayArtifactsMgtDAO.class, APIUtil.class })
 public class IdpKmPurgeTest {
 
-    private ApiMgtDAO apiMgtDAO;
+    private OrganizationPurgeDAO organizationPurgeDAO;
     private APIAdminImpl amAdmin;
 
     @Before public void init() {
-        apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        organizationPurgeDAO = Mockito.mock(OrganizationPurgeDAO.class);
         amAdmin = Mockito.mock(APIAdminImpl.class);
     }
 
     @Test public void testOrganizationRemoval() throws APIManagementException, UserStoreException {
 
-        PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(APIUtil.class);
 
-        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        PowerMockito.when(OrganizationPurgeDAO.getInstance()).thenReturn(organizationPurgeDAO);
 
         KeyManagerConfigurationDTO kmConfig = Mockito.mock(KeyManagerConfigurationDTO.class);
         List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
         keyManagerList.add(kmConfig);
 
         Mockito.doReturn(keyManagerList).when(amAdmin).getKeyManagerConfigurationsByOrganization("testOrg");
-        Mockito.doNothing().when(apiMgtDAO).deleteKeyManagerConfigurationList(keyManagerList, "testOrg");
+        Mockito.doNothing().when(organizationPurgeDAO).deleteKeyManagerConfigurationList(keyManagerList, "testOrg");
         Mockito.doNothing().when(amAdmin).deleteIdentityProvider("testOrg", kmConfig);
 
         Mockito.when(APIUtil.isInternalOrganization("testOrg")).thenReturn(true);
@@ -81,7 +80,7 @@ public class IdpKmPurgeTest {
                     APIConstants.OrganizationDeletion.COMPLETED, entry.getValue());
         }
 
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).
+        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).
                 deleteKeyManagerConfigurationList(Matchers.anyListOf(KeyManagerConfigurationDTO.class),
                         Mockito.any());
     }

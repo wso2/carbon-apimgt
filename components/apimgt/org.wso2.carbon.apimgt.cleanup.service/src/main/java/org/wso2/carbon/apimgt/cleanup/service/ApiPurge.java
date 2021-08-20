@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -50,7 +49,7 @@ public class ApiPurge implements OrganizationPurge {
 
     private final String username;
     private final ArtifactSaver artifactSaver;
-    private final ApiMgtDAO apiMgtDAO;
+    private final OrganizationPurgeDAO organizationPurgeDAO;
     private final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     LinkedHashMap<String, String> apiPurgeTaskMap = new LinkedHashMap<>();
     APIPersistence apiPersistenceInstance;
@@ -60,7 +59,7 @@ public class ApiPurge implements OrganizationPurge {
         this.username = username;
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
-        apiMgtDAO = ApiMgtDAO.getInstance();
+        organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
         setupPersistenceManager();
         initTaskList();
     }
@@ -105,10 +104,10 @@ public class ApiPurge implements OrganizationPurge {
                 try {
                     switch (task.getKey()) {
                     case APIConstants.OrganizationDeletion.API_RETRIEVER:
-                        apiIdentifierList = apiMgtDAO.getAPIIdList(organization);
+                        apiIdentifierList = organizationPurgeDAO.getAPIIdList(organization);
                         break;
                     case APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER:
-                        apiMgtDAO.deleteOrganizationAPIList(organization);
+                        organizationPurgeDAO.deleteOrganizationAPIList(organization);
                         break;
                     case APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER:
                         removeArtifactsFromArtifactServer(apiIdentifierList, organization);

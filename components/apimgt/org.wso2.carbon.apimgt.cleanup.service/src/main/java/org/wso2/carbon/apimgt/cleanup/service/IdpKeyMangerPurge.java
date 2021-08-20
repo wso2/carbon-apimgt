@@ -45,12 +45,12 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     protected String username;
     APIAdmin apiAdmin;
     LinkedHashMap<String, String> IdpKeyMangerPurgeTaskMap = new LinkedHashMap<>();
-    ApiMgtDAO apiMgtDAO;
+    OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(IdpKeyMangerPurge.class);
 
     public IdpKeyMangerPurge(String username) {
         this.username = username;
-        apiMgtDAO = ApiMgtDAO.getInstance();
+        organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
         this.apiAdmin = new APIAdminImpl();
         initTaskList();
     }
@@ -80,7 +80,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                         deleteIdpList(organization, keyManagerList);
                         break;
                     case APIConstants.OrganizationDeletion.KM_DATA_REMOVER:
-                        apiMgtDAO.deleteKeyManagerConfigurationList(keyManagerList, organization);
+                        organizationPurgeDAO.deleteKeyManagerConfigurationList(keyManagerList, organization);
                         break;
                     }
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
