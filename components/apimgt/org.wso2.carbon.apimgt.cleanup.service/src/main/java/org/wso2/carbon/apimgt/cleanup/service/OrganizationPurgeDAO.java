@@ -127,7 +127,8 @@ public class OrganizationPurgeDAO {
 
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while removing the  API data of organization " + organization + " from the database", e);
+            handleException("Error while removing the  API data of organization " + organization + " from the database",
+                    e);
         }
     }
 
