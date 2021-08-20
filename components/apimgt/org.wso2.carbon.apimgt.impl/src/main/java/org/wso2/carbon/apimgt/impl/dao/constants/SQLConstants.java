@@ -2555,6 +2555,7 @@ public class SQLConstants {
     public static final String REMOVE_MIGRATED_GROUP_ID_SQL =
             "UPDATE AM_APPLICATION SET GROUP_ID = '' WHERE APPLICATION_ID = ?";
 
+
     /** Environment related constants **/
 
     public static final String GET_ENVIRONMENT_BY_TENANT_SQL =
@@ -2566,7 +2567,6 @@ public class SQLConstants {
             "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ? AND UUID = ?";
-
 
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
             "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION) " +
