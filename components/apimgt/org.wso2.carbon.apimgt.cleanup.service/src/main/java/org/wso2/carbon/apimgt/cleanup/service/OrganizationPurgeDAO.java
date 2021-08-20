@@ -70,7 +70,7 @@ public class OrganizationPurgeDAO {
         return INSTANCE;
     }
 
-     /**
+    /**
      * Get API data for given organization
      *
      * @param orgId organization Id
