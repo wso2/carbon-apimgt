@@ -19,22 +19,21 @@ package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
-import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
-import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.regex.Pattern;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * This class will validate incoming requests with OAUth authenticator headers
@@ -86,11 +85,12 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
         try {
             if (logger.isDebugEnabled()) {
-                logger.debug(String.format("Authenticating request: " + inMessage.getId()));
+                logger.debug(String.format("Authenticating request with : "
+                        + inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME)) + "Authentication");
             }
             AbstractOAuthAuthenticator abstractOAuthAuthenticator = authenticatorMap
                     .get(inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME));
-            logger.debug("Selected Authenticator for the token validation" + abstractOAuthAuthenticator);
+            logger.debug("Selected Authenticator for the token validation " + abstractOAuthAuthenticator);
             if (abstractOAuthAuthenticator.authenticate(inMessage)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("User logged into Web app using OAuth Authentication");
