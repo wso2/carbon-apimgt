@@ -53,9 +53,8 @@ public class ApplicationPurge implements OrganizationPurge {
     }
 
     public ApplicationPurge(OrganizationPurgeDAO organizationPurgeDAO, String username) {
+        this(username);
         this.organizationPurgeDAO = organizationPurgeDAO;
-        this.username = username;
-        initTaskList();
     }
 
     /**
@@ -111,19 +110,19 @@ public class ApplicationPurge implements OrganizationPurge {
         return 0;
     }
 
-    private void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
-        organizationPurgeDAO.removeApplicationCreationWorkflows(organization);
-    }
-
     private void removePendingSubscriptions(String organization) throws APIManagementException {
         organizationPurgeDAO.removePendingSubscriptions(organization);
     }
 
-    private void deleteApplicationList(String organization) throws APIManagementException {
-        organizationPurgeDAO.deleteApplicationList(organization);
+    private void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
+        organizationPurgeDAO.removeApplicationCreationWorkflows(organization);
     }
 
     private void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
         organizationPurgeDAO.deletePendingApplicationRegistrations(organization);
+    }
+
+    private void deleteApplicationList(String organization) throws APIManagementException {
+        organizationPurgeDAO.deleteApplicationList(organization);
     }
 }

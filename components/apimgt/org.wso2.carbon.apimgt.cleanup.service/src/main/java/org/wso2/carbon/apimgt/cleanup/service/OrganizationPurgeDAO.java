@@ -44,7 +44,7 @@ public class OrganizationPurgeDAO {
     private static OrganizationPurgeDAO INSTANCE = null;
     private boolean multiGroupAppSharingEnabled = false;
 
-    public OrganizationPurgeDAO() {
+    private OrganizationPurgeDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
@@ -74,19 +74,24 @@ public class OrganizationPurgeDAO {
 
         String query = OrganizationPurgeSQLConstants.DELETE_PENDING_SUBSCRIPTIONS;
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
-            preparedStatement.setString(1, organization);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, organization);
 
-            preparedStatement.executeUpdate();
-            connection.commit();
-
+                preparedStatement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback remove pending subscriptions for organization: " + organization, ex);
+                }
+                handleException("Error occurred while removing pending subscriptions for organization: " + organization, e);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing pending subscriptions for organization: "+organization;
-            handleException(msg, e);
+            handleException("Error occurred while removing pending subscriptions for organization: " + organization, e);
         }
     }
 
@@ -96,23 +101,30 @@ public class OrganizationPurgeDAO {
      * @param organization Organization
      * @throws APIManagementException if failed to remove application creation workflows
      */
-    public void removeApplicationCreationWorkflows(String organization)
-            throws APIManagementException {
+    public void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
 
         String query = OrganizationPurgeSQLConstants.DELETE_APPLICATION_CREATION_WORKFLOWS;
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            preparedStatement.setString(1, organization);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, organization);
 
-            preparedStatement.executeUpdate();
-            connection.commit();
-
+                preparedStatement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback remove pending application creation workflows for organization: "
+                            + organization, ex);
+                }
+                handleException("Error occurred while removing application creation workflows for organization: " +
+                        organization, e);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing application creation workflows for organization: "+organization;
-            handleException(msg, e);
+            handleException("Error occurred while removing application creation workflows for organization: " +
+                    organization, e);
         }
     }
 
@@ -125,12 +137,23 @@ public class OrganizationPurgeDAO {
     public void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
         String query = OrganizationPurgeSQLConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS;
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, organization);
+                preparedStatement.executeUpdate();
 
-            preparedStatement.setString(1, organization);
-            preparedStatement.executeUpdate();
-
+                connection.commit();
+            } catch (SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback remove pending application registrations for organization: "
+                            + organization, ex);
+                }
+                handleException("Error while deleting pending application registrations for organization: " +
+                        organization, e);
+            }
         } catch (SQLException e) {
             handleException("Error while deleting pending application registrations for organization: " + organization,
                     e);
@@ -145,79 +168,79 @@ public class OrganizationPurgeDAO {
      */
     public void deleteApplicationList(String organization) throws APIManagementException {
 
-        Connection connection = null;
-        PreparedStatement prepStmtGetConsumerKey = null;
-        PreparedStatement deleteDomainApp = null;
-        PreparedStatement deleteApp = null;
-        ResultSet rs = null;
-
         String getConsumerKeyQuery = OrganizationPurgeSQLConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL;
 
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
 
         String deleteApplicationQuery = OrganizationPurgeSQLConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL;
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
             if (multiGroupAppSharingEnabled) {
                 updateGroupIDMappingsBulk(connection, organization);
             }
 
-            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmtGetConsumerKey.setString(1, organization);
+            try (PreparedStatement prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+                    PreparedStatement deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery)) {
+                prepStmtGetConsumerKey.setString(1, organization);
 
-            rs = prepStmtGetConsumerKey.executeQuery();
+                try (ResultSet rs = prepStmtGetConsumerKey.executeQuery()) {
+                    while (rs.next()) {
+                        String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
+                        String keyManagerName = rs.getString("NAME");
+                        String keyManagerOrganization = rs.getString("ORGANIZATION");
 
-            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
+                        // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
+                        String mode = rs.getString("CREATE_MODE");
+                        if (consumerKey != null) {
 
-            while (rs.next()) {
-                String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
-                String keyManagerName = rs.getString("NAME");
-                String keyManagerOrganization = rs.getString("ORGANIZATION");
+                            deleteDomainApp.setString(1, consumerKey);
+                            deleteDomainApp.addBatch();
+                            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization,
+                                    keyManagerName);
 
-                // This is true when OAuth App has been created by pasting consumer key/secret in the screen.
-                String mode = rs.getString("CREATE_MODE");
-                if (consumerKey != null) {
-
-                    deleteDomainApp.setString(1, consumerKey);
-                    deleteDomainApp.addBatch();
-                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerOrganization,
-                            keyManagerName);
-
-                    if (keyManager != null) {
-                        try {
-                            keyManager.deleteMappedApplication(consumerKey);
-                            log.info("Mapped application deleted for consumer key: " + consumerKey
-                                    + " and organization: " + organization);
-                        } catch (APIManagementException e) {
-                            handleException("Error while Deleting Client Application for consumer key: " + consumerKey
-                                    + " and organization: " + organization, e);
-                        }
-                    }
-
-                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
-                    // call delete.
-                    if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
-                        //delete on oAuthorization server.
-                        if (log.isDebugEnabled()) {
-                            log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the "
-                                    + "Oauth server for organization: " + organization);
-                        }
-                        if (keyManager != null) {
-                            try {
-                                keyManager.deleteApplication(consumerKey);
-                                log.info("Client application deleted for consumer key: " + consumerKey
-                                        + " and organization: " + organization);
-                            } catch (APIManagementException e) {
-                                handleException(
-                                        "Error while Deleting Client Application for organization: " + organization, e);
+                            if (keyManager != null) {
+                                try {
+                                    keyManager.deleteMappedApplication(consumerKey);
+                                    log.info("Mapped application deleted for consumer key: " + consumerKey
+                                            + " and organization: " + organization);
+                                } catch (APIManagementException e) {
+                                    handleException(
+                                            "Error while Deleting Client Application for consumer key: " + consumerKey
+                                                    + " and organization: " + organization, e);
+                                }
                             }
 
+                            // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                            // call delete.
+                            if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
+                                //delete on oAuthorization server.
+                                if (log.isDebugEnabled()) {
+                                    log.debug(
+                                            "Deleting Oauth application with consumer key " + consumerKey + " from the "
+                                                    + "Oauth server for organization: " + organization);
+                                }
+                                if (keyManager != null) {
+                                    try {
+                                        keyManager.deleteApplication(consumerKey);
+                                        log.info("Client application deleted for consumer key: " + consumerKey
+                                                + " and organization: " + organization);
+                                    } catch (APIManagementException e) {
+                                        handleException("Error while Deleting Client Application for organization: "
+                                                + organization, e);
+                                    }
+
+                                }
+                            }
                         }
                     }
                 }
+                deleteDomainApp.executeBatch();
+            } catch (SQLException domainAppsException) {
+                connection.rollback();
+                log.error("Failed to rollback removing domain applications for organization: " + organization,
+                        domainAppsException);
             }
 
             if (log.isDebugEnabled()) {
@@ -225,12 +248,14 @@ public class OrganizationPurgeDAO {
                         + "organization: " + organization);
             }
 
-            deleteDomainApp.executeBatch();
-
-            deleteApp = connection.prepareStatement(deleteApplicationQuery);
-            deleteApp.setString(1, organization);
-
-            deleteApp.execute();
+            try (PreparedStatement deleteApp = connection.prepareStatement(deleteApplicationQuery)) {
+                deleteApp.setString(1, organization);
+                deleteApp.execute();
+            } catch (SQLException appDeletionException) {
+                connection.rollback();
+                log.error("Failed to rollback removing applications for organization: " + organization,
+                        appDeletionException);
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("Applications are deleted successfully for organization: " + organization);
@@ -241,11 +266,6 @@ public class OrganizationPurgeDAO {
         } catch (SQLException e) {
             handleException(
                     "Error while removing application details from the database for organization: " + organization, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
-            APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
         }
     }
 
@@ -260,28 +280,27 @@ public class OrganizationPurgeDAO {
     private void updateGroupIDMappingsBulk(Connection conn, String organization)
             throws APIManagementException {
 
-        PreparedStatement removeMigratedGroupIdsStatement = null;
-        PreparedStatement deleteStatement = null;
-
         String deleteQuery = OrganizationPurgeSQLConstants.REMOVE_GROUP_ID_MAPPING_BULK_SQL;
         String removeGroupIdsQuery = OrganizationPurgeSQLConstants.REMOVE_MIGRATED_GROUP_ID_SQL_BULK;
 
-        try {
-            removeMigratedGroupIdsStatement = conn.prepareStatement(removeGroupIdsQuery);
+        try(PreparedStatement removeMigratedGroupIdsStatement = conn.prepareStatement(removeGroupIdsQuery);
+                PreparedStatement deleteStatement = conn.prepareStatement(deleteQuery)) {
 
             removeMigratedGroupIdsStatement.setString(1, organization);
             removeMigratedGroupIdsStatement.executeUpdate();
 
-            deleteStatement = conn.prepareStatement(deleteQuery);
 
             deleteStatement.setString(1, organization);
             deleteStatement.executeUpdate();
 
         } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                log.error("Failed to rollback update application group id mappings bulk for organization: " +
+                        organization, ex);
+            }
             handleException("Failed to update bulk groupId mappings for organization: "+organization, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(removeMigratedGroupIdsStatement, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
         }
     }
 
