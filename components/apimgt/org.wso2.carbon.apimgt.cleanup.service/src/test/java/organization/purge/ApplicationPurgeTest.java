@@ -21,15 +21,26 @@ package organization.purge;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.cleanup.service.ApplicationPurge;
 import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({OrganizationPurgeDAO.class})
 public class ApplicationPurgeTest {
 
     private OrganizationPurgeDAO organizationPurgeDAO;
@@ -41,6 +52,8 @@ public class ApplicationPurgeTest {
 
     @Test
     public void testOrganizationRemoval() throws APIManagementException {
+        PowerMockito.mockStatic(OrganizationPurgeDAO.class);
+        PowerMockito.when(OrganizationPurgeDAO.getInstance()).thenReturn(organizationPurgeDAO);
 
         Mockito.doNothing().when(organizationPurgeDAO).removePendingSubscriptions(Mockito.anyString());
         Mockito.doNothing().when(organizationPurgeDAO).removeApplicationCreationWorkflows(Mockito.anyString());
