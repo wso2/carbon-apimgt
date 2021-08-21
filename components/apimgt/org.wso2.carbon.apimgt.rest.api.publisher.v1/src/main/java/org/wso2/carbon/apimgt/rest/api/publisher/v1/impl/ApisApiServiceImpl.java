@@ -3658,16 +3658,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        validateWSDLAndReset(fileInputStream, fileDetail, url);
+        WSDLValidationResponse validationResponse = validateWSDLAndReset(fileInputStream, fileDetail, url);
         if (StringUtils.isNotBlank(url)) {
             apiProvider.addWSDLResource(apiId, null, url, organization);
         } else {
             ResourceFile wsdlResource;
             if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
                     APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
-                wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+                wsdlResource = new ResourceFile(validationResponse.getWsdlProcessor().getWSDL(),
+                        APIConstants.APPLICATION_ZIP);
             } else {
-                wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+                wsdlResource = new ResourceFile(validationResponse.getWsdlProcessor().getWSDL(),
+                        fileDetail.getContentType().toString());
             }
             apiProvider.addWSDLResource(apiId, wsdlResource, null, organization);
         }
