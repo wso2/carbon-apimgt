@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util.utils;
+package org.wso2.carbon.apimgt.api;
 
 /**
  * Details about an oauth Access Token.

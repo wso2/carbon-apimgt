@@ -19,19 +19,18 @@ package org.wso2.carbon.apimgt.rest.api.common.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.osgi.service.component.ComponentContext;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
-import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
+import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class implemented for Setting APIM Configuration Service
@@ -39,9 +38,9 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 @Component(
         name = "org.wso2.apimgt.rest.api.common",
         immediate = true)
-public class APIManagerJWTAuthComponent {
+public class APIMRestAPICommonComponent {
 
-    private static final Log log = LogFactory.getLog(APIManagerJWTAuthComponent.class);
+    private static final Log log = LogFactory.getLog(APIMRestAPICommonComponent.class);
 
     @Activate
     protected void activate(ComponentContext context) {

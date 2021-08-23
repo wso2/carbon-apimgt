@@ -39,7 +39,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 /**

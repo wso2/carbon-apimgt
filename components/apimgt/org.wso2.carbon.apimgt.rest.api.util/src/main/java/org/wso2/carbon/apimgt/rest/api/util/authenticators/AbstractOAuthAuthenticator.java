@@ -17,23 +17,24 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.authenticators;
 
-import java.util.Set;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import javax.cache.Cache;
-import org.apache.cxf.message.Message;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
-import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.uri.template.URITemplateException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.message.Message;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.uri.template.URITemplateException;
+
+import javax.cache.Cache;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class implemented for common methods of JWT and Opaque Authentications

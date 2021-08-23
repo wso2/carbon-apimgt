@@ -17,44 +17,41 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.impl;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.apache.cxf.message.Message;
-import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.apimgt.rest.api.util.utils.OAuthTokenInfo;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.user.api.UserStoreException;
-import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.JWTClaimsSet;
-
-import java.text.ParseException;
-
-import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.net.URL;
-import java.net.MalformedURLException;
-
-import com.nimbusds.jwt.util.DateUtils;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
-import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
-import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
-import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
-import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
