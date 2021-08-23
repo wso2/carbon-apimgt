@@ -831,6 +831,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         for (String scope : tokenScopes) {
             if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
                     || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
+                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
                     || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
                 updatePermittedForPublishedDeprecated = true;
                 break;
