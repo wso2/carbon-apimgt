@@ -105,7 +105,49 @@ public class WorkflowConstants {
     
     public static final String DEFAULT_EXECUTOR_API_STATE_CHANGE = 
             "org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor";
-    
+
+    public static final String DEFAULT_EXECUTOR_APPLICATION_CREATION =
+            "org.wso2.carbon.apimgt.impl.workflow.ApplicationCreationSimpleWorkflowExecutor";
+
+    public static final String DEFAULT_EXECUTOR_APPLICATION_CREATION_WORKFLOW_ELEMENT =
+            "<ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                    "ApplicationCreationSimpleWorkflowExecutor\"></ApplicationCreation>";
+
+    public static final String DEFAULT_APPLICATION_REGISTRATION =
+            "org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+
+    public static final String DEFAULT_APPLICATION_REGISTRATION_WORKFLOW_ELEMENT =
+            "<ProductionApplicationRegistration executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                    "ApplicationRegistrationSimpleWorkflowExecutor\"></ProductionApplicationRegistration>";
+
+    public static final String DEFAULT_SUBSCRIPTION_CREATION =
+            "org.wso2.carbon.apimgt.impl.workflow.SubscriptionCreationSimpleWorkflowExecutor";
+
+    public static final String DEFAULT_SUBSCRIPTION_CREATION_WORKFLOW_ELEMENT =
+            "<SubscriptionCreation executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                    "SubscriptionCreationSimpleWorkflowExecutor\"></SubscriptionCreation>";
+
+    public static final String DEFAULT_USER_SIGNUP =
+            "org.wso2.carbon.apimgt.impl.workflow.UserSignUpSimpleWorkflowExecutor";
+
+    public static final String DEFAULT_USER_SIGNUP_WORKFLOW_ELEMENT =
+            "<UserSignUp executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                    "UserSignUpSimpleWorkflowExecutor\"></UserSignUp>";
+
+    public static final String DEFAULT_SUBSCRIPTION_DELETION =
+            "org.wso2.carbon.apimgt.impl.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
+
+    public static final String DEFAULT_SUBSCRIPTION_DELETION_WORKFLOW_ELEMENT =
+            "<SubscriptionDeletion executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                    "SubscriptionDeletionSimpleWorkflowExecutor\"></SubscriptionDeletion>";
+
+    public static final String DEFAULT_APPLICATION_DELETION =
+            "org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionSimpleWorkflowExecutor";
+
+    public static final String DEFAULT_APPLICATION_DELETION_WORKFLOW_ELEMENT =
+            "<ApplicationDeletion executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                    "ApplicationDeletionSimpleWorkflowExecutor\"></ApplicationDeletion>";
+
     public static final String WORKFLOW_OAUTH_APP_NAME = "workflow_app";
     public static final String WORKFLOW_OAUTH_APP_GRANT_TYPES = "client_credentials password refresh_token";
     
