@@ -122,7 +122,6 @@ import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.swing.text.html.parser.Entity;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8693,24 +8692,20 @@ public class ApiMgtDAO {
     public Set<Integer> getPendingSubscriptionsByAPIId(String uuid) throws APIManagementException {
 
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
+
             ps.setString(1, uuid);
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            try (ResultSet rs = ps.executeQuery();) {
+                while (rs.next()) {
+                    pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
             }
+
         } catch (SQLException e) {
             handleException("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return pendingSubscriptions;
     }
@@ -8724,31 +8719,27 @@ public class ApiMgtDAO {
      * @return workflow reference of the registration
      * @throws APIManagementException
      */
-    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName) throws APIManagementException {
+    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
+            throws APIManagementException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String reference = null;
 
         String sqlQuery = SQLConstants.GET_REGISTRATION_WORKFLOW_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, applicationId);
             ps.setString(2, keyType);
             ps.setString(3, keyManagerName);
-            rs = ps.executeQuery();
 
-            // returns only one row
-            if (rs.next()) {
-                reference = rs.getString("WF_REF");
+            try (ResultSet rs = ps.executeQuery()) {
+                // returns only one row
+                if (rs.next()) {
+                    reference = rs.getString("WF_REF");
+                }
             }
+
         } catch (SQLException e) {
-            handleException("Error occurred while getting registration entry for " +
-                    "Application : " + applicationId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error occurred while getting registration entry for " + "Application : " + applicationId,
+                    e);
         }
         return reference;
     }

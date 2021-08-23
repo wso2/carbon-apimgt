@@ -1249,18 +1249,6 @@ public class SQLConstants {
             "   APPLICATION_ID = ? AND " +
             "   CREATE_MODE = ?";
 
-    public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_SQL =
-            " SELECT " +
-            "   AKM.CONSUMER_KEY " +
-            " FROM " +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_SUBSCRIBER SUB " +
-            " WHERE " +
-            "   SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-            "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +
-            "   AND APP.NAME = ? AND AKM.KEY_TYPE=?  ";
-
     public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_BY_APP_ID_SQL =
             " SELECT " +
                     "   AKM.CONSUMER_KEY " +
