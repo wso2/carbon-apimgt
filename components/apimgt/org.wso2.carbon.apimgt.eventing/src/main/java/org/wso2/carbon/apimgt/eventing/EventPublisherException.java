@@ -17,24 +17,20 @@
  */
 package org.wso2.carbon.apimgt.eventing;
 
-import java.util.Map;
-
 /**
- * Interface for event publisher factories.
+ * Custom exception class to be thrown for event publishing exceptions.
  */
-public interface EventPublisherFactory {
+public class EventPublisherException extends Exception {
 
-    /**
-     * Configure event publisher configuration.
-     *
-     * @param configuration event publisher configuration
-     */
-    void configure(Map<String, String> configuration);
+    public EventPublisherException(String msg) {
+        super(msg);
+    }
 
-    /**
-     * Get event publisher.
-     *
-     * @return event publisher
-     */
-    EventPublisher getEventPublisher(EventPublisherType eventPublisherType) throws EventPublisherException;
+    public EventPublisherException(String msg, Throwable throwable) {
+        super(msg, throwable);
+    }
+
+    public EventPublisherException(Throwable throwable) {
+        super(throwable);
+    }
 }

@@ -66,6 +66,7 @@
                             org.apache.commons.logging.*;version="${import.package.version.commons.logging}",
                             org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.apimgt.eventing.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.event.output.adapter.core.*;version="${carbon.analytics.common.version}",
                             *;resolution:=optional
                         </Import-Package>

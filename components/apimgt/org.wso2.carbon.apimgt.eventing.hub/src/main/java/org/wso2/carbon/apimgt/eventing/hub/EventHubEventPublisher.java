@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.eventing.hub.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-
 /**
  * Event hub event publisher class.
  */
@@ -39,17 +38,22 @@ public class EventHubEventPublisher implements EventPublisher {
 
     @Override
     public void publish(EventPublisherEvent eventPublisherEvent) {
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(
-                    EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, null, eventPublisherEvent);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            boolean tenantFlowStarted = false;
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                tenantFlowStarted = true;
+                ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(
+                        EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER,
+                        null,
+                        eventPublisherEvent
+                );
+            } finally {
+                if (tenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
             }
         }
     }
