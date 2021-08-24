@@ -1732,12 +1732,15 @@ public class AsyncApiParser extends APIDefinition {
             Schema schemaValidator = schemaLoader.load().build();
             schemaValidator.validate(schemaToBeValidated);
             validationSuccess = true;
-        } catch(ParseException e) {
+        } catch(ValidationException e) {
             //validation error messages
-            // validationErrorMessages = e.getAllMessages();
-
+            validationErrorMessages = e.getAllMessages();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            String msg = "Error occurred when registering the schema";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Error occurred when parsing the schema";
+            throw new APIManagementException(msg, e);
         }
 
         // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
