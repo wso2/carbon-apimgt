@@ -114,6 +114,10 @@ public class OrganizationPurgeDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
+            // TODO
+            String deleteURLMappingsQuery = OrganizationPurgeSQLConstants.REMOVE_AM_URL_MAPPINGS;
+            deleteAmApiUrlMappings(connection, deleteURLMappingsQuery, organization);
+
             // Remove records from AM_API table and associated data through cascade delete
             String deleteAPIQuery = OrganizationPurgeSQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
             deleteOrganizationAPIData(connection, deleteAPIQuery, organization);
@@ -129,6 +133,22 @@ public class OrganizationPurgeDAO {
         } catch (SQLException e) {
             handleException("Error while removing the  API data of organization " + organization + " from the database",
                     e);
+        }
+    }
+
+    private void deleteAmApiUrlMappings(Connection conn, String deleteURLMappingsQuery, String organization)
+            throws APIManagementException {
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(deleteURLMappingsQuery)) {
+            prepStmt.setString(1, organization);
+            prepStmt.execute();
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                log.error("Error while rolling back the failed operation", e1);
+            }
+            handleException("Failed to remove API URL mapping data of organization " + organization + " from the database", e);
         }
     }
 
