@@ -1731,6 +1731,45 @@ public class AsyncApiParser extends APIDefinition {
                     (new URI("http://json-schema.org/draft-07/schema#"), json).schemaJson(hyperSchema).build();
             Schema schemaValidator = schemaLoader.load().build();
             schemaValidator.validate(schemaToBeValidated);
+            /*AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            validationErrorMessages = new ArrayList<>();
+            if (asyncApiDocument.getServers().size() == 1) {
+                if (!APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                    validationErrorMessages.add("#:The protocol of the server should be 'ws' for websockets");
+                }
+            }
+            if (asyncApiDocument.getServers().size() > 1) {
+                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single server for websockets");
+            }
+            if (asyncApiDocument.getChannels().size() > 1) {
+                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
+            }
+            if (validationErrorMessages.size() == 0) {
+                validationSuccess = true;
+                validationErrorMessages = null;
+            }*/
+
+            //AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            /*//Checking whether it is a websocket
+            validationErrorMessages = new ArrayList<>();
+            if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
+                    isWebSocket = true;
+                }
+            }*/
+
+            //validating channel count for websockets
+            /*if (isWebSocket) {
+                if (asyncApiDocument.getChannels().size() > 1) {
+                    validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
+                }
+            }*/
+
+            /*if (validationErrorMessages.size() == 0) {
+                validationSuccess = true;
+                validationErrorMessages = null;
+            }*/
+            
             validationSuccess = true;
         } catch(ValidationException e) {
             //validation error messages
