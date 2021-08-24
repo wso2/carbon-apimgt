@@ -55,6 +55,11 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
         initTaskList();
     }
 
+    public IdpKeyMangerPurge(String username, OrganizationPurgeDAO organizationPurgeDAO) {
+        this(username);
+        this.organizationPurgeDAO = organizationPurgeDAO;
+    }
+
     private void initTaskList() {
         IdpKeyMangerPurgeTaskMap
                 .put(APIConstants.OrganizationDeletion.KM_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);

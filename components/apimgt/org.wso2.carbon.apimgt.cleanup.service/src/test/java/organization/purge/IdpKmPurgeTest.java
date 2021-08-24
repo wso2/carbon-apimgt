@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.cleanup.service.IdpKeyMangerPurge;
 import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -45,15 +46,17 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ServiceReferenceHolder.class, APIAdmin.class, OrganizationPurgeDAO.class,
+@PrepareForTest({ ServiceReferenceHolder.class, APIAdmin.class, OrganizationPurgeDAO.class, ApiMgtDAO.class,
         GatewayArtifactsMgtDAO.class, APIUtil.class })
 public class IdpKmPurgeTest {
 
     private OrganizationPurgeDAO organizationPurgeDAO;
+    private ApiMgtDAO apiMgtDAO;
     private APIAdminImpl amAdmin;
 
     @Before public void init() {
         organizationPurgeDAO = Mockito.mock(OrganizationPurgeDAO.class);
+        apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         amAdmin = Mockito.mock(APIAdminImpl.class);
     }
 
@@ -61,7 +64,11 @@ public class IdpKmPurgeTest {
 
         PowerMockito.mockStatic(APIUtil.class);
 
+        PowerMockito.mockStatic(OrganizationPurgeDAO.class);
         PowerMockito.when(OrganizationPurgeDAO.getInstance()).thenReturn(organizationPurgeDAO);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
         KeyManagerConfigurationDTO kmConfig = Mockito.mock(KeyManagerConfigurationDTO.class);
         List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
@@ -72,7 +79,7 @@ public class IdpKmPurgeTest {
         Mockito.doNothing().when(amAdmin).deleteIdentityProvider("testOrg", kmConfig);
 
         Mockito.when(APIUtil.isInternalOrganization("testOrg")).thenReturn(true);
-        IdpKeyMangerPurge kmPurge = new IdpKeyMangerPurge("test-username");
+        IdpKeyMangerPurge kmPurge = new IdpKeyManagerPurgeWrapper("test-username", organizationPurgeDAO);
         LinkedHashMap<String, String> subtaskResult =  kmPurge.purge("testOrg");
 
         for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {
