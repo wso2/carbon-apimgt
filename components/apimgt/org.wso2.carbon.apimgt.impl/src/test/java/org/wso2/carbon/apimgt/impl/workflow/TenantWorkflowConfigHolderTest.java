@@ -136,27 +136,40 @@ public class TenantWorkflowConfigHolderTest {
         }
     }
 
-//    TODO: Modify the below test to check for the availability of the simple workflow when the customized
-//     workflow is not found.
-//    @Test
-//    public void testFailureToLoadTenantWFConfigWhenWFExecutorClassNotFound() throws Exception {
-//        //Workflow executor is an non existing class so that ClassNotFoundException will be thrown
-//        String invalidWFExecutor =
-//                "<WorkFlowExtensions>\n" +
-//                        "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
-//                        ".TestExecutor\"/></WorkFlowExtensions>";
-//        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
-//        TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
-//        Resource defaultWFConfigResource = new ResourceImpl();
-//        defaultWFConfigResource.setContentStream(invalidInputStream);
-//        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
-//        try {
-//            tenantWorkflowConfigHolder.load();
-//            Assert.fail("Expected WorkflowException has not been thrown when workflow executor class not found");
-//        } catch (WorkflowException e) {
-//            Assert.assertEquals(e.getMessage(), "Unable to find class");
-//        }
-//    }
+    @Test
+    public void testFailureToLoadTenantWFConfigWhenWFExecutorClassNotFound() throws Exception {
+        //Workflow executor is an non existing class so that ClassNotFoundException will be thrown
+        String invalidWFExecutor =
+                "<WorkFlowExtensions>\n" +
+                        "<ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
+                        ".TestExecutor\"/>" +
+                        "<ProductionApplicationRegistration executor=\"org.wso2.carbon.wso2.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "<SandboxApplicationRegistration executor=\"org.wso2.carbon.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "<SubscriptionCreation executor=\"org.wso2.carbon.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "<UserSignUp executor=\"org.wso2.carbon.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "<SubscriptionDeletion executor=\"org.wso2.carbon.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "<ApplicationDeletion executor=\"org.wso2.carbon.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "<APIStateChange executor=\"org.wso2.carbon.workflow.appregistration" +
+                        ".TestExecutor\"/>" +
+                        "</WorkFlowExtensions>";
+        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
+        TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
+        Resource defaultWFConfigResource = new ResourceImpl();
+        defaultWFConfigResource.setContentStream(invalidInputStream);
+        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        try {
+            tenantWorkflowConfigHolder.load();
+            Assert.fail("Expected WorkflowException has not been thrown when workflow executor class not found");
+        } catch (WorkflowException e) {
+            Assert.assertEquals(e.getMessage(), "Unable to find class");
+        }
+    }
 
     @Test
     public void testFailureToLoadTenantWFConfigWhenWFExecutorClassCannotBeInstantiated() throws Exception {
