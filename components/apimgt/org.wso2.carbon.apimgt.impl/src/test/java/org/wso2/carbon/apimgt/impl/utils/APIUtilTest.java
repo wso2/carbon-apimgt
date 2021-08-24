@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -1967,5 +1968,23 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
         String tokenEndpointType = APIUtil.getTokenEndpointsByType("production");
         Assert.assertEquals("https://localhost:8243", tokenEndpointType);
+    }
+    
+    @Test
+    public void testSetEndpointSecurityForAPIProduct() throws Exception {
+        API api = new API(new APIIdentifier("admin", "test", "1.0"));
+        api.setEndpointUTPassword("testpassword");
+        api.setEndpointUTUsername("testuser");
+        api.setEndpointSecured(true);
+        Map<String, EndpointSecurity> map = APIUtil.setEndpointSecurityForAPIProduct(api);
+        Assert.assertEquals("Username mismatch for production endpoint", "testuser",
+                map.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION).getUsername());
+        Assert.assertEquals("Password mismatch for production endpoint", "testpassword",
+                map.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION).getPassword());
+        Assert.assertEquals("Username mismatch for sandbox endpoint", "testuser",
+                map.get(APIConstants.ENDPOINT_SECURITY_SANDBOX).getUsername());
+        Assert.assertEquals("Password mismatch for sandbox endpoint", "testpassword",
+                map.get(APIConstants.ENDPOINT_SECURITY_SANDBOX).getPassword());
+        
     }
 }

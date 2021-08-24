@@ -11002,7 +11002,7 @@ public final class APIUtil {
                 EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
                 productionEndpointSecurity.setEnabled(true);
                 productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
-                productionEndpointSecurity.setPassword(api.getEndpointUTUsername());
+                productionEndpointSecurity.setPassword(api.getEndpointUTPassword());
                 if (api.isEndpointAuthDigest()) {
                     productionEndpointSecurity.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
                 } else {
