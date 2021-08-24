@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.gateway.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.dto.APIMetaDataDTO;
 import javax.validation.constraints.*;
 
 
@@ -17,21 +17,21 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
-public class SubscriptionListDTO   {
+public class APIListDTO   {
   
     private Integer count = null;
-    private List<SubscriptionDTO> list = new ArrayList<>();
+    private List<APIMetaDataDTO> list = new ArrayList<>();
 
   /**
-   * Number of Subscriptions returned. 
+   * Number of APIs returned. 
    **/
-  public SubscriptionListDTO count(Integer count) {
+  public APIListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of Subscriptions returned. ")
+  @ApiModelProperty(example = "1", value = "Number of APIs returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -42,7 +42,7 @@ public class SubscriptionListDTO   {
 
   /**
    **/
-  public SubscriptionListDTO list(List<SubscriptionDTO> list) {
+  public APIListDTO list(List<APIMetaDataDTO> list) {
     this.list = list;
     return this;
   }
@@ -50,10 +50,10 @@ public class SubscriptionListDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<SubscriptionDTO> getList() {
+  public List<APIMetaDataDTO> getList() {
     return list;
   }
-  public void setList(List<SubscriptionDTO> list) {
+  public void setList(List<APIMetaDataDTO> list) {
     this.list = list;
   }
 
@@ -66,9 +66,9 @@ public class SubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SubscriptionListDTO subscriptionList = (SubscriptionListDTO) o;
-    return Objects.equals(count, subscriptionList.count) &&
-        Objects.equals(list, subscriptionList.list);
+    APIListDTO apIList = (APIListDTO) o;
+    return Objects.equals(count, apIList.count) &&
+        Objects.equals(list, apIList.list);
   }
 
   @Override
@@ -79,7 +79,7 @@ public class SubscriptionListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SubscriptionListDTO {\n");
+    sb.append("class APIListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

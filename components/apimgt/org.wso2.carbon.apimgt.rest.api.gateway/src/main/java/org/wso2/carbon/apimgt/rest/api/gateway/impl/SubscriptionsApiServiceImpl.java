@@ -1,82 +1,43 @@
-/*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.gateway.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.gateway.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.gateway.dto.SubscriptionListDTO;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import javax.ws.rs.core.Response;
 
-/**
- * This class used to retrieve in-memory subscriptions holds in gateway.
- */
 public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
-    @Override
-    public Response getSubscriptions(String apiUUID, String applicationUUID, String tenantDomain,
-                                     MessageContext messageContext) throws APIManagementException {
+    private static final Log log = LogFactory.getLog(SubscriptionsApiServiceImpl.class);
 
-        tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
-        SubscriptionDataStore tenantSubscriptionStore =
+    public Response subscriptionsGet(String apiUUID, String appUUID, String tenantDomain,
+                                     MessageContext messageContext) {
+
+        tenantDomain = GatewayUtils.validateTenantDomain(tenantDomain, messageContext);
+        SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if (tenantSubscriptionStore != null) {
-            if (StringUtils.isEmpty(apiUUID) || StringUtils.isEmpty(applicationUUID)) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-            Subscription subscription = tenantSubscriptionStore.getSubscriptionsByUUIds(apiUUID, applicationUUID);
-            if (subscription != null) {
-                return Response.ok().entity(toSubscriptionListDto(Arrays.asList(subscription))).build();
-            }
+        if (subscriptionDataStore == null) {
+            log.warn("Subscription data store not initialized for " + tenantDomain);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok().entity(toSubscriptionListDto(Collections.emptyList())).build();
-    }
+        if (StringUtils.isNotEmpty(apiUUID) && StringUtils.isNotEmpty(appUUID)) {
+            Subscription subscription = subscriptionDataStore.getSubscriptionByUUID(apiUUID, appUUID);
+            if (subscription == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            SubscriptionDTO subscriptionDTO = GatewayUtils.convertToSubscriptionDto(subscription);
+            return Response.ok().entity(subscriptionDTO).build();
 
-    private SubscriptionListDTO toSubscriptionListDto(List<Subscription> subscriptionList) {
-
-        List<SubscriptionDTO> subscriptionDTOS = new ArrayList<>();
-        for (Subscription subscription : subscriptionList) {
-            SubscriptionDTO subscriptionDTO = new SubscriptionDTO()
-                    .subscriptionId(Integer.parseInt(subscription.getSubscriptionId()))
-                    .subscriptionUUID(subscription.getSubscriptionUUId())
-                    .subscriptionState(subscription.getSubscriptionState())
-                    .appId(subscription.getAppId())
-                    .applicationUUID(subscription.getApplicationUUID())
-                    .apiId(subscription.getApiId())
-                    .apiUUID(subscription.getApiUUID())
-                    .policyId(subscription.getPolicyId());
-            subscriptionDTOS.add(subscriptionDTO);
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO().moreInfo("required parameters " +
+                    "missing")).build();
         }
-        SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
-        subscriptionListDTO.setList(subscriptionDTOS);
-        subscriptionListDTO.setCount(subscriptionDTOS.size());
-        return subscriptionListDTO;
     }
-
 }
