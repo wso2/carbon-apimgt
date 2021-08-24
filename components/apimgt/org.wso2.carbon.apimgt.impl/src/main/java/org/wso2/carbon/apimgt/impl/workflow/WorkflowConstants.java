@@ -105,7 +105,6 @@ public class WorkflowConstants {
     
     public static final String DEFAULT_EXECUTOR_API_STATE_CHANGE = 
             "org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor";
-
     public static final String WORKFLOW_OAUTH_APP_NAME = "workflow_app";
     public static final String WORKFLOW_OAUTH_APP_GRANT_TYPES = "client_credentials password refresh_token";
     
