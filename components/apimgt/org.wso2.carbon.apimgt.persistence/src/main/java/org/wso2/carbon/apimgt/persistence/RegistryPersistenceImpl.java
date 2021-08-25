@@ -918,6 +918,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
+    @Override
+    public PublisherAPISearchResult searchAndSortAPIsForPublisher(Organization org, String searchQuery,
+            int start, int offset, UserContext ctx, String sortBy, String order) throws APIPersistenceException {
+        return null;
+    }
+
     private PublisherAPISearchResult searchPaginatedPublisherAPIs(Registry userRegistry, int tenantIDLocal, String searchQuery,
             int start, int offset) throws APIManagementException {
         int totalLength = 0;

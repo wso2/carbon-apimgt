@@ -166,6 +166,21 @@ public interface APIPersistence {
                                     UserContext ctx) throws APIPersistenceException;
 
     /**
+     * Search APIs to be displayed on Publisher API listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @param sortBy      sort criteria
+     * @param order       sort order
+     * @return Publisher API Search Result
+     * @throws APIPersistenceException
+     */
+    PublisherAPISearchResult searchAndSortAPIsForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx, String sortBy, String order) throws APIPersistenceException;
+
+    /**
      * Search APIs to be displayed on Dev Portal API listing
      *
      * @param org         Organization the APIs are owned by
