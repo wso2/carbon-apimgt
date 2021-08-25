@@ -232,23 +232,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8168,7 +8152,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (log.isDebugEnabled()) {
                 log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }
-            SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+            // SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+            Set<Object> apiSet = new LinkedHashSet<>();
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
                 List<Object> apiList = new ArrayList<>();
@@ -8192,6 +8177,51 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return result ;
     }
+
+    @Override
+    public Map<String, Object> searchAndSortPaginatedAPIs(String searchQuery, String organization, int start, int end,
+                                                          String sortBy, String order) throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+
+        Organization org = new Organization(organization);
+        String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
+        Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
+        try {
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAndSortAPIsForPublisher(org, searchQuery,
+                    start, end, userCtx, sortBy, order);
+            if (log.isDebugEnabled()) {
+                log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+            }
+            // SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+            Set<Object> apiSet = new LinkedHashSet<>();
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<Object> apiList = new ArrayList<>();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateAPIStatus(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
+                    apiList.add(mappedAPI);
+                }
+                apiSet.addAll(apiList);
+                result.put("apis", apiSet);
+                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("isMore", true);
+            } else {
+                result.put("apis", apiSet);
+                result.put("length", 0);
+                result.put("isMore", false);
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
+        }
+        return result ;
+    }
+
 
     @Override
     public String addComment(String uuid, Comment comment, String user) throws APIManagementException {

@@ -198,6 +198,13 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
+    public Map<String, Object> searchAndSortPaginatedAPIs(String searchQuery, String organization, int start, int end,
+                                                          String sortBy, String order) throws APIManagementException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException {
         // TODO Auto-generated method stub

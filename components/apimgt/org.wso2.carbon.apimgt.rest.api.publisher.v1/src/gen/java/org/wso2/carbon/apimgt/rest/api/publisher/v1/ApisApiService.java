@@ -111,7 +111,7 @@ public interface ApisApiService {
       public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAllAPIMediationPolicies(String apiId, Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String order, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;

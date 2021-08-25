@@ -5597,6 +5597,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public Map<String, Object> searchAndSortPaginatedAPIs(String searchQuery, String organization, int start, int end,
+                                                          String sortBy, String order) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);

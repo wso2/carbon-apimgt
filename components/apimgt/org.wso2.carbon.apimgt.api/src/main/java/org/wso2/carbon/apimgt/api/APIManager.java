@@ -898,6 +898,17 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * @param searchQuery search query. ex : provider:admin
+     * @param organization Identifier of an organization
+     * @param start starting number
+     * @param end ending number
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchAndSortPaginatedAPIs(String searchQuery, String organization, int start, int end,
+                                                   String sortBy, String order) throws APIManagementException;
+
+    /**
      * Search in content of apis, api products and documents and provide the results
      * @param searchQuery search query
      * @param orgId Identifier of an organization

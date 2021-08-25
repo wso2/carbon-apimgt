@@ -126,6 +126,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/order'
         - $ref: '#/components/parameters/requestedTenant'
         - name: query
           in: query
@@ -11590,6 +11592,20 @@ components:
       schema:
         type: integer
         default: 0
+    sortBy:
+      name: sortBy
+      in: query
+      description: |
+        Criteria for sorting.
+      schema:
+        type: string
+    order:
+      name: order
+      in: query
+      description: |
+        Order of sorting(ascending/descending).
+      schema:
+        type: string
     If-None-Match:
       name: If-None-Match
       in: header
