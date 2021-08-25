@@ -16284,42 +16284,32 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevision apiRevision = new APIRevision();
-                    List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
-                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    APIRevision previousRevision = null;
-                    for (APIRevision apiRevisionObject : revisionList) {
-                        if (apiRevisionObject.getId() == rs.getInt(1)) {
-                            apiRevisionDeploymentList = apiRevisionObject.getApiRevisionDeploymentList();
-                            previousRevision = apiRevisionObject;
-                        }
-                    }
-                    if (previousRevision != null) {
-                        revisionList.remove(previousRevision);
-                    }
                     apiRevision.setId(rs.getInt("ID"));
                     apiRevision.setApiUUID(apiUUID);
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
                     apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
-                    String environmentName = rs.getString("NAME");
-                    if (!StringUtils.isEmpty(environmentName)) {
-                        apiRevisionDeployment.setDeployment(environmentName);
-                        String vhost = rs.getString("VHOST");
-                        apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
-                        apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
-                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                        apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                        apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
-                        apiRevisionDeploymentList.add(apiRevisionDeployment);
-                    }
-                    apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
+                    apiRevision.setApiRevisionDeploymentList(new ArrayList<>());
                     revisionList.add(apiRevision);
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to get revision details for API UUID: " + apiUUID, e);
         }
+
+        // adding deployment info to revision objects
+        List<APIRevisionDeployment> allAPIRevisionDeploymentList = getAPIRevisionDeploymentByApiUUID(apiUUID);
+
+        for(APIRevisionDeployment apiRevisionDeployment : allAPIRevisionDeploymentList) {
+            for (APIRevision apiRevision : revisionList) {
+                if (apiRevision.getRevisionUUID().equals(apiRevisionDeployment.getRevisionUUID())) {
+                    apiRevision.getApiRevisionDeploymentList().add(apiRevisionDeployment);
+                    break;
+                }
+            }
+        }
+
         return revisionList;
     }
 
@@ -16509,31 +16499,19 @@ public class ApiMgtDAO {
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
 
-        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.
                              APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    String environmentName = rs.getString("NAME");
-                    String vhost = rs.getString("VHOST");
-                    apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
-                    apiRevisionDeploymentList.add(apiRevisionDeployment);
-                }
+                return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
             }
         } catch (SQLException e) {
             handleException("Failed to get API Revision deployment mapping details for api uuid: " +
                     apiUUID, e);
         }
-        return apiRevisionDeploymentList;
+        return new ArrayList<>();
     }
 
     /**
