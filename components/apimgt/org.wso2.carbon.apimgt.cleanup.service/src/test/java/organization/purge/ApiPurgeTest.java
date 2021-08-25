@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -37,10 +38,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.mockito.Matchers.any;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ServiceReferenceHolder.class, APIPersistence.class, OrganizationPurgeDAO.class,
@@ -50,14 +56,16 @@ public class ApiPurgeTest {
     private OrganizationPurgeDAO organizationPurgeDAO;
     private GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private ServiceReferenceHolder serviceReferenceHolder;
+    private APIPersistence apiPersistenceInstance;
 
     @Before public void init() {
         organizationPurgeDAO = Mockito.mock(OrganizationPurgeDAO.class);
         gatewayArtifactsMgtDAO = Mockito.mock(GatewayArtifactsMgtDAO.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        apiPersistenceInstance = Mockito.mock(APIPersistence.class);
     }
 
-    @Test public void testOrganizationRemoval() throws APIManagementException {
+    @Test public void testOrganizationRemoval() throws APIManagementException, APIPersistenceException {
 
         PowerMockito.mockStatic(OrganizationPurgeDAO.class);
         PowerMockito.when(OrganizationPurgeDAO.getInstance()).thenReturn(organizationPurgeDAO);
@@ -88,8 +96,8 @@ public class ApiPurgeTest {
         Mockito.doReturn(apiIdentifierList).when(organizationPurgeDAO).getAPIIdList("testOrg");
         Mockito.doNothing().when(organizationPurgeDAO).deleteOrganizationAPIList(Mockito.any());
         Mockito.doNothing().when(gatewayArtifactsMgtDAO).removeOrganizationGatewayArtifacts(Mockito.any());
-
-        ApiPurge apiPurge = new ApiPurge("test-username");
+        Mockito.doNothing().when(apiPersistenceInstance).deleteAllAPIs(any(Organization.class));
+        ApiPurge apiPurge = new ApiPurgeWrapper(apiPersistenceInstance);
 
         LinkedHashMap<String, String> subtaskResult =   apiPurge.purge("testOrg");
         for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {

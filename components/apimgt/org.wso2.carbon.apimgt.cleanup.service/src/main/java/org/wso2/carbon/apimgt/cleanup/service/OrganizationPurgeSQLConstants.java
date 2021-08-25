@@ -63,4 +63,7 @@ public class OrganizationPurgeSQLConstants {
 
     public static final String REMOVE_MIGRATED_GROUP_ID_SQL_BULK =
             "UPDATE AM_APPLICATION APP SET APP.GROUP_ID = '' WHERE APP.ORGANIZATION = ?";
+
+    public static final String REMOVE_AM_URL_MAPPINGS = "DELETE URLMAP FROM AM_API_URL_MAPPING URLMAP "
+            + "JOIN AM_API AM ON AM_API.API_ID = URLMAP.API_ID WHERE AM.ORGANIZATION = ?";
 }

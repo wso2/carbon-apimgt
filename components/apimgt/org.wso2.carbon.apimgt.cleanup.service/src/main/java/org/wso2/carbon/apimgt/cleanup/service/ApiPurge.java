@@ -64,6 +64,11 @@ public class ApiPurge implements OrganizationPurge {
         initTaskList();
     }
 
+    public ApiPurge(String username, APIPersistence apiPersistence) {
+        this(username);
+        this.apiPersistenceInstance = apiPersistence;
+    }
+
     private void initTaskList() {
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
