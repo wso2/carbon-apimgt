@@ -132,6 +132,11 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
         return true;
     }
 
+    @Override
+    public boolean isContentAware() {
+        return false;
+    }
+
     public String getTokenEndpointUrl() {
 
         return tokenEndpointUrl;
