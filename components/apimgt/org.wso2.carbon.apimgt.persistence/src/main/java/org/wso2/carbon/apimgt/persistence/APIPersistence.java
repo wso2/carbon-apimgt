@@ -166,7 +166,7 @@ public interface APIPersistence {
                                     UserContext ctx) throws APIPersistenceException;
 
     /**
-     * Search APIs to be displayed on Publisher API listing
+     * Search and sort APIs to be displayed on Publisher API listing
      *
      * @param org         Organization the APIs are owned by
      * @param searchQuery search query
