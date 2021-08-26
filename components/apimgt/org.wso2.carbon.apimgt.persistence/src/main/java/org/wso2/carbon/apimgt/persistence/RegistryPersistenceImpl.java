@@ -918,6 +918,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
+    @Override
+    public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery,
+            int start, int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
+        // TODO: Use this method to search APIs for publisher after this is implemented in the choreo-apimgt-extentions repo.
+        return null;
+    }
+
     private PublisherAPISearchResult searchPaginatedPublisherAPIs(Registry userRegistry, int tenantIDLocal, String searchQuery,
             int start, int offset) throws APIManagementException {
         int totalLength = 0;
