@@ -919,8 +919,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public PublisherAPISearchResult searchAndSortAPIsForPublisher(Organization org, String searchQuery,
-            int start, int offset, UserContext ctx, String sortBy, String order) throws APIPersistenceException {
+    public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery,
+            int start, int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
         // TODO: Use this method to search APIs for publisher after this is implemented in the choreo-apimgt-extentions repo.
         return null;
     }
