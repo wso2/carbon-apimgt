@@ -32,6 +32,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.RelatesTo;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -438,16 +439,18 @@ public class Utils {
             }
             if (headers.containsKey(Utils.getClientCertificateHeader())) {
                 try {
-                    X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                    if (isClientCertificateValidationEnabled() && !APIUtil
-                            .isCertificateExistsInListenerTrustStore(x509Certificate)) {
-                        log.debug("Certificate in request header needs to exist in truststore when client certificate validation is enabled");
-                        return null;
+                    if (!isClientCertificateValidationEnabled() || APIUtil
+                            .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
+                        X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
+                        if (APIUtil.isCertificateExistsInListenerTrustStore(x509Certificate)) {
+                            // If valid client certificate is sent via header give it priority over the transport level cert
+                            axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
+                            return x509Certificate;
+                        } else {
+                            log.debug("Certificate in Header didn't exist in truststore");
+                            return null;
+                        }
                     }
-                    // If valid client certificate is sent via header give it priority over the transport level cert
-                    axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
-                    return x509Certificate;
-
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
                     log.error(msg, e);
@@ -465,18 +468,22 @@ public class Utils {
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         String certificate = (String) headers.get(Utils.getClientCertificateHeader());
+        byte[] bytes;
         if (certificate != null) {
-            if (isClientCertificateEncoded()) {
+            if (!isClientCertificateEncoded()) {
+                certificate = APIUtil.getX509certificateContent(certificate);
+                bytes = certificate.getBytes();
+            } else {
                 try {
                     certificate = URLDecoder.decode(certificate, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
                 }
-            }
 
-            certificate = removeIllegalBase64Characters(certificate);
-            byte[] bytes = java.util.Base64.getDecoder().decode(certificate);
+                certificate = APIUtil.getX509certificateContent(certificate);
+                bytes = Base64.decodeBase64(certificate);
+            }
 
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                 return X509Certificate.getInstance(inputStream);
@@ -624,19 +631,6 @@ public class Utils {
         }
 
         return selectedAPIMap;
-    }
-
-    private static String removeIllegalBase64Characters(String value) {
-        if (value.contains(APIConstants.BEGIN_CERTIFICATE_STRING)
-                && value.contains(APIConstants.END_CERTIFICATE_STRING)) {
-
-            // extracting certificate content
-            value = value.substring(value.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING)
-                            + APIConstants.BEGIN_CERTIFICATE_STRING.length(),
-                    value.indexOf(APIConstants.END_CERTIFICATE_STRING));
-        }
-        // remove spaces, \r, \\r, \n, \\n, ], [ characters from certificate string
-        return value.replaceAll("\\\\r|\\\\n|\\r|\\n|\\[|]| ", "");
     }
 
     private static class ContextLengthSorter implements Comparator<String> {
