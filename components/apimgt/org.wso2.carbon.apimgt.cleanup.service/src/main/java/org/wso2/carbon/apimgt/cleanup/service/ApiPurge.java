@@ -99,6 +99,8 @@ public class ApiPurge implements OrganizationPurge {
      * delete API data in given organization
      * @param organization Organization Id
      */
+    @MethodStats
+    @Override
     public LinkedHashMap<String, String> purge(String organization) {
         List<APIIdentifier> apiIdentifierList = new ArrayList<>();
 

@@ -62,6 +62,7 @@ public class ApplicationPurge implements OrganizationPurge {
      *
      * @param organization organization
      */
+    @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
