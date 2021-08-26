@@ -40,6 +40,7 @@ public class JWTInfoDto {
     private String apiName;
     private JWTValidationInfo jwtValidationInfo;
     private Map<String, String> appAttributes = new HashMap<>();
+    private String sub;
 
     public JWTInfoDto() {
 
@@ -61,6 +62,7 @@ public class JWTInfoDto {
         this.apiName = jwtInfoDto.getApiName();
         this.jwtValidationInfo = new JWTValidationInfo(jwtInfoDto.getJwtValidationInfo());
         this.appAttributes = jwtInfoDto.getAppAttributes();
+        this.sub = jwtInfoDto.getSub();
     }
 
     public String getApplicationTier() {
@@ -211,5 +213,13 @@ public class JWTInfoDto {
     public void setAppAttributes(Map<String, String> appAttributes) {
 
         this.appAttributes = appAttributes;
+    }
+
+    public String getSub() {
+        return sub;
+    }
+
+    public void setSub(String sub) {
+        this.sub = sub;
     }
 }

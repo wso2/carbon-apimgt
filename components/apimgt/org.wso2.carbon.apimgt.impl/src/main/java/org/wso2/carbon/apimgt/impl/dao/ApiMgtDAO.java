@@ -5841,13 +5841,14 @@ public class ApiMgtDAO {
             prepStmtDefVersionAdd.setString(1, api.getId().getApiName());
             prepStmtDefVersionAdd.setString(2, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmtDefVersionAdd.setString(3, api.getId().getVersion());
+
             if (deploymentAvailable) {
                 prepStmtDefVersionAdd.setString(4, api.getId().getVersion());
                 api.setAsPublishedDefaultVersion(true);
             } else {
                 prepStmtDefVersionAdd.setString(4, publishedDefaultVersion);
             }
-
+            prepStmtDefVersionAdd.setString(5, api.getOrganization());
             prepStmtDefVersionAdd.execute();
         } catch (SQLException e) {
             handleException("Error while adding the API default version entry: " + api.getId().getApiName() + " to " +
@@ -11311,11 +11312,14 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement deleteStatement = null;
         String query = null;
+        String deleteTierPermissionsQuery = null;
 
         if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             query = SQLConstants.DELETE_APPLICATION_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            //in case of a subscription policy delete we have to remove throttle tier permissions as well
             query = SQLConstants.DELETE_SUBSCRIPTION_POLICY_SQL;
+            deleteTierPermissionsQuery = SQLConstants.DELETE_THROTTLE_TIER_BY_NAME_PERMISSION_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             query = SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
@@ -11329,6 +11333,12 @@ public class ApiMgtDAO {
             deleteStatement.setInt(1, tenantId);
             deleteStatement.setString(2, policyName);
             deleteStatement.executeUpdate();
+            if (deleteTierPermissionsQuery != null) {
+                deleteStatement = connection.prepareStatement(deleteTierPermissionsQuery);
+                deleteStatement.setString(1, policyName);
+                deleteStatement.setInt(2, tenantId);
+                deleteStatement.executeUpdate();
+            }
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
@@ -15983,6 +15993,7 @@ public class ApiMgtDAO {
                 statement.setString(3, apiRevision.getRevisionUUID());
                 statement.setString(4, apiRevision.getDescription());
                 statement.setString(5, apiRevision.getCreatedBy());
+                statement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 statement.executeUpdate();
 
                 // Retrieve API ID
@@ -16273,42 +16284,32 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevision apiRevision = new APIRevision();
-                    List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
-                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    APIRevision previousRevision = null;
-                    for (APIRevision apiRevisionObject : revisionList) {
-                        if (apiRevisionObject.getId() == rs.getInt(1)) {
-                            apiRevisionDeploymentList = apiRevisionObject.getApiRevisionDeploymentList();
-                            previousRevision = apiRevisionObject;
-                        }
-                    }
-                    if (previousRevision != null) {
-                        revisionList.remove(previousRevision);
-                    }
                     apiRevision.setId(rs.getInt("ID"));
                     apiRevision.setApiUUID(apiUUID);
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
                     apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
-                    String environmentName = rs.getString("NAME");
-                    if (!StringUtils.isEmpty(environmentName)) {
-                        apiRevisionDeployment.setDeployment(environmentName);
-                        String vhost = rs.getString("VHOST");
-                        apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
-                        apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
-                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                        apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                        apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
-                        apiRevisionDeploymentList.add(apiRevisionDeployment);
-                    }
-                    apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
+                    apiRevision.setApiRevisionDeploymentList(new ArrayList<>());
                     revisionList.add(apiRevision);
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to get revision details for API UUID: " + apiUUID, e);
         }
+
+        // adding deployment info to revision objects
+        List<APIRevisionDeployment> allAPIRevisionDeploymentList = getAPIRevisionDeploymentByApiUUID(apiUUID);
+
+        for(APIRevisionDeployment apiRevisionDeployment : allAPIRevisionDeploymentList) {
+            for (APIRevision apiRevision : revisionList) {
+                if (apiRevision.getRevisionUUID().equals(apiRevisionDeployment.getRevisionUUID())) {
+                    apiRevision.getApiRevisionDeploymentList().add(apiRevisionDeployment);
+                    break;
+                }
+            }
+        }
+
         return revisionList;
     }
 
@@ -16363,6 +16364,7 @@ public class ApiMgtDAO {
                     statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
                     statement.setString(3, apiRevisionId);
                     statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
+                    statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -16399,14 +16401,22 @@ public class ApiMgtDAO {
                         statement.setString(1, deployedAPIRevision.getDeployment());
                         statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
                         statement.setString(3, apiRevisionId);
+                        statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
                         statement.addBatch();
                     }
                     statement.executeBatch();
                     connection.commit();
                 } catch (SQLException e) {
                     connection.rollback();
-                    handleException("Failed to add deployed API Revision for Revision UUID "
-                            + apiRevisionId, e);
+                    // handle concurrent db entry update. Fix duplicate primary key issue.
+                    if (e.getMessage().toLowerCase().contains("primary key violation") ||
+                            e.getMessage().toLowerCase().contains("duplicate entry")) {
+                        log.debug("Duplicate entries detected for Revision UUID " + apiRevisionId +
+                                " while adding deployed API revisions", e);
+                    } else {
+                        handleException("Failed to add deployed API Revision for Revision UUID "
+                                + apiRevisionId, e);
+                    }
                 }
             } catch (SQLException e) {
                 handleException("Failed to add deployed API Revision for Revision UUID " + apiRevisionId,
@@ -16489,31 +16499,19 @@ public class ApiMgtDAO {
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
 
-        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.
                              APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    String environmentName = rs.getString("NAME");
-                    String vhost = rs.getString("VHOST");
-                    apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
-                    apiRevisionDeploymentList.add(apiRevisionDeployment);
-                }
+                return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
             }
         } catch (SQLException e) {
             handleException("Failed to get API Revision deployment mapping details for api uuid: " +
                     apiUUID, e);
         }
-        return apiRevisionDeploymentList;
+        return new ArrayList<>();
     }
 
     /**
@@ -17025,6 +17023,7 @@ public class ApiMgtDAO {
                 statement.setString(3, apiRevision.getRevisionUUID());
                 statement.setString(4, apiRevision.getDescription());
                 statement.setString(5, apiRevision.getCreatedBy());
+                statement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 statement.executeUpdate();
 
                 // Retrieve API Product ID

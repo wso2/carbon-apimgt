@@ -77,7 +77,8 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Shared Scope by Scope Id", notes = "This operation can be used to retrieve details of a Shared Scope by a given scope Id. ", response = ScopeDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
@@ -93,7 +94,9 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get usages of a Shared Scope by Scope Id", notes = "This operation can be used to retrieve usages of a Shared Scope by a given scope Id. ", response = SharedScopeUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
@@ -109,7 +112,8 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All Available Shared Scopes", notes = "This operation can be used to get all the available Shared Scopes. ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
@@ -143,7 +147,9 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @ApiOperation(value = "Check Given Scope Name already Exists", notes = "Using this operation, user can check a given scope name exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes" })
     @ApiResponses(value = { 

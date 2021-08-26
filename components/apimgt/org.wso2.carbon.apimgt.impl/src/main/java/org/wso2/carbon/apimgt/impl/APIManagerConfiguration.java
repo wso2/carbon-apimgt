@@ -1749,6 +1749,7 @@ public class APIManagerConfiguration {
                 eventHubReceiverConfiguration.setJmsConnectionParameters(properties);
                 eventHubConfigurationDto.setEventHubReceiverConfiguration(eventHubReceiverConfiguration);
             }
+
             OMElement eventPublisherElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.EVENT_PUBLISHER_CONFIGURATIONS));
             EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
@@ -1773,10 +1774,40 @@ public class APIManagerConfiguration {
                 if (eventTypeElement != null) {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
+                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: " + eventPublisherElement.toString());
+                    Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
+                    eventHubPublisherConfiguration.setProperties(publisherProps);
+                }
                 eventHubConfigurationDto.setEventHubPublisherConfiguration(eventHubPublisherConfiguration);
             }
         }
         this.eventHubConfigurationDto = eventHubConfigurationDto;
+    }
+
+    /**
+     * Extracts out the additional parameters of the publisher configuration.
+     *
+     * @param eventPublisherElement publisher element defined in the format of
+     *                              <EventPublisherConfiguration>"
+     *                              "<Properties>"
+     *                              "<Property name="testProp">testVal</Property>"
+     *                              "</Properties>"
+     *                              "</EventPublisherConfiguration>
+     * @return the extracted properties as a map
+     */
+    public Map<String, String> extractPublisherProperties(OMElement eventPublisherElement) {
+        OMElement propertiesElement = eventPublisherElement.getFirstChildWithName(
+                new QName(APIConstants.AdvancedThrottleConstants.PROPERTIES_CONFIGURATION));
+        Iterator eventPublisherPropertiesIterator = propertiesElement.getChildrenWithLocalName("Property");
+        Map<String, String> publisherProps = new HashMap<>();
+        while (eventPublisherPropertiesIterator.hasNext()) {
+            OMElement propertyElem = (OMElement) eventPublisherPropertiesIterator.next();
+            String name = propertyElem.getAttributeValue(new QName("name"));
+            String value = propertyElem.getText();
+            publisherProps.put(name, value);
+        }
+        return publisherProps;
     }
 
     public ExtendedJWTConfigurationDto getJwtConfigurationDto() {

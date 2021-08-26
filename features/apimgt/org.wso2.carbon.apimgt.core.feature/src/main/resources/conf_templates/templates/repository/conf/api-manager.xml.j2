@@ -481,6 +481,9 @@
         <SubscriberClaims>{{apim.publisher.subscriber_claims}}</SubscriberClaims>
          <!--This parameter specifies the alias value of the internal Api Key which will be used for Api Key Authentication-->
         <InternalKeyAlias>{{apim.publisher.key_alias}}</InternalKeyAlias>
+        {% if apim.publisher.supported_document_types is defined %}
+        <SupportedDocumentTypes>{{apim.publisher.supported_document_types}}</SupportedDocumentTypes>
+        {% endif %}
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -1238,6 +1241,11 @@
                     <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
                 {% endif %}
             {% endif %}
+        <Properties>
+            {% for key,value in apim.event_hub.publish.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
         </EventPublisherConfiguration>
          <EventReceiverConfiguration>
              <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
