@@ -1951,6 +1951,7 @@ public final class APIConstants {
         public static final String DELETED = "deleted";
 
         public static final String API = "API";
+        public static final String ORGANIZATION = "Organization";
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
@@ -2752,6 +2753,26 @@ public final class APIConstants {
     public static class GatewayArtifactConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
+    }
+
+    public static class OrganizationDeletion {
+        public static final String API_RETRIEVER = "APIRetriever";
+        public static final String API_DB_DATA_REMOVER = "APIDataRemover";
+        public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
+        public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
+        public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+
+        public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
+        public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
+        public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
+        public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+
+        public static final String PENDING = "Pending";
+        public static final String COMPLETED = "Completed";
+        public static final String FAIL = "Fail";
+        public static final String KM_RETRIEVER = "KMRetriever";
+        public static final String IDP_DATA_REMOVER = "IDPDataRemover";
+        public static final String KM_DATA_REMOVER = "KMDataRemover";
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";

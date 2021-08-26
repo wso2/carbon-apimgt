@@ -152,6 +152,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -5778,26 +5779,33 @@ public class ApiMgtDAO {
      * If the api's version is the same as the published version, then the whole entry will be removed.
      * Otherwise only the default version attribute is set to null.
      *
-     * @param apiId
+     * @param apiIdList
      * @param connection
      * @return
      * @throws APIManagementException
      */
-    public void removeAPIFromDefaultVersion(APIIdentifier apiId, Connection connection) throws APIManagementException {
+    private void removeAPIFromDefaultVersion(List<APIIdentifier> apiIdList, Connection connection) throws
+            APIManagementException {
+        // TODO: check list empty
+        try (PreparedStatement prepStmtDefVersionDelete =
+                     connection.prepareStatement(SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL)) {
 
-        String queryDefaultVersionDelete = SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL;
-
-        PreparedStatement prepStmtDefVersionDelete = null;
-        try {
-            prepStmtDefVersionDelete = connection.prepareStatement(queryDefaultVersionDelete);
-            prepStmtDefVersionDelete.setString(1, apiId.getApiName());
-            prepStmtDefVersionDelete.setString(2, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmtDefVersionDelete.execute();
+            for (APIIdentifier apiId : apiIdList) {
+                prepStmtDefVersionDelete.setString(1, apiId.getApiName());
+                prepStmtDefVersionDelete.setString(2, APIUtil.
+                        replaceEmailDomainBack(apiId.getProviderName()));
+                prepStmtDefVersionDelete.addBatch();
+            }
+            prepStmtDefVersionDelete.executeBatch();
         } catch (SQLException e) {
-            handleException("Error while deleting the API default version entry: " + apiId.getApiName() + " from the " +
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            handleException("Error while deleting the API default version entry: " + apiIdList.stream().
+                    map(APIIdentifier::getApiName).collect(Collectors.joining(",")) + " from the " +
                     "database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtDefVersionDelete, null, null);
         }
     }
 
@@ -5832,7 +5840,10 @@ public class ApiMgtDAO {
 
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         boolean deploymentAvailable = isDeploymentAvailableByAPIUUID(connection, api.getUuid());
-        removeAPIFromDefaultVersion(api.getId(), connection);
+        ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+            add(api.getId());
+        }};
+        removeAPIFromDefaultVersion(apiIdList, connection);
 
         PreparedStatement prepStmtDefVersionAdd = null;
         String queryDefaultVersionAdd = SQLConstants.ADD_API_DEFAULT_VERSION_SQL;
@@ -6882,7 +6893,11 @@ public class ApiMgtDAO {
                 if (api.isDefaultVersion()) {
                     addUpdateAPIAsDefaultVersion(api, connection);
                 } else { //tick is removed
-                    removeAPIFromDefaultVersion(api.getId(), connection);
+                    ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                        add(api.getId());
+                    }};
+
+                    removeAPIFromDefaultVersion(apiIdList, connection);
                 }
             }
             String serviceKey = api.getServiceInfo("key");
@@ -7062,11 +7077,6 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-            prepStmt = connection.prepareStatement(deleteAPIQuery);
-            prepStmt.setString(1, uuid);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
-
             //Delete resource scope mappings of the API
             prepStmt = connection.prepareStatement(deleteResourceScopeMappingsQuery);
             prepStmt.setInt(1, id);
@@ -7078,10 +7088,18 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, id);
             prepStmt.execute();
 
+            prepStmt = connection.prepareStatement(deleteAPIQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
             String curDefaultVersion = getDefaultVersion(identifier);
             String pubDefaultVersion = getPublishedDefaultVersion(identifier);
             if (identifier.getVersion().equals(curDefaultVersion)) {
-                removeAPIFromDefaultVersion(identifier, connection);
+                ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                    add(identifier);
+                }};
+                removeAPIFromDefaultVersion(apiIdList, connection);
             } else if (identifier.getVersion().equals(pubDefaultVersion)) {
                 setPublishedDefVersion(identifier, connection, null);
             }
@@ -8674,24 +8692,20 @@ public class ApiMgtDAO {
     public Set<Integer> getPendingSubscriptionsByAPIId(String uuid) throws APIManagementException {
 
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
+
             ps.setString(1, uuid);
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            try (ResultSet rs = ps.executeQuery();) {
+                while (rs.next()) {
+                    pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
             }
+
         } catch (SQLException e) {
             handleException("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return pendingSubscriptions;
     }
@@ -8705,31 +8719,27 @@ public class ApiMgtDAO {
      * @return workflow reference of the registration
      * @throws APIManagementException
      */
-    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName) throws APIManagementException {
+    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
+            throws APIManagementException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String reference = null;
 
         String sqlQuery = SQLConstants.GET_REGISTRATION_WORKFLOW_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, applicationId);
             ps.setString(2, keyType);
             ps.setString(3, keyManagerName);
-            rs = ps.executeQuery();
 
-            // returns only one row
-            if (rs.next()) {
-                reference = rs.getString("WF_REF");
+            try (ResultSet rs = ps.executeQuery()) {
+                // returns only one row
+                if (rs.next()) {
+                    reference = rs.getString("WF_REF");
+                }
             }
+
         } catch (SQLException e) {
-            handleException("Error occurred while getting registration entry for " +
-                    "Application : " + applicationId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error occurred while getting registration entry for " + "Application : " + applicationId,
+                    e);
         }
         return reference;
     }
