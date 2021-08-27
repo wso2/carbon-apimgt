@@ -784,6 +784,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             validateAPIExistence(apiId);
+
+            // validate sandbox and production endpoints
+            if (!PublisherCommonUtils.validateEndpoints(body)) {
+                throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                        ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
+
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
@@ -3292,11 +3299,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param inlineApiDefinition Swagger API definition String
      * @param messageContext CXF message context
      * @return API Import using OpenAPI definition response
+     * @throws APIManagementException when error occurs while importing the OpenAPI definition
      */
     @Override
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
-                                            MessageContext messageContext) {
+                                            MessageContext messageContext) throws APIManagementException {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
@@ -3310,6 +3318,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        // validate sandbox and production endpoints
+        if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
+            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                    ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
         // Import the API and Definition
