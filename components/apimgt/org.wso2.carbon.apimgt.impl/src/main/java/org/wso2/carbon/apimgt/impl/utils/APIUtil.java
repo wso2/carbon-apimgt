@@ -10466,18 +10466,11 @@ public final class APIUtil {
      * @return masked token.
      */
     public static String getMaskedToken(String token) {
-
-        int allowedVisibleLen = Math.min(token.length() / MIN_VISIBLE_LEN_RATIO, MAX_VISIBLE_LEN);
-        StringBuilder maskedTokenBuilder = new StringBuilder();
-        if (token.length() > MAX_LEN) {
-            maskedTokenBuilder.append("...");
-            maskedTokenBuilder.append(String.join("", Collections.nCopies(MAX_LEN, MASK_CHAR)));
+        if (token.length() >= 10) {
+            return "XXXXX" + token.substring(token.length() - 10);
         } else {
-            maskedTokenBuilder.append(String.join("", Collections.nCopies(token.length()
-                    - allowedVisibleLen, MASK_CHAR)));
+            return "XXXXX" + token.substring(token.length() / 2);
         }
-        maskedTokenBuilder.append(token.substring(token.length() - allowedVisibleLen));
-        return maskedTokenBuilder.toString();
     }
 
     public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
