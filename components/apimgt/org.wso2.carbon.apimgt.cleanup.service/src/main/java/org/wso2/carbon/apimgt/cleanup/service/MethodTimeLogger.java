@@ -28,7 +28,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * This class provides AspectJ configurations
@@ -117,13 +117,9 @@ public class MethodTimeLogger
         stringBuilder.append("]");
         argString = stringBuilder.toString();
 
-        HashMap<String, String> threadLocalOrganization = ThreadLocalWithOrgContext.orgContext.get();
-
-        if (threadLocalOrganization != null) {
-            String correlationId = threadLocalOrganization.get(Thread.currentThread().getName());
-            if (StringUtils.isNotEmpty(correlationId)) {
-                MDC.put(APIConstants.CORRELATION_ID, correlationId);
-            }
+        if (StringUtils.isEmpty(MDC.get(APIConstants.CORRELATION_ID))) {
+            String correlationId = UUID.randomUUID().toString();
+            MDC.put(APIConstants.CORRELATION_ID, correlationId);
         }
 
         log.info((System.currentTimeMillis() - start) + "|METHOD|" +
