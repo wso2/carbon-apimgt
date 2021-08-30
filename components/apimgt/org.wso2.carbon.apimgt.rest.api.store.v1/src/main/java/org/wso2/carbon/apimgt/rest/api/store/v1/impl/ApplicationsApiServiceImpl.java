@@ -129,13 +129,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
 
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
         // todo: what are the applications shared to group "g2" among them. 
         groupId = RestApiUtil.getLoggedInUserGroupId();
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
@@ -216,7 +216,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
             }
 
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organization) && update != null
                     && update) {
@@ -226,15 +226,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         oldApplication.getUUID());
             } else {
                 application = preProcessAndAddApplication(ownerId, applicationDTO, organization);
+                update = Boolean.FALSE;
             }
-
-            // Get keys to import
-            List<ApplicationKeyDTO> applicationKeys = applicationDTO.getKeys();
-            for (ApplicationKeyDTO applicationKey : applicationKeys) {
-                application.addKey(ImportUtils.getAPIKeyFromApplicationKeyDTO(applicationKey));
-            }
-            // Update the application to add keys
-            apiConsumer.updateApplication(application);
 
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
@@ -251,10 +244,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             // check whether keys need to be skipped while import
             if (skipApplicationKeys == null || !skipApplicationKeys) {
+                // if this is an update, old keys will be removed and the OAuth app will be overridden with new values
+                if (update) {
+                    if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() > 0) {
+                        importedApplication.getKeys().clear();
+                    }
+                }
                 // Add application keys if present and keys does not exists in the current application
-                if (application.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
-                    for (APIKey apiKey : application.getKeys()) {
-                        ImportUtils.addApplicationKey(ownerId, importedApplication, apiKey, apiConsumer);
+                if (applicationDTO.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
+                    for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
+                        ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
+                                update);
                     }
                 }
             }
@@ -283,8 +283,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Application createdApplication = preProcessAndAddApplication(username, body, organization);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
@@ -363,8 +363,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant,
                                                  MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String organization = RestApiUtil.getOrganization(messageContext);
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
             if (application != null) {
@@ -743,7 +743,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (StringUtils.isNotEmpty(body.getKeyManager())) {
                         keyManagerName = body.getKeyManager();
                     }
-                    String organization = RestApiUtil.getOrganization(messageContext);
+                    String organization = RestApiUtil.getValidatedOrganization(messageContext);
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
@@ -1102,7 +1102,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
                 jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
-                String organization = RestApiUtil.getOrganization(messageContext);
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
                                 application.getName(), keyType, tokenType, keyManagerName, organization);
@@ -1123,7 +1123,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdOauthKeysGet(String applicationId,
                                                           String xWso2Tenant, MessageContext messageContext)
             throws APIManagementException {
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId, organization);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();

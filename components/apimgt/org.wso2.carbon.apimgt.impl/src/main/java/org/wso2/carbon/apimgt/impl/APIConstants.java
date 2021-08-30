@@ -821,6 +821,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
     public static final String API_PUBLISHER_INTERNAL_API_KEY_ALIAS = API_PUBLISHER + "InternalKeyAlias";
+    public static final String API_PUBLISHER_SUPPORTED_DOC_TYPES = API_PUBLISHER + "SupportedDocumentTypes";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -1243,6 +1244,7 @@ public final class APIConstants {
 
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";
@@ -1868,6 +1870,7 @@ public final class APIConstants {
 
         public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
         public static final String DATA_PUBLISHER_CONFIGURAION_TYPE = "Type";
+        public static final String PROPERTIES_CONFIGURATION = "Properties";
         public static final String DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP = "ReceiverUrlGroup";
         public static final String DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP = "AuthUrlGroup";
         public static final String USERNAME = "Username";
@@ -1948,6 +1951,7 @@ public final class APIConstants {
         public static final String DELETED = "deleted";
 
         public static final String API = "API";
+        public static final String ORGANIZATION = "Organization";
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
@@ -1985,6 +1989,12 @@ public final class APIConstants {
         public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
         public static final String LIST_PENDING_TASKS = "ListPendingTasks";
 
+    }
+
+    public static class AccessTokenBinding {
+
+        public static final String ACCESS_TOKEN_BINDING = "AccessTokenBinding";
+        public static final String ACCESS_TOKEN_BINDING_ENABLED = ACCESS_TOKEN_BINDING + ".Enabled";
     }
 
     public static class JwtTokenConstants {
@@ -2749,6 +2759,26 @@ public final class APIConstants {
     public static class GatewayArtifactConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
+    }
+
+    public static class OrganizationDeletion {
+        public static final String API_RETRIEVER = "APIRetriever";
+        public static final String API_DB_DATA_REMOVER = "APIDataRemover";
+        public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
+        public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
+        public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+
+        public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
+        public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
+        public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
+        public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+
+        public static final String PENDING = "Pending";
+        public static final String COMPLETED = "Completed";
+        public static final String FAIL = "Fail";
+        public static final String KM_RETRIEVER = "KMRetriever";
+        public static final String IDP_DATA_REMOVER = "IDPDataRemover";
+        public static final String KM_DATA_REMOVER = "KMDataRemover";
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";

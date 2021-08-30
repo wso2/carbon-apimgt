@@ -123,7 +123,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
         ApplicationUtils.class, KeyManagerHolder.class, WorkflowExecutorFactory.class,
         AbstractApplicationRegistrationWorkflowExecutor.class, ServiceReferenceHolder.class, MultitenantUtils.class,
         RegistryUtils.class, Caching.class, APIPersistence.class, ApiMgtDAO.class })
-@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
+@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);

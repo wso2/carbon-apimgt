@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -77,6 +78,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -982,6 +984,11 @@ public class GatewayUtils {
         if (jwtInfoDto.getJwtValidationInfo() != null) {
             jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
                     apiKeyValidationInfoDTO));
+            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
+                    && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
+                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
+                jwtInfoDto.setSub(MultitenantUtils.getTenantAwareUsername(sub));
+            }
         }
 
         if (apiKeyValidationInfoDTO != null) {
@@ -1356,5 +1363,9 @@ public class GatewayUtils {
                 }
             }
         }
+    }
+
+    public static TracingTracer getTracingTracer() {
+        return ServiceReferenceHolder.getInstance().getTracer();
     }
 }

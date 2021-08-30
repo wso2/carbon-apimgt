@@ -92,6 +92,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
+        List<String> revisionUUIDs = new ArrayList<>();
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
             // get revision uuid
             String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
@@ -99,29 +100,30 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (revisionUUID == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
-
-            Map<String, Environment> environments = APIUtil.getEnvironments();
-            List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
-            for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
-                DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
-                deployedAPIRevision.setRevisionUUID(revisionUUID);
-                String environment = deployedEnvInfoDTO.getName();
-                if (environments.get(environment) == null) {
-                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+            if (!revisionUUIDs.contains(revisionUUID)) {
+                revisionUUIDs.add(revisionUUID);
+                Map<String, Environment> environments = APIUtil.getEnvironments();
+                List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
+                for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
+                    DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();
+                    deployedAPIRevision.setRevisionUUID(revisionUUID);
+                    String environment = deployedEnvInfoDTO.getName();
+                    if (environments.get(environment) == null) {
+                        RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    }
+                    deployedAPIRevision.setDeployment(environment);
+                    deployedAPIRevision.setVhost(deployedEnvInfoDTO.getVhost());
+                    if (StringUtils.isEmpty(deployedEnvInfoDTO.getVhost())) {
+                        RestApiUtil.handleBadRequest(
+                                "Required field 'vhost' not found in deployment", log
+                        );
+                    }
+                    deployedAPIRevisions.add(deployedAPIRevision);
                 }
-                deployedAPIRevision.setDeployment(environment);
-                deployedAPIRevision.setVhost(deployedEnvInfoDTO.getVhost());
-                if (org.apache.commons.lang3.StringUtils.isEmpty(deployedEnvInfoDTO.getVhost())) {
-                    RestApiUtil.handleBadRequest(
-                            "Required field 'vhost' not found in deployment", log
-                    );
-                }
-                deployedAPIRevisions.add(deployedAPIRevision);
+                apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiId(), revisionUUID, deployedAPIRevisions);
             }
-            apiProvider.addDeployedAPIRevision(deployedAPIRevisionDTO.getApiId(), revisionUUID, deployedAPIRevisions);
         }
 
-        Response.Status status = Response.Status.CREATED;
-        return Response.status(status).build();
+        return Response.ok().build();
     }
 }

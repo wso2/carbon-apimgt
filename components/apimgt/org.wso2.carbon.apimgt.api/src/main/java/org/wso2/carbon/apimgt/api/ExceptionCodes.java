@@ -109,6 +109,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_RESTORING_API_REVISION(900354, "Can not restore API Revision ", 400, "Failed to restore API revision registry artifacts: %s "),
     DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
     EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
+    ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,

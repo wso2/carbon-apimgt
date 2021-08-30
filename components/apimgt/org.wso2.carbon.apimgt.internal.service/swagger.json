@@ -717,8 +717,8 @@
         }
       }
     },
-    "/apis/deployed-revision" : {
-      "post" : {
+    "/apis/deployed-revisions" : {
+      "patch" : {
         "tags" : [ "API Revisions" ],
         "summary" : "Deploy Revision",
         "description" : "Deploy a revision\n",

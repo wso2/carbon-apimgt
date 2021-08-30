@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.267-SNAPSHOT</version>
+        <version>9.0.307-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -29,6 +29,8 @@
     <name>API Management</name>
 
     <modules>
+        <module>org.wso2.carbon.apimgt.eventing</module>
+        <module>org.wso2.carbon.apimgt.eventing.hub</module>
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.persistence</module>
         <module>org.wso2.carbon.apimgt.impl</module>
@@ -61,5 +63,6 @@
         <module>org.wso2.carbon.apimgt.common.gateway</module>
         <module>org.wso2.carbon.apimgt.common.jms</module>
         <module>org.wso2.carbon.apimgt.common.analytics</module>
+        <module>org.wso2.carbon.apimgt.cleanup.service</module>
     </modules>
 </project>

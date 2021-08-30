@@ -876,6 +876,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public void deleteAllAPIs(Organization org) throws APIPersistenceException {
+        throw new UnsupportedOperationException("This method is not supported on this instance");
+    }
+
+    @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
@@ -911,6 +916,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
         return result;
+    }
+
+    @Override
+    public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery,
+            int start, int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
+        // TODO: Use this method to search APIs for publisher after this is implemented in the choreo-apimgt-extentions repo.
+        return null;
     }
 
     private PublisherAPISearchResult searchPaginatedPublisherAPIs(Registry userRegistry, int tenantIDLocal, String searchQuery,
