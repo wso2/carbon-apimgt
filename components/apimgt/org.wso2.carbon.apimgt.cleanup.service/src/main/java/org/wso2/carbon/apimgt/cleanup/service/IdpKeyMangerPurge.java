@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.cleanup.service;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -41,6 +42,11 @@ import java.util.Map;
 /**
  * This class used to remove IDP and KM data
  */
+@Component(
+        name = "idp.km.purge.service",
+        immediate = true,
+        service = OrganizationPurge.class
+)
 public class IdpKeyMangerPurge implements OrganizationPurge {
     protected String username;
     APIAdmin apiAdmin;
@@ -48,15 +54,14 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(IdpKeyMangerPurge.class);
 
-    public IdpKeyMangerPurge(String username) {
-        this.username = username;
+    public IdpKeyMangerPurge() {
         organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
         this.apiAdmin = new APIAdminImpl();
         initTaskList();
     }
 
-    public IdpKeyMangerPurge(String username, OrganizationPurgeDAO organizationPurgeDAO) {
-        this(username);
+    public IdpKeyMangerPurge(OrganizationPurgeDAO organizationPurgeDAO) {
+        this();
         this.organizationPurgeDAO = organizationPurgeDAO;
     }
 
@@ -107,7 +112,8 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
-                new Gson().toJson(IdpKeyMangerPurgeTaskMap), APIConstants.AuditLogConstants.DELETED, username);
+                new Gson().toJson(IdpKeyMangerPurgeTaskMap), APIConstants.AuditLogConstants.DELETED,
+                "Organization-Cleanup-Executor");
         return IdpKeyMangerPurgeTaskMap;
     }
 

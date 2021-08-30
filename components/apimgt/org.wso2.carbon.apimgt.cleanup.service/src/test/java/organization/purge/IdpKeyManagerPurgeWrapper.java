@@ -5,7 +5,7 @@ import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 
 public class IdpKeyManagerPurgeWrapper extends IdpKeyMangerPurge {
 
-    public IdpKeyManagerPurgeWrapper(String username, OrganizationPurgeDAO organizationPurgeDAO) {
-        super(username, organizationPurgeDAO);
+    public IdpKeyManagerPurgeWrapper(OrganizationPurgeDAO organizationPurgeDAO) {
+        super(organizationPurgeDAO);
     }
 }

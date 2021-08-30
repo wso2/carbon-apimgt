@@ -68,11 +68,14 @@ public class ApplicationPurgeTest {
                     APIConstants.OrganizationDeletion.COMPLETED, entry.getValue());
         }
 
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removePendingSubscriptions(Mockito.anyString());
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).removeApplicationCreationWorkflows(Mockito.anyString());
+        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).
+                removePendingSubscriptions(Mockito.anyString());
+        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).
+                removeApplicationCreationWorkflows(Mockito.anyString());
         Mockito.verify(organizationPurgeDAO, Mockito.times(1))
                 .deletePendingApplicationRegistrations(Mockito.anyString());
-        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).deleteApplicationList(Mockito.anyString());
+        Mockito.verify(organizationPurgeDAO, Mockito.times(1)).
+                deleteApplicationList(Mockito.anyString());
 
     }
 }

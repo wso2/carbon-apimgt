@@ -79,7 +79,7 @@ public class IdpKmPurgeTest {
         Mockito.doNothing().when(amAdmin).deleteIdentityProvider("testOrg", kmConfig);
 
         Mockito.when(APIUtil.isInternalOrganization("testOrg")).thenReturn(true);
-        IdpKeyMangerPurge kmPurge = new IdpKeyManagerPurgeWrapper("test-username", organizationPurgeDAO);
+        IdpKeyMangerPurge kmPurge = new IdpKeyManagerPurgeWrapper(organizationPurgeDAO);
         LinkedHashMap<String, String> subtaskResult =  kmPurge.purge("testOrg");
 
         for(Map.Entry<String, String> entry : subtaskResult.entrySet()) {
