@@ -60,6 +60,7 @@ public class ApplicationPurge implements OrganizationPurge {
     }
 
     public ApplicationPurge(OrganizationPurgeDAO organizationPurgeDAO) {
+        this();
         this.organizationPurgeDAO = organizationPurgeDAO;
     }
 
@@ -108,13 +109,13 @@ public class ApplicationPurge implements OrganizationPurge {
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(applicationPurgeTaskMap),
-                APIConstants.AuditLogConstants.DELETED, "Organization-Cleanup-Executor");
+                APIConstants.AuditLogConstants.DELETED, OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
         return applicationPurgeTaskMap;
     }
 
     @Override
     public int getPriority() {
-        return 0;
+        return -10;
     }
 
     private void removePendingSubscriptions(String organization) throws APIManagementException {

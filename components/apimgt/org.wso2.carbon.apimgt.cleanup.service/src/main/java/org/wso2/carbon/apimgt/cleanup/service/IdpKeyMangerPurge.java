@@ -113,7 +113,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
                 new Gson().toJson(IdpKeyMangerPurgeTaskMap), APIConstants.AuditLogConstants.DELETED,
-                "Organization-Cleanup-Executor");
+                OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
         return IdpKeyMangerPurgeTaskMap;
     }
 

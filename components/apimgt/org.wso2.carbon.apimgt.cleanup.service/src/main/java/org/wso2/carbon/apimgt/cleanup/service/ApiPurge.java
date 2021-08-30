@@ -148,11 +148,12 @@ public class ApiPurge implements OrganizationPurge {
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(apiPurgeTaskMap),
-                APIConstants.AuditLogConstants.DELETED, "Organization-Cleanup-Executor");
+                APIConstants.AuditLogConstants.DELETED, OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
         return apiPurgeTaskMap;
     }
 
-    @Override public int getPriority() {
+    @Override
+    public int getPriority() {
         return 0;
     }
 

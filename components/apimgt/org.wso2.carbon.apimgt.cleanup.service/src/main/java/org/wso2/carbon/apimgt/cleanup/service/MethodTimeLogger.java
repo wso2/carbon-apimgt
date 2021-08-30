@@ -25,7 +25,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.MDC;
+import org.apache.log4j.MDC;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.UUID;
@@ -117,7 +117,7 @@ public class MethodTimeLogger
         stringBuilder.append("]");
         argString = stringBuilder.toString();
 
-        if (StringUtils.isEmpty(MDC.get(APIConstants.CORRELATION_ID))) {
+        if (StringUtils.isEmpty((CharSequence) MDC.get(APIConstants.CORRELATION_ID))) {
             String correlationId = UUID.randomUUID().toString();
             MDC.put(APIConstants.CORRELATION_ID, correlationId);
         }
