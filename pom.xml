@@ -1838,16 +1838,11 @@
                 <artifactId>javax.jms-api</artifactId>
                 <version>${javax.jms.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.damnhandy.wso2</groupId>
-                <artifactId>handy-uri-templates</artifactId>
-                <version>${damnhandy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-validator</groupId>
-                <artifactId>commons-validator</artifactId>
-                <version>${commons-validator.version}</version>
-            </dependency>
+                <dependency>
+                    <groupId>com.damnhandy.wso2</groupId>
+                    <artifactId>handy-uri-templates</artifactId>
+                    <version>${damnhandy.version}</version>
+                </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2003,7 +1998,6 @@
         <caffeine.version>2.8.1</caffeine.version>
         <cal10n.version>0.8.1</cal10n.version>
         <commons-lang.version>2.4</commons-lang.version>
-        <commons-validator.version>1.7</commons-validator.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1, 1.7.0)</imp.pkg.version.axis2>
