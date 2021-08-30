@@ -131,7 +131,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
      * @param message       : cxf Message
      */
     private boolean handleScopeValidation(Message message, SignedJWTInfo signedJWTInfo, String accessToken)
-            throws ParseException {
+            throws APIManagementException, ParseException {
 
         String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
         OAuthTokenInfo oauthTokenInfo = new OAuthTokenInfo();
@@ -139,7 +139,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject());
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
-            String orgId = message.get(RestApiConstants.ORGANIZATION).toString();
+            String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
             scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
                     .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))

@@ -81,13 +81,13 @@
         <cxf:inInterceptors>
             <ref bean="URLValidationInterceptor"/>
             <ref bean="TokenMergeInterceptor"/>
-            <ref bean="OrganizationInterceptor"/>
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="BasicAuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
             <ref bean="SubscriberRegistrationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
+            <ref bean="OrganizationInterceptor"/>
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>
