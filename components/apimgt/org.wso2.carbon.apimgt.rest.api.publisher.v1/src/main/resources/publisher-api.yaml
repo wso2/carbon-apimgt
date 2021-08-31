@@ -11599,6 +11599,10 @@ components:
         Criteria for sorting.
       schema:
         type: string
+        enum:
+          - apiName
+          - version
+          - createdTime
     sortOrder:
       name: sortOrder
       in: query
@@ -11606,6 +11610,9 @@ components:
         Order of sorting(ascending/descending).
       schema:
         type: string
+        enum:
+          - asc
+          - desc
     If-None-Match:
       name: If-None-Match
       in: header
