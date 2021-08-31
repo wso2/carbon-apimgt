@@ -775,6 +775,12 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
+    public static final String JWT_AUDIENCES = "JWTAudiences";
+    public static final String JWT_AUDIENCE = "JWTAudience";
+    public static final String AUDIENCE = "Audience";
+    public static final String BASEPATH = "Basepath";
+    public static final String URN_CHOREO = "urn:choreo:";
+    public static final String BASE_PATH = "http.base.path";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
 

@@ -820,6 +820,16 @@
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
         </ETagSkipList>
+        {% if apim.rest_api.jwt.audience is defined %}
+        <JWTAudiences>
+        {%- for aud in apim.rest_api.jwt.audience -%}
+            <JWTAudience>
+                <Audience>{{aud.audience}}</Audience>
+                <Basepath>{{aud.basepath}}</Basepath>
+            </JWTAudience>
+         {%- endfor -%}
+        </JWTAudiences>
+        {% endif %}
     </RESTAPI>
     <ThrottlingConfigurations>
         <TrafficManager>

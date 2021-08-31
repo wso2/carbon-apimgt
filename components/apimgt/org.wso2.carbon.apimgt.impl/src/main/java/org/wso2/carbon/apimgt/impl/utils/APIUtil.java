@@ -246,6 +246,21 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.net.ssl.SSLContext;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -308,21 +323,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.net.ssl.SSLContext;
-import javax.security.cert.CertificateEncodingException;
-import javax.security.cert.X509Certificate;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -382,6 +382,12 @@ public final class APIUtil {
     private static String hostAddress = null;
     private static final int timeoutInSeconds = 15;
     private static final int retries = 2;
+
+    //constants for getting masked token
+    private static final int MAX_LEN = 36;
+    private static final int MAX_VISIBLE_LEN = 8;
+    private static final int MIN_VISIBLE_LEN_RATIO = 5;
+    private static final String MASK_CHAR = "X";
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
@@ -10460,12 +10466,19 @@ public final class APIUtil {
      * @return masked token.
      */
     public static String getMaskedToken(String token) {
-
-        if (token.length() >= 10) {
-            return "XXXXX" + token.substring(token.length() - 10);
-        } else {
-            return "XXXXX" + token.substring(token.length() / 2);
+        StringBuilder maskedTokenBuilder = new StringBuilder();
+        if (token != null){
+            int allowedVisibleLen = Math.min(token.length() / MIN_VISIBLE_LEN_RATIO, MAX_VISIBLE_LEN);
+            if (token.length() > MAX_LEN) {
+                maskedTokenBuilder.append("...");
+                maskedTokenBuilder.append(String.join("", Collections.nCopies(MAX_LEN, MASK_CHAR)));
+            } else {
+                maskedTokenBuilder.append(String.join("", Collections.nCopies(token.length()
+                        - allowedVisibleLen, MASK_CHAR)));
+            }
+            maskedTokenBuilder.append(token.substring(token.length() - allowedVisibleLen));
         }
+        return maskedTokenBuilder.toString();
     }
 
     public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {

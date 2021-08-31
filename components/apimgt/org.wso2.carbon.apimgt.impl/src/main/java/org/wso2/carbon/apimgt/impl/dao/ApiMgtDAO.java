@@ -2233,6 +2233,7 @@ public class ApiMgtDAO {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get subscribers for given provider
      */
+    @Deprecated
     public Set<Subscriber> getSubscribersOfProvider(String providerName) throws APIManagementException {
 
         Set<Subscriber> subscribers = new HashSet<Subscriber>();
