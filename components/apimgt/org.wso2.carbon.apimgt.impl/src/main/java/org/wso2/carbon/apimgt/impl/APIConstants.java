@@ -2682,10 +2682,6 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
 
-    public static class APPLICATION {
-        public static final String OVERRIDE_SP_NAME = "override.sp.name";
-    }
-
     public class SkipListConstants {
 
         public static final String SKIP_LIST_CONFIG = "SkipList";
