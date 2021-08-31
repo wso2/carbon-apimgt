@@ -401,7 +401,7 @@ public abstract class AbstractAPIManager implements APIManager {
         UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
-                    Integer.MAX_VALUE, userCtx);
+                    Integer.MAX_VALUE, userCtx, null, null);
 
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();

@@ -229,7 +229,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     @Override
-    public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String order, String xWSO2Tenant,
+    public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String xWSO2Tenant,
                                String query, String ifNoneMatch, Boolean expand, String accept,
                                MessageContext messageContext) {
 
@@ -243,7 +243,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         expand = expand != null && expand;
         sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
-        order = order != null ? order : RestApiConstants.DESCENDING_SORT_ORDER;
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
         try {
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
@@ -265,8 +265,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
             Map<String, Object> result;
 
-            //result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
-            result = apiProvider.searchAndSortPaginatedAPIs(query, organization, offset, limit, sortBy, order);
+            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, sortBy, sortOrder);
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);

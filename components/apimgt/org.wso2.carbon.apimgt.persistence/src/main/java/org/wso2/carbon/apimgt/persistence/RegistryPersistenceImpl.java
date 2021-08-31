@@ -883,46 +883,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-            UserContext ctx) throws APIPersistenceException {
-        String requestedTenantDomain = org.getName();
-        
-        boolean isTenantFlowStarted = false;
-        PublisherAPISearchResult result = null;
-        try {
-            RegistryHolder holder = getRegistry(requestedTenantDomain);
-            Registry sysRegistry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-            int tenantIDLocal = holder.getTenantId();
-            log.debug("Requested query for publisher search: " + searchQuery);
-            
-            String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx);
-            
-            log.debug("Modified query for publisher search: " + modifiedQuery);
-
-            String tenantAdminUsername = getTenantAwareUsername(
-                    RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdminUsername);
-
-            if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedPublisherAPIsByDoc(sysRegistry, tenantIDLocal, searchQuery.split(":")[1],
-                        tenantAdminUsername, start, offset);
-            } else {
-                result = searchPaginatedPublisherAPIs(sysRegistry, tenantIDLocal, modifiedQuery, start, offset);
-            }
-        } catch (APIManagementException e) {
-            throw new APIPersistenceException("Error while searching APIs " , e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-        return result;
-    }
-
-    @Override
-    public PublisherAPISearchResult searchAndSortAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-                                                           UserContext ctx, String sortBy, String order) throws APIPersistenceException {
+            UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
 
         boolean isTenantFlowStarted = false;
@@ -955,15 +916,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
         return result;
-    }
-
-    @Override
-    public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery,
-            int start, int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
-        // TODO: Use this method to search APIs for publisher after this is implemented in the choreo-apimgt-extentions repo.
-        return null;
     }
 
     private PublisherAPISearchResult searchPaginatedPublisherAPIs(Registry userRegistry, int tenantIDLocal, String searchQuery,
@@ -1003,7 +956,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
             }
             List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
-            // Implement the tree set in here
             int tempLength = 0;
             for (GovernanceArtifact artifact : governanceArtifacts) {
 
@@ -1033,7 +985,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             // Sort the publisherAPIInfoList according to the API name.
             Collections.sort(publisherAPIInfoList, new PublisherAPISearchResultComparator());
-
             searchResults.setPublisherAPIInfoList(publisherAPIInfoList);
             searchResults.setReturnedAPIsCount(publisherAPIInfoList.size());
             searchResults.setTotalAPIsCount(totalLength);

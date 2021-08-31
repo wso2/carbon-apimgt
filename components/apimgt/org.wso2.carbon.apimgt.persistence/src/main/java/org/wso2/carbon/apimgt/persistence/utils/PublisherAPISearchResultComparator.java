@@ -1,14 +1,9 @@
 package org.wso2.carbon.apimgt.persistence.utils;
 
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 
 import java.util.Comparator;
 
-// This class will compare the API names in the search result of the publisher.
 public class PublisherAPISearchResultComparator implements Comparator<Object>  {
     private static class Provider {
         private String provider1;

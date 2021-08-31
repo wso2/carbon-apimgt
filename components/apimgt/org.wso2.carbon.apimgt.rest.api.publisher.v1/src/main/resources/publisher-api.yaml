@@ -127,7 +127,7 @@ paths:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/sortBy'
-        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/requestedTenant'
         - name: query
           in: query
@@ -11599,8 +11599,8 @@ components:
         Criteria for sorting.
       schema:
         type: string
-    order:
-      name: order
+    sortOrder:
+      name: sortOrder
       in: query
       description: |
         Order of sorting(ascending/descending).

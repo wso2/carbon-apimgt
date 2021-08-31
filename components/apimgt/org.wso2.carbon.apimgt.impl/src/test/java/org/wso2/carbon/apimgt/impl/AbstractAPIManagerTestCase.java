@@ -211,13 +211,7 @@ public class AbstractAPIManagerTestCase {
 
                 @Override
                 public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start,
-                        int end) throws APIManagementException {
-                    return null;
-                }
-
-                @Override
-                public Map<String, Object> searchAndSortPaginatedAPIs(String searchQuery, String organization, int start,
-                                                               int end, String sortBy, String order) throws APIManagementException {
+                        int end, String sortBy, String sortOrder) throws APIManagementException {
                     return null;
                 }
 
@@ -260,7 +254,7 @@ public class AbstractAPIManagerTestCase {
         value.setPublisherAPIInfoList(publisherAPIInfoList);
         
         PowerMockito.when(apiPersistenceInstance.searchAPIsForPublisher(any(Organization.class), any(String.class),
-                any(Integer.class), any(Integer.class), any(UserContext.class))).thenReturn(value);
+                any(Integer.class), any(Integer.class), any(UserContext.class), any(String.class), any(String.class))).thenReturn(value);
         List<API> apis = abstractAPIManager.getAllAPIs();
         Assert.assertNotNull(apis);
         Assert.assertEquals(apis.size(), 1);
