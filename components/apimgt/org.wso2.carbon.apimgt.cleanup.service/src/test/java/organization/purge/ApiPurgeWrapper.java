@@ -25,12 +25,12 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 
 public class ApiPurgeWrapper extends ApiPurge {
 
-    public ApiPurgeWrapper(String username) {
-        super(username);
+    public ApiPurgeWrapper() {
+        super();
     }
 
     public ApiPurgeWrapper(APIPersistence apiPersistence) {
-        super("user-1", apiPersistence);
+        super(apiPersistence);
     }
 }
 

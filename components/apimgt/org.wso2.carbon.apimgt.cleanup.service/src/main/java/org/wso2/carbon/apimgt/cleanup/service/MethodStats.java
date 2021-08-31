@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,20 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.eventing;
+
+package org.wso2.carbon.apimgt.cleanup.service;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Enum for event publisher types.
+ * AspectJ utilizes this annotation to filter time logging methods
  */
-public enum EventPublisherType {
-    HTTP_RECOMMENDATION,
-    BLOCKING_EVENT,
-    KEY_TEMPLATE,
-    KEYMGT_EVENT,
-    NOTIFICATION,
-    CACHE_INVALIDATION,
-    GLOBAL_CACHE_INVALIDATION,
-    TOKEN_REVOCATION,
-    ASYNC_WEBHOOKS,
-    ORGANIZATION_PURGE
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+public @interface MethodStats {
 }

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.cleanup.service;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -29,8 +30,15 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * This class used to remove application data
+ */
+@Component(
+        name = "application.purge.service",
+        immediate = true,
+        service = OrganizationPurge.class
+)
 public class ApplicationPurge implements OrganizationPurge {
-    private String username;
     protected OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(ApplicationPurge.class);
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
@@ -46,14 +54,13 @@ public class ApplicationPurge implements OrganizationPurge {
                 APIConstants.OrganizationDeletion.PENDING);
     }
 
-    public ApplicationPurge(String username) {
-        this.username = username;
+    public ApplicationPurge() {
         organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
         initTaskList();
     }
 
-    public ApplicationPurge(OrganizationPurgeDAO organizationPurgeDAO, String username) {
-        this(username);
+    public ApplicationPurge(OrganizationPurgeDAO organizationPurgeDAO) {
+        this();
         this.organizationPurgeDAO = organizationPurgeDAO;
     }
 
@@ -62,6 +69,7 @@ public class ApplicationPurge implements OrganizationPurge {
      *
      * @param organization organization
      */
+    @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
@@ -101,13 +109,13 @@ public class ApplicationPurge implements OrganizationPurge {
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(applicationPurgeTaskMap),
-                APIConstants.AuditLogConstants.DELETED, username);
+                APIConstants.AuditLogConstants.DELETED, OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
         return applicationPurgeTaskMap;
     }
 
     @Override
     public int getPriority() {
-        return 0;
+        return -10;
     }
 
     private void removePendingSubscriptions(String organization) throws APIManagementException {

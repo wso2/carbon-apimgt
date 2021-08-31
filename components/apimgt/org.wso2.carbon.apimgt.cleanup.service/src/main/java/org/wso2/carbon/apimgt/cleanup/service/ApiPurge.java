@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.cleanup.service;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -45,9 +46,13 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 /**
  * This class used to remove API data from organization
  */
+@Component(
+        name = "api.purge.service",
+        immediate = true,
+        service = OrganizationPurge.class
+)
 public class ApiPurge implements OrganizationPurge {
 
-    private final String username;
     private final ArtifactSaver artifactSaver;
     private final OrganizationPurgeDAO organizationPurgeDAO;
     private final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
@@ -55,8 +60,7 @@ public class ApiPurge implements OrganizationPurge {
     APIPersistence apiPersistenceInstance;
     private static final Log log = LogFactory.getLog(ApiPurge.class);
 
-    public ApiPurge(String username) {
-        this.username = username;
+    public ApiPurge() {
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         organizationPurgeDAO = OrganizationPurgeDAO.getInstance();
@@ -64,8 +68,8 @@ public class ApiPurge implements OrganizationPurge {
         initTaskList();
     }
 
-    public ApiPurge(String username, APIPersistence apiPersistence) {
-        this(username);
+    public ApiPurge(APIPersistence apiPersistence) {
+        this();
         this.apiPersistenceInstance = apiPersistence;
     }
 
@@ -99,6 +103,8 @@ public class ApiPurge implements OrganizationPurge {
      * delete API data in given organization
      * @param organization Organization Id
      */
+    @MethodStats
+    @Override
     public LinkedHashMap<String, String> purge(String organization) {
         List<APIIdentifier> apiIdentifierList = new ArrayList<>();
 
@@ -142,11 +148,12 @@ public class ApiPurge implements OrganizationPurge {
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(apiPurgeTaskMap),
-                APIConstants.AuditLogConstants.DELETED, username);
+                APIConstants.AuditLogConstants.DELETED, OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
         return apiPurgeTaskMap;
     }
 
-    @Override public int getPriority() {
+    @Override
+    public int getPriority() {
         return 0;
     }
 
