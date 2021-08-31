@@ -2115,6 +2115,14 @@ public class SQLConstants {
     public static final String GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL =
             "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ? AND KEY_MANAGER = ?";
 
+    public static final String IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE_OR_CONSUMER_KEY =
+            "SELECT 1 FROM AM_APPLICATION_KEY_MAPPING WHERE " +
+                    "((APPLICATION_ID = ? AND KEY_TYPE = ?) OR (CONSUMER_KEY = ?)) AND KEY_MANAGER IN (?,?)";
+
+    public static final String IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE =
+            "SELECT 1 FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? " +
+                    "AND KEY_MANAGER IN (?,?)";
+
     public static final String GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL =
             " SELECT " +
             "   CONSUMER_KEY,KEY_MANAGER " +
