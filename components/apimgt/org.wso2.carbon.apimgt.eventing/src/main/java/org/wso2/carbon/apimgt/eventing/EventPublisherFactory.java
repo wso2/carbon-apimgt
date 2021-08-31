@@ -29,7 +29,7 @@ public interface EventPublisherFactory {
      *
      * @param configuration event publisher configuration
      */
-    void configure(Map<String, String> configuration);
+    void configure(Map<String, String> configuration) throws EventPublisherException;
 
     /**
      * Get event publisher.
