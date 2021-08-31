@@ -26,12 +26,7 @@ import java.util.Map;
 public class OnPremQuotaLimiter implements ResourceQuotaLimiter {
 
     /**
-     *
-     * @param orgID Organization ID relevant for the API creation.
-     * @param httpMethod HTTP method receiving for API creation.
-     * @param pathToMatch API type determining path in the request.
-     * @param payload Payload attributes coming with the request.
-     * @return Returns false since product-apim should allow to API creations since quota-limit extension not available there.
+     * @return Returns false since product-apim should allow for API creations since quota-limit extension not available there.
      */
     @Override
     public boolean getQuotaLimitStatus(String orgID, String httpMethod, String pathToMatch, Map<String, Object> payload) {
