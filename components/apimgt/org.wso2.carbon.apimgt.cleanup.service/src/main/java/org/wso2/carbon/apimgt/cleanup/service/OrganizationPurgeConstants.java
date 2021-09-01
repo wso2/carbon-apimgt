@@ -21,6 +21,16 @@ package org.wso2.carbon.apimgt.cleanup.service;
 public class OrganizationPurgeConstants {
 
     public static final String ORG_CLEANUP_EXECUTOR = "Organization-Cleanup-Executor";
+
+    public static final String API_ORGANIZATION_COMBINATION_EXIST = "SELECT API.API_ID FROM AM_API API WHERE "
+            + "API.ORGANIZATION = ?";
+
+    public static final String APPLICATION_ORGANIZATION_COMBINATION_EXIST = "SELECT APP.APPLICATION_ID FROM AM_"
+            + "APPLICATION APP WHERE APP.ORGANIZATION = ?";
+
+    public static final String IDP_ORGANIZATION_COMBINATION_EXIST = "SELECT KM.UUID FROM AM_KEY_MANAGER KM WHERE "
+            + "KM.ORGANIZATION = ?";
+
     public static final String GET_API_LIST_SQL_BY_ORG_SQL = "SELECT API.API_ID, API.API_UUID,API.API_NAME," +
             "API.API_VERSION, API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
 

@@ -44,6 +44,8 @@ public class ApplicationPurge implements OrganizationPurge {
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
 
     private void initTaskList() {
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST,
+                APIConstants.OrganizationDeletion.PENDING);
         applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL,
                 APIConstants.OrganizationDeletion.PENDING);
         applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL,
@@ -72,12 +74,16 @@ public class ApplicationPurge implements OrganizationPurge {
     @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
+        boolean isApplicationOrganizationExist = true;
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
                     switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST:
+                        isApplicationOrganizationExist = applicationOrganizationExist(organization);
+                        break;
                     case APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL:
                         removePendingSubscriptions(organization);
                         break;
@@ -92,8 +98,18 @@ public class ApplicationPurge implements OrganizationPurge {
                         break;
                     }
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    if (!isApplicationOrganizationExist) {
+                        throw new APIManagementException("Organization: "+organization+" doesn't exist to perform the"
+                                + " Application deletion");
+                    }
                     break;
                 } catch (APIManagementException e) {
+                    if (!isApplicationOrganizationExist) {
+                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        applicationPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        break;
+                    }
+
                     log.error("Error while deleting Application Data in organization " + organization, e);
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
                     log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
@@ -132,5 +148,9 @@ public class ApplicationPurge implements OrganizationPurge {
 
     private void deleteApplicationList(String organization) throws APIManagementException {
         organizationPurgeDAO.deleteApplicationList(organization);
+    }
+
+    private boolean applicationOrganizationExist(String organization) throws APIManagementException {
+        return organizationPurgeDAO.applicationOrganizationExist(organization);
     }
 }

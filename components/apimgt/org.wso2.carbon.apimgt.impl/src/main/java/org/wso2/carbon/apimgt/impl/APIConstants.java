@@ -2773,11 +2773,13 @@ public final class APIConstants {
         public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
         public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
         public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+        public static final String API_ORG_EXIST = "APIOrganizationExist";
 
         public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
         public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
         public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
         public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+        public static final String APPLICATION_ORG_EXIST = "ApplicationOrganizationExist";
 
         public static final String PENDING = "Pending";
         public static final String COMPLETED = "Completed";
@@ -2785,6 +2787,7 @@ public final class APIConstants {
         public static final String KM_RETRIEVER = "KMRetriever";
         public static final String IDP_DATA_REMOVER = "IDPDataRemover";
         public static final String KM_DATA_REMOVER = "KMDataRemover";
+        public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";

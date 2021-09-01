@@ -83,6 +83,8 @@ public class ApiPurge implements OrganizationPurge {
                 APIConstants.OrganizationDeletion.PENDING);
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER,
                 APIConstants.OrganizationDeletion.PENDING);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ORG_EXIST,
+                APIConstants.OrganizationDeletion.PENDING);
     }
 
     private void setupPersistenceManager(){
@@ -107,13 +109,16 @@ public class ApiPurge implements OrganizationPurge {
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
         List<APIIdentifier> apiIdentifierList = new ArrayList<>();
-
+        boolean isAPIOrganizationExist = true;
         for (Map.Entry<String, String> task : apiPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
                     switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.API_ORG_EXIST:
+                        isAPIOrganizationExist = organizationPurgeDAO.applicationOrganizationExist(organization);
+                        break;
                     case APIConstants.OrganizationDeletion.API_RETRIEVER:
                         apiIdentifierList = organizationPurgeDAO.getAPIIdList(organization);
                         break;
@@ -131,8 +136,18 @@ public class ApiPurge implements OrganizationPurge {
                         break;
                     }
                     apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    if (!isAPIOrganizationExist) {
+                        throw new APIManagementException("Organization: "+organization+" doesn't exist to perform the"
+                                + " API deletion");
+                    }
                     break;
                 } catch (APIManagementException e) {
+                    if (!isAPIOrganizationExist) {
+                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        apiPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        break;
+                    }
+
                     log.error("Error while deleting API Data in organization " + organization, e);
                     apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
                     log.info("Re-trying to execute " + task.getKey() + " process for organization" +

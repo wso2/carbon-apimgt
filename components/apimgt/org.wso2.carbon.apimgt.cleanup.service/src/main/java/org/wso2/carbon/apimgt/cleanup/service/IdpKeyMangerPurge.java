@@ -23,16 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
-import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -67,6 +61,8 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
 
     private void initTaskList() {
         IdpKeyMangerPurgeTaskMap
+                .put(APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST, APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap
                 .put(APIConstants.OrganizationDeletion.KM_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
         IdpKeyMangerPurgeTaskMap
                 .put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
@@ -79,12 +75,16 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     public LinkedHashMap<String, String> purge(String organization) {
 
         List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
+        boolean isKeyManagerOrganizationExist = true;
         for (Map.Entry<String, String> task : IdpKeyMangerPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
                     switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST:
+                        isKeyManagerOrganizationExist = organizationPurgeDAO.keyManagerOrganizationExist(organization);
+                        break;
                     case APIConstants.OrganizationDeletion.KM_RETRIEVER:
                         keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
                         break;
@@ -96,8 +96,18 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                         break;
                     }
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    if (!isKeyManagerOrganizationExist) {
+                        throw new APIManagementException("Organization: "+organization+" doesn't exist to perform the"
+                                + " IDP deletion");
+                    }
                     break;
                 } catch (APIManagementException e) {
+                    if (!isKeyManagerOrganizationExist) {
+                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        break;
+                    }
+
                     log.error("Error while deleting IDP-KeyManager Data in organization " + organization, e);
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
                     log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
