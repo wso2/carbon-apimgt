@@ -80,7 +80,8 @@ public class OrganizationPurgeDAO {
     public boolean apiOrganizationExist(String orgId) throws APIManagementException {
         boolean isApiOrganizationDataExist = false;
         try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(OrganizationPurgeConstants.API_ORGANIZATION_COMBINATION_EXIST)) {
+                PreparedStatement ps = conn.prepareStatement(
+                        OrganizationPurgeConstants.API_ORGANIZATION_COMBINATION_EXIST)) {
             ps.setString(1, orgId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -104,7 +105,8 @@ public class OrganizationPurgeDAO {
     public boolean applicationOrganizationExist(String orgId) throws APIManagementException {
         boolean isApiOrganizationDataExist = false;
         try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(OrganizationPurgeConstants.APPLICATION_ORGANIZATION_COMBINATION_EXIST)) {
+                PreparedStatement ps = conn.prepareStatement(
+                        OrganizationPurgeConstants.APPLICATION_ORGANIZATION_COMBINATION_EXIST)) {
             ps.setString(1, orgId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -128,7 +130,8 @@ public class OrganizationPurgeDAO {
     public boolean keyManagerOrganizationExist(String orgId) throws APIManagementException {
         boolean isApiOrganizationDataExist = false;
         try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(OrganizationPurgeConstants.IDP_ORGANIZATION_COMBINATION_EXIST)) {
+                PreparedStatement ps = conn.prepareStatement(
+                        OrganizationPurgeConstants.IDP_ORGANIZATION_COMBINATION_EXIST)) {
             ps.setString(1, orgId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

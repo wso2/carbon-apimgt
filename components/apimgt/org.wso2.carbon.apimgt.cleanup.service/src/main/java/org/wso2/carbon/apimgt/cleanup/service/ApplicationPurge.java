@@ -113,7 +113,7 @@ public class ApplicationPurge implements OrganizationPurge {
                 }
             }
             if (!isApplicationOrganizationExist) {
-                String msg = "No application related entities exist for the organization: "+organization;
+                String msg = "No application related entities exist for the organization: " + organization;
                 log.error(msg);
                 applicationPurgeTaskMap.put(task.getKey(), msg);
                 break;

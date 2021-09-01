@@ -74,8 +74,7 @@ public class ApiPurge implements OrganizationPurge {
     }
 
     private void initTaskList() {
-        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ORG_EXIST,
-                APIConstants.OrganizationDeletion.PENDING);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ORG_EXIST, APIConstants.OrganizationDeletion.PENDING);
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
         apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
                 APIConstants.OrganizationDeletion.PENDING);
@@ -117,7 +116,7 @@ public class ApiPurge implements OrganizationPurge {
                 try {
                     switch (task.getKey()) {
                     case APIConstants.OrganizationDeletion.API_ORG_EXIST:
-                        isAPIOrganizationExist = organizationPurgeDAO.applicationOrganizationExist(organization);
+                        isAPIOrganizationExist = organizationPurgeDAO.apiOrganizationExist(organization);
                         break;
                     case APIConstants.OrganizationDeletion.API_RETRIEVER:
                         apiIdentifierList = organizationPurgeDAO.getAPIIdList(organization);
@@ -140,8 +139,7 @@ public class ApiPurge implements OrganizationPurge {
                 } catch (APIManagementException e) {
                     log.error("Error while deleting API Data in organization " + organization, e);
                     apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
-                    log.info("Re-trying to execute " + task.getKey() + " process for organization" +
-                            organization, e);
+                    log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
 
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
@@ -151,7 +149,7 @@ public class ApiPurge implements OrganizationPurge {
                 }
             }
             if (!isAPIOrganizationExist) {
-                String msg = "No api related entities exist for the organization: "+organization;
+                String msg = "No api related entities exist for the organization: " + organization;
                 log.error(msg);
                 apiPurgeTaskMap.put(task.getKey(), msg);
                 break;

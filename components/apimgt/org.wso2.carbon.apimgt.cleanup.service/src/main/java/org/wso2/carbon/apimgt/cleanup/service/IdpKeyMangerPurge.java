@@ -66,14 +66,14 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     }
 
     private void initTaskList() {
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST, APIConstants.OrganizationDeletion.PENDING);
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.KM_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST,
+                APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_RETRIEVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
     }
 
     @MethodStats
@@ -116,7 +116,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                 }
             }
             if (!isKeyManagerOrganizationExist) {
-                String msg = "No idp related entities exist for the organization: "+organization;
+                String msg = "No idp related entities exist for the organization: " + organization;
                 log.error(msg);
                 IdpKeyMangerPurgeTaskMap.put(task.getKey(), msg);
                 break;
