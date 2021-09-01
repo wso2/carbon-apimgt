@@ -141,6 +141,8 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
+import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -5069,6 +5071,14 @@ public final class APIUtil {
     public static boolean isOnPremResolver() throws APIManagementException {
         OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         return resolver instanceof OnPremResolver;
+    }
+
+    public static ResourceQuotaLimiter getResourceQuotaLimiter() throws APIManagementException {
+        ResourceQuotaLimiter resourceQuotaLimiter = ServiceReferenceHolder.getInstance().getResourceQuotaLimiter();
+        if (resourceQuotaLimiter == null) {
+            resourceQuotaLimiter = new OnPremQuotaLimiter();
+        }
+        return resourceQuotaLimiter;
     }
     
     public static int getInternalOrganizationId(String organization) throws APIManagementException {

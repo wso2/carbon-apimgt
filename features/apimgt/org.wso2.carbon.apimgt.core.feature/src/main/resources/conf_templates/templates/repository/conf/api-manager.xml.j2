@@ -305,6 +305,14 @@
     </Analytics>
 
     <!--
+        Configurations relevant to enable rate limit feature.
+        This enables to use resources considering subscription levels.
+    -->
+    <ResourceQuotaLimit>
+        <EnableAPIQuotaLimit>{{apim.api_quota_limit.enable}}</EnableAPIQuotaLimit>
+    </ResourceQuotaLimit>
+
+    <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
     -->
