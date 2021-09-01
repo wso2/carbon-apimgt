@@ -97,6 +97,8 @@ public class ApiPurgeTest {
         Mockito.doNothing().when(organizationPurgeDAO).deleteOrganizationAPIList(Mockito.any());
         Mockito.doNothing().when(gatewayArtifactsMgtDAO).removeOrganizationGatewayArtifacts(Mockito.any());
         Mockito.doNothing().when(apiPersistenceInstance).deleteAllAPIs(any(Organization.class));
+        Mockito.doReturn(true).when(organizationPurgeDAO).apiOrganizationExist(Mockito.anyString());
+
         ApiPurge apiPurge = new ApiPurgeWrapper(apiPersistenceInstance);
 
         LinkedHashMap<String, String> subtaskResult =   apiPurge.purge("testOrg");

@@ -59,6 +59,7 @@ public class ApplicationPurgeTest {
         Mockito.doNothing().when(organizationPurgeDAO).removeApplicationCreationWorkflows(Mockito.anyString());
         Mockito.doNothing().when(organizationPurgeDAO).deletePendingApplicationRegistrations(Mockito.anyString());
         Mockito.doNothing().when(organizationPurgeDAO).deleteApplicationList(Mockito.anyString());
+        Mockito.doReturn(true).when(organizationPurgeDAO).applicationOrganizationExist(Mockito.anyString());
 
         ApplicationPurge applicationPurge = new ApplicationPurgeWrapper(organizationPurgeDAO);
         LinkedHashMap<String, String> subtaskResult = applicationPurge.purge("testOrg");

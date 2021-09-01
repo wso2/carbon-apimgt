@@ -76,6 +76,7 @@ public class IdpKmPurgeTest {
 
         Mockito.doReturn(keyManagerList).when(amAdmin).getKeyManagerConfigurationsByOrganization("testOrg");
         Mockito.doNothing().when(organizationPurgeDAO).deleteKeyManagerConfigurationList(keyManagerList, "testOrg");
+        Mockito.doReturn(true).when(organizationPurgeDAO).keyManagerOrganizationExist(Mockito.anyString());
         Mockito.doNothing().when(amAdmin).deleteIdentityProvider("testOrg", kmConfig);
 
         Mockito.when(APIUtil.isInternalOrganization("testOrg")).thenReturn(true);
