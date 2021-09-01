@@ -3003,13 +3003,7 @@ public class APIMappingUtil {
         String key = "Revision " + model.getId();
         apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
-        if (model.getCreatedTime() != null) {
-            try {
-                apiRevisionDTO.setCreatedTime(parseStringToDate(model.getCreatedTime()));
-            } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the created time:" + model.getCreatedTime(), e);
-            }
-        }
+        apiRevisionDTO.setCreatedTime(model.getCreatedTime());
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
         apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
@@ -3036,8 +3030,7 @@ public class APIMappingUtil {
         return apiRevisionListDTO;
     }
 
-    public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model)
-            throws APIManagementException {
+    public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) {
 
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
@@ -3046,26 +3039,8 @@ public class APIMappingUtil {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
-        if (model.getDeployedTime() != null) {
-            try {
-                apiRevisionDeploymentDTO.setDeployedTime(parseStringToDate(model.getDeployedTime()));
-            } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the deployed time:" + model.getDeployedTime(), e);
-            }
-        }
-        if (model.getSuccessDeployedTime() != null) {
-            try {
-                apiRevisionDeploymentDTO.setSuccessDeployedTime(parseStringToDate(model.getSuccessDeployedTime()));
-            } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the successfully deployed time:"
-                        + model.getSuccessDeployedTime(), e);
-            }
-        }
+        apiRevisionDeploymentDTO.setDeployedTime(model.getDeployedTime());
+        apiRevisionDeploymentDTO.setSuccessDeployedTime(model.getSuccessDeployedTime());
         return apiRevisionDeploymentDTO;
-    }
-
-    private static Date parseStringToDate(String time) throws java.text.ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.parse(time);
     }
 }

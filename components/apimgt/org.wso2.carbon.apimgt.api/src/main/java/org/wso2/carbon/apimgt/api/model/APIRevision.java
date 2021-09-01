@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class APIRevision implements Serializable {
@@ -27,7 +28,7 @@ public class APIRevision implements Serializable {
     private String revisionUUID;
     private String description;
     private String createdBy;
-    private String createdTime;
+    private Timestamp createdTime;
     private List<APIRevisionDeployment>  apiRevisionDeploymentList;
 
     public int getId() {
@@ -70,11 +71,11 @@ public class APIRevision implements Serializable {
         this.createdBy = createdBy;
     }
 
-    public String getCreatedTime() {
+    public Timestamp getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(String createdTime) {
+    public void setCreatedTime(Timestamp createdTime) {
         this.createdTime = createdTime;
     }
 

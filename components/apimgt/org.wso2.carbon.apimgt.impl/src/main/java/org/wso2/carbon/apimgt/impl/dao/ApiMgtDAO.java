@@ -9363,7 +9363,7 @@ public class ApiMgtDAO {
                     apiRevision.setApiUUID(rs.getString("API_UUID"));
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
-                    apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
+                    apiRevision.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
                     return apiRevision;
                 }
@@ -16288,7 +16288,7 @@ public class ApiMgtDAO {
                     apiRevision.setApiUUID(apiUUID);
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
-                    apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
+                    apiRevision.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
                     apiRevision.setApiRevisionDeploymentList(new ArrayList<>());
                     revisionList.add(apiRevision);
@@ -16448,7 +16448,7 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
                 }
             }
         } catch (SQLException e) {
@@ -16480,7 +16480,7 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -16560,7 +16560,7 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }

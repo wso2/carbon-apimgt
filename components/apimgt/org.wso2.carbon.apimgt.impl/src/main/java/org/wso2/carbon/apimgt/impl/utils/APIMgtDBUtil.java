@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -252,8 +254,8 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setVhost(vhost);
                 apiRevisionDeployment.setRevisionUUID(revisionUuid);
                 apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME"));
+                apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);
             } else {
@@ -262,10 +264,10 @@ public final class APIMgtDBUtil {
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                 }
                 if (apiRevisionDeployment.getDeployedTime() == null) {
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME"));
                 }
                 if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
-                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
                 }
             }
         }
