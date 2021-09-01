@@ -1140,8 +1140,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     if (StringUtils.isNotBlank(additionalProperty) && !StringUtils
                             .equals(additionalProperty, APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
                         try {
-                            Double doubleValue = Double.parseDouble(additionalProperty);
-                            if (doubleValue < 0) {
+                            Long longValue = Long.parseLong(additionalProperty);
+                            if (longValue < 0) {
                                 String errMsg = "Application configuration values cannot have negative values.";
                                 throw new APIManagementException(errMsg, ExceptionCodes
                                         .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
