@@ -96,18 +96,8 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                         break;
                     }
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
-                    if (!isKeyManagerOrganizationExist) {
-                        throw new APIManagementException("Organization: "+organization+" doesn't exist to perform the"
-                                + " IDP deletion");
-                    }
                     break;
                 } catch (APIManagementException e) {
-                    if (!isKeyManagerOrganizationExist) {
-                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
-                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), e.getMessage());
-                        break;
-                    }
-
                     log.error("Error while deleting IDP-KeyManager Data in organization " + organization, e);
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
                     log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
@@ -118,6 +108,12 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                         break;
                     }
                 }
+            }
+            if (!isKeyManagerOrganizationExist) {
+                String msg = "No idp related entities exist for the organization: "+organization;
+                log.error(msg);
+                IdpKeyMangerPurgeTaskMap.put(task.getKey(), msg);
+                break;
             }
         }
 

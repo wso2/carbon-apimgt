@@ -98,18 +98,8 @@ public class ApplicationPurge implements OrganizationPurge {
                         break;
                     }
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
-                    if (!isApplicationOrganizationExist) {
-                        throw new APIManagementException("Organization: "+organization+" doesn't exist to perform the"
-                                + " Application deletion");
-                    }
                     break;
                 } catch (APIManagementException e) {
-                    if (!isApplicationOrganizationExist) {
-                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
-                        applicationPurgeTaskMap.put(task.getKey(), e.getMessage());
-                        break;
-                    }
-
                     log.error("Error while deleting Application Data in organization " + organization, e);
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
                     log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
@@ -121,6 +111,12 @@ public class ApplicationPurge implements OrganizationPurge {
                     }
 
                 }
+            }
+            if (!isApplicationOrganizationExist) {
+                String msg = "No application related entities exist for the organization: "+organization;
+                log.error(msg);
+                applicationPurgeTaskMap.put(task.getKey(), msg);
+                break;
             }
         }
 
