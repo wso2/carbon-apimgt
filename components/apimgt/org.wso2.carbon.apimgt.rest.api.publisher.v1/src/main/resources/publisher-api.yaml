@@ -11599,10 +11599,12 @@ components:
         Criteria for sorting.
       schema:
         type: string
+        default: createdTime
         enum:
           - apiName
           - version
           - createdTime
+          - status
     sortOrder:
       name: sortOrder
       in: query
@@ -11610,6 +11612,7 @@ components:
         Order of sorting(ascending/descending).
       schema:
         type: string
+        default: desc
         enum:
           - asc
           - desc
