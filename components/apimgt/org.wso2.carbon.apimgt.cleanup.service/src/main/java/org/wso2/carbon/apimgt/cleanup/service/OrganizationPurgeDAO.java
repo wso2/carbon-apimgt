@@ -71,6 +71,81 @@ public class OrganizationPurgeDAO {
     }
 
     /**
+     * Check whether API data exists for a certain organization
+     *
+     * @param orgId organization Id
+     * @return boolean
+     * @throws APIManagementException
+     */
+    public boolean apiOrganizationExist(String orgId) throws APIManagementException {
+        boolean isApiOrganizationDataExist = false;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        OrganizationPurgeConstants.API_ORGANIZATION_COMBINATION_EXIST)) {
+            ps.setString(1, orgId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    isApiOrganizationDataExist = true;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while getting api data for organization" + orgId, e);
+            handleException("Failed to get API list of organization " + orgId, e);
+        }
+        return isApiOrganizationDataExist;
+    }
+
+    /**
+     * Check whether Application data exists for a certain organization
+     *
+     * @param orgId organization Id
+     * @return boolean
+     * @throws APIManagementException
+     */
+    public boolean applicationOrganizationExist(String orgId) throws APIManagementException {
+        boolean isApiOrganizationDataExist = false;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        OrganizationPurgeConstants.APPLICATION_ORGANIZATION_COMBINATION_EXIST)) {
+            ps.setString(1, orgId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    isApiOrganizationDataExist = true;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while getting application list of organization" + orgId, e);
+            handleException("Failed to get Application list of organization " + orgId, e);
+        }
+        return isApiOrganizationDataExist;
+    }
+
+    /**
+     * Check whether IDP data exists for a certain organization
+     *
+     * @param orgId organization Id
+     * @return boolean
+     * @throws APIManagementException
+     */
+    public boolean keyManagerOrganizationExist(String orgId) throws APIManagementException {
+        boolean isApiOrganizationDataExist = false;
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        OrganizationPurgeConstants.IDP_ORGANIZATION_COMBINATION_EXIST)) {
+            ps.setString(1, orgId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    isApiOrganizationDataExist = true;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while getting key manager list of organization" + orgId, e);
+            handleException("Failed to get key manager list of organization " + orgId, e);
+        }
+        return isApiOrganizationDataExist;
+    }
+
+    /**
      * Get API data for given organization
      *
      * @param orgId organization Id

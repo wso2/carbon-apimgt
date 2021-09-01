@@ -44,6 +44,8 @@ public class ApplicationPurge implements OrganizationPurge {
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
 
     private void initTaskList() {
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST,
+                APIConstants.OrganizationDeletion.PENDING);
         applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL,
                 APIConstants.OrganizationDeletion.PENDING);
         applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL,
@@ -72,12 +74,16 @@ public class ApplicationPurge implements OrganizationPurge {
     @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
+        boolean isApplicationOrganizationExist = true;
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
                     switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST:
+                        isApplicationOrganizationExist = applicationOrganizationExist(organization);
+                        break;
                     case APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL:
                         removePendingSubscriptions(organization);
                         break;
@@ -106,6 +112,12 @@ public class ApplicationPurge implements OrganizationPurge {
 
                 }
             }
+            if (!isApplicationOrganizationExist) {
+                String msg = "No application related entities exist for the organization: " + organization;
+                log.error(msg);
+                applicationPurgeTaskMap.put(task.getKey(), msg);
+                break;
+            }
         }
 
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(applicationPurgeTaskMap),
@@ -132,5 +144,9 @@ public class ApplicationPurge implements OrganizationPurge {
 
     private void deleteApplicationList(String organization) throws APIManagementException {
         organizationPurgeDAO.deleteApplicationList(organization);
+    }
+
+    private boolean applicationOrganizationExist(String organization) throws APIManagementException {
+        return organizationPurgeDAO.applicationOrganizationExist(organization);
     }
 }
