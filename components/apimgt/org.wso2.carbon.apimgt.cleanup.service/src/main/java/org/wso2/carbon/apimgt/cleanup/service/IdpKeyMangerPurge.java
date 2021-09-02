@@ -117,8 +117,8 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
             }
             if (!isKeyManagerOrganizationExist) {
                 String msg = "No idp related entities exist for the organization: " + organization;
-                log.error(msg);
-                IdpKeyMangerPurgeTaskMap.put(task.getKey(), msg);
+                log.warn(msg);
+                IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
                 break;
             }
         }

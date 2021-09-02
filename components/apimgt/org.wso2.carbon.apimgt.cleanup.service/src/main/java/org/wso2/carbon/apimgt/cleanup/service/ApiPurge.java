@@ -150,8 +150,8 @@ public class ApiPurge implements OrganizationPurge {
             }
             if (!isAPIOrganizationExist) {
                 String msg = "No api related entities exist for the organization: " + organization;
-                log.error(msg);
-                apiPurgeTaskMap.put(task.getKey(), msg);
+                log.warn(msg);
+                apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
                 break;
             }
         }
