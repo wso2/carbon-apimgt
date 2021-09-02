@@ -257,23 +257,8 @@ public class RestApiUtilTest {
     @Test
     public void testbuildForbiddenExceptionWithEmptyID() {
 
-        String apiId = "";
         String expectedErrormessage = "You don't have permission to access the " + RestApiConstants.RESOURCE_API;
-
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setCode(403l);
-        errorDTO.setMoreInfo("");
-        errorDTO.setMessage(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
-        errorDTO.setDescription(expectedErrormessage);
-
-        mockStatic(RestApiUtil.class);
-        when(RestApiUtil.getErrorDTO(Mockito.any(), Mockito.any(), Mockito.eq(expectedErrormessage)))
-                .thenReturn(errorDTO);
-        when(RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId)).thenCallRealMethod();
-
-        ForbiddenException forbiddenException = RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API,
-                apiId);
-
+        ForbiddenException forbiddenException = RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, "");
         Assert.assertEquals(expectedErrormessage, forbiddenException.getMessage());
     }
 
@@ -283,19 +268,8 @@ public class RestApiUtilTest {
         String apiId = "TesT_API_ID_45678";
         String expectedErrormessage = "You don't have permission to access the " + RestApiConstants.RESOURCE_API + " " +
                 "with Id " + apiId;
-
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setCode(403l);
-        errorDTO.setMoreInfo("");
-        errorDTO.setMessage(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
-        errorDTO.setDescription(expectedErrormessage);
-        mockStatic(RestApiUtil.class);
-        when(RestApiUtil.getErrorDTO(Mockito.any(), Mockito.any(), Mockito.eq(expectedErrormessage)))
-                .thenReturn(errorDTO);
-        when(RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId)).thenCallRealMethod();
         ForbiddenException forbiddenException = RestApiUtil
                 .buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
-
         Assert.assertEquals(expectedErrormessage, forbiddenException.getMessage());
     }
 

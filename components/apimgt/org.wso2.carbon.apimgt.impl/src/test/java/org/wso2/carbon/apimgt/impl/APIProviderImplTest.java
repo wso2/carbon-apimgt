@@ -1184,8 +1184,7 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
 
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
         
         try {
             apiProvider.addAPI(api);

@@ -259,6 +259,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot be blank"),
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
+    INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -302,6 +303,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+    INVALID_APPLICATION_ADDITIONAL_PROPERTIES(900970, "Invalid application additional properties", 400,
+            "Invalid additional properties. %s"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
     TOKEN_SCOPES_NOT_SET(
             900987, "The token information has not been correctly set internally", 400,
@@ -399,7 +402,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Key Manager is not enabled in the system"),
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+    APPLICATION_ALREADY_REGISTERED(901408, "Application already Registered", 409, "Application already Registered"),
+    KEY_MAPPING_ALREADY_EXIST(901409, "Key Mappings already exists", 409, "Key Mappings already exists"),
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),

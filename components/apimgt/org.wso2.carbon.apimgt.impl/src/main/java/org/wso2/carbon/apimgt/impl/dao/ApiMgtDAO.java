@@ -152,6 +152,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -231,7 +232,7 @@ public class ApiMgtDAO {
 
             if (resultSet.next()) {
                 throw new APIManagementException("Application '" + application.getName() + "' is already registered."
-                        , ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
+                        , ExceptionCodes.APPLICATION_ALREADY_REGISTERED);
             }
 
             if (!onlyKeyMappingEntry) {
@@ -2232,6 +2233,7 @@ public class ApiMgtDAO {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get subscribers for given provider
      */
+    @Deprecated
     public Set<Subscriber> getSubscribersOfProvider(String providerName) throws APIManagementException {
 
         Set<Subscriber> subscribers = new HashSet<Subscriber>();
@@ -2583,15 +2585,14 @@ public class ApiMgtDAO {
      * This method will create a new client at key-manager side.further it will add new record to
      * the AM_APPLICATION_KEY_MAPPING table
      *
-     * @param keyType
-     * @param applicationName apim application name.
-     * @param userName        apim user name
-     * @param clientId        this is the consumner key.
-     * @param keyMappingId
-     * @throws APIManagementException
+     * @param keyType         key type.
+     * @param applicationId   apim application id.
+     * @param clientId        consumer key.
+     * @param keyMappingId    key mapping id.
+     * @throws APIManagementException   if an error occurs while creation key mappings.
      */
-    public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName, String userName,
-                                                                String clientId, String keyManagerName,
+    public void createApplicationKeyTypeMappingForManualClients(String keyType, int applicationId,
+                                                                String clientId, String keyManagerId,
                                                                 String keyMappingId) throws APIManagementException {
 
         String consumerKey = null;
@@ -2600,9 +2601,6 @@ public class ApiMgtDAO {
         }
         Connection connection = null;
         PreparedStatement ps = null;
-
-        //APIM application id.
-        int applicationId = getApplicationId(applicationName, userName);
 
         if (consumerKey != null) {
             String addApplicationKeyMapping = SQLConstants.ADD_APPLICATION_KEY_TYPE_MAPPING_SQL;
@@ -2616,7 +2614,7 @@ public class ApiMgtDAO {
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5, APIConstants.OAuthAppMode.MAPPED.name());
-                ps.setString(6, keyManagerName);
+                ps.setString(6, keyManagerId);
                 ps.setString(7, keyMappingId);
                 ps.execute();
                 connection.commit();
@@ -5778,26 +5776,33 @@ public class ApiMgtDAO {
      * If the api's version is the same as the published version, then the whole entry will be removed.
      * Otherwise only the default version attribute is set to null.
      *
-     * @param apiId
+     * @param apiIdList
      * @param connection
      * @return
      * @throws APIManagementException
      */
-    public void removeAPIFromDefaultVersion(APIIdentifier apiId, Connection connection) throws APIManagementException {
+    private void removeAPIFromDefaultVersion(List<APIIdentifier> apiIdList, Connection connection) throws
+            APIManagementException {
+        // TODO: check list empty
+        try (PreparedStatement prepStmtDefVersionDelete =
+                     connection.prepareStatement(SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL)) {
 
-        String queryDefaultVersionDelete = SQLConstants.REMOVE_API_DEFAULT_VERSION_SQL;
-
-        PreparedStatement prepStmtDefVersionDelete = null;
-        try {
-            prepStmtDefVersionDelete = connection.prepareStatement(queryDefaultVersionDelete);
-            prepStmtDefVersionDelete.setString(1, apiId.getApiName());
-            prepStmtDefVersionDelete.setString(2, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmtDefVersionDelete.execute();
+            for (APIIdentifier apiId : apiIdList) {
+                prepStmtDefVersionDelete.setString(1, apiId.getApiName());
+                prepStmtDefVersionDelete.setString(2, APIUtil.
+                        replaceEmailDomainBack(apiId.getProviderName()));
+                prepStmtDefVersionDelete.addBatch();
+            }
+            prepStmtDefVersionDelete.executeBatch();
         } catch (SQLException e) {
-            handleException("Error while deleting the API default version entry: " + apiId.getApiName() + " from the " +
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            handleException("Error while deleting the API default version entry: " + apiIdList.stream().
+                    map(APIIdentifier::getApiName).collect(Collectors.joining(",")) + " from the " +
                     "database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtDefVersionDelete, null, null);
         }
     }
 
@@ -5832,7 +5837,10 @@ public class ApiMgtDAO {
 
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         boolean deploymentAvailable = isDeploymentAvailableByAPIUUID(connection, api.getUuid());
-        removeAPIFromDefaultVersion(api.getId(), connection);
+        ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+            add(api.getId());
+        }};
+        removeAPIFromDefaultVersion(apiIdList, connection);
 
         PreparedStatement prepStmtDefVersionAdd = null;
         String queryDefaultVersionAdd = SQLConstants.ADD_API_DEFAULT_VERSION_SQL;
@@ -6882,7 +6890,11 @@ public class ApiMgtDAO {
                 if (api.isDefaultVersion()) {
                     addUpdateAPIAsDefaultVersion(api, connection);
                 } else { //tick is removed
-                    removeAPIFromDefaultVersion(api.getId(), connection);
+                    ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                        add(api.getId());
+                    }};
+
+                    removeAPIFromDefaultVersion(apiIdList, connection);
                 }
             }
             String serviceKey = api.getServiceInfo("key");
@@ -7062,11 +7074,6 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-            prepStmt = connection.prepareStatement(deleteAPIQuery);
-            prepStmt.setString(1, uuid);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
-
             //Delete resource scope mappings of the API
             prepStmt = connection.prepareStatement(deleteResourceScopeMappingsQuery);
             prepStmt.setInt(1, id);
@@ -7078,10 +7085,18 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, id);
             prepStmt.execute();
 
+            prepStmt = connection.prepareStatement(deleteAPIQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
             String curDefaultVersion = getDefaultVersion(identifier);
             String pubDefaultVersion = getPublishedDefaultVersion(identifier);
             if (identifier.getVersion().equals(curDefaultVersion)) {
-                removeAPIFromDefaultVersion(identifier, connection);
+                ArrayList<APIIdentifier> apiIdList = new ArrayList<APIIdentifier>() {{
+                    add(identifier);
+                }};
+                removeAPIFromDefaultVersion(apiIdList, connection);
             } else if (identifier.getVersion().equals(pubDefaultVersion)) {
                 setPublishedDefVersion(identifier, connection, null);
             }
@@ -8674,24 +8689,20 @@ public class ApiMgtDAO {
     public Set<Integer> getPendingSubscriptionsByAPIId(String uuid) throws APIManagementException {
 
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
+
             ps.setString(1, uuid);
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            try (ResultSet rs = ps.executeQuery();) {
+                while (rs.next()) {
+                    pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+                }
             }
+
         } catch (SQLException e) {
             handleException("Error occurred while retrieving subscription entries for API with UUID: " + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return pendingSubscriptions;
     }
@@ -8705,31 +8716,27 @@ public class ApiMgtDAO {
      * @return workflow reference of the registration
      * @throws APIManagementException
      */
-    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName) throws APIManagementException {
+    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName)
+            throws APIManagementException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String reference = null;
 
         String sqlQuery = SQLConstants.GET_REGISTRATION_WORKFLOW_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, applicationId);
             ps.setString(2, keyType);
             ps.setString(3, keyManagerName);
-            rs = ps.executeQuery();
 
-            // returns only one row
-            if (rs.next()) {
-                reference = rs.getString("WF_REF");
+            try (ResultSet rs = ps.executeQuery()) {
+                // returns only one row
+                if (rs.next()) {
+                    reference = rs.getString("WF_REF");
+                }
             }
+
         } catch (SQLException e) {
-            handleException("Error occurred while getting registration entry for " +
-                    "Application : " + applicationId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error occurred while getting registration entry for " + "Application : " + applicationId,
+                    e);
         }
         return reference;
     }
@@ -10234,31 +10241,62 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param consumerKey
-     * @return
+     * Check if key mappings already exists for app ID, key manager name or ID and key type.
+     *
+     * @param applicationId  app ID
+     * @param keyManagerName key manager name
+     * @param keyManagerId   key manager ID
+     * @param keyType        key type
+     * @return true if key mapping exists
+     * @throws APIManagementException if an error occurs
      */
-    public boolean isMappingExistsforConsumerKey(String keyManager, String consumerKey) throws APIManagementException {
+    public boolean isKeyMappingExistsForApplication(int applicationId, String keyManagerName,
+                                                    String keyManagerId, String keyType) throws APIManagementException {
 
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyType);
+            preparedStatement.setString(3, keyManagerName);
+            preparedStatement.setString(4, keyManagerId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
 
-        String sqlQuery = SQLConstants.GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
-            ps.setString(2, keyManager);
-            resultSet = ps.executeQuery();
-            // We only expect one result.
-            if (resultSet.next()) {
-                String applicationId = resultSet.getString("APPLICATION_ID");
-                return (applicationId != null && !applicationId.isEmpty());
             }
         } catch (SQLException e) {
-            handleException("Failed to get Application ID by consumerKey ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            handleException("Error while checking Key Mapping existence", e);
+        }
+        return false;
+    }
+
+    /**
+     * Check if key mapping exists for (app ID, key type and key manager) or (consumer key and key manager) values.
+     *
+     * @param applicationId AppID
+     * @param keyManagerName KeyManager Name
+     * @param keyManagerId KeyManager Id
+     * @param keyType KeyType
+     * @param consumerKey   Consumer Key
+     * @return true if key mapping exists
+     * @throws APIManagementException if an error occurs.
+     */
+    public boolean isKeyMappingExistsForConsumerKeyOrApplication(int applicationId, String keyManagerName,
+                                                                 String keyManagerId, String keyType,
+                                                                 String consumerKey) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE_OR_CONSUMER_KEY)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyType);
+            preparedStatement.setString(3, consumerKey);
+            preparedStatement.setString(4, keyManagerName);
+            preparedStatement.setString(5, keyManagerId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking Key Mapping existence for AppId, KeyType or Consumer Key", e);
         }
         return false;
     }
@@ -16231,7 +16269,7 @@ public class ApiMgtDAO {
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID)) {
             statement.setString(1, apiUUID);
-            statement.setString(2, revisionNum);
+            statement.setInt(2, Integer.parseInt(revisionNum));
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     revisionUUID = rs.getString(1);

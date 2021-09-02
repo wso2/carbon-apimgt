@@ -401,7 +401,7 @@ public abstract class AbstractAPIManager implements APIManager {
         UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
-                    Integer.MAX_VALUE, userCtx);
+                    Integer.MAX_VALUE, userCtx, null, null);
 
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
@@ -1721,14 +1721,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             int tenantId = getTenantManager()
                     .getTenantId(getTenantDomain(username));
-            SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
-                    .DEFAULT_DIALECT_URI);
-            String email = claims.get(APIConstants.EMAIL_CLAIM);
-            if (StringUtils.isNotEmpty(email)) {
-                subscriber.setEmail(email);
-            } else {
                 subscriber.setEmail(StringUtils.EMPTY);
-            }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&

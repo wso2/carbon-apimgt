@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * This is a Artifact Saver type. these interface let users to save API artifacts to a storage.
@@ -60,6 +61,17 @@ public interface ArtifactSaver {
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
     void removeArtifact(String apiId, String name, String version, String revision, String organization)
+            throws ArtifactSynchronizerException;
+
+    /**
+     *
+     * @param apiId
+     * @param name
+     * @param version
+     * @param organization
+     * @throws ArtifactSynchronizerException
+     */
+    void removeArtifact(String apiId, String name, String version, String organization)
             throws ArtifactSynchronizerException;
 
     /**

@@ -51,7 +51,6 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
     public APIConsumerImplWrapper(Registry registry, ApiMgtDAO apiMgtDAO) throws APIManagementException {
         this.apiMgtDAO = apiMgtDAO;
         this.registry = registry;
-
     }
 
     public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO, APIPersistence apiPersistenceInstance)
