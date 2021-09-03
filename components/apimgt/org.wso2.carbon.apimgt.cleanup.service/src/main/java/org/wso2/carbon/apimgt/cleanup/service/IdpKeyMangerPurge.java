@@ -119,6 +119,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                 String msg = "No idp related entities exist for the organization: " + organization;
                 log.warn(msg);
                 IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                moveStatusToCompleted();
                 break;
             }
         }
@@ -142,5 +143,14 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
 
     @Override public int getPriority() {
         return 10;
+    }
+
+    private void moveStatusToCompleted() {
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_RETRIEVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
     }
 }
