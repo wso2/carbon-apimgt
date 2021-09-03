@@ -1845,8 +1845,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
                 String filename = fileDetail.getContentDisposition().getFilename();
-                if (filename.endsWith(".pdf") || filename.endsWith(".txt") || filename.endsWith(".doc")
-                        || filename.endsWith(".docx")) {
+                if (APIUtil.isSupportedFileType(filename)) {
                     RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
                 } else {
                     RestApiUtil.handleBadRequest("Unsupported extension type of document file: " + filename, log);

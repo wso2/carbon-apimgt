@@ -37,6 +37,7 @@ import APIProduct from 'AppData/APIProduct';
 import APIValidation from 'AppData/APIValidation';
 import AppContext from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/Alert';
+import Configurations from 'Config';
 
 const styles = theme => ({
     button: {
@@ -747,7 +748,7 @@ class CreateEditForm extends React.Component {
                 {sourceType === 'FILE' && (
                     <Dropzone
                         multiple={false}
-                        accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf, text/plain'
+                        accept={Configurations.app.supportedDocTypes}
                         className={classes.dropzone}
                         activeClassName={classes.acceptDrop}
                         rejectClassName={classes.rejectDrop}
