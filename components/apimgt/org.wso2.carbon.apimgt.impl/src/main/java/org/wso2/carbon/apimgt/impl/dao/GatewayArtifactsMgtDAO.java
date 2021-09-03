@@ -635,14 +635,12 @@ public class GatewayArtifactsMgtDAO {
      * @param organization
      * @throws APIManagementException
      */
-    public void removeOrganizationGatewayArtifacts(String organization)
-            throws APIManagementException {
-
-        String deleteGWApiDetails = SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS;
+    public void removeOrganizationGatewayArtifacts(String organization) throws APIManagementException {
 
         try (Connection artifactSynchronizerConn = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             // Delete gateway Artifacts from AM_GW_PUBLISHED_API_DETAILS, FK->AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS
-            try (PreparedStatement preparedStatement = artifactSynchronizerConn.prepareStatement(deleteGWApiDetails)) {
+            try (PreparedStatement preparedStatement = artifactSynchronizerConn.prepareStatement(
+                    SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS)) {
                 preparedStatement.setString(1, organization);
                 preparedStatement.executeUpdate();
                 artifactSynchronizerConn.commit();
@@ -650,7 +648,7 @@ public class GatewayArtifactsMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to Delete API GW Artifact of organization "  + organization + " from Database", e);
+            handleException("Failed to Delete API GW Artifact of organization " + organization + " from Database", e);
         }
     }
 
