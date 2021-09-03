@@ -1664,7 +1664,7 @@ public class SQLConstants {
             "WHERE API.API_UUID IN (_API_UUIDS_))";
 
     public static final String DELETE_BULK_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
-            "API_ID IN (_API_UUIDS_)";
+            "TENANT_DOMAIN = ?";
 
     public static final String GET_APPLICATION_BY_TIER_SQL =
             " SELECT DISTINCT AMS.APPLICATION_ID,NAME,SUBSCRIBER_ID " +

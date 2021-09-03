@@ -189,19 +189,15 @@ public class OrganizationPurgeDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
-            String deleteURLMappingsQuery = OrganizationPurgeConstants.REMOVE_AM_URL_MAPPINGS_SQL;
-            deleteAmApiUrlMappings(connection, deleteURLMappingsQuery, organization);
+            deleteAmApiUrlMappings(connection, OrganizationPurgeConstants.REMOVE_AM_URL_MAPPINGS_SQL, organization);
 
             // Remove records from AM_API table and associated data through cascade delete
-            String deleteAPIQuery = OrganizationPurgeConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
-            deleteOrganizationAPIData(connection, deleteAPIQuery, organization);
+            deleteOrganizationAPIData(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL, organization);
 
-            String deleteAPIDefaultVersionQuery = OrganizationPurgeConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL;
-            deleteAPIsFromDefaultVersion(connection, deleteAPIDefaultVersionQuery, organization);
+            deleteAPIsFromDefaultVersion(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL, organization);
 
             //Remove API Cleanup tasks
-            String deleteCleanUpTasksQuery = OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
-            deleteAPICleanupTasks(connection, deleteCleanUpTasksQuery, organization);
+            deleteAPICleanupTasks(connection, OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL, organization);
 
             connection.commit();
         } catch (SQLException e) {
@@ -283,9 +279,8 @@ public class OrganizationPurgeDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
-            String deleteKMQuery = OrganizationPurgeConstants.DELETE_BULK_KEY_MANAGER_LIST_SQL;
-            deleteKMQuery = deleteKMQuery.replaceAll(OrganizationPurgeConstants.KM_UUID_REGEX, String.join(",",
-                    collectionList));
+            String deleteKMQuery = OrganizationPurgeConstants.DELETE_BULK_KEY_MANAGER_LIST_SQL.replaceAll(
+                    OrganizationPurgeConstants.KM_UUID_REGEX, String.join(",", collectionList));
             try (PreparedStatement preparedStatement = conn.prepareStatement(deleteKMQuery)) {
                 preparedStatement.setString(1, organization);
                 int index = 1;
@@ -300,8 +295,8 @@ public class OrganizationPurgeDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error while deleting key managers:  " + kmIdList + " in organization "
-                    + organization,e);
+            throw new APIManagementException(
+                    "Error while deleting key managers:  " + kmIdList + " in organization " + organization, e);
         }
 
     }
@@ -314,12 +309,11 @@ public class OrganizationPurgeDAO {
      */
     public void removePendingSubscriptions(String organization) throws APIManagementException {
 
-        String query = OrganizationPurgeConstants.DELETE_PENDING_SUBSCRIPTIONS_SQL;
-
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    OrganizationPurgeConstants.DELETE_PENDING_SUBSCRIPTIONS_SQL)) {
                 preparedStatement.setString(1, organization);
 
                 preparedStatement.executeUpdate();
@@ -346,11 +340,10 @@ public class OrganizationPurgeDAO {
      */
     public void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
 
-        String query = OrganizationPurgeConstants.DELETE_APPLICATION_CREATION_WORKFLOWS_SQL;
-
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    OrganizationPurgeConstants.DELETE_APPLICATION_CREATION_WORKFLOWS_SQL)) {
                 preparedStatement.setString(1, organization);
 
                 preparedStatement.executeUpdate();
@@ -366,8 +359,9 @@ public class OrganizationPurgeDAO {
                         + organization, e);
             }
         } catch (SQLException e) {
-            handleException("Error occurred while removing application creation workflows for organization: " +
-                            organization, e);
+            handleException(
+                    "Error occurred while removing application creation workflows for organization: " + organization,
+                    e);
         }
     }
 
@@ -378,11 +372,11 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException when failed to delete pending application registrations
      */
     public void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
-        String query = OrganizationPurgeConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS_SQL;
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    OrganizationPurgeConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS_SQL)) {
                 preparedStatement.setString(1, organization);
                 preparedStatement.executeUpdate();
 
@@ -411,12 +405,6 @@ public class OrganizationPurgeDAO {
      */
     public void deleteApplicationList(String organization) throws APIManagementException {
 
-        String getConsumerKeyQuery = OrganizationPurgeConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL;
-
-        String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
-
-        String deleteApplicationQuery = OrganizationPurgeConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL;
-
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -424,8 +412,10 @@ public class OrganizationPurgeDAO {
                 updateGroupIDMappingsBulk(connection, organization);
             }
 
-            try (PreparedStatement prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
-                    PreparedStatement deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery)) {
+            try (PreparedStatement prepStmtGetConsumerKey = connection.prepareStatement(
+                    OrganizationPurgeConstants.GET_CONSUMER_KEYS_OF_APPLICATION_LIST_SQL);
+                    PreparedStatement deleteDomainApp = connection.prepareStatement(
+                            SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL)) {
                 prepStmtGetConsumerKey.setString(1, organization);
 
                 try (ResultSet rs = prepStmtGetConsumerKey.executeQuery()) {
@@ -491,7 +481,8 @@ public class OrganizationPurgeDAO {
                         + "organization: " + organization);
             }
 
-            try (PreparedStatement deleteApp = connection.prepareStatement(deleteApplicationQuery)) {
+            try (PreparedStatement deleteApp = connection.prepareStatement(
+                    OrganizationPurgeConstants.REMOVE_APPLICATION_LIST_FROM_APPLICATIONS_SQL)) {
                 deleteApp.setString(1, organization);
                 deleteApp.execute();
             } catch (SQLException appDeletionException) {
