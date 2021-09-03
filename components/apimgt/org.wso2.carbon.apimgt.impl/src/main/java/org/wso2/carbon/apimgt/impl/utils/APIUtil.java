@@ -11429,8 +11429,18 @@ public final class APIUtil {
 
 
     public static String getX509certificateContent(String certificate) {
+        if (certificate.contains(APIConstants.BEGIN_CERTIFICATE_STRING)
+                && certificate.contains(APIConstants.END_CERTIFICATE_STRING)) {
+
+            // extracting certificate content
+            certificate = certificate.substring(certificate.indexOf(APIConstants.BEGIN_CERTIFICATE_STRING)
+                            + APIConstants.BEGIN_CERTIFICATE_STRING.length(),
+                    certificate.indexOf(APIConstants.END_CERTIFICATE_STRING));
+        }
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
+                // remove spaces, \r, \\r, \n, \\n, ], [ characters from certificate string
+                .replaceAll("\\\\r|\\\\n|\\r|\\n|\\[|]| ", "");
 
         return content.trim();
     }
