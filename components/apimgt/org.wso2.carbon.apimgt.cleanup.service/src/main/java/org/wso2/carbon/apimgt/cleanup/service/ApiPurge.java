@@ -152,6 +152,7 @@ public class ApiPurge implements OrganizationPurge {
                 String msg = "No api related entities exist for the organization: " + organization;
                 log.warn(msg);
                 apiPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                moveStatusToCompleted();
                 break;
             }
         }
@@ -189,5 +190,17 @@ public class ApiPurge implements OrganizationPurge {
                 handleException("Failed to delete artifacts of organization " + orgId + " from artifact server.", e);
             }
         }
+    }
+
+    private void moveStatusToCompleted() {
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_RETRIEVER, APIConstants.OrganizationDeletion.COMPLETED);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_DB_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.ARTIFACT_SERVER_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.GW_ARTIFACT_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        apiPurgeTaskMap.put(APIConstants.OrganizationDeletion.API_ARTIFACT_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
     }
 }

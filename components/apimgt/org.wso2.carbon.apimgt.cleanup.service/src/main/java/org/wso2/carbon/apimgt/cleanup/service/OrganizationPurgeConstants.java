@@ -31,7 +31,7 @@ public class OrganizationPurgeConstants {
     public static final String IDP_ORGANIZATION_COMBINATION_EXIST = "SELECT KM.UUID FROM AM_KEY_MANAGER KM WHERE "
             + "KM.ORGANIZATION = ?";
 
-    public static final String GET_API_LIST_SQL_BY_ORG_SQL = "SELECT API.API_ID, API.API_UUID,API.API_NAME," +
+    public static final String GET_API_LIST_SQL_BY_ORG_SQL = "SELECT API.API_ID, API.API_UUID, API.API_NAME," +
             "API.API_VERSION, API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
 
     public static final String REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL = "DELETE FROM AM_API WHERE ORGANIZATION = ?";
@@ -41,7 +41,7 @@ public class OrganizationPurgeConstants {
 
     public static final String DELETE_BULK_API_WORKFLOWS_REQUEST_SQL = "DELETE FROM AM_WORKFLOWS WHERE " +
             "WF_TYPE=\"AM_API_STATE\" AND WF_REFERENCE IN (SELECT CONVERT(API.API_ID, CHAR) FROM AM_API API " +
-            "WHERE API.ORGANIZATION = ?";
+            "WHERE API.ORGANIZATION = ?)";
 
     public static final String DELETE_BULK_KEY_MANAGER_LIST_SQL = "DELETE FROM AM_KEY_MANAGER WHERE ORGANIZATION = ? "
             + "AND UUID IN (_KM_UUIDS_)";

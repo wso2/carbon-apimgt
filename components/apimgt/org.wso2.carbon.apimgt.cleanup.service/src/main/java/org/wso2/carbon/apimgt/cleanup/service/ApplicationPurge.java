@@ -116,6 +116,7 @@ public class ApplicationPurge implements OrganizationPurge {
                 String msg = "No application related entities exist for the organization: " + organization;
                 log.warn(msg);
                 applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                moveStatusToCompleted();
                 break;
             }
         }
@@ -148,5 +149,16 @@ public class ApplicationPurge implements OrganizationPurge {
 
     private boolean applicationOrganizationExist(String organization) throws APIManagementException {
         return organizationPurgeDAO.applicationOrganizationExist(organization);
+    }
+
+    private void moveStatusToCompleted() {
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_REGISTRATION_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
     }
 }
