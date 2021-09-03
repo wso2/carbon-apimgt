@@ -442,14 +442,8 @@ public class Utils {
                     if (!isClientCertificateValidationEnabled() || APIUtil
                             .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                         X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                        if (APIUtil.isCertificateExistsInListenerTrustStore(x509Certificate)) {
-                            // If valid client certificate is sent via header give it priority over the transport level cert
-                            axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
-                            return x509Certificate;
-                        } else {
-                            log.debug("Certificate in Header didn't exist in truststore");
-                            return null;
-                        }
+                        axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
+                        return x509Certificate;
                     }
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
@@ -468,22 +462,18 @@ public class Utils {
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         String certificate = (String) headers.get(Utils.getClientCertificateHeader());
-        byte[] bytes;
         if (certificate != null) {
-            if (!isClientCertificateEncoded()) {
-                certificate = APIUtil.getX509certificateContent(certificate);
-                bytes = certificate.getBytes();
-            } else {
+            if (isClientCertificateEncoded()) {
                 try {
                     certificate = URLDecoder.decode(certificate, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
                 }
-
-                certificate = APIUtil.getX509certificateContent(certificate);
-                bytes = Base64.decodeBase64(certificate);
             }
+
+            certificate = APIUtil.getX509certificateContent(certificate);
+            byte[] bytes = Base64.decodeBase64(certificate);
 
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                 return X509Certificate.getInstance(inputStream);

@@ -11,6 +11,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axiom.soap.impl.dom.SOAPHeaderBlockImpl;
 import org.apache.axiom.soap.impl.dom.SOAPHeaderImpl;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.commons.io.IOUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
@@ -23,11 +24,18 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -161,5 +169,47 @@ public class UtilsTestCase {
         Utils.setSOAPFault(messageContext, "", "code", "detail");
         Assert.assertTrue(true);  // No error has occurred. hence test passes.
 
+    }
+
+    @Test
+    public void testGetClientCertificate() throws IOException, APIManagementException {
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.MutualSSL.CLIENT_CERTIFICATE_ENCODE))
+                .thenReturn(Boolean.FALSE.toString());
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+
+        final String clientCertificate = IOUtils.toString(
+                new FileInputStream("src/test/resources/cnf/certificate.pem"), StandardCharsets.UTF_8);
+        final String invalidBase64Characters = "[\\r][\\n]";
+
+        Map<String, Object> headersMap = new HashMap<>();
+        headersMap.put(Utils.getClientCertificateHeader(), clientCertificate + invalidBase64Characters);
+
+        // when passing client certificate with invalid base64 characters
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headersMap);
+
+        Assert.assertNotNull(Utils.getClientCertificate(axis2MsgCntxt));
+    }
+
+    @Test
+    public void testGetClientCertificateWithURLEncodedCertificate() throws IOException, APIManagementException {
+        final String clientCertificate = IOUtils.toString(
+                new FileInputStream("src/test/resources/cnf/certificate.pem"), StandardCharsets.UTF_8);
+        final String invalidBase64Characters = "%0A[\\r][\\n]";
+
+        Map<String, Object> headersMap = new HashMap<>();
+        headersMap.put(Utils.getClientCertificateHeader(),
+                URLEncoder.encode(clientCertificate, StandardCharsets.UTF_8.name()) + invalidBase64Characters);
+
+        // when passing URL encoded client certificate with invalid base64 characters
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headersMap);
+
+        Assert.assertNotNull(Utils.getClientCertificate(axis2MsgCntxt));
     }
 }
