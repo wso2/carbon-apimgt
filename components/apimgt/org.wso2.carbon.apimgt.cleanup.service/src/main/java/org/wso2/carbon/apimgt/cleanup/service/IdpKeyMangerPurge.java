@@ -110,7 +110,11 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
 
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
-                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        String errorMessage = e.getMessage();
+                        if (e.getCause() != null) {
+                            errorMessage = errorMessage + ". Cause: " + e.getCause().getMessage();
+                        }
+                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), errorMessage);
                         break;
                     }
                 }

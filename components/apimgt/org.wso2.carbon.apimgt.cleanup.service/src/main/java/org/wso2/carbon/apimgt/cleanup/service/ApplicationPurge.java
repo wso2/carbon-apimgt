@@ -106,7 +106,11 @@ public class ApplicationPurge implements OrganizationPurge {
 
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
-                        applicationPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        String errorMessage = e.getMessage();
+                        if (e.getCause() != null) {
+                            errorMessage = errorMessage + ". Cause: " + e.getCause().getMessage();
+                        }
+                        applicationPurgeTaskMap.put(task.getKey(), errorMessage);
                         break;
                     }
 
