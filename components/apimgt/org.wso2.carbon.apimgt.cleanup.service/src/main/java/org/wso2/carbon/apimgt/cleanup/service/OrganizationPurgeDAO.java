@@ -197,7 +197,16 @@ public class OrganizationPurgeDAO {
             deleteAPIsFromDefaultVersion(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL, organization);
 
             //Remove API Cleanup tasks
-            deleteAPICleanupTasks(connection, OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL, organization);
+            String convertStr = "";
+
+            if (connection.getMetaData().getURL().contains("sqlserver")) {
+                convertStr = "CONVERT(CHAR, API.API_ID)";
+            } else {
+                convertStr = "CONVERT(API.API_ID, CHAR)";
+            }
+
+            String deleteBulkAPIWF = OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL.replaceAll("_CONVERT_PLACEHOLDER_", convertStr);
+            deleteAPICleanupTasks(connection, deleteBulkAPIWF, organization);
 
             connection.commit();
         } catch (SQLException e) {
