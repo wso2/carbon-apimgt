@@ -533,6 +533,9 @@
         <EnableAccessControl>true</EnableAccessControl>
         <!-- This property is to add the claims that needs to be displayed in Publisher -->
         <SubscriberClaims>{{apim.publisher.subscriber_claims}}</SubscriberClaims>
+        {% if apim.publisher.supported_document_types is defined %}
+        <SupportedDocumentTypes>{{apim.publisher.supported_document_types}}</SupportedDocumentTypes>
+        {% endif %}
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
