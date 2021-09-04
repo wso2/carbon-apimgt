@@ -1783,7 +1783,8 @@ public class APIManagerConfiguration {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
                 if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: " + eventPublisherElement.toString());
+                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: \n"
+                            + eventPublisherElement.toString());
                     Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
                     eventHubPublisherConfiguration.setProperties(publisherProps);
                 }

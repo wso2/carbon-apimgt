@@ -21,11 +21,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.CacheInvalidationConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.databridge.commons.Event;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import javax.cache.CacheEntryInfo;
@@ -69,6 +72,10 @@ public class APIMgtCacheInvalidationRequestSender implements CacheEntryRemovedLi
                         new Event(cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null,
                                 objects);
                 APIUtil.publishEventToEventHub(Collections.emptyMap(), cacheInvalidationMessage);
+                EventPublisherEvent globalCacheInvalidationEvent = new EventPublisherEvent(
+                        cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null, objects);
+                APIUtil.publishEvent(EventPublisherType.GLOBAL_CACHE_INVALIDATION, globalCacheInvalidationEvent,
+                        Arrays.toString(globalCacheInvalidationEvent.getPayloadData()));
             }
         }
     }

@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.carbon.apimgt.eventing.EventPublisherException;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -908,8 +910,12 @@ public class APIManagerComponent {
     /**
      * Method to configure wso2event type event adapter to be used for event notification.
      */
-    private void configureNotificationEventPublisher() {
+    private void configureNotificationEventPublisher() throws APIManagementException {
 
+        // TODO: (binod)
+        //  - replace adapter configuration code with EventPublisherFactory configuration code
+        //  - remove feature flag check
+        //  - change var name adapterParameters to factoryConfig
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
         adapterConfiguration.setName(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
@@ -932,6 +938,18 @@ public class APIManagerComponent {
                 adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
                 adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
                 adapterConfiguration.setStaticProperties(adapterParameters);
+                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+                    for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
+                        adapterParameters.put(key, eventHubPublisherConfiguration.getProperties().get(key));
+                    }
+                    adapterParameters.put("is_enabled",
+                            Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
+                    try {
+                        ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(adapterParameters);
+                    } catch (EventPublisherException e) {
+                        throw new APIManagementException(e);
+                    }
+                }
                 try {
                     ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
                 } catch (OutputEventAdapterException e) {
@@ -945,6 +963,7 @@ public class APIManagerComponent {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
     }
+
     @Reference(
             name = "artifactGenerator.service",
             service = GatewayArtifactGenerator.class,
@@ -1000,6 +1019,20 @@ public class APIManagerComponent {
 
     protected void removeQuotaLimiter(ResourceQuotaLimiter rateLimiter) {
         ServiceReferenceHolder.getInstance().setResourceQuotaLimiter(null);
+    }
+
+    @Reference(
+            name = "event.publisher.factory",
+            service = org.wso2.carbon.apimgt.eventing.EventPublisherFactory.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventPublisherFactory")
+    protected void setEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
+        ServiceReferenceHolder.getInstance().setEventPublisherFactory(eventPublisherFactory);
+    }
+
+    protected void unsetEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
+        ServiceReferenceHolder.getInstance().setEventPublisherFactory(null);
     }
 }
 
