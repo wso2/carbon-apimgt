@@ -789,7 +789,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIExistence(apiId);
 
             // validate sandbox and production endpoints
-            if (!PublisherCommonUtils.validateEndpoints(body)) {
+            if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
+                    !PublisherCommonUtils.validateEndpoints(body)) {
                 throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
@@ -3324,7 +3325,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
+                !PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }

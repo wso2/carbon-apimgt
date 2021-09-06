@@ -755,7 +755,8 @@ public class PublisherCommonUtils {
         }
 
         // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(apiDto)) {
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
+                !PublisherCommonUtils.validateEndpoints(apiDto)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
