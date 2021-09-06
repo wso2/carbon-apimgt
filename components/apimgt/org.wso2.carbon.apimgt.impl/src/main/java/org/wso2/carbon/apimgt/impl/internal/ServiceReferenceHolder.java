@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
@@ -64,6 +65,7 @@ public class ServiceReferenceHolder {
     private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
     private OrganizationResolver organizationResolver;
     private ResourceQuotaLimiter resourceQuotaLimiter;
+    private EventPublisherFactory eventPublisherFactory;
 
     private ServiceReferenceHolder() {
 
@@ -288,9 +290,20 @@ public class ServiceReferenceHolder {
     public void setOrganizationResolver(OrganizationResolver organizationResolver) {
         this.organizationResolver = organizationResolver;
     }
-    public ResourceQuotaLimiter getResourceQuotaLimiter() { return resourceQuotaLimiter;}
+
+    public ResourceQuotaLimiter getResourceQuotaLimiter() {
+        return resourceQuotaLimiter;
+    }
 
     public void setResourceQuotaLimiter(ResourceQuotaLimiter resourceQuotaLimiter) {
         this.resourceQuotaLimiter = resourceQuotaLimiter;
+    }
+
+    public EventPublisherFactory getEventPublisherFactory() {
+        return eventPublisherFactory;
+    }
+
+    public void setEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
+        this.eventPublisherFactory = eventPublisherFactory;
     }
 }

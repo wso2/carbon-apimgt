@@ -145,6 +145,11 @@ import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.eventing.EventPublisher;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherException;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -303,6 +308,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -391,10 +397,13 @@ public final class APIUtil {
     private static final int MIN_VISIBLE_LEN_RATIO = 5;
     private static final String MASK_CHAR = "X";
 
+    private static final Map<EventPublisherType, EventPublisher> eventPublishers =
+            new EnumMap<>(EventPublisherType.class);
+
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
      */
-    public static void init() {
+    public static void init() throws APIManagementException {
 
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -402,6 +411,25 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            try {
+                EventPublisherFactory eventPublisherFactory =
+                        ServiceReferenceHolder.getInstance().getEventPublisherFactory();
+                eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
+                eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
+                eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
+                eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
+                eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            } catch (EventPublisherException e) {
+                log.error("Could not initialize the event publishers. Events might not be published properly.");
+                throw new APIManagementException(e);
+            }
+        }
     }
 
     /**
@@ -11018,6 +11046,16 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String errorMessage) {
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            try {
+                eventPublishers.get(type).publish(event);
+            } catch (EventPublisherException e) {
+                log.error("Error occurred while trying to publish event.\n" + errorMessage, e);
+            }
+        }
     }
 
     public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
