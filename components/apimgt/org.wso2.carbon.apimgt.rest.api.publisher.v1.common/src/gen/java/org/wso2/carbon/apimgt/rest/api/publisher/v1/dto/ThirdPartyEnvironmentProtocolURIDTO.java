@@ -6,9 +6,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Objects;
 
-
-
-
 public class ThirdPartyEnvironmentProtocolURIDTO   {
 
     private String protocol = null;

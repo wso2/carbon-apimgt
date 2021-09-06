@@ -20,12 +20,24 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -139,6 +151,74 @@ public class EnvironmentMappingUtil {
     private static boolean isSecureWebsocketURL(String url) {
 
         return url.matches("^wss://.*");
+    }
+
+    /**
+     * Converts a List object of Third party environments into DTO
+     *
+     * @param thirdPartyEnvironmentCollection a collection of Environment objects
+     * @return EnvironmentListDTO object containing EnvironmentDTOs
+     */
+    public static ThirdPartyEnvironmentListDTO
+    fromThirdPartyEnvironmentCollectionToDTO(Collection<ThirdPartyEnvironment> thirdPartyEnvironmentCollection)
+            throws IOException {
+        ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
+        List<ThirdPartyEnvironmentDTO> thirdPartyEnvironmentDTOs = thirdPartyEnvironmentListDTO.getList();
+        if (thirdPartyEnvironmentDTOs == null) {
+            thirdPartyEnvironmentDTOs = new ArrayList<>();
+            thirdPartyEnvironmentListDTO.setList(thirdPartyEnvironmentDTOs);
+        }
+
+        for (ThirdPartyEnvironment thirdPartyEnvironment : thirdPartyEnvironmentCollection) {
+            thirdPartyEnvironmentDTOs.add(fromThirdPartyEnvironmentToDTO(thirdPartyEnvironment));
+        }
+        thirdPartyEnvironmentListDTO.setCount(thirdPartyEnvironmentDTOs.size());
+        return thirdPartyEnvironmentListDTO;
+    }
+
+    /**
+     * Converts an ThirdPartyEnvironment object into ThirdPartyEnvironmentDTO
+     *
+     * @param thirdPartyEnvironment Environment object
+     * @return ThirdPartyEnvironmentDTO object corresponding to the given ThirdPartyEnvironment object
+     */
+    public static ThirdPartyEnvironmentDTO fromThirdPartyEnvironmentToDTO(ThirdPartyEnvironment thirdPartyEnvironment)
+            throws IOException {
+
+        ThirdPartyEnvironmentDTO thirdPartyEnvironmentDTO = new ThirdPartyEnvironmentDTO();
+        thirdPartyEnvironmentDTO.setName(thirdPartyEnvironment.getName());
+        thirdPartyEnvironmentDTO.setOrganization(thirdPartyEnvironment.getOrganization());
+        thirdPartyEnvironmentDTO.setProvider(thirdPartyEnvironment.getProvider());
+        thirdPartyEnvironmentDTO.setDisplayName(thirdPartyEnvironment.getDisplayName());
+
+        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(thirdPartyEnvironment.getProvider())) {
+
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+            HttpResponse response = solaceAdminApis.environmentGET(
+                    thirdPartyEnvironment.getOrganization(), thirdPartyEnvironment.getName());
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String responseString = null;
+                responseString = EntityUtils.toString(response.getEntity());
+                JSONObject jsonObject = new JSONObject(responseString);
+                if (jsonObject.has("messagingProtocols")) {
+                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
+                    List<ThirdPartyEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
+                    for (int i = 0; i < protocols.length(); i++) {
+                        JSONObject protocolDetails = protocols.getJSONObject(i);
+                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
+                        String endpointURI = protocolDetails.getString("uri");
+                        ThirdPartyEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURIDTO =
+                                new ThirdPartyEnvironmentProtocolURIDTO();
+                        thirdPartyEnvironmentProtocolURIDTO.setProtocol(protocolName);
+                        thirdPartyEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
+                        endpointsList.add(thirdPartyEnvironmentProtocolURIDTO);
+                    }
+                    thirdPartyEnvironmentDTO.setEndpointURIs(endpointsList);
+                }
+            }
+        }
+
+        return thirdPartyEnvironmentDTO;
     }
 
 }

@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -414,6 +415,15 @@ public class APIMappingUtil {
         if (dto.getAudience() != null) {
             model.setAudience(dto.getAudience().toString());
         }
+        if (dto.isSolaceAPI() != null) {
+            model.setSolaceAPI(dto.isSolaceAPI());
+        }
+
+        if (dto.getSolaceTransportProtocols() != null) {
+            String solaceTransports = StringUtils.join(dto.getSolaceTransportProtocols(), ',');
+            model.setSolaceTransportProtocols(solaceTransports);
+        }
+
         return model;
     }
 
@@ -708,6 +718,7 @@ public class APIMappingUtil {
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
+        apiInfoDTO.setIsSolaceAPI(api.isSolaceAPI());
         return apiInfoDTO;
     }
 
@@ -1294,6 +1305,12 @@ public class APIMappingUtil {
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
+
+        dto.setSolaceAPI(model.isSolaceAPI());
+        if (model.getSolaceTransportProtocols() != null) {
+            dto.setSolaceTransportProtocols(Arrays.asList(model.getSolaceTransportProtocols().split(",")));
+        }
+
         return dto;
     }
 
@@ -1865,7 +1882,9 @@ public class APIMappingUtil {
     }
 
     public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
-            APIDefinitionValidationResponse model, boolean returnContent) {
+            APIDefinitionValidationResponse model, boolean returnContent) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
@@ -1882,6 +1901,10 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
+                infoDTO.isSolaceAPI(AsyncApiParserUtil.isSolaceAPIFromAsyncAPIDefinition(model.getContent()));
+                if (infoDTO.isIsSolaceAPI()) {
+                    infoDTO.solaceTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(model.getContent()));
+                }
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
