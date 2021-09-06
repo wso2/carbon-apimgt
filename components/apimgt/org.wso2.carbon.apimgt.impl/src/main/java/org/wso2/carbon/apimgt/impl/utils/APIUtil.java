@@ -11335,4 +11335,15 @@ public final class APIUtil {
     public static Schema retrieveTenantConfigJsonSchema(){
         return tenantConfigJsonSchema;
     }
+
+    /**
+     * Get third-party environments defined in the configuration: api-manager.xml
+     *
+     * @return map of configured third-party environments against third-party environment name
+     */
+    public static Map<String, ThirdPartyEnvironment> getReadOnlyThirdPartyEnvironments() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getThirdPartyEnvironments();
+    }
+
 }

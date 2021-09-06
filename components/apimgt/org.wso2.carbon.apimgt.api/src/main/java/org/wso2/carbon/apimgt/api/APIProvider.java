@@ -1823,4 +1823,12 @@ public interface APIProvider extends APIManager {
     String generateApiKey(String apiId) throws APIManagementException;
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
+
+    /**
+     * Get available transport protocols for the Solace API
+     *
+     * @param definition Solace API Definition
+     * @return List<String> List of available transport protocols
+     */
+    List<String> getTransportProtocolsForSolaceAPI(String definition);
 }
