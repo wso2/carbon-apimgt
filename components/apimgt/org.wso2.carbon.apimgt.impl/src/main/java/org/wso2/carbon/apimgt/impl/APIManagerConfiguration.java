@@ -29,10 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIPublisher;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -124,6 +121,7 @@ public class APIManagerConfiguration {
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
     }
+    private Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();
 
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
@@ -486,6 +484,40 @@ public class APIManagerConfiguration {
                          */
                         log.error("Duplicate environment name found in api-manager.xml " +
                                 environment.getName());
+                    }
+                }
+            } else if (APIConstants.THIRD_PARTY_ENVIRONMENT.equals(localName)) {
+
+                Iterator thirdPartyEnvironmentIterator = element.getChildrenWithLocalName(APIConstants.THIRD_PARTY_ENVIRONMENT);
+                thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();
+
+                while (thirdPartyEnvironmentIterator.hasNext()) {
+                    ThirdPartyEnvironment thirdPartyEnvironment = new ThirdPartyEnvironment();
+                    OMElement thirdPartyEnvironmentElem = (OMElement) thirdPartyEnvironmentIterator.next();
+                    thirdPartyEnvironment.setProvider(thirdPartyEnvironmentElem.getAttributeValue(new QName(
+                            APIConstants.PROVIDER_ASSOCIATION)));
+                    thirdPartyEnvironment.setName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.THIRD_PARTY_ENVIRONMENT)).getText());
+                    thirdPartyEnvironment.setOrganization(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.ORGANIZATION)).getText());
+                    thirdPartyEnvironment.setDisplayName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME)).getText());
+
+                    if (StringUtils.isEmpty(thirdPartyEnvironment.getDisplayName())) {
+                        thirdPartyEnvironment.setDisplayName(thirdPartyEnvironment.getName());
+                    }
+                    OMElement description =
+                            thirdPartyEnvironmentElem.getFirstChildWithName(new QName(APIConstants.
+                                    THIRD_PARTY_ENVIRONMENT_DESCRIPTION));
+
+                    if (description != null) {
+                        thirdPartyEnvironment.setDescription(description.getText());
+                    } else {
+                        thirdPartyEnvironment.setDescription("");
+                    }
+
+                    if (!thirdPartyEnvironments.containsKey(thirdPartyEnvironment.getName())) {
+                        thirdPartyEnvironments.put(thirdPartyEnvironment.getName(), thirdPartyEnvironment);
                     }
                 }
             } else if (APIConstants.EXTERNAL_API_STORES
@@ -1981,5 +2013,9 @@ public class APIManagerConfiguration {
             audienceForPath.add(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
             restApiJWTAuthAudiences.put(basePath, audienceForPath);
         }
+    }
+
+    public Map<String, ThirdPartyEnvironment> getThirdPartyEnvironments() {
+        return thirdPartyEnvironments;
     }
 }
