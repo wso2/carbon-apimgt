@@ -52,6 +52,7 @@
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
+            <ref bean="cors-filter" />
         </jaxrs:providers>
         <jaxrs:properties>
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
