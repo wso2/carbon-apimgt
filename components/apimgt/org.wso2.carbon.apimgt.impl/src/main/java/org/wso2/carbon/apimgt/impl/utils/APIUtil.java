@@ -11056,12 +11056,16 @@ public final class APIUtil {
         }
     }
 
-    public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String errorMessage) {
+    public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String eventString) {
         if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
             try {
-                eventPublishers.get(type).publish(event);
+                if (eventPublishers.get(type) != null) {
+                    eventPublishers.get(type).publish(event);
+                } else {
+                    log.error("Error occurred while trying to retrieve the event publisher for type: " + type);
+                }
             } catch (EventPublisherException e) {
-                log.error("Error occurred while trying to publish event.\n" + errorMessage, e);
+                log.error("Error occurred while trying to publish event.\n" + eventString, e);
             }
         }
     }
