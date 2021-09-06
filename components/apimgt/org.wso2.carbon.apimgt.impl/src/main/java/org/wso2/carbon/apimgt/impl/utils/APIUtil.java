@@ -399,6 +399,7 @@ public final class APIUtil {
 
     private static final Map<EventPublisherType, EventPublisher> eventPublishers =
             new EnumMap<>(EventPublisherType.class);
+    private static EventPublisherFactory eventPublisherFactory = null;
 
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
@@ -413,8 +414,7 @@ public final class APIUtil {
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
         if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
             try {
-                EventPublisherFactory eventPublisherFactory =
-                        ServiceReferenceHolder.getInstance().getEventPublisherFactory();
+                eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
                 eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
                         eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
                 eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
@@ -11048,6 +11048,14 @@ public final class APIUtil {
         return false;
     }
 
+    public static void addNewEventPublisher(EventPublisherType type) {
+        try {
+            eventPublishers.putIfAbsent(type, eventPublisherFactory.getEventPublisher(type));
+        } catch (EventPublisherException e) {
+            log.error("Could not add the event publisher." + type + " Events might not be published properly.");
+        }
+    }
+
     public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String errorMessage) {
         if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
             try {
@@ -11873,7 +11881,7 @@ public final class APIUtil {
     
     /**
      * Check whether the file type is supported.
-     * @param file name
+     * @param filename name
      * @return true if supported
      */
     public static boolean isSupportedFileType(String filename) {
