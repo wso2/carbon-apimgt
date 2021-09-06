@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
 import javax.validation.constraints.*;
 
 
@@ -32,6 +33,8 @@ public class SettingsDTO   {
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
+    private List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments = new ArrayList<ThirdPartyEnvironmentDTO>();
+
     private String authorizationHeader = null;
 
   /**
@@ -167,6 +170,22 @@ public class SettingsDTO   {
     return this;
   }
 
+  public SettingsDTO thirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
+    this.thirdPartyEnvironments = thirdPartyEnvironments;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+  @Valid
+  @JsonProperty("thirdPartyEnvironments")
+  public List<ThirdPartyEnvironmentDTO> getThirdPartyEnvironments() {
+    return thirdPartyEnvironments;
+  }
+  public void setThirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
+    this.thirdPartyEnvironments = thirdPartyEnvironments;
+  }
+
   
   @ApiModelProperty(example = "false", value = "Is Cross Tenant Subscriptions Enabled ")
   @JsonProperty("crossTenantSubscriptionEnabled")
@@ -185,7 +204,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "Authorization Header")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
@@ -213,12 +232,13 @@ public class SettingsDTO   {
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
-        Objects.equals(authorizationHeader, settings.authorizationHeader);
+        Objects.equals(authorizationHeader, settings.authorizationHeader) &&
+        Objects.equals(thirdPartyEnvironments, settings.thirdPartyEnvironments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader, thirdPartyEnvironments);
   }
 
   @Override
@@ -235,6 +255,7 @@ public class SettingsDTO   {
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+    sb.append("    thirdPartyEnvironments: ").append(toIndentedString(thirdPartyEnvironments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

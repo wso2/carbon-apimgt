@@ -24,7 +24,7 @@ import javax.validation.Valid;
 @ApiModel(description = "API definition information")
 
 public class AsyncAPISpecificationValidationResponseInfoDTO   {
-  
+
     private String name = null;
     private String version = null;
     private String context = null;
@@ -32,6 +32,8 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     private String asyncAPIVersion = null;
     private String protocol = null;
     private List<String> endpoints = new ArrayList<String>();
+    private Boolean isSolaceAPI = null;
+    private List<String> solaceTransportProtocols = new ArrayList<String>();
 
   /**
    **/
@@ -153,6 +155,37 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     this.endpoints = endpoints;
   }
 
+  public AsyncAPISpecificationValidationResponseInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+    return this;
+  }
+
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("isSolaceAPI")
+  public Boolean isIsSolaceAPI() {
+    return isSolaceAPI;
+  }
+  public void setIsSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+  }
+
+  /**
+   * contains available transports for s solace API
+   **/
+  public AsyncAPISpecificationValidationResponseInfoDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "contains available transports for s solace API")
+  @JsonProperty("solaceTransportProtocols")
+  public List<String> getSolaceTransportProtocols() {
+    return solaceTransportProtocols;
+  }
+  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -169,12 +202,14 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
         Objects.equals(description, asyncAPISpecificationValidationResponseInfo.description) &&
         Objects.equals(asyncAPIVersion, asyncAPISpecificationValidationResponseInfo.asyncAPIVersion) &&
         Objects.equals(protocol, asyncAPISpecificationValidationResponseInfo.protocol) &&
-        Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints);
+        Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints) &&
+        Objects.equals(isSolaceAPI, asyncAPISpecificationValidationResponseInfo.isSolaceAPI) &&
+        Objects.equals(solaceTransportProtocols, asyncAPISpecificationValidationResponseInfo.solaceTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints);
+    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints, isSolaceAPI, solaceTransportProtocols);
   }
 
   @Override
@@ -189,6 +224,8 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     sb.append("    asyncAPIVersion: ").append(toIndentedString(asyncAPIVersion)).append("\n");
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
+    sb.append("    isSolaceAPI: ").append(toIndentedString(isSolaceAPI)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

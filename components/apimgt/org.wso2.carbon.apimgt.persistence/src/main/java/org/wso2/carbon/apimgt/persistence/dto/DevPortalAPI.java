@@ -60,6 +60,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
+    private boolean isSolaceAPI = false;
+    private String solaceTransportProtocols;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -302,7 +304,15 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
+    public boolean isSolaceAPI() { return isSolaceAPI; }
 
+    public void setSolaceAPI(boolean solaceAPI) { isSolaceAPI = solaceAPI; }
+
+    public String getSolaceTransportProtocols() { return solaceTransportProtocols; }
+
+    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+    }
 
     @Override
     public String toString() {

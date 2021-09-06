@@ -310,6 +310,8 @@ return null;
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+    private Boolean solaceAPI = null;
+    private List<String> solaceTransportProtocols = new ArrayList<String>();
 
   /**
    * UUID of the api registry artifact 
@@ -1232,6 +1234,39 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
+    public APIDTO solaceAPI(Boolean solaceAPI) {
+        this.solaceAPI = solaceAPI;
+        return this;
+    }
+
+
+    @ApiModelProperty(example = "true", value = "")
+    @JsonProperty("solaceAPI")
+    public Boolean isSolaceAPI() {
+        return solaceAPI;
+    }
+    public void setSolaceAPI(Boolean solaceAPI) {
+        this.solaceAPI = solaceAPI;
+    }
+
+    /**
+     * Supported transports for the solace API (http and/or https).
+     **/
+    public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+        return this;
+    }
+
+
+    @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
+    @JsonProperty("solaceTransportProtocols")
+    public List<String> getSolaceTransportProtocols() {
+        return solaceTransportProtocols;
+    }
+    public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
+        this.solaceTransportProtocols = solaceTransportProtocols;
+    }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1293,12 +1328,14 @@ return null;
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(serviceInfo, API.serviceInfo) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo);
+        Objects.equals(advertiseInfo, API.advertiseInfo) &&
+        Objects.equals(solaceAPI, API.solaceAPI) &&
+        Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+      return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, solaceAPI, solaceTransportProtocols);
   }
 
   @Override

@@ -35,6 +35,8 @@ public class APIInfoDTO   {
     private String version = null;
     private String provider = null;
     private String type = null;
+  private Boolean isSolaceAPI = null;
+
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -73,6 +75,20 @@ return null;
     private List<String> securityScheme = new ArrayList<String>();
     private String createdTime = null;
     private String updatedTime = null;
+
+  public APIInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+    return this;
+  }
+
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isSolaceAPI")
+  public Boolean isIsSolaceAPI() {
+    return isSolaceAPI;
+  }
+  public void setIsSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+  }
 
   /**
    **/
@@ -376,12 +392,13 @@ return null;
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
         Objects.equals(securityScheme, apIInfo.securityScheme) &&
         Objects.equals(createdTime, apIInfo.createdTime) &&
-        Objects.equals(updatedTime, apIInfo.updatedTime);
+        Objects.equals(updatedTime, apIInfo.updatedTime) &&
+        Objects.equals(isSolaceAPI, apIInfo.isSolaceAPI);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
+    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, isSolaceAPI);
   }
 
   @Override
@@ -405,6 +422,7 @@ return null;
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    isSolaceAPI: ").append(toIndentedString(isSolaceAPI)).append("\n");
     sb.append("}");
     return sb.toString();
   }
