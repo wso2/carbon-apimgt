@@ -120,6 +120,12 @@ public class APIManagerConfiguration {
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private Map<String, String> restApiJWTAuthAudiences = new HashMap<>();
+
+    public Map<String, String> getRestApiJWTAuthAudiences() {
+        return restApiJWTAuthAudiences;
+    }
+
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
         return extensionListenerMap;
@@ -613,6 +619,8 @@ public class APIManagerConfiguration {
                 setSkipListConfigurations(element);
             } else if (APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS.equals(localName)) {
                 setExtensionListenerConfigurations(element);
+            } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
+                setRestApiJWTAuthAudiences(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1775,7 +1783,8 @@ public class APIManagerConfiguration {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
                 if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: " + eventPublisherElement.toString());
+                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: \n"
+                            + eventPublisherElement.toString());
                     Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
                     eventHubPublisherConfiguration.setProperties(publisherProps);
                 }
@@ -1961,6 +1970,17 @@ public class APIManagerConfiguration {
                     log.error("Cannot find the class " + listenerClass + e);
                 }
             }
+        }
+    }
+
+    private void setRestApiJWTAuthAudiences(OMElement omElement){
+
+        Iterator jwtAudiencesElement =
+                omElement.getChildrenWithLocalName(APIConstants.JWT_AUDIENCE);
+        while (jwtAudiencesElement.hasNext()) {
+            OMElement jwtAudienceElement = (OMElement) jwtAudiencesElement.next();
+            restApiJWTAuthAudiences.put(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText(),
+                    jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
         }
     }
 }

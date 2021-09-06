@@ -229,8 +229,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     @Override
-    public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query,
-                            String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) {
+    public Response getAllAPIs(Integer limit, Integer offset, String sortBy, String sortOrder, String xWSO2Tenant,
+                               String query, String ifNoneMatch, Boolean expand, String accept,
+                               MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -241,6 +242,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
         expand = expand != null && expand;
+        sortBy = sortBy != null ? sortBy : RestApiConstants.DEFAULT_SORT_CRITERION;
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
         try {
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
@@ -262,7 +265,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
             Map<String, Object> result;
 
-            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
+            result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, sortBy, sortOrder);
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
@@ -831,6 +834,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         for (String scope : tokenScopes) {
             if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
                     || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
+                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
                     || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
                 updatePermittedForPublishedDeprecated = true;
                 break;
@@ -1545,29 +1549,67 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
-            //check if the API has subscriptions
-            //Todo : need to optimize this check. This method seems too costly to check if subscription exists
-            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
-            if (apiUsages != null && apiUsages.size() > 0) {
-                RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+            boolean isAPIExistDB = false;
+            APIManagementException error = null;
+            APIInfo apiInfo = null;
+            try {
+                //validate if api exists
+                apiInfo = validateAPIExistence(apiId);
+                isAPIExistDB = true;
+            } catch (APIManagementException e) {
+                log.error("Error while validating API existence for deleting API " + apiId + " on organization "
+                        + organization);
+                error = e;
             }
 
-            List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
+            if (isAPIExistDB) {
+                //validate API update operation permitted based on the LC state
+                validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            if (!usedProductResources.isEmpty()) {
-                RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
-                        usedProductResources.toString() + " are used by one or more API Products", log);
+                try {
+                    //check if the API has subscriptions
+                    //Todo : need to optimize this check. This method seems too costly to check if subscription exists
+                    List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
+                    if (apiUsages != null && apiUsages.size() > 0) {
+                        RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while checking active subscriptions for deleting API " + apiId + " on organization "
+                            + organization);
+                    error = e;
+                }
+
+                try {
+                    List<APIResource> usedProductResources = apiProvider.getUsedProductResources(apiId);
+
+                    if (!usedProductResources.isEmpty()) {
+                        RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
+                                usedProductResources.toString() + " are used by one or more API Products", log);
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while checking API products using same resources for deleting API " + apiId +
+                            " on organization " + organization);
+                    error = e;
+                }
             }
 
-            api.setOrganization(organization);
-            //deletes the API
-            apiProvider.deleteAPI(api);
+            // Delete the API
+            boolean isDeleted = false;
+            try {
+                apiProvider.deleteAPI(apiId, organization);
+                isDeleted = true;
+            } catch (APIManagementException e) {
+                log.error("Error while deleting API " + apiId + "on organization " + organization, e);
+            }
+
+            if (error != null) {
+                throw error;
+            } else if (!isDeleted) {
+                RestApiUtil.handleInternalServerError("Error while deleting API : " + apiId + " on organization "
+                        + organization, log);
+                return null;
+            }
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -1701,8 +1743,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
                 String filename = fileDetail.getContentDisposition().getFilename();
-                if (filename.endsWith(".pdf") || filename.endsWith(".txt") || filename.endsWith(".doc")
-                        || filename.endsWith(".docx")) {
+                if (APIUtil.isSupportedFileType(filename)) {
                     RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, organization);
                 } else {
                     RestApiUtil.handleBadRequest("Unsupported extension type of document file: " + filename, log);
@@ -3621,16 +3662,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        validateWSDLAndReset(fileInputStream, fileDetail, url);
+        WSDLValidationResponse validationResponse = validateWSDLAndReset(fileInputStream, fileDetail, url);
         if (StringUtils.isNotBlank(url)) {
             apiProvider.addWSDLResource(apiId, null, url, organization);
         } else {
             ResourceFile wsdlResource;
             if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
                     APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
-                wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+                wsdlResource = new ResourceFile(validationResponse.getWsdlProcessor().getWSDL(),
+                        APIConstants.APPLICATION_ZIP);
             } else {
-                wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+                wsdlResource = new ResourceFile(validationResponse.getWsdlProcessor().getWSDL(),
+                        fileDetail.getContentType().toString());
             }
             apiProvider.addWSDLResource(apiId, wsdlResource, null, organization);
         }

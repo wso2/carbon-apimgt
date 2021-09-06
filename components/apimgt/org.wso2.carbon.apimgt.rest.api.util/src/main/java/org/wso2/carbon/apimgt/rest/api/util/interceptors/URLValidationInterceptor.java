@@ -25,6 +25,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 
 import java.io.IOException;
 
@@ -46,6 +47,7 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
     }
 
     @Override
+    @MethodStats
     public void handleMessage(Message message) throws Fault {
         if (message.get(PATH_INFO).toString()
                 .contains(message.get(BASE_PATH).toString().concat(latestVersion + pathSeparator))) {

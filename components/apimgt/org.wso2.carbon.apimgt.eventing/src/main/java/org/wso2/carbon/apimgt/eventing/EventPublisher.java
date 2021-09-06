@@ -32,5 +32,5 @@ public interface EventPublisher {
      *
      * @param eventPublisherEvent event to be published
      */
-    void publish(EventPublisherEvent eventPublisherEvent);
+    void publish(EventPublisherEvent eventPublisherEvent) throws EventPublisherException;
 }

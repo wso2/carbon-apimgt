@@ -42,6 +42,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -140,8 +141,15 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
+import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.eventing.EventPublisher;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherException;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -245,6 +253,21 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.net.ssl.SSLContext;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -285,6 +308,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -307,21 +331,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.net.ssl.SSLContext;
-import javax.security.cert.CertificateEncodingException;
-import javax.security.cert.X509Certificate;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -382,10 +391,19 @@ public final class APIUtil {
     private static final int timeoutInSeconds = 15;
     private static final int retries = 2;
 
+    //constants for getting masked token
+    private static final int MAX_LEN = 36;
+    private static final int MAX_VISIBLE_LEN = 8;
+    private static final int MIN_VISIBLE_LEN_RATIO = 5;
+    private static final String MASK_CHAR = "X";
+
+    private static final Map<EventPublisherType, EventPublisher> eventPublishers =
+            new EnumMap<>(EventPublisherType.class);
+
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
      */
-    public static void init() {
+    public static void init() throws APIManagementException {
 
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -393,6 +411,25 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            try {
+                EventPublisherFactory eventPublisherFactory =
+                        ServiceReferenceHolder.getInstance().getEventPublisherFactory();
+                eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
+                eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
+                eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
+                eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
+                eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            } catch (EventPublisherException e) {
+                log.error("Could not initialize the event publishers. Events might not be published properly.");
+                throw new APIManagementException(e);
+            }
+        }
     }
 
     /**
@@ -5062,6 +5099,14 @@ public final class APIUtil {
     public static boolean isOnPremResolver() throws APIManagementException {
         OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         return resolver instanceof OnPremResolver;
+    }
+
+    public static ResourceQuotaLimiter getResourceQuotaLimiter() throws APIManagementException {
+        ResourceQuotaLimiter resourceQuotaLimiter = ServiceReferenceHolder.getInstance().getResourceQuotaLimiter();
+        if (resourceQuotaLimiter == null) {
+            resourceQuotaLimiter = new OnPremQuotaLimiter();
+        }
+        return resourceQuotaLimiter;
     }
     
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
@@ -10459,12 +10504,19 @@ public final class APIUtil {
      * @return masked token.
      */
     public static String getMaskedToken(String token) {
-
-        if (token.length() >= 10) {
-            return "XXXXX" + token.substring(token.length() - 10);
-        } else {
-            return "XXXXX" + token.substring(token.length() / 2);
+        StringBuilder maskedTokenBuilder = new StringBuilder();
+        if (token != null){
+            int allowedVisibleLen = Math.min(token.length() / MIN_VISIBLE_LEN_RATIO, MAX_VISIBLE_LEN);
+            if (token.length() > MAX_LEN) {
+                maskedTokenBuilder.append("...");
+                maskedTokenBuilder.append(String.join("", Collections.nCopies(MAX_LEN, MASK_CHAR)));
+            } else {
+                maskedTokenBuilder.append(String.join("", Collections.nCopies(token.length()
+                        - allowedVisibleLen, MASK_CHAR)));
+            }
+            maskedTokenBuilder.append(token.substring(token.length() - allowedVisibleLen));
         }
+        return maskedTokenBuilder.toString();
     }
 
     public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
@@ -10994,6 +11046,16 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String errorMessage) {
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            try {
+                eventPublishers.get(type).publish(event);
+            } catch (EventPublisherException e) {
+                log.error("Error occurred while trying to publish event.\n" + errorMessage, e);
+            }
+        }
     }
 
     public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
@@ -11807,5 +11869,33 @@ public final class APIUtil {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
+    }
+    
+    /**
+     * Check whether the file type is supported.
+     * @param file name
+     * @return true if supported
+     */
+    public static boolean isSupportedFileType(String filename) {
+        if (log.isDebugEnabled()) {
+            log.debug("File name " + filename);
+        }
+        if (StringUtils.isEmpty(filename)) {
+            return false;
+        }
+        String fileType = FilenameUtils.getExtension(filename);
+        List<String> list = null;
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String supportedTypes = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_PUBLISHER_SUPPORTED_DOC_TYPES);
+        if (!StringUtils.isEmpty(supportedTypes)) {
+            String[] definedTypesArr = supportedTypes.trim().split("\\s*,\\s*");
+            list = Arrays.asList(definedTypesArr);
+        } else {
+            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods" };
+            list = Arrays.asList(defaultType);
+        }
+        return list.contains(fileType.toLowerCase());
     }
 }

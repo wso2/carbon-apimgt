@@ -1510,10 +1510,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Delete API
-     * @param api API to delete
+     * @param apiUuid API uuid to delete
+     * @param organization organization id of the deleting API
      * @throws APIManagementException
      */
-    void deleteAPI(API api) throws APIManagementException;
+    void deleteAPI(String apiUuid, String organization) throws APIManagementException;
     /**
      * Checks whether the given document already exists for the given api/product
      *

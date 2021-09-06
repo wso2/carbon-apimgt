@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.eventing.hub.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-
 /**
  * Event hub event publisher class.
  */
@@ -46,7 +45,10 @@ public class EventHubEventPublisher implements EventPublisher {
                     .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             tenantFlowStarted = true;
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(
-                    EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, null, eventPublisherEvent);
+                    EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER,
+                    null,
+                    eventPublisherEvent
+            );
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

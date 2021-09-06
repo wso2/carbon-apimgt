@@ -30,6 +30,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageContentsList;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ConstraintViolationException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
@@ -55,6 +56,7 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
         }
     }
 
+    @MethodStats
     public void handleMessage(Message message) {
 
         final OperationResourceInfo operationResource = message.getExchange().get(OperationResourceInfo.class);

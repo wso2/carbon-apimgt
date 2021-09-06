@@ -33,6 +33,10 @@ public class TokenIssuerDto {
     private Certificate certificate;
     private String consumerKeyClaim;
     private String scopesClaim;
+    private String audience;
+
+    public TokenIssuerDto() {
+    }
 
     public TokenIssuerDto(String issuer) {
 
@@ -113,5 +117,13 @@ public class TokenIssuerDto {
     public void setCertificate(Certificate certificate) {
 
         this.certificate = certificate;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
     }
 }

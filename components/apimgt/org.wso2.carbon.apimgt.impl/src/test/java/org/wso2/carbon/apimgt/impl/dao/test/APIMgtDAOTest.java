@@ -937,10 +937,10 @@ public class APIMgtDAOTest {
         SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionById(subsId);
         String clientIdProduction = UUID.randomUUID().toString();
         String clientIdSandbox = UUID.randomUUID().toString();
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
-                .getName(), subscriber.getName(), clientIdProduction, "Default", UUID.randomUUID().toString());
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
-                .getName(), subscriber.getName(), clientIdSandbox, "Default", UUID.randomUUID().toString());
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION,
+                application.getId(), clientIdProduction, "Default", UUID.randomUUID().toString());
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application.getId(),
+                clientIdSandbox, "Default", UUID.randomUUID().toString());
         assertTrue(apiMgtDAO.getSubscriptionCount(subscriber, application.getName(), null) > 0);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);

@@ -1249,18 +1249,6 @@ public class SQLConstants {
             "   APPLICATION_ID = ? AND " +
             "   CREATE_MODE = ?";
 
-    public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_SQL =
-            " SELECT " +
-            "   AKM.CONSUMER_KEY " +
-            " FROM " +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_SUBSCRIBER SUB " +
-            " WHERE " +
-            "   SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-            "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +
-            "   AND APP.NAME = ? AND AKM.KEY_TYPE=?  ";
-
     public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_BY_APP_ID_SQL =
             " SELECT " +
                     "   AKM.CONSUMER_KEY " +
@@ -1665,6 +1653,18 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
+
+    public static final String GET_API_LIST_SQL_BY_ORG = "SELECT API.API_ID, API.API_UUID,API.API_NAME," +
+            "API.API_VERSION,API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
+
+    public static final String REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL = "DELETE FROM AM_API WHERE API_UUID IN (_API_UUIDS_)";
+
+    public static final String DELETE_BULK_API_WORKFLOWS_REQUEST_SQL = "DELETE FROM AM_WORKFLOWS WHERE " +
+            "WF_TYPE=\"AM_API_STATE\" AND WF_REFERENCE IN (SELECT CONVERT(API.API_ID, CHAR) FROM AM_API API " +
+            "WHERE API.API_UUID IN (_API_UUIDS_))";
+
+    public static final String DELETE_BULK_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
+            "TENANT_DOMAIN = ?";
 
     public static final String GET_APPLICATION_BY_TIER_SQL =
             " SELECT DISTINCT AMS.APPLICATION_ID,NAME,SUBSCRIBER_ID " +
@@ -2114,6 +2114,14 @@ public class SQLConstants {
 
     public static final String GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL =
             "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ? AND KEY_MANAGER = ?";
+
+    public static final String IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE_OR_CONSUMER_KEY =
+            "SELECT 1 FROM AM_APPLICATION_KEY_MAPPING WHERE " +
+                    "((APPLICATION_ID = ? AND KEY_TYPE = ?) OR (CONSUMER_KEY = ?)) AND KEY_MANAGER IN (?,?)";
+
+    public static final String IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE =
+            "SELECT 1 FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? " +
+                    "AND KEY_MANAGER IN (?,?)";
 
     public static final String GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL =
             " SELECT " +
@@ -2834,6 +2842,7 @@ public class SQLConstants {
             "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String API_ID_REGEX = "_API_IDS_";
+    public static final String API_UUID_REGEX = "_API_UUIDS_";
     public static final int API_ID_CHUNK_SIZE = 25;
 
     /** Throttle related constants**/
@@ -3417,21 +3426,8 @@ public class SQLConstants {
         public static final String GET_MOST_RECENT_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +
                 "API_UUID = ? ORDER BY ID DESC LIMIT 1";
         public static final String GET_REVISION_APIID_BY_REVISION_UUID = "SELECT API_UUID, ID FROM AM_REVISION WHERE REVISION_UUID = ?";
-        static final String GET_API_REVISION_DEPLOYMENTS
-                = "(SELECT t3.NAME, t3.VHOST, t3.REVISION_UUID, MAX(t3.DEPLOYED_TIME) AS DEPLOYED_TIME, " +
-                "SUM(t3.DISPLAY_ON_DEVPORTAL) AS DISPLAY_ON_DEVPORTAL, MAX(t3.DEPLOY_TIME) AS DEPLOY_TIME " +
-                "FROM " +
-                "(SELECT NAME, VHOST, REVISION_UUID, DEPLOYED_TIME, 0 AS DISPLAY_ON_DEVPORTAL, NULL AS DEPLOY_TIME " +
-                "FROM " +
-                "AM_DEPLOYED_REVISION DR " +
-                "UNION " +
-                "SELECT NAME, VHOST, REVISION_UUID, NULL AS DEPLOYED_TIME, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME as DEPLOY_TIME " +
-                "FROM AM_DEPLOYMENT_REVISION_MAPPING DRM) AS t3 " +
-                "GROUP BY t3.NAME, t3.REVISION_UUID, t3.VHOST)";
-        public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, AR.REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
-                "CREATED_BY, NAME, VHOST, DISPLAY_ON_DEVPORTAL, DEPLOY_TIME, DEPLOYED_TIME " +
-                "FROM AM_REVISION AR LEFT JOIN " + GET_API_REVISION_DEPLOYMENTS + "AD " +
-                "ON AR.REVISION_UUID = AD.REVISION_UUID WHERE AR.API_UUID = ?";
+        public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
+                "CREATED_BY FROM AM_REVISION WHERE API_UUID = ?";
         public static final String ADD_API_REVISION_DEPLOYMENT_MAPPING =
                 " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME)" +
                         " VALUES (?,?,?,?,?)";
@@ -3444,9 +3440,16 @@ public class SQLConstants {
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
+        static final String GET_API_REVISION_DEPLOYMENTS
+                = "(SELECT NAME, VHOST, REVISION_UUID, DEPLOYED_TIME, 0 AS DISPLAY_ON_DEVPORTAL, NULL AS DEPLOY_TIME " +
+                "FROM AM_DEPLOYED_REVISION DR " +
+                "UNION " +
+                "SELECT NAME, VHOST, REVISION_UUID, NULL AS DEPLOYED_TIME, DISPLAY_ON_DEVPORTAL, " +
+                "DEPLOYED_TIME AS DEPLOY_TIME " +
+                "FROM AM_DEPLOYMENT_REVISION_MAPPING DRM) ";
         public static final String GET_API_REVISION_DEPLOYMENTS_BY_API_UUID
-                = "SELECT * FROM " + GET_API_REVISION_DEPLOYMENTS + "AS t4 " +
-                "WHERE t4.REVISION_UUID " +
+                = "SELECT * FROM " + GET_API_REVISION_DEPLOYMENTS + "AD " +
+                "WHERE AD.REVISION_UUID " +
                 "IN " +
                 "(SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ?)";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID
