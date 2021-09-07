@@ -754,6 +754,13 @@ public class PublisherCommonUtils {
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
+        // validate sandbox and production endpoints
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
+                !PublisherCommonUtils.validateEndpoints(apiDto)) {
+            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                    ExceptionCodes.INVALID_ENDPOINT_URL);
+        }
+
         Map endpointConfig = (Map) apiDto.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
@@ -848,6 +855,30 @@ public class PublisherCommonUtils {
         }
 
         return isValid;
+    }
+
+    /**
+     * Validate sandbox and production endpoint URLs.
+     *
+     * @param apiDto API DTO of the API
+     * @return validity of URLs found within the endpoint configurations of the DTO
+     */
+    public static boolean validateEndpoints(APIDTO apiDto) {
+
+        ArrayList<String> endpoints = new ArrayList<>();
+        org.json.JSONObject endpointConfiguration = new org.json.JSONObject((Map) apiDto.getEndpointConfig());
+
+        // extract sandbox endpoint URL
+        if (!endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
+                    .getString(APIConstants.API_DATA_URL));
+        }
+        // extract production endpoint URL
+        if (!endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                    .getString(APIConstants.API_DATA_URL));
+        }
+        return APIUtil.validateEndpointURLs(endpoints);
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
