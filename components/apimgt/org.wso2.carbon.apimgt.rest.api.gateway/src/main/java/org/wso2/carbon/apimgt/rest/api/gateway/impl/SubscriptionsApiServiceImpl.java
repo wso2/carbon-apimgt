@@ -24,7 +24,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
-            log.warn("Subscription data store not initialized for " + tenantDomain);
+            log.warn("Subscription data store is not initialized for " + tenantDomain);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         if (StringUtils.isNotEmpty(apiUUID) && StringUtils.isNotEmpty(appUUID)) {
@@ -37,7 +37,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO().moreInfo("required parameters " +
-                    "missing")).build();
+                    "are missing")).build();
         }
     }
 }

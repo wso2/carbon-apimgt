@@ -25,7 +25,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
-            log.warn("Subscription data store not initialized for " + tenantDomain);
+            log.warn("Subscription data store is not initialized for " + tenantDomain);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         List<Application> applicationList;
@@ -38,7 +38,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO().moreInfo("required parameters " +
-                    "missing")).build();
+                    "are missing")).build();
         }
         if (applicationList == null) {
             return Response.status(Response.Status.NOT_FOUND).build();

@@ -458,7 +458,7 @@ paths:
         200:
           description: |
             OK.
-            End-points successfully retrieved from the storage for the API.
+            Subscriptions successfully retrieved from the storage.
           schema:
             $ref: '#/definitions/Subscription'
         400:
