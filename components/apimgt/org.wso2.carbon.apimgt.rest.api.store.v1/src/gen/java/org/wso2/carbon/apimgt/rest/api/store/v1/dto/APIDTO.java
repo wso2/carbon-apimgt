@@ -62,9 +62,9 @@ public class APIDTO   {
     private Object keyManagers = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
-  private Boolean solaceAPI = null;
-  private List<String> solaceTransportProtocols = new ArrayList<String>();
-  private List<APISolaceEndpointURLsDTO> solaceEndpointURLs = new ArrayList<APISolaceEndpointURLsDTO>();
+    private Boolean solaceAPI = null;
+    private List<String> solaceTransportProtocols = new ArrayList<String>();
+    private List<APISolaceEndpointURLsDTO> solaceEndpointURLs = new ArrayList<APISolaceEndpointURLsDTO>();
 
   /**
    * UUID of the api 
@@ -626,11 +626,14 @@ public class APIDTO   {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
+  /**
+   **/
   public APIDTO solaceAPI(Boolean solaceAPI) {
     this.solaceAPI = solaceAPI;
     return this;
   }
 
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("solaceAPI")
   public Boolean isSolaceAPI() {
@@ -641,13 +644,14 @@ public class APIDTO   {
   }
 
   /**
-   * Supported transports for the solace API (http and/or https).
+   * Supported transports for the solace API (http and/or https). 
    **/
   public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
     this.solaceTransportProtocols = solaceTransportProtocols;
     return this;
   }
 
+  
   @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
   @JsonProperty("solaceTransportProtocols")
   public List<String> getSolaceTransportProtocols() {
@@ -657,13 +661,16 @@ public class APIDTO   {
     this.solaceTransportProtocols = solaceTransportProtocols;
   }
 
+  /**
+   **/
   public APIDTO solaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
     this.solaceEndpointURLs = solaceEndpointURLs;
     return this;
   }
 
+  
   @ApiModelProperty(value = "")
-  @Valid
+      @Valid
   @JsonProperty("solaceEndpointURLs")
   public List<APISolaceEndpointURLsDTO> getSolaceEndpointURLs() {
     return solaceEndpointURLs;
@@ -671,6 +678,7 @@ public class APIDTO   {
   public void setSolaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
     this.solaceEndpointURLs = solaceEndpointURLs;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -712,7 +720,8 @@ public class APIDTO   {
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
-        Objects.equals(solaceAPI, API.solaceAPI) && Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols) &&
+        Objects.equals(solaceAPI, API.solaceAPI) &&
+        Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols) &&
         Objects.equals(solaceEndpointURLs, API.solaceEndpointURLs);
   }
 

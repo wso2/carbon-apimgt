@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceDeployedEnvironmentsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -31,9 +31,6 @@ public class ApplicationDTO   {
     private String name = null;
     private String throttlingPolicy = null;
     private String description = null;
-    private Boolean containsSolaceApis = null;
-    private String solaceOrganization = null;
-    private List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments = new ArrayList<ApplicationSolaceDeployedEnvironmentsDTO>();
 
     @XmlType(name="TokenTypeEnum")
     @XmlEnum(String.class)
@@ -74,6 +71,9 @@ return null;
     private List<ScopeInfoDTO> subscriptionScopes = new ArrayList<ScopeInfoDTO>();
     private String owner = null;
     private Boolean hashEnabled = null;
+    private Boolean containsSolaceApis = null;
+    private String solaceOrganization = null;
+    private List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments = new ArrayList<ApplicationSolaceDeployedEnvironmentsDTO>();
 
   /**
    **/
@@ -292,6 +292,7 @@ return null;
     return this;
   }
 
+  
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hashEnabled")
   public Boolean isHashEnabled() {
@@ -301,49 +302,58 @@ return null;
     this.hashEnabled = hashEnabled;
   }
 
-    public ApplicationDTO containsSolaceApis(Boolean containsSolaceApis) {
-        this.containsSolaceApis = containsSolaceApis;
-        return this;
-    }
+  /**
+   **/
+  public ApplicationDTO containsSolaceApis(Boolean containsSolaceApis) {
+    this.containsSolaceApis = containsSolaceApis;
+    return this;
+  }
 
-    @ApiModelProperty(example = "false", value = "")
-    @JsonProperty("containsSolaceApis")
-    public Boolean isContainsSolaceApis() {
-        return containsSolaceApis;
-    }
-    public void setContainsSolaceApis(Boolean containsSolaceApis) {
-        this.containsSolaceApis = containsSolaceApis;
-    }
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("containsSolaceApis")
+  public Boolean isContainsSolaceApis() {
+    return containsSolaceApis;
+  }
+  public void setContainsSolaceApis(Boolean containsSolaceApis) {
+    this.containsSolaceApis = containsSolaceApis;
+  }
 
-    public ApplicationDTO solaceOrganization(String solaceOrganization) {
-        this.solaceOrganization = solaceOrganization;
-        return this;
-    }
+  /**
+   **/
+  public ApplicationDTO solaceOrganization(String solaceOrganization) {
+    this.solaceOrganization = solaceOrganization;
+    return this;
+  }
 
-    @ApiModelProperty(example = "default", value = "")
-    @JsonProperty("solaceOrganization")
-    public String getSolaceOrganization() {
-        return solaceOrganization;
-    }
+  
+  @ApiModelProperty(example = "default", value = "")
+  @JsonProperty("solaceOrganization")
+  public String getSolaceOrganization() {
+    return solaceOrganization;
+  }
+  public void setSolaceOrganization(String solaceOrganization) {
+    this.solaceOrganization = solaceOrganization;
+  }
 
-    public void setSolaceOrganization(String solaceOrganization) {
-        this.solaceOrganization = solaceOrganization;
-    }
+  /**
+   **/
+  public ApplicationDTO solaceDeployedEnvironments(List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments) {
+    this.solaceDeployedEnvironments = solaceDeployedEnvironments;
+    return this;
+  }
 
-    public ApplicationDTO solaceDeployedEnvironments(List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments) {
-        this.solaceDeployedEnvironments = solaceDeployedEnvironments;
-        return this;
-    }
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("solaceDeployedEnvironments")
+  public List<ApplicationSolaceDeployedEnvironmentsDTO> getSolaceDeployedEnvironments() {
+    return solaceDeployedEnvironments;
+  }
+  public void setSolaceDeployedEnvironments(List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments) {
+    this.solaceDeployedEnvironments = solaceDeployedEnvironments;
+  }
 
-    @ApiModelProperty(value = "")
-    @Valid
-    @JsonProperty("solaceDeployedEnvironments")
-    public List<ApplicationSolaceDeployedEnvironmentsDTO> getSolaceDeployedEnvironments() {
-        return solaceDeployedEnvironments;
-    }
-    public void setSolaceDeployedEnvironments(List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments) {
-        this.solaceDeployedEnvironments = solaceDeployedEnvironments;
-    }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -374,7 +384,7 @@ return null;
 
   @Override
   public int hashCode() {
-      return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, containsSolaceApis, solaceOrganization, solaceDeployedEnvironments);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, containsSolaceApis, solaceOrganization, solaceDeployedEnvironments);
   }
 
   @Override

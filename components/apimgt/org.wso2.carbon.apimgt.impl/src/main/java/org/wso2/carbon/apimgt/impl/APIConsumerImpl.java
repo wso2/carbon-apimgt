@@ -3224,8 +3224,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
 
             Application application = apiMgtDAO.getApplicationById(applicationId);
-            Set<SubscribedAPI> subscriptions = getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
-            List<SubscribedAPI> subscribedApiList = new ArrayList<>(subscriptions);
 
             assert api != null;
             if (api.isSolaceAPI()) {

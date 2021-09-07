@@ -1234,38 +1234,40 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
-    public APIDTO solaceAPI(Boolean solaceAPI) {
-        this.solaceAPI = solaceAPI;
-        return this;
-    }
+  /**
+   **/
+  public APIDTO solaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+    return this;
+  }
 
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("solaceAPI")
+  public Boolean isSolaceAPI() {
+    return solaceAPI;
+  }
+  public void setSolaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+  }
 
-    @ApiModelProperty(example = "true", value = "")
-    @JsonProperty("solaceAPI")
-    public Boolean isSolaceAPI() {
-        return solaceAPI;
-    }
-    public void setSolaceAPI(Boolean solaceAPI) {
-        this.solaceAPI = solaceAPI;
-    }
+  /**
+   * Supported transports for the solace API (http and/or https). 
+   **/
+  public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+    return this;
+  }
 
-    /**
-     * Supported transports for the solace API (http and/or https).
-     **/
-    public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
-        this.solaceTransportProtocols = solaceTransportProtocols;
-        return this;
-    }
-
-
-    @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
-    @JsonProperty("solaceTransportProtocols")
-    public List<String> getSolaceTransportProtocols() {
-        return solaceTransportProtocols;
-    }
-    public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
-        this.solaceTransportProtocols = solaceTransportProtocols;
-    }
+  
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
+  @JsonProperty("solaceTransportProtocols")
+  public List<String> getSolaceTransportProtocols() {
+    return solaceTransportProtocols;
+  }
+  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+  }
 
 
   @Override
@@ -1335,7 +1337,7 @@ return null;
 
   @Override
   public int hashCode() {
-      return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, solaceAPI, solaceTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, solaceAPI, solaceTransportProtocols);
   }
 
   @Override
@@ -1395,6 +1397,8 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    solaceAPI: ").append(toIndentedString(solaceAPI)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

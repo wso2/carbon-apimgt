@@ -32,7 +32,7 @@ public class SettingsDTO   {
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
-    private Boolean crossTenantSubscriptionEnabled = false;
+    private Boolean crossTenantSubscriptionEnabled = null;
     private List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments = new ArrayList<ThirdPartyEnvironmentDTO>();
 
     private String authorizationHeader = null;
@@ -170,23 +170,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  public SettingsDTO thirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
-    this.thirdPartyEnvironments = thirdPartyEnvironments;
-    return this;
-  }
 
-
-  @ApiModelProperty(value = "")
-  @Valid
-  @JsonProperty("thirdPartyEnvironments")
-  public List<ThirdPartyEnvironmentDTO> getThirdPartyEnvironments() {
-    return thirdPartyEnvironments;
-  }
-  public void setThirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
-    this.thirdPartyEnvironments = thirdPartyEnvironments;
-  }
-
-  
   @ApiModelProperty(example = "false", value = "Is Cross Tenant Subscriptions Enabled ")
   @JsonProperty("crossTenantSubscriptionEnabled")
   public Boolean isCrossTenantSubscriptionEnabled() {
@@ -195,6 +179,25 @@ public class SettingsDTO   {
   public void setCrossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
     this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
   }
+
+  /**
+   **/
+  public SettingsDTO thirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
+    this.thirdPartyEnvironments = thirdPartyEnvironments;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("thirdPartyEnvironments")
+  public List<ThirdPartyEnvironmentDTO> getThirdPartyEnvironments() {
+    return thirdPartyEnvironments;
+  }
+  public void setThirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
+    this.thirdPartyEnvironments = thirdPartyEnvironments;
+  }
+
 
   /**
    * Authorization Header

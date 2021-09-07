@@ -35,8 +35,6 @@ public class APIInfoDTO   {
     private String version = null;
     private String provider = null;
     private String type = null;
-  private Boolean isSolaceAPI = null;
-
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -75,20 +73,7 @@ return null;
     private List<String> securityScheme = new ArrayList<String>();
     private String createdTime = null;
     private String updatedTime = null;
-
-  public APIInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
-    this.isSolaceAPI = isSolaceAPI;
-    return this;
-  }
-
-  @ApiModelProperty(example = "false", value = "")
-  @JsonProperty("isSolaceAPI")
-  public Boolean isIsSolaceAPI() {
-    return isSolaceAPI;
-  }
-  public void setIsSolaceAPI(Boolean isSolaceAPI) {
-    this.isSolaceAPI = isSolaceAPI;
-  }
+    private Boolean isSolaceAPI = null;
 
   /**
    **/
@@ -367,6 +352,23 @@ return null;
     this.updatedTime = updatedTime;
   }
 
+  /**
+   **/
+  public APIInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isSolaceAPI")
+  public Boolean isIsSolaceAPI() {
+    return isSolaceAPI;
+  }
+  public void setIsSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -398,7 +400,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, isSolaceAPI);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, isSolaceAPI);
   }
 
   @Override

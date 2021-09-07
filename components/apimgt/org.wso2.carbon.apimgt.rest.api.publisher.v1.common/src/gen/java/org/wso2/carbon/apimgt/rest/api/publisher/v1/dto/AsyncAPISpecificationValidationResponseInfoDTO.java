@@ -24,7 +24,7 @@ import javax.validation.Valid;
 @ApiModel(description = "API definition information")
 
 public class AsyncAPISpecificationValidationResponseInfoDTO   {
-
+  
     private String name = null;
     private String version = null;
     private String context = null;
@@ -155,11 +155,14 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     this.endpoints = endpoints;
   }
 
+  /**
+   **/
   public AsyncAPISpecificationValidationResponseInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
     this.isSolaceAPI = isSolaceAPI;
     return this;
   }
 
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("isSolaceAPI")
   public Boolean isIsSolaceAPI() {
@@ -177,7 +180,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "contains available transports for s solace API")
   @JsonProperty("solaceTransportProtocols")
   public List<String> getSolaceTransportProtocols() {
@@ -186,6 +189,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
     this.solaceTransportProtocols = solaceTransportProtocols;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
