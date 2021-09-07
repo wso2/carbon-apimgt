@@ -8062,6 +8062,9 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
+        isSolaceAPI:
+          type: boolean
+          example: false
 
     Topic:
       title: Topic object
@@ -8551,6 +8554,20 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        solaceAPI:
+          title: field to identify API as Solace API
+          type: boolean
+          example:
+            true
+        solaceTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the solace API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10949,6 +10966,10 @@ components:
           type: string
           description: Authorization Header
           example: authorization
+        thirdPartyEnvironments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyEnvironment'
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
@@ -11205,6 +11226,15 @@ components:
               items:
                 type: string
                 example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            isSolaceAPI:
+              type: boolean
+              example: true
+            solaceTransportProtocols:
+              type: array
+              description: contains available transports for s solace API
+              items:
+                type: string
+                example: http
           description:
             API definition information
         errors:
@@ -11214,6 +11244,56 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    ThirdPartyEnvironment:
+      title: ThirdParty Environment
+      required:
+        - name
+        - organization
+        - provider
+      type: object
+      properties:
+        name:
+          type: string
+          example: default
+        organization:
+          type: string
+          example: default
+        provider:
+          type: string
+          example: default
+        displayName:
+          type: string
+          example: default
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyEnvironmentProtocolURI'
+    ThirdPartyEnvironmentProtocolURI:
+      title: ThirdParty Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
+    ThirdPartyEnvironmentList:
+      title: ThirdParty EnvironmentList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Third party environments returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyEnvironment'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
