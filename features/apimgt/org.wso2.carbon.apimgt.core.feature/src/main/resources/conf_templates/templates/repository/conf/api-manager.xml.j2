@@ -169,6 +169,17 @@
         </Environments>
     </APIGateway>
 
+    <ThirdPartyEnvironments>
+        {% for thirdparty_environment in apim.thirdparty.environment%}
+        <ThirdPartyEnvironment provider="{{thirdparty_environment.provider}}">
+            <Organization>{{thirdparty_environment.organization}}</Organization>
+            <EnvironmentName>{{thirdparty_environment.environmentName}}</EnvironmentName>
+            <Description>{{thirdparty_environment.description}}</Description>
+            <DisplayName>{{thirdparty_environment.displayName}}</DisplayName>
+        </ThirdPartyEnvironment>
+        {% endfor %}
+    </ThirdPartyEnvironments>
+
     <TokenIssuers>
     {%- for issuer_1 in apim.jwt.issuer -%}
     <TokenIssuer issuer ="{{issuer_1.name}}">
