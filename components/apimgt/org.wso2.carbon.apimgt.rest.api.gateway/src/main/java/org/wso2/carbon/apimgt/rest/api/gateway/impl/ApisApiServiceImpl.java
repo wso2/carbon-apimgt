@@ -66,7 +66,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         } else if ((StringUtils.isEmpty(context) && StringUtils.isNotEmpty(version)) ||
                 (StringUtils.isNotEmpty(context) && StringUtils.isEmpty(version))) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO().moreInfo("required parameters " +
-                    " are missing")).build();
+                    "are missing")).build();
         } else {
             List<API> apiList = subscriptionDataStore.getAPIs();
             APIListDTO apiListDTO = GatewayUtils.generateAPIListDTO(apiList);
