@@ -46,7 +46,7 @@ import java.util.Collections;
 
 public class OrganizationPurgeDAO {
 
-    private static final Log log = LogFactory.getLog(ApiMgtDAO.class);
+    private static final Log log = LogFactory.getLog(OrganizationPurgeDAO.class);
     private static OrganizationPurgeDAO INSTANCE = null;
     private boolean multiGroupAppSharingEnabled = false;
 
