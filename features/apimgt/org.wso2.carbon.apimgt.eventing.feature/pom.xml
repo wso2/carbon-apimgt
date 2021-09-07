@@ -25,16 +25,16 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.eventing.hub.feature</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.eventing.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Api Management Eventing Hub Feature</name>
+    <name>WSO2 Carbon - Api Management Eventing Feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains the bundles required for event publishing to event hub</description>
+    <description>This feature contains the common bundles required for event publishing</description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.eventing.hub</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.eventing</artifactId>
         </dependency>
     </dependencies>
 
@@ -51,7 +51,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.apimgt.eventing.hub</id>
+                            <id>org.wso2.carbon.apimgt.eventing</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -61,7 +61,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.eventing.hub:${carbon.apimgt.version}
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.eventing:${carbon.apimgt.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>
