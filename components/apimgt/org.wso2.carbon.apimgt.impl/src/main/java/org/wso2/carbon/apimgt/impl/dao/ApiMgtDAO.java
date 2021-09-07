@@ -16492,6 +16492,48 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     * @param rs result set
+     * @throws SQLException
+     */
+    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException, SQLException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
+        while (rs.next()) {
+            APIRevisionDeployment apiRevisionDeployment;
+            String environmentName = rs.getString("NAME");
+            String vhost = VHostUtils.resolveIfNullToDefaultVhost(environmentName,
+                    rs.getString("VHOST"));
+            String revisionUuid = rs.getString("REVISION_UUID");
+            String uniqueKey = (environmentName != null ? environmentName : "") +
+                    (vhost != null ? vhost : "") + (revisionUuid != null ? revisionUuid : "");
+            if (!uniqueSet.containsKey(uniqueKey)) {
+                apiRevisionDeployment = new APIRevisionDeployment();
+                apiRevisionDeployment.setDeployment(environmentName);
+                apiRevisionDeployment.setVhost(vhost);
+                apiRevisionDeployment.setRevisionUUID(revisionUuid);
+                apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME"));
+                apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                apiRevisionDeploymentList.add(apiRevisionDeployment);
+                uniqueSet.put(uniqueKey, apiRevisionDeployment);
+            } else {
+                apiRevisionDeployment = uniqueSet.get(uniqueKey);
+                if (!apiRevisionDeployment.isDisplayOnDevportal()) {
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                }
+                if (apiRevisionDeployment.getDeployedTime() == null) {
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME"));
+                }
+                if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
+                    apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                }
+            }
+        }
+        return  apiRevisionDeploymentList;
+    }
+
+    /**
      * Get APIRevisionDeployment details by providing API uuid
      *
      * @return List<APIRevisionDeployment> object
@@ -16505,7 +16547,7 @@ public class ApiMgtDAO {
                              APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
+                return mergeRevisionDeploymentDTOs(rs);
             }
         } catch (SQLException e) {
             handleException("Failed to get API Revision deployment mapping details for api uuid: " +
