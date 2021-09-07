@@ -16494,9 +16494,10 @@ public class ApiMgtDAO {
     /**
      * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
      * @param rs result set
-     * @throws SQLException
+     * @throws SQLException sql exception
+     * @throws APIManagementException api manager exception
      */
-    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException, SQLException {
+    private List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException, SQLException {
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
         while (rs.next()) {
