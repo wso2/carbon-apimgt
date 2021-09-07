@@ -286,7 +286,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Application createdApplication = preProcessAndAddApplication(username, body, organization);
-            ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+            ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(createdApplication);
 
             //to be set as the Location header
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
@@ -390,7 +390,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 }
                 application.setApplicationAttributes(applicationAttributes);
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                    ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(application);
                     applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     Set<Scope> scopes = apiConsumer
                             .getScopesForApplicationSubscription(username, application.getId(), organization);
@@ -434,7 +434,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
                     applicationId);
-            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
+            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
 
         } catch (APIManagementException e) {
@@ -482,6 +482,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
 
         apiConsumer.updateApplication(application);
+
+        ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
+        if (newApp.isContainsSolaceApis()) {
+            if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
+                apiConsumer.renameSolaceApplication(newApp.getSolaceOrganization(), application);
+            }
+        }
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
@@ -748,6 +755,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
                             jsonParams, keyManagerName, organization, false);
+                    if (ApplicationMappingUtil.containsSolaceApis(application)) {
+                        ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
+                        apiConsumer.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
+                    }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1209,6 +1220,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             appToken.setTokenScopes(Arrays.asList(response.getScopes()));
                         }
                         appToken.setValidityTime(response.getValidityPeriod());
+                        // for solace applications
+                        if (ApplicationMappingUtil.containsSolaceApis(application)) {
+                            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
+                            apiConsumer.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
+                        }
                         return Response.ok().entity(appToken).build();
                     } catch (APIManagementException e) {
                         Long errorCode = e.getErrorHandler() != null ? e.getErrorHandler().getErrorCode() :

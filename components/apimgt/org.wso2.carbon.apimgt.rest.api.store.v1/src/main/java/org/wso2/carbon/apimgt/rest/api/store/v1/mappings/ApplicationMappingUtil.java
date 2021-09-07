@@ -18,12 +18,22 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
@@ -32,8 +42,13 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SolaceTopicsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceDeployedEnvironmentsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceTopicsObjectDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +57,7 @@ import java.util.Set;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+    public static ApplicationDTO fromApplicationToDTO(Application application) throws APIManagementException {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingPolicy(application.getTier());
@@ -62,6 +77,82 @@ public class ApplicationMappingUtil {
                 .equals(application.getTokenType())) {
             applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.valueOf(application.getTokenType()));
         }
+        applicationDTO.setContainsSolaceApis(containsSolaceApis(application));
+        if (applicationDTO.isContainsSolaceApis()) {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+            for (SubscribedAPI subscribedAPI : subscriptions) {
+                API api = apiConsumer.getAPIbyUUID(subscribedAPI.getUUID(), subscribedAPI.getOrganization());
+                if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+                    applicationDTO.setSolaceOrganization(apiConsumer.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
+                }
+            }
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+            Map<String, ThirdPartyEnvironment> thirdPartyEnvironmentMap = APIUtil.getReadOnlyThirdPartyEnvironments();
+            HttpResponse response = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "default");
+            List<ApplicationSolaceDeployedEnvironmentsDTO> solaceEnvironments = new ArrayList<>();
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                try {
+                    String responseString = EntityUtils.toString(response.getEntity());
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                    if (jsonObject.getJSONArray("environments") != null) {
+                        JSONArray environmentsArray = jsonObject.getJSONArray("environments");
+                        for (int i = 0; i < environmentsArray.length(); i++) {
+                            ApplicationSolaceDeployedEnvironmentsDTO applicationSolaceDeployedEnvironmentsDTO = new ApplicationSolaceDeployedEnvironmentsDTO();
+                            org.json.JSONObject environmentObject = environmentsArray.getJSONObject(i);
+                            if (environmentObject.getString("name") != null) {
+                                String environmentName = environmentObject.getString("name");
+                                ThirdPartyEnvironment thirdPartyEnvironment = thirdPartyEnvironmentMap.get(environmentName);
+                                if (thirdPartyEnvironment != null) {
+                                    applicationSolaceDeployedEnvironmentsDTO.setEnvironmentName(thirdPartyEnvironment.getName());
+                                    applicationSolaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(thirdPartyEnvironment.getDisplayName());
+                                    applicationSolaceDeployedEnvironmentsDTO.setOrganizationName(thirdPartyEnvironment.getOrganization());
+                                    boolean containsMQTTProtocol = false;
+                                    if (environmentObject.getJSONArray("messagingProtocols") != null) {
+                                        List<APISolaceURLsDTO> endpointUrls = new ArrayList<>();
+                                        JSONArray protocolsArray = environmentObject.getJSONArray("messagingProtocols");
+                                        for (int j = 0; j < protocolsArray.length(); j++) {
+                                            APISolaceURLsDTO solaceURLsDTO = new APISolaceURLsDTO();
+                                            String protocol = protocolsArray.getJSONObject(j).getJSONObject("protocol").getString("name");
+                                            if ("MQTT".equalsIgnoreCase(protocol)) {
+                                                containsMQTTProtocol = true;
+                                            }
+                                            String uri = protocolsArray.getJSONObject(j).getString("uri");
+                                            solaceURLsDTO.setProtocol(protocol);
+                                            solaceURLsDTO.setEndpointURL(uri);
+                                            endpointUrls.add(solaceURLsDTO);
+                                        }
+                                        applicationSolaceDeployedEnvironmentsDTO.setSolaceURLs(endpointUrls);
+                                    }
+                                    if (environmentObject.getJSONObject("permissions") != null) {
+                                        org.json.JSONObject permissionsObject = environmentObject.getJSONObject("permissions");
+                                        ApplicationSolaceTopicsObjectDTO solaceTopicsObjectDTO = new ApplicationSolaceTopicsObjectDTO();
+                                        populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject, "default");
+
+                                        if (containsMQTTProtocol) {
+                                            HttpResponse response2 = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "MQTT");
+                                            org.json.JSONObject permissionsObject2 = extractPermissionsFromSolaceApplicationGetResponse(
+                                                    response2,
+                                                    i,
+                                                    thirdPartyEnvironmentMap
+                                            );
+                                            if (permissionsObject2 != null) {
+                                                populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject2, "MQTT");
+                                            }
+                                        }
+                                        applicationSolaceDeployedEnvironmentsDTO.setSolaceTopicsObject(solaceTopicsObjectDTO);
+                                    }
+                                }
+                            }
+                            solaceEnvironments.add(applicationSolaceDeployedEnvironmentsDTO);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            applicationDTO.setSolaceDeployedEnvironments(solaceEnvironments);
+        }
 
         //todo: Uncomment when this is implemented
         /*List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
@@ -71,6 +162,76 @@ public class ApplicationMappingUtil {
         }
         applicationDTO.setKeys(applicationKeyDTOs);*/
         return applicationDTO;
+    }
+
+    public static org.json.JSONObject extractPermissionsFromSolaceApplicationGetResponse(HttpResponse response, int environmentIndex, Map<String, ThirdPartyEnvironment> thirdPartyEnvironmentMap) throws IOException {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            String responseString = EntityUtils.toString(response.getEntity());
+            org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+            if (jsonObject.getJSONArray("environments") != null) {
+                JSONArray environmentsArray = jsonObject.getJSONArray("environments");
+                org.json.JSONObject environmentObject = environmentsArray.getJSONObject(environmentIndex);
+                if (environmentObject.getString("name") != null) {
+                    String environmentName = environmentObject.getString("name");
+                    ThirdPartyEnvironment thirdPartyEnvironment = thirdPartyEnvironmentMap.get(environmentName);
+                    if (thirdPartyEnvironment != null) {
+                        if (environmentObject.getJSONObject("permissions") != null) {
+                            return environmentObject.getJSONObject("permissions");
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void populateSolaceTopics(ApplicationSolaceTopicsObjectDTO solaceTopicsObjectDTO, org.json.JSONObject permissionsObject, String syntax) {
+        SolaceTopicsDTO topicsDTO = new SolaceTopicsDTO();
+        if (permissionsObject.getJSONArray("publish") != null) {
+            List<String> publishTopics = new ArrayList<>();
+            for (int j = 0; j < permissionsObject.getJSONArray("publish").length(); j++) {
+                org.json.JSONObject channelObject = permissionsObject.getJSONArray("publish").getJSONObject(j);
+                for (Object x : channelObject.keySet()) {
+                    org.json.JSONObject channel = channelObject.getJSONObject(x.toString());
+                    JSONArray channelPermissions = channel.getJSONArray("permissions");
+                    for (int k = 0; k < channelPermissions.length(); k++) {
+                        publishTopics.add(channelPermissions.getString(k));
+                    }
+                }
+            }
+            topicsDTO.setPublishTopics(publishTopics);
+        }
+        if (permissionsObject.getJSONArray("subscribe") != null) {
+            List<String> subscribeTopics = new ArrayList<>();
+            for (int j = 0; j < permissionsObject.getJSONArray("subscribe").length(); j++) {
+                org.json.JSONObject channelObject = permissionsObject.getJSONArray("subscribe").getJSONObject(j);
+                for (Object x : channelObject.keySet()) {
+                    org.json.JSONObject channel = channelObject.getJSONObject(x.toString());
+                    JSONArray channelPermissions = channel.getJSONArray("permissions");
+                    for (int k = 0; k < channelPermissions.length(); k++) {
+                        subscribeTopics.add(channelPermissions.getString(k));
+                    }
+                }
+            }
+            topicsDTO.setSubscribeTopics(subscribeTopics);
+        }
+        if ("MQTT".equalsIgnoreCase(syntax)) {
+            solaceTopicsObjectDTO.setMqttSyntax(topicsDTO);
+        } else {
+            solaceTopicsObjectDTO.setDefaultSyntax(topicsDTO);
+        }
+    }
+
+    public static boolean containsSolaceApis(Application application) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+        for (SubscribedAPI subscribedAPI : subscriptions) {
+            API api = apiConsumer.getAPIbyUUID(subscribedAPI.getUUID(), subscribedAPI.getOrganization());
+            if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String username) {

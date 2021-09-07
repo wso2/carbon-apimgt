@@ -86,6 +86,8 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -4444,13 +4446,20 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
             String environment = apiRevisionDeploymentDTO.getName();
             if (environments.get(environment) == null) {
-                RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                if (thirdPartyEnvironments != null) {
+                    if (thirdPartyEnvironments.get(environment) == null) {
+                        RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    }
+                } else {
+                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                }
             }
             apiRevisionDeployment.setDeployment(environment);
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
@@ -4514,6 +4523,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -4523,7 +4533,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiRevisionDeployment.setRevisionUUID(revisionId);
                 String environment = apiRevisionDeploymentDTO.getName();
                 if (environments.get(environment) == null) {
-                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    if (thirdPartyEnvironments != null) {
+                        if (thirdPartyEnvironments.get(environment) == null) {
+                            RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                        }
+                    } else {
+                        RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                    }
                 }
                 apiRevisionDeployment.setDeployment(environment);
                 apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
@@ -5057,6 +5073,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isServiceAPI) {
                 apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
             }
+            if (apiDTOFromProperties.isSolaceAPI()) {
+                apiDTOFromProperties.getPolicies().add("AsyncUnlimited");
+                apiDTOFromProperties.getTags().add("SolaceAPI");
+                apiDTOFromProperties.setSolaceTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(definitionToAdd));
+            }
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
             if (isServiceAPI) {
@@ -5067,10 +5088,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getServiceUrl(), protocol));
                 }
             }
+            apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
             //load topics from AsyncAPI
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
-                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
+                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || apiDTOFromProperties.isSolaceAPI()));
             apiToAdd.setOrganization(organization);
             apiToAdd.setAsyncApiDefinition(definitionToAdd);
 

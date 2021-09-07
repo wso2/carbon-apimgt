@@ -127,7 +127,7 @@ public class ExportUtils {
      */
     private static ExportedApplication createApplicationDTOToExport(Application application, APIConsumer apiConsumer,
             Boolean withKeys) throws APIManagementException {
-        ApplicationDTO applicationDto = ApplicationMappingUtil.fromApplicationtoDTO(application);
+        ApplicationDTO applicationDto = ApplicationMappingUtil.fromApplicationToDTO(application);
 
         // Set keys if withKeys is true
         if (withKeys == null || !withKeys) {

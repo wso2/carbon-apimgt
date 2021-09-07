@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
@@ -61,6 +62,9 @@ public class APIDTO   {
     private Object keyManagers = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+  private Boolean solaceAPI = null;
+  private List<String> solaceTransportProtocols = new ArrayList<String>();
+  private List<APISolaceEndpointURLsDTO> solaceEndpointURLs = new ArrayList<APISolaceEndpointURLsDTO>();
 
   /**
    * UUID of the api 
@@ -622,6 +626,51 @@ public class APIDTO   {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
+  public APIDTO solaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+    return this;
+  }
+
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("solaceAPI")
+  public Boolean isSolaceAPI() {
+    return solaceAPI;
+  }
+  public void setSolaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+  }
+
+  /**
+   * Supported transports for the solace API (http and/or https).
+   **/
+  public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+    return this;
+  }
+
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
+  @JsonProperty("solaceTransportProtocols")
+  public List<String> getSolaceTransportProtocols() {
+    return solaceTransportProtocols;
+  }
+  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
+    this.solaceTransportProtocols = solaceTransportProtocols;
+  }
+
+  public APIDTO solaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
+    this.solaceEndpointURLs = solaceEndpointURLs;
+    return this;
+  }
+
+  @ApiModelProperty(value = "")
+  @Valid
+  @JsonProperty("solaceEndpointURLs")
+  public List<APISolaceEndpointURLsDTO> getSolaceEndpointURLs() {
+    return solaceEndpointURLs;
+  }
+  public void setSolaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
+    this.solaceEndpointURLs = solaceEndpointURLs;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -662,12 +711,14 @@ public class APIDTO   {
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(createdTime, API.createdTime) &&
-        Objects.equals(lastUpdatedTime, API.lastUpdatedTime);
+        Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
+        Objects.equals(solaceAPI, API.solaceAPI) && Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols) &&
+        Objects.equals(solaceEndpointURLs, API.solaceEndpointURLs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, solaceAPI, solaceTransportProtocols, solaceEndpointURLs);
   }
 
   @Override
@@ -706,6 +757,9 @@ public class APIDTO   {
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    solaceAPI: ").append(toIndentedString(solaceAPI)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
+    sb.append("    solaceEndpointURLs: ").append(toIndentedString(solaceEndpointURLs)).append("\n");
     sb.append("}");
     return sb.toString();
   }
