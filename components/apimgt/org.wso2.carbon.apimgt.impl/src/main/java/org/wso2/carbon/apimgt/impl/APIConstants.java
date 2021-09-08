@@ -2472,6 +2472,8 @@ public final class APIConstants {
         public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
         public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
         public static final String NOT_APPLICABLE_VALUE = "N/A";
+        public static final String ENABLE_PKCE = "pkce_enable";
+        public static final String PKCE_ALGORITHM_DEFAULT = "S256";
 
         public static class KeyManagerEvent {
 

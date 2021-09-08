@@ -78,6 +78,16 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
                         "Id Token Expiry Time", "input", "Type ID Token Expiry Time " +
                         "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
                         Collections.EMPTY_LIST, false));
+        applicationConfigurationsList
+                .add(new ConfigurationDto(APIConstants.KeyManager.ENABLE_PKCE,
+                        "Enable PKCE", " checkbox", "Enable PKCE"
+                        , APIConstants.KeyManager.ENABLE_PKCE, false, false,
+                        Collections.EMPTY_LIST, false));
+        applicationConfigurationsList
+                .add(new ConfigurationDto(APIConstants.KeyManager.ENABLE_PKCE,
+                        "PKCE algorithm", " input", "S256 is recommended, plain too can be used "
+                        , APIConstants.KeyManager.PKCE_ALGORITHM_DEFAULT, false, false,
+                        Collections.EMPTY_LIST, false));
         return applicationConfigurationsList;
     }
 
