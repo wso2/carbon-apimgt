@@ -144,6 +144,13 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
+    public API getAPI(APIIdentifier identifier) throws APIManagementException {
+
+        return api;
+
+    }
+
+    @Override
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
 
         return super.getSecurityAuditAttributesFromConfig(userId);

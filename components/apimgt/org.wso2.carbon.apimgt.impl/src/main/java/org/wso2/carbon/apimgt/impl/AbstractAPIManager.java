@@ -4047,4 +4047,99 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return true;
     }
+
+    public API getAPI(APIIdentifier identifier) throws APIManagementException {
+
+        String apiPath = APIUtil.getAPIPath(identifier);
+        Registry registry;
+        try {
+            String apiTenantDomain = getTenantDomain(identifier);
+            int apiTenantId = getTenantManager()
+                    .getTenantId(apiTenantDomain);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
+                APIUtil.loadTenantRegistry(apiTenantId);
+            }
+
+            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
+                registry = getRegistryService().getGovernanceUserRegistry(
+                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
+            } else {
+                registry = this.registry;
+            }
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_KEY);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+
+            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
+            APIUtil.updateAPIProductDependencies(api, registry);
+            if (api.isAsync()) {
+                api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
+            } else {
+                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            }
+            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+            }
+            //check for API visibility
+            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
+                return api;
+            }
+            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                throw new APIManagementException("User " + username + " does not have permission to view API : "
+                        + api.getId().getApiName());
+            }
+
+            return api;
+
+        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get API from : " + apiPath;
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns the AsyncAPI definition of the given API
+     *
+     * @param apiId id of the APIIdentifier
+     * @return A String containing the AsyncAPI definition
+     * @throws APIManagementException
+     */
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+
+        String apiTenantDomain = getTenantDomain(apiId);
+        String asyncApiDoc;
+        boolean tenantFlowStarted = false;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                if (apiTenantDomain != null) {
+                    startTenantFlow(apiTenantDomain);
+                    tenantFlowStarted = true;
+                }
+                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
+                registryType = getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId
+                );
+            } else {
+                registryType = registry;
+            }
+            asyncApiDoc = AsyncApiParserUtil.getAPIDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
+            String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return asyncApiDoc;
+    }
+
 }
