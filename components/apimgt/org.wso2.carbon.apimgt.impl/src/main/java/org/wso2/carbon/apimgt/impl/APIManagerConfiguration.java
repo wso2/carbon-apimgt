@@ -486,7 +486,7 @@ public class APIManagerConfiguration {
                                 environment.getName());
                     }
                 }
-            } else if (APIConstants.THIRD_PARTY_ENVIRONMENT.equals(localName)) {
+            } else if (APIConstants.THIRD_PARTY_ENVIRONMENTS.equals(localName)) {
 
                 Iterator thirdPartyEnvironmentIterator = element.getChildrenWithLocalName(APIConstants.THIRD_PARTY_ENVIRONMENT);
                 thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();

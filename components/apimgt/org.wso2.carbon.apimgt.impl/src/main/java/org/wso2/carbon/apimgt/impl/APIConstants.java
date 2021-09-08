@@ -2790,6 +2790,7 @@ public final class APIConstants {
 
     //Solace integration related constants
     public static final String THIRD_PARTY_ENVIRONMENT = "ThirdPartyEnvironment";
+    public static final String THIRD_PARTY_ENVIRONMENTS = "ThirdPartyEnvironments";
     public static final String ORGANIZATION = "Organization";
     public static final String THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME = "DisplayName";
     public static final String THIRD_PARTY_ENVIRONMENT_DESCRIPTION = "Description";

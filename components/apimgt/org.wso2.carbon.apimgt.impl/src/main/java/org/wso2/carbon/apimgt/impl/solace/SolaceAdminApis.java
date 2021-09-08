@@ -608,7 +608,7 @@ public class SolaceAdminApis {
             protocolsFromBindings.add(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.ws != null) {
-            protocolsFromBindings.add(APIConstants.WS_PROTOCOL);
+            protocolsFromBindings.add(APIConstants.WS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.kafka != null) {
             protocolsFromBindings.add(APIConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
@@ -668,8 +668,8 @@ public class SolaceAdminApis {
         protocolsWithVersions.put(APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_NAME, APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_VERSION);
         protocolsWithVersions.put(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME, APIConstants.JMS_TRANSPORT_PROTOCOL_VERSION);
         protocolsWithVersions.put(APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME, APIConstants.HTTPS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SMF_TRANSPORT_PROTOCOL_VERSION, APIConstants.SMF_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SMFS_TRANSPORT_PROTOCOL_VERSION, APIConstants.SMFS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.SMF_TRANSPORT_PROTOCOL_NAME, APIConstants.SMF_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.SMFS_TRANSPORT_PROTOCOL_NAME, APIConstants.SMFS_TRANSPORT_PROTOCOL_VERSION);
         if (protocolsWithVersions.get(protocol) != null) {
             return protocolsWithVersions.get(protocol);
         }
