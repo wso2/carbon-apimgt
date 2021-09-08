@@ -110,7 +110,6 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -148,7 +147,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -182,6 +180,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
@@ -189,7 +188,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
@@ -2546,17 +2544,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     private void sendEmailNotification(API api) throws APIManagementException {
+
         try {
+            JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
             String isNotificationEnabled = "false";
-            Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getConfigSystemRegistry(tenantId);
-            if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                if (content != null) {
-                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
-                    isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
-                }
+
+            if (tenantConfig.containsKey(NotifierConstants.NOTIFICATIONS_ENABLED)) {
+                isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
             }
             if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
                 List<APIIdentifier> apiIdentifiers = getOldPublishedAPIList(api);
@@ -2577,11 +2571,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (NotificationException e) {
             log.error(e.getMessage(), e);
-        } catch (RegistryException re) {
-            handleException("Error while getting the tenant-config.json", re);
-        } catch (ParseException e) {
-            String msg = "Couldn't Create json Object from Swagger object for email notification";
-            handleException(msg, e);
         }
     }
 
@@ -5912,7 +5901,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }
@@ -6658,14 +6647,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
         }
         return null;
-    }
-
-
-    protected String getTenantConfigContent() throws RegistryException, UserStoreException {
-        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-
-        return apimRegistryService
-                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
     }
 
     protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
@@ -7887,14 +7868,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-
-        int tenantId = 0;
-        try {
-            tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            handleException("Error in getting tenantId of: " + tenantDomain, e);
-        }
-        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
+        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantDomain);
         if (securityAuditConfig != null) {
             if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
                     securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) instanceof Boolean &&

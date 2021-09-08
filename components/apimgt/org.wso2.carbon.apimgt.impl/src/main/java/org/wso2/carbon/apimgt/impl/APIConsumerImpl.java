@@ -81,7 +81,6 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -228,7 +227,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private volatile long lastUpdatedTimeForTagApi;
     private final Object tagCacheMutex = new Object();
     private final Object tagWithAPICacheMutex = new Object();
-    protected APIMRegistryService apimRegistryService;
     protected String userNameWithoutChange;
 
     public APIConsumerImpl() throws APIManagementException {
@@ -236,11 +234,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         readTagCacheConfigs();
     }
 
-    public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
+    public APIConsumerImpl(String username) throws APIManagementException {
         super(username);
         userNameWithoutChange = username;
         readTagCacheConfigs();
-        this.apimRegistryService = apimRegistryService;
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
@@ -2702,7 +2699,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }
@@ -4780,23 +4777,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
-        JSONObject apiTenantConfig = null;
-        try {
-            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-            }
-
-        } catch (UserStoreException e) {
-            handleException("UserStoreException thrown when getting API tenant config from registry", e);
-        } catch (RegistryException e) {
-            handleException("RegistryException thrown when getting API tenant config from registry", e);
-        } catch (ParseException e) {
-            handleException("ParseException thrown when passing API tenant config from registry", e);
-        }
-
+        JSONObject apiTenantConfig = APIUtil.getTenantConfig(tenantDomain);
         return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
     }
 
@@ -5114,7 +5095,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
         JSONArray applicationAttributes = null;
-        JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
+        JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantDomain);
         if (applicationConfig != null) {
             applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
         } else {

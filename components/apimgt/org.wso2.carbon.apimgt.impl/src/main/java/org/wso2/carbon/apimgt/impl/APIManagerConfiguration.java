@@ -501,7 +501,7 @@ public class APIManagerConfiguration {
                     String className = storeElem.getAttributeValue(new QName(APIConstants
                             .EXTERNAL_API_STORE_CLASS_NAME));
                     try {
-                        store.setPublisher((APIPublisher) APIUtil.getClassForName(className).newInstance());
+                        store.setPublisher((APIPublisher) APIUtil.getClassInstance(className));
                     } catch (InstantiationException e) {
                         String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
                                 "cannot be instantiated";
@@ -1959,8 +1959,7 @@ public class APIManagerConfiguration {
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
                 try {
-                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
-                            .getClassForName(listenerClass).newInstance();
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);

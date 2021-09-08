@@ -57,7 +57,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -120,7 +119,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -1435,32 +1433,12 @@ public class APIMappingUtil {
     private static boolean checkEndpointSecurityPasswordEnabled(String tenantDomainName) throws APIManagementException {
 
         JSONObject apiTenantConfig;
-        try {
-            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
-            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-                if (apiTenantConfig != null) {
-                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
-                    if (value != null) {
-                        return Boolean.parseBoolean(value.toString());
-                    }
-                }
+        apiTenantConfig = APIUtil.getTenantConfig(tenantDomainName);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
             }
-        } catch (UserStoreException e) {
-            String msg = "UserStoreException thrown when getting API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "RegistryException thrown when getting API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "ParseException thrown when parsing API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
         }
         return false;
     }

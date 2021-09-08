@@ -33,7 +33,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.loadAndSyncTenantConf;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
@@ -84,7 +83,7 @@ public class CommonConfigDeployerTestCase {
         APIUtil.createDefaultRoles(TENANT_ID);
 
         PowerMockito.verifyStatic(APIUtil.class);
-        loadAndSyncTenantConf(TENANT_ID);
+        APIUtil.loadAndSyncTenantConf(TENANT_DOMAIN);
 
         //PowerMockito.verifyStatic(APIUtil.class);
         //APIUtil.addDefaultTenantAdvancedThrottlePolicies(TENANT_DOMAIN, TENANT_ID);
@@ -127,15 +126,15 @@ public class CommonConfigDeployerTestCase {
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.writeDefinedSequencesToTenantRegistry(TENANT_ID);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.loadTenantExternalStoreConfig(TENANT_ID);
+        APIUtil.loadTenantExternalStoreConfig(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.loadTenantGAConfig(TENANT_ID);
+        APIUtil.loadTenantGAConfig(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.loadTenantWorkFlowExtensions(TENANT_ID);
+        APIUtil.loadTenantWorkFlowExtensions(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        APIUtil.loadTenantSelfSignUpConfigurations(TENANT_ID);
+        APIUtil.loadTenantSelfSignUpConfigurations(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
-        loadAndSyncTenantConf(TENANT_ID);
+        APIUtil.loadAndSyncTenantConf(TENANT_DOMAIN);
         PowerMockito.doThrow(new APIManagementException("error")).when(APIUtil.class);
         APIUtil.createDefaultRoles(TENANT_ID);
 
