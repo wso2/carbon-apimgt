@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 import com.google.gson.Gson;
+import java.util.TimeZone;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -9363,7 +9364,8 @@ public class ApiMgtDAO {
                     apiRevision.setApiUUID(rs.getString("API_UUID"));
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
-                    apiRevision.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                    apiRevision.setCreatedTime(rs.getTimestamp("CREATED_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
                     return apiRevision;
                 }
@@ -16288,7 +16290,8 @@ public class ApiMgtDAO {
                     apiRevision.setApiUUID(apiUUID);
                     apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
-                    apiRevision.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                    apiRevision.setCreatedTime(rs.getTimestamp("CREATED_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
                     apiRevision.setApiRevisionDeploymentList(new ArrayList<>());
                     revisionList.add(apiRevision);
@@ -16448,7 +16451,8 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                 }
             }
         } catch (SQLException e) {
@@ -16480,7 +16484,8 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -16514,8 +16519,10 @@ public class ApiMgtDAO {
                 apiRevisionDeployment.setVhost(vhost);
                 apiRevisionDeployment.setRevisionUUID(revisionUuid);
                 apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME"));
-                apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME",
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
+                apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME",
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);
             } else {
@@ -16524,10 +16531,12 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                 }
                 if (apiRevisionDeployment.getDeployedTime() == null) {
-                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOY_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                 }
                 if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
-                    apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setSuccessDeployedTime(rs.getTimestamp("DEPLOYED_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                 }
             }
         }
@@ -16603,7 +16612,8 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME"));
+                    apiRevisionDeployment.setDeployedTime(rs.getTimestamp("DEPLOYED_TIME",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
