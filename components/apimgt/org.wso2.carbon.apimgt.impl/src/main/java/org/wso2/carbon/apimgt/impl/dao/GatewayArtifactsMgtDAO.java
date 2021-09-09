@@ -643,6 +643,7 @@ public class GatewayArtifactsMgtDAO {
                     SQLConstants.DELETE_BULK_GW_PUBLISHED_API_DETAILS)) {
                 preparedStatement.setString(1, organization);
                 preparedStatement.executeUpdate();
+                artifactSynchronizerConn.setAutoCommit(false);
                 artifactSynchronizerConn.commit();
             } catch (SQLException e) {
                 throw e;
