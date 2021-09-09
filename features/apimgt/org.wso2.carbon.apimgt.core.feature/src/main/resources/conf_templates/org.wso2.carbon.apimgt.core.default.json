@@ -74,6 +74,7 @@
   ],
   "apim.oauth_config.token_endpoint_context": "/token",
   "apim.oauth_config.revoke_endpoint_context":"/revoke",
+  "apim.oauth_config.expires_in": "3600",
   "apim.devportal.login_username_case_insensitive": true,
   "apim.devportal.url": "https://localhost:${mgt.transport.https.port}/devportal",
   "apim.devportal.display_url": false,

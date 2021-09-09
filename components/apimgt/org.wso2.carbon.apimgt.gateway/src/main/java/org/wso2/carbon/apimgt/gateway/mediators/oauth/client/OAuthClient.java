@@ -30,6 +30,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.BufferedReader;
@@ -162,6 +163,13 @@ public class OAuthClient {
             }
             if (jsonResponse.containsKey("expires_in")) {
                 tokenResponse.setExpiresIn(jsonResponse.get("expires_in").toString());
+                long currentTimeInSeconds = System.currentTimeMillis() / 1000;
+                long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
+                tokenResponse.setValidTill(expiryTimeInSeconds);
+            } else if (null != APIUtil.getOAuthConfigurationFromAPIMConfig(
+                    APIConstants.OAuthConstants.EXPIRES_IN_CONFIG)){
+                tokenResponse.setExpiresIn(APIUtil.getOAuthConfigurationFromAPIMConfig(
+                        APIConstants.OAuthConstants.EXPIRES_IN_CONFIG));
                 long currentTimeInSeconds = System.currentTimeMillis() / 1000;
                 long expiryTimeInSeconds = currentTimeInSeconds + Long.parseLong(tokenResponse.getExpiresIn());
                 tokenResponse.setValidTill(expiryTimeInSeconds);
