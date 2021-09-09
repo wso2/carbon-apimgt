@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 
+import java.util.List;
 import java.util.Map;
 
 public class APIMConfigUtil {
@@ -32,7 +33,7 @@ public class APIMConfigUtil {
      * This is to get JWT audiences with basepaths from deployment.toml file
      * @return List of Audiences with basepath
      */
-    public static Map<String, String> getRestApiJWTAuthAudiences() {
+    public static Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return configuration.getRestApiJWTAuthAudiences();
     }
 
