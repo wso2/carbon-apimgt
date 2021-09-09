@@ -15086,7 +15086,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps =
                 connection.prepareStatement(deleteQuery)) {
             connection.setAutoCommit(false);
-            ps.setLong(1, System.currentTimeMillis() / 1000);
+            ps.setLong(1, System.currentTimeMillis());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
