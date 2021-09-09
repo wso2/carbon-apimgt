@@ -120,9 +120,9 @@ public class APIManagerConfiguration {
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
-    private Map<String, String> restApiJWTAuthAudiences = new HashMap<>();
+    private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
 
-    public Map<String, String> getRestApiJWTAuthAudiences() {
+    public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
     }
 
@@ -1979,8 +1979,13 @@ public class APIManagerConfiguration {
                 omElement.getChildrenWithLocalName(APIConstants.JWT_AUDIENCE);
         while (jwtAudiencesElement.hasNext()) {
             OMElement jwtAudienceElement = (OMElement) jwtAudiencesElement.next();
-            restApiJWTAuthAudiences.put(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText(),
-                    jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
+            String basePath = jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText();
+            List<String> audienceForPath = restApiJWTAuthAudiences.get(basePath);
+            if (audienceForPath == null) {
+                audienceForPath = new ArrayList<>();
+            }
+            audienceForPath.add(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
+            restApiJWTAuthAudiences.put(basePath, audienceForPath);
         }
     }
 }
