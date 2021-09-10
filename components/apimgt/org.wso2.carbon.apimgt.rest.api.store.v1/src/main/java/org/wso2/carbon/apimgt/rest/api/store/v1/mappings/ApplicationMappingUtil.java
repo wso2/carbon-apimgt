@@ -82,7 +82,7 @@ public class ApplicationMappingUtil {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
             for (SubscribedAPI subscribedAPI : subscriptions) {
-                API api = apiConsumer.getAPIbyUUID(subscribedAPI.getUUID(), subscribedAPI.getOrganization());
+                API api = apiConsumer.getAPI(subscribedAPI.getApiId());
                 if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
                     applicationDTO.setSolaceOrganization(apiConsumer.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
                 }
@@ -226,7 +226,7 @@ public class ApplicationMappingUtil {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
         for (SubscribedAPI subscribedAPI : subscriptions) {
-            API api = apiConsumer.getAPIbyUUID(subscribedAPI.getUUID(), subscribedAPI.getOrganization());
+            API api = apiConsumer.getAPI(subscribedAPI.getApiId());
             if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
                 return true;
             }

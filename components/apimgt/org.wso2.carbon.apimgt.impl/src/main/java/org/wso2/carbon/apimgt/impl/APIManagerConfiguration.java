@@ -495,11 +495,11 @@ public class APIManagerConfiguration {
                     ThirdPartyEnvironment thirdPartyEnvironment = new ThirdPartyEnvironment();
                     OMElement thirdPartyEnvironmentElem = (OMElement) thirdPartyEnvironmentIterator.next();
                     thirdPartyEnvironment.setProvider(thirdPartyEnvironmentElem.getAttributeValue(new QName(
-                            APIConstants.PROVIDER_ASSOCIATION)));
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_PROVIDER)));
                     thirdPartyEnvironment.setName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT)).getText());
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_NAME)).getText());
                     thirdPartyEnvironment.setOrganization(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.ORGANIZATION)).getText());
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_ORGANIZATION)).getText());
                     thirdPartyEnvironment.setDisplayName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
                             APIConstants.THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME)).getText());
 

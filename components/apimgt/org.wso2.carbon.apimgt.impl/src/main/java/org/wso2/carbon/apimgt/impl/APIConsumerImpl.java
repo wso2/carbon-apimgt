@@ -2744,10 +2744,41 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiContext = api.getContext();
         }
 
+        // get already subscribed APIs
+        Subscriber subscriber = new Subscriber(username);
+        Set<SubscribedAPI> subscriptions;
+        List<SubscribedAPI> subscribedAPIList;
+        subscriptions = getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+        subscribedAPIList = new ArrayList<>(subscriptions);
+
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
+
+            //Check whether the subscription is belongs to an API deployed in Solace
+            if (api.isSolaceAPI()) {
+                ArrayList<String> solaceApiProducts = new ArrayList<>();
+                List<ThirdPartyEnvironment> deployedSolaceEnvironments = getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
+                String applicationOrganizationName = getSolaceOrganizationName(deployedSolaceEnvironments);
+                if (applicationOrganizationName != null) {
+                    try {
+                        boolean apiProductDeployedIntoSolace = checkApiProductAlreadyDeployedIntoSolaceEnvironments(api, deployedSolaceEnvironments);
+                        if (apiProductDeployedIntoSolace) {
+                            for (ThirdPartyEnvironment environment : deployedSolaceEnvironments) {
+                                solaceApiProducts.add(generateApiProductNameForSolaceBroker(api, environment.getName()));
+                            }
+                            deployApplicationToSolaceBroker(application, solaceApiProducts, applicationOrganizationName);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    log.error("Cannot create solace application with API product deployed in different organizations...");
+                    throw new APIManagementException("Cannot create solace application with API product deployed in different organizations...");
+                }
+            }
+
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
@@ -2935,15 +2966,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // get already subscribed APIs
         Subscriber subscriber = new Subscriber(username);
-        Set<SubscribedAPI> subscriptions;
-        List<SubscribedAPI> subscribedAPIList;
-        subscriptions = getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
 
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
 
-            assert api != null;
+            //Check whether the subscription is belongs to an API deployed in Solace
             if (api.isSolaceAPI()) {
                 ArrayList<String> solaceApiProducts = new ArrayList<>();
                 List<ThirdPartyEnvironment> deployedSolaceEnvironments =
@@ -3225,7 +3253,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             Application application = apiMgtDAO.getApplicationById(applicationId);
 
-            assert api != null;
+            //Check whether the subscription is belongs to an API deployed in Solace
             if (api.isSolaceAPI()) {
                 unSubscribeAPIProductFromSolaceApplication(api, application);
             }
@@ -6226,25 +6254,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 
                 String responseString = EntityUtils.toString(response2.getEntity());
-                org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
-                if (jsonObject.getJSONObject("message") != null) {
-                    org.json.JSONObject messageObject = jsonObject.getJSONObject("message");
-                    if (messageObject.getInt("statusCode") == HttpStatus.SC_NOT_FOUND) {
-                        // create new app
-                        log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
-                                "Creating new application......");
-                        HttpResponse response4 = solaceAdminApis.createApplication(organization, application,
-                                apiProducts);
-                        if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                            log.info("Solace application '" + application.getName() + "' created successfully");
-                        } else {
-                            log.error("Error while creating Solace application '" + application.getName() + "'");
-                            throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
-                                    getStatusLine().getReasonPhrase());
-                        }
+                if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
+                    // create new app
+                    log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
+                            "Creating new application......");
+                    HttpResponse response4 = solaceAdminApis.createApplication(organization, application,
+                            apiProducts);
+                    if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                        log.info("Solace application '" + application.getName() + "' created successfully");
                     } else {
-                        log.error("Error while searching for application '" + application.getName() + "'");
-                        throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.
+                        log.error("Error while creating Solace application '" + application.getName() + "'");
+                        throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
                                 getStatusLine().getReasonPhrase());
                     }
                 } else {
@@ -6432,11 +6452,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 solaceApiProducts.add(generateApiProductNameForSolaceBroker(api, environment.getName()));
             }
             SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
-            HttpResponse response = solaceAdminApis.applicationPatchRemoveSubscription(
-                    applicationOrganizationName,
-                    application,
-                    solaceApiProducts
-            );
+            HttpResponse response = solaceAdminApis.applicationPatchRemoveSubscription(applicationOrganizationName,
+                    application, solaceApiProducts);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 log.info("API product unsubscribed from Solace application '" + application.getName() + "'");
                 try {
@@ -6445,10 +6462,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (jsonObject.getJSONArray("apiProducts") != null) {
                         if (jsonObject.getJSONArray("apiProducts").length() == 0) {
                             // delete application in Solace because of 0 number of api products
-                            HttpResponse response2 = solaceAdminApis.deleteApplication(
-                                    applicationOrganizationName,
-                                    application
-                            );
+                            HttpResponse response2 = solaceAdminApis.deleteApplication(applicationOrganizationName,
+                                    application);
                             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
                                 log.info("Successfully deleted application '" + application.getName() + "' in " +
                                         "Solace Broker");
