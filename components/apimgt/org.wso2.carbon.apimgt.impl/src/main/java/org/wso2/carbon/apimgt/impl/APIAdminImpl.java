@@ -582,8 +582,9 @@ public class APIAdminImpl implements APIAdmin {
                 try {
                     if (kmConfig.getExternalReferenceId() != null) {
                         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-                        log.info("Retrieving keymanager reference IDP for tenant domain :" +
-                                tenantDomain);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Retrieving key manager reference IDP for tenant domain : " + tenantDomain);
+                        }
                         IdentityProviderManager.getInstance().deleteIdPByResourceId(kmConfig.getExternalReferenceId(),
                                         APIUtil.getInternalOrganizationDomain(organization));
                     }
