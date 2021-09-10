@@ -9220,7 +9220,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String[] apiContextParts = api.getContext().split("/");
         String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +
                 "-" + apiContextParts[2];
-        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
 
         // check availability of environment
         HttpResponse response1 = solaceAdminApis.environmentGET(environment.getOrganization(), environment.getName());
@@ -9304,13 +9304,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private boolean undeployFromSolaceBroker(API api, ThirdPartyEnvironment environment) throws HttpResponseException {
+    private boolean undeployFromSolaceBroker(API api, ThirdPartyEnvironment environment) throws HttpResponseException,
+            APIManagementException {
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
         String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
         String[] apiContextParts = api.getContext().split("/");
         String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +
                 "-" + apiContextParts[2];
-        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
 
         //delete API product from Solace
         HttpResponse response1 = solaceAdminApis.deleteApiProduct(environment.getOrganization(), apiNameWithContext);
@@ -9346,14 +9347,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<String> getTransportProtocolsForSolaceAPI(String definition) {
+    public List<String> getTransportProtocolsForSolaceAPI(String definition) throws APIManagementException {
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
-        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
         HashSet<String> solaceTransportProtocols = new HashSet<>();
         for (AaiChannelItem channel : aai20Document.getChannels()) {
             solaceTransportProtocols.addAll(solaceAdminApis.getProtocols(channel));
         }
         ArrayList<String> solaceTransportProtocolsList = new ArrayList<>(solaceTransportProtocols);
         return solaceTransportProtocolsList;
+    }
+
+    /**
+     * Get and patch client id for Solace application
+     *
+     * @return SolaceAdminApis  object to invoke Solace
+     * @throws APIManagementException If the Solace env configuration if not provided properly
+     */
+    private SolaceAdminApis getSolaceAdminApis()
+            throws APIManagementException {
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        ThirdPartyEnvironment solaceEnvironment = null;
+
+        for (Map.Entry<String,ThirdPartyEnvironment> entry: thirdPartyEnvironments.entrySet()) {
+            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+                solaceEnvironment = entry.getValue();
+            }
+        }
+
+        if (solaceEnvironment != null) {
+            return new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
+                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getDeveloper());
+        } else {
+            throw new APIManagementException("Solace Environment configurations are not provided properly");
+        }
     }
 }

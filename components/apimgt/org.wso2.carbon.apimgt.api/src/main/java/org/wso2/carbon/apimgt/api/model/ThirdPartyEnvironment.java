@@ -22,6 +22,7 @@ public class ThirdPartyEnvironment extends Environment implements Serializable {
 
     private String organization;
     private String provider;
+    private String developer;
 
     public String getOrganization() {
         return organization;
@@ -48,6 +49,7 @@ public class ThirdPartyEnvironment extends Environment implements Serializable {
         if (!getName().equals(that.getName())) return false;
         if (!provider.equals(that.getProvider())) return false;
         if (!organization.equals(that.getOrganization())) return false;
+        if (!developer.equals(that.getDeveloper())) return false;
 
         return true;
     }
@@ -57,5 +59,13 @@ public class ThirdPartyEnvironment extends Environment implements Serializable {
         //return Objects.hash(environmentName, organization, provider);
         int result = provider.hashCode();
         return 31 * result + getName().hashCode();
+    }
+
+    public String getDeveloper() {
+        return developer;
+    }
+
+    public void setDeveloper(String developer) {
+        this.developer = developer;
     }
 }

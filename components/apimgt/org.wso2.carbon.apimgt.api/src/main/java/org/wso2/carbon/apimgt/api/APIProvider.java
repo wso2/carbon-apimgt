@@ -1829,6 +1829,7 @@ public interface APIProvider extends APIManager {
      *
      * @param definition Solace API Definition
      * @return List<String> List of available transport protocols
+     * @throws APIManagementException If the Solace env configuration if not provided properly
      */
-    List<String> getTransportProtocolsForSolaceAPI(String definition);
+    List<String> getTransportProtocolsForSolaceAPI(String definition) throws APIManagementException;
 }

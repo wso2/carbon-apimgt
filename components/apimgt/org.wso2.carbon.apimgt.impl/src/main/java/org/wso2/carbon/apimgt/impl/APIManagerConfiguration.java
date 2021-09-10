@@ -502,6 +502,14 @@ public class APIManagerConfiguration {
                             APIConstants.THIRD_PARTY_ENVIRONMENT_ORGANIZATION)).getText());
                     thirdPartyEnvironment.setDisplayName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
                             APIConstants.THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME)).getText());
+                    thirdPartyEnvironment.setServerURL(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_SERVER_URL)).getText());
+                    thirdPartyEnvironment.setUserName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_USERNAME)).getText());
+                    thirdPartyEnvironment.setPassword(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_PASSWORD)).getText());
+                    thirdPartyEnvironment.setDeveloper(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
+                            APIConstants.THIRD_PARTY_ENVIRONMENT_DEV_NAME)).getText());
 
                     if (StringUtils.isEmpty(thirdPartyEnvironment.getDisplayName())) {
                         thirdPartyEnvironment.setDisplayName(thirdPartyEnvironment.getName());

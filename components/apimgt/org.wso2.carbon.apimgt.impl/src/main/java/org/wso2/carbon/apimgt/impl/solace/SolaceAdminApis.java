@@ -54,9 +54,27 @@ import java.util.HashMap;
 
 public class SolaceAdminApis {
 
-    private static final String baseUrl = "http://api.solace-apim.net:3000/v1/";
-    private static final String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
-    private static final String developerUserName = "dev-1";
+    String baseUrl;
+    String password;
+    String userName;
+    String developerUserName;
+
+    public SolaceAdminApis(String baseUrl, String userName, String password, String developerUserName) {
+        this.baseUrl = baseUrl;
+        this.userName = userName;
+        this.password = password;
+        this.developerUserName = developerUserName;
+    }
+
+    private String getEncoding(){
+        String toEncode = userName + ":" + password;
+        return Base64.getEncoder().encodeToString((toEncode).getBytes());
+    }
+
+//    private static final String baseUrl = "http://api.solace-apim.net:3000/v1/";
+//    private static final String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
+//    private static final String developerUserName = "dev-1";
+
 
     /**
      * Check whether the environment is available
@@ -68,7 +86,7 @@ public class SolaceAdminApis {
     public HttpResponse environmentGET(String organization, String environment) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + environment);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -88,7 +106,7 @@ public class SolaceAdminApis {
     public HttpResponse registerAPI(String organization, String title, String apiDefinition) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPut request = new HttpPut(baseUrl + "/" + organization + "/apis/" + title);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
         JsonNode jsonNodeTree;
         String jsonAsYaml = null;
@@ -131,7 +149,7 @@ public class SolaceAdminApis {
                                          String apiProductName, String apiNameForRegistration) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost request = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         //setRequestBody
         org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName, apiNameForRegistration);
@@ -160,7 +178,7 @@ public class SolaceAdminApis {
     public HttpResponse registeredAPIGet(String organization, String apiTitle) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -179,7 +197,7 @@ public class SolaceAdminApis {
     public HttpResponse apiProductGet(String organization, String apiProductName) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -197,7 +215,7 @@ public class SolaceAdminApis {
     public HttpResponse developerGet(String organization) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -222,7 +240,7 @@ public class SolaceAdminApis {
         } else {
             request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID());
         }
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -244,7 +262,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         try {
@@ -278,7 +296,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         ArrayList<String> apiProducts = new ArrayList<>();
@@ -314,7 +332,7 @@ public class SolaceAdminApis {
     public HttpResponse createApplication(String organization, Application application, ArrayList<String> apiProducts) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost request = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
         StringEntity params = null;
@@ -338,7 +356,7 @@ public class SolaceAdminApis {
     public HttpResponse deleteApiProduct(String organization, String apiProductName) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -357,7 +375,7 @@ public class SolaceAdminApis {
     public HttpResponse deleteRegisteredAPI(String organization, String title) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/apis/" + title);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -379,7 +397,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = HttpClients.createDefault();
         HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);
         } catch (IOException e) {
@@ -399,7 +417,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForRenamingApp(application);
         StringEntity params = null;
@@ -425,7 +443,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey);
         StringEntity params = null;

@@ -193,7 +193,9 @@ public class EnvironmentMappingUtil {
 
         if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(thirdPartyEnvironment.getProvider())) {
 
-            SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(thirdPartyEnvironment.getServerURL(),
+                    thirdPartyEnvironment.getUserName(), thirdPartyEnvironment.getPassword(), thirdPartyEnvironment.
+                    getDeveloper());
             HttpResponse response = solaceAdminApis.environmentGET(
                     thirdPartyEnvironment.getOrganization(), thirdPartyEnvironment.getName());
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
