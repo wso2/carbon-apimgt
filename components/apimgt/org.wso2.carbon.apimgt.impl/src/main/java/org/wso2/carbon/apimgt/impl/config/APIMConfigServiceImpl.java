@@ -143,9 +143,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
             }
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
+
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
             if (!registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
@@ -209,9 +207,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 APIUtil.loadTenantRegistry(tenantId);
             }
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
@@ -220,9 +215,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                 resource.setMediaType(APIConstants.API_TENANT_CONF_MEDIA_TYPE);
                 registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
             }
-
         } catch (RegistryException | IOException e) {
-            throw new APIManagementException("Error while adding tenant config to registry for organization: "
+            throw new APIManagementException("Error while updating tenant config to registry for organization: "
                     + organization, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

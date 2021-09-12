@@ -3902,11 +3902,12 @@ public final class APIUtil {
         try {
             byte[] localTenantConfFileData = getLocalTenantConfFileData();
             String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
-            JSONParser parser = new JSONParser();
-            JSONObject tenantConfJson = (JSONObject) parser.parse(tenantConfDataStr);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jsonParser = new JsonParser();
+            JsonElement jsonElement = jsonParser.parse(tenantConfDataStr);
             ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
-                    tenantConfJson.toJSONString());
-        } catch (APIManagementException | IOException | ParseException e) {
+                    gson.toJson(jsonElement));
+        } catch (APIManagementException | IOException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
         }
     }
