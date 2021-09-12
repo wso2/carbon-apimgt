@@ -2654,7 +2654,7 @@ public final class APIUtil {
         // checking if Doc visibility levels enabled in api-manager.xml
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(
-                APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
     }
 
     /**
@@ -4931,6 +4931,7 @@ public final class APIUtil {
             throw new APIManagementException("Error while creating role: " + roleName, e);
         }
     }
+
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
 
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -6806,7 +6807,7 @@ public final class APIUtil {
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
-                            getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+                    getRegistryService().getGovernanceUserRegistry(userName, tenantId);
             if (registryType.resourceExists(resourceUrl)) {
                 apiDocResource = registryType.get(resourceUrl);
                 inStream = apiDocResource.getContentStream();
@@ -8018,6 +8019,7 @@ public final class APIUtil {
                         .getFirstProperty(APIConstants.PASS_REQUEST_PARAMS_TO_LAMBDA_FUNCTION);
         return Boolean.parseBoolean(isEnabled);
     }
+
     /**
      * Used to get access control allowed origins define in api-manager.xml
      *
@@ -8930,7 +8932,7 @@ public final class APIUtil {
         }
 
         return Caching.getCacheManager(
-                cacheManagerName).createCacheBuilder(cacheName).
+                        cacheManagerName).createCacheBuilder(cacheName).
                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                         modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
@@ -9273,7 +9275,7 @@ public final class APIUtil {
                 }
                 if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                     apiProduct.addProperty(propertyName.substring(
-                            APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                                    APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
                             productResource.getProperty(propertyName));
                 }
             }
@@ -9386,6 +9388,17 @@ public final class APIUtil {
             return oAuthConfiguration;
         }
 
+        return null;
+    }
+
+    public static String getMediationConfigurationFromAPIMConfig(String property) {
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        String mediatorConfiguration = apimConfig.getFirstProperty(APIConstants.MEDIATOR_CONFIG + property);
+        if (!StringUtils.isBlank(mediatorConfiguration)) {
+            return mediatorConfiguration;
+        }
         return null;
     }
 
@@ -10280,8 +10293,8 @@ public final class APIUtil {
     /**
      * Utility method to generate JWT header with public certificate thumbprint for signature verification.
      *
-     * @param publicCert            - The public certificate which needs to include in the header as thumbprint
-     * @param signatureAlgorithm    signature algorithm which needs to include in the header
+     * @param publicCert         - The public certificate which needs to include in the header as thumbprint
+     * @param signatureAlgorithm signature algorithm which needs to include in the header
      * @throws APIManagementException
      */
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws APIManagementException {
@@ -11868,9 +11881,9 @@ public final class APIUtil {
     }
 
     public static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity)
-                                    throws APIManagementException {
+            throws APIManagementException {
         String tenantDomain = MultitenantUtils
-                                        .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         if (APIUtil.isExposeEndpointPasswordEnabled(tenantDomain)) {
             return endpointSecurity;
         }
@@ -11878,11 +11891,11 @@ public final class APIUtil {
         endpointSecurityElement.putAll(endpointSecurity);
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
             JSONObject sandboxEndpointSecurity = (JSONObject) endpointSecurityElement
-                                            .get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    .get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
                 if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
-                                                .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                        .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
                     sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
                     sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
                 }
@@ -11890,11 +11903,11 @@ public final class APIUtil {
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
             JSONObject productionEndpointSecurity = (JSONObject) endpointSecurityElement
-                                            .get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    .get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
                 if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
-                                                .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                        .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
                     productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, "");
                     productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
                 }
@@ -11911,12 +11924,12 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static boolean isExposeEndpointPasswordEnabled(String tenantDomainName)
-                                    throws APIManagementException {
+            throws APIManagementException {
         org.json.simple.JSONObject apiTenantConfig;
         try {
             APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
             String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
-                                            APIConstants.API_TENANT_CONF_LOCATION);
+                    APIConstants.API_TENANT_CONF_LOCATION);
             if (content != null) {
                 JSONParser parser = new JSONParser();
                 apiTenantConfig = (org.json.simple.JSONObject) parser.parse(content);
@@ -11929,15 +11942,15 @@ public final class APIUtil {
             }
         } catch (UserStoreException e) {
             String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
-                                            "ExposeEndpointPassword config";
+                    "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
             String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
-                                            "ExposeEndpointPassword config";
+                    "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
             String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
-                                            "ExposeEndpointPassword config";
+                    "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         }
         return false;
@@ -12041,7 +12054,7 @@ public final class APIUtil {
         try {
             governanceSystemRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantID);
         } catch (RegistryException e) {
-            log.error("Error while retrieving tenant registry "+ tenantDomain, e);
+            log.error("Error while retrieving tenant registry " + tenantDomain, e);
             return null;
         }
         APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
@@ -12049,7 +12062,7 @@ public final class APIUtil {
         try {
             apiArtifact = getAPIArtifact(apiIdentifier, governanceSystemRegistry);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving API Artifact "+ tenantDomain, e);
+            log.error("Error while retrieving API Artifact " + tenantDomain, e);
             return null;
         }
         if (apiArtifact != null) {
@@ -12060,6 +12073,7 @@ public final class APIUtil {
 
     /**
      * Check whether the file type is supported.
+     *
      * @param filename
      * @return true if supported
      */
@@ -12080,7 +12094,7 @@ public final class APIUtil {
             String[] definedTypesArr = supportedTypes.trim().split("\\s*,\\s*");
             list = Arrays.asList(definedTypesArr);
         } else {
-            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md" };
+            String[] defaultType = {"pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md"};
             list = Arrays.asList(defaultType);
         }
         return list.contains(fileType.toLowerCase());

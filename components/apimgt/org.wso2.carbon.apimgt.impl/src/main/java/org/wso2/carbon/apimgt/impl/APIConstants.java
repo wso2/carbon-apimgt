@@ -460,6 +460,7 @@ public final class APIConstants {
     public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
     public static final String ENABLE_TENANT_BASED_JWT_SIGNING = "EnableTenantBasedSigning";
 
+    public static final String MEDIATOR_CONFIG = "MediatorConfigs.";
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -1294,12 +1295,14 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "grant_type=password";
         public static final String REFRESH_TOKEN_GRANT_TYPE = "grant_type=refresh_token";
 
+        public static final String OAUTH_MEDIATION_CONFIG = "OAuth.";
         public static final String ACCESS_TOKEN = "access_token";
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String SCOPE = "scope";
         public static final String TOKEN_TYPE = "token_type";
         public static final String EXPIRES_IN = "expires_in";
         public static final String EXPIRES_IN_CONFIG = "ExpiresIn";
+
 
         // Properties in Endpoint Config
         public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
