@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.impl.config;
 
 import org.apache.commons.io.IOUtils;
@@ -24,7 +41,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 
 /**
- *
+ * Config Service Implementation for retrieve configurations.
  */
 public class APIMConfigServiceImpl implements APIMConfigService {
 
@@ -70,7 +87,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public void updateExternalStoreConfig(String organization, String externalStoreConfig) throws APIManagementException {
+    public void updateExternalStoreConfig(String organization, String externalStoreConfig)
+            throws APIManagementException {
 
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -172,9 +190,6 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization, true);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
                 APIUtil.loadTenantRegistry(tenantId);
             }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -406,7 +421,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                                 getTenantUserRealm(tenantId).getAuthorizationManager();
                 String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                         APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                + APIConstants.GA_CONFIGURATION_LOCATION);
                 authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
             }
         } catch (RegistryException | IOException | UserStoreException e) {
@@ -450,7 +466,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public void updateSelfSighupConfig(String organization, String signUpConfig) throws APIManagementException {
+    public void updateSelfSighupConfig(String organization, String selfSignUpConfig) throws APIManagementException {
 
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -465,7 +481,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-                byte[] data = IOUtils.toByteArray(new StringReader(signUpConfig));
+                byte[] data = IOUtils.toByteArray(new StringReader(selfSignUpConfig));
                 Resource resource = registry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
                 resource.setContent(data);
                 resource.setMediaType(APIConstants.SELF_SIGN_UP_CONFIG_MEDIA_TYPE);
@@ -481,7 +497,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
-    public void addSelfSighupConfig(String organization, String signUpConfig) throws APIManagementException {
+    public void addSelfSighupConfig(String organization, String selfSignUpConfig) throws APIManagementException {
 
         if (organization == null) {
             organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -496,7 +512,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (!registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-                byte[] data = IOUtils.toByteArray(new StringReader(signUpConfig));
+                byte[] data = IOUtils.toByteArray(new StringReader(selfSignUpConfig));
                 Resource resource = registry.newResource();
                 resource.setContent(data);
                 resource.setMediaType(APIConstants.SELF_SIGN_UP_CONFIG_MEDIA_TYPE);
