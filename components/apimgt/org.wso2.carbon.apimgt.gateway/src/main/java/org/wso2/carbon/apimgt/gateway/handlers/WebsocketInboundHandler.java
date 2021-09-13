@@ -319,9 +319,17 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
+                    AuthenticationContext authenticationContext = null;
+                    JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
+                    if (APIConstants.GRAPHQL_API.equals(electedAPI.getApiType())) {
+                        authenticationContext = jwtValidator.
+                                authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version,
+                                        matchingResource);
+                    } else {
+                        authenticationContext = jwtValidator.
+                                authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
+                    }
 
-                    AuthenticationContext authenticationContext = new JWTValidator(new APIKeyValidator(), tenantDomain).
-                            authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
                     if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }
@@ -390,6 +398,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         apiPropertiesMap.put(RESTConstants.PROCESSED_API, api);
         apiPropertiesMap.put(RESTConstants.REST_API_CONTEXT, apiContext);
         apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)){
+            apiPropertiesMap.put(APIMgtGatewayConstants.API_OBJECT, electedAPI);
+            apiPropertiesMap.put(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST, true);
+        }
         ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
