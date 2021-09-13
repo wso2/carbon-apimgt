@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -254,7 +253,7 @@ public class APIAdminImpl implements APIAdmin {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }

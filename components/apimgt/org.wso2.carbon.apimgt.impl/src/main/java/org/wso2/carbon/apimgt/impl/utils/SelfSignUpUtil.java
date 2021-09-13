@@ -18,18 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -54,14 +42,20 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class contains the utility methods used for self signup
@@ -91,32 +85,8 @@ public final class SelfSignUpUtil {
 	 */
 	public static UserRegistrationConfigDTO getSignupConfiguration(String tenantDomain)
 			throws APIManagementException {
-		UserRegistrationConfigDTO config = null;
-		String currentFlowDomain =
-				PrivilegedCarbonContext.getThreadLocalCarbonContext()
-				.getTenantDomain();
-		boolean isTenantFlowStarted = false;
-		try {
 
-			/* start the correct tenant flow to load the tenant's registry*/
-			if (tenantDomain != null &&
-					!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-				if (!currentFlowDomain.equals(tenantDomain)) {
-					/* if the current flow is not the one related to the domain */
-					isTenantFlowStarted = true;
-					PrivilegedCarbonContext.startTenantFlow();
-					PrivilegedCarbonContext.getThreadLocalCarbonContext()
-					.setTenantDomain(tenantDomain, true);
-				}
-			}
-			config = getSignupConfigurationFromRegistry(tenantDomain);
-		} finally {
-			if (isTenantFlowStarted) {
-				PrivilegedCarbonContext.endTenantFlow();
-			}
-		}	
-
-		return config;
+		return getSignupConfigurationFromRegistry(tenantDomain);
 	}
 
 	/**
@@ -126,64 +96,42 @@ public final class SelfSignUpUtil {
 	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
 	 */
-    private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
-                                                                                      throws APIManagementException {
+	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
+			throws APIManagementException {
 
-        UserRegistrationConfigDTO config = null;
+		UserRegistrationConfigDTO config;
 
-        try {
-
-            int tenantId =
-                           ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                 .getTenantId(tenantDomain);
-            APIUtil.loadTenantRegistry(tenantId);
-            Registry registry =
-                                (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                                                  .getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-            if (registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-                Resource resource = registry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                config = new UserRegistrationConfigDTO();
-                
-                
-                config.setSignUpDomain(element.getFirstChildWithName(
-                                                      new QName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM)).getText());
-                config.setAdminUserName(APIUtil.replaceSystemProperty(
-                                                      element.getFirstChildWithName(new QName(
-                                                                APIConstants.SELF_SIGN_UP_REG_USERNAME)).getText()));
-
-                String encryptedPassword = element
-                        .getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_PASSWORD)).getText();
-                PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
-                String resovledPassword = passwordResolver.getPassword(encryptedPassword);
-                config.setAdminPassword(APIUtil.replaceSystemProperty(resovledPassword));
-                config.setSignUpEnabled(Boolean.parseBoolean(element.getFirstChildWithName(
-                                                      new QName(APIConstants.SELF_SIGN_UP_REG_ENABLED)).getText()));
-                
-                OMElement rolesElement = element.getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM));
-                
-                Iterator roleListIterator = rolesElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM);
-                
-                while (roleListIterator.hasNext()) {
-                    OMElement roleElement = (OMElement) roleListIterator.next();
-                    String tmpRole = roleElement.getFirstChildWithName(
-                                                 new QName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)).getText();
-                    boolean tmpIsExternal = Boolean.parseBoolean(roleElement.getFirstChildWithName(
-                                                 new QName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL)).getText());
-                    config.getRoles().put(tmpRole, tmpIsExternal);
-                }
+		try {
+			String selfSighupConfig =
+					ServiceReferenceHolder.getInstance().getApimConfigService().getSelfSighupConfig(tenantDomain);
+			OMElement element = AXIOMUtil.stringToOM(selfSighupConfig);
+			config = new UserRegistrationConfigDTO();
+			config.setSignUpDomain(element.getFirstChildWithName(
+					new QName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM)).getText());
+			config.setAdminUserName(APIUtil.replaceSystemProperty(
+					element.getFirstChildWithName(new QName(
+							APIConstants.SELF_SIGN_UP_REG_USERNAME)).getText()));
+			String encryptedPassword = element
+					.getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_PASSWORD)).getText();
+			PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+			String resovledPassword = passwordResolver.getPassword(encryptedPassword);
+			config.setAdminPassword(APIUtil.replaceSystemProperty(resovledPassword));
+			config.setSignUpEnabled(Boolean.parseBoolean(element.getFirstChildWithName(
+					new QName(APIConstants.SELF_SIGN_UP_REG_ENABLED)).getText()));
+			OMElement rolesElement =
+					element.getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_ROLES_ELEM));
+			Iterator roleListIterator = rolesElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM);
+			while (roleListIterator.hasNext()) {
+				OMElement roleElement = (OMElement) roleListIterator.next();
+				String tmpRole = roleElement.getFirstChildWithName(
+						new QName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)).getText();
+				boolean tmpIsExternal = Boolean.parseBoolean(roleElement.getFirstChildWithName(
+						new QName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL)).getText());
+				config.getRoles().put(tmpRole, tmpIsExternal);
 			}
-		} catch (RegistryException e) {
-			throw new APIManagementException("Error while reading registry " +
-					APIConstants.SELF_SIGN_UP_CONFIG_LOCATION, e);
 		} catch (XMLStreamException e) {
-		    throw new APIManagementException("Error while parsing configuration " +
-                    APIConstants.SELF_SIGN_UP_CONFIG_LOCATION, e);
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error in retrieving Tenant Information while reading SignUp "
-                                             + "configuration", e);
-        }
+			throw new APIManagementException("Error while parsing configuration ", e);
+		}
 		return config;
 	}
 

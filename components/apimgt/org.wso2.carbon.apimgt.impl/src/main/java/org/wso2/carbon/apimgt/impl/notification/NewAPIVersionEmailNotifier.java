@@ -265,7 +265,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
      */
     protected ClaimsRetriever getClaimsRetriever(String claimsRetrieverImplClass)
             throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        return (ClaimsRetriever) APIUtil.getClassForName(claimsRetrieverImplClass).newInstance();
+        return (ClaimsRetriever) APIUtil.getClassInstance(claimsRetrieverImplClass);
     }
 
     /**

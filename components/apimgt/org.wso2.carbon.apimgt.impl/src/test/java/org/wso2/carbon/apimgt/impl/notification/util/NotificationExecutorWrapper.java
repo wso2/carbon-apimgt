@@ -26,8 +26,4 @@ public class NotificationExecutorWrapper extends NotificationExecutor {
         this.registry = registry;
     }
 
-    @Override
-    protected Registry getRegistry(int tenantId) {
-        return registry;
-    }
 }

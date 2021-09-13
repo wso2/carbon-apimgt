@@ -18,8 +18,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -49,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -76,7 +75,6 @@ import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
-import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -108,9 +106,7 @@ import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.api.AuthorizationManager;
-import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -171,15 +167,14 @@ public class APIManagerComponent {
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
-            addTierPolicies();
             addApplicationsPermissionsToRegistry();
-            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
-            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
+            APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            APIUtil.loadAndSyncTenantConf(tenantId);
-            APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            APIUtil.loadAndSyncTenantConf(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            APIUtil.loadTenantWorkFlowExtensions(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             // load self sigup configuration to the registry
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
+            APIUtil.loadTenantSelfSignUpConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
@@ -188,8 +183,6 @@ public class APIManagerComponent {
             }
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
-            SignupObserver signupObserver = new SignupObserver();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
             KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
@@ -492,50 +485,6 @@ public class APIManagerComponent {
         }
     }
 
-    private void addTierPolicies() throws APIManagementException {
-        String apiTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
-        String appTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
-        String resTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
-        addTierPolicy(APIConstants.API_TIER_LOCATION, apiTierFilePath);
-        addTierPolicy(APIConstants.APP_TIER_LOCATION, appTierFilePath);
-        addTierPolicy(APIConstants.RES_TIER_LOCATION, resTierFilePath);
-    }
-
-    private void addTierPolicy(String tierLocation, String defaultTierFileName) throws APIManagementException {
-        File defaultTiers = new File(defaultTierFileName);
-        if (!defaultTiers.exists()) {
-            log.info("Default tier policies not found in : " + defaultTierFileName);
-            return;
-        }
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        InputStream inputStream = null;
-        try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(tierLocation)) {
-                log.debug("Tier policies already uploaded to the registry");
-                return;
-            }
-            log.debug("Adding API tier policies to the registry");
-            inputStream = FileUtils.openInputStream(defaultTiers);
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = registry.newResource();
-            resource.setContent(data);
-            registry.put(tierLocation, resource);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving policy information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading policy file content", e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    log.error("Error when closing input stream", e);
-                }
-            }
-        }
-    }
-
     private void addDefinedSequencesToRegistry() throws APIManagementException {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -546,59 +495,6 @@ public class APIManagerComponent {
             APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving defined sequences to the registry ", e);
-        }
-    }
-
-    private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
-        boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
-        if (!enabled) {
-            return;
-        }
-        String role = config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
-        if (role == null) {
-            // Required parameter missing - Throw an exception and interrupt startup
-            throw new APIManagementException("Required subscriber role parameter missing " + "in the self sign up configuration");
-        }
-        try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserRealm realm = realmService.getBootstrapRealm();
-            UserStoreManager manager = realm.getUserStoreManager();
-            if (!manager.isExistingRole(role)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating subscriber role: " + role);
-                }
-                Permission[] subscriberPermissions = new Permission[] { new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION), new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
-                String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
-                String[] userList = new String[] { superTenantName };
-                manager.addRole(role, userList, subscriberPermissions);
-            }
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating subscriber role: " + role + " - " + "Self registration might not function properly.", e);
-        }
-    }
-
-    /**
-     * Add the External API Stores Configuration to registry
-     * @throws APIManagementException
-     */
-    private void addExternalStoresConfigs() throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                log.debug("External Stores configuration already uploaded to the registry");
-                return;
-            }
-            log.debug("Adding External Stores configuration to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/externalstores/default-external-api-stores.xml");
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = registry.newResource();
-            resource.setContent(data);
-            registry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading External Stores configuration file content", e);
         }
     }
 
@@ -1033,6 +929,19 @@ public class APIManagerComponent {
 
     protected void unsetEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
         ServiceReferenceHolder.getInstance().setEventPublisherFactory(null);
+    }
+    @Reference(
+            name = "apim.config.service",
+            service = org.wso2.carbon.apimgt.impl.config.APIMConfigService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMConfigService")
+    protected void setAPIMConfigService(APIMConfigService apimConfigService) {
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(apimConfigService);
+    }
+
+    protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
+        ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
     }
 }
 
