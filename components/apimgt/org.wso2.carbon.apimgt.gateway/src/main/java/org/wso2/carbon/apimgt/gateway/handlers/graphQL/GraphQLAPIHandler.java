@@ -97,6 +97,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
+            if (axis2MC.getIncomingTransportName().equals("ws") &&
+                    (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
+                return true;
+            }
             String requestPath = messageContext.getProperty(REST_SUB_REQUEST_PATH).toString();
             if (requestPath != null && !requestPath.isEmpty()) {
                 String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().

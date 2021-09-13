@@ -34,6 +34,7 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -53,6 +54,12 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     private GraphQLSchema schema = null;
 
     public boolean handleRequest(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        if (axis2MC.getIncomingTransportName().equals("ws") &&
+                (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
+            return true;
+        }
         schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
         if (!analyseQuery(messageContext, payload)) {

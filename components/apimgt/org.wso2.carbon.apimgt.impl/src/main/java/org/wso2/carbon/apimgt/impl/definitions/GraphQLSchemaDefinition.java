@@ -102,6 +102,26 @@ public class GraphQLSchemaDefinition {
     }
 
     /**
+     * Ckeck subscription operation availability from given graphql schema
+     *
+     * @param schema graphQL Schema
+     * @return the boolean value of subscription operation availability
+     */
+    public boolean checkSubscriptionAvailability(String schema) {
+        boolean isSubscriptionAvailable = false;
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
+            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
+                isSubscriptionAvailable = true;
+                break;
+            }
+        }
+        return isSubscriptionAvailable;
+    }
+
+    /**
      * @param entry          Entry
      * @param operationArray operationArray
      */

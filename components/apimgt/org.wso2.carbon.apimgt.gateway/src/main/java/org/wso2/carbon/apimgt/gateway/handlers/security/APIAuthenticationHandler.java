@@ -426,6 +426,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
 
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        if (axis2MC.getIncomingTransportName().equals("ws") && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
+            AuthenticationContext authCtx = (AuthenticationContext) messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT);
+            return authCtx.isAuthenticated();
+        }
+
         for (Authenticator authenticator : authenticators) {
             authenticationResponse = authenticator.authenticate(messageContext);
             if (authenticationResponse.isMandatoryAuthentication()) {

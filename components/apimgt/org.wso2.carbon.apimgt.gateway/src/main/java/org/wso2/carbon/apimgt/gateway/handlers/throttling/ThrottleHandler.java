@@ -513,6 +513,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             return true;
         }
 
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        if (axis2MC.getIncomingTransportName().equals("ws") && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
+            return true;
+        }
+
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
                     "has not been initialised");
