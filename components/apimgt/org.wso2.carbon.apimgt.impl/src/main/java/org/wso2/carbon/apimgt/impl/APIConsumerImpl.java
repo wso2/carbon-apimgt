@@ -5339,7 +5339,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 searchResults.put("apis", resultAPIandProductSet);
             }
             searchResults.put("length",
-                    totalLength - (apiSetLengthWithVersionedApis - apiSetLengthWithoutVersionedApis));
+                    totalLength - (apiSetLengthWithVersionedApis - (apiSetLengthWithoutVersionedApis + apiProductSet
+                            .size())));
         }
         return searchResults;
     }
