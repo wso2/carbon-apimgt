@@ -143,10 +143,7 @@ public class ApplicationMappingUtil {
                                             if (containsMQTTProtocol) {
                                                 HttpResponse response2 = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "MQTT");
                                                 org.json.JSONObject permissionsObject2 = extractPermissionsFromSolaceApplicationGetResponse(
-                                                        response2,
-                                                        i,
-                                                        thirdPartyEnvironmentMap
-                                                );
+                                                        response2, i, thirdPartyEnvironmentMap);
                                                 if (permissionsObject2 != null) {
                                                     populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject2, "MQTT");
                                                 }

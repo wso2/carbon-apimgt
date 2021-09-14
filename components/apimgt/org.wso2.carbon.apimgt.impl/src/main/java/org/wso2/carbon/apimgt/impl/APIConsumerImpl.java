@@ -2745,10 +2745,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // get already subscribed APIs
         Subscriber subscriber = new Subscriber(username);
-        Set<SubscribedAPI> subscriptions;
-        List<SubscribedAPI> subscribedAPIList;
-        subscriptions = getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
-        subscribedAPIList = new ArrayList<>(subscriptions);
 
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
@@ -2962,9 +2958,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiUUId = api.getUuid();
             apiContext = api.getContext();
         }
-
-        // get already subscribed APIs
-        Subscriber subscriber = new Subscriber(username);
 
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
