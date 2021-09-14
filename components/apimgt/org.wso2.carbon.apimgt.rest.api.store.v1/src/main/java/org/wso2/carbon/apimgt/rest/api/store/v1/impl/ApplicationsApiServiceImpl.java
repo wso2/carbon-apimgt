@@ -443,8 +443,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
             } else if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-            RestApiUtil.handleResourceAlreadyExistsError("An application already exists with name "
-                    + body.getName(), e, log);
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "An application already exists with name " + body.getName(), e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }

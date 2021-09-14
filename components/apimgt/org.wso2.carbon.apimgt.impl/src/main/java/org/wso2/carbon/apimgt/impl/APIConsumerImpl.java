@@ -3580,7 +3580,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (!existingApp.getName().equals(application.getName())) {
             processedIds = application.getGroupId();
         } else {
-            processedIds = processGroupIds(existingApp.getGroupId(), application.getGroupId());
+            processedIds = getUpdatedGroupIds(existingApp.getGroupId(), application.getGroupId());
         }
 
         if (application.getGroupId() != null && APIUtil.isApplicationGroupCombinationExist(
@@ -3689,22 +3689,29 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
-    private String processGroupIds(String existing, String updated) {
-        if (updated == null || updated.isEmpty()) {
-            return updated;
+    /**
+     * Function to find newly added group Ids
+     * 
+     * @param existingGroupIds existing GroupIds
+     * @param updatedGroupIds updated GroupIds
+     * @return
+     */
+    private String getUpdatedGroupIds(String existingGroupIds, String updatedGroupIds) {
+        if (updatedGroupIds == null || updatedGroupIds.isEmpty()) {
+            return updatedGroupIds;
         }
 
-        Set<String> existingSet = new HashSet<>();
-        if (existing != null && !existing.isEmpty()) {
-            existingSet.addAll(Arrays.asList(existing.split(",")));
+        Set<String> existingGroupIdSet = new HashSet<>();
+        if (existingGroupIds != null && !existingGroupIds.isEmpty()) {
+            existingGroupIdSet.addAll(Arrays.asList(existingGroupIds.split(",")));
         }
-        Set<String> updatedSet = new HashSet<>();
-        updatedSet.addAll(Arrays.asList(updated.split(",")));
+        Set<String> updatedGroupIdSet = new HashSet<>();
+        updatedGroupIdSet.addAll(Arrays.asList(updatedGroupIds.split(",")));
 
-        updatedSet.removeAll(existingSet);
+        updatedGroupIdSet.removeAll(existingGroupIdSet);
 
-        updated = String.join(",", updatedSet);
-        return updated;
+        updatedGroupIds = String.join(",", updatedGroupIdSet);
+        return updatedGroupIds;
     }
 
     /**
