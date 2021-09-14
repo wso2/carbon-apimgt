@@ -118,15 +118,18 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
                 event.getCallback(), event.getTopic(), event.getMode(), event.getSecret(), event.getExpiryTime(),
                 event.getSubscriberName(), event.getApplicationTier(), event.getTier(), event.getApiTier(),
                 !isSuccess};
-        Event notificationMessage = new Event(APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID,
-                System.currentTimeMillis(), null, null, objects);
-        NotificationUtil.publishEventToStreamService(notificationMessage);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully sent the webhooks subscription notification on realtime");
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            EventPublisherEvent asyncWebhooksEvent = new EventPublisherEvent(
+                    APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID, System.currentTimeMillis(), null, null, objects);
+            APIUtil.publishEvent(EventPublisherType.ASYNC_WEBHOOKS, asyncWebhooksEvent, asyncWebhooksEvent.toString());
+        } else {
+            Event notificationMessage = new Event(APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID,
+                    System.currentTimeMillis(), null, null, objects);
+            NotificationUtil.publishEventToStreamService(notificationMessage);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully sent the webhooks subscription notification on realtime");
+            }
         }
-        EventPublisherEvent asyncWebhooksEvent = new EventPublisherEvent(
-                APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID, System.currentTimeMillis(), null, null, objects);
-        APIUtil.publishEvent(EventPublisherType.ASYNC_WEBHOOKS, asyncWebhooksEvent, asyncWebhooksEvent.toString());
     }
 
     /**

@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.databridge.commons.Event;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import javax.cache.CacheEntryInfo;
@@ -68,14 +67,18 @@ public class APIMgtCacheInvalidationRequestSender implements CacheEntryRemovedLi
                         constructCacheKeyString(cacheInfo.getCacheKey()), cacheInfo.getTenantDomain(),
                         cacheInfo.getTenantId(),
                         cacheInvalidationConfiguration.getDomain(), DataHolder.getNodeId()};
-                Event cacheInvalidationMessage =
-                        new Event(cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null,
-                                objects);
-                APIUtil.publishEventToEventHub(Collections.emptyMap(), cacheInvalidationMessage);
-                EventPublisherEvent globalCacheInvalidationEvent = new EventPublisherEvent(
-                        cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null, objects);
-                APIUtil.publishEvent(EventPublisherType.GLOBAL_CACHE_INVALIDATION, globalCacheInvalidationEvent,
-                        Arrays.toString(globalCacheInvalidationEvent.getPayloadData()));
+                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+                    EventPublisherEvent globalCacheInvalidationEvent = new EventPublisherEvent(
+                            cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null,
+                            objects);
+                    APIUtil.publishEvent(EventPublisherType.GLOBAL_CACHE_INVALIDATION, globalCacheInvalidationEvent,
+                            globalCacheInvalidationEvent.toString());
+                } else {
+                    Event cacheInvalidationMessage =
+                            new Event(cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null,
+                                    null, objects);
+                    APIUtil.publishEventToEventHub(Collections.emptyMap(), cacheInvalidationMessage);
+                }
             }
         }
     }

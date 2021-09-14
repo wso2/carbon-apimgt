@@ -57,7 +57,6 @@ public class APIAuthenticationAdminClient {
         log.debug("Sending Resource Invalidation Message");
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
-        APIUtil.publishEventToEventHub(null, event);
         publishEvent(event);
     }
 
@@ -73,7 +72,6 @@ public class APIAuthenticationAdminClient {
                 StringEscapeUtils.escapeJava(tokenArray.toJSONString())};
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
-        APIUtil.publishEventToEventHub(null, event);
         publishEvent(event);
     }
 
@@ -100,7 +98,6 @@ public class APIAuthenticationAdminClient {
                 StringEscapeUtils.escapeJava(userArray.toJSONString())};
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
-        APIUtil.publishEventToEventHub(null, event);
         publishEvent(event);
     }
 
@@ -111,9 +108,13 @@ public class APIAuthenticationAdminClient {
      */
     private void publishEvent(Event event) {
 
-        EventPublisherEvent cacheInvalidationEvent = new EventPublisherEvent(event.getStreamId(),
-                event.getTimeStamp(), event.getMetaData(), event.getCorrelationData(), event.getPayloadData());
-        APIUtil.publishEvent(EventPublisherType.CACHE_INVALIDATION, cacheInvalidationEvent,
-                Arrays.toString(cacheInvalidationEvent.getPayloadData()));
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            EventPublisherEvent cacheInvalidationEvent = new EventPublisherEvent(event.getStreamId(),
+                    event.getTimeStamp(), event.getMetaData(), event.getCorrelationData(), event.getPayloadData());
+            APIUtil.publishEvent(EventPublisherType.CACHE_INVALIDATION, cacheInvalidationEvent,
+                    cacheInvalidationEvent.toString());
+        } else {
+            APIUtil.publishEventToEventHub(null, event);
+        }
     }
 }

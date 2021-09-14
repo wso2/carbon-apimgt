@@ -72,14 +72,17 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
         Object[] objects =
                 new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
-        Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
-                null, null, objects);
-        NotificationUtil.publishEventToStreamService(tokenRevocationMessage);
-        log.debug("Successfully sent the revoked token notification on realtime");
-        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(APIConstants.TOKEN_REVOCATION_STREAM_ID,
-                System.currentTimeMillis(), null, null, objects);
-        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOCATION, tokenRevocationEvent,
-                tokenRevocationEvent.toString());
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(APIConstants.TOKEN_REVOCATION_STREAM_ID,
+                    System.currentTimeMillis(), null, null, objects);
+            APIUtil.publishEvent(EventPublisherType.TOKEN_REVOCATION, tokenRevocationEvent,
+                    tokenRevocationEvent.toString());
+        } else {
+            Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID,
+                    System.currentTimeMillis(), null, null, objects);
+            NotificationUtil.publishEventToStreamService(tokenRevocationMessage);
+            log.debug("Successfully sent the revoked token notification on realtime");
+        }
     }
 
     /**
