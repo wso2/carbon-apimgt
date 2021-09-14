@@ -1726,7 +1726,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API tags";
             throw new APIManagementException(msg, e);
-        } 
+        }
         return tagSet;
     }
 
@@ -3668,7 +3668,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-        
+
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, tenantDomain,
@@ -3924,8 +3924,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             tenantDomain = MultitenantUtils.getTenantDomain(userId);
         } else {
             int tenantId = APIUtil.getInternalOrganizationId(tenantDomain);
-            
-            // To handle choreo scenario. 
+
+            // To handle choreo scenario.
             if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
                 tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
@@ -5238,6 +5238,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             apiSet = (ArrayList<Object>) apiObj;
         }
+        int apiSetLengthWithVersionedApis = apiSet.size(); // Store the length of the APIs list with the versioned APIs
+        int totalLength = Integer.parseInt(searchResults.get("length").toString());
 
         //filter store results if displayMultipleVersions is set to false
         Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
@@ -5302,6 +5304,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
             }
+
+            // Store the length of the APIs list without the versioned APIs
+            int apiSetLengthWithoutVersionedApis = tempApiSet.size();
+
             apiSet = tempApiSet;
             ArrayList<Object> resultAPIandProductSet = new ArrayList<>();
             resultAPIandProductSet.addAll(apiSet);
@@ -5313,6 +5319,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 searchResults.put("apis", resultAPIandProductSet);
             }
+            searchResults.put("length",
+                    totalLength - (apiSetLengthWithVersionedApis - (apiSetLengthWithoutVersionedApis + apiProductSet
+                            .size())));
         }
         return searchResults;
     }
