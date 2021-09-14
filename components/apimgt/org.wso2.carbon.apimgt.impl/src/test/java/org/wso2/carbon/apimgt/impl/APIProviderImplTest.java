@@ -934,21 +934,7 @@ public class APIProviderImplTest {
         assertEquals(configuredClaims.split(",").length, subscriberClaims.size());
     }
 
-    @Test
-    public void testAddTier() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        Tier tier = new Tier("testTier");
-        tier.setDescription("testDescription");
-        tier.setTierPlan("testPlan");
 
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
-        tierMap.put("tier", tier);
-        PowerMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
-        Resource resource = new ResourceImpl();
-        Mockito.when(apiProvider.registry.newResource()).thenReturn(resource);
-        apiProvider.addTier(tier);
-        Mockito.verify(apiProvider.registry);
-    }
 
     @Test
     public void testGetExternalWorkflowReferenceId() throws APIManagementException {
@@ -1055,37 +1041,6 @@ public class APIProviderImplTest {
                 apiProvider.username, "testTerm", APIConstants.PUBLISHER_CLIENT)).thenReturn(apiMap);
         assertEquals(apiMap, apiProvider.searchAPIsByDoc("testTerm", "testType"));
     }
-
-
-    @Test
-    public void testRemoveTier() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        Tier tier = new Tier("testTier");
-        tier.setDescription("testDescription");
-        tier.setTierPlan("testPlan");
-
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
-        tierMap.put("tier", tier);
-        PowerMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
-        Resource resource = new ResourceImpl();
-        Mockito.when(apiProvider.registry.newResource()).thenReturn(resource);
-
-        PowerMockito.when(APIUtil.getArtifactManager(apiProvider.registry, APIConstants.API_KEY)).
-                thenReturn(artifactManager);
-        GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
-        GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
-        GenericArtifact[] genericArtifacts = new GenericArtifact[]{genericArtifact1, genericArtifact2};
-        Mockito.when(artifactManager.findGovernanceArtifacts(Mockito.anyString()))
-                .thenReturn(null, genericArtifacts);
-        apiProvider.removeTier(tier);
-        try {
-            apiProvider.removeTier(tier);
-        } catch (APIManagementException e) {
-            assertEquals("Unable to remove this tier. Tier in use", e.getMessage());
-        }
-        Mockito.verify(apiProvider.registry);
-    }
-
 
     @Test
     public void testRemoveDocumentation() throws APIManagementException, RegistryException {
@@ -1416,8 +1371,6 @@ public class APIProviderImplTest {
 
         prepareForGetAPIsByProvider(artifactManager, apiProvider, "admin", api1, api2);
         PowerMockito.when(registryService.getConfigSystemRegistry(-1)).thenReturn(configRegistry);
-        PowerMockito.when(configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        PowerMockito.when(configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
         Mockito.when(resource.getContent()).thenReturn(getTenantConfigContent());
         PowerMockito.when(tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED)).thenReturn("true");
         PowerMockito.when(tenantConfig.get(APIConstants.EXTENSION_HANDLER_POSITION)).thenReturn("bottom");
@@ -1621,13 +1574,6 @@ public class APIProviderImplTest {
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
         PowerMockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
-
-        PowerMockito.when(registryService.getConfigSystemRegistry(-1234)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Resource tenantConfResource = Mockito.mock(Resource.class);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(tenantConfResource);
-        Mockito.when(tenantConfResource.getContent()).thenReturn(getTenantConfigContent());
-
     }
 
     @Ignore
@@ -1774,9 +1720,6 @@ public class APIProviderImplTest {
         ServiceReferenceHolder sh = TestUtils.getServiceReferenceHolder();
         RegistryService registryService = Mockito.mock(RegistryService.class);
         PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
-        UserRegistry systemReg = Mockito.mock(UserRegistry.class);
-        PowerMockito.when(registryService.getConfigSystemRegistry(-1234)).thenReturn(systemReg);
-        Mockito.when(systemReg.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(false);
         PowerMockito.when(apiPersistenceInstance.getPublisherAPI(any(Organization.class), any(String.class)))
         .thenReturn(publisherAPI);
         //apiProvider.createNewAPIVersion(api, newVersion);
@@ -3707,11 +3650,8 @@ public class APIProviderImplTest {
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-        Mockito.when(resource.getContent()).thenReturn(jsonObject);
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(tenantId)).thenReturn(jsonObject);
+        Mockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(superTenantDomain)).thenReturn(jsonObject);
 
         // Pass the mock values to the method call
         JSONObject jsonObject1 = apiProvider.getSecurityAuditAttributesFromConfig("admin");
@@ -3785,12 +3725,8 @@ public class APIProviderImplTest {
         Resource resource = Mockito.mock(Resource.class);
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-        Mockito.when(resource.getContent()).thenReturn(jsonObject);
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(tenantId)).thenReturn(jsonObject);
+        Mockito.when(APIUtil.getSecurityAuditAttributesFromRegistry(superTenantDomain)).thenReturn(jsonObject);
 
         // Test the object to be returned when overrideGlobal is true
         JSONObject jsonObject1 = apiProvider.getSecurityAuditAttributesFromConfig("admin");

@@ -46,14 +46,11 @@ public class GAConfigMediaTypeHandler extends Handler {
 
         // Local entry is updated only if the content of ga-config is updated
         Object content = resource.getContent();
-        String resourceContent;
-        if (content instanceof String) {
-            resourceContent = (String) content;
-        } else if (content instanceof byte[]) {
-            resourceContent = RegistryUtils.decodeBytes((byte[]) content);
-        } else {
-            log.warn("The resource content is not of expected type");
-            return;
+        if (!(content instanceof String)) {
+            if (!(content instanceof byte[])) {
+                log.warn("The resource content is not of expected type");
+                return;
+            }
         }
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -62,15 +59,6 @@ public class GAConfigMediaTypeHandler extends Handler {
                 new GoogleAnalyticsConfigEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.GA_CONFIG_UPDATE.toString(), tenantId, tenantDomain);
         APIUtil.sendNotification(googleAnalyticsConfigEvent, APIConstants.NotifierType.GA_CONFIG.name());
-    }
-
-    private APIManagerConfiguration getAPIManagerConfig() {
-        APIManagerConfigurationService apiManagerConfigurationService = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService();
-        if (apiManagerConfigurationService == null) {
-            return null;
-        }
-        return apiManagerConfigurationService.getAPIManagerConfiguration();
     }
 
 }

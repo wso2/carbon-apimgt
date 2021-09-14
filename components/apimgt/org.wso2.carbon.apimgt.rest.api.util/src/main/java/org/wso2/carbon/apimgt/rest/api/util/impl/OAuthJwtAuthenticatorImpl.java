@@ -66,11 +66,11 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
-    private java.util.Map<String, String> audiencesList;
+    private java.util.Map<String, List<String>> audiencesMap;
 
     public OAuthJwtAuthenticatorImpl() {
         tokenIssuers = getTokenIssuers();
-        audiencesList = getRestApiJWTAuthAudiences();
+        audiencesMap = getRestApiJWTAuthAudiences();
     }
 
     /**
@@ -220,10 +220,11 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
         if (StringUtils.isNotEmpty(issuer)) {
             //validate Issuer
-            List<String> audiences = signedJWTInfo.getJwtClaimsSet().getAudience();
+            List<String> tokenAudiences = signedJWTInfo.getJwtClaimsSet().getAudience();
             if (tokenIssuers != null && tokenIssuers.containsKey(issuer)) {
                 //validate audience
-                if (audiencesList != null && audiences.contains(audiencesList.get(basePath.getPath()))) {
+                if (audiencesMap != null && audiencesMap.get(basePath.getPath()) != null &&
+                        tokenAudiences.stream().anyMatch(audiencesMap.get(basePath.getPath())::contains)) {
                     if (isRESTApiTokenCacheEnabled) {
                         JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getRESTAPITokenCache().get(jti);
                         if (tempJWTValidationInfo != null) {
@@ -271,9 +272,18 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                                 + maskedToken);
                     }
                 } else {
-                    log.error("JWT token audience validation failed. Reason: Non of the aud present "
-                            + "in the JWT (" + signedJWTInfo.getJwtClaimsSet().getAudience().toString() +
-                            ") matches the intended audience. (" + audiencesList.values().toString() + ")");
+                    if (audiencesMap == null) {
+                        log.error("JWT token audience validation failed. Reason: No audiences registered " +
+                                "in the server");
+                    } else if (audiencesMap.get(basePath.getPath()) == null) {
+                        log.error("JWT token audience validation failed. Reason: No audiences registered " +
+                                "in the server for the base path (" + basePath.getPath() + ")");
+                    } else {
+                        log.error("JWT token audience validation failed. Reason: None of the aud present "
+                                + "in the JWT (" + tokenAudiences.toString() +
+                                ") matches the intended audience (" + audiencesMap.get(basePath.getPath())
+                                .toString() + ") for base path ( " + basePath.getPath() +  " ).");
+                    }
                     return null;
                 }
             } else {

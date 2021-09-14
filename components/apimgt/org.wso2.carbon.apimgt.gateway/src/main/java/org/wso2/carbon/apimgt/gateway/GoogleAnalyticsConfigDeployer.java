@@ -26,6 +26,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -83,6 +84,7 @@ public class GoogleAnalyticsConfigDeployer {
                 if (localEntryServiceProxy.localEntryExists(APIConstants.GA_CONF_KEY)) {
                     localEntryServiceProxy.deleteEntry(APIConstants.GA_CONF_KEY);
                 }
+                DataHolder.getInstance().addGoogleAnalyticsConfig(tenantDomain, resourceContent);
                 localEntryServiceProxy.addLocalEntry("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
                         + resourceContent + "</localEntry>");
             } catch (LocalEntryAdminException e) {

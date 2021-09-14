@@ -22,6 +22,8 @@ import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -66,6 +68,7 @@ public class ServiceReferenceHolder {
     private OrganizationResolver organizationResolver;
     private ResourceQuotaLimiter resourceQuotaLimiter;
     private EventPublisherFactory eventPublisherFactory;
+    private APIMConfigService apimConfigService;
 
     private ServiceReferenceHolder() {
 
@@ -305,5 +308,16 @@ public class ServiceReferenceHolder {
 
     public void setEventPublisherFactory(EventPublisherFactory eventPublisherFactory) {
         this.eventPublisherFactory = eventPublisherFactory;
+    }
+
+    public void setAPIMConfigService(APIMConfigService apimConfigService) {
+        this.apimConfigService = apimConfigService;
+    }
+
+    public APIMConfigService getApimConfigService() {
+        if (apimConfigService != null){
+            return apimConfigService;
+        }
+        return new APIMConfigServiceImpl();
     }
 }

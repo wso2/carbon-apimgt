@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -84,7 +83,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -158,7 +156,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -223,7 +220,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT(tenantUserName, tenantId);
-                APIUtil.loadTenantAPIPolicy(tenantUserName, tenantId);
 
                 //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
                 APIManagerConfiguration configuration = getAPIManagerConfiguration();
@@ -1725,7 +1721,7 @@ public abstract class AbstractAPIManager implements APIManager {
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
-                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(getTenantDomain(username))) {
                 // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
@@ -2010,7 +2006,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return Collections.emptySet();
     }
 
-    @Override
     public Set<Tier> getAllTiers() throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
@@ -2037,7 +2032,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return tiers;
     }
 
-    @Override
     public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());

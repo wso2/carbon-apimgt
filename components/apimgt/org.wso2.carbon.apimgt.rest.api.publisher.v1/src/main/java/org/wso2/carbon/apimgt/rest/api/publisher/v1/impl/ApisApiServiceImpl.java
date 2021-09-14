@@ -33,10 +33,7 @@ import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -47,7 +44,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -87,11 +83,9 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -144,9 +138,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMap
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
@@ -192,8 +184,6 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -220,6 +210,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
@@ -787,6 +779,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
             validateAPIExistence(apiId);
+
+            // validate sandbox and production endpoints
+            if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
+                    !PublisherCommonUtils.validateEndpoints(body)) {
+                throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                        ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
+
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
@@ -3295,11 +3295,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param inlineApiDefinition Swagger API definition String
      * @param messageContext CXF message context
      * @return API Import using OpenAPI definition response
+     * @throws APIManagementException when error occurs while importing the OpenAPI definition
      */
     @Override
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
-                                            MessageContext messageContext) {
+                                            MessageContext messageContext) throws APIManagementException {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
@@ -3313,6 +3314,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        // validate sandbox and production endpoints
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
+                !PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
+            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                    ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
         // Import the API and Definition
@@ -4246,7 +4254,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             HttpResponse response = client.execute(method);
             apiEndpointValidationResponseDTO.setStatusCode(response.getStatusLine().getStatusCode());
-            apiEndpointValidationResponseDTO.setStatusMessage(response.getStatusLine().getReasonPhrase());
+            apiEndpointValidationResponseDTO.setStatusMessage(HttpStatus.getStatusText(response.getStatusLine().getStatusCode()));
         } catch (UnknownHostException e) {
             log.error("UnknownHostException occurred while sending the HEAD request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError("Unknown Host");

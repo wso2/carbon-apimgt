@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.notification;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
@@ -52,6 +53,11 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
                 tokenRevocationEvent.getExpiryTime(), tokenRevocationEvent.getTenantId());
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(),
                 tokenRevocationEvent.getExpiryTime(), properties);
+
+        // Cleanup expired revoked tokens from db.
+        Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
+        Thread cleanupThread = new Thread(expiredJWTCleaner);
+        cleanupThread.start();
         return true;
     }
 }

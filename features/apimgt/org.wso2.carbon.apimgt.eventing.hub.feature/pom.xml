@@ -20,7 +20,7 @@
     <parent>
         <artifactId>apimgt-feature</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.0.322-SNAPSHOT</version>
+        <version>9.0.332-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,10 +32,6 @@
     <description>This feature contains the bundles required for event publishing to event hub</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.eventing</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.eventing.hub</artifactId>
@@ -65,9 +61,6 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.eventing:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.eventing.hub:${carbon.apimgt.version}
                                 </bundleDef>
                             </bundles>
@@ -77,5 +70,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
@@ -253,7 +253,7 @@ public class APIAdminImpl implements APIAdmin {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }
@@ -580,6 +580,10 @@ public class APIAdminImpl implements APIAdmin {
                     kmConfig.getTokenType())) {
                 try {
                     if (kmConfig.getExternalReferenceId() != null) {
+                        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                        if (log.isDebugEnabled()) {
+                            log.debug("Retrieving key manager reference IDP for tenant domain : " + tenantDomain);
+                        }
                         IdentityProviderManager.getInstance().deleteIdPByResourceId(kmConfig.getExternalReferenceId(),
                                         APIUtil.getInternalOrganizationDomain(organization));
                     }

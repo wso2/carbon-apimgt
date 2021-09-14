@@ -122,11 +122,10 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantRegistry(tenantId);
-            APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
-            APIUtil.loadTenantExternalStoreConfig(tenantId);
-            APIUtil.loadTenantWorkFlowExtensions(tenantId);
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-            APIUtil.loadTenantConf(tenantId);
+            APIUtil.loadTenantExternalStoreConfig(tenantDomain);
+            APIUtil.loadTenantWorkFlowExtensions(tenantDomain);
+            APIUtil.loadTenantSelfSignUpConfigurations(tenantDomain);
+            APIUtil.loadAndSyncTenantConf(tenantDomain);
 
         } catch (RegistryException e) {
             throw new APIManagementException("Error occured while loading registry for tenant '" + tenantDomain + "'");
