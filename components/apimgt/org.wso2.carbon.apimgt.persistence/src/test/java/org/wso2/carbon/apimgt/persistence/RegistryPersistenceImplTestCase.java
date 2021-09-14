@@ -137,8 +137,6 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(realmService.getTenantUserRealm(SUPER_TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
                 Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
-                Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(SUPER_TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(SUPER_TENANT_ID);
@@ -199,8 +197,6 @@ public class RegistryPersistenceImplTestCase {
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
-                Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
                 Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);
@@ -264,8 +260,6 @@ public class RegistryPersistenceImplTestCase {
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
-                Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
                 Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);

@@ -76,12 +76,6 @@ public final class APIConstants {
 
     public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
 
-    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
-
-    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
-
-    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
-
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
     public static final int TIER_API_TYPE = 0;
@@ -89,12 +83,6 @@ public final class APIConstants {
     public static final int TIER_RESOURCE_TYPE = 1;
 
     public static final int TIER_APPLICATION_TYPE = 2;
-
-    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
-
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
-
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 

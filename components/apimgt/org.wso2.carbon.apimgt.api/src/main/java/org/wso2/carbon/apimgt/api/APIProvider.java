@@ -235,8 +235,6 @@ public interface APIProvider extends APIManager {
      */
     Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
-    void addTier(Tier tier) throws APIManagementException;
-
     void addPolicy(Policy policy) throws APIManagementException;
 
     /**
@@ -339,10 +337,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void updatePolicy(Policy policy) throws APIManagementException;
-
-    void updateTier(Tier tier) throws APIManagementException;
-
-    void removeTier(Tier tier) throws APIManagementException;
 
     String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
 
