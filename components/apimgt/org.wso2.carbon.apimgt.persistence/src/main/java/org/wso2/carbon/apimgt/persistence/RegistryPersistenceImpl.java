@@ -3103,7 +3103,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                    RegistryPersistenceUtil.loadTenantAPIPolicy(null, tenantId);
                     holder.setTenantId(tenantId);
                     ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
                             .getRealmService().getTenantUserRealm(tenantId)));
@@ -3113,7 +3112,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                RegistryPersistenceUtil.loadTenantAPIPolicy(null, tenantId);
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);
@@ -3162,7 +3160,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                    RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
                     holder.setTenantId(tenantId);
                     ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
                             .getRealmService().getTenantUserRealm(tenantId)));
@@ -3173,7 +3170,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);

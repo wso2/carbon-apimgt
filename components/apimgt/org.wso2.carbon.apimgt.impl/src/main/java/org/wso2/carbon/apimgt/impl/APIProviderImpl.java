@@ -21,10 +21,8 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
-import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
@@ -105,8 +103,6 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
-import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
@@ -229,10 +225,8 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -586,101 +580,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return count;
     }
 
-    @Override
-    public void addTier(Tier tier) throws APIManagementException {
-        addOrUpdateTier(tier, false);
-    }
-
-    @Override
-    public void updateTier(Tier tier) throws APIManagementException {
-        addOrUpdateTier(tier, true);
-    }
-
-    private void addOrUpdateTier(Tier tier, boolean update) throws APIManagementException {
-        if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
-            throw new APIManagementException("Changes on the '" + APIConstants.UNLIMITED_TIER + "' " +
-                    "tier are not allowed");
-        }
-
-        Set<Tier> tiers = getAllTiers();
-        if (update && !tiers.contains(tier)) {
-            throw new APIManagementException("No tier exists by the name: " + tier.getName());
-        }
-
-        Set<Tier> finalTiers = new HashSet<Tier>();
-        for (Tier t : tiers) {
-            if (!t.getName().equals(tier.getName())) {
-                finalTiers.add(t);
-            }
-        }
-
-        invalidateTierCache();
-
-        finalTiers.add(tier);
-        saveTiers(finalTiers);
-    }
-
-    /**
-     * This method is to cleanup tier cache when update or deletion is performed
-     */
-    private void invalidateTierCache() {
-
-        try {
-            // Note that this call happens to store node in a distributed setup.
-            TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
-            tierCacheInvalidationClient.clearCaches(tenantDomain);
-
-            // Clear registry cache. Note that this call happens to gateway node in a distributed setup.
-            RegistryCacheInvalidationClient registryCacheInvalidationClient = new RegistryCacheInvalidationClient();
-            registryCacheInvalidationClient.clearTiersResourceCache(tenantDomain);
-        } catch (APIManagementException e) {
-            // This means that there is an exception when trying to clear the cache.
-            // But we should not break the flow in such scenarios.
-            // Hence we log the exception and continue to the flow
-            log.error("Error while invalidating the tier cache", e);
-        }
-    }
-
-    private void saveTiers(Collection<Tier> tiers) throws APIManagementException {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMElement root = fac.createOMElement(APIConstants.POLICY_ELEMENT);
-        OMElement assertion = fac.createOMElement(APIConstants.ASSERTION_ELEMENT);
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            Resource resource = registry.newResource();
-            for (Tier tier : tiers) {
-                // This is because we do not save the unlimited tier to the tiers.xml file.
-                if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
-                    continue;
-                }
-                // This is a new tier. Hence the policyContent will be null
-                if (tier.getPolicyContent() == null) {
-                    // This means we have to create the policy from scratch.
-                    assertion.addChild(createThrottlePolicy(tier));
-                } else {
-                    String policy = new String(tier.getPolicyContent(), Charset.defaultCharset());
-                    assertion.addChild(AXIOMUtil.stringToOM(policy));
-                }
-            }
-            root.addChild(assertion);
-            resource.setContent(root.toString());
-            registry.put(APIConstants.API_TIER_LOCATION, resource);
-        } catch (XMLStreamException e) {
-            handleException("Error while constructing tier policy file", e);
-        } catch (RegistryException e) {
-            handleException("Error while saving tier configurations to the registry", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
     private OMElement createThrottlePolicy(Tier tier) throws APIManagementException {
         OMElement throttlePolicy = null;
         String policy = APIConstants.THROTTLE_POLICY_TEMPLATE;
@@ -734,66 +633,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Invalid policy xml generated", e);
         }
         return throttlePolicy;
-    }
-
-    @Override
-    public void removeTier(Tier tier) throws APIManagementException {
-        if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
-            handleException("Changes on the '" + APIConstants.UNLIMITED_TIER + "' " +
-                    "tier are not allowed");
-        }
-
-        Set<Tier> tiers = getAllTiers();
-        // We need to see whether this used in any of the APIs
-        GenericArtifact[] tierArtifacts = null;
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            try {
-                if (artifactManager == null) {
-                    String errorMessage = "Failed to retrieve artifact manager when removing tier " + tier.getName();
-                    log.error(errorMessage);
-                    throw new APIManagementException(errorMessage);
-                }
-                // The search name pattern is this
-                // tier=Gold|| OR ||Gold||
-                String query = "tier=\"" + tier.getName() + "\\||\" \"\\||" + tier.getName() + "\\||\" \"\\||" + tier
-                        .getName() + '\"';
-                tierArtifacts = artifactManager.findGovernanceArtifacts(query);
-                if (tierArtifacts == null) {
-                    String errorMessage = "Tier artifact is null when removing tier " + tier.getName() + " by user : "
-                            + PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + " in domain : "
-                            + tenantDomain;
-                    log.error(errorMessage);
-                }
-            } catch (GovernanceException e) {
-                handleException("Unable to check the usage of the tier ", e);
-            }
-        } catch (APIManagementException e) {
-            handleException("Unable to delete the tier", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-        if (tierArtifacts != null && tierArtifacts.length > 0) {
-            // This means that there is at least one API that is using this tier. Hence we can not delete.
-            handleException("Unable to remove this tier. Tier in use");
-        }
-
-        if (tiers.remove(tier)) {
-            saveTiers(tiers);
-            invalidateTierCache();
-        } else {
-            handleException("No tier exists by the name: " + tier.getName());
-        }
     }
 
     /**

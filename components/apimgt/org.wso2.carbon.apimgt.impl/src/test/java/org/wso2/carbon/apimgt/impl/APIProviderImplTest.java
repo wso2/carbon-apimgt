@@ -934,21 +934,7 @@ public class APIProviderImplTest {
         assertEquals(configuredClaims.split(",").length, subscriberClaims.size());
     }
 
-    @Test
-    public void testAddTier() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        Tier tier = new Tier("testTier");
-        tier.setDescription("testDescription");
-        tier.setTierPlan("testPlan");
 
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
-        tierMap.put("tier", tier);
-        PowerMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
-        Resource resource = new ResourceImpl();
-        Mockito.when(apiProvider.registry.newResource()).thenReturn(resource);
-        apiProvider.addTier(tier);
-        Mockito.verify(apiProvider.registry);
-    }
 
     @Test
     public void testGetExternalWorkflowReferenceId() throws APIManagementException {
@@ -1055,37 +1041,6 @@ public class APIProviderImplTest {
                 apiProvider.username, "testTerm", APIConstants.PUBLISHER_CLIENT)).thenReturn(apiMap);
         assertEquals(apiMap, apiProvider.searchAPIsByDoc("testTerm", "testType"));
     }
-
-
-    @Test
-    public void testRemoveTier() throws APIManagementException, RegistryException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
-        Tier tier = new Tier("testTier");
-        tier.setDescription("testDescription");
-        tier.setTierPlan("testPlan");
-
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
-        tierMap.put("tier", tier);
-        PowerMockito.when(APIUtil.getAllTiers()).thenReturn(tierMap);
-        Resource resource = new ResourceImpl();
-        Mockito.when(apiProvider.registry.newResource()).thenReturn(resource);
-
-        PowerMockito.when(APIUtil.getArtifactManager(apiProvider.registry, APIConstants.API_KEY)).
-                thenReturn(artifactManager);
-        GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
-        GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
-        GenericArtifact[] genericArtifacts = new GenericArtifact[]{genericArtifact1, genericArtifact2};
-        Mockito.when(artifactManager.findGovernanceArtifacts(Mockito.anyString()))
-                .thenReturn(null, genericArtifacts);
-        apiProvider.removeTier(tier);
-        try {
-            apiProvider.removeTier(tier);
-        } catch (APIManagementException e) {
-            assertEquals("Unable to remove this tier. Tier in use", e.getMessage());
-        }
-        Mockito.verify(apiProvider.registry);
-    }
-
 
     @Test
     public void testRemoveDocumentation() throws APIManagementException, RegistryException {
