@@ -22,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.databridge.commons.Event;
 
@@ -56,6 +58,7 @@ public class APIAuthenticationAdminClient {
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
+        publishEvent(event);
     }
 
     /**
@@ -71,6 +74,7 @@ public class APIAuthenticationAdminClient {
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
+        publishEvent(event);
     }
 
     /**
@@ -97,6 +101,19 @@ public class APIAuthenticationAdminClient {
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
+        publishEvent(event);
     }
 
+    /**
+     * Publishes events through event publisher
+     *
+     * @param event - The event to be published.
+     */
+    private void publishEvent(Event event) {
+
+        EventPublisherEvent cacheInvalidationEvent = new EventPublisherEvent(event.getStreamId(),
+                event.getTimeStamp(), event.getMetaData(), event.getCorrelationData(), event.getPayloadData());
+        APIUtil.publishEvent(EventPublisherType.CACHE_INVALIDATION, cacheInvalidationEvent,
+                Arrays.toString(cacheInvalidationEvent.getPayloadData()));
+    }
 }

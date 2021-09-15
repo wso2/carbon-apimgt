@@ -66,6 +66,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
+import org.wso2.carbon.apimgt.api.OrganizationResolver;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -1399,5 +1400,36 @@ public class RestApiUtil {
     
     public static String getOrganization(MessageContext ctx) {
         return (String) ctx.get(RestApiConstants.ORGANIZATION);
+    }
+
+    /**
+     * Method to extract the validated organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static String getValidatedOrganization(MessageContext ctx) throws APIManagementException{
+        String organization = (String) ctx.get(RestApiConstants.ORGANIZATION);
+        if (organization == null) {
+            throw new APIManagementException(
+                    "Organization is not found in the request", ExceptionCodes.ORGANIZATION_NOT_FOUND);
+        }
+        return organization;
+    }
+
+    /**
+     * Method to resolve the organization
+     * @param message Message
+     * @return organization
+     */
+
+    public static String resolveOrganization (Message message) throws APIManagementException{
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        // populate properties needed for the resolver.
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+        properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
+        properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+        String organization = resolver.resolve(properties);
+        return  organization;
     }
 }

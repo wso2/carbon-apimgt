@@ -235,8 +235,6 @@ public interface APIProvider extends APIManager {
      */
     Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
-    void addTier(Tier tier) throws APIManagementException;
-
     void addPolicy(Policy policy) throws APIManagementException;
 
     /**
@@ -339,10 +337,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void updatePolicy(Policy policy) throws APIManagementException;
-
-    void updateTier(Tier tier) throws APIManagementException;
-
-    void removeTier(Tier tier) throws APIManagementException;
 
     String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
 
@@ -1510,10 +1504,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Delete API
-     * @param api API to delete
+     * @param apiUuid API uuid to delete
+     * @param organization organization id of the deleting API
      * @throws APIManagementException
      */
-    void deleteAPI(API api) throws APIManagementException;
+    void deleteAPI(String apiUuid, String organization) throws APIManagementException;
     /**
      * Checks whether the given document already exists for the given api/product
      *
@@ -1683,6 +1678,17 @@ public interface APIProvider extends APIManager {
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
 
     /**
+     * Adds a new DeployedAPIRevision to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param deployedAPIRevisions List of DeployedAPIRevision objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void addDeployedAPIRevision(String apiId, String apiRevisionUUID, List<DeployedAPIRevision>
+            deployedAPIRevisions) throws APIManagementException;
+
+    /**
      * Update the displayOnDevportal field in an existing deployments of an API
      *
      * @param apiId API UUID
@@ -1815,4 +1821,6 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     String generateApiKey(String apiId) throws APIManagementException;
+
+    List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 }

@@ -42,7 +42,8 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Whether the Given Tenant already Exists", notes = "Using this operation, user can check whether a given tenant exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Tenants",  })
     @ApiResponses(value = { 
@@ -58,7 +59,8 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Tenants by State ", notes = "This operation is to get tenants by state ", response = TenantListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Tenants" })
     @ApiResponses(value = { 

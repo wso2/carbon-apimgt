@@ -145,17 +145,27 @@ public interface APIPersistence {
     void deleteAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
+     * Delete all APIs
+     *
+     * @param org   Organization the API is owned by
+     * @throws APIPersistenceException
+     */
+    void deleteAllAPIs(Organization org) throws APIPersistenceException;
+
+    /**
      * Search APIs to be displayed on Publisher API listing
      *
      * @param org         Organization the APIs are owned by
      * @param searchQuery search query
      * @param start       starting index
      * @param offset      offset to search
+     * @param sortBy      sort criteria
+     * @param sortOrder       sort order
      * @return Publisher API Search Result
      * @throws APIPersistenceException
      */
-    PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-                                    UserContext ctx) throws APIPersistenceException;
+    PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Dev Portal API listing

@@ -27,8 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -45,8 +43,6 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryService;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -62,8 +58,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateB
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -74,6 +68,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,7 +111,7 @@ public class TemplateBuilderUtil {
         } else {
             //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
             // in tenant registry
-            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.AUTHORIZATION_HEADER);
         }
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
@@ -194,7 +189,7 @@ public class TemplateBuilderUtil {
         }
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
         String removeHeaderFromOutMessage = APIUtil
-                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+                .getOAuthConfiguration(tenantDomain, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
         if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
             authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
         } else {
@@ -291,7 +286,7 @@ public class TemplateBuilderUtil {
         } else {
             //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
             // in tenant registry
-            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantDomain, APIConstants.AUTHORIZATION_HEADER);
         }
         if (!StringUtils.isBlank(authorizationHeader)) {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
@@ -366,7 +361,7 @@ public class TemplateBuilderUtil {
 
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
         String removeHeaderFromOutMessage = APIUtil
-                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+                .getOAuthConfiguration(tenantDomain, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
         if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
             authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
         } else {
@@ -419,29 +414,8 @@ public class TemplateBuilderUtil {
      */
     private static String getExtensionHandlerPosition(String tenantDomain) throws APIManagementException {
 
-        String extensionHandlerPosition = null;
-        try {
-            String content = getTenantConfigContent(tenantDomain);
-            if (content != null) {
-                JSONParser jsonParser = new JSONParser();
-                JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-                extensionHandlerPosition = (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
-            }
-        } catch (RegistryException | UserStoreException e) {
-            throw new APIManagementException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (ParseException e) {
-            throw new APIManagementException(
-                    "Couldn't parse tenant configuration for reading extension handler position", e);
-        }
-        return extensionHandlerPosition;
-    }
-
-    protected static String getTenantConfigContent(String tenantDomain) throws RegistryException, UserStoreException {
-
-        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-
-        return apimRegistryService
-                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+        JSONObject tenantConf = APIUtil.getTenantConfig(tenantDomain);
+        return (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -455,10 +429,19 @@ public class TemplateBuilderUtil {
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
 
+        JSONObject originalProperties = api.getAdditionalProperties();
+        // add new property for entires that has a __display suffix
+        JSONObject modifiedProperties = getModifiedProperties(originalProperties);
+        api.setAdditionalProperties(modifiedProperties);
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
-        return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
+        GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
                 extractedFolderPath, apidto, clientCertificatesDTOList);
+        // Reset the additional properties to the original values
+        if (originalProperties != null) {
+            api.setAdditionalProperties(originalProperties);
+        }
+        return gatewaAPIDto;
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -1254,6 +1237,21 @@ public class TemplateBuilderUtil {
             }
         }
         return "";
+    }
+    
+    public static JSONObject getModifiedProperties(JSONObject originalProperties) {
+        JSONObject modifiedProperties = new JSONObject();
+        if (originalProperties.size() > 0) {
+            for (Iterator iterator = originalProperties.keySet().iterator(); iterator.hasNext();) {
+                String key = (String) iterator.next();
+                String val = (String) originalProperties.get(key);
+                if (key.endsWith("__display")) {
+                    modifiedProperties.put(key.replace("__display", ""), val);
+                }
+                modifiedProperties.put(key, val);
+            }
+        }
+        return modifiedProperties;
     }
 
 }

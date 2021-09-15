@@ -447,22 +447,6 @@ public interface APIManager {
     Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
 
     /**
-     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} in the system
-     *
-     * @return Set of tiers
-     * @throws APIManagementException if failed to get the predefined tiers
-     */
-    Set<Tier> getAllTiers() throws APIManagementException;
-
-    /**
-     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} for the tenant in the system
-     *
-     * @return Set of tiers
-     * @throws APIManagementException if failed to get the predefined tiers
-     */
-    Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException;
-
-    /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
      * @return Set<Tier>
@@ -894,8 +878,8 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
-            throws APIManagementException;
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
+            String sortBy, String sortOrder) throws APIManagementException;
 
     /**
      * Search in content of apis, api products and documents and provide the results

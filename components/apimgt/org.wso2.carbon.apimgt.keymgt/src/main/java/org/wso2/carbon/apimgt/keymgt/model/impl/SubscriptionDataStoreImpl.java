@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -653,18 +654,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         return scopesInitialized;
     }
-
-    @Override
-    public Subscription getSubscriptionsByUUIds(String apiUUID, String applicationUUID) {
-
-        for (Subscription subscription : subscriptionMap.values()) {
-            if (apiUUID.equals(subscription.getApiUUID()) && applicationUUID.equals(subscription.getApplicationUUID())) {
-                return subscription;
-            }
-        }
-        return null;
-    }
-
     @Override
     public Subscription getSubscriptionBySubscriptionUUID(String subscriptionUUID) {
 
@@ -674,6 +663,80 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<Application> getApplicationsByName(String name) {
+
+        List<Application> applicationList = new ArrayList<>();
+        if (applicationMap != null) {
+            for (Application application : applicationMap.values()) {
+                if (application.getName().equals(name)) {
+                    applicationList.add(application);
+                }
+            }
+        }
+        return applicationList;
+    }
+
+    @Override
+    public Application getApplicationByUUID(String uuid) {
+
+        if (applicationMap != null) {
+            for (Application application : applicationMap.values()) {
+                if (application.getUUID().equals(uuid)) {
+                    return application;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsByAPIId(int apiId) {
+
+        List<Subscription> subscriptionList = new ArrayList<>();
+        if (subscriptionMap != null) {
+            for (Subscription subscription : subscriptionMap.values()) {
+                if (subscription.getApiId() == apiId) {
+                    subscriptionList.add(subscription);
+                }
+            }
+        }
+        return subscriptionList;
+    }
+
+    @Override
+    public List<API> getAPIs() {
+
+        return new ArrayList<>(apiMap.values());
+    }
+
+    @Override
+    public Subscription getSubscriptionByUUID(String apiUUID, String appUUID) {
+
+        if (subscriptionMap != null) {
+            for (Subscription subscription : subscriptionMap.values()) {
+                if (subscription.getApiUUID().equals(apiUUID) && subscription.getApplicationUUID().equals(appUUID)) {
+                    return subscription;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<ApplicationKeyMapping> getKeyMappingByApplicationId(int applicationId) {
+
+        List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
+        if (applicationKeyMappingMap != null) {
+            for (ApplicationKeyMapping applicationKeyMapping : applicationKeyMappingMap.values()) {
+                if (applicationKeyMapping.getApplicationId() == applicationId) {
+                    applicationKeyMappings.add(applicationKeyMapping);
+                }
+            }
+        }
+        return applicationKeyMappings;
     }
 
     @Override

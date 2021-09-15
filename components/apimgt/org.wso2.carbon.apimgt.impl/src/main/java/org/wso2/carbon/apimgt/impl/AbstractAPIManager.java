@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -84,7 +83,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -158,7 +156,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -223,7 +220,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT(tenantUserName, tenantId);
-                APIUtil.loadTenantAPIPolicy(tenantUserName, tenantId);
 
                 //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
                 APIManagerConfiguration configuration = getAPIManagerConfiguration();
@@ -401,7 +397,7 @@ public abstract class AbstractAPIManager implements APIManager {
         UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
-                    Integer.MAX_VALUE, userCtx);
+                    Integer.MAX_VALUE, userCtx, null, null);
 
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
@@ -1721,18 +1717,11 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             int tenantId = getTenantManager()
                     .getTenantId(getTenantDomain(username));
-            SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
-                    .DEFAULT_DIALECT_URI);
-            String email = claims.get(APIConstants.EMAIL_CLAIM);
-            if (StringUtils.isNotEmpty(email)) {
-                subscriber.setEmail(email);
-            } else {
                 subscriber.setEmail(StringUtils.EMPTY);
-            }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
-                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(getTenantDomain(username))) {
                 // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
@@ -2017,7 +2006,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return Collections.emptySet();
     }
 
-    @Override
     public Set<Tier> getAllTiers() throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
@@ -2044,7 +2032,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return tiers;
     }
 
-    @Override
     public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());

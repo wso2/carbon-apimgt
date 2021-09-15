@@ -604,6 +604,51 @@
         }
       }
     },
+    "/retrieve-api-artifacts" : {
+      "post" : {
+        "tags" : [ "Retrieve API artifacts" ],
+        "summary" : "Get API runtime artifacts from ID list",
+        "description" : "This will provide access to API runtime artifacts in database for a given API UUID list.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "type of gateway\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "uuidList",
+          "description" : "API UUID list payload",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/UUIDList"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of runtime Artifacts"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/runtime-metadata" : {
       "get" : {
         "tags" : [ "Retrieving Runtime artifacts" ],
@@ -625,18 +670,6 @@
           "name" : "gatewayLabel",
           "in" : "query",
           "description" : "**Search condition**.\n label associated with the APIs\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "name",
-          "in" : "query",
-          "description" : "**Search condition**.\n name of API\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "version",
-          "in" : "query",
-          "description" : "**Search condition**.\n version of API\n",
           "required" : false,
           "type" : "string"
         } ],
@@ -680,6 +713,34 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
+          }
+        }
+      }
+    },
+    "/apis/deployed-revisions" : {
+      "patch" : {
+        "tags" : [ "API Revisions" ],
+        "summary" : "Deploy Revision",
+        "description" : "Deploy a revision\n",
+        "operationId" : "deployedAPIRevision",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "deployedAPIRevisionDTOList",
+          "description" : "Notification event payload",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/DeployedAPIRevision"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Created.\n"
+          },
+          "default" : {
+            "$ref" : "#/definitions/Error"
           }
         }
       }
@@ -867,6 +928,16 @@
         }
       }
     },
+    "UUIDList" : {
+      "properties" : {
+        "uuids" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
     "RevokedJWTList" : {
       "type" : "array",
       "items" : {
@@ -952,6 +1023,45 @@
         }
       },
       "title" : "API List"
+    },
+    "DeployedAPIRevision" : {
+      "properties" : {
+        "apiId" : {
+          "type" : "string",
+          "example" : "c26b2b9b-4632-4ca4-b6f3-521c8863990c",
+          "minLength" : 0,
+          "maxLength" : 255
+        },
+        "revisionId" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "envInfo" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/DeployedEnvInfo"
+          }
+        }
+      },
+      "title" : "Deployed revision information"
+    },
+    "DeployedEnvInfo" : {
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "default",
+          "minLength" : 1,
+          "maxLength" : 255
+        },
+        "vhost" : {
+          "type" : "string",
+          "example" : "mg.wso2.com",
+          "minLength" : 1,
+          "maxLength" : 255,
+          "pattern" : "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+        }
+      },
+      "title" : "Environment information"
     },
     "API" : {
       "properties" : {

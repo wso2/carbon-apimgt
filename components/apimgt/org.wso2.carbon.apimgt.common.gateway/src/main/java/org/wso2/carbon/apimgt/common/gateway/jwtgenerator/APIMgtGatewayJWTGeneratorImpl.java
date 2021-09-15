@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 
 import java.util.Arrays;
@@ -86,6 +85,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (appAttributes != null && !appAttributes.isEmpty()) {
             claims.put(dialect + "applicationAttributes", appAttributes);
         }
+        if (StringUtils.isNotEmpty(jwtInfoDto.getSub())) {
+            claims.put("sub", jwtInfoDto.getSub());
+        }
         return claims;
     }
 
@@ -93,10 +95,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
     public Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto) {
 
         String[] restrictedClaims = {"iss", "sub", "aud", "exp", "nbf", "iat", "jti", "application", "tierInfo",
-                "subscribedAPIs"};
-        JWTConfigurationDto jwtConfigurationDto = super.jwtConfigurationDto;
-        /*JWTConfigurationDto jwtConfigurationDto =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();*/
+                "subscribedAPIs", "aut"};
         Map<String, Object> claims = new HashMap<>();
         Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
         jwtExcludedClaims.addAll(Arrays.asList(restrictedClaims));

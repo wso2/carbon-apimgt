@@ -128,12 +128,13 @@ public class DevPortalAPIInfo {
     public void setSubscriptionAvailability(String subscriptionAvailability) {
         this.subscriptionAvailability = subscriptionAvailability;
     }
+
     @Override
     public String toString() {
-        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
-                + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
-                + ", businessOwner=" + businessOwner + ", status=" + status + ", availableTierNames="
-                + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
+        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version="
+                + version + ", providerName=" + providerName + ", context=" + context + ", type=" + type + ", " +
+                "thumbnail=" + thumbnail + ", businessOwner=" + businessOwner + ", status=" + status + ", " +
+                "availableTierNames=" + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
                 + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + "]";
     }
 

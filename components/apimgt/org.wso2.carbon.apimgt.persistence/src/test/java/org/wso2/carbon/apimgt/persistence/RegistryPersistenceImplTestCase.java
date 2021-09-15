@@ -137,8 +137,6 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(realmService.getTenantUserRealm(SUPER_TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
                 Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
-                Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(SUPER_TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(SUPER_TENANT_ID);
@@ -199,8 +197,6 @@ public class RegistryPersistenceImplTestCase {
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
-                Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
                 Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);
@@ -265,8 +261,6 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
                 Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
-                Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(TENANT_ID);
@@ -305,6 +299,7 @@ public class RegistryPersistenceImplTestCase {
         String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
         apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
         String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiDescription = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
         String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
         String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
@@ -316,6 +311,7 @@ public class RegistryPersistenceImplTestCase {
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
         Assert.assertEquals("API UUID does not match", apiUUID, publisherAPI.getId());
+        Assert.assertEquals("API Description does not match", apiDescription, publisherAPI.getDescription());
         Assert.assertEquals("API audience does not match", artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE),
                 publisherAPI.getAudience());
     }
@@ -333,12 +329,14 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(registry.getTags(anyString())).thenReturn(tags);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
         String apiUUID = artifact.getId();
-        
+        String apiDescription = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
+
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         DevPortalAPI devAPI = apiPersistenceInstance.getDevPortalAPI(org, apiUUID);
         Assert.assertEquals("API UUID does not match", apiUUID, devAPI.getId());
+        Assert.assertEquals("API Description does not match", apiDescription, devAPI.getDescription());
     }
     
     @Test

@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: ' '
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /:
+    get:
+      operationId: operation1_get_/
+      responses:
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

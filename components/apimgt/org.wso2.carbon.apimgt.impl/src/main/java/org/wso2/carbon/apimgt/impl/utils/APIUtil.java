@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,7 +31,6 @@ import feign.gson.GsonEncoder;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -42,6 +40,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -49,6 +48,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.routines.RegexValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -140,11 +141,16 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.quotalimiter.OnPremQuotaLimiter;
+import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.eventing.EventPublisher;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherException;
+import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryService;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -205,9 +211,6 @@ import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
-import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
-import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
@@ -263,6 +266,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
@@ -285,6 +290,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -295,7 +301,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -360,9 +365,6 @@ public final class APIUtil {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private static final String NONE = "NONE";
-    private static final String MIGRATION = "Migration";
-    private static final String VERSION_3 = "3.0.0";
-    private static final String META = "Meta";
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
@@ -382,10 +384,20 @@ public final class APIUtil {
     private static final int timeoutInSeconds = 15;
     private static final int retries = 2;
 
+    //constants for getting masked token
+    private static final int MAX_LEN = 36;
+    private static final int MAX_VISIBLE_LEN = 8;
+    private static final int MIN_VISIBLE_LEN_RATIO = 5;
+    private static final String MASK_CHAR = "X";
+
+    private static final Map<EventPublisherType, EventPublisher> eventPublishers =
+            new EnumMap<>(EventPublisherType.class);
+    private static EventPublisherFactory eventPublisherFactory = null;
+
     /**
      * To initialize the publisherRoleCache configurations, based on configurations.
      */
-    public static void init() {
+    public static void init() throws APIManagementException {
 
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -393,6 +405,24 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            try {
+                eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
+                eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
+                eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
+                eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
+                eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
+                eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
+                        eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            } catch (EventPublisherException e) {
+                log.error("Could not initialize the event publishers. Events might not be published properly.");
+                throw new APIManagementException(e);
+            }
+        }
     }
 
     /**
@@ -614,14 +644,17 @@ public final class APIUtil {
      */
     public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
 
-        List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
-        notifierList.forEach((notifier) -> {
-            try {
-                notifier.publishEvent(event);
-            } catch (NotifierException e) {
-                log.error("Error when publish " + event + " through notifier:" + notifierType + ". Error:" + e);
-            }
-        });
+        if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)) {
+            List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
+            notifierList.forEach((notifier) -> {
+                try {
+                    notifier.publishEvent(event);
+                } catch (NotifierException e) {
+                    log.error("Error when publish " + event + " through notifier:" + notifierType + ". Error:" + e);
+                }
+            });
+        }
+
     }
 
     /**
@@ -2445,7 +2478,7 @@ public final class APIUtil {
                     String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     String className =
                             storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
-                    store.setPublisher((APIPublisher) getClassForName(className).newInstance());
+                    store.setPublisher((APIPublisher) getClassInstance(className));
                     store.setType(type); //Set Store type [eg:wso2]
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
@@ -2504,18 +2537,11 @@ public final class APIUtil {
 
         Iterator apiStoreIterator = null;
         try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving External Stores Configuration from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            String content =
+                    ServiceReferenceHolder.getInstance().getApimConfigService().getExternalStoreConfig(getTenantDomainFromTenantId(tenantId));
+            OMElement element = AXIOMUtil.stringToOM(content);
+            apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
+
         } catch (XMLStreamException e) {
             String msg = "Malformed XML found in the External Stores Configuration resource";
             log.error(msg, e);
@@ -2841,97 +2867,6 @@ public final class APIUtil {
     }
 
     /**
-     * This method deletes a given tier from tier xml file, for a given tenant
-     *
-     * @param tier     tier to be deleted
-     * @param tenantId id of the tenant
-     * @throws APIManagementException if error occurs while getting registry resource or processing XML
-     */
-    public static void deleteTier(Tier tier, int tenantId) throws APIManagementException {
-
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-                boolean foundTier = false;
-
-                String tierName = null;
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    tierName = tier.getName();
-                    if (tierName != null && tierName.equalsIgnoreCase(id.getText())) {
-                        foundTier = true;
-                        policies.remove();
-                        break;
-                    }
-                }
-                if (!foundTier) {
-                    log.error("Tier doesn't exist : " + tierName);
-                    throw new APIManagementException("Tier doesn't exist : " + tierName);
-                }
-                resource.setContent(element.toString());
-                registry.put(APIConstants.API_TIER_LOCATION, resource);
-            }
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(e.getMessage());
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(e.getMessage());
-        }
-    }
-
-    /**
-     * Returns the tier display name for a particular tier
-     *
-     * @return the relevant tier display name
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static String getTierDisplayName(int tenantId, String tierName) throws APIManagementException {
-
-        String displayName = null;
-        if (APIConstants.UNLIMITED_TIER.equals(tierName)) {
-            return APIConstants.UNLIMITED_TIER;
-        }
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    if (id.getText().equals(tierName)) {
-                        if (id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT) != null) {
-                            displayName = id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                        } else if (displayName == null) {
-                            displayName = id.getText();
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-        }
-        return displayName;
-    }
-
-    /**
      * Checks whether the specified user has the specified permission.
      *
      * @param username   A username
@@ -3124,47 +3059,6 @@ public final class APIUtil {
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
         return stub.getUserInfo();
-    }
-
-    /**
-     * Get user profiles of user
-     *
-     * @param username username
-     * @return default user profile of user
-     * @throws APIManagementException
-     */
-    public static UserProfileDTO getUserDefaultProfile(String username) throws APIManagementException {
-
-        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String url = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        String errorMsg = "Error while getting profile of user ";
-        try {
-            UserProfileMgtServiceStub stub = new UserProfileMgtServiceStub(
-                    ServiceReferenceHolder.getContextService().getClientConfigContext(),
-                    url + APIConstants.USER_PROFILE_MGT_SERVICE);
-            ServiceClient gatewayServiceClient = stub._getServiceClient();
-            CarbonUtils.setBasicAccessSecurityHeaders(
-                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME),
-                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD),
-                    gatewayServiceClient);
-            UserProfileDTO[] profiles = stub.getUserProfiles(username);
-            for (UserProfileDTO dto : profiles) {
-                if (APIConstants.USER_DEFAULT_PROFILE.equals(dto.getProfileName())) {
-                    return dto;
-                }
-            }
-        } catch (AxisFault axisFault) {
-            //here we are going to log the error message and return because in this case, current user cannot fetch
-            //profile of another user (due to cross tenant isolation, not allowed to access user details etc.)
-            log.error("Cannot access user profile of : " + username);
-            return null;
-        } catch (RemoteException e) {
-            handleException(errorMsg + username, e);
-        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
-            handleException(errorMsg + username, e);
-        }
-        return null;
     }
 
     /**
@@ -3743,201 +3637,56 @@ public final class APIUtil {
         }
     }
 
-    public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
-
-        String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                + File.separator + "default-tiers" + File.separator;
-
-        String apiTierFilePath = tierBasePath + APIConstants.DEFAULT_API_TIER_FILE_NAME;
-        String appTierFilePath = tierBasePath + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
-        String resTierFilePath = tierBasePath + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
-
-        loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, apiTierFilePath);
-        loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, appTierFilePath);
-        loadTenantAPIPolicy(tenantID, APIConstants.RES_TIER_LOCATION, resTierFilePath);
-    }
-
-    /**
-     * Load the throttling policy  to the registry for tenants
-     *
-     * @param tenantID
-     * @param location
-     * @param fileName
-     * @throws APIManagementException
-     */
-    private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
-            throws APIManagementException {
-
-        InputStream inputStream = null;
-
-        try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
-
-            if (govRegistry.resourceExists(location)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Tier policies already uploaded to the tenant's registry space");
-                }
-                return;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding API tier policies to the tenant's registry");
-            }
-            File defaultTiers = new File(fileName);
-            if (!defaultTiers.exists()) {
-                log.info("Default tier policies not found in : " + fileName);
-                return;
-            }
-            inputStream = FileUtils.openInputStream(defaultTiers);
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            govRegistry.put(location, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving policy information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading policy file content", e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    log.error("Error when closing input stream", e);
-                }
-            }
-        }
-    }
-
     /**
      * Load the External API Store Configuration  to the registry
      *
-     * @param tenantID
+     * @param organization
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
 
-    public static void loadTenantExternalStoreConfig(int tenantID) throws APIManagementException {
+    public static void loadTenantExternalStoreConfig(String organization) throws APIManagementException {
 
-        try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
-
-            if (govRegistry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                log.debug("External Stores configuration already uploaded to the registry");
-                return;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding External Stores configuration to the tenant's registry");
-            }
-            InputStream inputStream =
-                    APIManagerComponent.class.getResourceAsStream("/externalstores/default-external-api-stores.xml");
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            govRegistry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
-
-            /*set resource permission*/
-            org.wso2.carbon.user.api.AuthorizationManager authManager =
-                    ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantID).
-                            getAuthorizationManager();
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                            + APIConstants.EXTERNAL_API_STORES_LOCATION);
-            authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving External Stores configuration information to the " +
-                    "registry", e);
+        if (log.isDebugEnabled()) {
+            log.debug("Adding External Stores configuration to the tenant's registry");
+        }
+        try (InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/externalstores/default" +
+                "-external-api-stores.xml")) {
+            ServiceReferenceHolder.getInstance().getApimConfigService().addExternalStoreConfig(organization, IOUtils.toString(inputStream));
         } catch (IOException e) {
             throw new APIManagementException("Error while reading External Stores configuration file content", e);
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while setting permission to External Stores configuration file", e);
         }
     }
 
     /**
      * Load the Google Analytics Configuration  to the registry
      *
-     * @param tenantID
+     * @param organization
      * @throws APIManagementException
      */
 
-    public static void loadTenantGAConfig(int tenantID) throws APIManagementException {
+    public static void loadTenantGAConfig(String organization) throws APIManagementException {
 
-        InputStream inputStream = null;
-        try {
-            RegistryService registryService =
-                    ServiceReferenceHolder.getInstance()
-                            .getRegistryService();
-
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
-
-            // If resource does not exist
-            if (!govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding Google Analytics configuration to the tenant's registry");
-                }
-                inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
-                byte[] data = IOUtils.toByteArray(inputStream);
-                Resource resource = govRegistry.newResource();
-                resource.setContent(data);
-                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
-
-                /*set resource permission*/
-                org.wso2.carbon.user.api.AuthorizationManager authManager =
-                        ServiceReferenceHolder.getInstance().getRealmService().
-                                getTenantUserRealm(tenantID).getAuthorizationManager();
-                String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
-                authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
-            }
-
+        if (log.isDebugEnabled()) {
+            log.debug("Adding Google Analytics configuration to the tenant's registry");
+        }
+        try (InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml")) {
+            ServiceReferenceHolder.getInstance().getApimConfigService().addGAConfig(organization, IOUtils.toString(inputStream));
             //Resource already in the registry, set media type as ga-config
             log.debug("Google Analytics configuration already uploaded to the registry");
-            Resource resource = govRegistry.get(APIConstants.GA_CONFIGURATION_LOCATION);
-            if (!APIConstants.GA_CONF_MEDIA_TYPE.equals(resource.getMediaType())) {
-                resource.setMediaType(APIConstants.GA_CONF_MEDIA_TYPE);
-                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
-            }
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving Google Analytics configuration information to the registry", e);
+
         } catch (IOException e) {
             throw new APIManagementException("Error while reading Google Analytics configuration file content", e);
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while setting permission to Google Analytics configuration file", e);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                if (log.isWarnEnabled()) {
-                    log.warn("Error while closing the input stream", e);
-                }
-            }
         }
     }
 
-    public static void loadTenantWorkFlowExtensions(int tenantID)
+    public static void loadTenantWorkFlowExtensions(String organization)
             throws APIManagementException {
-        // TODO: Merge different resource loading methods and create a single method.
+
         try {
             String workflowExtensionLocation =
                     CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
 
             File wfExtension = new File(workflowExtensionLocation);
-
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
-
-            if (govRegistry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
-                log.debug("External Stores configuration already uploaded to the registry");
-                return;
-            }
             if (log.isDebugEnabled()) {
                 log.debug("Adding External Stores configuration to the tenant's registry");
             }
@@ -3949,55 +3698,36 @@ public final class APIUtil {
                 inputStream = APIManagerComponent.class
                         .getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
             }
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            resource.setMediaType(APIConstants.WORKFLOW_MEDIA_TYPE);
-            govRegistry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving Workflow configuration information to the registry",
-                    e);
+            ServiceReferenceHolder.getInstance().getApimConfigService().addWorkflowConfig(organization, IOUtils.toString(inputStream));
         } catch (IOException e) {
             throw new APIManagementException("Error while reading Workflow configuration file content", e);
         }
     }
 
     /**
-     * @param tenantId
+     * @param organization
      * @throws APIManagementException
      */
-    public static void loadTenantSelfSignUpConfigurations(int tenantId)
+    public static void loadTenantSelfSignUpConfigurations(String organization)
             throws APIManagementException {
 
         try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
-
-            if (govRegistry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-                log.debug("Self signup configuration already uploaded to the registry");
-                return;
-            }
             if (log.isDebugEnabled()) {
                 log.debug("Adding Self signup configuration to the tenant's registry");
             }
             InputStream inputStream;
-            if (tenantId == org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID) {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
                 inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/default-sign-up-config.xml");
+                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/default-sign-up-config" +
+                                ".xml");
             } else {
                 inputStream =
-                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/tenant-sign-up-config.xml");
+                        APIManagerComponent.class.getResourceAsStream("/signupconfigurations/tenant-sign-up-config" +
+                                ".xml");
             }
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            resource.setMediaType(APIConstants.SELF_SIGN_UP_CONFIG_MEDIA_TYPE);
-            govRegistry.put(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION, resource);
 
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving Self signup configuration information to the registry", e);
-        } catch (IOException e) {
+            ServiceReferenceHolder.getInstance().getApimConfigService().addSelfSighupConfig(organization, IOUtils.toString(inputStream));
+        } catch (IOException  e) {
             throw new APIManagementException("Error while reading Self signup configuration file content", e);
         }
     }
@@ -4006,79 +3736,21 @@ public final class APIUtil {
      * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
      * If any REST API scopes are added to the local tenant-conf.json, they will be updated in the registry.
      *
-     * @param tenantID tenant Id
+     * @param organization organization.
      * @throws APIManagementException when error occurred while loading the tenant-conf to registry
      */
-    public static void loadAndSyncTenantConf(int tenantID) throws APIManagementException {
+    public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
-            byte[] data = getLocalTenantConfFileData();
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                log.debug("tenant-conf of tenant " + tenantID + " is  already uploaded to the registry");
-                Optional<Byte[]> migratedTenantConf = migrateTenantConfScopes(tenantID);
-                if (migratedTenantConf.isPresent()) {
-                    log.debug("Detected new additions to tenant-conf of tenant " + tenantID);
-                    data = ArrayUtils.toPrimitive(migratedTenantConf.get());
-                } else {
-                    log.debug("No changes required in tenant-conf.json of tenant " + tenantID);
-                    return;
-                }
-            }
-            log.debug("Adding/updating tenant-conf.json to the registry of tenant " + tenantID);
-            updateTenantConf(registry, data);
-            log.debug("Successfully added/updated tenant-conf.json of tenant  " + tenantID);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + tenantID, e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading tenant conf file content of tenant " + tenantID, e);
-        }
-    }
-
-    public static void updateTenantConf(String tenantConfString, String tenantDomain) throws APIManagementException {
-
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            updateTenantConf(registry, tenantConfString.getBytes());
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry of tenant "
-                    + tenantDomain, e);
-        }
-    }
-
-    private static void updateTenantConf(UserRegistry registry, byte[] data) throws RegistryException {
-
-        Resource resource = registry.newResource();
-        resource.setMediaType(APIConstants.API_TENANT_CONF_MEDIA_TYPE);
-        resource.setContent(data);
-        registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
-    }
-
-    /**
-     * Loads tenant-conf.json (tenant config) to registry from the tenant-conf.json available in the file system.
-     *
-     * @param tenantID tenant Id
-     * @throws APIManagementException when error occurred while loading the tenant-conf to registry
-     */
-    public static void loadTenantConf(int tenantID) throws APIManagementException {
-
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                log.debug("Tenant conf already uploaded to the registry");
-                return;
-            }
-            byte[] data = getLocalTenantConfFileData();
-            log.debug("Adding tenant config to the registry");
-            updateTenantConf(registry, data);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving tenant conf to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading tenant conf file content", e);
+            byte[] localTenantConfFileData = getLocalTenantConfFileData();
+            String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jsonParser = new JsonParser();
+            JsonElement jsonElement = jsonParser.parse(tenantConfDataStr);
+            ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
+                    gson.toJson(jsonElement));
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
         }
     }
 
@@ -4106,158 +3778,7 @@ public final class APIUtil {
         return data;
     }
 
-    /**
-     * Migrate the newly added scopes to the tenant-conf which is already in the registry identified with tenantId and
-     * its byte content is returned. If there were no changes done, an empty Optional will be returned.
-     *
-     * @param tenantId Tenant Id
-     * @return Optional byte content
-     * @throws APIManagementException when error occurred while updating the updating the tenant-conf with scopes.
-     */
-    private static Optional<Byte[]> migrateTenantConfScopes(int tenantId) throws APIManagementException {
 
-        JSONObject tenantConf = getTenantConfig(tenantId);
-        JSONObject scopesConfigTenant = getRESTAPIScopesFromTenantConfig(tenantConf);
-        JSONObject scopeConfigLocal = getRESTAPIScopesConfigFromFileSystem();
-        JSONObject roleMappingConfigTenant = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConf);
-        JSONObject roleMappingConfigLocal = getRESTAPIRoleMappingsConfigFromFileSystem();
-        Map<String, String> scopesTenant = getRESTAPIScopesFromConfig(scopesConfigTenant, roleMappingConfigTenant);
-        Map<String, String> scopesLocal = getRESTAPIScopesFromConfig(scopeConfigLocal, roleMappingConfigLocal);
-        JSONArray tenantScopesArray = (JSONArray) scopesConfigTenant.get(APIConstants.REST_API_SCOPE);
-        boolean isRoleUpdated = false;
-        boolean isMigrated = false;
-        JSONObject metaJson = (JSONObject) tenantConf.get(MIGRATION);
-
-        if (metaJson != null && metaJson.get(VERSION_3) != null) {
-            isMigrated = Boolean.parseBoolean(metaJson.get(VERSION_3).toString());
-        }
-
-        if (!isMigrated) {
-            try {
-                //Get admin role name of the current domain
-                String adminRoleName = CarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                        .getRealmConfiguration().getAdminRoleName();
-                for (int i = 0; i < tenantScopesArray.size(); i++) {
-                    JSONObject scope = (JSONObject) tenantScopesArray.get(i);
-                    String roles = scope.get(APIConstants.REST_API_SCOPE_ROLE).toString();
-                    if (APIConstants.APIM_SUBSCRIBE_SCOPE.equals(scope.get(APIConstants.REST_API_SCOPE_NAME)) &&
-                            !roles.contains(adminRoleName)) {
-                        tenantScopesArray.remove(i);
-                        JSONObject scopeJson = new JSONObject();
-                        scopeJson.put(APIConstants.REST_API_SCOPE_NAME, APIConstants.APIM_SUBSCRIBE_SCOPE);
-                        scopeJson.put(APIConstants.REST_API_SCOPE_ROLE,
-                                roles + APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + adminRoleName);
-                        tenantScopesArray.add(scopeJson);
-                        isRoleUpdated = true;
-                        break;
-                    }
-                }
-                if (isRoleUpdated) {
-                    JSONObject metaInfo = new JSONObject();
-                    JSONObject migrationInfo = new JSONObject();
-                    migrationInfo.put(VERSION_3, true);
-                    metaInfo.put(MIGRATION, migrationInfo);
-                    tenantConf.put(META, metaInfo);
-                }
-            } catch (UserStoreException e) {
-                String tenantDomain = getTenantDomainFromTenantId(tenantId);
-                String errorMessage = "Error while retrieving admin role name of " + tenantDomain;
-                log.error(errorMessage, e);
-                throw new APIManagementException(errorMessage, e);
-            }
-            Set<String> scopes = scopesLocal.keySet();
-            //Find any scopes that are not added to tenant conf which is available in local tenant-conf
-            scopes.removeAll(scopesTenant.keySet());
-            if (!scopes.isEmpty() || isRoleUpdated) {
-                for (String scope : scopes) {
-                    JSONObject scopeJson = new JSONObject();
-                    scopeJson.put(APIConstants.REST_API_SCOPE_NAME, scope);
-                    scopeJson.put(APIConstants.REST_API_SCOPE_ROLE, scopesLocal.get(scope));
-                    if (log.isDebugEnabled()) {
-                        log.debug("Found scope that is not added to tenant-conf.json in tenant " + tenantId +
-                                ": " + scopeJson);
-                    }
-                    tenantScopesArray.add(scopeJson);
-                }
-                try {
-                    ObjectMapper mapper = new ObjectMapper();
-                    String formattedTenantConf = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenantConf);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
-                    }
-                    return Optional.of(ArrayUtils.toObject(formattedTenantConf.getBytes()));
-                } catch (JsonProcessingException e) {
-                    throw new APIManagementException("Error while formatting tenant-conf.json of tenant " + tenantId);
-                }
-            } else {
-                log.debug("Scopes in tenant-conf.json in tenant " + tenantId + " are already migrated.");
-                return Optional.empty();
-            }
-        } else {
-            log.debug("Scopes in tenant-conf.json in tenant " + tenantId + " are already migrated.");
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Returns the REST API scopes JSONObject from the tenant-conf.json in the file system
-     *
-     * @return REST API scopes JSONObject from the tenant-conf.json in the file system
-     * @throws APIManagementException when error occurred while retrieving local REST API scopes.
-     */
-    private static JSONObject getRESTAPIScopesConfigFromFileSystem() throws APIManagementException {
-
-        try {
-            byte[] tenantConfData = getLocalTenantConfFileData();
-            String tenantConfDataStr = new String(tenantConfData, Charset.defaultCharset());
-            JSONParser parser = new JSONParser();
-            JSONObject tenantConfJson = (JSONObject) parser.parse(tenantConfDataStr);
-            if (tenantConfJson == null) {
-                throw new APIManagementException("tenant-conf.json (in file system) content cannot be null");
-            }
-            JSONObject restAPIScopes = getRESTAPIScopesFromTenantConfig(tenantConfJson);
-            if (restAPIScopes == null) {
-                throw new APIManagementException("tenant-conf.json (in file system) should have RESTAPIScopes config");
-            }
-            return restAPIScopes;
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading tenant conf file content from file system", e);
-        } catch (ParseException e) {
-            throw new APIManagementException("ParseException thrown when parsing tenant config json from string " +
-                    "content", e);
-        }
-    }
-
-    /**
-     * Returns the REST API role mappings JSONObject from the tenant-conf.json in the file system
-     *
-     * @return REST API role mappings JSONObject from the tenant-conf.json in the file system
-     * @throws APIManagementException when error occurred while retrieving local REST API role mappings.
-     */
-    private static JSONObject getRESTAPIRoleMappingsConfigFromFileSystem() throws APIManagementException {
-
-        try {
-            byte[] tenantConfData = getLocalTenantConfFileData();
-            String tenantConfDataStr = new String(tenantConfData, Charset.defaultCharset());
-            JSONParser parser = new JSONParser();
-            JSONObject tenantConfJson = (JSONObject) parser.parse(tenantConfDataStr);
-            if (tenantConfJson == null) {
-                throw new APIManagementException("tenant-conf.json (in file system) content cannot be null");
-            }
-            JSONObject roleMappings = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConfJson);
-            if (roleMappings == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Scope role mappings are not defined in the tenant-conf.json in file system");
-                }
-            }
-            return roleMappings;
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading tenant conf file content from file system", e);
-        } catch (ParseException e) {
-            throw new APIManagementException("ParseException thrown when parsing tenant config json from string " +
-                    "content", e);
-        }
-    }
 
     /**
      * @param tenantId
@@ -4266,15 +3787,14 @@ public final class APIUtil {
     public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
 
         try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
-            if (govRegistry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-                Resource resource = govRegistry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
-                InputStream content = resource.getContentStream();
-                DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            String selfSighupConfig =
+                    ServiceReferenceHolder.getInstance().getApimConfigService()
+                            .getSelfSighupConfig(getTenantDomainFromTenantId(tenantId));
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
                 factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
                 DocumentBuilder parser = factory.newDocumentBuilder();
-                Document dc = parser.parse(content);
+                InputStream inputStream = new ByteArrayInputStream(selfSighupConfig.getBytes());
+                Document dc = parser.parse(inputStream);
                 boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
                 String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
                         .getFirstChild().getNodeValue();
@@ -4300,19 +3820,12 @@ public final class APIUtil {
                             createSubscriberRole(roleName, tenantId);
                         }
                     }
-                }
             }
             if (log.isDebugEnabled()) {
                 log.debug("Adding Self signup configuration to the tenant's registry");
             }
 
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while getting Self signup role information from the registry", e);
-        } catch (ParserConfigurationException e) {
-            throw new APIManagementException("Error while getting Self signup role information from the registry", e);
-        } catch (SAXException e) {
-            throw new APIManagementException("Error while getting Self signup role information from the registry", e);
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new APIManagementException("Error while getting Self signup role information from the registry", e);
         }
     }
@@ -5062,6 +4575,14 @@ public final class APIUtil {
     public static boolean isOnPremResolver() throws APIManagementException {
         OrganizationResolver resolver = APIUtil.getOrganizationResolver();
         return resolver instanceof OnPremResolver;
+    }
+
+    public static ResourceQuotaLimiter getResourceQuotaLimiter() throws APIManagementException {
+        ResourceQuotaLimiter resourceQuotaLimiter = ServiceReferenceHolder.getInstance().getResourceQuotaLimiter();
+        if (resourceQuotaLimiter == null) {
+            resourceQuotaLimiter = new OnPremQuotaLimiter();
+        }
+        return resourceQuotaLimiter;
     }
     
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
@@ -6919,38 +6440,7 @@ public final class APIUtil {
     }
 
     private static boolean isUnlimitedTierPaid(String tenantDomain) throws APIManagementException {
-
-        JSONObject apiTenantConfig = null;
-        try {
-            String content = null;
-
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getConfigSystemRegistry(tenantId);
-
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            }
-
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-            }
-        } catch (UserStoreException e) {
-            handleException("UserStoreException thrown when getting API tenant config from registry", e);
-        } catch (RegistryException e) {
-            handleException("RegistryException thrown when getting API tenant config from registry", e);
-        } catch (ParseException e) {
-            handleException("ParseException thrown when passing API tenant config from registry", e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-
+        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
         if (apiTenantConfig != null) {
             Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
 
@@ -7223,6 +6713,22 @@ public final class APIUtil {
      * @throws InstantiationException
      */
 
+    public static Object getClassInstance(String className) throws ClassNotFoundException, IllegalAccessException,
+            InstantiationException {
+
+        return getClassForName(className).newInstance();
+    }
+
+    /**
+     * Gets the  class given the class name.
+     *
+     * @param className the fully qualified name of the class.
+     * @return an instance of the class with the given name
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
             InstantiationException {
 
@@ -7291,66 +6797,37 @@ public final class APIUtil {
 
     public static String getGAConfigFromRegistry(String tenantDomain) throws APIManagementException {
 
-        try {
-            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
-            return apimRegistryService.getGovernanceRegistryResourceContent(tenantDomain,
-                    APIConstants.GA_CONFIGURATION_LOCATION);
-
-        } catch (UserStoreException e) {
-            String msg = "UserStoreException thrown when loading GA config from registry";
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "RegistryException thrown when loading GA config from registry";
-            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
-        }
+        return ServiceReferenceHolder.getInstance().getApimConfigService().getGAConfig(tenantDomain);
     }
 
-    public static JSONObject getTenantConfig(String tenantDomain) throws APIManagementException {
 
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        return getTenantConfig(tenantId);
-    }
 
     /**
      * Returns the tenant-conf.json in JSONObject format for the given tenant(id) from the registry.
      *
-     * @param tenantId tenant ID
+     * @param organization organization
      * @return tenant-conf.json in JSONObject format for the given tenant(id)
      * @throws APIManagementException when tenant-conf.json is not available in registry
      */
-    private static JSONObject getTenantConfig(int tenantId) throws APIManagementException {
+    public static JSONObject getTenantConfig(String organization) throws APIManagementException {
 
-        try {
-            Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
-            String cacheName = tenantId + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-            if (tenantConfigCache.containsKey(cacheName)) {
-                return (JSONObject) tenantConfigCache.get(cacheName);
-            } else {
-                if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                    loadTenantRegistry(tenantId);
+        Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
+        String cacheName = organization + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+        if (tenantConfigCache.containsKey(cacheName)) {
+            return (JSONObject) tenantConfigCache.get(cacheName);
+        } else {
+            String tenantConfig =
+             ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            if (StringUtils.isNotEmpty(tenantConfig)){
+                try {
+                    JSONObject jsonObject = (JSONObject) new JSONParser().parse(tenantConfig);
+                    tenantConfigCache.put(cacheName, jsonObject);
+                    return jsonObject;
+                } catch (ParseException e) {
+                    throw new APIManagementException("Error occurred while converting to json",e);
                 }
-                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-                UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-                Resource resource;
-                if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                    resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                } else {
-                    loadTenantConf(tenantId);
-                    if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                        resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                    } else {
-                        throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
-                    }
-                }
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                JSONParser parser = new JSONParser();
-                JSONObject tenantConfig = (JSONObject) parser.parse(content);
-                tenantConfigCache.put(cacheName, tenantConfig);
-                return tenantConfig;
             }
-        } catch (RegistryException | ParseException e) {
-            throw new APIManagementException("Error while getting tenant config from registry for tenant: "
-                    + tenantId, e);
+            return new JSONObject();
         }
     }
 
@@ -7417,34 +6894,18 @@ public final class APIUtil {
 
         JSONObject apiTenantConfig;
         JSONObject defaultRolesConfigJSON = null;
-        try {
-            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-                if (apiTenantConfig != null) {
-                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES);
-                    if (value != null) {
-                        defaultRolesConfigJSON = (JSONObject) value;
-                    } else {
-                        //Config might not exist for migrated environments from previous release
-                        if (log.isDebugEnabled()) {
-                            log.debug(APIConstants.API_TENANT_CONF_DEFAULT_ROLES + " config does not exist for tenant "
-                                    + tenantDomain);
-                        }
-                    }
+        apiTenantConfig = getTenantConfig(tenantDomain);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES);
+            if (value != null) {
+                defaultRolesConfigJSON = (JSONObject) value;
+            } else {
+                //Config might not exist for migrated environments from previous release
+                if (log.isDebugEnabled()) {
+                    log.debug(APIConstants.API_TENANT_CONF_DEFAULT_ROLES + " config does not exist for tenant "
+                            + tenantDomain);
                 }
             }
-        } catch (UserStoreException e) {
-            handleException("Error while retrieving user realm for tenant " + tenantDomain, e);
-        } catch (RegistryException e) {
-            handleException("Error while retrieving tenant configuration file for tenant " + tenantDomain, e);
-        } catch (ParseException e) {
-            handleException(
-                    "Error while parsing tenant configuration file while retrieving default roles for tenant "
-                            + tenantDomain, e);
         }
         return defaultRolesConfigJSON;
     }
@@ -8909,8 +8370,8 @@ public final class APIUtil {
             if (groupIdExtractorClass != null && !groupIdExtractorClass.isEmpty()) {
                 try {
 
-                    LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
-                            (groupIdExtractorClass).newInstance();
+                    LoginPostExecutor groupingExtractor =
+                            (LoginPostExecutor) APIUtil.getClassInstance(groupIdExtractorClass);
 
                     if (groupingExtractor instanceof NewPostLoginExecutor) {
                         multiGrpAppSharing = "true";
@@ -9189,17 +8650,17 @@ public final class APIUtil {
      * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if
      * config is not available in tenant registry
      *
-     * @param tenantId The Tenant ID
+     * @param organization The organization
      * @param property The configuration to get from tenant registry or api-manager.xml
      * @return The configuration read from tenant registry or api-manager.xml
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
      */
-    public static String getOAuthConfiguration(int tenantId, String property)
+    public static String getOAuthConfiguration(String organization, String property)
             throws APIManagementException {
 
         String authConfigValue = APIUtil
-                .getOAuthConfigurationFromTenantRegistry(tenantId, property);
+                .getOAuthConfigurationFromTenantRegistry(organization, property);
         if (StringUtils.isBlank(authConfigValue)) {
             authConfigValue = APIUtil.getOAuthConfigurationFromAPIMConfig(property);
         }
@@ -9209,44 +8670,28 @@ public final class APIUtil {
     /**
      * This method is used to get the authorization configurations from the tenant registry
      *
-     * @param tenantId The Tenant ID
+     * @param organization  organization.
      * @param property The configuration to get from tenant registry
      * @return The configuration read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
      */
-    public static String getOAuthConfigurationFromTenantRegistry(int tenantId, String property)
+    public static String getOAuthConfigurationFromTenantRegistry(String organization, String property)
             throws APIManagementException {
 
-        try {
-            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getConfigSystemRegistry(tenantId);
-
-            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                if (content != null) {
-                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
-                    //Read the configuration from the tenant registry
-                    String oAuthConfiguration = "";
-                    if (null != tenantConfig.get(property)) {
-                        StringBuilder stringBuilder = new StringBuilder();
-                        stringBuilder.append(tenantConfig.get(property));
-                        oAuthConfiguration = stringBuilder.toString();
-                    }
-
-                    if (!StringUtils.isBlank(oAuthConfiguration)) {
-                        return oAuthConfiguration;
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving " + property + " from tenant registry.";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException pe) {
-            String msg = "Couldn't create json object from Swagger object for custom OAuth header.";
-            throw new APIManagementException(msg, pe);
+        JSONObject tenantConfig = getTenantConfig(organization);
+        //Read the configuration from the tenant registry
+        String oAuthConfiguration = "";
+        if (null != tenantConfig.get(property)) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(tenantConfig.get(property));
+            oAuthConfiguration = stringBuilder.toString();
         }
+
+        if (!StringUtils.isBlank(oAuthConfiguration)) {
+            return oAuthConfiguration;
+        }
+
         return null;
     }
 
@@ -9439,33 +8884,18 @@ public final class APIUtil {
      * Get if there any tenant-specific application configurations from the tenant
      * registry
      *
-     * @param tenantId The Tenant Id
+     * @param organization The organization name.
      * @return JSONObject The Application Attributes read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
      */
-    public static JSONObject getAppAttributeKeysFromRegistry(int tenantId) throws APIManagementException {
+    public static JSONObject getAppAttributeKeysFromRegistry(String organization) throws APIManagementException {
 
-        try {
-            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                if (content != null) {
-                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
-                    String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
-                    if (tenantConfigs.keySet().contains(property)) {
-                        return (JSONObject) tenantConfigs.get(
-                                APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
-                    }
-                }
-            }
-        } catch (RegistryException exception) {
-            String msg = "Error while retrieving application attributes from tenant registry.";
-            throw new APIManagementException(msg, exception);
-        } catch (ParseException parseExceptione) {
-            String msg = "Couldn't create json object from Swagger object for custom application attributes.";
-            throw new APIManagementException(msg, parseExceptione);
+        JSONObject tenantConfigs = getTenantConfig(organization);
+        String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+        if (tenantConfigs.keySet().contains(property)) {
+            return (JSONObject) tenantConfigs.get(
+                    APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS);
         }
         return null;
     }
@@ -9473,32 +8903,16 @@ public final class APIUtil {
     /**
      * Get the Security Audit Attributes for tenant from the Registry
      *
-     * @param tenantId tenant id
+     * @param organization organization name.
      * @return JSONObject JSONObject containing the properties
      * @throws APIManagementException Throw if a registry or parse exception arises
      */
-    public static JSONObject getSecurityAuditAttributesFromRegistry(int tenantId) throws APIManagementException {
+    public static JSONObject getSecurityAuditAttributesFromRegistry(String organization) throws APIManagementException {
 
-        try {
-            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                if (content != null) {
-                    JSONObject tenantConfigs = (JSONObject) new JSONParser().parse(content);
-                    String property = APIConstants.SECURITY_AUDIT_CONFIGURATION;
-                    if (tenantConfigs.keySet().contains(property)) {
-                        return (JSONObject) tenantConfigs.get(property);
-                    }
-                }
-            }
-        } catch (RegistryException exception) {
-            String msg = "Error while retrieving Security Audit attributes from tenant registry.";
-            throw new APIManagementException(msg, exception);
-        } catch (ParseException parseException) {
-            String msg = "Cannot read the security audit attributes. "
-                    + "Please make sure the properties are in the correct format";
-            throw new APIManagementException(msg, parseException);
+        JSONObject tenantConfigs = getTenantConfig(organization);
+        String property = APIConstants.SECURITY_AUDIT_CONFIGURATION;
+        if (tenantConfigs.containsKey(property)) {
+            return (JSONObject) tenantConfigs.get(property);
         }
         return null;
     }
@@ -9713,8 +9127,8 @@ public final class APIUtil {
 
         if (groupingExtractorClass != null) {
             try {
-                LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
-                        (groupingExtractorClass).newInstance();
+                LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassInstance
+                        (groupingExtractorClass);
                 //switching 2.1.0 and 2.2.0
                 if (APIUtil.isMultiGroupAppSharingEnabled()) {
                     NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
@@ -10473,12 +9887,19 @@ public final class APIUtil {
      * @return masked token.
      */
     public static String getMaskedToken(String token) {
-
-        if (token.length() >= 10) {
-            return "XXXXX" + token.substring(token.length() - 10);
-        } else {
-            return "XXXXX" + token.substring(token.length() / 2);
+        StringBuilder maskedTokenBuilder = new StringBuilder();
+        if (token != null){
+            int allowedVisibleLen = Math.min(token.length() / MIN_VISIBLE_LEN_RATIO, MAX_VISIBLE_LEN);
+            if (token.length() > MAX_LEN) {
+                maskedTokenBuilder.append("...");
+                maskedTokenBuilder.append(String.join("", Collections.nCopies(MAX_LEN, MASK_CHAR)));
+            } else {
+                maskedTokenBuilder.append(String.join("", Collections.nCopies(token.length()
+                        - allowedVisibleLen, MASK_CHAR)));
+            }
+            maskedTokenBuilder.append(token.substring(token.length() - allowedVisibleLen));
         }
+        return maskedTokenBuilder.toString();
     }
 
     public static Certificate getCertificateFromParentTrustStore(String certAlias) throws APIManagementException {
@@ -10868,16 +10289,16 @@ public final class APIUtil {
         }
     }
 
-    public static boolean isDefaultApplicationCreationDisabledForTenant(int tenantId) {
+    public static boolean isDefaultApplicationCreationDisabledForTenant(String organization) {
 
         boolean state = false;
         try {
-            JSONObject tenantConfig = getTenantConfig(tenantId);
+            JSONObject tenantConfig = getTenantConfig(organization);
             if (tenantConfig.containsKey(APIConstants.DISABLE_DEFAULT_APPLICATION_CREATION)) {
                 state = (boolean) tenantConfig.get(APIConstants.DISABLE_DEFAULT_APPLICATION_CREATION);
             }
         } catch (APIManagementException e) {
-            log.error("Error while reading tenant-config.json for tenant " + tenantId, e);
+            log.error("Error while reading tenant-config.json for tenant " + organization, e);
             state = false;
         }
         return state;
@@ -11008,6 +10429,28 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static void addNewEventPublisher(EventPublisherType type) {
+        try {
+            eventPublishers.putIfAbsent(type, eventPublisherFactory.getEventPublisher(type));
+        } catch (EventPublisherException e) {
+            log.error("Could not add the event publisher." + type + " Events might not be published properly.");
+        }
+    }
+
+    public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String eventString) {
+        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+            try {
+                if (eventPublishers.get(type) != null) {
+                    eventPublishers.get(type).publish(event);
+                } else {
+                    log.error("Error occurred while trying to retrieve the event publisher for type: " + type);
+                }
+            } catch (EventPublisherException e) {
+                log.error("Error occurred while trying to publish event.\n" + eventString, e);
+            }
+        }
     }
 
     public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
@@ -11460,17 +10903,8 @@ public final class APIUtil {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         //read from tenant-conf.json
-        JsonObject existingTenantConfObject = new JsonObject();
-        try {
-            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
-        } catch (RegistryException e) {
-            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (UserStoreException e) {
-            APIUtil.handleException("Couldn't read tenant configuration from user-store", e);
-        }
+        JSONObject tenantConfig = getTenantConfig(tenantDomain);
+        JsonObject existingTenantConfObject = (JsonObject) new JsonParser().parse(tenantConfig.toJSONString());
         JsonElement existingTenantConfScopes = existingTenantConfObject.get(APIConstants.REST_API_SCOPES_CONFIG);
         JsonElement newTenantConfScopes = new JsonParser().parse(newScopeRoleJson.toJSONString());
         JsonObject mergedTenantConfScopes = mergeTenantConfScopes(existingTenantConfScopes, newTenantConfScopes);
@@ -11483,8 +10917,8 @@ public final class APIUtil {
         // Prettify the tenant-conf
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String formattedTenantConf = gson.toJson(existingTenantConfObject);
-
-        APIUtil.updateTenantConf(formattedTenantConf, tenantDomain);
+        ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(tenantDomain,
+                formattedTenantConf);
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
@@ -11543,16 +10977,9 @@ public final class APIUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         //read from tenant-conf.json
         JsonObject existingTenantConfObject = new JsonObject();
-        try {
-            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-            String existingTenantConf = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-            existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
-        } catch (RegistryException e) {
-            APIUtil.handleException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (UserStoreException e) {
-            APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
-        }
+        String existingTenantConf =
+                ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(tenantDomain);
+        existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
 
         //append original role to the role mapping list
         Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
@@ -11577,8 +11004,8 @@ public final class APIUtil {
         // Prettify the tenant-conf
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String formattedTenantConf = gson.toJson(existingTenantConfObject);
-
-        APIUtil.updateTenantConf(formattedTenantConf, tenantDomain);
+        ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(tenantDomain,
+                formattedTenantConf);
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
@@ -11821,5 +11248,67 @@ public final class APIUtil {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
+    }
+
+    /**
+     * Validate sandbox and production endpoint URLs.
+     *
+     * @param endpoints sandbox and production endpoint URLs inclusive list
+     * @return validity of given URLs
+     */
+    public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
+        long validatorOptions = UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
+        RegexValidator authorityValidator = new RegexValidator(".*");
+        UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
+
+        for (String endpoint : endpoints) {
+            // If url is a JMS connection url, validation is skipped. If not, validity is checked.
+            if (!endpoint.startsWith("jms:") && !urlValidator.isValid(endpoint)) {
+                try {
+                    // If the url is not identified as valid from the above check,
+                    // next step is determine the validity of the encoded url (done through the URI constructor).
+                    URL endpointUrl = new URL(endpoint);
+                    URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                            endpointUrl.getPath(), endpointUrl.getQuery(), null);
+
+                    if (!urlValidator.isValid(endpointUri.toString())) {
+                        log.error("Invalid endpoint url " + endpointUrl);
+                        return false;
+                    }
+                } catch (URISyntaxException | MalformedURLException e) {
+                    log.error("Error while parsing the endpoint url " + endpoint);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check whether the file type is supported.
+     * @param filename name
+     * @return true if supported
+     */
+    public static boolean isSupportedFileType(String filename) {
+        if (log.isDebugEnabled()) {
+            log.debug("File name " + filename);
+        }
+        if (StringUtils.isEmpty(filename)) {
+            return false;
+        }
+        String fileType = FilenameUtils.getExtension(filename);
+        List<String> list = null;
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String supportedTypes = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_PUBLISHER_SUPPORTED_DOC_TYPES);
+        if (!StringUtils.isEmpty(supportedTypes)) {
+            String[] definedTypesArr = supportedTypes.trim().split("\\s*,\\s*");
+            list = Arrays.asList(definedTypesArr);
+        } else {
+            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods" };
+            list = Arrays.asList(defaultType);
+        }
+        return list.contains(fileType.toLowerCase());
     }
 }
