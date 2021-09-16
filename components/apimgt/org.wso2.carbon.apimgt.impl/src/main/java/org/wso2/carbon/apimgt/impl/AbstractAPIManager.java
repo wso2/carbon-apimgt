@@ -1839,52 +1839,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    public Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException {
-
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, null);
-        for (SubscribedAPI subscribedApi : subscribedAPIs) {
-            Application application = subscribedApi.getApplication();
-            if (application != null) {
-                int applicationId = application.getId();
-                Set<APIKey> keys = getApplicationKeys(applicationId);
-                for (APIKey key : keys) {
-                    application.addKey(key);
-                }
-            }
-        }
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                startTenantFlow(tenantDomain);
-            }
-            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                String apiPath = APIUtil.getAPIPath(subscribedAPI.getApiId());
-                Resource resource;
-                try {
-                    resource = registry.get(apiPath);
-                    GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                            APIConstants.API_KEY);
-                    GenericArtifact artifact = artifactManager.getGenericArtifact(
-                            resource.getUUID());
-                    API api = getAPI(artifact);
-                    if (api != null) {
-                        apiSortedSet.add(api);
-                    }
-                } catch (RegistryException e) {
-                    String msg = "Failed to get APIs for subscriber: " + subscriber.getName();
-                    throw new APIManagementException(msg, e);
-                }
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-        return apiSortedSet;
-    }
-
     /**
      * To get the API from generic artifact, if the user is authorized to view it.
      *
