@@ -278,51 +278,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get Subscribed APIs for given userId
-     *
-     * @param userId id of the user
-     * @return APIInfoDTO[]
-     * @throws APIManagementException if failed to get Subscribed APIs
-     */
-    public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIManagementException {
-
-        List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        //identify logged in user
-        String loginUserName = getLoginUserName(userId);
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = APIUtil.getTenantId(loginUserName);
-
-        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_SQL;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL;
-        }
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, tenantAwareUsername);
-            ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                APIInfoDTO infoDTO = new APIInfoDTO();
-                infoDTO.setProviderId(APIUtil.replaceEmailDomain(rs.getString("API_PROVIDER")));
-                infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setVersion(rs.getString("API_VERSION"));
-                apiInfoDTOList.add(infoDTO);
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return apiInfoDTOList.toArray(new APIInfoDTO[apiInfoDTOList.size()]);
-    }
-
-    /**
      * Get API key information for given API
      *
      * @param apiInfoDTO API info
@@ -9518,8 +9473,7 @@ public class ApiMgtDAO {
         }
 
         try {
-            RemoteUserManagerClient rmUserClient = new RemoteUserManagerClient(login);
-            String[] user = rmUserClient.getUserList(claimURI, login);
+            String[] user = RemoteUserManagerClient.getInstance().getUserList(claimURI, login);
             if (user.length > 0) {
                 username = user[0];
             }

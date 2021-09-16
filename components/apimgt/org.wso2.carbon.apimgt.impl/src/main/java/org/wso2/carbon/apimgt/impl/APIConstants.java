@@ -834,10 +834,6 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
     public static final String EXTERNAL_API_STORE_PASSWORD = "Password";
 
-    public static final String AUTH_MANAGER = "AuthManager.";
-    public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
-    public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
-    public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
     public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
@@ -1482,8 +1478,6 @@ public final class APIConstants {
     }
 
     public static class ConfigParameters {
-
-        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
 
         private ConfigParameters() {
 
