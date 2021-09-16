@@ -42,6 +42,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,19 +126,18 @@ public class UserSignUpSimpleWorkflowExecutorTest {
     }
 
     @Test
-    public void testFailuresToCompleteUserSignUpSimpleWorkflow() throws APIManagementException,
-            org.wso2.carbon.user.core.UserStoreException {
+    public void testFailuresToCompleteUserSignUpSimpleWorkflow() throws Exception {
         Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
         roleMap.put(signUpRole, false);
 
         UserRegistrationConfigDTO userRegistrationConfigDTO = new UserRegistrationConfigDTO();
         userRegistrationConfigDTO.setRoles(roleMap);
-
-        PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
-        PowerMockito.when(SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO)).thenCallRealMethod();
+        workflowDTO.setTenantDomain(tenantDomain);
+        PowerMockito.when(SelfSignUpUtil.class, "getSignupConfiguration", tenantDomain).thenReturn(userRegistrationConfigDTO);
+        PowerMockito.when(SelfSignUpUtil.class, "getRoleNames", userRegistrationConfigDTO).thenReturn(Collections.singletonList(
+                "Internal/" + signUpRole));
 
         Mockito.when(userStoreManager.isExistingUser(username)).thenReturn(true);
-        Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
 
         //Test failure to complete workflow execution, when sign up roles are not existing in user realm
         Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(false);
