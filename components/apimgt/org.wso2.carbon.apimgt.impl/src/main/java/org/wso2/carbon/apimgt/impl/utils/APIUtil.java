@@ -39,7 +39,6 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -159,7 +158,6 @@ import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -2037,16 +2035,6 @@ public final class APIUtil {
 
         log.error(msg);
         throw new APIMgtAuthorizationFailedException(msg);
-    }
-
-    public static UserInformationRecoveryClient getUserInformationRecoveryClient() throws APIManagementException {
-
-        try {
-            return new UserInformationRecoveryClient();
-        } catch (Exception e) {
-            handleException("Error while initializing the User information recovery client", e);
-            return null;
-        }
     }
 
     /**
