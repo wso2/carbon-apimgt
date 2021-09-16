@@ -362,16 +362,6 @@ public interface APIManager {
     Subscriber getSubscriber(int subscriberId) throws APIManagementException;
 
     /**
-     * Returns a set of APIs purchased by the given Subscriber
-     *
-     * @param subscriber   Subscriber
-     * @param organization Organization
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException;
-
-    /**
      * Associates the given icon image with the specified path.
      * @param identifier ID representing the API
      * @param resourcePath a String representing the relative path of a resource.

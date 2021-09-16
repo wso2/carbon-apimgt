@@ -135,29 +135,4 @@ public class UserSignUpWorkflowExecutorTest {
         }
     }
 
-    @Test
-    public void testAddingUsersToUserStore() throws UserStoreException, RemoteException, UserAdminUserAdminException {
-        try {
-            UserSignUpWorkflowExecutor userSignUpWorkflowExecutor = new UserSignUpWSWorkflowExecutor();
-            userSignUpWorkflowExecutor.addUserToUserStore(serverURL, new UserDTO());
-            Assert.assertTrue(true);
-        } catch (Exception e) {
-            Assert.fail("Unexpected exception occurred while adding users to user store");
-        }
-    }
-
-    @Test
-    public void testFailureToAddUsersToUserStoreWhenRemoteServiceCallFailed() throws UserStoreException,
-            RemoteException, UserAdminUserAdminException, UserRegistrationAdminServiceException {
-        PowerMockito.doThrow(new RemoteException("Exception occurred while adding user to user store")).when
-                (userRegistrationAdminServiceStub).addUser((UserDTO) Mockito
-                .anyObject());
-        try {
-            UserSignUpWorkflowExecutor userSignUpWorkflowExecutor = new UserSignUpWSWorkflowExecutor();
-            userSignUpWorkflowExecutor.addUserToUserStore(serverURL, new UserDTO());
-            Assert.fail("Expected exception has been not thrown while adding user to user store");
-        } catch (Exception e) {
-            Assert.assertEquals(e.getMessage(), "Exception occurred while adding user to user store");
-        }
-    }
 }

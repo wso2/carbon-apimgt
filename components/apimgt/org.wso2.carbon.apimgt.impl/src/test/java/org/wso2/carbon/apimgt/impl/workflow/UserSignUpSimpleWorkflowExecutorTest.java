@@ -28,7 +28,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
@@ -37,15 +36,12 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.user.mgt.stub.UserAdminStub;
-import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
-import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,9 +56,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
     private UserSignUpSimpleWorkflowExecutor userSignUpSimpleWorkflowExecutor;
     private WorkflowDTO workflowDTO;
     private APIManagerConfiguration apiManagerConfiguration;
-    private UserAdminStub userAdminStub;
     private UserStoreManager userStoreManager;
-    private ServiceClient serviceClient;
     private String tenantDomain = "carbon.super";
     private int tenantID = -1234;
     private String username = "testuser";
@@ -82,8 +76,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         userStoreManager = Mockito.mock(UserStoreManager.class);
-        userAdminStub = Mockito.mock(UserAdminStub.class);
-        serviceClient = Mockito.mock(ServiceClient.class);
+        ServiceClient serviceClient = Mockito.mock(ServiceClient.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(SelfSignUpUtil.class);
         PowerMockito.mockStatic(CarbonUtils.class);
@@ -98,10 +91,6 @@ public class UserSignUpSimpleWorkflowExecutorTest {
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
         Mockito.when(realmService.getTenantUserRealm(tenantID)).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-        PowerMockito.whenNew(UserAdminStub.class).withAnyArguments().thenReturn(userAdminStub);
-        Mockito.when(userAdminStub._getServiceClient()).thenReturn(serviceClient);
-        PowerMockito.doNothing().when(CarbonUtils.class, "setBasicAccessSecurityHeaders", Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyBoolean(), (ServiceClient) Mockito.anyObject());
 
     }
 
@@ -111,8 +100,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
     }
 
     @Test
-    public void testExecutingUserSignUpSimpleWorkflow() throws APIManagementException, org
-            .wso2.carbon.user.core.UserStoreException, RemoteException, UserAdminUserAdminException {
+    public void testExecutingUserSignUpSimpleWorkflow() throws APIManagementException, UserStoreException {
         Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
         roleMap.put(signUpRole, false);
 
@@ -123,15 +111,10 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.when(SelfSignUpUtil.getRoleNames(userRegistrationConfigDTO)).thenCallRealMethod();
-        PowerMockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL)).thenReturn
-                ("https://localhost:9443/services/");
         Mockito.when(userStoreManager.isExistingUser(username)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
-        FlaggedName flaggedName = new FlaggedName();
-        flaggedName.setSelected(true);
-        flaggedName.setItemName(signUpRole);
-        FlaggedName[] flaggedNames = {flaggedName};
-        Mockito.when(userAdminStub.getRolesOfUser(username, "*", -1)).thenReturn(flaggedNames);
+        Mockito.doNothing().when(userStoreManager).updateRoleListOfUser(username, null,
+                new String[]{"Internal/" + signUpRole});
 
         try {
             Assert.assertNotNull(userSignUpSimpleWorkflowExecutor.execute(workflowDTO));
@@ -142,7 +125,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
     @Test
     public void testFailuresToCompleteUserSignUpSimpleWorkflow() throws APIManagementException,
-            org.wso2.carbon.user.core.UserStoreException, RemoteException, UserAdminUserAdminException {
+            org.wso2.carbon.user.core.UserStoreException {
         Map<String, Boolean> roleMap = new HashMap<String, Boolean>();
         roleMap.put(signUpRole, false);
 
@@ -154,39 +137,6 @@ public class UserSignUpSimpleWorkflowExecutorTest {
 
         Mockito.when(userStoreManager.isExistingUser(username)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(true);
-
-        //Test failure to complete workflow execution when AuthManager server url is not configured
-        try {
-            userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown auth manager URL is not found");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Error while assigning role to user");
-        }
-        //Set AuthManager endpoint url
-        PowerMockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL)).thenReturn
-                ("https://localhost:9443/services/");
-
-        //Test failure to complete workflow execution when tenant admin credentials are not found
-        try {
-            userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown when admin credentials are not found");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Error while assigning role to user");
-        }
-
-        //Set tenant admin credentials
-        userRegistrationConfigDTO.setAdminUserName("admin");
-        userRegistrationConfigDTO.setAdminPassword("admin");
-
-        //Test failure to complete workflow execution, when error has been occurred while updating user with signup
-        // roles
-        Mockito.when(userAdminStub.getRolesOfUser(username, "*", -1)).thenThrow(new RemoteException());
-        try {
-            userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown while signup user role update failed");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Error while assigning role to user");
-        }
 
         //Test failure to complete workflow execution, when sign up roles are not existing in user realm
         Mockito.when(userStoreManager.isExistingRole("Internal/" + signUpRole)).thenReturn(false);
