@@ -2803,31 +2803,6 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 }
             }
-
-            // setting scope
-            if (!apiIdsString.isEmpty() && !reducedPublisherAPIInfo) {
-
-                Map<String, Set<Scope>> apiScopeSet = getScopesForAPIS(apiIdsString);
-                if (apiScopeSet.size() > 0) {
-                    for (int i = 0; i < apiCount; i++) {
-                        Object api = apiList.get(i);
-                        String apiId = "";
-                        if (api instanceof API) {
-                            apiId = ((API) api).getId().getApplicationId();
-                        } else if (api instanceof APIProduct) {
-                            apiId = ((APIProduct) api).getId().getApplicationId();
-                        }
-                        if (apiId != null && apiId != "") {
-                            Set<Scope> scopes = apiScopeSet.get(apiId);
-                            if (api instanceof API) {
-                                ((API) api).setScopes(scopes);
-                            } else if (api instanceof APIProduct) {
-                                ((APIProduct) api).setScopes(scopes);
-                            }
-                        }
-                    }
-                }
-            }
             apiSet.addAll(apiList);
         } catch (RegistryException e) {
             String msg = "Failed to search APIs with type";
@@ -2839,22 +2814,6 @@ public abstract class AbstractAPIManager implements APIManager {
         result.put("length", totalLength);
         result.put("isMore", isMore);
         return result;
-    }
-
-    private Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
-
-        Map<String, Set<Scope>> apiToScopeMapping = new HashMap<>();
-        Map<String, Set<String>> apiToScopeKeyMapping = apiMgtDAO.getScopesForAPIS(apiIdsString);
-        for (String apiId : apiToScopeKeyMapping.keySet()) {
-            Set<Scope> apiScopes = new LinkedHashSet<>();
-            Set<String> scopeKeys = apiToScopeKeyMapping.get(apiId);
-            for (String scopeKey : scopeKeys) {
-                Scope scope = scopesDAO.getScope(scopeKey, tenantId);
-                apiScopes.add(scope);
-            }
-            apiToScopeMapping.put(apiId, apiScopes);
-        }
-        return apiToScopeMapping;
     }
 
     /**

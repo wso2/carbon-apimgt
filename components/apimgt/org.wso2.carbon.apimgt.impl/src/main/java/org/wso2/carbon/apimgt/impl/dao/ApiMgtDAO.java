@@ -9852,50 +9852,6 @@ public class ApiMgtDAO {
         return scopeKeySet;
     }
 
-    /**
-     * Returns all the scopes assigned for given apis
-     *
-     * @param apiIdsString list of api ids separated by commas
-     * @return Map<String, Set < String>> set of scope keys for each apiId
-     * @throws APIManagementException
-     */
-    public Map<String, Set<String>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
-
-        Map<String, Set<String>> apiScopeSet = new HashMap();
-
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-
-            String sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST;
-
-            if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST_ORACLE;
-            }
-
-            // apids are retrieved from the db so no need to protect for sql injection
-            sqlQuery = sqlQuery.replace("$paramList", apiIdsString);
-
-            try (PreparedStatement ps = conn.prepareStatement(sqlQuery);
-                 ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
-                    String scopeKey = resultSet.getString(1);
-                    String apiId = resultSet.getString(2);
-                    Set<String> scopeList = apiScopeSet.get(apiId);
-                    if (scopeList == null) {
-                        scopeList = new LinkedHashSet<>();
-                        scopeList.add(scopeKey);
-                        apiScopeSet.put(apiId, scopeList);
-                    } else {
-                        scopeList.add(scopeKey);
-                        apiScopeSet.put(apiId, scopeList);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve api scopes ", e);
-        }
-        return apiScopeSet;
-    }
-
     public Set<String> getScopesBySubscribedAPIs(List<String> identifiers) throws APIManagementException {
 
         Connection conn = null;
