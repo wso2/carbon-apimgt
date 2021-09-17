@@ -33,7 +33,7 @@ public class EventHubEventPublisher implements EventPublisher {
 
     @Override
     public void init() {
-        log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] EventHubEventPublisher is initialized.");
+        log.info("EventHubEventPublisher is initialized.");
     }
 
     @Override

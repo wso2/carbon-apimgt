@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.eventing.hub.internal.ServiceReferenceHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,27 +35,12 @@ public class EventHubEventPublisherFactory implements EventPublisherFactory {
     private static final Log log = LogFactory.getLog(EventHubEventPublisherFactory.class);
 
     @Override
-    public void configure(Map<String, String> configuration) {
+    public void configure(Map<String, String> properties) {
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
         adapterConfiguration.setName(EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
         adapterConfiguration.setType(EventHubEventPublisherConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(EventHubEventPublisherConstants.BLOCKING_EVENT_FORMAT);
-        Map<String, String> adapterParameters = new HashMap<>();
-        adapterParameters.put(EventHubEventPublisherConstants.RECEIVER_URL,
-                configuration.get(EventHubEventPublisherConstants.RECEIVER_URL));
-        adapterParameters.put(EventHubEventPublisherConstants.AUTHENTICATOR_URL,
-                configuration.get(EventHubEventPublisherConstants.AUTHENTICATOR_URL));
-        adapterParameters.put(EventHubEventPublisherConstants.USERNAME,
-                configuration.get(EventHubEventPublisherConstants.USERNAME));
-        adapterParameters.put(EventHubEventPublisherConstants.PASSWORD,
-                configuration.get(EventHubEventPublisherConstants.PASSWORD));
-        adapterParameters.put(EventHubEventPublisherConstants.PROTOCOL,
-                configuration.get(EventHubEventPublisherConstants.PROTOCOL));
-        adapterParameters.put(EventHubEventPublisherConstants.PUBLISHING_MODE,
-                configuration.get(EventHubEventPublisherConstants.PUBLISHING_MODE));
-        adapterParameters.put(EventHubEventPublisherConstants.PUBLISHING_TIME_OUT,
-                configuration.get(EventHubEventPublisherConstants.PUBLISHING_TIME_OUT));
-        adapterConfiguration.setStaticProperties(adapterParameters);
+        adapterConfiguration.setStaticProperties(properties);
         try {
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
         } catch (OutputEventAdapterException e) {

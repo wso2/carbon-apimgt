@@ -42,12 +42,12 @@ public class ServiceComponent {
     protected void activate(ComponentContext componentContext) {
         componentContext.getBundleContext().registerService(EventPublisherFactory.class.getName(),
                 new EventHubEventPublisherFactory(), null);
-        log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Eventing Hub ServiceComponent is activated");
+        log.info("Eventing Hub ServiceComponent is activated");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Eventing Hub ServiceComponent is deactivated");
+        log.info("Eventing Hub ServiceComponent is deactivated");
     }
 
     /**

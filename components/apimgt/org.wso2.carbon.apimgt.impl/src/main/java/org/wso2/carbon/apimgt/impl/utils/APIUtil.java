@@ -419,23 +419,21 @@ public final class APIUtil {
                 .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
         isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
                 .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-            try {
-                eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
-                eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
-                eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
-                eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
-                eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
-                eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
-                        eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
-            } catch (EventPublisherException e) {
-                log.error("Could not initialize the event publishers. Events might not be published properly.");
-                throw new APIManagementException(e);
-            }
+        try {
+            eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
+            eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.ASYNC_WEBHOOKS));
+            eventPublishers.putIfAbsent(EventPublisherType.CACHE_INVALIDATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.CACHE_INVALIDATION));
+            eventPublishers.putIfAbsent(EventPublisherType.GLOBAL_CACHE_INVALIDATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.GLOBAL_CACHE_INVALIDATION));
+            eventPublishers.putIfAbsent(EventPublisherType.NOTIFICATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
+            eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+        } catch (EventPublisherException e) {
+            log.error("Could not initialize the event publishers. Events might not be published properly.");
+            throw new APIManagementException(e);
         }
     }
 
@@ -10452,16 +10450,14 @@ public final class APIUtil {
     }
 
     public static void publishEvent(EventPublisherType type, EventPublisherEvent event, String eventString) {
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-            try {
-                if (eventPublishers.get(type) != null) {
-                    eventPublishers.get(type).publish(event);
-                } else {
-                    log.error("Error occurred while trying to retrieve the event publisher for type: " + type);
-                }
-            } catch (EventPublisherException e) {
-                log.error("Error occurred while trying to publish event.\n" + eventString, e);
+        try {
+            if (eventPublishers.get(type) != null) {
+                eventPublishers.get(type).publish(event);
+            } else {
+                log.error("Error occurred while trying to retrieve the event publisher for type: " + type);
             }
+        } catch (EventPublisherException e) {
+            log.error("Error occurred while trying to publish event.\n" + eventString, e);
         }
     }
 
@@ -10499,23 +10495,6 @@ public final class APIUtil {
             }
         }
 
-    }
-
-    public static void publishEventToEventHub(Map dynamicProperties, Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER, dynamicProperties, event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
     }
 
     /**
