@@ -604,8 +604,8 @@ public class TemplateBuilderUtil {
                     gatewayAPIDTO.getLocalEntriesToBeRemove()));
             GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();
             graphqlLocalEntry.setName(api.getUUID() + "_graphQL");
-            graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
-                    api.getGraphQLSchema() + "</localEntry>");
+            graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" + "<![CDATA[" +
+                    api.getGraphQLSchema() + "]]>" + "</localEntry>");
             gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
             Set<URITemplate> uriTemplates = new HashSet<>();
