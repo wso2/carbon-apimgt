@@ -135,7 +135,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
 
-        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, false);
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, applicationName, false);
         ClientInfo createdClient;
 
         try {
@@ -159,13 +159,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * Construct ClientInfo object for application create request
      *
      * @param info            The OAuthApplicationInfo object
-     * @param applicationName The name of the application to be created. We specifically request for this value as this
-     *                        should be formatted properly prior to calling this method
+     * @param oauthClientName The name of the OAuth application to be created
+     * @param applicationName Application display name
      * @return constructed ClientInfo object
      * @throws JSONException for errors in parsing the OAuthApplicationInfo json string
      */
-    private ClientInfo createClientInfo(OAuthApplicationInfo info, String applicationName, boolean isUpdate)
-            throws JSONException, APIManagementException {
+    private ClientInfo createClientInfo(OAuthApplicationInfo info, String oauthClientName, String applicationName,
+                                        boolean isUpdate) throws JSONException, APIManagementException {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
@@ -189,7 +189,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (StringUtils.isNotEmpty(overrideSpName) && !Boolean.parseBoolean(overrideSpName)) {
             clientInfo.setClientName(info.getClientName());
         } else {
-            clientInfo.setClientName(applicationName);
+            clientInfo.setClientName(oauthClientName);
         }
 
         //todo: run tests by commenting the type
@@ -336,6 +336,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
         }
 
+        // Set the display name of the application. This name would appear in the consent page of the app.
+        clientInfo.setApplicationDisplayName(applicationName);
+
         return clientInfo;
     }
 
@@ -373,7 +376,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Client Name : " + oauthClientName);
         }
 
-        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, true);
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, applicationName, true);
         ClientInfo createdClient;
         try {
             createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
