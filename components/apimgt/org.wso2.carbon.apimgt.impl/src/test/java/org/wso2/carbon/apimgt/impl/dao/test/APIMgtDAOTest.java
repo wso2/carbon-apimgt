@@ -206,12 +206,6 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void testGetSubscribedAPIsOfUser() throws Exception {
-        APIInfoDTO[] apis = apiMgtDAO.getSubscribedAPIsOfUser("SUMEDHA");
-        assertNotNull(apis);
-        assertTrue(apis.length > 1);
-    }
-    @Test
     public void testGetSubscribedUsersForAPI() throws Exception {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setApiName("API1");

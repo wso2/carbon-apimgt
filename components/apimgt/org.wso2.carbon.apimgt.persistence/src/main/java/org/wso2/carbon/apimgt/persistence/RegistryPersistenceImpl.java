@@ -96,6 +96,7 @@ import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
+import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
@@ -882,9 +883,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-            UserContext ctx) throws APIPersistenceException {
+            UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
-        
+
         boolean isTenantFlowStarted = false;
         PublisherAPISearchResult result = null;
         try {
@@ -893,9 +894,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             int tenantIDLocal = holder.getTenantId();
             log.debug("Requested query for publisher search: " + searchQuery);
-            
+
             String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx);
-            
+
             log.debug("Modified query for publisher search: " + modifiedQuery);
 
             String tenantAdminUsername = getTenantAwareUsername(
@@ -916,13 +917,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
         return result;
-    }
-
-    @Override
-    public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery,
-            int start, int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
-        // TODO: Use this method to search APIs for publisher after this is implemented in the choreo-apimgt-extentions repo.
-        return null;
     }
 
     private PublisherAPISearchResult searchPaginatedPublisherAPIs(Registry userRegistry, int tenantIDLocal, String searchQuery,
@@ -989,7 +983,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     break;
                 }
             }
-
+            // Sort the publisherAPIInfoList according to the API name.
+            Collections.sort(publisherAPIInfoList, new PublisherAPISearchResultComparator());
             searchResults.setPublisherAPIInfoList(publisherAPIInfoList);
             searchResults.setReturnedAPIsCount(publisherAPIInfoList.size());
             searchResults.setTotalAPIsCount(totalLength);
@@ -1340,6 +1335,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                 }
             }
+            // Sort the publisherAPIInfoList according to the API name.
+            Collections.sort(publisherAPIInfoList, new PublisherAPISearchResultComparator());
             searchResults.setPublisherAPIInfoList(publisherAPIInfoList);
             searchResults.setTotalAPIsCount(publisherAPIInfoList.size());
             searchResults.setReturnedAPIsCount(publisherAPIInfoList.size());
@@ -3106,7 +3103,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                    RegistryPersistenceUtil.loadTenantAPIPolicy(null, tenantId);
                     holder.setTenantId(tenantId);
                     ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
                             .getRealmService().getTenantUserRealm(tenantId)));
@@ -3116,7 +3112,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                RegistryPersistenceUtil.loadTenantAPIPolicy(null, tenantId);
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);
@@ -3165,7 +3160,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                    RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
                     holder.setTenantId(tenantId);
                     ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
                             .getRealmService().getTenantUserRealm(tenantId)));
@@ -3176,7 +3170,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);

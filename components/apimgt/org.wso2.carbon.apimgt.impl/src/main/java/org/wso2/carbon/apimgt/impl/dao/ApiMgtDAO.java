@@ -278,51 +278,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get Subscribed APIs for given userId
-     *
-     * @param userId id of the user
-     * @return APIInfoDTO[]
-     * @throws APIManagementException if failed to get Subscribed APIs
-     */
-    public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIManagementException {
-
-        List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        //identify logged in user
-        String loginUserName = getLoginUserName(userId);
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = APIUtil.getTenantId(loginUserName);
-
-        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_SQL;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_CASE_INSENSITIVE_SQL;
-        }
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, tenantAwareUsername);
-            ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                APIInfoDTO infoDTO = new APIInfoDTO();
-                infoDTO.setProviderId(APIUtil.replaceEmailDomain(rs.getString("API_PROVIDER")));
-                infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setVersion(rs.getString("API_VERSION"));
-                apiInfoDTOList.add(infoDTO);
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return apiInfoDTOList.toArray(new APIInfoDTO[apiInfoDTOList.size()]);
-    }
-
-    /**
      * Get API key information for given API
      *
      * @param apiInfoDTO API info
@@ -9518,8 +9473,7 @@ public class ApiMgtDAO {
         }
 
         try {
-            RemoteUserManagerClient rmUserClient = new RemoteUserManagerClient(login);
-            String[] user = rmUserClient.getUserList(claimURI, login);
+            String[] user = RemoteUserManagerClient.getInstance().getUserList(claimURI, login);
             if (user.length > 0) {
                 username = user[0];
             }
@@ -9850,50 +9804,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return scopeKeySet;
-    }
-
-    /**
-     * Returns all the scopes assigned for given apis
-     *
-     * @param apiIdsString list of api ids separated by commas
-     * @return Map<String, Set < String>> set of scope keys for each apiId
-     * @throws APIManagementException
-     */
-    public Map<String, Set<String>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
-
-        Map<String, Set<String>> apiScopeSet = new HashMap();
-
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-
-            String sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST;
-
-            if (conn.getMetaData().getDriverName().contains("Oracle")) {
-                sqlQuery = SQLConstants.GET_SCOPES_FOR_API_LIST_ORACLE;
-            }
-
-            // apids are retrieved from the db so no need to protect for sql injection
-            sqlQuery = sqlQuery.replace("$paramList", apiIdsString);
-
-            try (PreparedStatement ps = conn.prepareStatement(sqlQuery);
-                 ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
-                    String scopeKey = resultSet.getString(1);
-                    String apiId = resultSet.getString(2);
-                    Set<String> scopeList = apiScopeSet.get(apiId);
-                    if (scopeList == null) {
-                        scopeList = new LinkedHashSet<>();
-                        scopeList.add(scopeKey);
-                        apiScopeSet.put(apiId, scopeList);
-                    } else {
-                        scopeList.add(scopeKey);
-                        apiScopeSet.put(apiId, scopeList);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve api scopes ", e);
-        }
-        return apiScopeSet;
     }
 
     public Set<String> getScopesBySubscribedAPIs(List<String> identifiers) throws APIManagementException {
@@ -15086,7 +14996,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps =
                 connection.prepareStatement(deleteQuery)) {
             connection.setAutoCommit(false);
-            ps.setLong(1, System.currentTimeMillis() / 1000);
+            ps.setLong(1, System.currentTimeMillis());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {

@@ -38,22 +38,20 @@ public class EventHubEventPublisher implements EventPublisher {
 
     @Override
     public void publish(EventPublisherEvent eventPublisherEvent) {
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-            boolean tenantFlowStarted = false;
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                        .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                tenantFlowStarted = true;
-                ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(
-                        EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER,
-                        null,
-                        eventPublisherEvent
-                );
-            } finally {
-                if (tenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(
+                    EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER,
+                    null,
+                    eventPublisherEvent
+            );
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }

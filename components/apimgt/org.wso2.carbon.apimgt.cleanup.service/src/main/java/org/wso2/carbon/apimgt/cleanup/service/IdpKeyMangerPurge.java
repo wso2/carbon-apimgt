@@ -66,12 +66,14 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     }
 
     private void initTaskList() {
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.KM_RETRIEVER, APIConstants.OrganizationDeletion.PENDING);
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
-        IdpKeyMangerPurgeTaskMap
-                .put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER, APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST,
+                APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_RETRIEVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.PENDING);
     }
 
     @MethodStats
@@ -79,12 +81,16 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     public LinkedHashMap<String, String> purge(String organization) {
 
         List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
+        boolean isKeyManagerOrganizationExist = true;
         for (Map.Entry<String, String> task : IdpKeyMangerPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
                     switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST:
+                        isKeyManagerOrganizationExist = organizationPurgeDAO.keyManagerOrganizationExist(organization);
+                        break;
                     case APIConstants.OrganizationDeletion.KM_RETRIEVER:
                         keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
                         break;
@@ -104,10 +110,21 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
 
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
-                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        String errorMessage = e.getMessage();
+                        if (e.getCause() != null) {
+                            errorMessage = errorMessage + ". Cause: " + e.getCause().getMessage();
+                        }
+                        IdpKeyMangerPurgeTaskMap.put(task.getKey(), errorMessage);
                         break;
                     }
                 }
+            }
+            if (!isKeyManagerOrganizationExist) {
+                String msg = "No idp related entities exist for the organization: " + organization;
+                log.warn(msg);
+                IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                moveStatusToCompleted();
+                break;
             }
         }
 
@@ -130,5 +147,14 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
 
     @Override public int getPriority() {
         return 10;
+    }
+
+    private void moveStatusToCompleted() {
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_RETRIEVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.IDP_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        IdpKeyMangerPurgeTaskMap.put(APIConstants.OrganizationDeletion.KM_DATA_REMOVER,
+                APIConstants.OrganizationDeletion.COMPLETED);
     }
 }

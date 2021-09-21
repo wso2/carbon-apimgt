@@ -44,6 +44,8 @@ public class ApplicationPurge implements OrganizationPurge {
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
 
     private void initTaskList() {
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST,
+                APIConstants.OrganizationDeletion.PENDING);
         applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL,
                 APIConstants.OrganizationDeletion.PENDING);
         applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL,
@@ -72,12 +74,16 @@ public class ApplicationPurge implements OrganizationPurge {
     @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
+        boolean isApplicationOrganizationExist = true;
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
             int count = 0;
             int maxTries = 3;
             while (true) {
                 try {
                     switch (task.getKey()) {
+                    case APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST:
+                        isApplicationOrganizationExist = applicationOrganizationExist(organization);
+                        break;
                     case APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL:
                         removePendingSubscriptions(organization);
                         break;
@@ -100,11 +106,22 @@ public class ApplicationPurge implements OrganizationPurge {
 
                     if (++count == maxTries) {
                         log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
-                        applicationPurgeTaskMap.put(task.getKey(), e.getMessage());
+                        String errorMessage = e.getMessage();
+                        if (e.getCause() != null) {
+                            errorMessage = errorMessage + ". Cause: " + e.getCause().getMessage();
+                        }
+                        applicationPurgeTaskMap.put(task.getKey(), errorMessage);
                         break;
                     }
 
                 }
+            }
+            if (!isApplicationOrganizationExist) {
+                String msg = "No application related entities exist for the organization: " + organization;
+                log.warn(msg);
+                applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                moveStatusToCompleted();
+                break;
             }
         }
 
@@ -132,5 +149,20 @@ public class ApplicationPurge implements OrganizationPurge {
 
     private void deleteApplicationList(String organization) throws APIManagementException {
         organizationPurgeDAO.deleteApplicationList(organization);
+    }
+
+    private boolean applicationOrganizationExist(String organization) throws APIManagementException {
+        return organizationPurgeDAO.applicationOrganizationExist(organization);
+    }
+
+    private void moveStatusToCompleted() {
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_REGISTRATION_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
+        applicationPurgeTaskMap.put(APIConstants.OrganizationDeletion.APPLICATION_REMOVAL,
+                APIConstants.OrganizationDeletion.COMPLETED);
     }
 }

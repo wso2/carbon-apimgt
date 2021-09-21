@@ -60,11 +60,6 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
         			workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
         			workflowDTO.getStatus());
     	}
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
-        String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
 
 		String tenantDomain = workflowDTO.getTenantDomain();
 
@@ -73,16 +68,11 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 			UserRegistrationConfigDTO signupConfig =
 					SelfSignUpUtil.getSignupConfiguration(tenantDomain);
 			
-			if (serverURL == null || signupConfig.getAdminUserName() == null ||
-					signupConfig.getAdminPassword() == null) {
-				throw new WorkflowException("Required parameter missing to connect to the"
-						+ " authentication manager");
-			}
 
 			String tenantAwareUserName =
 					MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
-			updateRolesOfUser(serverURL, signupConfig.getAdminUserName(),
-			                  signupConfig.getAdminPassword(), tenantAwareUserName,
+			updateRolesOfUser(
+					tenantAwareUserName,
 			                  SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
 		} catch (APIManagementException e) {
 			throw new WorkflowException("Error while accessing signup configuration", e);

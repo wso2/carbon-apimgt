@@ -120,9 +120,9 @@ public class APIManagerConfiguration {
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
-    private Map<String, String> restApiJWTAuthAudiences = new HashMap<>();
+    private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
 
-    public Map<String, String> getRestApiJWTAuthAudiences() {
+    public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
     }
 
@@ -501,7 +501,7 @@ public class APIManagerConfiguration {
                     String className = storeElem.getAttributeValue(new QName(APIConstants
                             .EXTERNAL_API_STORE_CLASS_NAME));
                     try {
-                        store.setPublisher((APIPublisher) APIUtil.getClassForName(className).newInstance());
+                        store.setPublisher((APIPublisher) APIUtil.getClassInstance(className));
                     } catch (InstantiationException e) {
                         String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
                                 "cannot be instantiated";
@@ -1783,7 +1783,8 @@ public class APIManagerConfiguration {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
                 if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: " + eventPublisherElement.toString());
+                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: \n"
+                            + eventPublisherElement.toString());
                     Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
                     eventHubPublisherConfiguration.setProperties(publisherProps);
                 }
@@ -1958,8 +1959,7 @@ public class APIManagerConfiguration {
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
                 try {
-                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
-                            .getClassForName(listenerClass).newInstance();
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);
@@ -1978,8 +1978,13 @@ public class APIManagerConfiguration {
                 omElement.getChildrenWithLocalName(APIConstants.JWT_AUDIENCE);
         while (jwtAudiencesElement.hasNext()) {
             OMElement jwtAudienceElement = (OMElement) jwtAudiencesElement.next();
-            restApiJWTAuthAudiences.put(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText(),
-                    jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
+            String basePath = jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText();
+            List<String> audienceForPath = restApiJWTAuthAudiences.get(basePath);
+            if (audienceForPath == null) {
+                audienceForPath = new ArrayList<>();
+            }
+            audienceForPath.add(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
+            restApiJWTAuthAudiences.put(basePath, audienceForPath);
         }
     }
 }

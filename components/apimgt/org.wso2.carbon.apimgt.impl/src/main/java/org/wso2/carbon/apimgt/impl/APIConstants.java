@@ -76,12 +76,6 @@ public final class APIConstants {
 
     public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
 
-    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
-
-    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
-
-    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
-
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
     public static final int TIER_API_TYPE = 0;
@@ -89,12 +83,6 @@ public final class APIConstants {
     public static final int TIER_RESOURCE_TYPE = 1;
 
     public static final int TIER_APPLICATION_TYPE = 2;
-
-    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
-
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
-
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
@@ -605,6 +593,10 @@ public final class APIConstants {
     public static final String DEFAULT_WEBSUB_SIGNATURE_HEADER = "x-hub-signature";
     public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
 
+    // Constants for for api quota limit feature
+    public static final String API_QUOTA_LIMIT = "ResourceQuotaLimit.";
+    public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";
@@ -842,10 +834,6 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
     public static final String EXTERNAL_API_STORE_PASSWORD = "Password";
 
-    public static final String AUTH_MANAGER = "AuthManager.";
-    public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
-    public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
-    public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
     public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
@@ -869,7 +857,7 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
     public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
     public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
-    
+
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
@@ -1490,8 +1478,6 @@ public final class APIConstants {
     }
 
     public static class ConfigParameters {
-
-        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
 
         private ConfigParameters() {
 
@@ -2680,6 +2666,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 
     //Constants related to user password
@@ -2773,11 +2760,13 @@ public final class APIConstants {
         public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
         public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
         public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+        public static final String API_ORG_EXIST = "APIOrganizationExist";
 
         public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
         public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
         public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
         public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+        public static final String APPLICATION_ORG_EXIST = "ApplicationOrganizationExist";
 
         public static final String PENDING = "Pending";
         public static final String COMPLETED = "Completed";
@@ -2785,6 +2774,7 @@ public final class APIConstants {
         public static final String KM_RETRIEVER = "KMRetriever";
         public static final String IDP_DATA_REMOVER = "IDPDataRemover";
         public static final String KM_DATA_REMOVER = "KMDataRemover";
+        public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";

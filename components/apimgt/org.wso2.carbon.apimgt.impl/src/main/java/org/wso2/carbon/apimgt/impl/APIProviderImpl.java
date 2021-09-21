@@ -21,10 +21,8 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
-import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
@@ -105,12 +103,9 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
-import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -148,7 +143,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -182,6 +176,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
@@ -189,7 +184,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
-import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
@@ -231,20 +225,18 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -588,101 +580,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return count;
     }
 
-    @Override
-    public void addTier(Tier tier) throws APIManagementException {
-        addOrUpdateTier(tier, false);
-    }
-
-    @Override
-    public void updateTier(Tier tier) throws APIManagementException {
-        addOrUpdateTier(tier, true);
-    }
-
-    private void addOrUpdateTier(Tier tier, boolean update) throws APIManagementException {
-        if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
-            throw new APIManagementException("Changes on the '" + APIConstants.UNLIMITED_TIER + "' " +
-                    "tier are not allowed");
-        }
-
-        Set<Tier> tiers = getAllTiers();
-        if (update && !tiers.contains(tier)) {
-            throw new APIManagementException("No tier exists by the name: " + tier.getName());
-        }
-
-        Set<Tier> finalTiers = new HashSet<Tier>();
-        for (Tier t : tiers) {
-            if (!t.getName().equals(tier.getName())) {
-                finalTiers.add(t);
-            }
-        }
-
-        invalidateTierCache();
-
-        finalTiers.add(tier);
-        saveTiers(finalTiers);
-    }
-
-    /**
-     * This method is to cleanup tier cache when update or deletion is performed
-     */
-    private void invalidateTierCache() {
-
-        try {
-            // Note that this call happens to store node in a distributed setup.
-            TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
-            tierCacheInvalidationClient.clearCaches(tenantDomain);
-
-            // Clear registry cache. Note that this call happens to gateway node in a distributed setup.
-            RegistryCacheInvalidationClient registryCacheInvalidationClient = new RegistryCacheInvalidationClient();
-            registryCacheInvalidationClient.clearTiersResourceCache(tenantDomain);
-        } catch (APIManagementException e) {
-            // This means that there is an exception when trying to clear the cache.
-            // But we should not break the flow in such scenarios.
-            // Hence we log the exception and continue to the flow
-            log.error("Error while invalidating the tier cache", e);
-        }
-    }
-
-    private void saveTiers(Collection<Tier> tiers) throws APIManagementException {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMElement root = fac.createOMElement(APIConstants.POLICY_ELEMENT);
-        OMElement assertion = fac.createOMElement(APIConstants.ASSERTION_ELEMENT);
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            Resource resource = registry.newResource();
-            for (Tier tier : tiers) {
-                // This is because we do not save the unlimited tier to the tiers.xml file.
-                if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
-                    continue;
-                }
-                // This is a new tier. Hence the policyContent will be null
-                if (tier.getPolicyContent() == null) {
-                    // This means we have to create the policy from scratch.
-                    assertion.addChild(createThrottlePolicy(tier));
-                } else {
-                    String policy = new String(tier.getPolicyContent(), Charset.defaultCharset());
-                    assertion.addChild(AXIOMUtil.stringToOM(policy));
-                }
-            }
-            root.addChild(assertion);
-            resource.setContent(root.toString());
-            registry.put(APIConstants.API_TIER_LOCATION, resource);
-        } catch (XMLStreamException e) {
-            handleException("Error while constructing tier policy file", e);
-        } catch (RegistryException e) {
-            handleException("Error while saving tier configurations to the registry", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
     private OMElement createThrottlePolicy(Tier tier) throws APIManagementException {
         OMElement throttlePolicy = null;
         String policy = APIConstants.THROTTLE_POLICY_TEMPLATE;
@@ -736,66 +633,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Invalid policy xml generated", e);
         }
         return throttlePolicy;
-    }
-
-    @Override
-    public void removeTier(Tier tier) throws APIManagementException {
-        if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
-            handleException("Changes on the '" + APIConstants.UNLIMITED_TIER + "' " +
-                    "tier are not allowed");
-        }
-
-        Set<Tier> tiers = getAllTiers();
-        // We need to see whether this used in any of the APIs
-        GenericArtifact[] tierArtifacts = null;
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            try {
-                if (artifactManager == null) {
-                    String errorMessage = "Failed to retrieve artifact manager when removing tier " + tier.getName();
-                    log.error(errorMessage);
-                    throw new APIManagementException(errorMessage);
-                }
-                // The search name pattern is this
-                // tier=Gold|| OR ||Gold||
-                String query = "tier=\"" + tier.getName() + "\\||\" \"\\||" + tier.getName() + "\\||\" \"\\||" + tier
-                        .getName() + '\"';
-                tierArtifacts = artifactManager.findGovernanceArtifacts(query);
-                if (tierArtifacts == null) {
-                    String errorMessage = "Tier artifact is null when removing tier " + tier.getName() + " by user : "
-                            + PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + " in domain : "
-                            + tenantDomain;
-                    log.error(errorMessage);
-                }
-            } catch (GovernanceException e) {
-                handleException("Unable to check the usage of the tier ", e);
-            }
-        } catch (APIManagementException e) {
-            handleException("Unable to delete the tier", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-        if (tierArtifacts != null && tierArtifacts.length > 0) {
-            // This means that there is at least one API that is using this tier. Hence we can not delete.
-            handleException("Unable to remove this tier. Tier in use");
-        }
-
-        if (tiers.remove(tier)) {
-            saveTiers(tiers);
-            invalidateTierCache();
-        } else {
-            handleException("No tier exists by the name: " + tier.getName());
-        }
     }
 
     /**
@@ -2546,17 +2383,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     private void sendEmailNotification(API api) throws APIManagementException {
+
         try {
+            JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
             String isNotificationEnabled = "false";
-            Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getConfigSystemRegistry(tenantId);
-            if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                if (content != null) {
-                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
-                    isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
-                }
+
+            if (tenantConfig.containsKey(NotifierConstants.NOTIFICATIONS_ENABLED)) {
+                isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
             }
             if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
                 List<APIIdentifier> apiIdentifiers = getOldPublishedAPIList(api);
@@ -2577,11 +2410,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (NotificationException e) {
             log.error(e.getMessage(), e);
-        } catch (RegistryException re) {
-            handleException("Error while getting the tenant-config.json", re);
-        } catch (ParseException e) {
-            String msg = "Couldn't Create json Object from Swagger object for email notification";
-            handleException(msg, e);
         }
     }
 
@@ -5912,7 +5740,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }
@@ -6658,14 +6486,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
         }
         return null;
-    }
-
-
-    protected String getTenantConfigContent() throws RegistryException, UserStoreException {
-        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-
-        return apimRegistryService
-                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
     }
 
     protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
@@ -7887,14 +7707,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-
-        int tenantId = 0;
-        try {
-            tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            handleException("Error in getting tenantId of: " + tenantDomain, e);
-        }
-        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
+        JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantDomain);
         if (securityAuditConfig != null) {
             if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
                     securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) instanceof Boolean &&
@@ -8151,8 +7964,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
-            throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
+            String sortBy, String sortOrder) throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
@@ -8164,11 +7977,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
-                    start, end, userCtx);
+                    start, end, userCtx, sortBy, sortOrder);
             if (log.isDebugEnabled()) {
                 log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }
-            SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+            Set<Object> apiSet = new LinkedHashSet<>();
             if (searchAPIs != null) {
                 List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
                 List<Object> apiList = new ArrayList<>();

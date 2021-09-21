@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -1556,13 +1557,14 @@ public class APIUtilTest {
             Mockito.when(MultitenantUtils.getTenantDomain(provider)).thenReturn(tenantDomain);
             Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
             Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig(tenantDomain)).thenReturn(tenantConfValue);
+
             Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
             Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
             Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
             Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-            Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-            Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-
             String artifactPath = "";
             Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
             Mockito.when(registry.get(artifactPath)).thenReturn(resource);
@@ -1642,7 +1644,9 @@ public class APIUtilTest {
             RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
             RegistryService registryService = Mockito.mock(RegistryService.class);
             UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-
+            APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig(tenantDomain)).thenReturn(tenantConfValue);
             PowerMockito.mockStatic(ApiMgtDAO.class);
             PowerMockito.mockStatic(GovernanceUtils.class);
             PowerMockito.mockStatic(MultitenantUtils.class);
@@ -1662,9 +1666,6 @@ public class APIUtilTest {
             Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
             Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
             Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-            Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-            Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-
             String artifactPath = "";
             Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
             Mockito.when(registry.get(artifactPath)).thenReturn(resource);
@@ -1850,29 +1851,32 @@ public class APIUtilTest {
 
     @Test
     public void testGetOAuthConfigurationFromTenantRegistry() throws Exception {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            final int tenantId = -1234;
+            final String property = "AuthorizationHeader";
 
-        final int tenantId = -1234;
-        final String property = "AuthorizationHeader";
-
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        Resource resource = Mockito.mock(Resource.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
-                getResource("tenant-conf.json").getFile());
-        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
-        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
-        JSONParser parser = new JSONParser();
-        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
-        String authorizationHeader = (String) json.get(property);
-        String authHeader = getOAuthConfigurationFromTenantRegistry(tenantId, property);
-        Assert.assertEquals(authorizationHeader, authHeader);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                    getResource("tenant-conf.json").getFile());
+            String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+            APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig(tenantDomain)).thenReturn(tenantConfValue);
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+            String authorizationHeader = (String) json.get(property);
+            String authHeader = getOAuthConfigurationFromTenantRegistry(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, property);
+            Assert.assertEquals(authorizationHeader, authHeader);
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     @Test
@@ -2047,28 +2051,34 @@ public class APIUtilTest {
     @Test
     public void testGetAppAttributeKeysFromRegistry() throws Exception {
 
-        final int tenantId = -1234;
-        final String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            final int tenantId = -1234;
+            final String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
 
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
-        Resource resource = Mockito.mock(Resource.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
-                getResource("tenant-conf.json").getFile());
-        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
-        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
-        JSONParser parser = new JSONParser();
-        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
-        JSONObject applicationAttributes = (JSONObject) json.get(property);
-        JSONObject appAttributes = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
-        Assert.assertEquals(applicationAttributes, appAttributes);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            RegistryService registryService = Mockito.mock(RegistryService.class);
+            Resource resource = Mockito.mock(Resource.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                    getResource("tenant-conf.json").getFile());
+            String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+            APIMConfigService apimConfigService = Mockito.mock(APIMConfigService.class);
+            Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+            Mockito.when(apimConfigService.getTenantConfig(tenantDomain)).thenReturn(tenantConfValue);
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+            JSONObject applicationAttributes = (JSONObject) json.get(property);
+            JSONObject appAttributes = APIUtil.getAppAttributeKeysFromRegistry(tenantDomain);
+            Assert.assertEquals(applicationAttributes, appAttributes);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     @Test

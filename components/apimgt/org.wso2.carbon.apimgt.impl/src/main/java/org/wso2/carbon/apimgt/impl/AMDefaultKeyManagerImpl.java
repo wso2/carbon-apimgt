@@ -19,6 +19,9 @@
 package org.wso2.carbon.apimgt.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import feign.Feign;
 import feign.Response;
 import feign.auth.BasicAuthRequestInterceptor;
@@ -40,12 +43,14 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.FormEncoder;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
@@ -1115,5 +1120,40 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             handleException("Error while getting user info", e);
         }
         return map;
+    }
+
+    @Override
+    protected void validateOAuthAppCreationProperties(OAuthApplicationInfo oAuthApplicationInfo)
+            throws APIManagementException {
+        super.validateOAuthAppCreationProperties(oAuthApplicationInfo);
+
+        String type = getType();
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(type);
+        if (keyManagerConnectorConfiguration != null) {
+            Object additionalProperties = oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+            if (additionalProperties != null) {
+                JsonObject additionalPropertiesJson = (JsonObject) new JsonParser()
+                        .parse((String) additionalProperties);
+                for (Map.Entry<String, JsonElement> entry : additionalPropertiesJson.entrySet()) {
+                    String additionalProperty = entry.getValue().getAsString();
+                    if (StringUtils.isNotBlank(additionalProperty) && !StringUtils
+                            .equals(additionalProperty, APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
+                        try {
+                            Long longValue = Long.parseLong(additionalProperty);
+                            if (longValue < 0) {
+                                String errMsg = "Application configuration values cannot have negative values.";
+                                throw new APIManagementException(errMsg, ExceptionCodes
+                                        .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                            }
+                        } catch (NumberFormatException e) {
+                            String errMsg = "Application configuration values cannot have string values.";
+                            throw new APIManagementException(errMsg, ExceptionCodes
+                                    .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -98,7 +98,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
-                    limit);
+                    limit, null, null);
             
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
