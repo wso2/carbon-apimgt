@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentListDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,12 +83,11 @@ public class SettingsMappingUtil {
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-            ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
+            GatewayEnvironmentListDTO gatewayEnvironmentListDTO = new GatewayEnvironmentListDTO();
             if (gatewayEnvironments != null) {
-                thirdPartyEnvironmentListDTO = EnvironmentMappingUtil.
+                gatewayEnvironmentListDTO = EnvironmentMappingUtil.
                         fromThirdPartyEnvironmentCollectionToDTO(gatewayEnvironments.values());
             }
-            settingsDTO.setThirdPartyEnvironments(thirdPartyEnvironmentListDTO.getList());
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);
 
@@ -96,6 +95,7 @@ public class SettingsMappingUtil {
                 authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
             }
             settingsDTO.setAuthorizationHeader(authorizationHeader);
+            settingsDTO.setEnvironment(gatewayEnvironmentListDTO.getList());
         }
         return settingsDTO;
     }

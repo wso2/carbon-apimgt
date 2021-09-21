@@ -1,35 +1,26 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
-import javax.validation.constraints.*;
 
 
-import io.swagger.annotations.*;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
-public class ThirdPartyEnvironmentListDTO   {
+public class GatewayEnvironmentListDTO {
   
     private Integer count = null;
-    private List<ThirdPartyEnvironmentDTO> list = new ArrayList<ThirdPartyEnvironmentDTO>();
+    private List<EnvironmentDTO> list = new ArrayList<EnvironmentDTO>();
 
   /**
    * Number of Third party environments returned. 
    **/
-  public ThirdPartyEnvironmentListDTO count(Integer count) {
+  public GatewayEnvironmentListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -46,7 +37,7 @@ public class ThirdPartyEnvironmentListDTO   {
 
   /**
    **/
-  public ThirdPartyEnvironmentListDTO list(List<ThirdPartyEnvironmentDTO> list) {
+  public GatewayEnvironmentListDTO list(List<EnvironmentDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +46,10 @@ public class ThirdPartyEnvironmentListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<ThirdPartyEnvironmentDTO> getList() {
+  public List<EnvironmentDTO> getList() {
     return list;
   }
-  public void setList(List<ThirdPartyEnvironmentDTO> list) {
+  public void setList(List<EnvironmentDTO> list) {
     this.list = list;
   }
 
@@ -71,7 +62,7 @@ public class ThirdPartyEnvironmentListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ThirdPartyEnvironmentListDTO thirdPartyEnvironmentList = (ThirdPartyEnvironmentListDTO) o;
+    GatewayEnvironmentListDTO thirdPartyEnvironmentList = (GatewayEnvironmentListDTO) o;
     return Objects.equals(count, thirdPartyEnvironmentList.count) &&
         Objects.equals(list, thirdPartyEnvironmentList.list);
   }

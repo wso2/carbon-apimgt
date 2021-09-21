@@ -31,9 +31,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentProtocolURIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 
 import java.io.IOException;
@@ -158,63 +157,62 @@ public class EnvironmentMappingUtil {
      * @param gatewayEnvironmentCollection a collection of Environment objects
      * @return EnvironmentListDTO object containing EnvironmentDTOs
      */
-    public static ThirdPartyEnvironmentListDTO
+    public static GatewayEnvironmentListDTO
     fromThirdPartyEnvironmentCollectionToDTO(Collection<Environment> gatewayEnvironmentCollection)
             throws IOException {
-        ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
-        List<ThirdPartyEnvironmentDTO> thirdPartyEnvironmentDTOs = thirdPartyEnvironmentListDTO.getList();
-        if (thirdPartyEnvironmentDTOs == null) {
-            thirdPartyEnvironmentDTOs = new ArrayList<>();
-            thirdPartyEnvironmentListDTO.setList(thirdPartyEnvironmentDTOs);
+        GatewayEnvironmentListDTO gatewayEnvironmentListDTO = new GatewayEnvironmentListDTO();
+        List<EnvironmentDTO> environmentDTOS = gatewayEnvironmentListDTO.getList();
+        if (environmentDTOS == null) {
+            environmentDTOS = new ArrayList<>();
+            gatewayEnvironmentListDTO.setList(environmentDTOS);
         }
 
         for (Environment thirdPartyEnvironment : gatewayEnvironmentCollection) {
-            thirdPartyEnvironmentDTOs.add(fromThirdPartyEnvironmentToDTO(thirdPartyEnvironment));
+            environmentDTOS.add(fromThirdPartyEnvironmentToDTO(thirdPartyEnvironment));
         }
-        thirdPartyEnvironmentListDTO.setCount(thirdPartyEnvironmentDTOs.size());
-        return thirdPartyEnvironmentListDTO;
+        gatewayEnvironmentListDTO.setCount(environmentDTOS.size());
+        return gatewayEnvironmentListDTO;
     }
 
     /**
      * Converts an ThirdPartyEnvironment object into ThirdPartyEnvironmentDTO
      *
-     * @param thirdPartyEnvironment Environment object
+     * @param gatewayEnvironment Environment object
      * @return ThirdPartyEnvironmentDTO object corresponding to the given ThirdPartyEnvironment object
      */
-    public static ThirdPartyEnvironmentDTO fromThirdPartyEnvironmentToDTO(Environment thirdPartyEnvironment)
+    public static EnvironmentDTO fromThirdPartyEnvironmentToDTO(Environment gatewayEnvironment)
             throws IOException {
 
-        ThirdPartyEnvironmentDTO thirdPartyEnvironmentDTO = new ThirdPartyEnvironmentDTO();
-        thirdPartyEnvironmentDTO.setName(thirdPartyEnvironment.getName());
-        thirdPartyEnvironmentDTO.setOrganization(thirdPartyEnvironment.getAdditionalProperties()
-                .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
-        thirdPartyEnvironmentDTO.setProvider(thirdPartyEnvironment.getProvider());
-        thirdPartyEnvironmentDTO.setDisplayName(thirdPartyEnvironment.getDisplayName());
+        EnvironmentDTO thirdPartyEnvironmentDTO = new EnvironmentDTO();
+        thirdPartyEnvironmentDTO.setName(gatewayEnvironment.getName());
+        thirdPartyEnvironmentDTO.setAdditionalProperties(gatewayEnvironment.getAdditionalProperties());
+        thirdPartyEnvironmentDTO.setProvider(gatewayEnvironment.getProvider());
+        thirdPartyEnvironmentDTO.setDisplayName(gatewayEnvironment.getDisplayName());
 
-        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(thirdPartyEnvironment.getProvider())) {
+        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironment.getProvider())) {
 
-            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(thirdPartyEnvironment.getServerURL(),
-                    thirdPartyEnvironment.getUserName(), thirdPartyEnvironment.getPassword(), thirdPartyEnvironment.
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(gatewayEnvironment.getServerURL(),
+                    gatewayEnvironment.getUserName(), gatewayEnvironment.getPassword(), gatewayEnvironment.
                     getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
             HttpResponse response = solaceAdminApis.environmentGET(
-                    thirdPartyEnvironment.getAdditionalProperties()
-                            .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), thirdPartyEnvironment.getName());
+                    gatewayEnvironment.getAdditionalProperties()
+                            .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), gatewayEnvironment.getName());
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 String responseString = null;
                 responseString = EntityUtils.toString(response.getEntity());
                 JSONObject jsonObject = new JSONObject(responseString);
                 if (jsonObject.has("messagingProtocols")) {
                     JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
-                    List<ThirdPartyEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
+                    List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
                     for (int i = 0; i < protocols.length(); i++) {
                         JSONObject protocolDetails = protocols.getJSONObject(i);
                         String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
                         String endpointURI = protocolDetails.getString("uri");
-                        ThirdPartyEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURIDTO =
-                                new ThirdPartyEnvironmentProtocolURIDTO();
-                        thirdPartyEnvironmentProtocolURIDTO.setProtocol(protocolName);
-                        thirdPartyEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
-                        endpointsList.add(thirdPartyEnvironmentProtocolURIDTO);
+                        GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURIDTO =
+                                new GatewayEnvironmentProtocolURIDTO();
+                        gatewayEnvironmentProtocolURIDTO.setProtocol(protocolName);
+                        gatewayEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
+                        endpointsList.add(gatewayEnvironmentProtocolURIDTO);
                     }
                     thirdPartyEnvironmentDTO.setEndpointURIs(endpointsList);
                 }

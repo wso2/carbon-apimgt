@@ -8611,59 +8611,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
             gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-        boolean deletedFromSolace = false;
         if (environmentsToRemove.size() > 0) {
-            for (APIRevisionDeployment deployment : environmentsToRemove) {
-                String environment = deployment.getDeployment();
-                if (thirdPartyEnvironments.containsKey(environment)) {
-                    if ("solace".equalsIgnoreCase(
-                            thirdPartyEnvironments.get(environment).getProvider())) {
-                        try {
-                            deletedFromSolace = undeployFromSolaceBroker(api, thirdPartyEnvironments.get(environment));
-                            if (!deletedFromSolace) {
-                                throw new APIManagementException("Error while deleting API product from Solace broker");
-                            }
-                        } catch (HttpResponseException e) {
-                            e.printStackTrace();
-                            throw new APIManagementException(e.getMessage());
-                        }
-                    }
-                }
-            }
             apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
             removeFromGateway(api, environmentsToRemove, environmentsToAdd);
         }
-
-        boolean deployedToSolace = false;
-        Set<String> environmentsToAddOtherThanThirdParty = new HashSet<>();
+        GatewayArtifactsMgtDAO.getInstance()
+                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, gatewayVhosts,
+                        environmentsToRemove);
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
             // TODO remove this to organization once the microgateway can build gateway based on organization.
-            for (String environment : environmentsToAdd) {
-                if (thirdPartyEnvironments.containsKey(environment)) {
-                    if ("solace".equalsIgnoreCase(thirdPartyEnvironments.get(environment).getProvider())) {
-                        try {
-                            deployedToSolace = deployToSolaceBroker(api, thirdPartyEnvironments.get(environment));
-                            if (!deployedToSolace) {
-                                throw new APIManagementException("Error while deploying API product to Solace broker");
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            throw new APIManagementException(e.getMessage());
-                        }
-                    }
-                } else {
-                    environmentsToAddOtherThanThirdParty.add(environment);
-                }
-            }
-        }
-
-        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-        if (environmentsToAddOtherThanThirdParty.size() > 0) {
-            GatewayArtifactsMgtDAO.getInstance()
-                    .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAddOtherThanThirdParty, gatewayVhosts,
-                            environmentsToRemove);
-            gatewayManager.deployToGateway(api, tenantDomain, environmentsToAddOtherThanThirdParty);
+            gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
         }
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
         String defaultVersion = getDefaultVersion(apiIdentifier);
@@ -8791,7 +8749,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+                                              List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -8805,40 +8763,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         API api = getAPIbyUUID(apiId, apiRevision, organization);
-
-        boolean solaceBrokerAPI = false;
-        boolean unDeployedFromSolace = false;
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-        List<APIRevisionDeployment> deploymentsOtherThanThirdParty = new ArrayList<>();
-
-        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
-            if (thirdPartyEnvironments.containsKey(deployment.getDeployment())) {
-                String organizationName = thirdPartyEnvironments.get(deployment.getDeployment()).getProvider();
-                if ("solace".equalsIgnoreCase(organizationName)) {
-                    solaceBrokerAPI = true;
-                    if (solaceBrokerAPI) {
-                        try {
-                            unDeployedFromSolace = undeployFromSolaceBroker(api, thirdPartyEnvironments.get(deployment.getDeployment()));
-                            if (!unDeployedFromSolace) {
-                                throw new APIManagementException("Error while deleting API product and API from Solace broker");
-                            }
-                        } catch (HttpResponseException e) {
-                            e.printStackTrace();
-                            throw new APIManagementException(e.getMessage());
-                        }
-                    }
-                }
-            } else {
-                deploymentsOtherThanThirdParty.add(deployment);
-            }
-        }
-
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-        if (deploymentsOtherThanThirdParty.size() > 0) {
-            removeFromGateway(api, new HashSet<>(deploymentsOtherThanThirdParty), Collections.emptySet());
-            GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
-        }
-
+        GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
     }
 
     /**
@@ -9175,174 +9102,4 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
     }
 
-    private boolean deployToSolaceBroker(API api, ThirdPartyEnvironment environment) throws IOException, APIManagementException {
-        String apiDefinition = api.getAsyncApiDefinition();
-        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
-        String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
-        String[] apiContextParts = api.getContext().split("/");
-        String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +
-                "-" + apiContextParts[2];
-        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-
-        // check availability of environment
-        HttpResponse response1 = solaceAdminApis.environmentGET(environment.getOrganization(), environment.getName());
-        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            log.info("environment '" + environment.getName() + "' found in Solace broker");
-            // check api product already exists in solace
-            HttpResponse response4 = solaceAdminApis.apiProductGet(environment.getOrganization(), apiNameWithContext);
-            if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                // api Product Already found in solace. No need to deploy again into Solace
-                log.info("API product '" + apiNameWithContext + "' already found in Solace. No need to create again");
-                return true;
-            } else if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                // api product not found in solace. check existence of registered API in solace
-                log.info("API product '" + apiNameWithContext + "' not found in Solace. Checking the existence of API");
-                HttpResponse response5 = solaceAdminApis.registeredAPIGet(environment.getOrganization(),
-                        apiNameForRegistration);
-                if (response5.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    log.info("API '" + apiNameForRegistration + "' already registered in Solace. Creating API product " +
-                            "using registered API");
-                    // create API product only
-                    HttpResponse response3 = solaceAdminApis.createAPIProduct(environment.getOrganization(),
-                            environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
-                    if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                        log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
-                        return true;
-                    } else {
-                        log.error("Error while creating API product in Solace");
-                        throw new HttpResponseException(response3.getStatusLine().getStatusCode(),
-                                response3.getStatusLine().getReasonPhrase());
-                    }
-                } else if (response5.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                    log.info("API '" + apiNameForRegistration + "' not registered in Solace. Creating both API and " +
-                            "API product");
-                    // register the API in Solace Broker
-                    HttpResponse response2 = solaceAdminApis.registerAPI(environment.getOrganization(),
-                            apiNameForRegistration, apiDefinition);
-                    if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                        log.info("API '" + apiNameForRegistration + "' has been registered in Solace broker");
-                        //create API Product in Solace broker
-                        HttpResponse response3 = solaceAdminApis.createAPIProduct(environment.getOrganization(),
-                                environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
-                        if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                            log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
-                            return true;
-                        } else {
-                            log.error("Error while creating API product in Solace");
-                            // delete registered API in solace
-                            HttpResponse response6 = solaceAdminApis.deleteRegisteredAPI(environment.getOrganization(),
-                                    apiNameForRegistration);
-                            if (response6.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                                log.info("Successfully deleted registered API '" + apiNameForRegistration + "' " +
-                                        "from Solace");
-                            } else {
-                                log.error("Error while deleting registered API '" + apiNameForRegistration + "' " +
-                                        "in Solace");
-                                throw new HttpResponseException(response6.getStatusLine().getStatusCode(),
-                                        response6.getStatusLine().getReasonPhrase());
-                            }
-                            throw new HttpResponseException(response3.getStatusLine().getStatusCode(),
-                                    response3.getStatusLine().getReasonPhrase());
-                        }
-                    } else {
-                        log.error("Error while registering API in Solace - '" + apiNameForRegistration + "'");
-                        throw new HttpResponseException(response2.getStatusLine().getStatusCode(),
-                                response2.getStatusLine().getReasonPhrase());
-                    }
-                } else {
-                    log.error("Error while finding API '" + apiNameForRegistration + "' in Solace");
-                    throw new HttpResponseException(response5.getStatusLine().getStatusCode(),
-                            response5.getStatusLine().getReasonPhrase());
-                }
-            } else {
-                log.error("Error while finding API product '" + apiNameWithContext + "' in Solace");
-                throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().
-                        getReasonPhrase());
-            }
-        } else {
-            log.error("Cannot find specified Solace environment - '" + environment.getName() + "'");
-            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
-                    getReasonPhrase());
-        }
-    }
-
-    private boolean undeployFromSolaceBroker(API api, ThirdPartyEnvironment environment) throws HttpResponseException,
-            APIManagementException {
-        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
-        String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
-        String[] apiContextParts = api.getContext().split("/");
-        String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +
-                "-" + apiContextParts[2];
-        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-
-        //delete API product from Solace
-        HttpResponse response1 = solaceAdminApis.deleteApiProduct(environment.getOrganization(), apiNameWithContext);
-        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-
-            log.info("API product '" + apiNameWithContext + "' has been deleted from Solace Broker");
-            //delete registered API from Solace
-            HttpResponse response2 = solaceAdminApis.deleteRegisteredAPI(environment.getOrganization(),
-                    apiNameForRegistration);
-            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                log.info("API product '" + apiNameWithContext + "' and API '" + apiNameForRegistration + "' have " +
-                        "been deleted from Solace broker");
-                return true;
-            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT) {
-                log.info("Registered API '" + apiNameWithContext + "' is still referenced for another API product. " +
-                        "Skipping API Deletion....");
-                return true;
-            } else {
-                log.error("Error occurred while deleting the API '" + apiNameForRegistration + "' from Solace Broker");
-                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().
-                        getReasonPhrase());
-            }
-        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT) {
-            log.error("Cannot undeploy. Solace API product '" + apiNameWithContext + "' is subscribed for a solace " +
-                    "Application");
-            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
-                    getReasonPhrase());
-        } else {
-            log.error("Error occurred while deleting the API Product '" + apiNameWithContext + "' from Solace Broker");
-            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
-                    getReasonPhrase());
-        }
-    }
-
-    @Override
-    public List<String> getTransportProtocolsForSolaceAPI(String definition) throws APIManagementException {
-        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
-        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-        HashSet<String> solaceTransportProtocols = new HashSet<>();
-        for (AaiChannelItem channel : aai20Document.getChannels()) {
-            solaceTransportProtocols.addAll(solaceAdminApis.getProtocols(channel));
-        }
-        ArrayList<String> solaceTransportProtocolsList = new ArrayList<>(solaceTransportProtocols);
-        return solaceTransportProtocolsList;
-    }
-
-    /**
-     * Get and patch client id for Solace application
-     *
-     * @return SolaceAdminApis  object to invoke Solace
-     * @throws APIManagementException If the Solace env configuration if not provided properly
-     */
-    private SolaceAdminApis getSolaceAdminApis()
-            throws APIManagementException {
-        Map<String, Environment>gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        Environment solaceEnvironment = null;
-
-        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
-                solaceEnvironment = entry.getValue();
-            }
-        }
-
-        if (solaceEnvironment != null) {
-            return new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
-                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
-                    get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
-        } else {
-            throw new APIManagementException("Solace Environment configurations are not provided properly");
-        }
-    }
 }

@@ -1,31 +1,21 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
-import io.swagger.annotations.*;
 import java.util.Objects;
 
-import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
-import javax.validation.Valid;
-
-
-
-public class ThirdPartyEnvironmentProtocolURIDTO   {
+public class GatewayEnvironmentProtocolURIDTO {
   
     private String protocol = null;
     private String endpointURI = null;
 
   /**
    **/
-  public ThirdPartyEnvironmentProtocolURIDTO protocol(String protocol) {
+  public GatewayEnvironmentProtocolURIDTO protocol(String protocol) {
     this.protocol = protocol;
     return this;
   }
@@ -43,7 +33,7 @@ public class ThirdPartyEnvironmentProtocolURIDTO   {
 
   /**
    **/
-  public ThirdPartyEnvironmentProtocolURIDTO endpointURI(String endpointURI) {
+  public GatewayEnvironmentProtocolURIDTO endpointURI(String endpointURI) {
     this.endpointURI = endpointURI;
     return this;
   }
@@ -68,7 +58,7 @@ public class ThirdPartyEnvironmentProtocolURIDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ThirdPartyEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURI = (ThirdPartyEnvironmentProtocolURIDTO) o;
+    GatewayEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURI = (GatewayEnvironmentProtocolURIDTO) o;
     return Objects.equals(protocol, thirdPartyEnvironmentProtocolURI.protocol) &&
         Objects.equals(endpointURI, thirdPartyEnvironmentProtocolURI.endpointURI);
   }

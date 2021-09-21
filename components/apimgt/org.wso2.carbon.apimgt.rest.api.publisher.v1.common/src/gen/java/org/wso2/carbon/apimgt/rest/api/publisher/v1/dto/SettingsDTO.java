@@ -1,30 +1,19 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
-import javax.validation.constraints.*;
 
 
-import io.swagger.annotations.*;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
 
 
 public class SettingsDTO   {
-  
+
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> scopes = new ArrayList<String>();
@@ -33,7 +22,6 @@ public class SettingsDTO   {
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = null;
-    private List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments = new ArrayList<ThirdPartyEnvironmentDTO>();
 
     private String authorizationHeader = null;
 
@@ -45,7 +33,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "https://localhost:9443/devportal", value = "The Developer Portal URL")
   @JsonProperty("devportalUrl")
   public String getDevportalUrl() {
@@ -62,7 +50,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("environment")
@@ -80,7 +68,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[\"apim:api_create\",\"apim:api_manage\",\"apim:api_publish\"]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
@@ -97,7 +85,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[]", value = "")
       @Valid
   @JsonProperty("monetizationAttributes")
@@ -115,7 +103,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("securityAuditProperties")
@@ -127,14 +115,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is External Stores configuration enabled 
+   * Is External Stores configuration enabled
    **/
   public SettingsDTO externalStoresEnabled(Boolean externalStoresEnabled) {
     this.externalStoresEnabled = externalStoresEnabled;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "true", value = "Is External Stores configuration enabled ")
   @JsonProperty("externalStoresEnabled")
   public Boolean isExternalStoresEnabled() {
@@ -145,14 +133,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Document Visibility configuration enabled 
+   * Is Document Visibility configuration enabled
    **/
   public SettingsDTO docVisibilityEnabled(Boolean docVisibilityEnabled) {
     this.docVisibilityEnabled = docVisibilityEnabled;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "false", value = "Is Document Visibility configuration enabled ")
   @JsonProperty("docVisibilityEnabled")
   public Boolean isDocVisibilityEnabled() {
@@ -163,7 +151,7 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Cross Tenant Subscriptions Enabled 
+   * Is Cross Tenant Subscriptions Enabled
    **/
   public SettingsDTO crossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
     this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
@@ -178,24 +166,6 @@ public class SettingsDTO   {
   }
   public void setCrossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
     this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
-  }
-
-  /**
-   **/
-  public SettingsDTO thirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
-    this.thirdPartyEnvironments = thirdPartyEnvironments;
-    return this;
-  }
-
-
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("thirdPartyEnvironments")
-  public List<ThirdPartyEnvironmentDTO> getThirdPartyEnvironments() {
-    return thirdPartyEnvironments;
-  }
-  public void setThirdPartyEnvironments(List<ThirdPartyEnvironmentDTO> thirdPartyEnvironments) {
-    this.thirdPartyEnvironments = thirdPartyEnvironments;
   }
 
 
@@ -234,14 +204,14 @@ public class SettingsDTO   {
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
+        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled);
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
-        Objects.equals(authorizationHeader, settings.authorizationHeader) &&
-        Objects.equals(thirdPartyEnvironments, settings.thirdPartyEnvironments);
+        Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader, thirdPartyEnvironments);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
   }
 
   @Override
@@ -258,7 +228,6 @@ public class SettingsDTO   {
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
-    sb.append("    thirdPartyEnvironments: ").append(toIndentedString(thirdPartyEnvironments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

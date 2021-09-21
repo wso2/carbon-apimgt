@@ -179,6 +179,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -5074,7 +5075,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.SOLACE_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
                 apiDTOFromProperties.getPolicies().add("AsyncUnlimited");
                 apiDTOFromProperties.getTags().add("SolaceAPI");
-                apiDTOFromProperties.setAsyncTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(definitionToAdd));
+                apiDTOFromProperties.setAsyncTransportProtocols(SolaceNotifierUtils.getTransportProtocolsForSolaceAPI(definitionToAdd));
             }
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername(), organization);

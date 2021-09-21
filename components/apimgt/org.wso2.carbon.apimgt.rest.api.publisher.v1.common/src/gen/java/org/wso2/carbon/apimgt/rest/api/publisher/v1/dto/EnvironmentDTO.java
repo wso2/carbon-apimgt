@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
+
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
 
 import io.swagger.annotations.*;
-import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
@@ -27,8 +27,12 @@ public class EnvironmentDTO   {
     private String displayName = null;
     private String type = null;
     private String serverUrl = null;
+    private String provider = null;
     private Boolean showInApiConsole = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
+    private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
+    private Map<String,String> additionalProperties = new HashMap<>();
+
 
   /**
    **/
@@ -90,7 +94,61 @@ public class EnvironmentDTO   {
     return this;
   }
 
-  
+  /**
+   **/
+  public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+  @Valid
+  @JsonProperty("endpointURIs")
+  public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
+    return endpointURIs;
+  }
+  public void setEndpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO additionalProperties(Map<String,String> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+  @Valid
+  @JsonProperty("additionalProperties")
+  public Map<String, String> getAdditionalProperties() {
+    return additionalProperties;
+  }
+
+  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO provider(String provider) {
+    this.provider = provider;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "wso2", required = true, value = "")
+  @JsonProperty("provider")
+  @NotNull
+  public String getProvider() {
+    return provider;
+  }
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+
   @ApiModelProperty(example = "https://localhost:9443/services/", required = true, value = "")
   @JsonProperty("serverUrl")
   @NotNull
@@ -152,7 +210,8 @@ public class EnvironmentDTO   {
         Objects.equals(type, environment.type) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
-        Objects.equals(vhosts, environment.vhosts);
+        Objects.equals(vhosts, environment.vhosts) &&
+        Objects.equals(endpointURIs, environment.endpointURIs);
   }
 
   @Override
@@ -171,6 +230,7 @@ public class EnvironmentDTO   {
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
+    sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("}");
     return sb.toString();
   }

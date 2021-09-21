@@ -117,6 +117,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -1903,7 +1904,7 @@ public class APIMappingUtil {
                 infoDTO.setProtocol(model.getProtocol());
                 if (AsyncApiParserUtil.isSolaceAPIFromAsyncAPIDefinition(model.getContent())) {
                     infoDTO.setGatewayVendor(APIConstants.SOLACE_ENVIRONMENT);
-                    infoDTO.asyncTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(model.getContent()));
+                    infoDTO.asyncTransportProtocols(SolaceNotifierUtils.getTransportProtocolsForSolaceAPI(model.getContent()));
                 }
                 responseDTO.setInfo(infoDTO);
             }
