@@ -31,8 +31,8 @@ import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -258,7 +258,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         int numberOfDeployedEnvironmentsInSolace = 0;
         for (Environment environment : environments) {
             String apiNameWithContext = generateApiProductNameForSolaceBroker(api, environment.getName());
-            SolaceAdminApis solaceAdminApis = org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils.getSolaceAdminApis();
+            SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
             HttpResponse response = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(APIConstants.
                     SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -291,7 +291,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     private void deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts, String organization)
             throws IOException, APIManagementException {
 
-        SolaceAdminApis solaceAdminApis = org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils.getSolaceAdminApis();
+        SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
 
         // check existence of the developer
         HttpResponse response1 = solaceAdminApis.developerGet(organization);

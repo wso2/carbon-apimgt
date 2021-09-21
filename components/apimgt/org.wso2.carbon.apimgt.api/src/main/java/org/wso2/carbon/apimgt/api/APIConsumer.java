@@ -990,13 +990,4 @@ public interface APIConsumer extends APIManager {
      */
     List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
 
-
-    //Todo:Add method descriptions
-    void renameSolaceApplication(String organization, Application application) throws APIManagementException;
-
-    boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException;
-
-    String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException;
-
-    void patchSolaceApplicationClientId(String organization, Application application, String consumerKey) throws APIManagementException;
 }

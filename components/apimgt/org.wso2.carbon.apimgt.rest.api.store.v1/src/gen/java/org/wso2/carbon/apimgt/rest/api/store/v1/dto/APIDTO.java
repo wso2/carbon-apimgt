@@ -1,13 +1,29 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
 
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
@@ -611,25 +627,24 @@ public class APIDTO   {
   }
 
   /**
-   *
    **/
-  public APIDTO getGatewayVendor(String gatewayVendor) {
+  public APIDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
   }
 
-
-  @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+  
+  @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
-
   public String getGatewayVendor() {
     return gatewayVendor;
   }
   public void setGatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
   }
+
   /**
-   * Supported transports for the solace API (http and/or https). 
+   * Supported transports for the aync API (http and/or https). 
    **/
   public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
     this.asyncTransportProtocols = asyncTransportProtocols;
@@ -637,8 +652,8 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
-  @JsonProperty("solaceTransportProtocols")
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the aync API (http and/or https). ")
+  @JsonProperty("asyncTransportProtocols")
   public List<String> getAsyncTransportProtocols() {
     return asyncTransportProtocols;
   }
@@ -751,8 +766,8 @@ public class APIDTO   {
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    solaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
-    sb.append("    solaceTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("    solaceEndpointURLs: ").append(toIndentedString(solaceEndpointURLs)).append("\n");
     sb.append("}");
     return sb.toString();

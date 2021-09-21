@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
@@ -42,6 +41,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SolaceTopicsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceDeployedEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceTopicsObjectDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.solace.utils.SolaceBrokerUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,8 +79,8 @@ public class ApplicationMappingUtil {
             Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
             for (SubscribedAPI subscribedAPI : subscriptions) {
                 API api = apiConsumer.getAPI(subscribedAPI.getApiId());
-                if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
-                    applicationDTO.setSolaceOrganization(apiConsumer.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
+                if (SolaceBrokerUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+                    applicationDTO.setSolaceOrganization(SolaceBrokerUtils.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
                 }
             }
 
@@ -237,7 +238,7 @@ public class ApplicationMappingUtil {
         Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
         for (SubscribedAPI subscribedAPI : subscriptions) {
             API api = apiConsumer.getAPI(subscribedAPI.getApiId());
-            if (apiConsumer.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+            if (SolaceBrokerUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
                 return true;
             }
         }

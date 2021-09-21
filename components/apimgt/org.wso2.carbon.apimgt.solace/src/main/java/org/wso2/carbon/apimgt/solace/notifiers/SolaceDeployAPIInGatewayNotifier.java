@@ -34,8 +34,8 @@ import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 

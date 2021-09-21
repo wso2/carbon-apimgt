@@ -3,11 +3,17 @@ package org.wso2.carbon.apimgt.solace.utils;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.solace.notifiers.SolaceDeployAPIInGatewayNotifier;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SolaceNotifierUtils {
-
+    private static final Log log = LogFactory.getLog(SolaceNotifierUtils.class);
 
     /**
      * Get and patch client id for Solace application

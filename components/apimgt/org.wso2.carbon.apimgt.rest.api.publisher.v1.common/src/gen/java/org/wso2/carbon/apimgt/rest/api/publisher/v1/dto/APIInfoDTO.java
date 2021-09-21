@@ -353,17 +353,15 @@ return null;
   }
 
   /**
-   *
    **/
-  public APIInfoDTO getGatewayVendor(String gatewayVendor) {
+  public APIInfoDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
   }
 
-
-  @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+  
+  @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
-
   public String getGatewayVendor() {
     return gatewayVendor;
   }
@@ -426,7 +424,7 @@ return null;
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
-    sb.append("    isSolaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -209,14 +209,16 @@ public class EnvironmentDTO   {
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(type, environment.type) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
+        Objects.equals(provider, environment.provider) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
         Objects.equals(vhosts, environment.vhosts) &&
-        Objects.equals(endpointURIs, environment.endpointURIs);
+        Objects.equals(endpointURIs, environment.endpointURIs)&&
+        Objects.equals(additionalProperties, environment.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, type, serverUrl, showInApiConsole, vhosts);
+    return Objects.hash(name, displayName, type, serverUrl, provider, showInApiConsole, vhosts, additionalProperties);
   }
 
   @Override
@@ -228,9 +230,11 @@ public class EnvironmentDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
+    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

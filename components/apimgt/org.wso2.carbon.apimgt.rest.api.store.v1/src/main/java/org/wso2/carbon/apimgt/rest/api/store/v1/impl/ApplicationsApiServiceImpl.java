@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.solace.utils.SolaceBrokerUtils;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -486,7 +487,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
         if (newApp.isContainsSolaceApis()) {
             if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
-                apiConsumer.renameSolaceApplication(newApp.getSolaceOrganization(), application);
+                SolaceBrokerUtils.renameSolaceApplication(newApp.getSolaceOrganization(), application);
             }
         }
 
@@ -757,7 +758,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             jsonParams, keyManagerName, organization, false);
                     if (ApplicationMappingUtil.containsSolaceApis(application)) {
                         ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-                        apiConsumer.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
+                        SolaceBrokerUtils.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
                     }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
@@ -1223,7 +1224,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         // for solace applications
                         if (ApplicationMappingUtil.containsSolaceApis(application)) {
                             ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-                            apiConsumer.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
+                            SolaceBrokerUtils.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
                         }
                         return Response.ok().entity(appToken).build();
                     } catch (APIManagementException e) {

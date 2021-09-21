@@ -2,18 +2,35 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 
+import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
@@ -1217,30 +1234,28 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
-    /**
-     *
-     **/
-    public APIDTO getGatewayVendor(String gatewayVendor) {
-        this.gatewayVendor = gatewayVendor;
-        return this;
-    }
+  /**
+   **/
+  public APIDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
 
-
-    @ApiModelProperty(value = "contains the gateway vendor of the deployment")
-    @JsonProperty("gatewayVendor")
-
-    public String getGatewayVendor() {
-        return gatewayVendor;
-    }
-    public void setGatewayVendor(String gatewayVendor) {
-        this.gatewayVendor = gatewayVendor;
-    }
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
 
   /**
-   * Supported transports for the solace API (http and/or https). 
+   * Supported transports for the async API (http and/or https). 
    **/
-  public APIDTO asyncTransportProtocols(List<String> solaceTransportProtocols) {
-    this.asyncTransportProtocols = solaceTransportProtocols;
+  public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
     return this;
   }
 
@@ -1382,8 +1397,8 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
-    sb.append("    solaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
-    sb.append("    solaceTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

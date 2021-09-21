@@ -82,9 +82,9 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
-import org.wso2.carbon.apimgt.solace.notifiers.SolaceApplicationNotifier;
-import org.wso2.carbon.apimgt.solace.notifiers.SolaceDeployAPIInGatewayNotifier;
-import org.wso2.carbon.apimgt.solace.notifiers.SolaceSubscriptionsNotifier;
+//import org.wso2.carbon.apimgt.solace.notifiers.SolaceApplicationNotifier;
+//import org.wso2.carbon.apimgt.solace.notifiers.SolaceDeployAPIInGatewayNotifier;
+//import org.wso2.carbon.apimgt.solace.notifiers.SolaceSubscriptionsNotifier;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -202,6 +202,10 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
+//            bundleContext.registerService(Notifier.class.getName(), new SolaceDeployAPIInGatewayNotifier(), null);
+//            bundleContext.registerService(Notifier.class.getName(),new SolaceSubscriptionsNotifier(),null);
+//            bundleContext.registerService(Notifier.class.getName(),new SolaceApplicationNotifier(),null);
+
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();

@@ -45,7 +45,6 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -70,6 +69,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;

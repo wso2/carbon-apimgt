@@ -8065,7 +8065,6 @@ components:
         gatewayVendor:
           type: string
           example: wso2
-
     Topic:
       title: Topic object
       required:
@@ -9874,6 +9873,9 @@ components:
         serverUrl:
           type: string
           example: https://localhost:9443/services/
+        provider:
+          type: string
+          example: wso2
         showInApiConsole:
           type: boolean
           example: true
@@ -9881,6 +9883,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VHost'
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayEnvironmentProtocolURI'
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalProperty'
     EnvironmentList:
       title: Environment List
       type: object
@@ -9894,6 +9904,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    AdditionalProperty:
+      title: Additional Gateway Properties
+      type: object
+      properties:
+        key:
+          type: string
+          example: Organization
+        value:
+          type: string
+          example: wso2
     VHost:
       title: Virtual Host
       type: object
@@ -10966,10 +10986,6 @@ components:
           type: string
           description: Authorization Header
           example: authorization
-        thirdPartyEnvironments:
-          type: array
-          items:
-            $ref: '#/components/schemas/ThirdPartyEnvironment'
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
@@ -11244,32 +11260,8 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
-    ThirdPartyEnvironment:
-      title: ThirdParty Environment
-      required:
-        - name
-        - organization
-        - provider
-      type: object
-      properties:
-        name:
-          type: string
-          example: default
-        organization:
-          type: string
-          example: default
-        provider:
-          type: string
-          example: default
-        displayName:
-          type: string
-          example: default
-        endpointURIs:
-          type: array
-          items:
-            $ref: '#/components/schemas/ThirdPartyEnvironmentProtocolURI'
-    ThirdPartyEnvironmentProtocolURI:
-      title: ThirdParty Environment protocols and URIs
+    GatewayEnvironmentProtocolURI:
+      title: Gateway Environment protocols and URIs
       required:
         - protocol
         - endpointURI
@@ -11281,19 +11273,6 @@ components:
         endpointURI:
           type: string
           example: default
-    ThirdPartyEnvironmentList:
-      title: ThirdParty EnvironmentList
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of Third party environments returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/ThirdPartyEnvironment'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

@@ -1,16 +1,25 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.*;
 
 /**
  * API definition information
  **/
 
+import io.swagger.annotations.*;
 import java.util.Objects;
+
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 @ApiModel(description = "API definition information")
 
@@ -147,17 +156,15 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   }
 
   /**
-   *
    **/
-  public AsyncAPISpecificationValidationResponseInfoDTO getGatewayVendor(String gatewayVendor) {
+  public AsyncAPISpecificationValidationResponseInfoDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
   }
 
-
-  @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+  
+  @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
-
   public String getGatewayVendor() {
     return gatewayVendor;
   }
@@ -166,20 +173,19 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   }
 
   /**
-   * contains available transports for an Async API
+   * contains available transports for an async API
    **/
   public AsyncAPISpecificationValidationResponseInfoDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
     this.asyncTransportProtocols = asyncTransportProtocols;
     return this;
   }
 
-
-  @ApiModelProperty(value = "contains available transports for an Async API")
-  @JsonProperty("solaceTransportProtocols")
+  
+  @ApiModelProperty(value = "contains available transports for an async API")
+  @JsonProperty("asyncTransportProtocols")
   public List<String> getAsyncTransportProtocols() {
     return asyncTransportProtocols;
   }
-
   public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
     this.asyncTransportProtocols = asyncTransportProtocols;
   }
@@ -222,8 +228,8 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     sb.append("    asyncAPIVersion: ").append(toIndentedString(asyncAPIVersion)).append("\n");
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
-    sb.append("    isSolaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
-    sb.append("    solaceTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }
