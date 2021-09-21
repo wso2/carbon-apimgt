@@ -92,8 +92,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
-    private boolean isSolaceAPI = false;
-    private String solaceTransportProtocols;
+    private String gatewayVendor;
+    private String asyncTransportProtocols;
     
     private String audience;
 
@@ -561,14 +561,20 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.asyncApiDefinition = asyncApiDefinition;
     }
 
-    public boolean isSolaceAPI() { return isSolaceAPI; }
+    @Override
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
 
-    public void setSolaceAPI(boolean solaceAPI) { isSolaceAPI = solaceAPI; }
+    @Override
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
 
-    public String getSolaceTransportProtocols() { return solaceTransportProtocols; }
+    public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
 
-    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
-        this.solaceTransportProtocols = solaceTransportProtocols;
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
     @Override

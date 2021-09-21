@@ -84,9 +84,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -274,9 +272,12 @@ public class APIMappingUtil {
         dto.setCategories(categoryNamesList);
         dto.setKeyManagers(model.getKeyManagers());
 
-        dto.setSolaceAPI(model.isSolaceAPI());
-        if (model.getSolaceTransportProtocols() != null) {
-            dto.setSolaceTransportProtocols(Arrays.asList(model.getSolaceTransportProtocols().split(",")));
+        if (dto.getGatewayVendor() != null) {
+            model.setGatewayVendor(dto.getGatewayVendor());
+        }
+        
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
 
         return dto;
@@ -474,7 +475,7 @@ public class APIMappingUtil {
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
         }
 
-        if (apidto.isSolaceAPI()) {
+        if (APIConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
             apidto.setSolaceEndpointURLs(setEndpointURLsForSolaceAPI(model, organization));
         }
         return apidto;
@@ -497,7 +498,7 @@ public class APIMappingUtil {
                             dto.setEnvironmentName(environment.getName());
                             dto.setEnvironmentDisplayName(environment.getDisplayName());
                             dto.setEnvironmentOrganization(environment.getOrganization());
-                            dto.setSolaceURLs(getSolaceURLs(environment.getOrganization(), environment.getName(), apidto.getSolaceTransportProtocols()));
+                            dto.setSolaceURLs(getSolaceURLs(environment.getOrganization(), environment.getName(), apidto.getAsyncTransportProtocols()));
                             solaceEndpointURLsList.add(dto);
                         }
                     }

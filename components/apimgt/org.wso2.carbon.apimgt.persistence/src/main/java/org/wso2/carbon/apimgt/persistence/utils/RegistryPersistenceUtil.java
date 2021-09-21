@@ -280,10 +280,10 @@ public class RegistryPersistenceUtil {
             }
 
             //set boolean for Solace API
-            artifact.setAttribute(APIConstants.API_IS_SOLACE_API, Boolean.toString(api.isSolaceAPI()));
+            artifact.setAttribute(APIConstants.API_GATEWAY_VENDOR, api.getGatewayVendor());
 
             //set solace transport protocols
-            artifact.setAttribute(APIConstants.SOLACE_API_TRANSPORT_PROTOCOLS, api.getSolaceTransportProtocols());
+            artifact.setAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS, api.getAsyncTransportProtocols());
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCE, api.getAudience());
 
@@ -694,8 +694,8 @@ public class RegistryPersistenceUtil {
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
-            api.setSolaceAPI(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_IS_SOLACE_API)));
-            api.setSolaceTransportProtocols(artifact.getAttribute(APIConstants.SOLACE_API_TRANSPORT_PROTOCOLS));
+            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            api.setAsyncTransportProtocols(artifact.getAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS));
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);

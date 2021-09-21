@@ -1,29 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
 
-import io.swagger.annotations.*;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
@@ -62,8 +46,8 @@ public class APIDTO   {
     private Object keyManagers = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
-    private Boolean solaceAPI = null;
-    private List<String> solaceTransportProtocols = new ArrayList<String>();
+    private String gatewayVendor = null;
+    private List<String> asyncTransportProtocols = new ArrayList<String>();
     private List<APISolaceEndpointURLsDTO> solaceEndpointURLs = new ArrayList<APISolaceEndpointURLsDTO>();
 
   /**
@@ -627,38 +611,39 @@ public class APIDTO   {
   }
 
   /**
+   *
    **/
-  public APIDTO solaceAPI(Boolean solaceAPI) {
-    this.solaceAPI = solaceAPI;
+  public APIDTO getGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
     return this;
   }
 
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("solaceAPI")
-  public Boolean isSolaceAPI() {
-    return solaceAPI;
-  }
-  public void setSolaceAPI(Boolean solaceAPI) {
-    this.solaceAPI = solaceAPI;
-  }
 
+  @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+  @JsonProperty("gatewayVendor")
+
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
   /**
    * Supported transports for the solace API (http and/or https). 
    **/
-  public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
-    this.solaceTransportProtocols = solaceTransportProtocols;
+  public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
     return this;
   }
 
   
   @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
   @JsonProperty("solaceTransportProtocols")
-  public List<String> getSolaceTransportProtocols() {
-    return solaceTransportProtocols;
+  public List<String> getAsyncTransportProtocols() {
+    return asyncTransportProtocols;
   }
-  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
-    this.solaceTransportProtocols = solaceTransportProtocols;
+  public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
   }
 
   /**
@@ -720,14 +705,14 @@ public class APIDTO   {
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
-        Objects.equals(solaceAPI, API.solaceAPI) &&
-        Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols) &&
+        Objects.equals(gatewayVendor, API.gatewayVendor) &&
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
         Objects.equals(solaceEndpointURLs, API.solaceEndpointURLs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, solaceAPI, solaceTransportProtocols, solaceEndpointURLs);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, solaceEndpointURLs);
   }
 
   @Override
@@ -766,8 +751,8 @@ public class APIDTO   {
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    solaceAPI: ").append(toIndentedString(solaceAPI)).append("\n");
-    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
+    sb.append("    solaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("    solaceEndpointURLs: ").append(toIndentedString(solaceEndpointURLs)).append("\n");
     sb.append("}");
     return sb.toString();

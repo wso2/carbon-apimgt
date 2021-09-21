@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1268,29 +1267,29 @@ public class API implements Serializable {
     }
 
     /**
-     * Property to indicate whether this is a solace API.
+     * Property to indicate the gateway vendor to deploy API
      */
-    private boolean isSolaceAPI = false;
+    private String gatewayVendor;
 
-    public boolean isSolaceAPI() {
-        return isSolaceAPI;
+    public String getGatewayVendor() {
+        return gatewayVendor;
     }
 
-    public void setSolaceAPI(boolean solaceAPI) {
-        isSolaceAPI = solaceAPI;
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
     }
 
     /**
-     * Property to hold Solace API transport protocols
+     * Property to hold Async API transport protocols
      */
-    private String solaceTransportProtocols;
+    private String asyncTransportProtocols;
 
-    public String getSolaceTransportProtocols() {
-        return solaceTransportProtocols;
+    public String getAsyncTransportProtocols() {
+        return asyncTransportProtocols;
     }
 
-    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
-        this.solaceTransportProtocols = solaceTransportProtocols;
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
 }

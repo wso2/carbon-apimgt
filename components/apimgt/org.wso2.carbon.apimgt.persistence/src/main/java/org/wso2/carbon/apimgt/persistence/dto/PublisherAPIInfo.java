@@ -37,7 +37,7 @@ public class PublisherAPIInfo {
     private String thumbnail; // thumbnail is not required for normal ApiGet
     private String createdTime;
     private Date updatedTime;
-    private boolean isSolaceAPI;
+    private String gatewayVendor;
     private String audience;
     private Map<String, String> additionalProperties;
     private String description;
@@ -130,12 +130,12 @@ public class PublisherAPIInfo {
         this.description = description;
     }
 
-    public boolean isSolaceAPI() {
-        return isSolaceAPI;
+    public String getGatewayVendor() {
+        return gatewayVendor;
     }
 
-    public void setSolaceAPI(boolean solaceAPI) {
-        isSolaceAPI = solaceAPI;
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
     }
 
     @Override

@@ -1,25 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.*;
 
 /**
  * API definition information
  **/
 
-import io.swagger.annotations.*;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
-
-import javax.validation.Valid;
 
 @ApiModel(description = "API definition information")
 
@@ -32,8 +23,8 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     private String asyncAPIVersion = null;
     private String protocol = null;
     private List<String> endpoints = new ArrayList<String>();
-    private Boolean isSolaceAPI = null;
-    private List<String> solaceTransportProtocols = new ArrayList<String>();
+    private String gatewayVendor = null;
+    private List<String> asyncTransportProtocols = new ArrayList<String>();
 
   /**
    **/
@@ -156,38 +147,41 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   }
 
   /**
+   *
    **/
-  public AsyncAPISpecificationValidationResponseInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
-    this.isSolaceAPI = isSolaceAPI;
+  public AsyncAPISpecificationValidationResponseInfoDTO getGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
     return this;
   }
 
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("isSolaceAPI")
-  public Boolean isIsSolaceAPI() {
-    return isSolaceAPI;
+
+  @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+  @JsonProperty("gatewayVendor")
+
+  public String getGatewayVendor() {
+    return gatewayVendor;
   }
-  public void setIsSolaceAPI(Boolean isSolaceAPI) {
-    this.isSolaceAPI = isSolaceAPI;
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
   }
 
   /**
-   * contains available transports for s solace API
+   * contains available transports for an Async API
    **/
-  public AsyncAPISpecificationValidationResponseInfoDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
-    this.solaceTransportProtocols = solaceTransportProtocols;
+  public AsyncAPISpecificationValidationResponseInfoDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
     return this;
   }
 
-  
-  @ApiModelProperty(value = "contains available transports for s solace API")
+
+  @ApiModelProperty(value = "contains available transports for an Async API")
   @JsonProperty("solaceTransportProtocols")
-  public List<String> getSolaceTransportProtocols() {
-    return solaceTransportProtocols;
+  public List<String> getAsyncTransportProtocols() {
+    return asyncTransportProtocols;
   }
-  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
-    this.solaceTransportProtocols = solaceTransportProtocols;
+
+  public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
   }
 
 
@@ -207,13 +201,13 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
         Objects.equals(asyncAPIVersion, asyncAPISpecificationValidationResponseInfo.asyncAPIVersion) &&
         Objects.equals(protocol, asyncAPISpecificationValidationResponseInfo.protocol) &&
         Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints) &&
-        Objects.equals(isSolaceAPI, asyncAPISpecificationValidationResponseInfo.isSolaceAPI) &&
-        Objects.equals(solaceTransportProtocols, asyncAPISpecificationValidationResponseInfo.solaceTransportProtocols);
+        Objects.equals(gatewayVendor, asyncAPISpecificationValidationResponseInfo.gatewayVendor) &&
+        Objects.equals(asyncTransportProtocols, asyncAPISpecificationValidationResponseInfo.asyncTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints, isSolaceAPI, solaceTransportProtocols);
+    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -228,8 +222,8 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     sb.append("    asyncAPIVersion: ").append(toIndentedString(asyncAPIVersion)).append("\n");
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
-    sb.append("    isSolaceAPI: ").append(toIndentedString(isSolaceAPI)).append("\n");
-    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
+    sb.append("    isSolaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

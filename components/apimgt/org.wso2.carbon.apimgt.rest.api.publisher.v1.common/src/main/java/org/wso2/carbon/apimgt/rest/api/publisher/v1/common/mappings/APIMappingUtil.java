@@ -415,13 +415,13 @@ public class APIMappingUtil {
         if (dto.getAudience() != null) {
             model.setAudience(dto.getAudience().toString());
         }
-        if (dto.isSolaceAPI() != null) {
-            model.setSolaceAPI(dto.isSolaceAPI());
+        if (dto.getGatewayVendor() != null) {
+            model.setGatewayVendor(dto.getGatewayVendor());
         }
 
-        if (dto.getSolaceTransportProtocols() != null) {
-            String solaceTransports = StringUtils.join(dto.getSolaceTransportProtocols(), ',');
-            model.setSolaceTransportProtocols(solaceTransports);
+        if (dto.getAsyncTransportProtocols() != null) {
+            String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
+            model.setAsyncTransportProtocols(asyncTransports);
         }
 
         return model;
@@ -718,7 +718,7 @@ public class APIMappingUtil {
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
-        apiInfoDTO.setIsSolaceAPI(api.isSolaceAPI());
+        apiInfoDTO.getGatewayVendor(api.getGatewayVendor());
         return apiInfoDTO;
     }
 
@@ -1306,9 +1306,9 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
-        dto.setSolaceAPI(model.isSolaceAPI());
-        if (model.getSolaceTransportProtocols() != null) {
-            dto.setSolaceTransportProtocols(Arrays.asList(model.getSolaceTransportProtocols().split(",")));
+        dto.getGatewayVendor(model.getGatewayVendor());
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
 
         return dto;
@@ -1901,9 +1901,9 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
-                infoDTO.isSolaceAPI(AsyncApiParserUtil.isSolaceAPIFromAsyncAPIDefinition(model.getContent()));
-                if (infoDTO.isIsSolaceAPI()) {
-                    infoDTO.solaceTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(model.getContent()));
+                if (AsyncApiParserUtil.isSolaceAPIFromAsyncAPIDefinition(model.getContent())) {
+                    infoDTO.setGatewayVendor(APIConstants.SOLACE_ENVIRONMENT);
+                    infoDTO.asyncTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(model.getContent()));
                 }
                 responseDTO.setInfo(infoDTO);
             }

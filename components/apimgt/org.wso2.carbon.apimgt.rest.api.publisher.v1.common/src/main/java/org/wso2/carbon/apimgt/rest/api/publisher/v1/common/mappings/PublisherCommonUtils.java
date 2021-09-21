@@ -1055,8 +1055,8 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Specified policy " + body.getApiThrottlingPolicy() + " is invalid",
                     ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
-        if (body.isSolaceAPI() == null) {
-            body.setSolaceAPI(false);
+        if (body.getGatewayVendor() == null) {
+            body.setGatewayVendor("wso2");
         }
 
         API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
@@ -1116,8 +1116,9 @@ public class PublisherCommonUtils {
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
-        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
-                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()) || existingAPI.isSolaceAPI());
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
+                API_TYPE_WS.equals(existingAPI.getType()) || APIConstants.SOLACE_ENVIRONMENT.equals
+                (existingAPI.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }

@@ -2,35 +2,18 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 
-import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
@@ -310,8 +293,8 @@ return null;
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
-    private Boolean solaceAPI = null;
-    private List<String> solaceTransportProtocols = new ArrayList<String>();
+    private String gatewayVendor = null;
+    private List<String> asyncTransportProtocols = new ArrayList<String>();
 
   /**
    * UUID of the api registry artifact 
@@ -1234,39 +1217,41 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
-  /**
-   **/
-  public APIDTO solaceAPI(Boolean solaceAPI) {
-    this.solaceAPI = solaceAPI;
-    return this;
-  }
+    /**
+     *
+     **/
+    public APIDTO getGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+        return this;
+    }
 
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("solaceAPI")
-  public Boolean isSolaceAPI() {
-    return solaceAPI;
-  }
-  public void setSolaceAPI(Boolean solaceAPI) {
-    this.solaceAPI = solaceAPI;
-  }
+
+    @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+    @JsonProperty("gatewayVendor")
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
 
   /**
    * Supported transports for the solace API (http and/or https). 
    **/
-  public APIDTO solaceTransportProtocols(List<String> solaceTransportProtocols) {
-    this.solaceTransportProtocols = solaceTransportProtocols;
+  public APIDTO asyncTransportProtocols(List<String> solaceTransportProtocols) {
+    this.asyncTransportProtocols = solaceTransportProtocols;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the solace API (http and/or https). ")
-  @JsonProperty("solaceTransportProtocols")
-  public List<String> getSolaceTransportProtocols() {
-    return solaceTransportProtocols;
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the async API (http and/or https). ")
+  @JsonProperty("asyncTransportProtocols")
+  public List<String> getAsyncTransportProtocols() {
+    return asyncTransportProtocols;
   }
-  public void setSolaceTransportProtocols(List<String> solaceTransportProtocols) {
-    this.solaceTransportProtocols = solaceTransportProtocols;
+  public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
+    this.asyncTransportProtocols = asyncTransportProtocols;
   }
 
 
@@ -1331,13 +1316,13 @@ return null;
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(serviceInfo, API.serviceInfo) &&
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
-        Objects.equals(solaceAPI, API.solaceAPI) &&
-        Objects.equals(solaceTransportProtocols, API.solaceTransportProtocols);
+        Objects.equals(gatewayVendor, API.gatewayVendor) &&
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, solaceAPI, solaceTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -1397,8 +1382,8 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
-    sb.append("    solaceAPI: ").append(toIndentedString(solaceAPI)).append("\n");
-    sb.append("    solaceTransportProtocols: ").append(toIndentedString(solaceTransportProtocols)).append("\n");
+    sb.append("    solaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    solaceTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

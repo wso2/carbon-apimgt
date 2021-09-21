@@ -73,7 +73,7 @@ return null;
     private List<String> securityScheme = new ArrayList<String>();
     private String createdTime = null;
     private String updatedTime = null;
-    private Boolean isSolaceAPI = null;
+    private String gatewayVendor = null;
 
   /**
    **/
@@ -353,20 +353,22 @@ return null;
   }
 
   /**
+   *
    **/
-  public APIInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
-    this.isSolaceAPI = isSolaceAPI;
+  public APIInfoDTO getGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
     return this;
   }
 
-  
-  @ApiModelProperty(example = "false", value = "")
-  @JsonProperty("isSolaceAPI")
-  public Boolean isIsSolaceAPI() {
-    return isSolaceAPI;
+
+  @ApiModelProperty(value = "contains the gateway vendor of the deployment")
+  @JsonProperty("gatewayVendor")
+
+  public String getGatewayVendor() {
+    return gatewayVendor;
   }
-  public void setIsSolaceAPI(Boolean isSolaceAPI) {
-    this.isSolaceAPI = isSolaceAPI;
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
   }
 
 
@@ -395,12 +397,12 @@ return null;
         Objects.equals(securityScheme, apIInfo.securityScheme) &&
         Objects.equals(createdTime, apIInfo.createdTime) &&
         Objects.equals(updatedTime, apIInfo.updatedTime) &&
-        Objects.equals(isSolaceAPI, apIInfo.isSolaceAPI);
+        Objects.equals(gatewayVendor, apIInfo.gatewayVendor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, isSolaceAPI);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor);
   }
 
   @Override
@@ -424,7 +426,7 @@ return null;
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
-    sb.append("    isSolaceAPI: ").append(toIndentedString(isSolaceAPI)).append("\n");
+    sb.append("    isSolaceAPI: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("}");
     return sb.toString();
   }

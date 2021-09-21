@@ -60,8 +60,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
-    private boolean isSolaceAPI = false;
-    private String solaceTransportProtocols;
+    private String gatewayVendor;
+    private String asyncTransportProtocols;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -304,14 +304,18 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
-    public boolean isSolaceAPI() { return isSolaceAPI; }
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
 
-    public void setSolaceAPI(boolean solaceAPI) { isSolaceAPI = solaceAPI; }
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
 
-    public String getSolaceTransportProtocols() { return solaceTransportProtocols; }
+    public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
 
-    public void setSolaceTransportProtocols(String solaceTransportProtocols) {
-        this.solaceTransportProtocols = solaceTransportProtocols;
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
     @Override

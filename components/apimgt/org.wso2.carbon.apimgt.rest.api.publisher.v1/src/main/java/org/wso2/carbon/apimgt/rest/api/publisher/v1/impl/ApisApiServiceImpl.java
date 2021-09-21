@@ -87,7 +87,6 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -5073,10 +5072,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isServiceAPI) {
                 apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
             }
-            if (apiDTOFromProperties.isSolaceAPI()) {
+            if (APIConstants.SOLACE_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
                 apiDTOFromProperties.getPolicies().add("AsyncUnlimited");
                 apiDTOFromProperties.getTags().add("SolaceAPI");
-                apiDTOFromProperties.setSolaceTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(definitionToAdd));
+                apiDTOFromProperties.setAsyncTransportProtocols(apiProvider.getTransportProtocolsForSolaceAPI(definitionToAdd));
             }
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
@@ -5092,7 +5091,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //load topics from AsyncAPI
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
-                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || apiDTOFromProperties.isSolaceAPI()));
+                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) || APIConstants.SOLACE_ENVIRONMENT.equals
+                            (apiToAdd.getGatewayVendor())));
             apiToAdd.setOrganization(organization);
             apiToAdd.setAsyncApiDefinition(definitionToAdd);
 

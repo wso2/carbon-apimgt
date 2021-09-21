@@ -39,7 +39,6 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +54,6 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -108,7 +106,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -983,7 +980,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
-                apiInfo.setSolaceAPI(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_IS_SOLACE_API)));
+                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1334,7 +1331,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));
                                 apiInfo.setUpdatedTime(resource.getLastModified());
-                                apiInfo.setSolaceAPI(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_IS_SOLACE_API)));
+                                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                                 publisherAPIInfoList.add(apiInfo);
