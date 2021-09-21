@@ -121,7 +121,6 @@ public class APIManagerConfiguration {
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
     }
-    private Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();
 
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
@@ -409,11 +408,13 @@ public class APIManagerConfiguration {
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_SERVER_URL)).getText()));
                     environment.setUserName(APIUtil.replaceSystemProperty(
-
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_USERNAME)).getText()));
                     OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
                             APIConstants.API_GATEWAY_PASSWORD));
+                    environment.setProvider(APIUtil.replaceSystemProperty(
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_PROVIDER)).getText()));
                     String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
                     environment.setPassword(APIUtil.replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
@@ -475,6 +476,18 @@ public class APIManagerConfiguration {
                                 httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
                         vhosts.add(vhost);
                     }
+                    OMElement properties = element.getFirstChildWithName(new
+                            QName(APIConstants.API_GATEWAY_ADDITIONAL_PROPERTIES));
+                    Iterator gatewayAdditionalProperties = properties.getChildrenWithLocalName
+                            (APIConstants.API_GATEWAY_ADDITIONAL_PROPERTY);
+                    Map<String, String> additionalProperties = new HashMap<>();
+                    while (gatewayAdditionalProperties.hasNext()) {
+                        OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
+                        String propName = propertyElem.getAttributeValue(new QName("name"));
+                        String propValue = propertyElem.getText();
+                        additionalProperties.put(propName, propValue);
+                    }
+                    environment.setAdditionalProperties(additionalProperties);
 
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
@@ -484,48 +497,6 @@ public class APIManagerConfiguration {
                          */
                         log.error("Duplicate environment name found in api-manager.xml " +
                                 environment.getName());
-                    }
-                }
-            } else if (APIConstants.THIRD_PARTY_ENVIRONMENTS.equals(localName)) {
-
-                Iterator thirdPartyEnvironmentIterator = element.getChildrenWithLocalName(APIConstants.THIRD_PARTY_ENVIRONMENT);
-                thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();
-
-                while (thirdPartyEnvironmentIterator.hasNext()) {
-                    ThirdPartyEnvironment thirdPartyEnvironment = new ThirdPartyEnvironment();
-                    OMElement thirdPartyEnvironmentElem = (OMElement) thirdPartyEnvironmentIterator.next();
-                    thirdPartyEnvironment.setProvider(thirdPartyEnvironmentElem.getAttributeValue(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_PROVIDER)));
-                    thirdPartyEnvironment.setName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_NAME)).getText());
-                    thirdPartyEnvironment.setOrganization(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_ORGANIZATION)).getText());
-                    thirdPartyEnvironment.setDisplayName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME)).getText());
-                    thirdPartyEnvironment.setServerURL(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_SERVER_URL)).getText());
-                    thirdPartyEnvironment.setUserName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_USERNAME)).getText());
-                    thirdPartyEnvironment.setPassword(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_PASSWORD)).getText());
-                    thirdPartyEnvironment.setDeveloper(thirdPartyEnvironmentElem.getFirstChildWithName(new QName(
-                            APIConstants.THIRD_PARTY_ENVIRONMENT_DEV_NAME)).getText());
-
-                    if (StringUtils.isEmpty(thirdPartyEnvironment.getDisplayName())) {
-                        thirdPartyEnvironment.setDisplayName(thirdPartyEnvironment.getName());
-                    }
-                    OMElement description =
-                            thirdPartyEnvironmentElem.getFirstChildWithName(new QName(APIConstants.
-                                    THIRD_PARTY_ENVIRONMENT_DESCRIPTION));
-
-                    if (description != null) {
-                        thirdPartyEnvironment.setDescription(description.getText());
-                    } else {
-                        thirdPartyEnvironment.setDescription("");
-                    }
-
-                    if (!thirdPartyEnvironments.containsKey(thirdPartyEnvironment.getName())) {
-                        thirdPartyEnvironments.put(thirdPartyEnvironment.getName(), thirdPartyEnvironment);
                     }
                 }
             } else if (APIConstants.EXTERNAL_API_STORES
@@ -2023,7 +1994,7 @@ public class APIManagerConfiguration {
         }
     }
 
-    public Map<String, ThirdPartyEnvironment> getThirdPartyEnvironments() {
-        return thirdPartyEnvironments;
+    public Map<String, Environment> getGatewayEnvironments() {
+        return apiGatewayEnvironments;
     }
 }

@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
@@ -483,22 +482,24 @@ public class APIMappingUtil {
 
     private static List<APISolaceEndpointURLsDTO> setEndpointURLsForSolaceAPI(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
         APIDTO apidto = fromAPItoDTO(model.getApi(), tenantDomain);
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
         List<APISolaceEndpointURLsDTO> solaceEndpointURLsList = new ArrayList<>();
         for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
             if (revisionDeployment.isDisplayOnDevportal()) {
-                if (thirdPartyEnvironments != null) {
+                if (gatewayEnvironments != null) {
                     // Deployed environment
-                    ThirdPartyEnvironment environment = thirdPartyEnvironments.get(revisionDeployment.getDeployment());
+                    Environment environment = gatewayEnvironments.get(revisionDeployment.getDeployment());
                     if (environment != null) {
                         if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
                             APISolaceEndpointURLsDTO dto = new APISolaceEndpointURLsDTO();
                             dto.setEnvironmentName(environment.getName());
                             dto.setEnvironmentDisplayName(environment.getDisplayName());
-                            dto.setEnvironmentOrganization(environment.getOrganization());
-                            dto.setSolaceURLs(getSolaceURLs(environment.getOrganization(), environment.getName(), apidto.getAsyncTransportProtocols()));
+                            dto.setEnvironmentOrganization(environment.getAdditionalProperties().get(APIConstants.
+                                    SOLACE_ENVIRONMENT_ORGANIZATION));
+                            dto.setSolaceURLs(getSolaceURLs(environment.getAdditionalProperties().get(APIConstants.
+                                    SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName(), apidto.getAsyncTransportProtocols()));
                             solaceEndpointURLsList.add(dto);
                         }
                     }
@@ -510,10 +511,10 @@ public class APIMappingUtil {
 
     private static List<APISolaceURLsDTO> getSolaceURLs(String organizationName, String environmentName,
                                                         List<String> availableProtocols) throws APIManagementException {
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-        ThirdPartyEnvironment solaceEnvironment = null;
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        Environment solaceEnvironment = null;
 
-        for (Map.Entry<String,ThirdPartyEnvironment> entry: thirdPartyEnvironments.entrySet()) {
+        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
             if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
@@ -521,7 +522,8 @@ public class APIMappingUtil {
 
         if (solaceEnvironment != null) {
             SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
-                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getDeveloper());
+                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
+                    get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
             List<APISolaceURLsDTO> solaceURLsDTOs = new ArrayList<>();
             HttpResponse response = solaceAdminApis.environmentGET(organizationName, environmentName);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {

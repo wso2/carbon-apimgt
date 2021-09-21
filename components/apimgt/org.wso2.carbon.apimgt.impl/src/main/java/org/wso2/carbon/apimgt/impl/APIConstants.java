@@ -686,6 +686,9 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
+    public static final String API_GATEWAY_PROVIDER = "Provider";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
@@ -2789,17 +2792,17 @@ public final class APIConstants {
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Solace integration related constants
-    public static final String THIRD_PARTY_ENVIRONMENT = "ThirdPartyEnvironment";
-    public static final String THIRD_PARTY_ENVIRONMENTS = "ThirdPartyEnvironments";
-    public static final String THIRD_PARTY_ENVIRONMENT_PROVIDER = "provider";
-    public static final String THIRD_PARTY_ENVIRONMENT_ORGANIZATION = "Organization";
-    public static final String THIRD_PARTY_ENVIRONMENT_NAME = "EnvironmentName";
-    public static final String THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME = "DisplayName";
-    public static final String THIRD_PARTY_ENVIRONMENT_DESCRIPTION = "Description";
-    public static final String THIRD_PARTY_ENVIRONMENT_SERVER_URL = "ServerURL";
-    public static final String THIRD_PARTY_ENVIRONMENT_USERNAME = "Username";
-    public static final String THIRD_PARTY_ENVIRONMENT_PASSWORD = "Password";
-    public static final String THIRD_PARTY_ENVIRONMENT_DEV_NAME = "DevAccountName";
+//    public static final String THIRD_PARTY_ENVIRONMENT = "ThirdPartyEnvironment";
+//    public static final String THIRD_PARTY_ENVIRONMENTS = "ThirdPartyEnvironments";
+//    public static final String THIRD_PARTY_ENVIRONMENT_PROVIDER = "provider";
+    public static final String SOLACE_ENVIRONMENT_ORGANIZATION = "Organization";
+//    public static final String THIRD_PARTY_ENVIRONMENT_NAME = "EnvironmentName";
+//    public static final String THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME = "DisplayName";
+//    public static final String THIRD_PARTY_ENVIRONMENT_DESCRIPTION = "Description";
+//    public static final String THIRD_PARTY_ENVIRONMENT_SERVER_URL = "ServerURL";
+//    public static final String THIRD_PARTY_ENVIRONMENT_USERNAME = "Username";
+//    public static final String THIRD_PARTY_ENVIRONMENT_PASSWORD = "Password";
+    public static final String SOLACE_ENVIRONMENT_DEV_NAME = "DevAccountName";
     public static final String SOLACE_ENVIRONMENT = "solace";
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
     public static final String HTTP_TRANSPORT_PROTOCOL_VERSION = "1.1";

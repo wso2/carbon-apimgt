@@ -11337,13 +11337,13 @@ public final class APIUtil {
     }
 
     /**
-     * Get third-party environments defined in the configuration: api-manager.xml
+     * Get gateway environments defined in the configuration: api-manager.xml
      *
-     * @return map of configured third-party environments against third-party environment name
+     * @return map of configured gateway environments against the environment name
      */
-    public static Map<String, ThirdPartyEnvironment> getReadOnlyThirdPartyEnvironments() {
+    public static Map<String, Environment> getReadOnlyGatewayEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getThirdPartyEnvironments();
+                .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
 
 }

@@ -80,7 +80,6 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -137,6 +136,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -6331,13 +6331,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException If an error occurs when checking API product availability
      */
     public boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException {
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
         for (APIRevisionDeployment deployment : deployments) {
             if (deployment.isDisplayOnDevportal()) {
                 String environmentName = deployment.getDeployment();
-                if (thirdPartyEnvironments.containsKey(environmentName)) {
-                    ThirdPartyEnvironment deployedEnvironment = thirdPartyEnvironments.get(environmentName);
+                if (gatewayEnvironments.containsKey(environmentName)) {
+                    Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
                     if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
                         return true;
                     }
@@ -6356,15 +6356,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException {
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
         for (APIRevisionDeployment deployment : deployments) {
             if (deployment.isDisplayOnDevportal()) {
                 String environmentName = deployment.getDeployment();
-                if (thirdPartyEnvironments.containsKey(environmentName)) {
-                    ThirdPartyEnvironment deployedEnvironment = thirdPartyEnvironments.get(environmentName);
+                if (gatewayEnvironments.containsKey(environmentName)) {
+                    Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
                     if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
-                        return deployedEnvironment.getOrganization();
+                        return deployedEnvironment.getAdditionalProperties().
+                                get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
                     }
                 }
             }

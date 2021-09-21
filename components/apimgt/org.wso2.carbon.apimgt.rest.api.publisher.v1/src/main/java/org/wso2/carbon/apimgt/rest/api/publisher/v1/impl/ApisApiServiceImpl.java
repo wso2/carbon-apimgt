@@ -86,7 +86,6 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -4445,15 +4444,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
             String environment = apiRevisionDeploymentDTO.getName();
             if (environments.get(environment) == null) {
-                if (thirdPartyEnvironments != null) {
-                    if (thirdPartyEnvironments.get(environment) == null) {
+                if (gatewayEnvironments != null) {
+                    if (gatewayEnvironments.get(environment) == null) {
                         RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
                     }
                 } else {
@@ -4522,7 +4521,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
-        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -4532,8 +4531,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiRevisionDeployment.setRevisionUUID(revisionId);
                 String environment = apiRevisionDeploymentDTO.getName();
                 if (environments.get(environment) == null) {
-                    if (thirdPartyEnvironments != null) {
-                        if (thirdPartyEnvironments.get(environment) == null) {
+                    if (gatewayEnvironments != null) {
+                        if (gatewayEnvironments.get(environment) == null) {
                             RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
                         }
                     } else {

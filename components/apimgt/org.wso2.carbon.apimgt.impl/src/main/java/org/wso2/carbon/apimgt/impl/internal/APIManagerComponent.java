@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
@@ -81,6 +82,9 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.solace.notifiers.SolaceApplicationNotifier;
+import org.wso2.carbon.apimgt.solace.notifiers.SolaceDeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.solace.notifiers.SolaceSubscriptionsNotifier;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -942,6 +946,26 @@ public class APIManagerComponent {
 
     protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
         ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
+    }
+
+    /**
+     * Check whether the Solace is Added as a third party environment
+     *
+     * @return true if Solace is Added as a third party environment
+     */
+    private boolean isSolaceEnvironmentAdded() {
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        if (gatewayEnvironments.isEmpty()){
+            return false;
+        }
+        Environment solaceEnvironment = null;
+
+        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
+            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+                solaceEnvironment = entry.getValue();
+            }
+        }
+        return solaceEnvironment != null;
     }
 }
 

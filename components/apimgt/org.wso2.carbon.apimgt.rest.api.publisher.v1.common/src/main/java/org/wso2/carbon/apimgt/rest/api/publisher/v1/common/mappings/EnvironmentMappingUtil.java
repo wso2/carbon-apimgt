@@ -26,7 +26,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
@@ -156,11 +155,11 @@ public class EnvironmentMappingUtil {
     /**
      * Converts a List object of Third party environments into DTO
      *
-     * @param thirdPartyEnvironmentCollection a collection of Environment objects
+     * @param gatewayEnvironmentCollection a collection of Environment objects
      * @return EnvironmentListDTO object containing EnvironmentDTOs
      */
     public static ThirdPartyEnvironmentListDTO
-    fromThirdPartyEnvironmentCollectionToDTO(Collection<ThirdPartyEnvironment> thirdPartyEnvironmentCollection)
+    fromThirdPartyEnvironmentCollectionToDTO(Collection<Environment> gatewayEnvironmentCollection)
             throws IOException {
         ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
         List<ThirdPartyEnvironmentDTO> thirdPartyEnvironmentDTOs = thirdPartyEnvironmentListDTO.getList();
@@ -169,7 +168,7 @@ public class EnvironmentMappingUtil {
             thirdPartyEnvironmentListDTO.setList(thirdPartyEnvironmentDTOs);
         }
 
-        for (ThirdPartyEnvironment thirdPartyEnvironment : thirdPartyEnvironmentCollection) {
+        for (Environment thirdPartyEnvironment : gatewayEnvironmentCollection) {
             thirdPartyEnvironmentDTOs.add(fromThirdPartyEnvironmentToDTO(thirdPartyEnvironment));
         }
         thirdPartyEnvironmentListDTO.setCount(thirdPartyEnvironmentDTOs.size());
@@ -182,12 +181,13 @@ public class EnvironmentMappingUtil {
      * @param thirdPartyEnvironment Environment object
      * @return ThirdPartyEnvironmentDTO object corresponding to the given ThirdPartyEnvironment object
      */
-    public static ThirdPartyEnvironmentDTO fromThirdPartyEnvironmentToDTO(ThirdPartyEnvironment thirdPartyEnvironment)
+    public static ThirdPartyEnvironmentDTO fromThirdPartyEnvironmentToDTO(Environment thirdPartyEnvironment)
             throws IOException {
 
         ThirdPartyEnvironmentDTO thirdPartyEnvironmentDTO = new ThirdPartyEnvironmentDTO();
         thirdPartyEnvironmentDTO.setName(thirdPartyEnvironment.getName());
-        thirdPartyEnvironmentDTO.setOrganization(thirdPartyEnvironment.getOrganization());
+        thirdPartyEnvironmentDTO.setOrganization(thirdPartyEnvironment.getAdditionalProperties()
+                .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
         thirdPartyEnvironmentDTO.setProvider(thirdPartyEnvironment.getProvider());
         thirdPartyEnvironmentDTO.setDisplayName(thirdPartyEnvironment.getDisplayName());
 
@@ -195,9 +195,10 @@ public class EnvironmentMappingUtil {
 
             SolaceAdminApis solaceAdminApis = new SolaceAdminApis(thirdPartyEnvironment.getServerURL(),
                     thirdPartyEnvironment.getUserName(), thirdPartyEnvironment.getPassword(), thirdPartyEnvironment.
-                    getDeveloper());
+                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
             HttpResponse response = solaceAdminApis.environmentGET(
-                    thirdPartyEnvironment.getOrganization(), thirdPartyEnvironment.getName());
+                    thirdPartyEnvironment.getAdditionalProperties()
+                            .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), thirdPartyEnvironment.getName());
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 String responseString = null;
                 responseString = EntityUtils.toString(response.getEntity());

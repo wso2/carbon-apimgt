@@ -24,7 +24,6 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -83,11 +82,11 @@ public class SettingsMappingUtil {
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
-            Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
             ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
-            if (thirdPartyEnvironments != null) {
+            if (gatewayEnvironments != null) {
                 thirdPartyEnvironmentListDTO = EnvironmentMappingUtil.
-                        fromThirdPartyEnvironmentCollectionToDTO(thirdPartyEnvironments.values());
+                        fromThirdPartyEnvironmentCollectionToDTO(gatewayEnvironments.values());
             }
             settingsDTO.setThirdPartyEnvironments(thirdPartyEnvironmentListDTO.getList());
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,

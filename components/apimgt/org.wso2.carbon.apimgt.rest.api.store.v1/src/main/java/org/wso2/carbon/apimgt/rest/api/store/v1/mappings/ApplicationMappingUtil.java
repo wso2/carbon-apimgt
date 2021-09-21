@@ -25,12 +25,7 @@ import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -88,10 +83,10 @@ public class ApplicationMappingUtil {
                 }
             }
 
-            Map<String, ThirdPartyEnvironment> thirdPartyEnvironmentMap = APIUtil.getReadOnlyThirdPartyEnvironments();
-            ThirdPartyEnvironment solaceEnvironment = null;
+            Map<String, Environment> gatewayEnvironmentMap = APIUtil.getReadOnlyGatewayEnvironments();
+            Environment solaceEnvironment = null;
 
-            for (Map.Entry<String,ThirdPartyEnvironment> entry: thirdPartyEnvironmentMap.entrySet()) {
+            for (Map.Entry<String,Environment> entry: gatewayEnvironmentMap.entrySet()) {
                 if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                     solaceEnvironment = entry.getValue();
                 }
@@ -99,7 +94,8 @@ public class ApplicationMappingUtil {
 
             if (solaceEnvironment != null) {
                 SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.getUserName(),
-                        solaceEnvironment.getPassword(), solaceEnvironment.getDeveloper());
+                        solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
+                        get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
                 HttpResponse response = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "default");
                 List<ApplicationSolaceDeployedEnvironmentsDTO> solaceEnvironments = new ArrayList<>();
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -113,11 +109,12 @@ public class ApplicationMappingUtil {
                                 org.json.JSONObject environmentObject = environmentsArray.getJSONObject(i);
                                 if (environmentObject.getString("name") != null) {
                                     String environmentName = environmentObject.getString("name");
-                                    ThirdPartyEnvironment thirdPartyEnvironment = thirdPartyEnvironmentMap.get(environmentName);
-                                    if (thirdPartyEnvironment != null) {
-                                        applicationSolaceDeployedEnvironmentsDTO.setEnvironmentName(thirdPartyEnvironment.getName());
-                                        applicationSolaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(thirdPartyEnvironment.getDisplayName());
-                                        applicationSolaceDeployedEnvironmentsDTO.setOrganizationName(thirdPartyEnvironment.getOrganization());
+                                    Environment gatewayEnvironment = gatewayEnvironmentMap.get(environmentName);
+                                    if (gatewayEnvironment != null) {
+                                        applicationSolaceDeployedEnvironmentsDTO.setEnvironmentName(gatewayEnvironment.getName());
+                                        applicationSolaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(gatewayEnvironment.getDisplayName());
+                                        applicationSolaceDeployedEnvironmentsDTO.setOrganizationName(gatewayEnvironment.getAdditionalProperties().
+                                                get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
                                         boolean containsMQTTProtocol = false;
                                         if (environmentObject.getJSONArray("messagingProtocols") != null) {
                                             List<APISolaceURLsDTO> endpointUrls = new ArrayList<>();
@@ -143,7 +140,7 @@ public class ApplicationMappingUtil {
                                             if (containsMQTTProtocol) {
                                                 HttpResponse response2 = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "MQTT");
                                                 org.json.JSONObject permissionsObject2 = extractPermissionsFromSolaceApplicationGetResponse(
-                                                        response2, i, thirdPartyEnvironmentMap);
+                                                        response2, i, gatewayEnvironmentMap);
                                                 if (permissionsObject2 != null) {
                                                     populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject2, "MQTT");
                                                 }
@@ -176,7 +173,8 @@ public class ApplicationMappingUtil {
         return applicationDTO;
     }
 
-    public static org.json.JSONObject extractPermissionsFromSolaceApplicationGetResponse(HttpResponse response, int environmentIndex, Map<String, ThirdPartyEnvironment> thirdPartyEnvironmentMap) throws IOException {
+    public static org.json.JSONObject extractPermissionsFromSolaceApplicationGetResponse
+            (HttpResponse response, int environmentIndex, Map<String, Environment> gatewayEnvironmentMap) throws IOException {
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String responseString = EntityUtils.toString(response.getEntity());
             org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
@@ -185,8 +183,8 @@ public class ApplicationMappingUtil {
                 org.json.JSONObject environmentObject = environmentsArray.getJSONObject(environmentIndex);
                 if (environmentObject.getString("name") != null) {
                     String environmentName = environmentObject.getString("name");
-                    ThirdPartyEnvironment thirdPartyEnvironment = thirdPartyEnvironmentMap.get(environmentName);
-                    if (thirdPartyEnvironment != null) {
+                    Environment gatewayEnvironment = gatewayEnvironmentMap.get(environmentName);
+                    if (gatewayEnvironment != null) {
                         if (environmentObject.getJSONObject("permissions") != null) {
                             return environmentObject.getJSONObject("permissions");
                         }
