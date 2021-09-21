@@ -857,7 +857,7 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
     public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
     public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
-    
+
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
@@ -2666,6 +2666,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 
     //Constants related to user password
