@@ -11231,7 +11231,8 @@ public final class APIUtil {
      * @return validity of given URLs
      */
     public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
-        long validatorOptions = UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
+        long validatorOptions =
+                UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
         RegexValidator authorityValidator = new RegexValidator(".*");
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
