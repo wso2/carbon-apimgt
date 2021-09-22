@@ -28,17 +28,18 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -157,10 +158,9 @@ public class EnvironmentMappingUtil {
      * @param gatewayEnvironmentCollection a collection of Environment objects
      * @return EnvironmentListDTO object containing EnvironmentDTOs
      */
-    public static GatewayEnvironmentListDTO
-    fromThirdPartyEnvironmentCollectionToDTO(Collection<Environment> gatewayEnvironmentCollection)
-            throws IOException {
-        GatewayEnvironmentListDTO gatewayEnvironmentListDTO = new GatewayEnvironmentListDTO();
+    public static EnvironmentListDTO fromThirdPartyEnvironmentCollectionToDTO
+    (Collection<Environment> gatewayEnvironmentCollection) throws IOException {
+        EnvironmentListDTO gatewayEnvironmentListDTO = new EnvironmentListDTO();
         List<EnvironmentDTO> environmentDTOS = gatewayEnvironmentListDTO.getList();
         if (environmentDTOS == null) {
             environmentDTOS = new ArrayList<>();
@@ -185,7 +185,15 @@ public class EnvironmentMappingUtil {
 
         EnvironmentDTO thirdPartyEnvironmentDTO = new EnvironmentDTO();
         thirdPartyEnvironmentDTO.setName(gatewayEnvironment.getName());
-        thirdPartyEnvironmentDTO.setAdditionalProperties(gatewayEnvironment.getAdditionalProperties());
+        Map<String, String> additionalProps = gatewayEnvironment.getAdditionalProperties();
+        List<AdditionalPropertyDTO> additionalPropertyDTOS = new ArrayList<>();
+        for (Map.Entry<String, String> prop : additionalProps.entrySet()) {
+            AdditionalPropertyDTO additionalPropertyDTO = new AdditionalPropertyDTO();
+            additionalPropertyDTO.setKey(prop.getKey());
+            additionalPropertyDTO.setValue(additionalPropertyDTO.getValue());
+            additionalPropertyDTOS.add(additionalPropertyDTO);
+        }
+        thirdPartyEnvironmentDTO.setAdditionalProperties(additionalPropertyDTOS);
         thirdPartyEnvironmentDTO.setProvider(gatewayEnvironment.getProvider());
         thirdPartyEnvironmentDTO.setDisplayName(gatewayEnvironment.getDisplayName());
 

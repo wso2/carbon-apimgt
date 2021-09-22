@@ -123,7 +123,7 @@
                 <!-- Admin password for the API gateway.-->
                 <Password>{{environment_name.password}}</Password>
                 <!-- Provider Vendor of the API gateway.-->
-                <Provider>{{environment_name.password}}</Provider>
+                <Provider>{{environment_name.provider}}</Provider>
                 <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
                 {% if environment_name.http_endpoint is defined and environment_name.https_endpoint is defined %}
                 <GatewayEndpoint>{{environment_name.https_endpoint}},{{environment_name.http_endpoint}}</GatewayEndpoint>
@@ -135,11 +135,13 @@
                 <GatewayEndpoint></GatewayEndpoint>
                 {% endif %}
                 <!-- Additional properties for External Gateways -->
+                {% if environment_name.properties %}
                 <Properties>
                     {% for key,value in environment_name.properties.items() %}
                     <Property name="{{key}}">{{value}}</Property>
                     {% endfor %}
                 </Properties>
+                {% endif %}
                 <!-- Endpoint URLs of the WebSocket APIs hosted in this API Gateway -->
                 {% if environment_name.ws_endpoint is defined and environment_name.wss_endpoint is defined %}
                 <GatewayWSEndpoint>{{environment_name.ws_endpoint}},{{environment_name.wss_endpoint}}</GatewayWSEndpoint>

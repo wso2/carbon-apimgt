@@ -412,11 +412,11 @@ public class APIManagerConfiguration {
                                     APIConstants.API_GATEWAY_USERNAME)).getText()));
                     OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
                             APIConstants.API_GATEWAY_PASSWORD));
+                    String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
+                    environment.setPassword(APIUtil.replaceSystemProperty(value));
                     environment.setProvider(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_PROVIDER)).getText()));
-                    String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
-                    environment.setPassword(APIUtil.replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_ENDPOINT)).getText()));
@@ -476,16 +476,18 @@ public class APIManagerConfiguration {
                                 httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
                         vhosts.add(vhost);
                     }
-                    OMElement properties = element.getFirstChildWithName(new
+                    OMElement properties = environmentElem.getFirstChildWithName(new
                             QName(APIConstants.API_GATEWAY_ADDITIONAL_PROPERTIES));
-                    Iterator gatewayAdditionalProperties = properties.getChildrenWithLocalName
-                            (APIConstants.API_GATEWAY_ADDITIONAL_PROPERTY);
                     Map<String, String> additionalProperties = new HashMap<>();
-                    while (gatewayAdditionalProperties.hasNext()) {
-                        OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
-                        String propName = propertyElem.getAttributeValue(new QName("name"));
-                        String propValue = propertyElem.getText();
-                        additionalProperties.put(propName, propValue);
+                    if (properties != null) {
+                        Iterator gatewayAdditionalProperties = properties.getChildrenWithLocalName
+                                (APIConstants.API_GATEWAY_ADDITIONAL_PROPERTY);
+                        while (gatewayAdditionalProperties.hasNext()) {
+                            OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
+                            String propName = propertyElem.getAttributeValue(new QName("name"));
+                            String propValue = propertyElem.getText();
+                            additionalProperties.put(propName, propValue);
+                        }
                     }
                     environment.setAdditionalProperties(additionalProperties);
 

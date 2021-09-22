@@ -719,7 +719,7 @@ public class APIMappingUtil {
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
-        apiInfoDTO.getGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         return apiInfoDTO;
     }
 
@@ -1307,7 +1307,7 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
-        dto.getGatewayVendor(model.getGatewayVendor());
+        dto.setGatewayVendor(model.getGatewayVendor());
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
@@ -1904,7 +1904,8 @@ public class APIMappingUtil {
                 infoDTO.setProtocol(model.getProtocol());
                 if (AsyncApiParserUtil.isSolaceAPIFromAsyncAPIDefinition(model.getContent())) {
                     infoDTO.setGatewayVendor(APIConstants.SOLACE_ENVIRONMENT);
-                    infoDTO.asyncTransportProtocols(SolaceNotifierUtils.getTransportProtocolsForSolaceAPI(model.getContent()));
+                    infoDTO.asyncTransportProtocols(SolaceNotifierUtils.getTransportProtocolsForSolaceAPI
+                            (model.getContent()));
                 }
                 responseDTO.setInfo(infoDTO);
             }

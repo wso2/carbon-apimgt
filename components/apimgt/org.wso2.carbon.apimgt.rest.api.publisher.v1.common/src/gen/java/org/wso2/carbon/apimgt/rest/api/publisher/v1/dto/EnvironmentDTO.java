@@ -4,14 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
 
 import io.swagger.annotations.*;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
@@ -31,8 +33,7 @@ public class EnvironmentDTO   {
     private Boolean showInApiConsole = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
-    private Map<String,String> additionalProperties = new HashMap<>();
-
+    private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
 
   /**
    **/
@@ -94,41 +95,15 @@ public class EnvironmentDTO   {
     return this;
   }
 
-  /**
-   **/
-  public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
-    this.endpointURIs = endpointURIs;
-    return this;
+  
+  @ApiModelProperty(example = "https://localhost:9443/services/", required = true, value = "")
+  @JsonProperty("serverUrl")
+  @NotNull
+  public String getServerUrl() {
+    return serverUrl;
   }
-
-
-  @ApiModelProperty(value = "")
-  @Valid
-  @JsonProperty("endpointURIs")
-  public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
-    return endpointURIs;
-  }
-  public void setEndpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
-    this.endpointURIs = endpointURIs;
-  }
-
-  /**
-   **/
-  public EnvironmentDTO additionalProperties(Map<String,String> additionalProperties) {
-    this.additionalProperties = additionalProperties;
-    return this;
-  }
-
-
-  @ApiModelProperty(value = "")
-  @Valid
-  @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
-    return additionalProperties;
-  }
-
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
-    this.additionalProperties = additionalProperties;
+  public void setServerUrl(String serverUrl) {
+    this.serverUrl = serverUrl;
   }
 
   /**
@@ -138,25 +113,14 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
-  @ApiModelProperty(example = "wso2", required = true, value = "")
+  
+  @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("provider")
-  @NotNull
   public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {
     this.provider = provider;
-  }
-
-  @ApiModelProperty(example = "https://localhost:9443/services/", required = true, value = "")
-  @JsonProperty("serverUrl")
-  @NotNull
-  public String getServerUrl() {
-    return serverUrl;
-  }
-  public void setServerUrl(String serverUrl) {
-    this.serverUrl = serverUrl;
   }
 
   /**
@@ -195,6 +159,42 @@ public class EnvironmentDTO   {
     this.vhosts = vhosts;
   }
 
+  /**
+   **/
+  public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("endpointURIs")
+  public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
+    return endpointURIs;
+  }
+  public void setEndpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO additionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalProperties")
+  public List<AdditionalPropertyDTO> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -212,13 +212,13 @@ public class EnvironmentDTO   {
         Objects.equals(provider, environment.provider) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
         Objects.equals(vhosts, environment.vhosts) &&
-        Objects.equals(endpointURIs, environment.endpointURIs)&&
+        Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, type, serverUrl, provider, showInApiConsole, vhosts, additionalProperties);
+    return Objects.hash(name, displayName, type, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override

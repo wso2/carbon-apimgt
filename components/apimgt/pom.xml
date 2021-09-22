@@ -35,6 +35,7 @@
         <module>org.wso2.carbon.apimgt.persistence</module>
         <module>org.wso2.carbon.apimgt.impl</module>
         <module>org.wso2.carbon.apimgt.tracing</module>
+        <module>org.wso2.carbon.apimgt.solace</module>
         <module>org.wso2.carbon.apimgt.keymgt</module>
         <module>org.wso2.carbon.apimgt.keymgt.client</module>
         <module>org.wso2.carbon.apimgt.gateway</module>

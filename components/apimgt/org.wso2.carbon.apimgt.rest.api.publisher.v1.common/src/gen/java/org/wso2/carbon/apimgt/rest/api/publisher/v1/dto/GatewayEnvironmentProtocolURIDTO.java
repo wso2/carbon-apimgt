@@ -1,14 +1,24 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
+import io.swagger.annotations.*;
 import java.util.Objects;
 
+import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
-public class GatewayEnvironmentProtocolURIDTO {
+import javax.validation.Valid;
+
+
+
+public class GatewayEnvironmentProtocolURIDTO   {
   
     private String protocol = null;
     private String endpointURI = null;
@@ -58,9 +68,9 @@ public class GatewayEnvironmentProtocolURIDTO {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GatewayEnvironmentProtocolURIDTO thirdPartyEnvironmentProtocolURI = (GatewayEnvironmentProtocolURIDTO) o;
-    return Objects.equals(protocol, thirdPartyEnvironmentProtocolURI.protocol) &&
-        Objects.equals(endpointURI, thirdPartyEnvironmentProtocolURI.endpointURI);
+    GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURI = (GatewayEnvironmentProtocolURIDTO) o;
+    return Objects.equals(protocol, gatewayEnvironmentProtocolURI.protocol) &&
+        Objects.equals(endpointURI, gatewayEnvironmentProtocolURI.endpointURI);
   }
 
   @Override
@@ -71,7 +81,7 @@ public class GatewayEnvironmentProtocolURIDTO {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ThirdPartyEnvironmentProtocolURIDTO {\n");
+    sb.append("class GatewayEnvironmentProtocolURIDTO {\n");
     
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpointURI: ").append(toIndentedString(endpointURI)).append("\n");
