@@ -2782,6 +2782,14 @@ public final class APIConstants {
         public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
     }
 
+    public static class APILogHandler {
+        public static final String DELETE = "delete";
+        public static final String DELETE_ALL = "deleteAll";
+        public static final String HEADERS = "headers";
+        public static final String ALL = "all";
+        public static final String BODY = "body";
+    }
+
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";

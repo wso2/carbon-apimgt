@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
+import org.wso2.andes.client.message.AMQPEncodedMapMessage;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -103,7 +104,16 @@ public class JMSMessageListener implements MessageListener {
                             handleKeyTemplateMessage(payloadData);
                         }
                     }
-                } else {
+                } else if (message instanceof AMQPEncodedMapMessage) {
+                    /**
+                     * This message contains PER API Logging related data context and the log level of the API as
+                     * two map entries. The handlePerAPILogging method ensure that the data is being synced with the
+                     * local log API data holder (new entries, update entries, delete entries)
+                     */
+                    Map loggingMap = ((AMQPEncodedMapMessage) message).getMap();
+                    handlePerAPILogging(loggingMap);
+                }
+                else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
             } else {
@@ -116,6 +126,15 @@ public class JMSMessageListener implements MessageListener {
         } catch (JsonProcessingException e) {
             log.error("Error while parsing JMS payload", e);
         }
+    }
+    /**
+     * This method sync the local log data holder and put or remote the entry depending on the received value for
+     * a given API context
+     *
+     * @param map Incoming data map consisting API ctx and the log level
+     */
+    private void handlePerAPILogging(Map<String, Object> map) {
+        ServiceReferenceHolder.getInstance().getPerAPILogService().syncLocalAPILogDetailsMap(map);
     }
 
     private void handleThrottleUpdateMessage(JsonNode msg) throws ParseException {

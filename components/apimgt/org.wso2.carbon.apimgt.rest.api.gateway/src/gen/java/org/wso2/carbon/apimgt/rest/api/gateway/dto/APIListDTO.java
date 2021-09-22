@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.gateway.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.gateway.dto.APIMetaDataDTO;
 import javax.validation.constraints.*;
 
@@ -21,6 +22,7 @@ public class APIListDTO   {
   
     private Integer count = null;
     private List<APIMetaDataDTO> list = new ArrayList<>();
+    private List<APIDTO> apis = new ArrayList<>();
 
   /**
    * Number of APIs returned. 
@@ -57,6 +59,23 @@ public class APIListDTO   {
     this.list = list;
   }
 
+  /**
+   **/
+  public APIListDTO apis(List<APIDTO> apis) {
+    this.apis = apis;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apis")
+  public List<APIDTO> getApis() {
+    return apis;
+  }
+  public void setApis(List<APIDTO> apis) {
+    this.apis = apis;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -68,12 +87,13 @@ public class APIListDTO   {
     }
     APIListDTO apIList = (APIListDTO) o;
     return Objects.equals(count, apIList.count) &&
-        Objects.equals(list, apIList.list);
+        Objects.equals(list, apIList.list) &&
+        Objects.equals(apis, apIList.apis);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list);
+    return Objects.hash(count, list, apis);
   }
 
   @Override
@@ -83,6 +103,7 @@ public class APIListDTO   {
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("}");
     return sb.toString();
   }

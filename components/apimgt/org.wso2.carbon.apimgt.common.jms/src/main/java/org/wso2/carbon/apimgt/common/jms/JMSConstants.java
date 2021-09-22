@@ -329,4 +329,5 @@ public class JMSConstants {
     public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
     public static final String TOPIC_KEY_MANAGER = "keyManager";
     public static final String TOPIC_NOTIFICATION = "notification";
+    public static final String PER_API_LOG = "perAPILog";
 }

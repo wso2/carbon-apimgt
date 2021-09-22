@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
+import org.wso2.carbon.apimgt.impl.perlog.PerAPILogService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.impl.webhooks.SubscriptionsDataService;
@@ -83,6 +84,7 @@ public class ServiceReferenceHolder {
     private JWTValidationService jwtValidationService;
     private KeyManagerDataService keyManagerDataService;
     private SubscriptionsDataService subscriptionsDataService;
+    private PerAPILogService perAPILogService;
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     private RedisCacheUtils redisCacheUtils;
@@ -383,4 +385,18 @@ public class ServiceReferenceHolder {
             return false;
         }
     }
+
+
+    public void setPerAPILogService(PerAPILogService perAPILogService) {
+        if (perAPILogService != null) {
+            this.perAPILogService = perAPILogService;
+        } else {
+            this.perAPILogService = null;
+        }
+    }
+
+    public PerAPILogService getPerAPILogService() {
+        return perAPILogService;
+    }
+
 }

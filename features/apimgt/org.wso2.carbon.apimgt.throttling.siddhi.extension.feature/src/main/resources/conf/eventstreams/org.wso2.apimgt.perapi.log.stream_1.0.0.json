@@ -1,0 +1,16 @@
+{
+  "name": "org.wso2.apimgt.perapi.log.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "Per API Log",
+  "payloadData": [
+    {
+      "name": "context",
+      "type": "STRING"
+    },
+    {
+      "name": "value",
+      "type": "STRING"
+    }
+  ]
+}

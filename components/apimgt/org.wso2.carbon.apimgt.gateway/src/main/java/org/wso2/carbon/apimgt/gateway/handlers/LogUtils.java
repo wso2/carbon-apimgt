@@ -86,6 +86,13 @@ class LogUtils {
         return (String) axis2MsgContext.getProperty("REST_URL_POSTFIX");
     }
 
+    protected static String getTransportInURL(org.apache.synapse.MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        String transportInURL = (String) axis2MsgContext.getProperty("TransportInURL");
+        return transportInURL.substring(1);
+    }
+
     protected static String getElectedResource(org.apache.synapse.MessageContext messageContext) {
         return (String) messageContext.getProperty("API_ELECTED_RESOURCE");
     }

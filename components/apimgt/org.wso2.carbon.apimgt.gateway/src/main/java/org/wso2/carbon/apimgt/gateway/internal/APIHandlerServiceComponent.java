@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClie
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.gateway.perlogging.PerAPILogger;
 import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
+import org.wso2.carbon.apimgt.impl.perlog.PerAPILogService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -109,6 +111,8 @@ public class APIHandlerServiceComponent {
                     context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                             new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
             // Start JWT revoked map cleaner.
+            PerAPILogService perAPILogService = PerAPILogger.getInstance();
+            ServiceReferenceHolder.getInstance().setPerAPILogService(perAPILogService);
             RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
             revokedJWTMapCleaner.startJWTRevokedMapCleaner();
             ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()

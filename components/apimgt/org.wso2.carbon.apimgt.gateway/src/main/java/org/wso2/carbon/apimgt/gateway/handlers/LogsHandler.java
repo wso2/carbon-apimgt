@@ -29,12 +29,15 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.logging.PerAPILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -48,6 +51,7 @@ public class LogsHandler extends AbstractSynapseHandler {
     private String apiCTX = null;
     private String apiMethod = null;
     private String apiTo = null;
+    private String logLevel = null;
     private long requestSize = 0;
     private String apiElectedRsrc = null;
     private String apiRestReqFullPath = null;
@@ -56,6 +60,7 @@ public class LogsHandler extends AbstractSynapseHandler {
     private String apiRsrcCacheKey = null;
     private String applicationName = null;
     private String apiConsumerKey = null;
+    private static Map<String, String> logProperties= new ConcurrentHashMap<>();
 
     private static final String AUTH_HEADER = "AUTH_HEADER";
     private static final String ORG_ID_HEADER = "ORG_ID_HEADER";
@@ -63,6 +68,11 @@ public class LogsHandler extends AbstractSynapseHandler {
     private static final String APP_ID_HEADER = "APP_ID_HEADER";
     private static final String UUID_HEADER = "UUID_HEADER";
     private static final String CORRELATION_ID_HEADER = "CORRELATION_ID_HEADER";
+
+    private static final String REQUEST_IN = "request-in";
+    private static final String REQUEST_OUT = "request-out";
+    private static final String RESPONSE_IN = "response-in";
+    private static final String RESPONSE_OUT = "response-out";
 
     private static final String REQUEST_BODY_SIZE_ERROR = "Error occurred while building the message to calculate" +
             " the response body size";
@@ -88,6 +98,12 @@ public class LogsHandler extends AbstractSynapseHandler {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                 return false;
             }
+        }
+        // Get the log level of if logs are enabled to the API belongs to current API request
+        String log = getAPILogLevel(messageContext);
+        // If it presents log the details
+        if ((log) != null) {
+            PerAPILogHandler.logAPI(REQUEST_IN, messageContext);
         }
         return true;
     }
@@ -127,6 +143,10 @@ public class LogsHandler extends AbstractSynapseHandler {
                 return false;
             }
         }
+        String log = (String) messageContext.getProperty("LOG_LEVEL");
+        if (log != null) {
+            PerAPILogHandler.logAPI(REQUEST_OUT, messageContext);
+        }
         return true;
     }
 
@@ -162,10 +182,20 @@ public class LogsHandler extends AbstractSynapseHandler {
                 }
             }
         }
+        // if PER API logging is available
+        String log = (String) messageContext.getProperty("LOG_LEVEL");
+        if (log != null) {
+            PerAPILogHandler.logAPI(RESPONSE_IN, messageContext);
+        }
         return true;
     }
 
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        // if PER API logging is available
+        String log = (String) messageContext.getProperty("LOG_LEVEL");
+        if (log != null) {
+            PerAPILogHandler.logAPI(RESPONSE_OUT, messageContext);
+        }
         return true;
     }
 
@@ -277,5 +307,68 @@ public class LogsHandler extends AbstractSynapseHandler {
         }
         return responseSize;
 
+    }
+
+    /**
+     * Sync the node's map based on the user given values.
+     *
+     * @param map Map containing API context and logLevel
+     */
+    public static Map<String, String> syncAPILogData(Map<String, Object> map) {
+        // get the received context and the logLevel
+        String apictx = (String) map.get("context");
+        String logLevel = (String) map.get("value");
+
+        if (!APIConstants.APILogHandler.DELETE.equals(logLevel) && !APIConstants.APILogHandler.DELETE_ALL
+                .equals(logLevel)) {
+            // value "delete" & "deleteAll" responsible for deleting operations
+            // If the values are other than than, then they should be added to the map
+            log.debug("Adding context : " + apictx + ", value : " + logLevel);
+            logProperties.put(apictx, logLevel);
+        } else {
+            if (APIConstants.APILogHandler.DELETE_ALL.equals(logLevel)) {
+                //handle updating already existing API values
+                log.debug("Deleting all entries");
+                logProperties.clear();
+            } else if (logProperties.containsKey(apictx) && APIConstants.APILogHandler.DELETE.equals(logLevel)) {
+                //handle already existing hence update
+                log.debug("Deleting entry with context : " + apictx + ", value : " + logLevel);
+                logProperties.remove(apictx);
+            }
+        }
+        return logProperties;
+    }
+
+    public static String getLogData(String context) {
+        return logProperties.get(context);
+    }
+
+    public static Map<String, String> getLogData() {
+        return logProperties;
+    }
+
+    /**
+     * Check if the incoming API need to be logged, if yes return the loglevel, if not return null
+     *
+     * @param ctx MessageContext of the incoming request
+     * @return log level of the API or null if not
+     */
+    private String getAPILogLevel(MessageContext ctx) {
+        // if the logging API data holder is empty or null return null
+        if (!logProperties.isEmpty()) {
+            // API REST url post fix
+            String apiCtx = LogUtils.getTransportInURL(ctx);
+            for (Map.Entry<String, String> entry : logProperties.entrySet()) {
+                String key = entry.getKey();
+                // REST URL POST FIX pizzashack/1.0.0/menu pizzashack/1.0.0/ and  pizzashack/1.0.0
+                // context value pizzashack/1.0
+                if (apiCtx.startsWith(key + "/") || apiCtx.equals(key)) {
+                    ctx.setProperty("LOG_LEVEL", entry.getValue());
+                    ctx.setProperty("API_TO", apiCtx);
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

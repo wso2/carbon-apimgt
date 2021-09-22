@@ -465,7 +465,99 @@ paths:
           $ref: '#/responses/BadRequest'
         404:
           $ref: '#/responses/NotFound'
-
+  /api-logging:
+    post:
+      summary: |
+        POST logging data of the API with its context template and version
+      description: |
+        This operation enables you to provide the API context template(context/version) with the log level (headers, body or all). You should either provide a payload or context and logLevel as query parameters with this API request.
+      parameters:
+        - name: Payload
+          description: |
+            context and the logLevel can be provided as a payload. This is useful if you want to enable logs for multiple APIs at once.
+          required: false
+          in: body
+          schema:
+            $ref: '#/definitions/APIList'
+        - name: context
+          in: query
+          description: |
+            API context ( context/version eg: pizzashack/1.0.0)
+          required: false
+          type: string
+        - name: logLevel
+          in: query
+          description: |
+            logLevel of the API. "all","headers" or "body"
+          required: false
+          type: string
+          enum:
+            - all
+            - headers
+            - body
+      responses:
+        '200':
+          description: 'Successfully Enabled the logs for the API'
+          schema:
+            $ref: '#/definitions/APIList'
+        '404':
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Internal server error while configuring API to be logged
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      summary: |
+        GET log enabled API data
+      responses:
+        '200':
+          description: 'Logs enabled API details'
+          schema:
+            $ref: '#/definitions/APIList'
+        '404':
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Internal server error while retrieving API data to be logged
+          schema:
+            $ref: '#/definitions/Error'
+      parameters:
+        - name: context
+          in: query
+          description: |
+            API context with the version (eg: pizzashack/1.0.0). If this is not provided, then it will retrieve all logs enabled APIs with log levels.
+          required: false
+          type: string
+    delete:
+      summary: |
+        Delete log enabled API data
+      responses:
+        '204':
+          description: 'Successfully deleted'
+        '404':
+          description: |
+            Not Found.
+            Request API context is not found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Internal server error while deleting API details
+          schema:
+            $ref: '#/definitions/Error'
+      parameters:
+        - name: context
+          in: query
+          required: false
+          type: string
+          description: |
+            API context with the version (eg :pizzashack/1.0.0). If this is not provided all API details will be deleted.
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -815,6 +907,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APIMetaData'
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/API'
   #-----------------------------------------------------
   # The APIMetaData resource
   #-----------------------------------------------------
@@ -887,7 +983,15 @@ definitions:
         type: integer
       subscriptionState:
         type: string
-
+  API:
+    title: API Info object with log details
+    properties:
+      context:
+        type: string
+        example: pizashack/v1.0.0
+      logLevel:
+        type: string
+        example: all
 
 
 #-----------------------------------------------------
