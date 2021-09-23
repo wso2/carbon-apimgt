@@ -69,6 +69,8 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
 
         if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
             removeSolaceApplication(applicationEvent);
+        } else if (APIConstants.EventType.APPLICATION_UPDATE.name().equals(event.getType())) {
+            renameSolaceApplication(applicationEvent);
         }
     }
 
@@ -143,6 +145,45 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                     throw new NotifierException("Error while deleting application '" + application.getName() +
                             "' in Solace");
                 }
+            }
+        } catch (APIManagementException e) {
+            throw new NotifierException(e.getMessage());
+        }
+    }
+
+    /**
+     * Rename applications on the Solace broker
+     *
+     * @param event ApplicationEvent to rename Solace applications
+     * @throws NotifierException if error occurs when renaming applications on the Solace broker
+     */
+    public void renameSolaceApplication(ApplicationEvent event) throws NotifierException {
+        try {
+
+            Application application = apiMgtDAO.getApplicationByUUID(event.getUuid());
+            Set<SubscribedAPI> subscriptions = application.getSubscribedAPIs();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+            boolean isContainsSolaceApis = false;
+            String organizationNameOfSolaceDeployment = null;
+            labelOne:
+            //Check whether the application needs to be updated has a Solace API subscription
+            for (SubscribedAPI api : subscriptions) {
+                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.getUUID());
+                for (APIRevisionDeployment deployment : deployments) {
+                    if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
+                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
+                                getDeployment()).getProvider())) {
+                            isContainsSolaceApis = true;
+                            organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
+                                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
+                            break labelOne;
+                        }
+                    }
+                }
+            }
+            // Renaming application using Solace Admin Apis
+            if (isContainsSolaceApis) {
+                SolaceNotifierUtils.renameSolaceApplication(organizationNameOfSolaceDeployment, application);
             }
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());

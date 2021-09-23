@@ -41,7 +41,7 @@ import java.util.*;
 
 public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     protected ApiMgtDAO apiMgtDAO;
-    private static final Log log = LogFactory.getLog(SolaceDeployAPIInGatewayNotifier.class);
+    private static final Log log = LogFactory.getLog(SolaceSubscriptionsNotifier.class);
 
 
     @Override
@@ -69,6 +69,8 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             crateSubscription(subscriptionEvent);
         } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
             updateSubscription(subscriptionEvent);
+        } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
+            removeSubscription(subscriptionEvent);
         }
     }
 

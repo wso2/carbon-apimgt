@@ -158,7 +158,7 @@ public class EnvironmentMappingUtil {
      * @param gatewayEnvironmentCollection a collection of Environment objects
      * @return EnvironmentListDTO object containing EnvironmentDTOs
      */
-    public static EnvironmentListDTO fromThirdPartyEnvironmentCollectionToDTO
+    public static EnvironmentListDTO fromGatewayEnvironmentCollectionToDTO
     (Collection<Environment> gatewayEnvironmentCollection) throws IOException {
         EnvironmentListDTO gatewayEnvironmentListDTO = new EnvironmentListDTO();
         List<EnvironmentDTO> environmentDTOS = gatewayEnvironmentListDTO.getList();
@@ -168,7 +168,7 @@ public class EnvironmentMappingUtil {
         }
 
         for (Environment thirdPartyEnvironment : gatewayEnvironmentCollection) {
-            environmentDTOS.add(fromThirdPartyEnvironmentToDTO(thirdPartyEnvironment));
+            environmentDTOS.add(fromGatewayEnvironmentToDTO(thirdPartyEnvironment));
         }
         gatewayEnvironmentListDTO.setCount(environmentDTOS.size());
         return gatewayEnvironmentListDTO;
@@ -180,11 +180,11 @@ public class EnvironmentMappingUtil {
      * @param gatewayEnvironment Environment object
      * @return ThirdPartyEnvironmentDTO object corresponding to the given ThirdPartyEnvironment object
      */
-    public static EnvironmentDTO fromThirdPartyEnvironmentToDTO(Environment gatewayEnvironment)
+    public static EnvironmentDTO fromGatewayEnvironmentToDTO(Environment gatewayEnvironment)
             throws IOException {
 
-        EnvironmentDTO thirdPartyEnvironmentDTO = new EnvironmentDTO();
-        thirdPartyEnvironmentDTO.setName(gatewayEnvironment.getName());
+        EnvironmentDTO environmentDTO = new EnvironmentDTO();
+        environmentDTO.setName(gatewayEnvironment.getName());
         Map<String, String> additionalProps = gatewayEnvironment.getAdditionalProperties();
         List<AdditionalPropertyDTO> additionalPropertyDTOS = new ArrayList<>();
         for (Map.Entry<String, String> prop : additionalProps.entrySet()) {
@@ -193,9 +193,9 @@ public class EnvironmentMappingUtil {
             additionalPropertyDTO.setValue(additionalPropertyDTO.getValue());
             additionalPropertyDTOS.add(additionalPropertyDTO);
         }
-        thirdPartyEnvironmentDTO.setAdditionalProperties(additionalPropertyDTOS);
-        thirdPartyEnvironmentDTO.setProvider(gatewayEnvironment.getProvider());
-        thirdPartyEnvironmentDTO.setDisplayName(gatewayEnvironment.getDisplayName());
+        environmentDTO.setAdditionalProperties(additionalPropertyDTOS);
+        environmentDTO.setProvider(gatewayEnvironment.getProvider());
+        environmentDTO.setDisplayName(gatewayEnvironment.getDisplayName());
 
         if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironment.getProvider())) {
 
@@ -222,12 +222,12 @@ public class EnvironmentMappingUtil {
                         gatewayEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
                         endpointsList.add(gatewayEnvironmentProtocolURIDTO);
                     }
-                    thirdPartyEnvironmentDTO.setEndpointURIs(endpointsList);
+                    environmentDTO.setEndpointURIs(endpointsList);
                 }
             }
         }
 
-        return thirdPartyEnvironmentDTO;
+        return environmentDTO;
     }
 
 }

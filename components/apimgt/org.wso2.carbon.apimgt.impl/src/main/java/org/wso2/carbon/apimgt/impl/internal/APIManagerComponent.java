@@ -951,25 +951,5 @@ public class APIManagerComponent {
     protected void unsetAPIMConfigService(APIMConfigService apimConfigService) {
         ServiceReferenceHolder.getInstance().setAPIMConfigService(null);
     }
-
-    /**
-     * Check whether the Solace is Added as a third party environment
-     *
-     * @return true if Solace is Added as a third party environment
-     */
-    private boolean isSolaceEnvironmentAdded() {
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        if (gatewayEnvironments.isEmpty()){
-            return false;
-        }
-        Environment solaceEnvironment = null;
-
-        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
-                solaceEnvironment = entry.getValue();
-            }
-        }
-        return solaceEnvironment != null;
-    }
 }
 

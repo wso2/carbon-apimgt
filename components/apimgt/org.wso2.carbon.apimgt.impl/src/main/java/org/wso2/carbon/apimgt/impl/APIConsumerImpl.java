@@ -30,8 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.util.EntityUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -113,7 +111,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
-import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -136,7 +133,6 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -2747,30 +2743,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
-//
-//            //Check whether the subscription is belongs to an API deployed in Solace
-//            if (api.isSolaceAPI()) {
-//                ArrayList<String> solaceApiProducts = new ArrayList<>();
-//                List<ThirdPartyEnvironment> deployedSolaceEnvironments = getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-//                String applicationOrganizationName = getSolaceOrganizationName(deployedSolaceEnvironments);
-//                if (applicationOrganizationName != null) {
-//                    try {
-//                        boolean apiProductDeployedIntoSolace = checkApiProductAlreadyDeployedIntoSolaceEnvironments(api, deployedSolaceEnvironments);
-//                        if (apiProductDeployedIntoSolace) {
-//                            for (ThirdPartyEnvironment environment : deployedSolaceEnvironments) {
-//                                solaceApiProducts.add(generateApiProductNameForSolaceBroker(api, environment.getName()));
-//                            }
-//                            deployApplicationToSolaceBroker(application, solaceApiProducts, applicationOrganizationName);
-//                        }
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                } else {
-//                    log.error("Cannot create solace application with API product deployed in different organizations...");
-//                    throw new APIManagementException("Cannot create solace application with API product deployed in different organizations...");
-//                }
-//            }
-
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
@@ -2959,34 +2931,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
-
-//            //Check whether the subscription is belongs to an API deployed in Solace
-//            if (api.isSolaceAPI()) {
-//                ArrayList<String> solaceApiProducts = new ArrayList<>();
-//                List<ThirdPartyEnvironment> deployedSolaceEnvironments =
-//                        getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-//                String applicationOrganizationName = getSolaceOrganizationName(deployedSolaceEnvironments);
-//                if (applicationOrganizationName != null) {
-//                    try {
-//                        boolean apiProductDeployedIntoSolace = checkApiProductAlreadyDeployedIntoSolaceEnvironments
-//                                (api, deployedSolaceEnvironments);
-//                        if (apiProductDeployedIntoSolace) {
-//                            for (ThirdPartyEnvironment environment : deployedSolaceEnvironments) {
-//                                solaceApiProducts.add(generateApiProductNameForSolaceBroker(api, environment.getName()));
-//                            }
-//                            deployApplicationToSolaceBroker(application, solaceApiProducts, applicationOrganizationName);
-//                        }
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                } else {
-//                    log.error("Cannot create solace application with API product deployed in " +
-//                            "different organizations...");
-//                    throw new APIManagementException("Cannot create solace application with API product deployed " +
-//                            "in different organizations...");
-//                }
-//            }
-
             subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
                     APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
 
@@ -3239,13 +3183,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
-
-//            Application application = apiMgtDAO.getApplicationById(applicationId);
-//
-//            //Check whether the subscription is belongs to an API deployed in Solace
-//            if (api.isSolaceAPI()) {
-//                unSubscribeAPIProductFromSolaceApplication(api, application);
-//            }
 
             Tier tier = null;
             if (api != null) {
@@ -3759,51 +3696,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         consumerKeysOfApplication = apiMgtDAO.getConsumerKeysForApplication(application.getId());
 
-//        // get list of subscribed APIs in the application
-//        Subscriber subscriber = new Subscriber(username);
-//        Set<SubscribedAPI> subscriptions = getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
-//        List<SubscribedAPI> subscribedApiList = new ArrayList<>(subscriptions);
-//        boolean hasSubscribedAPIDeployedInSolace = false;
-//        String organizationNameOfSolaceDeployment = null;
-//
-//        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-//        labelOne:
-//        for (SubscribedAPI api : subscribedApiList) {
-//            List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUUID());
-//            for (APIRevisionDeployment deployment : deployments) {
-//                if (thirdPartyEnvironments.containsKey(deployment.getDeployment())) {
-//                    if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(thirdPartyEnvironments.get(deployment.getDeployment()).getProvider())) {
-//                        hasSubscribedAPIDeployedInSolace = true;
-//                        organizationNameOfSolaceDeployment = thirdPartyEnvironments.get(deployment.getDeployment()).
-//                                getOrganization();
-//                        break labelOne;
-//                    }
-//                }
-//            }
-//        }
-//
-//        boolean applicationFoundInSolaceBroker = false;
-//        if (hasSubscribedAPIDeployedInSolace) {
-//            SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-//
-//            // check existence of application in Solace Broker
-//            HttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment, application,
-//                    "default");
-//            if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                applicationFoundInSolaceBroker = true;
-//                log.info("Found application '" + application.getName() + "' in Solace broker");
-//                log.info("Waiting until application removing workflow gets finished");
-//            } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-//                log.error("Application '" + application.getName() + "' cannot be found in Solace Broker");
-//                throw new APIManagementException("Application '" + application.getName() + "' cannot be found in " +
-//                        "Solace Broker");
-//            } else {
-//                log.error("Error while searching for application '" + application.getName() + "' in Solace Broker");
-//                throw new APIManagementException("Error while searching for application '" + application.getName() +
-//                        "' in Solace Broker");
-//            }
-//        }
-
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
 
@@ -3929,20 +3821,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
             removeApplicationWFExecutor.execute(workflowDTO);
-
-//            if (applicationFoundInSolaceBroker) {
-//                log.info("Deleting application from Solace Broker");
-//                // delete application from solace
-//                SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-//                HttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment, application);
-//                if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-//                    log.info("Successfully deleted application '" + application.getName() + "' in Solace Broker");
-//                } else {
-//                    log.error("Error while deleting application '" + application.getName() + "' in Solace");
-//                    throw new APIManagementException("Error while deleting application '" + application.getName() +
-//                            "' in Solace");
-//                }
-//            }
 
             JSONObject appLogObject = new JSONObject();
             appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -6128,387 +6006,4 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return hostsWithSchemes;
     }
-//
-//    /**
-//     * Generate a name for the API product in Solace broker
-//     *
-//     * @param api             Name of the API
-//     * @param environmentName Name of the environment
-//     * @return APIProduct name for Solace broker
-//     */
-//    private String generateApiProductNameForSolaceBroker(API api, String environmentName) {
-//        String[] apiContextParts = api.getContext().split("/");
-//        return environmentName + "-" + api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
-//    }
-//
-//    /**
-//     * Check whether the given API product is already deployed in the Solace broker
-//     *
-//     * @param api          Name of the API
-//     * @param organization Name of the organization
-//     * @return returns true if the given API product is already deployed in the Solace
-//     * @throws APIManagementException If an error occurs when checking API product availability
-//     */
-//    private boolean checkApiProductAlreadyDeployedInSolace(API api, String organization) throws IOException,
-//            APIManagementException {
-//
-//        Map<String, ThirdPartyEnvironment> thirdPartyEnvironmentMap = APIUtil.getReadOnlyThirdPartyEnvironments();
-//        ThirdPartyEnvironment solaceEnvironment = thirdPartyEnvironmentMap.get(APIConstants.SOLACE_ENVIRONMENT);
-//        if (solaceEnvironment != null) {
-//            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.getUserName(),
-//                    solaceEnvironment.getPassword(), solaceEnvironment.getDeveloper());
-//            String apiNameWithContext = generateApiProductNameForSolaceBroker(api,
-//                    getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(api));
-//            HttpResponse response = solaceAdminApis.apiProductGet(organization, apiNameWithContext);
-//
-//            if (response != null) {
-//                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                    log.info("API product found in Solace Broker");
-//                    return true;
-//                } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-//                    log.error("API product not found in Solace broker");
-//                    log.error(EntityUtils.toString(response.getEntity()));
-//                    throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().
-//                            getReasonPhrase());
-//                } else {
-//                    log.error("Cannot find API product in Solace Broker");
-//                    log.error(EntityUtils.toString(response.getEntity()));
-//                    throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().
-//                            getReasonPhrase());
-//                }
-//            }
-//            return false;
-//        } else {
-//            throw new APIManagementException("Solace Environment configurations are not provided properly");
-//        }
-//    }
-//
-//    /**
-//     * Check whether the given API product is already deployed in the Solace environment
-//     *
-//     * @param api          Name of the API
-//     * @param environments List of the environments
-//     * @return returns true if the given API product is already deployed in one of environments
-//     * @throws IOException If an error occurs when checking API product availability
-//     * @throws APIManagementException if an error occurs when getting Solace config
-//     */
-//    private boolean checkApiProductAlreadyDeployedIntoSolaceEnvironments(API api, List<ThirdPartyEnvironment> environments)
-//            throws IOException, APIManagementException {
-//        int numberOfDeployedEnvironmentsInSolace = 0;
-//        for (ThirdPartyEnvironment environment : environments) {
-//            String apiNameWithContext = generateApiProductNameForSolaceBroker(api, environment.getName());
-//            SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-//            HttpResponse response = solaceAdminApis.apiProductGet(environment.getOrganization(), apiNameWithContext);
-//            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                log.info("API product found in Solace Broker");
-//                numberOfDeployedEnvironmentsInSolace++;
-//            } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-//                log.error("API product not found in Solace broker");
-//                log.error(EntityUtils.toString(response.getEntity()));
-//                throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().
-//                        getReasonPhrase());
-//            } else {
-//                log.error("Cannot find API product in Solace Broker");
-//                log.error(EntityUtils.toString(response.getEntity()));
-//                throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().
-//                        getReasonPhrase());
-//            }
-//        }
-//        return numberOfDeployedEnvironmentsInSolace == environments.size();
-//    }
-//
-//    /**
-//     * Deploy an application to Solace broker
-//     *
-//     * @param application  Application to be deployed
-//     * @param apiProducts  Api products to be subscribed to Application
-//     * @param organization Name of the organization
-//     * @throws IOException If an error occurs when deploying the application
-//     * @throws APIManagementException if an error occurs when getting Solace config
-//     */
-//    private void deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts, String organization)
-//            throws IOException,APIManagementException {
-//
-//        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-//
-//        // check existence of the developer
-//        HttpResponse response1 = solaceAdminApis.developerGet(organization);
-//        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//            log.info("Developer found in Solace Broker");
-//
-//            //check application status
-//            HttpResponse response2 = solaceAdminApis.applicationGet(organization, application, "default");
-//            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                // app already exists
-//                log.info("Solace application '" + application.getName() + "' already exists in Solace." +
-//                        " Updating Application......");
-//                HttpResponse response3 = solaceAdminApis.applicationPatchAddSubscription(organization, application,
-//                        apiProducts);
-//                if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                    log.info("Solace application '" + application.getName() + "' updated successfully");
-//                } else {
-//                    log.error("Error while updating Solace application '" + application.getName() + "'");
-//                    throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine()
-//                            .getReasonPhrase());
-//                }
-//            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-//
-//                String responseString = EntityUtils.toString(response2.getEntity());
-//                if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
-//                    // create new app
-//                    log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
-//                            "Creating new application......");
-//                    HttpResponse response4 = solaceAdminApis.createApplication(organization, application,
-//                            apiProducts);
-//                    if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-//                        log.info("Solace application '" + application.getName() + "' created successfully");
-//                    } else {
-//                        log.error("Error while creating Solace application '" + application.getName() + "'");
-//                        throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
-//                                getStatusLine().getReasonPhrase());
-//                    }
-//                } else {
-//                    log.error("Error while searching for application '" + application.getName() + "'");
-//                    throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.
-//                            getStatusLine().getReasonPhrase());
-//                }
-//            } else {
-//                log.error("Error while searching for application '" + application.getName() + "'");
-//                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.
-//                        getStatusLine().getReasonPhrase());
-//            }
-//        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-//            log.error("Developer not found in Solace Broker");
-//            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
-//                    getReasonPhrase());
-//        } else {
-//            log.error("Error while finding developer in Solace Broker");
-//            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
-//                    getReasonPhrase());
-//        }
-//    }
-//
-//    /**
-//     * Build the request body for Application creation request
-//     *
-//     * @param appName     Name of the application to be deployed
-//     * @param apiProducts Api products to be subscribed to Application
-//     * @return org.json.JSON Object of request body
-//     */
-//    private org.json.JSONObject buildRequestBodyForCreatingApp(String appName, ArrayList<String> apiProducts) {
-//
-//        org.json.JSONObject requestBody = new org.json.JSONObject();
-//        requestBody.put("name", appName);
-//        requestBody.put("expiresIn", -1);
-//
-//        //add api products
-//        org.json.JSONArray apiProductsArray = new org.json.JSONArray();
-//        for (String x : apiProducts) {
-//            apiProductsArray.put(x);
-//        }
-//        requestBody.put("apiProducts", apiProductsArray);
-//
-//        //add credentials
-//        org.json.JSONObject credentialsBody = new org.json.JSONObject();
-//        credentialsBody.put("expiresAt", -1);
-//        org.json.JSONObject credentialsSecret = new org.json.JSONObject();
-//        credentialsSecret.put("consumerKey", "elevator-app-key");
-//        credentialsSecret.put("consumerSecret", "elevator-app-secret");
-//        credentialsBody.put("secret", credentialsSecret);
-//        requestBody.put("credentials", credentialsBody);
-//
-//        return requestBody;
-//    }
-//
-    /**
-     * Check whether the given API is already deployed in the Solace using revision
-     *
-     * @param api Name of the API
-     * @return returns true if the given API is already deployed
-     * @throws APIManagementException If an error occurs when checking API product availability
-     */
-    public boolean checkWhetherAPIDeployedToSolaceUsingRevision(API api) throws APIManagementException {
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
-        for (APIRevisionDeployment deployment : deployments) {
-            if (deployment.isDisplayOnDevportal()) {
-                String environmentName = deployment.getDeployment();
-                if (gatewayEnvironments.containsKey(environmentName)) {
-                    Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
-                    if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Get third party Solace broker organization Name for API deployment
-     *
-     * @param api Name of the API
-     * @return String of the name of organization in Solace broker
-     * @throws APIManagementException is error occurs when getting the name of the organization name
-     */
-    @Override
-    public String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException {
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
-        for (APIRevisionDeployment deployment : deployments) {
-            if (deployment.isDisplayOnDevportal()) {
-                String environmentName = deployment.getDeployment();
-                if (gatewayEnvironments.containsKey(environmentName)) {
-                    Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
-                    if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
-                        return deployedEnvironment.getAdditionalProperties().
-                                get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-//    /**
-//     * Get third party Solace broker organization Name
-//     *
-//     * @param environments List of the environments
-//     * @return String of the name of organization in Solace broker
-//     */
-//    public String getSolaceOrganizationName(List<ThirdPartyEnvironment> environments) {
-//        HashSet<String> organizationNames = new HashSet<>();
-//        for (ThirdPartyEnvironment environment : environments) {
-//            if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
-//                organizationNames.add(environment.getOrganization());
-//            }
-//        }
-//        if (organizationNames.size() == 1) {
-//            return organizationNames.toArray()[0].toString();
-//        } else {
-//            return null;
-//        }
-//    }
-//
-//    /**
-//     * Get third party Solace broker environment Name for API deployment
-//     *
-//     * @param api Name of the API
-//     * @return String of the name of environment in Solace broker
-//     * @throws APIManagementException is error occurs when getting the name of the environment name
-//     */
-//    private String getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(API api) throws APIManagementException {
-//        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-//        List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
-//        for (APIRevisionDeployment deployment : deployments) {
-//            String environmentName = deployment.getDeployment();
-//            if (thirdPartyEnvironments.containsKey(environmentName)) {
-//                ThirdPartyEnvironment deployedEnvironment = thirdPartyEnvironments.get(environmentName);
-//                if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
-//                    return environmentName;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-//
-//    /**
-//     * Get deployed solace environment name form the revision deployments
-//     *
-//     * @param api Name of the API
-//     * @return List<ThirdPartyEnvironment> List of deployed solace environments
-//     * @throws APIManagementException is error occurs when getting the list of solace environments
-//     */
-//    private List<ThirdPartyEnvironment> getDeployedSolaceEnvironmentsFromRevisionDeployments(API api) throws
-//            APIManagementException {
-//        List<ThirdPartyEnvironment> deployedSolaceEnvironments = new ArrayList<>();
-//        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-//        List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
-//        for (APIRevisionDeployment deployment : deployments) {
-//            String environmentName = deployment.getDeployment();
-//            if (thirdPartyEnvironments.containsKey(environmentName)) {
-//                ThirdPartyEnvironment deployedEnvironment = thirdPartyEnvironments.get(environmentName);
-//                if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
-//                    deployedSolaceEnvironments.add(deployedEnvironment);
-//                }
-//            }
-//        }
-//        return deployedSolaceEnvironments;
-//    }
-//
-//    /**
-//     * Unsubscribe the given API product from the Solace application
-//     *
-//     * @param api         API object to be unsubscribed
-//     * @param application Solace application
-//     * @throws APIManagementException is error occurs when unsubscribing the API from application
-//     */
-//    // Todo: Rename the method
-//    private void unSubscribeAPIProductFromSolaceApplication(API api, Application application) throws APIManagementException {
-//        List<ThirdPartyEnvironment> deployedSolaceEnvironments = getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-//        String applicationOrganizationName = getSolaceOrganizationName(deployedSolaceEnvironments);
-//        ArrayList<String> solaceApiProducts = new ArrayList<>();
-//        if (applicationOrganizationName != null) {
-//            for (ThirdPartyEnvironment environment : deployedSolaceEnvironments) {
-//                solaceApiProducts.add(generateApiProductNameForSolaceBroker(api, environment.getName()));
-//            }
-//            SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-//            HttpResponse response = solaceAdminApis.applicationPatchRemoveSubscription(applicationOrganizationName,
-//                    application, solaceApiProducts);
-//            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                log.info("API product unsubscribed from Solace application '" + application.getName() + "'");
-//                try {
-//                    String responseString = EntityUtils.toString(response.getEntity());
-//                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
-//                    if (jsonObject.getJSONArray("apiProducts") != null) {
-//                        if (jsonObject.getJSONArray("apiProducts").length() == 0) {
-//                            // delete application in Solace because of 0 number of api products
-//                            HttpResponse response2 = solaceAdminApis.deleteApplication(applicationOrganizationName,
-//                                    application);
-//                            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-//                                log.info("Successfully deleted application '" + application.getName() + "' in " +
-//                                        "Solace Broker");
-//                            } else {
-//                                log.error("Error while deleting application '" + application.getName() + "' in Solace");
-//                                throw new APIManagementException("Error while deleting application '" +
-//                                        application.getName() + "' in Solace");
-//                            }
-//                        }
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                log.error("Error while unsubscribing API product from Solace Application '" + application.getName()
-//                        + "'");
-//                throw new APIManagementException(response.getStatusLine().getStatusCode() + "-" + response.getStatusLine()
-//                        .getReasonPhrase());
-//            }
-//        } else {
-//            throw new APIManagementException("Multiple Solace organizations found");
-//        }
-//    }
-//
-    /**
-     * Rename the Solace application
-     *
-     * @param organization Name of the Organization
-     * @param application  Solace application
-     * @throws APIManagementException is error occurs when renaming the application
-     */
-    @Override
-    public void renameSolaceApplication(String organization, Application application) throws APIManagementException {
-        SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-        log.info("Renaming solace application display name....");
-        HttpResponse response = solaceAdminApis.renameApplication(organization, application);
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            log.info("Renamed solace application display name into '" + application.getName() + "'");
-        } else {
-            log.error("Error while renaming solace Application display name....");
-            throw new APIManagementException(response.getStatusLine().getStatusCode() + "-" + response.getStatusLine().
-                    getReasonPhrase());
-        }
-    }
-
-
 }

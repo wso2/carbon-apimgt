@@ -81,7 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.solace.utils.SolaceBrokerUtils;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -484,12 +484,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         apiConsumer.updateApplication(application);
 
-        ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-        if (newApp.isContainsSolaceApis()) {
-            if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
-                SolaceBrokerUtils.renameSolaceApplication(newApp.getSolaceOrganization(), application);
-            }
-        }
+//        ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
+//        if (newApp.isContainsSolaceApis()) {
+//            if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
+//                SolaceNotifierUtils.renameSolaceApplication(newApp.getSolaceOrganization(), application);
+//            }
+//        }
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
@@ -756,10 +756,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
                             jsonParams, keyManagerName, organization, false);
-                    if (ApplicationMappingUtil.containsSolaceApis(application)) {
-                        ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-                        SolaceBrokerUtils.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
-                    }
+//                    if (ApplicationMappingUtil.containsSolaceApis(application)) {
+//                        ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
+//                        SolaceNotifierUtils.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
+//                    }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1221,11 +1221,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             appToken.setTokenScopes(Arrays.asList(response.getScopes()));
                         }
                         appToken.setValidityTime(response.getValidityPeriod());
-                        // for solace applications
-                        if (ApplicationMappingUtil.containsSolaceApis(application)) {
-                            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-                            SolaceBrokerUtils.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
-                        }
+//                        // for solace applications
+//                        if (ApplicationMappingUtil.containsSolaceApis(application)) {
+//                            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
+//                            SolaceNotifierUtils.patchSolaceApplicationClientId(applicationDTO.getSolaceOrganization(), application, appKey.getConsumerKey());
+//                        }
                         return Response.ok().entity(appToken).build();
                     } catch (APIManagementException e) {
                         Long errorCode = e.getErrorHandler() != null ? e.getErrorHandler().getErrorCode() :

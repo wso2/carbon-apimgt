@@ -42,7 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceDeployedEnv
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceTopicsObjectDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
-import org.wso2.carbon.apimgt.solace.utils.SolaceBrokerUtils;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,8 +79,8 @@ public class ApplicationMappingUtil {
             Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
             for (SubscribedAPI subscribedAPI : subscriptions) {
                 API api = apiConsumer.getAPI(subscribedAPI.getApiId());
-                if (SolaceBrokerUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
-                    applicationDTO.setSolaceOrganization(SolaceBrokerUtils.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
+                if (SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+                    applicationDTO.setSolaceOrganization(SolaceNotifierUtils.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
                 }
             }
 
@@ -238,7 +238,7 @@ public class ApplicationMappingUtil {
         Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
         for (SubscribedAPI subscribedAPI : subscriptions) {
             API api = apiConsumer.getAPI(subscribedAPI.getApiId());
-            if (SolaceBrokerUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
+            if (SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
                 return true;
             }
         }

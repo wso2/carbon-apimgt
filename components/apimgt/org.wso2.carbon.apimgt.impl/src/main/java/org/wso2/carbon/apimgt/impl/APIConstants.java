@@ -2792,16 +2792,7 @@ public final class APIConstants {
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Solace integration related constants
-//    public static final String THIRD_PARTY_ENVIRONMENT = "ThirdPartyEnvironment";
-//    public static final String THIRD_PARTY_ENVIRONMENTS = "ThirdPartyEnvironments";
-//    public static final String THIRD_PARTY_ENVIRONMENT_PROVIDER = "provider";
     public static final String SOLACE_ENVIRONMENT_ORGANIZATION = "Organization";
-//    public static final String THIRD_PARTY_ENVIRONMENT_NAME = "EnvironmentName";
-//    public static final String THIRD_PARTY_ENVIRONMENT_DISPLAY_NAME = "DisplayName";
-//    public static final String THIRD_PARTY_ENVIRONMENT_DESCRIPTION = "Description";
-//    public static final String THIRD_PARTY_ENVIRONMENT_SERVER_URL = "ServerURL";
-//    public static final String THIRD_PARTY_ENVIRONMENT_USERNAME = "Username";
-//    public static final String THIRD_PARTY_ENVIRONMENT_PASSWORD = "Password";
     public static final String SOLACE_ENVIRONMENT_DEV_NAME = "DevAccountName";
     public static final String SOLACE_ENVIRONMENT = "solace";
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";

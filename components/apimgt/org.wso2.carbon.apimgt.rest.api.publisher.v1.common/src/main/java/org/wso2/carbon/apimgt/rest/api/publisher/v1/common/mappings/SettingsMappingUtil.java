@@ -85,7 +85,7 @@ public class SettingsMappingUtil {
             EnvironmentListDTO gatewayEnvironmentListDTO = new EnvironmentListDTO();
             if (gatewayEnvironments != null) {
                 gatewayEnvironmentListDTO = EnvironmentMappingUtil.
-                        fromThirdPartyEnvironmentCollectionToDTO(gatewayEnvironments.values());
+                        fromGatewayEnvironmentCollectionToDTO(gatewayEnvironments.values());
             }
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);
