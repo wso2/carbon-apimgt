@@ -78,16 +78,22 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
                         "Id Token Expiry Time", "input", "Type ID Token Expiry Time " +
                         "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
                         Collections.EMPTY_LIST, false));
-        applicationConfigurationsList
-                .add(new ConfigurationDto(APIConstants.KeyManager.ENABLE_PKCE,
-                        "Enable PKCE", " checkbox", "Enable PKCE"
-                        , APIConstants.KeyManager.ENABLE_PKCE, false, false,
-                        Collections.EMPTY_LIST, false));
-        applicationConfigurationsList
-                .add(new ConfigurationDto(APIConstants.KeyManager.ENABLE_PKCE,
-                        "PKCE algorithm", " input", "S256 is recommended, plain too can be used "
-                        , APIConstants.KeyManager.PKCE_ALGORITHM_DEFAULT, false, false,
-                        Collections.EMPTY_LIST, false));
+
+        ConfigurationDto configurationDtoPkceMandatory = new ConfigurationDto(APIConstants.KeyManager.PKCE_MANDATORY,
+                "Enable PKCE", "checkbox", "Enable PKCE", String.valueOf(false), false, false,
+                Collections.EMPTY_LIST, false);
+        applicationConfigurationsList.add(configurationDtoPkceMandatory);
+
+        ConfigurationDto configurationDtoPkcePlainText = new ConfigurationDto(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN,
+                "PKCE support Plain text", "checkbox", "S256 is recommended, plain text too can be used."
+                , String.valueOf(false), false, false, Collections.EMPTY_LIST, false);
+        applicationConfigurationsList.add(configurationDtoPkcePlainText);
+
+        ConfigurationDto configurationDtoBypassClientCredentials = new ConfigurationDto(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
+                "Allow authentication without the client secret", "checkbox", "Allow authentication without the client secret."
+                , String.valueOf(false), false, false, Collections.EMPTY_LIST, false);
+        applicationConfigurationsList.add(configurationDtoBypassClientCredentials);
+
         return applicationConfigurationsList;
     }
 
