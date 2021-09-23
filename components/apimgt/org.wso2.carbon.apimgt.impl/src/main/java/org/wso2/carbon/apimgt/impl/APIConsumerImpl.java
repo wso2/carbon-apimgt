@@ -150,6 +150,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserAdmin;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
@@ -4629,45 +4630,58 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribeValid;
     }
 
-    public boolean updateApplicationOwner(String userId, Application application) throws APIManagementException {
+    public boolean updateApplicationOwner(String userId, String organizationId, Application application) throws APIManagementException {
         boolean isAppUpdated;
         String consumerKey;
         String oldUserName = application.getSubscriber().getName();
         String oldTenantDomain = MultitenantUtils.getTenantDomain(oldUserName);
         String newTenantDomain = MultitenantUtils.getTenantDomain(userId);
         if (oldTenantDomain.equals(newTenantDomain)) {
-            if (isSubscriberValid(userId)) {
-                String applicationName = application.getName();
-                if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName)) {
-                    for (APIKey apiKey : application.getKeys()) {
-                        KeyManager keyManager =
-                                KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
-                             /* retrieving OAuth application information for specific consumer key */
-                        consumerKey = apiKey.getConsumerKey();
-                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                        if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
-                            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
-                                            getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
-                                    oAuthApplicationInfo.getCallBackURL(), null,
-                                    null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
-                            oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
-                            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-                             /* updating the owner of the OAuth application with userId */
-                            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
-                                    oldUserName);
-                            isAppUpdated = true;
-                            audit.info("Successfully updated the owner of application " + application.getName() +
-                                    " from " + oldUserName + " to " + userId + ".");
-                        } else {
-                            throw new APIManagementException("Unable to retrieve OAuth application information.");
+            if (!isSubscriberValid(userId)) {
+                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+                try {
+                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(newTenantDomain);
+                    UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+                    if (userStoreManager.isExistingUser(userId)) {
+                        if (apiMgtDAO.getSubscriber(userId) == null){
+                            addSubscriber(userId, "");
                         }
+                    } else {
+                        throw new APIManagementException("User " + userId + " doesn't exist in user store");
                     }
-                } else {
-                    throw new APIManagementException("Unable to update application owner to " + userId +
-                            " as this user has an application with the same name. Update owner to another user.");
+                } catch (UserStoreException e) {
+                    throw new APIManagementException("Error while adding user " + userId + " as a subscriber");
+                }
+            }
+            String applicationName = application.getName();
+            if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organizationId)) {
+                for (APIKey apiKey : application.getKeys()) {
+                    KeyManager keyManager =
+                            KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    /* retrieving OAuth application information for specific consumer key */
+                    consumerKey = apiKey.getConsumerKey();
+                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
+                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
+                                        getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
+                                oAuthApplicationInfo.getCallBackURL(), null,
+                                null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
+                        oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
+                        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+                        /* updating the owner of the OAuth application with userId */
+                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
+                                oldUserName, organizationId);
+                        isAppUpdated = true;
+                        audit.info("Successfully updated the owner of application " + application.getName() +
+                                " from " + oldUserName + " to " + userId + ".");
+                    } else {
+                        throw new APIManagementException("Unable to retrieve OAuth application information.");
+                    }
                 }
             } else {
-                throw new APIManagementException(userId + " is not a subscriber");
+                throw new APIManagementException("Unable to update application owner to " + userId +
+                        " as this user has an application with the same name. Update owner to another user.");
             }
         } else {
             throw new APIManagementException("Unable to update application owner to " +

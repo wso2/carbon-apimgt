@@ -56,14 +56,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
 
     @Override
-    public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId,
+    public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId,  String organizationId,
                                                              MessageContext messageContext) {
 
         APIConsumer apiConsumer = null;
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(owner);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, application);
+            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organizationId, application);
             if (applicationUpdated) {
                 return Response.ok().build();
             } else {

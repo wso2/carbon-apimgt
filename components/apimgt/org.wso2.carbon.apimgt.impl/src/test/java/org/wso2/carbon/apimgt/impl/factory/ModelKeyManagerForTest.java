@@ -46,7 +46,7 @@ public class ModelKeyManagerForTest extends AbstractKeyManager {
         return null;
     }
 
-    @Override public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest oAuthAppRequest, String owner)
+    @Override public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest oAuthAppRequest, String owner, String organizationId)
             throws APIManagementException {
         return null;
     }

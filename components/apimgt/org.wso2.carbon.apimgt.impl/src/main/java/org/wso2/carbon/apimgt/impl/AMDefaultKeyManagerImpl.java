@@ -340,7 +340,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
+    public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner,  String organizationId)
             throws APIManagementException {
 
         OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
@@ -348,7 +348,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo updatedClient;
         try {
-            updatedClient = dcrClient.updateApplicationOwner(owner, oAuthApplicationInfo.getClientId());
+            updatedClient = dcrClient.updateApplicationOwner(owner, oAuthApplicationInfo.getClientId(), organizationId);
             return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);

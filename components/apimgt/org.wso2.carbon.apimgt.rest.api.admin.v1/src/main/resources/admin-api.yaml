@@ -1678,6 +1678,10 @@ paths:
         required: true
         schema:
           type: string
+      - name: organizationId
+        in: query
+        schema:
+          type: string
       - $ref: '#/components/parameters/applicationId'
       responses:
         200:

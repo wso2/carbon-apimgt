@@ -45,7 +45,8 @@ public interface DCRClient {
     @RequestLine("POST /{clientId}/change-owner")
     @Headers("Content-Type: application/json")
     ClientInfo updateApplicationOwner(@Param("applicationOwner") String applicationOwner,
-                                      @Param("clientId") String clientId)
+                                      @Param("clientId") String clientId,
+                                      @Param("organizationId") String organizationId)
             throws KeyManagerClientException;
 
     @RequestLine("POST /{clientId}/regenerate-consumer-secret")
