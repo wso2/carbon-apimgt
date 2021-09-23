@@ -95,7 +95,7 @@ public class LogsHandler extends AbstractSynapseHandler {
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         if (isEnabled()) {
             try {
-                requestSize = buildRequestMessage(messageContext);
+                requestSize = getContentLength(messageContext);
                 Map headers = LogUtils.getTransportHeaders(messageContext);
                 Set<String> key = headers.keySet();
                 String authHeader = LogUtils.getAuthorizationHeader(headers);
@@ -220,7 +220,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         return responseTime;
     }
 
-    private long buildRequestMessage(org.apache.synapse.MessageContext messageContext) {
+    private long getContentLength(org.apache.synapse.MessageContext messageContext) {
         long requestSize = 0;
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
@@ -228,23 +228,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
         if (contentLength != null) {
             requestSize = Integer.parseInt(contentLength);
-        } else {
-            // When chunking is enabled
-            try {
-                RelayUtils.buildMessage(axis2MC);
-            } catch (IOException | XMLStreamException ex) {
-                // In case of an exception, it won't be propagated up,and set response size to 0
-                log.error(REQUEST_BODY_SIZE_ERROR, ex);
-            }
-            SOAPEnvelope env = messageContext.getEnvelope();
-            if (env != null) {
-                SOAPBody soapbody = env.getBody();
-                if (soapbody != null) {
-                    byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
-                    requestSize = size.length;
-                }
-
-            }
+            // request size is left as 0 if chunking is enabled. this is to avoid building the message
         }
         return requestSize;
     }
