@@ -87,7 +87,7 @@ public class RegistryLCManager {
                         Node action = transition.getAttributes().getNamedItem("event");
                         if (id.getNodeValue().equals(STATE_ID_PROTOTYPED)
                                 && (target.getNodeValue().equals(TRANSITION_TARGET_PROTOTYPED)
-                                || target.getNodeValue().equals(TRANSITION_TARGET_PUBLISHED))) {
+                                )) {
                             // skip adding "Publish" and "Deploy as a Prototype" transitions as having those transitions
                             // in Prototyped state is invalid
                         } else if (id.getNodeValue().equals(STATE_ID_PUBLISHED)

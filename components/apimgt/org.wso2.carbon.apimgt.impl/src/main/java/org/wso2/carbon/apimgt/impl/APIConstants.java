@@ -2279,7 +2279,7 @@ public final class APIConstants {
                 "/client-registration/" + REST_API_OLD_VERSION + "/register";
     }
 
-    public static final int MAX_LENGTH_API_NAME = 50;
+    public static final int MAX_LENGTH_API_NAME = 60;
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
     public static final int MAX_LENGTH_CONTEXT = 232; //context becomes context + version + two '/'. Max context is 200

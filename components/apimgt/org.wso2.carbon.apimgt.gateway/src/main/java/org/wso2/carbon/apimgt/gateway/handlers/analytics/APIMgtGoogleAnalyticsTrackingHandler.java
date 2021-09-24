@@ -72,9 +72,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
     @MethodStats
     @Override
     public boolean handleRequest(MessageContext msgCtx) {
-        if (GatewayUtils.isAPIStatusPrototype(msgCtx)) {
-            return true;
-        }
+
         TracingSpan span = null;
         TracingTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
