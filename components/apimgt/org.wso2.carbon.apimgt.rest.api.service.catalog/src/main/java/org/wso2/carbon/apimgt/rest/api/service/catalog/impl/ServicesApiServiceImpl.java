@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -199,6 +200,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                     .DefinitionTypeEnum.fromValue(service.getDefinitionType().name())) || ServiceDTO.DefinitionTypeEnum
                     .ASYNC_API.equals(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType().name()))) {
                 contentType = "application/yaml";
+            } else if (ServiceDTO.DefinitionTypeEnum.WSDL1.equals(ServiceDTO.DefinitionTypeEnum.fromValue(service
+                    .getDefinitionType().name()))) {
+                contentType = "text/xml";
             }
             InputStream serviceDefinition = service.getEndpointDef();
             if (serviceDefinition == null) {
@@ -255,11 +259,13 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 serviceEntries.get(key).setMd5(newResourcesHash.get(key));
                 ServiceEntry service = serviceEntries.get(key);
                 byte[] definitionFileByteArray = getDefinitionFromInput(service.getEndpointDef());
-                if (!validateAndRetrieveServiceDefinition(definitionFileByteArray, service.getDefUrl(),
-                        service.getDefinitionType()).isValid()) {
-                    servicesWithInvalidDefinition.add(service);
-                } else {
+                if (validateAndRetrieveServiceDefinition(definitionFileByteArray, service.getDefUrl(),
+                        service.getDefinitionType()).isValid() ||
+                        (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())
+                                && APIMWSDLReader.validateWSDLFile(definitionFileByteArray).isValid())) {
                     service.setEndpointDef(new ByteArrayInputStream(definitionFileByteArray));
+                } else {
+                    servicesWithInvalidDefinition.add(service);
                 }
                 if (overwrite) {
                     if (StringUtils.isNotEmpty(verifier) && validationResults
