@@ -140,7 +140,7 @@ public class LogsHandler extends AbstractSynapseHandler {
                 try {
                     long responseTime = getResponseTime(messageContext);
                     long beTotalLatency = getBackendLatency(messageContext);
-                    long responseSize = buildResponseMessage(messageContext);
+                    long responseSize = getContentLength(messageContext);
                     apiResponseSC = LogUtils.getRestHttpResponseStatusCode(messageContext);
                     applicationName = LogUtils.getApplicationName(messageContext);
                     apiConsumerKey = LogUtils.getConsumerKey(messageContext);
@@ -221,45 +221,15 @@ public class LogsHandler extends AbstractSynapseHandler {
     }
 
     private long getContentLength(org.apache.synapse.MessageContext messageContext) {
-        long requestSize = 0;
+        long requestSize = -1;
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
         if (contentLength != null) {
             requestSize = Integer.parseInt(contentLength);
-            // request size is left as 0 if chunking is enabled. this is to avoid building the message
+            // request size is left as -1 if chunking is enabled. this is to avoid building the message
         }
         return requestSize;
-    }
-
-    private long buildResponseMessage(org.apache.synapse.MessageContext messageContext) {
-        long responseSize = 0;
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
-                .getAxis2MessageContext();
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
-        if (contentLength != null) {
-            responseSize = Integer.parseInt(contentLength);
-        } else {
-            // When chunking is enabled
-            try {
-                RelayUtils.buildMessage(axis2MC);
-            } catch (IOException | XMLStreamException ex) {
-                // In case of an exception, it won't be propagated up,and set response size to 0
-                log.error(REQUEST_BODY_SIZE_ERROR, ex);
-            }
-        }
-        SOAPEnvelope env = messageContext.getEnvelope();
-        if (env != null) {
-            SOAPBody soapbody = env.getBody();
-            if (soapbody != null) {
-                byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
-                responseSize = size.length;
-            }
-
-        }
-        return responseSize;
-
     }
 }
