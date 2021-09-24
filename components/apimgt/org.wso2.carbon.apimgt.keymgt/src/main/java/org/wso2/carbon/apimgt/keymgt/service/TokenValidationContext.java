@@ -104,10 +104,6 @@ public class TokenValidationContext {
         this.requiredAuthenticationLevel = requiredAuthenticationLevel;
     }
 
-    public String getClientDomain() {
-        return clientDomain;
-    }
-
     public void setClientDomain(String clientDomain) {
         this.clientDomain = clientDomain;
     }

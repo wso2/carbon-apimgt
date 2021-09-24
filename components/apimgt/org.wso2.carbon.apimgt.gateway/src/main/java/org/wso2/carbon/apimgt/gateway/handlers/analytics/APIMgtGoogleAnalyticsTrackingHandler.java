@@ -77,7 +77,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         TracingTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             tracer = Util.getGlobalTracer();
             span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
         }
