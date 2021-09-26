@@ -87,7 +87,6 @@ public class OAuthAuthenticator implements Authenticator {
     private boolean removeDefaultAPIHeaderFromOutMessage = true;
     private String clientDomainHeader = "referer";
     private String requestOrigin;
-    private String remainingAuthHeader;
     private boolean isMandatory;
 
     public OAuthAuthenticator() {
@@ -115,6 +114,7 @@ public class OAuthAuthenticator implements Authenticator {
     public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
         boolean isJwtToken = false;
         String accessToken = null;
+        String remainingAuthHeader = "";
         boolean defaultVersionInvoked = false;
         TracingSpan getClientDomainSpan = null;
         TracingSpan authenticationSchemeSpan = null;
@@ -137,7 +137,48 @@ public class OAuthAuthenticator implements Authenticator {
         if (headers != null) {
             requestOrigin = (String) headers.get("Origin");
 
-            accessToken = extractCustomerKeyFromAuthHeader(headers);
+            // Extract the access token from auth header
+
+            // From 1.0.7 version of this component onwards remove the OAuth authorization header from
+            // the message is configurable. So we dont need to remove headers at this point.
+            String authHeader = (String) headers.get(getSecurityHeader());
+            if (authHeader == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 Authentication: Expected authorization header with the name '"
+                            .concat(getSecurityHeader()).concat("' was not found."));
+                }
+            } else {
+                ArrayList<String> remainingAuthHeaders = new ArrayList<>();
+                boolean consumerkeyFound = false;
+                String[] splitHeaders = authHeader.split(oauthHeaderSplitter);
+                if (splitHeaders != null) {
+                    for (int i = 0; i < splitHeaders.length; i++) {
+                        String[] elements = splitHeaders[i].split(consumerKeySegmentDelimiter);
+                        if (elements != null && elements.length > 1) {
+                            int j = 0;
+                            boolean isConsumerKeyHeaderAvailable = false;
+                            for (String element : elements) {
+                                if (!"".equals(element.trim())) {
+                                    if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
+                                        isConsumerKeyHeaderAvailable = true;
+                                    } else if (isConsumerKeyHeaderAvailable) {
+                                        accessToken = removeLeadingAndTrailing(elements[j].trim());
+                                        consumerkeyFound = true;
+                                    }
+                                }
+                                j++;
+                            }
+                        }
+                        if (!consumerkeyFound) {
+                            remainingAuthHeaders.add(splitHeaders[i]);
+                        } else {
+                            consumerkeyFound = false;
+                        }
+                    }
+                }
+                remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
+            }
+
             if (log.isDebugEnabled()) {
                 log.debug(accessToken != null ? "Received Token ".concat(accessToken) : "No valid Authorization header found");
             }
@@ -156,7 +197,6 @@ public class OAuthAuthenticator implements Authenticator {
                     log.debug("Removing OAuth key from Authorization header");
                 }
                 headers.put(getSecurityHeader(), remainingAuthHeader);
-                remainingAuthHeader = "";
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Removing Authorization header from headers");
@@ -415,60 +455,6 @@ public class OAuthAuthenticator implements Authenticator {
                     ", version: "+ apiVersion + " status: (" + info.getValidationStatus() +
                     ") - " + APISecurityConstants.getAuthenticationFailureMessage(info.getValidationStatus()));
         }
-    }
-
-    /**
-     * Extracts the customer API key from the OAuth Authentication header. If the required
-     * security header is present in the provided map, it will be removed from the map
-     * after processing.
-     *
-     * @param headersMap Map of HTTP headers
-     * @return extracted customer key value or null if the required header is not present
-     */
-    public String extractCustomerKeyFromAuthHeader(Map headersMap) {
-
-        //From 1.0.7 version of this component onwards remove the OAuth authorization header from
-        // the message is configurable. So we dont need to remove headers at this point.
-        String authHeader = (String) headersMap.get(getSecurityHeader());
-        if (authHeader == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("OAuth2 Authentication: Expected authorization header with the name '"
-                        .concat(getSecurityHeader()).concat("' was not found."));
-            }
-            return null;
-        }
-
-        ArrayList<String> remainingAuthHeaders = new ArrayList<>();
-        String consumerKey = null;
-        boolean consumerkeyFound = false;
-        String[] headers = authHeader.split(oauthHeaderSplitter);
-        if (headers != null) {
-            for (int i = 0; i < headers.length; i++) {
-                String[] elements = headers[i].split(consumerKeySegmentDelimiter);
-                if (elements != null && elements.length > 1) {
-                    int j = 0;
-                    boolean isConsumerKeyHeaderAvailable = false;
-                    for (String element : elements) {
-                        if (!"".equals(element.trim())) {
-                            if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
-                                isConsumerKeyHeaderAvailable = true;
-                            } else if (isConsumerKeyHeaderAvailable) {
-                                consumerKey = removeLeadingAndTrailing(elements[j].trim());
-                                consumerkeyFound = true;
-                            }
-                        }
-                        j++;
-                    }
-                }
-                if (!consumerkeyFound) {
-                    remainingAuthHeaders.add(headers[i]);
-                } else {
-                    consumerkeyFound = false;
-                }
-            }
-        }
-        remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
-        return consumerKey;
     }
 
     private String removeLeadingAndTrailing(String base) {
