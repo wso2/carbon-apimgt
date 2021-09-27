@@ -42,7 +42,6 @@ public class SolaceManagerComponent extends APIManagerComponent {
         BundleContext bundleContext = componentContext.getBundleContext();
 
         //Registering Notifiers
-        bundleContext.registerService(Notifier.class.getName(), new SolaceDeployAPIInGatewayNotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceSubscriptionsNotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceApplicationNotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceKeyGenNotifier(), null);
