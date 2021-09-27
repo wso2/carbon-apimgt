@@ -321,7 +321,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TracingTracer tracer = Util.getGlobalTracer();
             keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
             messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
