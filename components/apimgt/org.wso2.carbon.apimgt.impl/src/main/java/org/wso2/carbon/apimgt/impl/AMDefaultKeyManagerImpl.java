@@ -623,6 +623,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
                 appResponse.getRefreshTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME, appResponse.getIdTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.PKCE_MANDATORY, appResponse.getPkceMandatory());
+        additionalProperties.put(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN, appResponse.getPkceSupportPlain());
+        additionalProperties.put(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
+                appResponse.getBypassClientCredentials());
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;

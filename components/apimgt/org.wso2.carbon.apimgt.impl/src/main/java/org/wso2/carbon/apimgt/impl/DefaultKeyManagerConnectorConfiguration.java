@@ -85,12 +85,12 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
         applicationConfigurationsList.add(configurationDtoPkceMandatory);
 
         ConfigurationDto configurationDtoPkcePlainText = new ConfigurationDto(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN,
-                "PKCE support Plain text", "checkbox", "S256 is recommended, plain text too can be used."
+                "Support PKCE Plain text", "checkbox", "S256 is recommended, plain text too can be used."
                 , String.valueOf(false), false, false, Collections.EMPTY_LIST, false);
         applicationConfigurationsList.add(configurationDtoPkcePlainText);
 
         ConfigurationDto configurationDtoBypassClientCredentials = new ConfigurationDto(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
-                "Allow authentication without the client secret", "checkbox", "Allow authentication without the client secret."
+                "Public client", "checkbox", "Allow authentication without the client secret."
                 , String.valueOf(false), false, false, Collections.EMPTY_LIST, false);
         applicationConfigurationsList.add(configurationDtoBypassClientCredentials);
 

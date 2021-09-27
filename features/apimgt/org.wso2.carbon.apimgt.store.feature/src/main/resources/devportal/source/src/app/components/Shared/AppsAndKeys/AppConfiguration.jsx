@@ -81,7 +81,7 @@ const AppConfiguration = (props) => {
         classes, config, isUserOwner, previousValue, handleChange,
     } = props;
 
-    const [selectedValue, setSelectedValue] = useState(previousValue);
+    let [selectedValue, setSelectedValue] = useState(previousValue);
 
     /**
      * This method is used to handle the updating of key generation
@@ -100,6 +100,11 @@ const AppConfiguration = (props) => {
     useEffect(() => {
         setSelectedValue(previousValue);
     }, [previousValue])
+
+    if (config.type === 'checkbox' && typeof selectedValue === 'string'){
+        selectedValue = selectedValue === 'true'
+    }
+    
     return (
         <>
             <TableRow>
@@ -206,7 +211,7 @@ const AppConfiguration = (props) => {
                             fullWidth
                             id={config.name}
                             label={config.label}
-                            value={selectedValue}
+                            checked={selectedValue}                            
                             name={config.name}
                             onChange={e => handleAppRequestChange(e)}
                             helperText={
