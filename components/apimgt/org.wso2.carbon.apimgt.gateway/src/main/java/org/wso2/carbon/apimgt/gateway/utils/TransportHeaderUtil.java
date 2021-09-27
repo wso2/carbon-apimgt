@@ -63,12 +63,14 @@ public class TransportHeaderUtil {
      */
     public static void removeTransportHeadersFromList(MessageContext synCtx, List<String> removableHeaders) {
         Map<String, String> transportHeaders = getTransportHeaders(synCtx);
-        for (String header : removableHeaders) {
-            if (transportHeaders.containsKey(header)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("'" + header + "' is removed from the Transport header list");
+        if (transportHeaders != null) {
+            for (String header : removableHeaders) {
+                if (transportHeaders.containsKey(header)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("'" + header + "' is removed from the Transport header list");
+                    }
+                    transportHeaders.remove(header);
                 }
-                transportHeaders.remove(header);
             }
         }
     }
@@ -107,13 +109,15 @@ public class TransportHeaderUtil {
      */
     public static void removeRequestHeadersFromResponseHeaders(Map requestHeaders, Map responseHeaders,
                                                                List<String> preserveHeaders) {
-        for (Object headerObj : requestHeaders.keySet()) {
-            String headerName = (String) headerObj;
-            if (!preserveHeaders.contains(headerName) && responseHeaders.containsKey(headerName)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Request header '" + headerName + "' is removed from the Response");
+        if (responseHeaders != null) {
+            for (Object headerObj : requestHeaders.keySet()) {
+                String headerName = (String) headerObj;
+                if (!preserveHeaders.contains(headerName) && responseHeaders.containsKey(headerName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Request header '" + headerName + "' is removed from the Response");
+                    }
+                    responseHeaders.remove(headerName);
                 }
-                responseHeaders.remove(headerName);
             }
         }
     }
