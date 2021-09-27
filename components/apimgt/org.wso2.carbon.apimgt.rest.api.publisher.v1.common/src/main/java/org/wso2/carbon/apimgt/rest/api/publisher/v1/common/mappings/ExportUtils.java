@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -886,6 +887,11 @@ public class ExportUtils {
                                 GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                         CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION,
                                 exportFormat, ImportExportConstants.GRAPHQL_COMPLEXITY, graphQLQueryComplexityInfoDTO);
+                    }
+                    if (new GraphQLSchemaDefinition().checkSubscriptionAvailability(schemaContent)) {
+                        String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
+                        CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
+                                exportFormat, asyncApiJson);
                     }
                 }
                 // For GraphQL APIs, swagger export is not needed

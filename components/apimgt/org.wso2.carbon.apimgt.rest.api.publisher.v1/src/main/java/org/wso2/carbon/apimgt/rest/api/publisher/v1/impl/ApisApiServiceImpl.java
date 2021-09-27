@@ -3919,6 +3919,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
+
+            //If graphql schema contains subscriptions
+            GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+            if (graphql.checkSubscriptionAvailability(schema)) {
+                AsyncApiParser asyncApiParser = new AsyncApiParser();
+                String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefForGQLSubscriptions(apiToAdd);
+                apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
+            }
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
 

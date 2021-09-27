@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -145,6 +146,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     context.put("signatureHeader", api.getWebsubSubscriptionConfiguration().getSignatureHeader());
                     context.put("isSecurityEnabled", !StringUtils.isEmpty(api.getWebsubSubscriptionConfiguration().
                             getSecret()));
+                } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    boolean isSubscriptionAvailable = false;
+                    GraphQLSchemaDefinition graphQLSchemaDefinition = new GraphQLSchemaDefinition();
+                    if (graphQLSchemaDefinition.checkSubscriptionAvailability(api.getGraphQLSchema())) {
+                        isSubscriptionAvailable = true;
+                        context.put("topicMappings", this.api.getWebSocketTopicMappingConfiguration().getMappings());
+                    }
+                    context.put("isSubscriptionAvailable", isSubscriptionAvailable);
                 }
             } else {
                 t = velocityengine.getTemplate(getApiProductTemplatePath());

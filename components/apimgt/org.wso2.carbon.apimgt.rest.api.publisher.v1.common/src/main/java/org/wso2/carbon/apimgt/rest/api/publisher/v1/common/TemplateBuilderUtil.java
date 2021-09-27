@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -624,8 +625,10 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setTenantDomain(tenantDomain);
 
         String definition;
+        boolean isGraphQLSubscriptionAPI = false;
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+            isGraphQLSubscriptionAPI = true;
             //Build schema with additional info
             gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUUID() + "_graphQL",
                     gatewayAPIDTO.getLocalEntriesToBeRemove()));
@@ -643,6 +646,26 @@ public class TemplateBuilderUtil {
             template.setUriTemplate("/*");
             uriTemplates.add(template);
             api.setUriTemplates(uriTemplates);
+
+            GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+            if (graphql.checkSubscriptionAvailability(api.getGraphQLSchema())) {
+                template = new URITemplate();
+                template.setUriTemplate("/*");
+                uriTemplates.add(template);
+                api.setUriTemplates(uriTemplates);
+                gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUuid(),
+                        gatewayAPIDTO.getLocalEntriesToBeRemove()));
+                definition = api.getAsyncApiDefinition();
+                GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
+                apiLocalEntry.setName(api.getUuid());
+                apiLocalEntry.setContent("<localEntry key=\"" + api.getUuid() + "\">" +
+                        definition.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                        + "</localEntry>");
+                gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
+                        gatewayAPIDTO.getLocalEntriesToBeAdd()));
+                addGQLWebSocketTopicMappings(api, apidto);
+            }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
                 || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
@@ -709,7 +732,8 @@ public class TemplateBuilderUtil {
                     .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
                 if (!isWsApi) {
                     addEndpoints(api, builder, gatewayAPIDTO);
-                } else {
+                }
+                if (isWsApi || isGraphQLSubscriptionAPI) {
                     addWebSocketResourceEndpoints(api, builder, gatewayAPIDTO);
                 }
             }
@@ -745,6 +769,32 @@ public class TemplateBuilderUtil {
         addWebsocketTopicResourceKeys(api);
     }
 
+    /**
+     * TODO://
+     * @param api
+     * @param apidto
+     */
+    private static void addGQLWebSocketTopicMappings(API api, APIDTO apidto) {
+
+        org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig()).getJSONObject("ws");
+        String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url") : null;
+        String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url") : null;
+
+
+        Map<String, String> endpoints = new HashMap<>();
+        if (sandboxEndpointUrl != null) {
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl + "/*");
+        }
+        if (productionEndpointUrl != null) {
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + "/*");
+        }
+        Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
+        perTopicMappings.put("/*", endpoints);
+        api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
+        addWebsocketTopicResourceKeys(api);
+    }
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
                                                     APIDTO apidto) throws APIManagementException {
 
@@ -821,6 +871,15 @@ public class TemplateBuilderUtil {
         }
     }
 
+    private static GatewayContentDTO[] addGatewayContentsToList(List<GatewayContentDTO> gatewayContentDTOList,
+                                                               GatewayContentDTO[] gatewayContents) {
+
+        if (gatewayContents != null) {
+            Collections.addAll(gatewayContentDTOList, gatewayContents);
+        }
+        return gatewayContentDTOList.toArray(new GatewayContentDTO[gatewayContentDTOList.size()]);
+    }
+
     private static void addEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
 
@@ -882,8 +941,12 @@ public class TemplateBuilderUtil {
                     endpointsToAdd.add(endpoint);
                 }
             }
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                break;
+            }
         }
-        gatewayAPIDTO.setEndpointEntriesToBeAdd(endpointsToAdd.toArray(new GatewayContentDTO[endpointsToAdd.size()]));
+        gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentsToList(endpointsToAdd,
+                gatewayAPIDTO.getEndpointEntriesToBeAdd()));
     }
 
     /**

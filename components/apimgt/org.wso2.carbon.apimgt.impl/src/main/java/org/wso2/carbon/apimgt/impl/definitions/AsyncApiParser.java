@@ -1888,4 +1888,39 @@ public class AsyncApiParser extends APIDefinition {
         }
         return wsUriMapping;
     }
+
+    /**
+     * TODO:// generate async api def
+     * @param api
+     * @return
+     */
+    public String generateAsyncAPIDefForGQLSubscriptions(API api) {
+        Aai20Document aaiDocument = new Aai20Document();
+        aaiDocument.info = aaiDocument.createInfo();
+        aaiDocument.info.title = api.getId().getName();
+        aaiDocument.info.version = api.getId().getVersion();
+        Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
+        JSONObject wsEndpointConfig = new JSONObject(api.getEndpointConfig()).getJSONObject("ws");
+        server.url = wsEndpointConfig.getJSONObject("production_endpoints").getString("url");
+//        JSONArray prodEndpoints = new JSONObject(api.getEndpointConfig()).getJSONArray("production_endpoints");
+//        for (int i = 0; i < prodEndpoints.length(); i++) {
+//            JSONObject prodEndpoint = ((JSONObject) prodEndpoints.get(i));
+//            if (StringUtils.equalsIgnoreCase(APIConstants.WS_PROTOCOL, prodEndpoint.getString("endpoint_type"))) {
+//                server.url = prodEndpoint.getString("url");
+//                break;
+//            }
+//        }
+        server.protocol = APIConstants.WS_PROTOCOL;
+        aaiDocument.addServer("production", server);
+
+        Map<String, AaiChannelItem> channels = new HashMap<>();
+        Aai20ChannelItem channelItem = aaiDocument.createChannelItem("/*");
+        Aai20Operation subscribeOp = new Aai20Operation(channelItem, "subscribe");
+        channelItem.subscribe = subscribeOp;
+        Aai20Operation publishOp = new Aai20Operation(channelItem, "publish");
+        channelItem.publish = publishOp;
+        channels.put("/*", channelItem);
+        aaiDocument.channels = channels;
+        return Library.writeDocumentToJSONString(aaiDocument);
+    }
 }
