@@ -81,6 +81,9 @@ public class TransportHeaderUtil {
      */
     public static void removeExcessTransportHeadersFromList(MessageContext synCtx, List<String> removableHeaders) {
         Map<String, String> excessTransportHeaders = getExcessTransportHeaders(synCtx);
+        if (excessTransportHeaders == null) {
+            return;
+        }
         Iterator<String> headerIter = excessTransportHeaders.keySet().iterator();
         while (headerIter.hasNext()) {
             String headerName = headerIter.next();
