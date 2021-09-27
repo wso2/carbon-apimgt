@@ -58,7 +58,7 @@ https://github.com/wso2-support/wso2-axis2/tree/support-1.6.1-wso2v28
     6. identity-inbound-auth-oauth - support-6.0.53
 https://github.com/wso2-support/identity-inbound-auth-oauth/tree/support-6.0.53
 
-- [Support-6.6.349](https://github.com/wso2-support/carbon-apimgt/tree/support-6.5.349) - APIM 3.0.0
+- [Support-6.6.349](https://github.com/wso2-support/carbon-apimgt/tree/support-6.6.349) - APIM 3.0.0
 - [Support-6.6.163](https://github.com/wso2-support/carbon-apimgt/tree/support-6.6.163) - APIM 3.1.0
 
     We need to build following additional Repos before building support-6.6.163 branch:
