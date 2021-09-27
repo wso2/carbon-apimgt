@@ -44,6 +44,7 @@ public class BasicAuthAuthenticatorTest {
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
     private BasicAuthAuthenticator basicAuthAuthenticator;
     private final String CUSTOM_AUTH_HEADER = "AUTH-HEADER";
+    private final String UNLIMITED_THROTTLE_POLICY= "Unlimited";
 
     @Before
     public void setup() throws Exception {
@@ -58,7 +59,7 @@ public class BasicAuthAuthenticatorTest {
         Mockito.when((messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)))
                 .thenReturn(Mockito.mock(OpenAPI.class));
 
-        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true);
+        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, UNLIMITED_THROTTLE_POLICY);
         BasicAuthCredentialValidator basicAuthCredentialValidator = Mockito.mock(BasicAuthCredentialValidator.class);
         BasicAuthValidationInfoDTO basicAuthValidationInfoDTO = new BasicAuthValidationInfoDTO();
 

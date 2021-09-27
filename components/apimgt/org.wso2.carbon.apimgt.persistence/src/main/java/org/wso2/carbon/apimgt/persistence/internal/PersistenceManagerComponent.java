@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
@@ -131,6 +132,23 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(null);
+    }
+    
+    /**
+     * Initialize the registry impl
+     */
+    @Reference(
+            name = "api.persistence.service",
+            service = APIPersistence.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPersistenceService")
+    protected void setPersistenceService(APIPersistence apiPersistence) {
+        ServiceReferenceHolder.getInstance().setApiPersistence(apiPersistence);
+    }
+
+    protected void unsetPersistenceService(APIPersistence apiPersistence) {
+        ServiceReferenceHolder.getInstance().setApiPersistence(apiPersistence);
     }
 }
 

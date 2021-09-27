@@ -34,9 +34,26 @@ public class DevPortalAPIInfo {
     private String status;
     private Set<String> availableTierNames;
     private String subscriptionAvailability; 
-    private String subscriptionAvailableOrgs; 
+    private String subscriptionAvailableOrgs;
+    private String createdTime;
+    private String description;
 
-    
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
     //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
     // attached tiers.
     public String getId() {
@@ -111,12 +128,13 @@ public class DevPortalAPIInfo {
     public void setSubscriptionAvailability(String subscriptionAvailability) {
         this.subscriptionAvailability = subscriptionAvailability;
     }
+
     @Override
     public String toString() {
-        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
-                + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
-                + ", businessOwner=" + businessOwner + ", status=" + status + ", availableTierNames="
-                + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
+        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version="
+                + version + ", providerName=" + providerName + ", context=" + context + ", type=" + type + ", " +
+                "thumbnail=" + thumbnail + ", businessOwner=" + businessOwner + ", status=" + status + ", " +
+                "availableTierNames=" + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
                 + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + "]";
     }
 

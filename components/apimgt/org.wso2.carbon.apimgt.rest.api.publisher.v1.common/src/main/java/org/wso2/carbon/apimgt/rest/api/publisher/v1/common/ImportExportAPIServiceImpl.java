@@ -55,14 +55,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-            boolean exportLatestRevision, String originalDevPortalUrl)
+            boolean exportLatestRevision, String originalDevPortalUrl, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
         APIDTO apiDtoToReturn;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api;
         String exportAPIUUID;
 
@@ -71,7 +70,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
             if (apiId == null) {
                 throw new APIImportExportException("API Id not found for the provided details");
             }
@@ -91,49 +90,48 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         }
         //If an incorrect revision num provided or revision does not exists, working copy will be exported
         exportAPIUUID = (exportAPIUUID == null) ? apiId : exportAPIUUID;
-        api = apiProvider.getAPIbyUUID(exportAPIUUID, tenantDomain);
+        api = apiProvider.getAPIbyUUID(exportAPIUUID, organization);
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, originalDevPortalUrl);
+                preserveDocs, originalDevPortalUrl, organization);
     }
 
     @Override
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                          boolean preserveDocs, boolean preserveCredentials)
+                          boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        API api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+        API api = apiProvider.getAPIbyUUID(revisionUUID, organization);
         api.setUuid(apiId);
+        apiIdentifier.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, StringUtils.EMPTY);
+                preserveDocs, StringUtils.EMPTY, organization);
 
     }
 
     @Override
     public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
-                                 boolean preserveDocs, boolean preserveCredentials)
+                                 boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiId);
-        APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, tenantDomain);
+        APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, organization);
         APIProductDTO apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(product);
         return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName,
-                format, preserveStatus, preserveDocs, preserveCredentials);
+                format, preserveStatus, preserveDocs, preserveCredentials, organization);
     }
 
     @Override
     public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
                                  ExportFormat format, boolean preserveStatus, boolean preserveDocs,
-                                 boolean preserveCredentials, boolean exportLatestRevision)
+                                 boolean preserveCredentials, boolean exportLatestRevision, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;
@@ -150,7 +148,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiId = APIUtil.getUUIDFromIdentifier(apiProductIdentifier);
+            apiId = APIUtil.getUUIDFromIdentifier(apiProductIdentifier, organization);
         }
 
         if (exportLatestRevision) {
@@ -171,16 +169,14 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return ExportUtils
                     .exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, format,
-                            preserveStatus, preserveDocs, preserveCredentials);
+                            preserveStatus, preserveDocs, preserveCredentials, organization);
         }
         return null;
 
     }
 
-    @Override
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider,
-                         Boolean rotateRevision, Boolean overwrite,
-                         String[] tokenScopes) throws APIManagementException {
+    @Override public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+            Boolean overwrite, String[] tokenScopes, String organization) throws APIManagementException {
 
         String extractedFolderPath;
         try {
@@ -188,14 +184,14 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
-        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
-                false, tokenScopes, null);
+        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision,
+                overwrite, false, tokenScopes, null, organization);
     }
 
     @Override
-    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
-                                       Boolean rotateRevision, Boolean overwriteAPIProduct,
-                                       Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
+            String organization)
             throws APIManagementException {
 
         String extractedFolderPath;
@@ -205,6 +201,6 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, rotateRevision, overwriteAPIProduct,
-                overwriteAPIs, importAPIs, tokenScopes);
+                overwriteAPIs, importAPIs, tokenScopes, organization);
     }
 }

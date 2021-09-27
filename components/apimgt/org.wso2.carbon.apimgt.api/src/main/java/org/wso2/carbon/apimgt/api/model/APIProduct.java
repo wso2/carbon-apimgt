@@ -81,6 +81,8 @@ public class APIProduct {
      */
     private String productionMaxTps;
     private String sandboxMaxTps;
+    
+    private String organization;
 
     /**
      * Custom authorization header specific to the API
@@ -607,5 +609,13 @@ public class APIProduct {
 
     public void setRevisionId(int revisionId) {
         this.revisionId = revisionId;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RealmUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -71,6 +72,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param inMessage cxf Message
      */
     @Override
+    @MethodStats
     public void handleMessage(Message inMessage) {
         //by-passes the interceptor if user calls an anonymous api
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {

@@ -77,7 +77,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "[\"apim:api_create\",\"apim:api_publish\"]", value = "")
+  @ApiModelProperty(example = "[\"apim:api_create\",\"apim:api_manage\",\"apim:api_publish\"]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;

@@ -20,12 +20,19 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.compass.core.util.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.factory.ModelKeyManagerForTest;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.UUID;
 
@@ -35,6 +42,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceReferenceHolder.class})
 public class AbstractKeyManagerTestCase {
 
     @Test
@@ -84,6 +93,15 @@ public class AbstractKeyManagerTestCase {
     @Test
     public void buildFromJSONTest() throws APIManagementException {
         AbstractKeyManager keyManager = new AMDefaultKeyManagerImpl();
+
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = Mockito
+                .mock(DefaultKeyManagerConnectorConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder
+                .getKeyManagerConnectorConfiguration(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE))
+                .thenReturn(keyManagerConnectorConfiguration);
 
         // test with empty json payload
         assertNotNull(keyManager.buildFromJSON(new OAuthApplicationInfo(), "{}"));

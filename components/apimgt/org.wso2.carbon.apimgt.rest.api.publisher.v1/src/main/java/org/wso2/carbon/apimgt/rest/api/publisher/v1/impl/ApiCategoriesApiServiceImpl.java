@@ -41,7 +41,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     public Response getAllAPICategories(MessageContext messageContext) {
           try {
               String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-              List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfTenant(tenantDomain);
+              List<APICategory> categoryList = APIUtil.getAllAPICategoriesOfOrganization(tenantDomain);
               APICategoryListDTO categoryListDTO =
                       APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
               return Response.ok().entity(categoryListDTO).build();

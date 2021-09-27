@@ -85,7 +85,7 @@ public class ServiceReferenceHolder {
                 (APIConstants.KEY_VALIDATION_HANDLER_CLASSNAME);
         try {
             if (StringUtils.isNotEmpty(className)) {
-                keyValidationHandler = (KeyValidationHandler) APIUtil.getClassForName(className).newInstance();
+                keyValidationHandler = (KeyValidationHandler) APIUtil.getClassInstance(className);
             } else {
                 keyValidationHandler = new DefaultKeyValidationHandler();
             }

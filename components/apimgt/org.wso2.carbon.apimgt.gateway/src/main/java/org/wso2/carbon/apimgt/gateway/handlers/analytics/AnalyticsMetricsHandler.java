@@ -48,14 +48,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
-
-
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
         if (!messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
-            if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-                return true;
-            }
             String userAgent = getUserAgent(messageContext);
             String userIp = DataPublisherUtil.getEndUserIP(messageContext);
             messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);

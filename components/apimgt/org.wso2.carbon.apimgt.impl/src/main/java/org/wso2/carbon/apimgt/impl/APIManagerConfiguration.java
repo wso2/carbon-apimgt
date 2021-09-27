@@ -115,10 +115,17 @@ public class APIManagerConfiguration {
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
+    private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
+
+    public Map<String, List<String>> getRestApiJWTAuthAudiences() {
+        return restApiJWTAuthAudiences;
+    }
+
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
         return extensionListenerMap;
@@ -336,6 +343,18 @@ public class APIManagerConfiguration {
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
                 analyticsProps.put("auth.api.token", resolvedAuthToken);
                 analyticsProperties = analyticsProps;
+            } else if ("PersistenceConfigs".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> persistenceProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    persistenceProps.put(name, value);
+                }
+                
+                persistenceProperties = persistenceProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
                 OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
@@ -482,7 +501,7 @@ public class APIManagerConfiguration {
                     String className = storeElem.getAttributeValue(new QName(APIConstants
                             .EXTERNAL_API_STORE_CLASS_NAME));
                     try {
-                        store.setPublisher((APIPublisher) APIUtil.getClassForName(className).newInstance());
+                        store.setPublisher((APIPublisher) APIUtil.getClassInstance(className));
                     } catch (InstantiationException e) {
                         String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
                                 "cannot be instantiated";
@@ -600,6 +619,8 @@ public class APIManagerConfiguration {
                 setSkipListConfigurations(element);
             } else if (APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS.equals(localName)) {
                 setExtensionListenerConfigurations(element);
+            } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
+                setRestApiJWTAuthAudiences(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1475,6 +1496,11 @@ public class APIManagerConfiguration {
                             }
                         }
                     }
+                    OMElement claimRetrievalElement =
+                            configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
+                    if (claimRetrievalElement != null) {
+                        jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                    }
                 }
             }
         }
@@ -1731,6 +1757,7 @@ public class APIManagerConfiguration {
                 eventHubReceiverConfiguration.setJmsConnectionParameters(properties);
                 eventHubConfigurationDto.setEventHubReceiverConfiguration(eventHubReceiverConfiguration);
             }
+
             OMElement eventPublisherElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.EVENT_PUBLISHER_CONFIGURATIONS));
             EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
@@ -1755,10 +1782,41 @@ public class APIManagerConfiguration {
                 if (eventTypeElement != null) {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
+                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
+                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: \n"
+                            + eventPublisherElement.toString());
+                    Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
+                    eventHubPublisherConfiguration.setProperties(publisherProps);
+                }
                 eventHubConfigurationDto.setEventHubPublisherConfiguration(eventHubPublisherConfiguration);
             }
         }
         this.eventHubConfigurationDto = eventHubConfigurationDto;
+    }
+
+    /**
+     * Extracts out the additional parameters of the publisher configuration.
+     *
+     * @param eventPublisherElement publisher element defined in the format of
+     *                              <EventPublisherConfiguration>"
+     *                              "<Properties>"
+     *                              "<Property name="testProp">testVal</Property>"
+     *                              "</Properties>"
+     *                              "</EventPublisherConfiguration>
+     * @return the extracted properties as a map
+     */
+    public Map<String, String> extractPublisherProperties(OMElement eventPublisherElement) {
+        OMElement propertiesElement = eventPublisherElement.getFirstChildWithName(
+                new QName(APIConstants.AdvancedThrottleConstants.PROPERTIES_CONFIGURATION));
+        Iterator eventPublisherPropertiesIterator = propertiesElement.getChildrenWithLocalName("Property");
+        Map<String, String> publisherProps = new HashMap<>();
+        while (eventPublisherPropertiesIterator.hasNext()) {
+            OMElement propertyElem = (OMElement) eventPublisherPropertiesIterator.next();
+            String name = propertyElem.getAttributeValue(new QName("name"));
+            String value = propertyElem.getText();
+            publisherProps.put(name, value);
+        }
+        return publisherProps;
     }
 
     public ExtendedJWTConfigurationDto getJwtConfigurationDto() {
@@ -1875,6 +1933,10 @@ public class APIManagerConfiguration {
     public static Map<String, String> getAnalyticsProperties() {
         return analyticsProperties;
     }
+    
+    public static Map<String, String> getPersistenceProperties() {
+        return persistenceProperties;
+    }
 
     /**
      * Set Extension Listener Configurations.
@@ -1897,8 +1959,7 @@ public class APIManagerConfiguration {
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
                 try {
-                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
-                            .getClassForName(listenerClass).newInstance();
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);
@@ -1908,6 +1969,22 @@ public class APIManagerConfiguration {
                     log.error("Cannot find the class " + listenerClass + e);
                 }
             }
+        }
+    }
+
+    private void setRestApiJWTAuthAudiences(OMElement omElement){
+
+        Iterator jwtAudiencesElement =
+                omElement.getChildrenWithLocalName(APIConstants.JWT_AUDIENCE);
+        while (jwtAudiencesElement.hasNext()) {
+            OMElement jwtAudienceElement = (OMElement) jwtAudiencesElement.next();
+            String basePath = jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.BASEPATH)).getText();
+            List<String> audienceForPath = restApiJWTAuthAudiences.get(basePath);
+            if (audienceForPath == null) {
+                audienceForPath = new ArrayList<>();
+            }
+            audienceForPath.add(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
+            restApiJWTAuthAudiences.put(basePath, audienceForPath);
         }
     }
 }

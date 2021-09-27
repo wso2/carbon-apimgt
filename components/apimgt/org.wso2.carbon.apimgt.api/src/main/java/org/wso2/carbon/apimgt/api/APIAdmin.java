@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -188,11 +187,12 @@ public interface APIAdmin  {
     /**
      * Adds a new category for the tenant
      *
-     * @param userName    logged in user name
-     * @param category        category to add
+     * @param userName      logged in user name
+     * @param category      category to add
+     * @param organization  organization
      * @throws APIManagementException if failed add category
      */
-    APICategory addCategory(APICategory category, String userName) throws APIManagementException;
+    APICategory addCategory(APICategory category, String userName, String organization) throws APIManagementException;
 
     /**
      * Updates an API Category
@@ -220,38 +220,28 @@ public interface APIAdmin  {
      *                              defined by the passed uuid in the given tenant
      *
      * @param categoryName
-     * @param tenantID
+     * @param organization
      * @return true if an api category exists by the given category name
      * @throws APIManagementException
      */
-    boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException;
+    boolean isCategoryNameExists(String categoryName, String uuid, String organization) throws APIManagementException;
 
     /**
-     * Returns all api categories of the tenant
-     *
-     * @param tenantID
+     * Returns all api categories of the organization
+     * @param organization  Organization
      * @return
      * @throws APIManagementException
      */
-    List<APICategory> getAllAPICategoriesOfTenant(int tenantID) throws APIManagementException;
+    List<APICategory> getAllAPICategoriesOfOrganization(String organization) throws APIManagementException;
 
     /**
-     * Returns all api categories of the tenant with number of APIs for each category
+     * Returns all api categories of the organization with number of APIs for each category
      *
-     * @param tenantID
+     * @param organization organization of the API
      * @return
      * @throws APIManagementException
      */
-    List<APICategory> getAPICategoriesOfTenant(int tenantID) throws APIManagementException;
-
-    /**
-     * Returns all api categories of the tenant along with the count of attached APIs
-     *
-     * @param username
-     * @return
-     * @throws APIManagementException
-     */
-    List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException;
+    List<APICategory> getAPICategoriesOfOrganization(String organization) throws APIManagementException;
 
     /**
      * Get API Category identified by the given uuid
@@ -272,11 +262,11 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager configurations for tenant
-     * @param tenantDomain tenant Domain
+     * @param organization organization of the key manager
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain) throws APIManagementException;
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization) throws APIManagementException;
 
     /**
      * This method returns all the key managers registered in all the tenants
@@ -287,21 +277,21 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager with Id in respective tenant
-     * @param tenantDomain tenant domain requested
+     * @param organization organization requested
      * @param id uuid of key manager
      * @return KeyManagerConfigurationDTO for retrieved data
      * @throws APIManagementException
      */
-    KeyManagerConfigurationDTO getKeyManagerConfigurationById(String tenantDomain, String id)
+    KeyManagerConfigurationDTO getKeyManagerConfigurationById(String organization, String id)
             throws APIManagementException;
     /**
      * This method used to check existence of key manager with Id in respective tenant
-     * @param tenantDomain tenant domain requested
+     * @param organization organization requested
      * @param id uuid of key manager
      * @return existence
      * @throws APIManagementException
      */
-    boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException;
+    boolean isKeyManagerConfigurationExistById(String organization, String id) throws APIManagementException;
 
     /**
      * This method used to create key Manager
@@ -321,21 +311,31 @@ public interface APIAdmin  {
             throws APIManagementException;
 
     /**
-     * This method used to delete key manager
-     * @param tenantDomain tenant domain requested
-     * @param id uuid of key manager
+     * hTis method used to delete IDP mapped with key manager
+     * @param organization organization requested
+     * @param keyManagerConfigurationDTO key manager data
      * @throws APIManagementException
      */
-    void deleteKeyManagerConfigurationById(String tenantDomain,String id) throws APIManagementException;
+    void deleteIdentityProvider(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+
+    /**
+     * This method used to delete key manager
+     * @param organization organization requested
+     * @param keyManagerConfigurationDTO  key manager data
+     * @throws APIManagementException
+     */
+    void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
 
     /**
      * This method used to retrieve key manager from name
-     * @param tenantDomain tenant domain requested
+     * @param organization organization requested
      * @param name name requested
      * @return keyManager data
      * @throws APIManagementException
      */
-    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
             throws APIManagementException;
 
     /**
