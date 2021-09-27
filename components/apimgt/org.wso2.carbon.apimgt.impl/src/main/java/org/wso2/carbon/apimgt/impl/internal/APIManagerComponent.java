@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
@@ -50,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
@@ -82,9 +82,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
-//import org.wso2.carbon.apimgt.solace.notifiers.SolaceApplicationNotifier;
-//import org.wso2.carbon.apimgt.solace.notifiers.SolaceDeployAPIInGatewayNotifier;
-//import org.wso2.carbon.apimgt.solace.notifiers.SolaceSubscriptionsNotifier;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -202,10 +199,6 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
-//            bundleContext.registerService(Notifier.class.getName(), new SolaceDeployAPIInGatewayNotifier(), null);
-//            bundleContext.registerService(Notifier.class.getName(),new SolaceSubscriptionsNotifier(),null);
-//            bundleContext.registerService(Notifier.class.getName(),new SolaceApplicationNotifier(),null);
-
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
@@ -773,6 +766,21 @@ public class APIManagerComponent {
     protected void removeNotifiers(Notifier notifier) {
 
         ServiceReferenceHolder.getInstance().getNotifiersMap().remove(notifier.getType());
+    }
+
+    @Reference(
+            name = "externalGatewayDeployer.component",
+            service = ExternalGatewayDeployer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalGatewayDeployers")
+    protected void addExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
+        ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
+    }
+
+    protected void removeExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
+
+        ServiceReferenceHolder.getInstance().getNotifiersMap().remove(deployer.getType());
     }
 
     @Reference(

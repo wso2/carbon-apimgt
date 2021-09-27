@@ -5,16 +5,16 @@
     <parent>
         <artifactId>carbon-apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.0.339-SNAPSHOT</version>
+        <version>9.0.341-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <name>WSO2 Carbon - Solace Broker </name>
     <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
-<!--    <packaging>bundle</packaging>-->
+    <packaging>bundle</packaging>
     <description>Solace broker gateway integration with WSO2 API Manager</description>
-    <url>http://wso2.org</url>
+
     <dependencies>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -38,9 +38,50 @@
         </dependency>
     </dependencies>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/Abstract*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>
+                            ${project.artifactId}
+                        </Bundle-SymbolicName>
+                        <Import-Package>
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
+                            *;resolution:=optional
+                        </Import-Package>
+                        <Export-Package>
+                            org.wso2.carbon.apimgt.solace.*;version="${carbon.apimgt.version}"
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

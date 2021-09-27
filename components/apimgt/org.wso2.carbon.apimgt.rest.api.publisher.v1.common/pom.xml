@@ -51,11 +51,6 @@
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
             <scope>provided</scope>
         </dependency>
-    <dependency>
-        <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
-        <scope>provided</scope>
-    </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
@@ -69,6 +64,11 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -116,6 +116,7 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
