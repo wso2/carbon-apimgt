@@ -170,7 +170,7 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
-            <version>9.0.341-SNAPSHOT</version>
+            <version>${carbon.apimgt.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

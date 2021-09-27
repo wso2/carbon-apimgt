@@ -780,7 +780,7 @@ public class APIManagerComponent {
         ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
     }
 
-    protected void removeExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
+    protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
 
         ServiceReferenceHolder.getInstance().getNotifiersMap().remove(deployer.getType());
     }

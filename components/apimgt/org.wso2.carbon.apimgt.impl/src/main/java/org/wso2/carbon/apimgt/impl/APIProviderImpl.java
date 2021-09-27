@@ -8775,7 +8775,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                              List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9127,5 +9127,4 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
     }
-
 }
