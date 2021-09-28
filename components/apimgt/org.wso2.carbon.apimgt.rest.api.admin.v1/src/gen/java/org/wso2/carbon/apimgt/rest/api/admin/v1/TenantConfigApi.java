@@ -67,7 +67,7 @@ TenantConfigApiService delegate = new TenantConfigApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 413, message = "Payload Too Large. Request entity is larger than limits defined by server.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateTenantConfig(@ApiParam(value = "role-alias mapping" ,required=true) Object body) throws APIManagementException{
+    public Response updateTenantConfig(@ApiParam(value = "tenant-config" ,required=true) String body) throws APIManagementException{
         return delegate.updateTenantConfig(body, securityContext);
     }
 }

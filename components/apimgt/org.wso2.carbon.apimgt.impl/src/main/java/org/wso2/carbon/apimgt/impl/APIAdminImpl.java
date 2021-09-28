@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
@@ -1045,9 +1046,10 @@ public class APIAdminImpl implements APIAdmin {
             try {
                 org.json.JSONObject uploadedConfig = new org.json.JSONObject(config);
                 schema.validate(uploadedConfig);
+                APIUtil.validateRestAPIScopes(config);
                 ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(organization, config);
-            } catch (ValidationException e) {
-                throw new APIManagementException("tenant-config validation failure", ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, e.getMessage()));
+            } catch (ValidationException | JSONException e) {
+                throw new APIManagementException("tenant-config validation failure", e, ExceptionCodes.INVALID_TENANT_CONFIG);
             }
         } else {
             throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
