@@ -460,6 +460,7 @@
                             org.apache.commons.codec.*,
                             org.wso2.carbon.apimgt.common.gateway.*,
                             org.wso2.carbon.apimgt.common.jms.*,
+                            org.wso2.carbon.apimgt.usage.publisher.*; version="${carbon.apimgt.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
