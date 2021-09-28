@@ -291,6 +291,51 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
         }
 
+        if (additionalProperties.containsKey(APIConstants.KeyManager.PKCE_MANDATORY)) {
+            Object pkceMandatoryValue =
+                    additionalProperties.get(APIConstants.KeyManager.PKCE_MANDATORY);
+            if (pkceMandatoryValue instanceof String) {
+                if (!APIConstants.KeyManager.PKCE_MANDATORY.equals(pkceMandatoryValue)) {
+                    try {
+                        Boolean pkceMandatory = Boolean.parseBoolean((String) pkceMandatoryValue);
+                        clientInfo.setPkceMandatory(pkceMandatory);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN)) {
+            Object pkceSupportPlainValue =
+                    additionalProperties.get(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN);
+            if (pkceSupportPlainValue instanceof String) {
+                if (!APIConstants.KeyManager.PKCE_SUPPORT_PLAIN.equals(pkceSupportPlainValue)) {
+                    try {
+                        Boolean pkceSupportPlain = Boolean.parseBoolean((String) pkceSupportPlainValue);
+                        clientInfo.setPkceSupportPlain(pkceSupportPlain);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS)) {
+            Object bypassClientCredentialsValue =
+                    additionalProperties.get(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS);
+            if (bypassClientCredentialsValue instanceof String) {
+                if (!APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS.equals(bypassClientCredentialsValue)) {
+                    try {
+                        Boolean bypassClientCredentials = Boolean.parseBoolean((String) bypassClientCredentialsValue);
+                        clientInfo.setBypassClientCredentials(bypassClientCredentials);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
         return clientInfo;
     }
 
@@ -578,6 +623,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
                 appResponse.getRefreshTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME, appResponse.getIdTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.PKCE_MANDATORY, appResponse.getPkceMandatory());
+        additionalProperties.put(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN, appResponse.getPkceSupportPlain());
+        additionalProperties.put(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
+                appResponse.getBypassClientCredentials());
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
@@ -1140,11 +1189,23 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     if (StringUtils.isNotBlank(additionalProperty) && !StringUtils
                             .equals(additionalProperty, APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
                         try {
-                            Long longValue = Long.parseLong(additionalProperty);
-                            if (longValue < 0) {
-                                String errMsg = "Application configuration values cannot have negative values.";
-                                throw new APIManagementException(errMsg, ExceptionCodes
-                                        .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                            if (APIConstants.KeyManager.PKCE_MANDATORY.equals(entry.getKey()) ||
+                                    APIConstants.KeyManager.PKCE_SUPPORT_PLAIN.equals(entry.getKey()) ||
+                                    APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS.equals(entry.getKey())) {
+
+                                if (!(additionalProperty.equalsIgnoreCase(Boolean.TRUE.toString()) ||
+                                        additionalProperty.equalsIgnoreCase(Boolean.FALSE.toString()))) {
+                                    String errMsg = "Application configuration values cannot have negative values.";
+                                    throw new APIManagementException(errMsg, ExceptionCodes
+                                            .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                                }
+                            } else {
+                                Long longValue = Long.parseLong(additionalProperty);
+                                if (longValue < 0) {
+                                    String errMsg = "Application configuration values cannot have negative values.";
+                                    throw new APIManagementException(errMsg, ExceptionCodes
+                                            .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                                }
                             }
                         } catch (NumberFormatException e) {
                             String errMsg = "Application configuration values cannot have string values.";
