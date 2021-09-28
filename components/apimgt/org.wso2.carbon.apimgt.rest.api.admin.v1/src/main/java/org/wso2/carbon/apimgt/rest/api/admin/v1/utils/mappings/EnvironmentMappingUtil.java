@@ -22,9 +22,11 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +62,27 @@ public class EnvironmentMappingUtil {
         envDTO.setIsReadOnly(env.isReadOnly());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
+        envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
+                (env.getAdditionalProperties()));
         return envDTO;
+    }
+
+    /**
+     * Converts AdditionalProperties into a AdditionalPropertiesDTO.
+     *
+     * @param additionalProperties Set of additional properties
+     * @return List<AdditionalPropertyDTO>
+     */
+    public static List<AdditionalPropertyDTO> fromAdditionalPropertiesToAdditionalPropertiesDTO(Map<String, String>
+                                                                                                        additionalProperties) {
+        List<AdditionalPropertyDTO> additionalPropertyDTOList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+            AdditionalPropertyDTO additionalPropertyDTO = new AdditionalPropertyDTO();
+            additionalPropertyDTO.setKey(entry.getKey());
+            additionalPropertyDTO.setValue(entry.getValue());
+            additionalPropertyDTOList.add(additionalPropertyDTO);
+        }
+        return additionalPropertyDTOList;
     }
 
     /**

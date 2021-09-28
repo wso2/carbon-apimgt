@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -30,6 +31,15 @@ import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 
+
+@Component(
+        name = "solace.external.gateway.deployer.component",
+        immediate = true,
+        service = ExternalGatewayDeployer.class
+)
+/**
+ *  This is to register Solace Deployer as connector
+ */
 public class SolaceGatewayDeployer implements ExternalGatewayDeployer {
 
     private static final Log log = LogFactory.getLog(SolaceGatewayDeployer.class);
