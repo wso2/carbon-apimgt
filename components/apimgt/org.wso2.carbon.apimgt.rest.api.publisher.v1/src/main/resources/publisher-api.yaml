@@ -10945,6 +10945,9 @@ components:
             Is Cross Tenant Subscriptions Enabled
           example: false
           default: false
+        authorizationHeader:
+          type: string
+          description: Authorization Header
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
