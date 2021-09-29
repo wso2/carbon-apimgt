@@ -52,6 +52,8 @@ public class ClientInfo {
     private Long refreshTokenLifeTime;
     @SerializedName("ext_id_token_lifetime")
     private Long idTokenLifeTime;
+    @SerializedName("application_display_name")
+    private String applicationDisplayName;
     @SerializedName("pkceMandatory")
     private Boolean pkceMandatory;
     @SerializedName("pkceSupportPlain")
@@ -197,6 +199,16 @@ public class ClientInfo {
     public void setIdTokenLifeTime(Long idTokenLifeTime) {
 
         this.idTokenLifeTime = idTokenLifeTime;
+    }
+
+    public String getApplicationDisplayName() {
+
+        return applicationDisplayName;
+    }
+
+    public void setApplicationDisplayName(String applicationDisplayName) {
+
+        this.applicationDisplayName = applicationDisplayName;
     }
 
     public Boolean getPkceMandatory() {
