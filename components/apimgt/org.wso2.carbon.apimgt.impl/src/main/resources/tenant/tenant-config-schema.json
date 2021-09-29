@@ -1,0 +1,823 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "The root schema",
+  "description": "The root schema comprises the entire JSON document.",
+  "default": {},
+  "required": [
+    "EnableMonetization",
+    "EnableRecommendation",
+    "IsUnlimitedTierPaid",
+    "ExtensionHandlerPosition",
+    "RESTAPIScopes",
+    "Meta",
+    "NotificationsEnabled",
+    "Notifications",
+    "DefaultRoles"
+  ],
+  "properties": {
+    "EnableMonetization": {
+      "$id": "#/properties/EnableMonetization",
+      "type": "boolean",
+      "title": "The EnableMonetization schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": false,
+      "examples": [
+        false
+      ]
+    },
+    "EnableRecommendation": {
+      "$id": "#/properties/EnableRecommendation",
+      "type": "boolean",
+      "title": "The EnableRecommendation schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": false,
+      "examples": [
+        false
+      ]
+    },
+    "IsUnlimitedTierPaid": {
+      "$id": "#/properties/IsUnlimitedTierPaid",
+      "type": "boolean",
+      "title": "The IsUnlimitedTierPaid schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": false,
+      "examples": [
+        false
+      ]
+    },
+    "ExtensionHandlerPosition": {
+      "$id": "#/properties/ExtensionHandlerPosition",
+      "type": "string",
+      "title": "The ExtensionHandlerPosition schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "bottom"
+      ]
+    },
+    "RESTAPIScopes": {
+      "$id": "#/properties/RESTAPIScopes",
+      "type": "object",
+      "title": "The RESTAPIScopes schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": {},
+      "examples": [
+        {
+          "Scope": [
+            {
+              "Name": "apim:api_publish",
+              "Roles": "admin,Internal/publisher"
+            },
+            {
+              "Name": "apim:api_create",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:api_generate_key",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:api_view",
+              "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
+            },
+            {
+              "Name": "apim:api_delete",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:subscribe",
+              "Roles": "admin,Internal/subscriber,Internal/devops"
+            },
+            {
+              "Name": "apim:tier_view",
+              "Roles": "admin,Internal/publisher,Internal/creator"
+            },
+            {
+              "Name": "apim:tier_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:bl_view",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:bl_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:subscription_view",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:subscription_block",
+              "Roles": "admin,Internal/publisher"
+            },
+            {
+              "Name": "apim:mediation_policy_view",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:mediation_policy_create",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:api_workflow_view",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:api_workflow_approve",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:admin",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:app_owner_change",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:app_import_export",
+              "Roles": "admin,Internal/devops"
+            },
+            {
+              "Name": "apim:api_import_export",
+              "Roles": "admin,Internal/devops"
+            },
+            {
+              "Name": "apim:api_product_import_export",
+              "Roles": "admin,Internal/devops"
+            },
+            {
+              "Name": "apim:label_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:label_read",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:app_update",
+              "Roles": "admin,Internal/subscriber"
+            },
+            {
+              "Name": "apim:app_manage",
+              "Roles": "admin,Internal/subscriber,Internal/devops"
+            },
+            {
+              "Name": "apim:sub_manage",
+              "Roles": "admin,Internal/subscriber,Internal/devops"
+            },
+            {
+              "Name": "apim:monetization_usage_publish",
+              "Roles": "admin, Internal/publisher"
+            },
+            {
+              "Name": "apim:document_create",
+              "Roles": "admin, Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:ep_certificates_update",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:client_certificates_update",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:threat_protection_policy_manage",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:document_manage",
+              "Roles": "admin, Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:client_certificates_add",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:publisher_settings",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:store_settings",
+              "Roles": "admin,Internal/subscriber"
+            },
+            {
+              "Name": "apim:admin_settings",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:client_certificates_view",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:mediation_policy_manage",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:threat_protection_policy_create",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:ep_certificates_add",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:ep_certificates_view",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:api_key",
+              "Roles": "admin,Internal/subscriber"
+            },
+            {
+              "Name": "apim_analytics:admin",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:monitoring_dashboard:own",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:monitoring_dashboard:edit",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:monitoring_dashboard:view",
+              "Roles": "admin,Internal/analytics"
+            },
+            {
+              "Name": "apim_analytics:business_analytics:own",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:business_analytics:edit",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:business_analytics:view",
+              "Roles": "admin,Internal/analytics"
+            },
+            {
+              "Name": "apim_analytics:api_analytics:own",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:api_analytics:edit",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:api_analytics:view",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim_analytics:application_analytics:own",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:application_analytics:edit",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim_analytics:application_analytics:view",
+              "Roles": "admin,Internal/subscriber"
+            },
+            {
+              "Name": "apim:pub_alert_manage",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:sub_alert_manage",
+              "Roles": "admin,Internal/subscriber"
+            },
+            {
+              "Name": "apim:tenantInfo",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:tenant_theme_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:admin_operations",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:shared_scope_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:admin_alert_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:bot_data",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:scope_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:role_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:environment_manage",
+              "Roles": "admin"
+            },
+            {
+              "Name": "apim:environment_read",
+              "Roles": "admin"
+            },
+            {
+              "Name": "service_catalog:service_view",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "service_catalog:service_write",
+              "Roles": "admin,Internal/creator"
+            },
+            {
+              "Name": "apim:comment_view",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:comment_write",
+              "Roles": "admin,Internal/creator,Internal/publisher"
+            }
+          ]
+        }
+      ],
+      "required": [
+        "Scope"
+      ],
+      "properties": {
+        "Scope": {
+          "$id": "#/properties/RESTAPIScopes/properties/Scope",
+          "type": "array",
+          "title": "The Scope schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": [],
+          "examples": [
+            [
+              {
+                "Name": "apim:api_publish",
+                "Roles": "admin,Internal/publisher"
+              },
+              {
+                "Name": "apim:api_create",
+                "Roles": "admin,Internal/creator"
+              }
+            ]
+          ],
+          "additionalItems": true,
+          "items": {
+            "$id": "#/properties/RESTAPIScopes/properties/Scope/items",
+            "anyOf": [
+              {
+                "$id": "#/properties/RESTAPIScopes/properties/Scope/items/anyOf/0",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "examples": [
+                  {
+                    "Name": "apim:api_publish",
+                    "Roles": "admin,Internal/publisher"
+                  }
+                ],
+                "required": [
+                  "Name",
+                  "Roles"
+                ],
+                "properties": {
+                  "Name": {
+                    "$id": "#/properties/RESTAPIScopes/properties/Scope/items/anyOf/0/properties/Name",
+                    "type": "string",
+                    "title": "The Name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                      "apim:api_publish"
+                    ]
+                  },
+                  "Roles": {
+                    "$id": "#/properties/RESTAPIScopes/properties/Scope/items/anyOf/0/properties/Roles",
+                    "type": "string",
+                    "title": "The Roles schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                      "admin,Internal/publisher"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "Meta": {
+      "$id": "#/properties/Meta",
+      "type": "object",
+      "title": "The Meta schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": {},
+      "examples": [
+        {
+          "Migration": {
+            "3.0.0": true
+          }
+        }
+      ],
+      "required": [
+        "Migration"
+      ],
+      "properties": {
+        "Migration": {
+          "$id": "#/properties/Meta/properties/Migration",
+          "type": "object",
+          "title": "The Migration schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "3.0.0": true
+            }
+          ],
+          "required": [
+            "3.0.0"
+          ],
+          "properties": {
+            "3.0.0": {
+              "$id": "#/properties/Meta/properties/Migration/properties/3.0.0",
+              "type": "boolean",
+              "title": "The 3.0.0 schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": false,
+              "examples": [
+                true
+              ]
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "NotificationsEnabled": {
+      "$id": "#/properties/NotificationsEnabled",
+      "type": "string",
+      "title": "The NotificationsEnabled schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "false"
+      ]
+    },
+    "Notifications": {
+      "$id": "#/properties/Notifications",
+      "type": "array",
+      "title": "The Notifications schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": [],
+      "examples": [
+        [
+          {
+            "Type": "new_api_version",
+            "Notifiers": [
+              {
+                "Class": "org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier",
+                "ClaimsRetrieverImplClass": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
+                "Title": "Version $2 of $1 Released",
+                "Template": " <html> <body> <h3 style=\"color:Black;\">We’re happy to announce the arrival of the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\"https://localhost:9443/store\">Click here to Visit WSO2 API Store</a></body></html>"
+              }
+            ]
+          }
+        ]
+      ],
+      "additionalItems": true,
+      "items": {
+        "$id": "#/properties/Notifications/items",
+        "anyOf": [
+          {
+            "$id": "#/properties/Notifications/items/anyOf/0",
+            "type": "object",
+            "title": "The first anyOf schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+              {
+                "Type": "new_api_version",
+                "Notifiers": [
+                  {
+                    "Class": "org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier",
+                    "ClaimsRetrieverImplClass": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
+                    "Title": "Version $2 of $1 Released",
+                    "Template": " <html> <body> <h3 style=\"color:Black;\">We’re happy to announce the arrival of the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\"https://localhost:9443/store\">Click here to Visit WSO2 API Store</a></body></html>"
+                  }
+                ]
+              }
+            ],
+            "required": [
+              "Type",
+              "Notifiers"
+            ],
+            "properties": {
+              "Type": {
+                "$id": "#/properties/Notifications/items/anyOf/0/properties/Type",
+                "type": "string",
+                "title": "The Type schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": "",
+                "examples": [
+                  "new_api_version"
+                ]
+              },
+              "Notifiers": {
+                "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers",
+                "type": "array",
+                "title": "The Notifiers schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": [],
+                "examples": [
+                  [
+                    {
+                      "Class": "org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier",
+                      "ClaimsRetrieverImplClass": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
+                      "Title": "Version $2 of $1 Released",
+                      "Template": " <html> <body> <h3 style=\"color:Black;\">We’re happy to announce the arrival of the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\"https://localhost:9443/store\">Click here to Visit WSO2 API Store</a></body></html>"
+                    }
+                  ]
+                ],
+                "additionalItems": true,
+                "items": {
+                  "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers/items",
+                  "anyOf": [
+                    {
+                      "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers/items/anyOf/0",
+                      "type": "object",
+                      "title": "The first anyOf schema",
+                      "description": "An explanation about the purpose of this instance.",
+                      "default": {},
+                      "examples": [
+                        {
+                          "Class": "org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier",
+                          "ClaimsRetrieverImplClass": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
+                          "Title": "Version $2 of $1 Released",
+                          "Template": " <html> <body> <h3 style=\"color:Black;\">We’re happy to announce the arrival of the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\"https://localhost:9443/store\">Click here to Visit WSO2 API Store</a></body></html>"
+                        }
+                      ],
+                      "required": [
+                        "Class",
+                        "ClaimsRetrieverImplClass",
+                        "Title",
+                        "Template"
+                      ],
+                      "properties": {
+                        "Class": {
+                          "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers/items/anyOf/0/properties/Class",
+                          "type": "string",
+                          "title": "The Class schema",
+                          "description": "An explanation about the purpose of this instance.",
+                          "default": "",
+                          "examples": [
+                            "org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier"
+                          ]
+                        },
+                        "ClaimsRetrieverImplClass": {
+                          "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers/items/anyOf/0/properties/ClaimsRetrieverImplClass",
+                          "type": "string",
+                          "title": "The ClaimsRetrieverImplClass schema",
+                          "description": "An explanation about the purpose of this instance.",
+                          "default": "",
+                          "examples": [
+                            "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever"
+                          ]
+                        },
+                        "Title": {
+                          "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers/items/anyOf/0/properties/Title",
+                          "type": "string",
+                          "title": "The Title schema",
+                          "description": "An explanation about the purpose of this instance.",
+                          "default": "",
+                          "examples": [
+                            "Version $2 of $1 Released"
+                          ]
+                        },
+                        "Template": {
+                          "$id": "#/properties/Notifications/items/anyOf/0/properties/Notifiers/items/anyOf/0/properties/Template",
+                          "type": "string",
+                          "title": "The Template schema",
+                          "description": "An explanation about the purpose of this instance.",
+                          "default": "",
+                          "examples": [
+                            " <html> <body> <h3 style=\"color:Black;\">We’re happy to announce the arrival of the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\"https://localhost:9443/store\">Click here to Visit WSO2 API Store</a></body></html>"
+                          ]
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    "DefaultRoles": {
+      "$id": "#/properties/DefaultRoles",
+      "type": "object",
+      "title": "The DefaultRoles schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": {},
+      "examples": [
+        {
+          "PublisherRole": {
+            "CreateOnTenantLoad": true,
+            "RoleName": "Internal/publisher"
+          },
+          "CreatorRole": {
+            "CreateOnTenantLoad": true,
+            "RoleName": "Internal/creator"
+          },
+          "SubscriberRole": {
+            "CreateOnTenantLoad": true
+          },
+          "DevOpsRole": {
+            "CreateOnTenantLoad": true,
+            "RoleName": "Internal/devops"
+          }
+        }
+      ],
+      "required": [
+        "PublisherRole",
+        "CreatorRole",
+        "SubscriberRole",
+        "DevOpsRole"
+      ],
+      "properties": {
+        "PublisherRole": {
+          "$id": "#/properties/DefaultRoles/properties/PublisherRole",
+          "type": "object",
+          "title": "The PublisherRole schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "CreateOnTenantLoad": true,
+              "RoleName": "Internal/publisher"
+            }
+          ],
+          "required": [
+            "CreateOnTenantLoad",
+            "RoleName"
+          ],
+          "properties": {
+            "CreateOnTenantLoad": {
+              "$id": "#/properties/DefaultRoles/properties/PublisherRole/properties/CreateOnTenantLoad",
+              "type": "boolean",
+              "title": "The CreateOnTenantLoad schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": false,
+              "examples": [
+                true
+              ]
+            },
+            "RoleName": {
+              "$id": "#/properties/DefaultRoles/properties/PublisherRole/properties/RoleName",
+              "type": "string",
+              "title": "The RoleName schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "Internal/publisher"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "CreatorRole": {
+          "$id": "#/properties/DefaultRoles/properties/CreatorRole",
+          "type": "object",
+          "title": "The CreatorRole schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "CreateOnTenantLoad": true,
+              "RoleName": "Internal/creator"
+            }
+          ],
+          "required": [
+            "CreateOnTenantLoad",
+            "RoleName"
+          ],
+          "properties": {
+            "CreateOnTenantLoad": {
+              "$id": "#/properties/DefaultRoles/properties/CreatorRole/properties/CreateOnTenantLoad",
+              "type": "boolean",
+              "title": "The CreateOnTenantLoad schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": false,
+              "examples": [
+                true
+              ]
+            },
+            "RoleName": {
+              "$id": "#/properties/DefaultRoles/properties/CreatorRole/properties/RoleName",
+              "type": "string",
+              "title": "The RoleName schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "Internal/creator"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "SubscriberRole": {
+          "$id": "#/properties/DefaultRoles/properties/SubscriberRole",
+          "type": "object",
+          "title": "The SubscriberRole schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "CreateOnTenantLoad": true
+            }
+          ],
+          "required": [
+            "CreateOnTenantLoad"
+          ],
+          "properties": {
+            "CreateOnTenantLoad": {
+              "$id": "#/properties/DefaultRoles/properties/SubscriberRole/properties/CreateOnTenantLoad",
+              "type": "boolean",
+              "title": "The CreateOnTenantLoad schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": false,
+              "examples": [
+                true
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "DevOpsRole": {
+          "$id": "#/properties/DefaultRoles/properties/DevOpsRole",
+          "type": "object",
+          "title": "The DevOpsRole schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "CreateOnTenantLoad": true,
+              "RoleName": "Internal/devops"
+            }
+          ],
+          "required": [
+            "CreateOnTenantLoad",
+            "RoleName"
+          ],
+          "properties": {
+            "CreateOnTenantLoad": {
+              "$id": "#/properties/DefaultRoles/properties/DevOpsRole/properties/CreateOnTenantLoad",
+              "type": "boolean",
+              "title": "The CreateOnTenantLoad schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": false,
+              "examples": [
+                true
+              ]
+            },
+            "RoleName": {
+              "$id": "#/properties/DefaultRoles/properties/DevOpsRole/properties/RoleName",
+              "type": "string",
+              "title": "The RoleName schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "Internal/devops"
+              ]
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

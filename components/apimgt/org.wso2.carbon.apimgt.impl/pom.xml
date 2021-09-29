@@ -449,6 +449,10 @@
             <artifactId>commons-validator</artifactId>
             <version>${commons-validator.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.damnhandy.wso2</groupId>
+            <artifactId>handy-uri-templates</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
