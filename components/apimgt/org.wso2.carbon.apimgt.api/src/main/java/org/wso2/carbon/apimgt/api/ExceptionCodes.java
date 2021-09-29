@@ -495,6 +495,15 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+
+    //Operation Policies related error codes
+    INVALID_OPERATION_POLICY_PARAMETERS(900915,
+            "Missing required parameters for operation policy", 400,
+            "Required parameter(s) %s for operation policy %s is/are either missing or empty"),
+    UNSUPPORTED_HTTP_VERB(900917,
+            "Unsupported HTTP verb", 400,
+            "Unsupported HTTP verb defined in REWRITE_HTTP_METHOD policy"),
+
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false);
     private final long errorCode;

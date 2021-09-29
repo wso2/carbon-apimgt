@@ -2858,6 +2858,20 @@ public final class APIConstants {
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
+    //Constants related to Operation Mediation Policies
+    public static final String OPERATION_SEQUENCE_TYPE_IN = "in";
+    public static final String OPERATION_SEQUENCE_TYPE_OUT = "out";
+    public static final String HEADER_NAME_PARAM = "headerName";
+    public static final String HEADER_VALUE_PARAM = "headerValue";
+    public static final String HTTP_METHOD_PARAM = "httpMethod";
+    public static final String RESOURCE_PATH_PARAM = "resourcePath";
+    public static final String QUERY_PARAM_NAME = "paramName";
+    public static final String QUERY_PARAM_VALUE = "paramValue";
+    public static final String PAYLOAD = "payload";
+    public static final String CONTENT_TYPE = "contentType";
+    public static final String HEADERS = "headers";
+    public static final String STATUS_CODE = "statusCode";
+
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 
     // Protocol variables

@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -661,6 +662,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
+
+        //Validate Operation Mediation Policies
+        validateOperationPolicyParameters(api);
 
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
@@ -1374,6 +1378,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         validateResourceThrottlingTiers(api, tenantDomain);
+
+        //Validate Operation Mediation Policies
+        validateOperationPolicyParameters(api);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
@@ -2475,6 +2482,99 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } else {
             apiProduct.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+        }
+    }
+
+    //todo if possible make this useable for both APIs and products
+    private void validateOperationPolicyParameters(API api) throws APIManagementException {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                for (OperationPolicy operationPolicy : operationPolicies) {
+                    OperationPolicy.PolicyType policyType = operationPolicy.getPolicyType();
+                    Map<String, String> parameters = operationPolicy.getParameters();
+                    boolean valid = true;
+                    String requiredParameters = "";
+                    switch (policyType) {
+                        case SET_HEADER :
+                            if (!parameters.containsKey(APIConstants.HEADER_NAME_PARAM) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.HEADER_NAME_PARAM)) ||
+                                    !parameters.containsKey(APIConstants.HEADER_VALUE_PARAM) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.HEADER_VALUE_PARAM))) {
+                                valid = false;
+                                requiredParameters = "'headerName' and 'headerValue'";
+                            }
+                            break;
+                        case REMOVE_HEADER:
+                            if (!parameters.containsKey(APIConstants.HEADER_NAME_PARAM) || StringUtils
+                                    .isEmpty(parameters.get(APIConstants.HEADER_NAME_PARAM))) {
+                                valid = false;
+                                requiredParameters = "'headerName'";
+                            }
+                            break;
+                        case REWRITE_ENDPOINT:
+                            //todo add correct impl
+                            break;
+                        case REWRITE_HTTP_METHOD:
+                            if (!parameters.containsKey(APIConstants.HTTP_METHOD_PARAM) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.HTTP_METHOD_PARAM))) {
+                                valid = false;
+                                requiredParameters = "'httpMethod'";
+                            } else if(!APIConstants.SUPPORTED_METHODS
+                                    .contains(parameters.get(APIConstants.HTTP_METHOD_PARAM).toLowerCase())) {
+                                throw new APIManagementException(
+                                        "Unsupported HTTP method provided for REWRITE_HTTP_METHOD operation "
+                                                + "policy", ExceptionCodes.from(ExceptionCodes.UNSUPPORTED_HTTP_VERB));
+                            }
+                            break;
+                        case CALL_VALIDATION_SERVICE:
+                            //todo add correct impl
+                            int i = 1;
+                            break;
+                        case MOCK_RESPONSE:
+                            if (!parameters.containsKey(APIConstants.PAYLOAD) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.PAYLOAD)) ||
+                                    !parameters.containsKey(APIConstants.CONTENT_TYPE) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.CONTENT_TYPE))) {
+                                valid = false;
+                                requiredParameters = "'payload' and 'contentType'";
+                            }
+                            break;
+                        case REWRITE_RESOURCE_PATH:
+                            if (!parameters.containsKey(APIConstants.RESOURCE_PATH_PARAM) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.RESOURCE_PATH_PARAM))) {
+                                handleException("Required 'resourcePath' parameter for REWRITE_RESOURCE_PATH "
+                                        + "operation policy is either missing or empty");
+                            }
+                            break;
+                        case ADD_QUERY_PARAM:
+                            if (!parameters.containsKey(APIConstants.QUERY_PARAM_NAME) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.QUERY_PARAM_NAME)) ||
+                                    !parameters.containsKey(APIConstants.QUERY_PARAM_VALUE) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.QUERY_PARAM_VALUE))) {
+                                valid = false;
+                                requiredParameters = "'paramName' and 'paramValue'";
+                            }
+                            break;
+                        case REMOVE_QUERY_PARAM:
+                            if (!parameters.containsKey(APIConstants.QUERY_PARAM_NAME) ||
+                                    StringUtils.isEmpty(parameters.get(APIConstants.QUERY_PARAM_NAME))) {
+                                valid = false;
+                                requiredParameters = "'paramName'";
+                            }
+                            break;
+                    }
+
+                    if (!valid) {
+                        throw new APIManagementException(
+                                "Required " + requiredParameters + " parameter(s) for " + policyType.toString() +
+                                         " operation policy are either missing or empty", ExceptionCodes
+                                .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS,
+                                        requiredParameters, policyType.toString()));
+                    }
+                }
+            }
         }
     }
 
@@ -9365,6 +9465,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
     }
 
+<<<<<<< HEAD
     @Override
     public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
             EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
@@ -9397,5 +9498,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return env;
+=======
+    /*@Override
+    public List<APIOperationPolicy> updateAPIOperationPolicies(String apiId,
+            List<APIOperationPolicy> operationPolicyList) throws APIManagementException {
+        apiMgtDAO.updateAPIOperationPolicies(apiId, operationPolicyList);
+
+        return apiMgtDAO.getAllAPIOperationPolicies(apiId);
+    }
+
+    @Override
+    public List<APIOperationPolicy> getAllAPIOperationPoliciesOfAPI(String apiId)
+            throws APIManagementException {
+        return apiMgtDAO.getAllAPIOperationPolicies(apiId);
+    }*/
+
+    @Override
+    public Set<URITemplate> getURITemplatesWithOperationPolicies(String apiId) throws APIManagementException {
+        return apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
+    }
+
+    @Override
+    public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+        Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
+
+        if (!uriTemplatesWithPolicies.isEmpty()) {
+            //This is a temporary map to keep operation policies list of URI Templates against the URI mapping ID
+            Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
+
+            for (URITemplate uriTemplate : uriTemplatesWithPolicies) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+                if (!operationPolicies.isEmpty()) {
+                    operationPoliciesMap.put(key, operationPolicies);
+                }
+            }
+
+            for (URITemplate uriTemplate : uriTemplates) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                if (operationPoliciesMap.containsKey(key)) {
+                    uriTemplate.setOperationPolicies(operationPoliciesMap.get(key));
+                }
+            }
+        }
+>>>>>>> Add support for operation policies in API create and update flows
     }
 }
