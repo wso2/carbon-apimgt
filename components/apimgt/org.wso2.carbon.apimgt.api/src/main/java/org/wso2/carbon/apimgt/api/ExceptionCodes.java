@@ -484,7 +484,16 @@ public enum ExceptionCodes implements ErrorHandler {
     SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
-    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false);
+    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+
+    //Operation Policies related error codes
+    INVALID_OPERATION_POLICY_PARAMETERS(900915,
+            "Missing required parameters for operation policy", 400,
+            "Required parameter(s) %s for operation policy %s is/are either missing or empty"),
+    UNSUPPORTED_HTTP_VERB(900917,
+            "Unsupported HTTP verb", 400,
+            "Unsupported HTTP verb defined in REWRITE_HTTP_METHOD policy");
+
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

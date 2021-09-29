@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -89,6 +90,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -299,7 +301,26 @@ public class PublisherCommonUtils {
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
             apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
-                apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
+
+                //set operation policies from the original API Payload
+                Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
+                Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                for (URITemplate uriTemplate : uriTemplatesFromPayload) {
+                    if (!uriTemplate.getOperationPolicies().isEmpty()) {
+                        String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                        operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                    }
+                }
+
+                for (URITemplate uriTemplate : uriTemplates) {
+                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                    if (operationPoliciesPerURITemplate.containsKey(key)) {
+                        uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                }
+
+                apiToUpdate.setUriTemplates(uriTemplates);
             }
         } else {
             String oldDefinition = apiProvider
@@ -1213,6 +1234,9 @@ public class PublisherCommonUtils {
                     .from(ExceptionCodes.API_PRODUCT_USED_RESOURCES, existingAPI.getId().getApiName(),
                             existingAPI.getId().getVersion()));
         }
+
+        //set existing operation policies to URI templates
+        apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
