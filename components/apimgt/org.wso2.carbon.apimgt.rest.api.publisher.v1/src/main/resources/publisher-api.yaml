@@ -3489,7 +3489,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
-            - apim:api_manage 
+            - apim:api_manage
             - apim:mediation_policy_view
             - apim:mediation_policy_manage
             - apim:api_mediation_policy_manage
@@ -10568,6 +10568,8 @@ components:
         uriMapping:
           type: string
           example: ""
+        operationPolicies:
+          $ref: '#/components/schemas/APIOperationPolicies'
     ScopeList:
       title: Scope List
       type: object
@@ -11564,6 +11566,37 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    OperationPolicy:
+      title: API Operation Policy
+      type: object
+      required:
+        - policyType
+      properties:
+        policyType:
+          type: string
+          enum:
+            - SET_HEADER
+            - REMOVE_HEADER
+            - REWRITE_HTTP_METHOD
+            - REWRITE_RESOURCE_PATH
+            - ADD_QUERY_PARAM
+            - REMOVE_QUERY_PARAM
+            - MOCK_RESPONSE
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+    APIOperationPolicies:
+      title: API Operation Level Policies
+      properties:
+        in:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        out:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
     GatewayEnvironmentProtocolURI:
       title: Gateway Environment protocols and URIs
       required:
@@ -12101,6 +12134,24 @@ components:
         The combination of the provider, name and the version of the API Product is also accepted as a valid API Product ID.
         Should be formatted as **provider-name-version**.
       required: true
+      schema:
+        type: string
+    direction:
+      name: direction
+      description: Operation policy direction(in/out)
+      in: query
+      schema:
+        type: string
+    resourcePath:
+      name: resourcePath
+      description: Resource path
+      in: query
+      schema:
+        type: string
+    httpVerb:
+      name: httpVerb
+      description: HTTP verb
+      in: query
       schema:
         type: string
   requestBodies:

@@ -1101,6 +1101,10 @@ public class APIMappingUtil {
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+
+            //set operation mediation policies
+            OperationPolicyMappingUtil.setOperationPoliciesToOperationsDTO(dto.getId(), apiOperationsDTO);
+
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1587,7 +1591,10 @@ public class APIMappingUtil {
                 template.setHttpVerbs(httpVerb.toUpperCase());
                 template.setAuthType(authType);
                 template.setAuthTypes(authType);
-
+                if (operation.getOperationPolicies() != null) {
+                    template.setOperationPolicies(OperationPolicyMappingUtil
+                            .fromDTOToAPIOpeationPoliciesList(operation.getOperationPolicies()));
+                }
                 uriTemplates.add(template);
             } else {
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {

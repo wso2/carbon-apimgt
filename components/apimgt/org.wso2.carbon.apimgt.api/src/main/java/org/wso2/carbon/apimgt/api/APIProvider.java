@@ -1826,6 +1826,7 @@ public interface APIProvider extends APIManager {
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 
+<<<<<<< HEAD
     void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
             EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException;
 
@@ -1839,4 +1840,24 @@ public interface APIProvider extends APIManager {
      * @return List of environments related to the given tenant
      */
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
+=======
+    /**
+     * Get all API Operation Level Mediation Policies of an API
+     *
+     * @param apiId API UUID
+     * @return List of API Operation Level Mediation Policies
+     * @throws APIManagementException if failed to fetch API Operation Policies
+     */
+
+    Set<URITemplate> getURITemplatesWithOperationPolicies(String apiId) throws APIManagementException;
+
+    /**
+     * Set existing operation policy mapping to the URI Templates
+     *
+     * @param apiId API UUID
+     * @param uriTemplates Set of URI Templates
+     * @throws APIManagementException
+     */
+    void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
+>>>>>>> Add support for operation policies in API create and update flows
 }
