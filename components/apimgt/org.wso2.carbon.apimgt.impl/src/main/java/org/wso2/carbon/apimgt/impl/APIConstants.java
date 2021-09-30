@@ -2859,6 +2859,8 @@ public final class APIConstants {
     public static final String CONTENT_TYPE = "contentType";
     public static final String HEADERS = "headers";
     public static final String STATUS_CODE = "statusCode";
+    public static final String PATH_PARAM_PREFIX = "uri.var.";
+
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
 
