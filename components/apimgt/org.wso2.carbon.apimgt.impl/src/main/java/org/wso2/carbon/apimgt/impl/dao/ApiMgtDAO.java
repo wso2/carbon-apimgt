@@ -5761,7 +5761,6 @@ public class ApiMgtDAO {
                             operationPolicyMappingPrepStmt.setString(2, policy.getPolicyType().toString());
                             operationPolicyMappingPrepStmt.setString(3, policy.getDirection());
                             operationPolicyMappingPrepStmt.setString(4, paramJSON);
-                            operationPolicyMappingPrepStmt.setInt(5, apiId);
                             operationPolicyMappingPrepStmt.addBatch();
                         }
                     }
@@ -7231,6 +7230,37 @@ public class ApiMgtDAO {
                         APIProductIdentifier productIdentifier = new APIProductIdentifier
                                 (productProvider, productName, productVersion);
                         uriTemplate.addUsedByProduct(productIdentifier);
+                    }
+                }
+            }
+        }
+    }
+    
+    private void setOperationPoliciesToURITemplatesMap(int apiId, String revisionId,
+            Map<String, URITemplate> uriTemplates) throws SQLException, APIManagementException {
+        String query;
+        if (!StringUtils.isEmpty(revisionId)) {
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+        } else {
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+        }
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, apiId);
+            if (!StringUtils.isEmpty(revisionId)) {
+                ps.setString(2, revisionId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String key = rs.getString("URL_PATTERN") + rs.getString("HTTP_METHOD");
+
+                    URITemplate uriTemplate = uriTemplates.get(key);
+                    if (uriTemplate != null) {
+                        OperationPolicy policy = new OperationPolicy();
+                        policy.setPolicyType(OperationPolicy.PolicyType.valueOf(rs.getString("POLICY_TYPE")));
+                        policy.setParameters(getPolicyParameterMapFromJSONString(rs.getString("PARAMETERS")));
+                        policy.setDirection(rs.getString("DIRECTION"));
+                        uriTemplate.addOperationPolicy(policy);
                     }
                 }
             }
@@ -15977,6 +16007,8 @@ public class ApiMgtDAO {
                     }
                 }
 
+                setOperationPoliciesToURITemplatesMap(apiId, null, uriTemplateMap);
+
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
@@ -15997,6 +16029,8 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                PreparedStatement insertOperationPolicyMappingStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     if (urlMapping.getScopes() != null) {
                         getRevisionedURLMappingsStatement.setInt(1, apiId);
@@ -16031,9 +16065,32 @@ public class ApiMgtDAO {
                             }
                         }
                     }
+                    if (urlMapping.getId() != 0) {
+                        getRevisionedURLMappingsStatement.setInt(1, apiId);
+                        getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                        getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
+                        getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
+                        getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
+                        getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    Gson gson = new Gson();
+                                    String paramJSON = gson.toJson(policy.getParameters());
+
+                                    insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
+                                    insertOperationPolicyMappingStatement.setString(2, policy.getPolicyType().toString());
+                                    insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+                                    insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                    insertOperationPolicyMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
                 }
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
+                insertOperationPolicyMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 PreparedStatement getClientCertificatesStatement = connection
@@ -16731,6 +16788,8 @@ public class ApiMgtDAO {
                     }
                 }
 
+                setOperationPoliciesToURITemplatesMap(apiId, apiRevision.getRevisionUUID(), uriTemplateMap);
+
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
@@ -16750,6 +16809,8 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                PreparedStatement insertOperationPolicyMappingStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     if (urlMapping.getScopes() != null) {
                         getCurrentAPIURLMappingsStatement.setInt(1, apiId);
@@ -16782,9 +16843,31 @@ public class ApiMgtDAO {
                             }
                         }
                     }
+                    if (!urlMapping.getOperationPolicies().isEmpty()) {
+                        getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                        getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getCurrentAPIURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    Gson gson = new Gson();
+                                    String paramJSON = gson.toJson(policy.getParameters());
+
+                                    insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
+                                    insertOperationPolicyMappingStatement.setString(2, policy.getPolicyType().toString());
+                                    insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+                                    insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                    insertOperationPolicyMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
                 }
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
+                insertOperationPolicyMappingStatement.executeBatch();
 
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
                 PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
