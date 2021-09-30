@@ -306,7 +306,7 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
-    public static final String API_GATEWAY_VENDOR = "GatewayVendor";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
     public static final String API_OVERVIEW_TAG = "tags";
@@ -2792,6 +2792,8 @@ public final class APIConstants {
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
+
+    public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     //Solace integration related constants
     public static final String SOLACE_ENVIRONMENT_ORGANIZATION = "Organization";
     public static final String SOLACE_ENVIRONMENT_DEV_NAME = "DevAccountName";

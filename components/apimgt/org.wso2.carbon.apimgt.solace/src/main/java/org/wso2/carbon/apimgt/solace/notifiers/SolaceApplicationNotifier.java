@@ -92,8 +92,8 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
             apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             Application application = apiProvider.getApplicationByUUID(event.getUuid());
-            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(),
-                    application.getGroupId());
+            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, event.getApplicationName(),
+                    event.getGroupId());
             List<SubscribedAPI> subscribedApiList = new ArrayList<>(subscriptions);
             boolean hasSubscribedAPIDeployedInSolace = false;
             String organizationNameOfSolaceDeployment = null;
@@ -117,22 +117,22 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
 
             boolean applicationFoundInSolaceBroker = false;
             if (hasSubscribedAPIDeployedInSolace) {
-                SolaceAdminApis solaceAdminApis = org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils.getSolaceAdminApis();
+                SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
 
                 // check existence of application in Solace Broker
-                HttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment, application,
-                        "default");
+                HttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment,
+                        event.getUuid(), "default");
                 if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     applicationFoundInSolaceBroker = true;
-                    log.info("Found application '" + application.getName() + "' in Solace broker");
+                    log.info("Found application '" + event.getApplicationName() + "' in Solace broker");
                     log.info("Waiting until application removing workflow gets finished");
                 } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                    log.error("Application '" + application.getName() + "' cannot be found in Solace Broker");
-                    throw new NotifierException("Application '" + application.getName() + "' cannot be found in " +
+                    log.error("Application '" + event.getApplicationName() + "' cannot be found in Solace Broker");
+                    throw new NotifierException("Application '" + event.getApplicationName() + "' cannot be found in " +
                             "Solace Broker");
                 } else {
-                    log.error("Error while searching for application '" + application.getName() + "' in Solace Broker");
-                    throw new NotifierException("Error while searching for application '" + application.getName() +
+                    log.error("Error while searching for application '" + event.getApplicationName() + "' in Solace Broker");
+                    throw new NotifierException("Error while searching for application '" + event.getApplicationName() +
                             "' in Solace Broker");
                 }
             }
@@ -141,12 +141,13 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                 log.info("Deleting application from Solace Broker");
                 // delete application from solace
                 SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-                HttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment, application);
+                HttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment,
+                        event.getUuid());
                 if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                    log.info("Successfully deleted application '" + application.getName() + "' in Solace Broker");
+                    log.info("Successfully deleted application '" + event.getApplicationName() + "' in Solace Broker");
                 } else {
-                    log.error("Error while deleting application '" + application.getName() + "' in Solace");
-                    throw new NotifierException("Error while deleting application '" + application.getName() +
+                    log.error("Error while deleting application '" + event.getApplicationName() + "' in Solace");
+                    throw new NotifierException("Error while deleting application '" + event.getApplicationName() +
                             "' in Solace");
                 }
             }

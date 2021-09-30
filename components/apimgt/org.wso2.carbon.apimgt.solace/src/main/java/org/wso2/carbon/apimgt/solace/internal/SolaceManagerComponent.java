@@ -22,6 +22,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.solace.notifiers.SolaceApplicationNotifier;
@@ -45,6 +46,12 @@ public class SolaceManagerComponent extends APIManagerComponent {
         bundleContext.registerService(Notifier.class.getName(), new SolaceSubscriptionsNotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceApplicationNotifier(), null);
         bundleContext.registerService(Notifier.class.getName(), new SolaceKeyGenNotifier(), null);
+    }
 
+    @Deactivate
+    protected void deactivate(ComponentContext componentContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Deactivating API manager component");
+        }
     }
 }

@@ -271,8 +271,10 @@ public class APIMappingUtil {
         dto.setCategories(categoryNamesList);
         dto.setKeyManagers(model.getKeyManagers());
 
-        if (dto.getGatewayVendor() != null) {
-            model.setGatewayVendor(dto.getGatewayVendor());
+        if (model.getGatewayVendor() != null) {
+            dto.setGatewayVendor(model.getGatewayVendor());
+        } else {
+            dto.setGatewayVendor("wso2");
         }
         
         if (model.getAsyncTransportProtocols() != null) {

@@ -228,17 +228,17 @@ public class SolaceAdminApis {
      * Check existence of application in Solace
      *
      * @param organization name of the Organization
-     * @param application  Application to be checked in solace
+     * @param uuid  Application UUID to be checked in solace
      * @param syntax       protocol type
      * @return HttpResponse of the GET call
      */
-    public HttpResponse applicationGet(String organization, Application application, String syntax) {
+    public HttpResponse applicationGet(String organization, String uuid, String syntax) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet request;
         if ("MQTT".equalsIgnoreCase(syntax)) {
-            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID() + "?topicSyntax=mqtt");
+            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + uuid + "?topicSyntax=mqtt");
         } else {
-            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getUUID());
+            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + uuid);
         }
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
@@ -266,7 +266,7 @@ public class SolaceAdminApis {
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         try {
-            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application, "default"
+            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(), "default"
             ), apiProducts);
         } catch (IOException e) {
             e.printStackTrace();
@@ -301,7 +301,7 @@ public class SolaceAdminApis {
         // retrieve existing API products in the app
         ArrayList<String> apiProducts = new ArrayList<>();
         try {
-            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application, "default"
+            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(), "default"
             ), apiProducts);
         } catch (IOException e) {
             e.printStackTrace();
@@ -390,13 +390,13 @@ public class SolaceAdminApis {
      * Delete application from Solace Broker
      *
      * @param organization name of the Organization
-     * @param application  Application object to be deleted
+     * @param uuid         UUID of Application object to be deleted
      * @return HttpResponse of the DELETE call
      */
-    public HttpResponse deleteApplication(String organization, Application application) {
+    public HttpResponse deleteApplication(String organization, String uuid) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/developers/" + developerUserName +
-                "/apps/" + application.getUUID());
+                "/apps/" + uuid);
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
             return httpClient.execute(request);

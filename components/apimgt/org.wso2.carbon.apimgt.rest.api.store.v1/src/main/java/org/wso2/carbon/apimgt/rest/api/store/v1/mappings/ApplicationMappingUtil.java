@@ -97,7 +97,8 @@ public class ApplicationMappingUtil {
                 SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.getUserName(),
                         solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
                         get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
-                HttpResponse response = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "default");
+                HttpResponse response = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(),
+                        application.getUUID(), "default");
                 List<ApplicationSolaceDeployedEnvironmentsDTO> solaceEnvironments = new ArrayList<>();
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     try {
@@ -139,7 +140,8 @@ public class ApplicationMappingUtil {
                                             populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject, "default");
 
                                             if (containsMQTTProtocol) {
-                                                HttpResponse response2 = solaceAdminApis.applicationGet(applicationDTO.getSolaceOrganization(), application, "MQTT");
+                                                HttpResponse response2 = solaceAdminApis.applicationGet(applicationDTO.
+                                                        getSolaceOrganization(), application.getUUID(), "MQTT");
                                                 org.json.JSONObject permissionsObject2 = extractPermissionsFromSolaceApplicationGetResponse(
                                                         response2, i, gatewayEnvironmentMap);
                                                 if (permissionsObject2 != null) {

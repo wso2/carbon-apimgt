@@ -1307,7 +1307,7 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
-        dto.setGatewayVendor(model.getGatewayVendor());
+        dto.setGatewayVendor(StringUtils.toRootLowerCase(model.getGatewayVendor()));
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }

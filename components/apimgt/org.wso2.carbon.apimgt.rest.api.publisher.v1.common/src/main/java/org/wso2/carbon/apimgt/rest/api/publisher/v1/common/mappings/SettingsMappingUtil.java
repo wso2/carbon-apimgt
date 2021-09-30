@@ -82,11 +82,6 @@ public class SettingsMappingUtil {
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-            EnvironmentListDTO gatewayEnvironmentListDTO = new EnvironmentListDTO();
-            if (gatewayEnvironments != null) {
-                gatewayEnvironmentListDTO = EnvironmentMappingUtil.
-                        fromGatewayEnvironmentCollectionToDTO(gatewayEnvironments.values());
-            }
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);
 
@@ -94,7 +89,6 @@ public class SettingsMappingUtil {
                 authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
             }
             settingsDTO.setAuthorizationHeader(authorizationHeader);
-            settingsDTO.setEnvironment(gatewayEnvironmentListDTO.getList());
         }
         return settingsDTO;
     }

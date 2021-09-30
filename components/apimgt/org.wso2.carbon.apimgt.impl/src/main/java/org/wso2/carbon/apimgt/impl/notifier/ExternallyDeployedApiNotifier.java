@@ -17,10 +17,10 @@ package org.wso2.carbon.apimgt.impl.notifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.HttpResponseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -28,18 +28,16 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
-import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
+public class ExternallyDeployedApiNotifier extends ApisNotifier{
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(ExternalGatewayNotifier.class);
 
@@ -51,56 +49,64 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
     }
 
     /**
-     * Process gateway notifier events related to External gateway deployments
+     * Process API lifecycle notifier events related to APIs deployed in external gateway
      *
      * @param event related to deployments
      * @throws NotifierException if error occurs when casting event
      */
     private void process (Event event) throws NotifierException {
-        DeployAPIInGatewayEvent deployAPIInGatewayEvent;
+         APIEvent apiEvent;
         try {
-            deployAPIInGatewayEvent = (DeployAPIInGatewayEvent) event;
+            apiEvent = (APIEvent) event;
         } catch (ExceptionInInitializerError e) {
             throw new NotifierException("Event types is not provided correctly");
         }
 
-        if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
-            deployApi(deployAPIInGatewayEvent);
-        } else {
-            unDeployApi(deployAPIInGatewayEvent);
+        if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
+            // Handle API retiring life cycle change in external gateway
+            undeployApiWhenRetiring(apiEvent);
+        } else if (APIConstants.EventType.API_DELETE.name().equals(event.getType())) {
+            // Handle API deletion in external gateway
+            undeployWhenDeleting(apiEvent);
         }
     }
 
     /**
-     * Deploy APIs to external gateway
+     * Undeploy APIs from external gateway when life cycle state changed to retire
      *
-     * @param deployAPIInGatewayEvent DeployAPIInGatewayEvent to deploy APIs to external gateway
-     * @throws NotifierException if error occurs when deploying APIs to external gateway
+     * @param apiEvent APIEvent to undeploy APIs from external gateway
+     * @throws NotifierException if error occurs when undeploying APIs from external gateway
      */
-    private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
+    private void undeployApiWhenRetiring(APIEvent apiEvent) throws NotifierException {
 
+        apiMgtDAO = ApiMgtDAO.getInstance();
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        boolean deployedToSolace;
-        Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
-        String apiId = deployAPIInGatewayEvent.getUuid();
+        boolean deletedFromSolace;
+        String apiId = apiEvent.getUuid();
+
+        if (!apiEvent.getApiStatus().equals(APIConstants.RETIRED)) {
+            return;
+        }
 
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiId));
+            List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
-            for (String deploymentEnv : gateways) {
+            for (APIRevisionDeployment deployment : test) {
+                String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
                             (gatewayEnvironments.get(deploymentEnv).getProvider());
-                    if ( deployer!= null) {
+                    if (deployer != null) {
                         try {
-                            deployedToSolace = deployer.deploy(api, gatewayEnvironments.get(deploymentEnv));
-                            if (!deployedToSolace) {
-                                throw new APIManagementException("Error while deploying API product to Solace broker");
+                            deletedFromSolace = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv));
+                            if (!deletedFromSolace) {
+                                throw new NotifierException("Error while deleting API product from Solace broker");
                             }
                         } catch (DeployerException e) {
-                            throw new APIManagementException(e.getMessage());
+                            throw new NotifierException(e.getMessage());
                         }
                     }
                 }
@@ -108,34 +114,32 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
+
     }
 
     /**
-     * Undeploy APIs from external gateway
+     * Undeploy APIs from external gateway when API is deleted
      *
-     * @param deployAPIInGatewayEvent DeployAPIInGatewayEvent to undeploy APIs from external gateway
+     * @param apiEvent APIEvent to undeploy APIs from external gateway
      * @throws NotifierException if error occurs when undeploying APIs from external gateway
      */
-    private void unDeployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
+    private void undeployWhenDeleting(APIEvent apiEvent) throws NotifierException {
 
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         boolean deletedFromSolace;
-        Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
-        String apiId = deployAPIInGatewayEvent.getUuid();
+        String apiId = apiEvent.getUuid();
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiId));
-
-            for (String deploymentEnv : gateways) {
+            List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+            for (APIRevisionDeployment deployment : test) {
+                String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
                             (gatewayEnvironments.get(deploymentEnv).getProvider());
                     if (deployer != null) {
                         try {
-                            deletedFromSolace = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
-                                    api.getContext(), gatewayEnvironments.get(deploymentEnv));
+                            deletedFromSolace = deployer.undeploy(apiEvent.getApiName(), apiEvent.getApiVersion(),
+                                    apiEvent.getApiContext(), gatewayEnvironments.get(deploymentEnv));
                             if (!deletedFromSolace) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }

@@ -19,12 +19,13 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,6 +60,7 @@ public class EnvironmentMappingUtil {
         envDTO.setName(env.getName());
         envDTO.setDisplayName(env.getDisplayName());
         envDTO.setDescription(env.getDescription());
+        envDTO.setProvider(env.getProvider());
         envDTO.setIsReadOnly(env.isReadOnly());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
@@ -128,9 +130,12 @@ public class EnvironmentMappingUtil {
         env.setName(envDTO.getName());
         env.setDisplayName(envDTO.getDisplayName());
         env.setDescription(envDTO.getDescription());
+        env.setProvider(envDTO.getProvider());
         env.setReadOnly(false);
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
+        env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties
+                (envDTO.getAdditionalProperties()));
         return env;
     }
 
@@ -149,5 +154,20 @@ public class EnvironmentMappingUtil {
         vhost.setWsPort(vhostDTO.getWsPort());
         vhost.setWssPort(vhostDTO.getWssPort());
         return vhost;
+    }
+
+    /**
+     * Converts AdditionalPropertiesDTO into a AdditionalProperties map.
+     *
+     * @param additionalPropertiesDTOs Set of additional propertyDTOs
+     * @return Map<String, String> of Additional properties
+     */
+    public static Map<String, String>  fromAdditionalPropertiesDTOToAdditionalProperties(List<AdditionalPropertyDTO>
+                                                                             additionalPropertiesDTOs) {
+        Map<String,String> additionalProperties = new HashMap<>();
+        for (AdditionalPropertyDTO entry : additionalPropertiesDTOs) {
+            additionalProperties.putIfAbsent(entry.getKey(),entry.getValue());
+        }
+        return additionalProperties;
     }
 }

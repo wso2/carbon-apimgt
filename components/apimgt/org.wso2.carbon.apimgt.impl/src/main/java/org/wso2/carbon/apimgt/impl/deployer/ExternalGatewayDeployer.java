@@ -33,13 +33,25 @@ public interface ExternalGatewayDeployer {
     public boolean deploy(API api, Environment environment) throws DeployerException;
 
     /**
-     * Undeploy API artifact from provided environment in the external gateway
+     * Undeploy API artifact from provided environment
+     *
+     * @param apiName     Name of the API to be undeployed from Solace broker
+     * @param apiVersion  Version of the API to be undeployed from Solace broker
+     * @param apiContext  Context of the API to be undeployed from Solace broker
+     * @param environment Environment needed to be undeployed API from
+     * @throws DeployerException if error occurs when undeploying APIs from Solace broker
+     */
+    public boolean undeploy(String apiName, String apiVersion, String apiContext, Environment environment)
+            throws DeployerException;
+
+    /**
+     * Undeploy API artifact from provided environment in the external gateway when Api is retired
      *
      * @param api API to be undeployed from the external gateway
      * @param environment Environment needed to be undeployed API from the external gateway
      * @throws DeployerException if error occurs when undeploying APIs from the external gateway
      */
-    public boolean undeploy(API api, Environment environment) throws DeployerException;
+    public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException;
 
     /**
      * Get vendor type of the external gateway

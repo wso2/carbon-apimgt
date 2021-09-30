@@ -23,13 +23,22 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
+import org.wso2.carbon.context.CarbonContext;
+
+import java.util.List;
 
 
 @Component(
@@ -43,6 +52,7 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 public class SolaceGatewayDeployer implements ExternalGatewayDeployer {
 
     private static final Log log = LogFactory.getLog(SolaceGatewayDeployer.class);
+    protected ApiMgtDAO apiMgtDAO;
 
     /**
      * Get external vendor type as Solace
@@ -53,10 +63,11 @@ public class SolaceGatewayDeployer implements ExternalGatewayDeployer {
     public String getType() {
         return APIConstants.SOLACE_ENVIRONMENT;
     }
+
     /**
      * Deploy API artifact to provided environment
      *
-     * @param api API to be deployed into Solace broker
+     * @param api         API to be deployed into Solace broker
      * @param environment Environment to be deployed
      * @throws DeployerException if error occurs when deploying APIs to Solace broker
      */
@@ -157,15 +168,17 @@ public class SolaceGatewayDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment
      *
-     * @param api API to be undeployed from Solace broker
+     * @param apiName     Name of the API to be undeployed from Solace broker
+     * @param apiVersion  Version of the API to be undeployed from Solace broker
+     * @param apiContext  Context of the API to be undeployed from Solace broker
      * @param environment Environment needed to be undeployed API from
      * @throws DeployerException if error occurs when undeploying APIs from Solace broker
      */
     @Override
-    public boolean undeploy(API api, Environment environment) throws DeployerException {
-        String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
-        String[] apiContextParts = api.getContext().split("/");
-        String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +
+    public boolean undeploy(String apiName, String apiVersion, String apiContext, Environment environment) throws DeployerException {
+        String apiNameForRegistration = apiName + "-" + apiVersion;
+        String[] apiContextParts = apiContext.split("/");
+        String apiNameWithContext = environment.getName() + "-" + apiName + "-" + apiContextParts[1] +
                 "-" + apiContextParts[2];
         SolaceAdminApis solaceAdminApis;
         try {
@@ -202,6 +215,43 @@ public class SolaceGatewayDeployer implements ExternalGatewayDeployer {
             log.error("Error occurred while deleting the API Product '" + apiNameWithContext + "' from Solace Broker");
             throw new DeployerException(response1.getStatusLine().toString());
         }
+    }
+
+    /**
+     * Undeploy API artifact from provided environment in the external gateway when Api is retired
+     *
+     * @param api         API to be undeployed from the external gateway
+     * @param environment Environment needed to be undeployed API from the external gateway
+     * @throws DeployerException if error occurs when undeploying APIs from the external gateway
+     */
+    public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException {
+        apiMgtDAO = ApiMgtDAO.getInstance();
+        Application application;
+        APIProvider apiProvider;
+
+        // Remove subscription
+        try {
+            apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getUuid(), api.getOrganization());
+            for (SubscribedAPI usage : apiUsages) {
+                application = usage.getApplication();
+                //Check whether the subscription is belongs to an API deployed in Solace
+                if (APIConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
+                    SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
+                }
+            }
+        } catch (APIManagementException e) {
+            throw new DeployerException("Error occurred when removing subscriptions of the API to be retired", e);
+        }
+
+        // undeploy API from Solace
+        boolean deletedFromSolace = undeploy(api.getId().getName(),api.getId().getVersion(),api.getContext(),
+                environment);
+        if (!deletedFromSolace) {
+            throw new DeployerException("Error while deleting API product from Solace broker");
+        }
+        return true;
     }
 
 }

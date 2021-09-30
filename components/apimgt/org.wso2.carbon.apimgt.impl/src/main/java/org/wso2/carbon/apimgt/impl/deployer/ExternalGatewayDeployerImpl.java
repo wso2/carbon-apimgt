@@ -27,7 +27,13 @@ public class ExternalGatewayDeployerImpl implements ExternalGatewayDeployer {
     }
 
     @Override
-    public boolean undeploy(API api, Environment environment) throws DeployerException {
+    public boolean undeploy(String apiName, String apiVersion, String apiContext, Environment environment)
+            throws DeployerException {
+        return false;
+    }
+
+    @Override
+    public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException {
         return false;
     }
 
