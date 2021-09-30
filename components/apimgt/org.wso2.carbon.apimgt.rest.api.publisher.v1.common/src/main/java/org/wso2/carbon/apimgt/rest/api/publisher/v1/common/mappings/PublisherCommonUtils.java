@@ -970,6 +970,13 @@ public class PublisherCommonUtils {
                     ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
         }
 
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+        }
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             throw new APIManagementException(
                     "Valid roles should be added under 'visibleRoles' to restrict " + "the visibility",
