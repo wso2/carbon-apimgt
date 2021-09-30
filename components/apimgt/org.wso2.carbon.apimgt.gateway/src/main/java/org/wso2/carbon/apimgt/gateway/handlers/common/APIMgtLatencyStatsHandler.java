@@ -29,6 +29,9 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(APIMgtLatencyStatsHandler.class);
@@ -46,6 +49,12 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext messageContext) {
 
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            TracingSpan span = Util.startSpan(APIMgtGatewayConstants.RESOURCE_SPAN, responseLatencySpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.RESOURCE_SPAN, span);
+        }
         messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);
         org.apache.axis2.context.MessageContext axis2MsgContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();

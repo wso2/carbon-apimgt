@@ -22,7 +22,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
@@ -932,7 +932,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         AWSCredentialsProvider credentialsProvider;
                         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey) &&
                             StringUtils.isEmpty(region)) {
-                            credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                            credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
                         } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
                                     !StringUtils.isEmpty(region)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {

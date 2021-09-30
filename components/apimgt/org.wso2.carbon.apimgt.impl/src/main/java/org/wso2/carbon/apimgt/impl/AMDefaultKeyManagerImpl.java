@@ -159,12 +159,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * Construct ClientInfo object for application create request
      *
      * @param info            The OAuthApplicationInfo object
-     * @param applicationName The name of the application to be created. We specifically request for this value as this
-     *                        should be formatted properly prior to calling this method
+     * @param oauthClientName The name of the OAuth application to be created
+     * @param isUpdate        To determine whether the ClientInfo object is related to application update call
      * @return constructed ClientInfo object
-     * @throws JSONException for errors in parsing the OAuthApplicationInfo json string
+     * @throws JSONException          for errors in parsing the OAuthApplicationInfo json string
+     * @throws APIManagementException if an error occurs while constructing the ClientInfo object
      */
-    private ClientInfo createClientInfo(OAuthApplicationInfo info, String applicationName, boolean isUpdate)
+    private ClientInfo createClientInfo(OAuthApplicationInfo info, String oauthClientName, boolean isUpdate)
             throws JSONException, APIManagementException {
 
         ClientInfo clientInfo = new ClientInfo();
@@ -189,7 +190,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (StringUtils.isNotEmpty(overrideSpName) && !Boolean.parseBoolean(overrideSpName)) {
             clientInfo.setClientName(info.getClientName());
         } else {
-            clientInfo.setClientName(applicationName);
+            clientInfo.setClientName(oauthClientName);
         }
 
         //todo: run tests by commenting the type
@@ -235,7 +236,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
                             throw new APIManagementException("Invalid application access token expiry time given for "
-                                    + applicationName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                                    + oauthClientName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setApplicationAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
@@ -253,7 +254,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
                             throw new APIManagementException("Invalid user access token expiry time given for "
-                                    + applicationName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                                    + oauthClientName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setUserAccessTokenLifeTime(expiry);
                     } catch (NumberFormatException e) {
@@ -290,6 +291,54 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 }
             }
         }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.PKCE_MANDATORY)) {
+            Object pkceMandatoryValue =
+                    additionalProperties.get(APIConstants.KeyManager.PKCE_MANDATORY);
+            if (pkceMandatoryValue instanceof String) {
+                if (!APIConstants.KeyManager.PKCE_MANDATORY.equals(pkceMandatoryValue)) {
+                    try {
+                        Boolean pkceMandatory = Boolean.parseBoolean((String) pkceMandatoryValue);
+                        clientInfo.setPkceMandatory(pkceMandatory);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN)) {
+            Object pkceSupportPlainValue =
+                    additionalProperties.get(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN);
+            if (pkceSupportPlainValue instanceof String) {
+                if (!APIConstants.KeyManager.PKCE_SUPPORT_PLAIN.equals(pkceSupportPlainValue)) {
+                    try {
+                        Boolean pkceSupportPlain = Boolean.parseBoolean((String) pkceSupportPlainValue);
+                        clientInfo.setPkceSupportPlain(pkceSupportPlain);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS)) {
+            Object bypassClientCredentialsValue =
+                    additionalProperties.get(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS);
+            if (bypassClientCredentialsValue instanceof String) {
+                if (!APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS.equals(bypassClientCredentialsValue)) {
+                    try {
+                        Boolean bypassClientCredentials = Boolean.parseBoolean((String) bypassClientCredentialsValue);
+                        clientInfo.setBypassClientCredentials(bypassClientCredentials);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
+        // Set the display name of the application. This name would appear in the consent page of the app.
+        clientInfo.setApplicationDisplayName(info.getClientName());
 
         return clientInfo;
     }
@@ -578,6 +627,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
                 appResponse.getRefreshTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME, appResponse.getIdTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.PKCE_MANDATORY, appResponse.getPkceMandatory());
+        additionalProperties.put(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN, appResponse.getPkceSupportPlain());
+        additionalProperties.put(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
+                appResponse.getBypassClientCredentials());
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
@@ -1140,11 +1193,23 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     if (StringUtils.isNotBlank(additionalProperty) && !StringUtils
                             .equals(additionalProperty, APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
                         try {
-                            Long longValue = Long.parseLong(additionalProperty);
-                            if (longValue < 0) {
-                                String errMsg = "Application configuration values cannot have negative values.";
-                                throw new APIManagementException(errMsg, ExceptionCodes
-                                        .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                            if (APIConstants.KeyManager.PKCE_MANDATORY.equals(entry.getKey()) ||
+                                    APIConstants.KeyManager.PKCE_SUPPORT_PLAIN.equals(entry.getKey()) ||
+                                    APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS.equals(entry.getKey())) {
+
+                                if (!(additionalProperty.equalsIgnoreCase(Boolean.TRUE.toString()) ||
+                                        additionalProperty.equalsIgnoreCase(Boolean.FALSE.toString()))) {
+                                    String errMsg = "Application configuration values cannot have negative values.";
+                                    throw new APIManagementException(errMsg, ExceptionCodes
+                                            .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                                }
+                            } else {
+                                Long longValue = Long.parseLong(additionalProperty);
+                                if (longValue < 0) {
+                                    String errMsg = "Application configuration values cannot have negative values.";
+                                    throw new APIManagementException(errMsg, ExceptionCodes
+                                            .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                                }
                             }
                         } catch (NumberFormatException e) {
                             String errMsg = "Application configuration values cannot have string values.";

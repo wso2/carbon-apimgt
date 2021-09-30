@@ -25,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -3730,15 +3731,23 @@ public final class APIUtil {
     public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
         try {
-            byte[] localTenantConfFileData = getLocalTenantConfFileData();
-            String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonParser jsonParser = new JsonParser();
-            JsonElement jsonElement = jsonParser.parse(tenantConfDataStr);
+            JsonElement jsonElement = getFileBaseTenantConfig();
             ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
                     gson.toJson(jsonElement));
-        } catch (APIManagementException | IOException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
+        }
+    }
+
+    private static JsonElement getFileBaseTenantConfig() throws APIManagementException{
+        try {
+            byte[] localTenantConfFileData = getLocalTenantConfFileData();
+            String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
+            JsonParser jsonParser = new JsonParser();
+            return jsonParser.parse(tenantConfDataStr);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while retrieving file base tenant-config" , e);
         }
     }
 
@@ -10835,19 +10844,6 @@ public final class APIUtil {
         return claimMappingDtoList;
     }
 
-    /**
-     * This method is used to get deployment clusters' configurations from the api manager configurations
-     *
-     * @return The configuration read from api-manager.xml or else null
-     */
-    public static JSONArray getClusterInfoFromAPIMConfig() {
-
-        //Read the configuration from api-manager.xml
-        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        return apimConfig.getContainerMgtAttributes();
-    }
-
 
     public static String getX509certificateContent(String certificate) {
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
@@ -11299,5 +11295,40 @@ public final class APIUtil {
             list = Arrays.asList(defaultType);
         }
         return list.contains(fileType.toLowerCase());
+    }
+    public static void validateRestAPIScopes(String tenantConfig) throws APIManagementException {
+        JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
+        Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
+        Set<String> uploadedTenantConfigScopes = getRestAPIScopes((JsonObject) new JsonParser().parse(tenantConfig));
+        fileBaseScopes.removeAll(uploadedTenantConfigScopes);
+        if (fileBaseScopes.size() > 0) {
+            throw new APIManagementException("Insufficient scopes available in tenant-config", ExceptionCodes.INVALID_TENANT_CONFIG);
+        }
+    }
+
+    private static Set<String> getRestAPIScopes(JsonObject tenantConfig) {
+
+        Set<String> scopes = new HashSet<>();
+        if (tenantConfig.has(APIConstants.REST_API_SCOPES_CONFIG)) {
+            JsonObject restApiScopes = (JsonObject) tenantConfig.get(APIConstants.REST_API_SCOPES_CONFIG);
+            if (restApiScopes.has(APIConstants.REST_API_SCOPE)
+                    && restApiScopes.get(APIConstants.REST_API_SCOPE) instanceof JsonArray) {
+                JsonArray restAPIScopes = (JsonArray) restApiScopes.get(APIConstants.REST_API_SCOPE);
+                if (restAPIScopes != null) {
+                    for (JsonElement scopeElement : restAPIScopes) {
+                        if (scopeElement instanceof JsonObject) {
+                            if (((JsonObject) scopeElement).has(APIConstants.REST_API_SCOPE_NAME)
+                                    && ((JsonObject) scopeElement).get(APIConstants.REST_API_SCOPE_NAME)
+                                    instanceof JsonPrimitive) {
+                                JsonElement name = ((JsonObject) scopeElement).get(APIConstants.REST_API_SCOPE_NAME);
+                                scopes.add(name.toString());
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return scopes;
     }
 }

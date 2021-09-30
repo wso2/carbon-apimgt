@@ -63,7 +63,6 @@ public class APIMgtGatewayConstants {
     public static final String THROTTLING_LATENCY = "throttling_latency";
     public static final String REQUEST_MEDIATION_LATENCY = "request_mediation_latency";
     public static final String RESPONSE_MEDIATION_LATENCY = "response_mediation_latency";
-    public static final String OTHER_LATENCY = "other_latency";
     public static final String AM_CORRELATION_ID = "am.correlationID";
 
     /**
@@ -75,7 +74,6 @@ public class APIMgtGatewayConstants {
     public static final String ENABLED_CHECK_HEADERS = "enabledCheckHeaders";
     public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
     public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
-    public static final String SERVICE_PREFIX = "SERVICE_PREFIX";
     public static final String REGEX_THREAT_PROTECTOR_ENABLED_TENANTS = "regexThreatProtectorEnabledTenants";
     public static final String PAYLOAD_SIZE_LIMIT_FOR_REGEX_TREAT_PROTECTOR = "payloadSizeLimitForRegexThreatProtector";
 
@@ -106,9 +104,6 @@ public class APIMgtGatewayConstants {
     public static final String WS_JWT_TOKEN_HEADER = "websocket.custom.header.X-JWT-Assertion";
 
     public static final String GATEWAY_TYPE = "SYNAPSE";
-    public static final String SYNAPDE_GW_LABEL = "Synapse";
-    public static final String CLIENT_USER_AGENT = "clientUserAgent";
-    public static final String CLIENT_IP = "clientIp";
 
     /**
      * Constants for Open Tracing
@@ -119,19 +114,9 @@ public class APIMgtGatewayConstants {
     public static final String KEY_VALIDATION = "API:Key_Validation_Latency";
     public static final String REQUEST_MEDIATION = "API:Request_Mediation_Latency";
     public static final String RESPONSE_MEDIATION = "API:Response_Mediation_Latency";
-    public static final String GET_RESOURCE_AUTHENTICATION_SCHEME = "API:Get_Resource_Authentication_Scheme()";
-    public static final String KEY_VALIDATION_FROM_GATEWAY_NODE = "API:Key_Validation_From_Gateway_Node";
-    public static final String GET_CLIENT_DOMAIN = "API:Get_Client_Domain()";
-    public static final String GET_KEY_VALIDATION_INFO = "API:Get_Key_Validation_Info()";
-    public static final String FIND_MATCHING_VERB = "API:Find_matching_verb()";
     public static final String CORS_REQUEST_HANDLER = "API:CORS_Request_Handler";
     public static final String THROTTLE_LATENCY = "API:Throttle_Latency";
-    public static final String DO_GET_API_INFO_DTO = "API:Do_Get_API_Info_dto()";
-    public static final String API_MGT_RESPONSE_HANDLER = "API:API_MGT_Response_Handler";
     public static final String GOOGLE_ANALYTICS_HANDLER = "API:Google_Analytics_Handler";
-    public static final String API_MGT_USAGE_HANDLER = "API:API_Mgt_Usage_Handler";
-    public static final String GET_ALL_URI_TEMPLATES = "API:GET_ALL_URI_TEMPLATES()";
-    public static final String TRACING_ENABLED = "OpenTracer.Enabled";
     public static final String SPAN_KIND = "span.kind";
     public static final String SPAN_REQUEST_PATH = "span.request.path";
     public static final String SPAN_REQUEST_METHOD = "span.request.method";
@@ -140,11 +125,9 @@ public class APIMgtGatewayConstants {
     public static final String KEY_SPAN_ERROR = "API Authentication Failure";
     public static final String RESPONSE_MEDIATION_ERROR = "Error in Response Mediation";
     public static final String REQUEST_MEDIATION_ERROR = "Error in Request Mediation";
-    public static final String RESOURCE_AUTH_ERROR = "Error in Resource Authentication";
     public static final String THROTTLE_HANDLER_ERROR = "Error in Throttle Handler";
     public static final String API_THROTTLE_HANDLER_ERROR = "Error in API Throttle Handler";
     public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
-    public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
     public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
     public static final String CUSTOM_ANALYTICS_REQUEST_PROPERTIES = "apim.analytics.request.properties";
     public static final String CUSTOM_ANALYTICS_RESPONSE_PROPERTIES = "apim.analytics.response.properties";
@@ -157,51 +140,19 @@ public class APIMgtGatewayConstants {
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
     public static final String ELECTED_REQUEST_METHOD = "api.ut.HTTP_METHOD";
     public static final String HTTP_REQUEST_METHOD = "HTTP_METHOD_OBJECT";
-    public static final String APPLICATION_JSON = "application/json";
     public static final String REST_CONTENT_TYPE = "ContentType";
     public static final String REST_MESSAGE_TYPE = "messageType";
-    public static final String SCHEMA_REFERENCE = "$ref";
-    public static final String PATHS = "$..paths..";
-    public static final String BODY_CONTENT = "..requestBody.content.application/json.schema";
-    public static final String JSON_PATH = "$.";
-    public static final String ITEMS = "items";
-    public static final String OPEN_API = ".openapi";
-    public static final char JSONPATH_SEPARATE = '.';
-    public static final String PARAM_SCHEMA = ".parameters..schema";
-    public static final String REQUEST_BODY = "..requestBody";
-    public static final String JSON_RESPONSES = ".responses.";
-    public static final String DEFAULT = "default";
-    public static final String CONTENT = ".content";
-    public static final String JSON_CONTENT = ".application/json.schema.$ref";
-    public static final String SCHEMA = ".schema";
-    public static final String EMPTY_ARRAY = "[]";
-    public static final String INTERNAL_ERROR_CODE = "500";
-    public static final String DEFINITIONS = "definitions";
-    public static final String COMPONENT_SCHEMA = "components/schemas";
-    public static final char HASH = '#';
-    public static final String EMPTY = "";
-    public static final String BACKWARD_SLASH = "\"";
-    public static final char FORWARD_SLASH = '/';
-    public static final String REQUESTBODY_SCHEMA = "components.requestBodies.";
-    public static final String COMPONENTS_SCHEMAS = "components.schemas.";
-    public static final String REQUESTBODIES = "requestBodies";
-    public static final String JSONPATH_SCHEMAS = "$..components.schemas.";
-    public static final String JSON_SCHEMA = ".content.application/json.schema";
+
 
     /**
      * Constants for trust store access
      */
-    public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
-    public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
     public static final String HTTP_RESPONSE_STATUS_CODE = "HTTP_RESPONSE_STATUS_CODE";
     public static final String BASE64_ENCODED_CLIENT_CERTIFICATE_HEADER = "X-WSO2-CLIENT-CERTIFICATE";
-    public static final String DEFAULT_JWT_TRANSFORMER_ISSUER = "default";
     public static final String SPAN_ACTIVITY_ID = "span.activity.id";
     public static final String SPAN_RESOURCE = "span.resource";
     public static final String SPAN_API_NAME = "span.api.name";
     public static final String SPAN_API_VERSION = "span.api.version";
-    public static final String SPAN_APPLICATION_NAME = "span.application.name";
-    public static final String SPAN_APPLICATION_ID = "span.application.id";
     public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
     public static final String SPAN_ENDPOINT = "span.endpoint";
 
@@ -212,16 +163,9 @@ public class APIMgtGatewayConstants {
      */
     public static final String HOST = "Host";
     public static final String HOST_HEADER = "HostHeader";
-    public static final String LOCATION = "Location";
-    public static final String AUTHORIZE_CONTEXT = "/authorize";
-    public static final String COMMON_AUTH_CONTEXT = "/commonauth";
-    public static final String OIDC_CONTEXT = "/oidc";
-    public static final String OIDC_LOGOUT = "/oidc/logout";
-    public static final String AUTHENTICATION_ENDPOINT_CONTEXT = "/authenticationendpoint";
-    public static final String LOGIN_CONTEXT = "/logincontext";
-    public static final String OAUTH2_CONTEXT = "/oauth2";
     public static final String API_OBJECT = "API";
     public static final String OAUTH_ENDPOINT_INSTANCE = "oauth.instance";
     public static final String VALIDATED_X509_CERT = "ValidatedX509Cert";
+    public static final String RESOURCE_SPAN = "API:Resource";
 }
 

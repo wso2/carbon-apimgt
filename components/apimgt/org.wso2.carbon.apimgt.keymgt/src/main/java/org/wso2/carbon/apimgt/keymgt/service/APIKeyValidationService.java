@@ -79,8 +79,8 @@ public class APIKeyValidationService {
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
-                                               String requiredAuthenticationLevel, String clientDomain,
-                                               String matchingResource, String httpVerb,String tenantDomain,
+                                               String requiredAuthenticationLevel,
+                                               String matchingResource, String httpVerb, String tenantDomain,
                                                List keyManagers)
             throws APIKeyMgtException, APIManagementException {
 
@@ -142,7 +142,6 @@ public class APIKeyValidationService {
 
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
-        validationContext.setClientDomain(clientDomain);
         validationContext.setContext(context);
         validationContext.setHttpVerb(httpVerb);
         validationContext.setMatchingResource(matchingResource);

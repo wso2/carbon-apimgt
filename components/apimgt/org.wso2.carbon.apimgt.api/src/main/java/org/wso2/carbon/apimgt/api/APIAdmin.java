@@ -425,4 +425,9 @@ public interface APIAdmin  {
      * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
     void deleteTenantTheme(int tenantId) throws APIManagementException;
+
+    String getTenantConfig(String organization) throws APIManagementException;
+
+    void updateTenantConfig(String organization, String config) throws APIManagementException;
+
 }
