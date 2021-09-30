@@ -699,7 +699,7 @@ public class APIAdminImpl implements APIAdmin {
      */
     public String extractBotDetectionDataContent(String messageBody) {
 
-        String content;
+        String content = "";
         try {
             //Parse the message body and extract the content in XML form
             DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
@@ -708,11 +708,13 @@ public class APIAdminImpl implements APIAdmin {
             Node bodyContentNode = document.getFirstChild().getFirstChild();
 
             //Convert XML form to String
-            StringWriter writer = new StringWriter();
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
-            String output = writer.toString();
-            content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+            if (bodyContentNode != null) {
+                StringWriter writer = new StringWriter();
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
+                String output = writer.toString();
+                content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+            }
         } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
             String errorMessage = "Error while extracting content from " + messageBody;
             log.error(errorMessage, e);
