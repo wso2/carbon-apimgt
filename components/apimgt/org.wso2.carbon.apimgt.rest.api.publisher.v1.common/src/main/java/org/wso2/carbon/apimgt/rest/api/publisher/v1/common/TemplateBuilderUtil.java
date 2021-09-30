@@ -785,10 +785,10 @@ public class TemplateBuilderUtil {
 
         Map<String, String> endpoints = new HashMap<>();
         if (sandboxEndpointUrl != null) {
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl + "/*");
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl);
         }
         if (productionEndpointUrl != null) {
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + "/*");
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl);
         }
         Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
         perTopicMappings.put("/*", endpoints);
