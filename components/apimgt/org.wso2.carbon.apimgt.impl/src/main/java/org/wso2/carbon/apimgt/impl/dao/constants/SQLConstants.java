@@ -3638,8 +3638,8 @@ public class SQLConstants {
     public static class OperationPolicyConstants {
         public static final String ADD_API_OPERATION_POLICY =
                 "INSERT INTO AM_API_OPERATION_POLICY_MAPPING " +
-                "(URL_MAPPING_ID, POLICY_TYPE, DIRECTION, PARAMETERS, API_ID) " +
-                "VALUES (?,?,?,?,?)";
+                "(URL_MAPPING_ID, POLICY_TYPE, DIRECTION, PARAMETERS) " +
+                "VALUES (?,?,?,?)";
 
         public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL =
                 " SELECT " +
@@ -3658,8 +3658,22 @@ public class SQLConstants {
                 " AUM.REVISION_UUID IS NULL " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
-        public static final String REMOVE_FROM_OPERATION_POLICIES =
-                "DELETE FROM AM_API_OPERATION_POLICY_MAPPING WHERE API_ID=? AND REVISION_UUID IS NULL";
+        public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL =
+                " SELECT " +
+                " AUM.URL_MAPPING_ID," +
+                " AUM.URL_PATTERN," +
+                " AUM.HTTP_METHOD," +
+                " OPM.POLICY_TYPE," +
+                " OPM.PARAMETERS," +
+                " OPM.DIRECTION" +
+                " FROM " +
+                " AM_API_URL_MAPPING AUM " +
+                " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
+                " WHERE " +
+                " API.API_ID = ? AND " +
+                " AUM.REVISION_UUID = ? " +
+                " ORDER BY AUM.URL_MAPPING_ID ASC ";
     }
 
     /**
