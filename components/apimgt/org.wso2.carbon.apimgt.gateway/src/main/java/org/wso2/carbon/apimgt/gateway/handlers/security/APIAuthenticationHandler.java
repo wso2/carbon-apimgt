@@ -428,7 +428,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        if (axis2MC.getIncomingTransportName().equals("ws") && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
+        if ((axis2MC.getIncomingTransportName().equals("ws") || axis2MC.getIncomingTransportName().equals("wss"))
+                && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
             AuthenticationContext authCtx = (AuthenticationContext) messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT);
             return authCtx.isAuthenticated();
         }
