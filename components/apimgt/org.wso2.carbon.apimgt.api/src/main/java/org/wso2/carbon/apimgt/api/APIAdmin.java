@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -284,6 +285,26 @@ public interface APIAdmin  {
      */
     KeyManagerConfigurationDTO getKeyManagerConfigurationById(String organization, String id)
             throws APIManagementException;
+
+    /**
+     * This method is used to check IDP is in the given organization
+     *
+     * @param organization organization uuid
+     * @param resourceId   IDP resource ID
+     * @return boolean indication of it's existence
+     * @throws APIManagementException
+     */
+    boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException;
+
+    /**
+     * Used to get organization UUID of a application by giving consumer key.
+     *
+     * @param consumerKey consumer key of the application
+     * @return ApplicationInfo details of a application
+     * @throws APIManagementException
+     */
+    ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException;
+
     /**
      * This method used to check existence of key manager with Id in respective tenant
      * @param organization organization requested
