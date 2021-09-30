@@ -19,6 +19,10 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -38,6 +42,7 @@ import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -47,6 +52,7 @@ import org.apache.synapse.api.API;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
@@ -92,6 +98,7 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSoc
  */
 public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
+    private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private String tenantDomain;
     private String fullRequestPath;
     private String requestPath; // request path without query param section
@@ -106,8 +113,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private API api;
     private String electedRoute;
     private AuthenticationContext authContext;
+    private List<String> tokenScopes = new ArrayList<>();
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
+    private GraphQLSchema schema = null;
+    private String schemaDefinition;
 
     public WebsocketInboundHandler() {
         initializeDataPublisher();
@@ -322,9 +332,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     AuthenticationContext authenticationContext = null;
                     JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
                     if (APIConstants.GRAPHQL_API.equals(electedAPI.getApiType())) {
-                        authenticationContext = jwtValidator.
-                                authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version,
-                                        matchingResource);
+                        Pair<AuthenticationContext, List<String>> authResponse = jwtValidator.
+                                authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
+                        authenticationContext = authResponse.getLeft();
+                        tokenScopes = authResponse.getRight();
                     } else {
                         authenticationContext = jwtValidator.
                                 authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
@@ -629,6 +640,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 publishResourceNotFoundEvent(ctx);
             }
             handleError(ctx, "No matching resource found to dispatch the request");
+        }
+        if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)) {
+            Entry localEntryObj = (Entry) synCtx.getConfiguration().getLocalRegistry().get(electedAPI.getUuid() +
+                    GRAPHQL_IDENTIFIER);
+            if (localEntryObj != null) {
+                SchemaParser schemaParser = new SchemaParser();
+                schemaDefinition = localEntryObj.getValue().toString();
+                TypeDefinitionRegistry registry = schemaParser.parse(schemaDefinition);
+                schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+            }
         }
         String resource = selectedResource.getDispatcherHelper().getString();
         if (log.isDebugEnabled()) {

@@ -20,6 +20,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -63,6 +64,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
@@ -82,7 +84,7 @@ public class JWTValidator {
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
 
-    public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain) throws APIManagementException{
+    public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain) throws APIManagementException {
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.apiKeyValidator = apiKeyValidator;
@@ -185,7 +187,7 @@ public class JWTValidator {
                     log.debug("Subscription validation via Key Manager. Status: "
                             + apiKeyValidationInfoDTO.isAuthorized());
                 }
-                if (!apiKeyValidationInfoDTO.isAuthorized()){
+                if (!apiKeyValidationInfoDTO.isAuthorized()) {
                     log.debug(
                             "User is NOT authorized to access the Resource. API Subscription validation failed.");
                     throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
@@ -361,49 +363,22 @@ public class JWTValidator {
             throws APISecurityException {
 
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
-
-        JWTValidationInfo jwtValidationInfo;
-        String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        String jti;
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        jti = jwtClaimsSet.getJWTID();
-
-        jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jti);
-        if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
-                        getMaskedToken(jwtHeader));
-            }
-            log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
-        }
+        String jti = jwtClaimsSet.getJWTID();
+        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, tokenSignature, jti);
 
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
-            log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
-            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
-                    apiVersion, jwtValidationInfo);
-            if (log.isDebugEnabled()) {
-                log.debug("Subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager() + ". Status: " +
-                        apiKeyValidationInfoDTO.isAuthorized());
-            }
+            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
+                    apiVersion);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
                 validateScopes(apiContext, apiVersion, matchingResource,
                                WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
                                signedJWTInfo);
                 log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
-                String endUserToken = null;
-                JWTInfoDto jwtInfoDto;
-                if (jwtGenerationEnabled) {
-                    jwtInfoDto = GatewayUtils.generateJWTInfoDto(jwtValidationInfo,
-                            apiKeyValidationInfoDTO, apiContext, apiVersion);
-                    endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
-                }
-                AuthenticationContext context = GatewayUtils
-                        .generateAuthenticationContext(jti, jwtValidationInfo, apiKeyValidationInfoDTO,
-                                endUserToken, true);
-                context.setApiVersion(apiVersion);
-                return context;
+                String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
+                        apiVersion, tokenSignature);
+                return generateAuthenticationContextForWS(jti, jwtValidationInfo, apiKeyValidationInfoDTO, endUserToken,
+                        apiVersion);
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
                 log.debug(message);
@@ -417,18 +392,13 @@ public class JWTValidator {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
-    public AuthenticationContext authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
-                                                                    String apiVersion, String matchingResource)
-            throws APISecurityException {
 
-        String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
+
+    private JWTValidationInfo validateTokenForWS(SignedJWTInfo signedJWTInfo, String tokenSignature, String jti)
+            throws APISecurityException {
 
         JWTValidationInfo jwtValidationInfo;
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        String jti;
-        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        jti = jwtClaimsSet.getJWTID();
-
         jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jti);
         if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
             if (log.isDebugEnabled()) {
@@ -439,29 +409,65 @@ public class JWTValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     "Invalid JWT token");
         }
+        return jwtValidationInfo;
+    }
 
+    private APIKeyValidationInfoDTO validateSubscriptionsForWS(JWTValidationInfo jwtValidationInfo, String apiContext, String apiVersion)
+            throws APISecurityException {
+        log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
+                apiVersion, jwtValidationInfo);
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager() + ". Status: " +
+                    apiKeyValidationInfoDTO.isAuthorized());
+        }
+        return apiKeyValidationInfoDTO;
+    }
+
+    private String generateBackendJWTForWS(JWTValidationInfo jwtValidationInfo,
+                                           APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                           String apiContext, String apiVersion, String tokenSignature)
+            throws APISecurityException {
+
+        String endUserToken = null;
+        JWTInfoDto jwtInfoDto;
+        if (jwtGenerationEnabled) {
+            jwtInfoDto = GatewayUtils.generateJWTInfoDto(jwtValidationInfo,
+                    apiKeyValidationInfoDTO, apiContext, apiVersion);
+            endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
+        }
+        return endUserToken;
+    }
+
+    private AuthenticationContext generateAuthenticationContextForWS(String jti, JWTValidationInfo jwtValidationInfo,
+                                                                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                                     String endUserToken, String apiVersion) {
+        AuthenticationContext context = GatewayUtils
+                .generateAuthenticationContext(jti, jwtValidationInfo, apiKeyValidationInfoDTO,
+                        endUserToken, true);
+        context.setApiVersion(apiVersion);
+        return context;
+    }
+
+
+    public Pair<AuthenticationContext, List<String>> authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
+                                                                                        String apiVersion)
+            throws APISecurityException {
+
+        String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
+        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
+        String jti = jwtClaimsSet.getJWTID();
+        JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, tokenSignature, jti);
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
-            log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
-            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
-                    apiVersion, jwtValidationInfo);
-            if (log.isDebugEnabled()) {
-                log.debug("Subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager() + ". Status: " +
-                        apiKeyValidationInfoDTO.isAuthorized());
-            }
+            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
+                    apiVersion);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
-                  log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
-                String endUserToken = null;
-                JWTInfoDto jwtInfoDto;
-                if (jwtGenerationEnabled) {
-                    jwtInfoDto = GatewayUtils.generateJWTInfoDto(jwtValidationInfo,
-                            apiKeyValidationInfoDTO, apiContext, apiVersion);
-                    endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
-                }
-                AuthenticationContext context = GatewayUtils
-                        .generateAuthenticationContext(jti, jwtValidationInfo, apiKeyValidationInfoDTO,
-                                endUserToken, true);
-                context.setApiVersion(apiVersion);
-                return context;
+                log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
+                String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
+                        apiVersion, tokenSignature);
+                AuthenticationContext authenticationContext = generateAuthenticationContextForWS(jti, jwtValidationInfo,
+                        apiKeyValidationInfoDTO, endUserToken, apiVersion);
+                return Pair.of(authenticationContext, jwtValidationInfo.getScopes());
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
                 log.debug(message);
