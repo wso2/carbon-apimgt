@@ -104,18 +104,9 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
-    private static Schema schema;
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
-    }
-    static {
-        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
-            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
-            schema = SchemaLoader.load(tenantConfigSchema);
-        } catch (IOException e) {
-            log.error("Error occurred while reading tenant-config-schema.json", e);
-        }
     }
 
     @Override
@@ -699,7 +690,7 @@ public class APIAdminImpl implements APIAdmin {
      */
     public String extractBotDetectionDataContent(String messageBody) {
 
-        String content;
+        String content = "";
         try {
             //Parse the message body and extract the content in XML form
             DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
@@ -708,11 +699,13 @@ public class APIAdminImpl implements APIAdmin {
             Node bodyContentNode = document.getFirstChild().getFirstChild();
 
             //Convert XML form to String
-            StringWriter writer = new StringWriter();
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
-            String output = writer.toString();
-            content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+            if (bodyContentNode != null) {
+                StringWriter writer = new StringWriter();
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
+                String output = writer.toString();
+                content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+            }
         } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
             String errorMessage = "Error while extracting content from " + messageBody;
             log.error(errorMessage, e);
@@ -1042,6 +1035,8 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public void updateTenantConfig(String organization, String config) throws APIManagementException {
+
+        Schema schema = APIUtil.retrieveTenantConfigJsonSchema();
         if (schema != null) {
             try {
                 org.json.JSONObject uploadedConfig = new org.json.JSONObject(config);

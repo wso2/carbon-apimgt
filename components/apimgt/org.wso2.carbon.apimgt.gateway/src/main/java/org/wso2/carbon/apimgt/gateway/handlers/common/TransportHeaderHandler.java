@@ -104,14 +104,16 @@ public class TransportHeaderHandler extends AbstractSynapseHandler {
             NHttpConnection sourceHttpConnection =
                     (NHttpConnection)((Axis2MessageContext)synCtx).getAxis2MessageContext().
                             getProperty(TransportHeaderUtil.PASSTHROUGH_SOURCE_CONNECTION);
-            SourceRequest sourceRequest = SourceContext.getRequest(sourceHttpConnection);
-            if (TransportHeaderUtil.isRemovingRequestHeadersInResponseRequired(synCtx, sourceRequest)) {
-                TransportHeaderUtil.removeRequestHeadersFromResponseHeaders(
-                        sourceRequest.getHeaders(), TransportHeaderUtil.getTransportHeaders(synCtx),
-                        this.preserveRequestHeaders);
-                TransportHeaderUtil.removeRequestHeadersFromResponseHeaders(
-                        sourceRequest.getExcessHeaders(), TransportHeaderUtil.getExcessTransportHeaders(synCtx),
-                        this.preserveRequestHeaders);
+            if (sourceHttpConnection != null) {
+                SourceRequest sourceRequest = SourceContext.getRequest(sourceHttpConnection);
+                if (TransportHeaderUtil.isRemovingRequestHeadersInResponseRequired(synCtx, sourceRequest)) {
+                    TransportHeaderUtil.removeRequestHeadersFromResponseHeaders(sourceRequest.getHeaders(),
+                                                    TransportHeaderUtil.getTransportHeaders(synCtx),
+                                                    this.preserveRequestHeaders);
+                    TransportHeaderUtil.removeRequestHeadersFromResponseHeaders(sourceRequest.getExcessHeaders(),
+                                                    TransportHeaderUtil.getExcessTransportHeaders(synCtx),
+                                                    this.preserveRequestHeaders);
+                }
             }
         }
         return true;

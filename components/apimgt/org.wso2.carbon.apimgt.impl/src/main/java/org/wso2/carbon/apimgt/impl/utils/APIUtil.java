@@ -81,6 +81,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -150,6 +152,7 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -370,6 +373,12 @@ public final class APIUtil {
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
+    private static Schema tenantConfigJsonSchema;
+
+    private APIUtil() {
+
+    }
+
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
         tenantIdleTimeMillis =
@@ -377,6 +386,12 @@ public final class APIUtil {
                         org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_IDLE_TIME,
                         String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
                         * 60 * 1000;
+        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
+            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+            tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
+        } catch (IOException e) {
+            log.error("Error occurred while reading tenant-config-schema.json", e);
+        }
     }
 
     private static String hostAddress = null;
@@ -8036,7 +8051,7 @@ public final class APIUtil {
         return false;
     }
 
-    public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
+    public static String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
 
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
@@ -11330,5 +11345,8 @@ public final class APIUtil {
             }
         }
         return scopes;
+    }
+    public static Schema retrieveTenantConfigJsonSchema(){
+        return tenantConfigJsonSchema;
     }
 }
