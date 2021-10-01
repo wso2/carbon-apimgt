@@ -4009,6 +4009,35 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get the organization of an application mapped to given a consumer key. This method is used by the
+     * ChoreoTokenIssuer
+     * @param consumerKey the consumer key of the service provider
+     * @return organization
+     * @throws APIManagementException if error occurred during db operation
+     */
+    public String getAppOrganizationFromConsumerKey(String consumerKey) throws APIManagementException {
+
+        String query = "SELECT AM_APPLICATION.ORGANIZATION FROM AM_APPLICATION INNER JOIN AM_APPLICATION_KEY_MAPPING " +
+                "ON AM_APPLICATION.APPLICATION_ID = AM_APPLICATION_KEY_MAPPING.APPLICATION_ID WHERE " +
+                "AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY = ?";
+
+        String organization = "";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, consumerKey);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    organization = rs.getString("ORGANIZATION");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when retrieving the organization for consumer key " + consumerKey, e);
+        }
+        return organization;
+    }
+
+
+    /**
      * @param username Subscriber
      * @return ApplicationId for given appname.
      * @throws APIManagementException if failed to get Applications for given subscriber.
