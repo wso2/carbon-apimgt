@@ -974,6 +974,13 @@ public class PublisherCommonUtils {
                     "Valid roles should be added under 'visibleRoles' to restrict " + "the visibility",
                     ExceptionCodes.USER_ROLES_CANNOT_BE_NULL);
         }
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+        }
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
         if (body.getVisibleRoles() != null) {
             String errorMessage = PublisherCommonUtils.validateRoles(body.getVisibleRoles());
             if (!errorMessage.isEmpty()) {
