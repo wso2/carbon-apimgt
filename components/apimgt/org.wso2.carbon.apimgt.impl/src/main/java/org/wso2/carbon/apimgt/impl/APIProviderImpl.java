@@ -6198,8 +6198,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            APIUtil utils = new APIUtil();
-            return utils.getFullLifeCycleData(configRegistry);
+            return APIUtil.getFullLifeCycleData(configRegistry);
         } catch (XMLStreamException e) {
             handleException("Parsing error while getting the lifecycle configuration content.", e);
             return null;

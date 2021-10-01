@@ -104,18 +104,9 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
-    private static Schema schema;
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
-    }
-    static {
-        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
-            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
-            schema = SchemaLoader.load(tenantConfigSchema);
-        } catch (IOException e) {
-            log.error("Error occurred while reading tenant-config-schema.json", e);
-        }
     }
 
     @Override
@@ -1044,6 +1035,8 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public void updateTenantConfig(String organization, String config) throws APIManagementException {
+
+        Schema schema = APIUtil.retrieveTenantConfigJsonSchema();
         if (schema != null) {
             try {
                 org.json.JSONObject uploadedConfig = new org.json.JSONObject(config);
