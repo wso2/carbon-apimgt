@@ -2065,7 +2065,7 @@ public class SQLConstants {
             + "API_ID = ? AND REVISION_UUID = 'Current API' ";
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
-            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+            "SELECT DISTINCT ARSM.SCOPE_NAME, ARSM.TENANT_ID " +
                     "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM " +
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.REVISION_UUID IS NULL AND AUM.API_ID IN (";
@@ -2073,7 +2073,7 @@ public class SQLConstants {
     public static final char GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX = ')';
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL =
-            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+            "SELECT DISTINCT ARSM.SCOPE_NAME, ARSM.TENANT_ID " +
                     "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM " +
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.REVISION_UUID IS NULL AND AUM.API_ID IN (";

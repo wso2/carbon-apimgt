@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1281,14 +1282,14 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
-    public Set<String> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
+    public Set<Pair<String, Integer>> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
 
         PreparedStatement getIncludedApisInProduct = null;
         PreparedStatement getSubscribedApisAndProducts = null;
         ResultSet resultSet = null;
         ResultSet resultSet1 = null;
-        Set<String> scopeKeysSet = new HashSet<>();
+        Set<Pair<String, Integer>> scopeKeyAndTenantIdSet = new HashSet<>();
         Set<Integer> apiIdSet = new HashSet<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
 
@@ -1322,7 +1323,8 @@ public class ApiMgtDAO {
                 try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
                     try (ResultSet finalResultSet = statement.executeQuery()) {
                         while (finalResultSet.next()) {
-                            scopeKeysSet.add(finalResultSet.getString(1));
+                            scopeKeyAndTenantIdSet.add(new ImmutablePair<>(finalResultSet.getString(1),
+                                    Integer.parseInt(finalResultSet.getString(2))));
                         }
                     }
                 }
@@ -1333,7 +1335,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(getSubscribedApisAndProducts, null, resultSet);
             APIMgtDBUtil.closeAllConnections(getIncludedApisInProduct, null, resultSet1);
         }
-        return scopeKeysSet;
+        return scopeKeyAndTenantIdSet;
     }
 
     public Integer getSubscriptionCount(Subscriber subscriber, String applicationName, String groupingId)

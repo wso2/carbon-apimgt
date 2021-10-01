@@ -46,6 +46,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.RegexValidator;
@@ -10816,6 +10817,29 @@ public final class APIUtil {
             scopeToKeyMap.put(scopeKey, scope);
         }
         return scopeToKeyMap;
+    }
+
+    /**
+     * Get scopes associated with the given scope keys and tenant IDs.
+     *
+     * @param scopeKeyAndTenantIdSet Scope keys and associated tenant IDs
+     * @return Scope key to Scope object mapping
+     * @throws APIManagementException if an error occurs while getting scopes using scope keys
+     */
+    public static Map<String, Scope> getScopesFromKeyAndTenantId(Set<Pair<String, Integer>> scopeKeyAndTenantIdSet)
+            throws APIManagementException {
+
+        Map<String, Scope> scopeToKeyMap = new HashMap<>();
+        for (Pair<String, Integer> scopeKeyAndTenantId : scopeKeyAndTenantIdSet) {
+            Scope scope = getScopeFromKeyAndTenantId(scopeKeyAndTenantId.getKey(), scopeKeyAndTenantId.getValue());
+            scopeToKeyMap.put(scopeKeyAndTenantId.getKey(), scope);
+        }
+        return scopeToKeyMap;
+    }
+
+    public static Scope getScopeFromKeyAndTenantId(String scopeKey, Integer tenantId) throws APIManagementException {
+
+        return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
     }
 
     public static Scope getScopeByName(String scopeKey, String organization) throws APIManagementException {
