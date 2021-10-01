@@ -1593,7 +1593,7 @@ public class SQLConstants {
 
     public static final String GET_APPLICATION_INFO_BY_CK =
             "SELECT APP.NAME as NAME, APP.UUID as UUID, APP.ORGANIZATION as ORGANIZATION, SUB.USER_ID as OWNER"
-            + " FROM AM_SUBSCRIBER,"
+            + " FROM"
             + "     AM_APPLICATION APP,"
             + "     AM_APPLICATION_KEY_MAPPING AM_APP_MAP,"
             + "     AM_SUBSCRIBER SUB"
