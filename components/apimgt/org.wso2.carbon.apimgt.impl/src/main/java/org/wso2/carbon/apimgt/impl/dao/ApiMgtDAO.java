@@ -3959,7 +3959,6 @@ public class ApiMgtDAO {
         return organization;
     }
 
-
     /**
      * @param username Subscriber
      * @return ApplicationId for given appname.
