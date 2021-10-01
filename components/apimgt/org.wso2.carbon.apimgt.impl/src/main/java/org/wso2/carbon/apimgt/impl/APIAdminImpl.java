@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -433,6 +434,16 @@ public class APIAdminImpl implements APIAdmin {
             maskValues(keyManagerConfigurationDTO);
         }
         return keyManagerConfigurationDTO;
+    }
+
+    @Override
+    public boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException {
+        return apiMgtDAO.isIDPExistInOrg(organization, resourceId);
+    }
+
+    @Override
+    public ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException {
+        return apiMgtDAO.getLightweightApplicationByConsumerKey(consumerKey);
     }
 
     @Override

@@ -1591,6 +1591,16 @@ public class SQLConstants {
                     "   AM_APP_MAP.CONSUMER_KEY = ? " +
                     "   AND APP.APPLICATION_ID = AM_APP_MAP.APPLICATION_ID";
 
+    public static final String GET_APPLICATION_INFO_BY_CK =
+            "SELECT APP.NAME as NAME, APP.UUID as UUID, APP.ORGANIZATION as ORGANIZATION, SUB.USER_ID as OWNER"
+            + " FROM"
+            + "     AM_APPLICATION APP,"
+            + "     AM_APPLICATION_KEY_MAPPING AM_APP_MAP,"
+            + "     AM_SUBSCRIBER SUB"
+            + " WHERE AM_APP_MAP.CONSUMER_KEY = ?"
+            + "  AND APP.APPLICATION_ID = AM_APP_MAP.APPLICATION_ID"
+            + "  AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+
     public static final String REMOVE_FROM_URI_TEMPLATES_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL";
 
