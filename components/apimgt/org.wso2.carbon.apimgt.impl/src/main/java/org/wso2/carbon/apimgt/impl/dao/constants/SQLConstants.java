@@ -3674,6 +3674,14 @@ public class SQLConstants {
                 " API.API_ID = ? AND " +
                 " AUM.REVISION_UUID = ? " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
+        public static final String GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID =
+                "SELECT " +
+                "OPM.POLICY_TYPE, OPM.DIRECTION, OPM.PARAMETERS " +
+                "FROM " +
+                "AM_API_URL_MAPPING AUM INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM " +
+                "ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
+                "WHERE AUM.URL_MAPPING_ID = ?";
     }
 
     /**

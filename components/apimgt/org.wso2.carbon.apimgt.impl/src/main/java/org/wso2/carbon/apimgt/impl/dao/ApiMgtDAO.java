@@ -7235,6 +7235,26 @@ public class ApiMgtDAO {
             }
         }
     }
+
+    private List<OperationPolicy> getOperationPoliciesOfURITemplate(int urlMappingId)
+            throws SQLException, APIManagementException {
+        List<OperationPolicy> operationPolicies = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+            ps.setInt(1, urlMappingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    OperationPolicy policy = new OperationPolicy();
+                    policy.setPolicyType(OperationPolicy.PolicyType.valueOf(rs.getString("POLICY_TYPE")));
+                    policy.setDirection(rs.getString("DIRECTION"));
+                    policy.setParameters(getPolicyParameterMapFromJSONString(rs.getString("PARAMETERS")));
+                    operationPolicies.add(policy);
+                }
+            }
+        }
+        return operationPolicies;
+    }
     
     private void setOperationPoliciesToURITemplatesMap(int apiId, String revisionId,
             Map<String, URITemplate> uriTemplates) throws SQLException, APIManagementException {
@@ -14251,6 +14271,8 @@ public class ApiMgtDAO {
                             // Adding api id to uri template id just to store value
                             uriTemplate.setId(rs.getInt("API_ID"));
                         }
+                        List<OperationPolicy> operationPolicies = getOperationPoliciesOfURITemplate(urlMappingId);
+                        uriTemplate.setOperationPolicies(operationPolicies);
                         urlMappingList.add(uriTemplate);
                     }
                 }
@@ -14303,6 +14325,8 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(addProductResourceMappingSql);
+                PreparedStatement insertOperationPolicyMappingStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
                     getRevisionedURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -14330,9 +14354,24 @@ public class ApiMgtDAO {
                             insertProductResourceMappingStatement.addBatch();
                         }
                     }
+                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                        while (rs.next()) {
+                            for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                Gson gson = new Gson();
+                                String paramJSON = gson.toJson(policy.getParameters());
+
+                                insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
+                                insertOperationPolicyMappingStatement.setString(2, policy.getPolicyType().toString());
+                                insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+                                insertOperationPolicyMappingStatement.setString(4, paramJSON);
+                                insertOperationPolicyMappingStatement.addBatch();
+                            }
+                        }
+                    }
                 }
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
+                insertOperationPolicyMappingStatement.executeBatch();
             }
         } catch (SQLException e) {
             handleException("Error while adding API product Resources", e);
@@ -14569,6 +14608,23 @@ public class ApiMgtDAO {
                                 }
                             }
 
+                            try (PreparedStatement policiesStatement = connection.
+                                    prepareStatement(SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                                policiesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet policiesResult = policiesStatement.executeQuery()) {
+                                    List<OperationPolicy> operationPolicies = new ArrayList<>();
+                                    while (policiesResult.next()) {
+                                        OperationPolicy policy = new OperationPolicy();
+                                        policy.setPolicyType(
+                                                OperationPolicy.PolicyType.valueOf(policiesResult.getString("POLICY_TYPE")));
+                                        policy.setDirection(policiesResult.getString("DIRECTION"));
+                                        policy.setParameters(getPolicyParameterMapFromJSONString(policiesResult.getString("PARAMETERS")));
+                                        operationPolicies.add(policy);
+                                    }
+                                    uriTemplate.setOperationPolicies(operationPolicies);
+                                }
+                            }
+
                             resource.setUriTemplate(uriTemplate);
                             productResourceList.add(resource);
                         }
@@ -14608,6 +14664,23 @@ public class ApiMgtDAO {
                                         scope.setKey(scopesResult.getString("SCOPE_NAME"));
                                         uriTemplate.setScopes(scope);
                                     }
+                                }
+                            }
+
+                            try (PreparedStatement policiesStatement = connection.
+                                    prepareStatement(SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                                policiesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet policiesResult = policiesStatement.executeQuery()) {
+                                    List<OperationPolicy> operationPolicies = new ArrayList<>();
+                                    while (policiesResult.next()) {
+                                        OperationPolicy policy = new OperationPolicy();
+                                        policy.setPolicyType(
+                                                OperationPolicy.PolicyType.valueOf(policiesResult.getString("POLICY_TYPE")));
+                                        policy.setDirection(policiesResult.getString("DIRECTION"));
+                                        policy.setParameters(getPolicyParameterMapFromJSONString(policiesResult.getString("PARAMETERS")));
+                                        operationPolicies.add(policy);
+                                    }
+                                    uriTemplate.setOperationPolicies(operationPolicies);
                                 }
                             }
 
