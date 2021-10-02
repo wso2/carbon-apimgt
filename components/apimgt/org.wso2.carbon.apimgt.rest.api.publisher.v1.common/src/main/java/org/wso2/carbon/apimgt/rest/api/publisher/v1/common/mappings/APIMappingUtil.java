@@ -2071,6 +2071,8 @@ public class APIMappingUtil {
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
         operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
                 Collectors.toList()));
+        operationsDTO.setOperationPolicies(
+                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
