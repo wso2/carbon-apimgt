@@ -842,14 +842,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     private void initThrottleForSubscriptionLevelSpikeArrest(MessageContext synCtx,
                                                              AuthenticationContext authenticationContext) {
-        AuthenticationContext authContext = authenticationContext;
-        policyKey = authContext.getTier();
+
+        policyKey = authenticationContext.getTier();
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion;
-        int maxRequestCount = authContext.getSpikeArrestLimit();
+        String subscriptionLevelThrottleKey = getSubscriptionLevelThrottleKey(policyKey, authenticationContext,
+                apiContext, apiVersion);
+        int maxRequestCount = authenticationContext.getSpikeArrestLimit();
         if (maxRequestCount != 0) {
-            String unitTime = authContext.getSpikeArrestUnit();
+            String unitTime = authenticationContext.getSpikeArrestUnit();
             int spikeArrestWindowUnitTime;
             if (APIThrottleConstants.MIN.equalsIgnoreCase(unitTime)) {
                 spikeArrestWindowUnitTime = 60000;
