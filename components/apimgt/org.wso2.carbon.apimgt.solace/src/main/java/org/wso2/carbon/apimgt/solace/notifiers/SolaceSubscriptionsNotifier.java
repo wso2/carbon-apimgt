@@ -88,7 +88,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiUUID));
+            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace
@@ -135,7 +135,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiUUID));
+            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace
@@ -185,7 +185,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiUUID));
+            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace

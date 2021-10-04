@@ -31,8 +31,7 @@ public class SettingsDTO   {
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
-    private Boolean crossTenantSubscriptionEnabled = null;
-
+    private Boolean crossTenantSubscriptionEnabled = false;
     private String authorizationHeader = null;
 
   /**
@@ -178,7 +177,6 @@ public class SettingsDTO   {
     this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
   }
 
-
   /**
    * Authorization Header
    **/
@@ -187,8 +185,8 @@ public class SettingsDTO   {
     return this;
   }
 
-
-  @ApiModelProperty(value = "Authorization Header")
+  
+  @ApiModelProperty(example = "authorization", value = "Authorization Header")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -214,7 +212,6 @@ public class SettingsDTO   {
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
-        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled);
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader);
   }

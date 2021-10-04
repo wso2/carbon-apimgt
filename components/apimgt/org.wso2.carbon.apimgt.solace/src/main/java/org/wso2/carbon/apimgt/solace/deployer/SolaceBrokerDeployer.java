@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
@@ -49,9 +48,9 @@ import java.util.List;
 /**
  *  This is to register Solace Deployer as connector
  */
-public class SolaceGatewayDeployer implements ExternalGatewayDeployer {
+public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
 
-    private static final Log log = LogFactory.getLog(SolaceGatewayDeployer.class);
+    private static final Log log = LogFactory.getLog(SolaceBrokerDeployer.class);
     protected ApiMgtDAO apiMgtDAO;
 
     /**

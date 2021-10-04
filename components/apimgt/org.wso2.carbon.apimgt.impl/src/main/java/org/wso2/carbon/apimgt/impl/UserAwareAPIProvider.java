@@ -441,12 +441,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
-    }
-
-    @Override
     public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getAsyncAPIDefinition(apiId);

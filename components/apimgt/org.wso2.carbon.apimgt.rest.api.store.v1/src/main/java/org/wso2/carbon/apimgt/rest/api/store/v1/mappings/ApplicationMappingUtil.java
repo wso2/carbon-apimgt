@@ -25,8 +25,14 @@ import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
@@ -54,6 +60,7 @@ import java.util.Set;
 public class ApplicationMappingUtil {
 
     public static ApplicationDTO fromApplicationToDTO(Application application) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingPolicy(application.getTier());
@@ -78,7 +85,8 @@ public class ApplicationMappingUtil {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
             for (SubscribedAPI subscribedAPI : subscriptions) {
-                API api = apiConsumer.getAPI(subscribedAPI.getApiId());
+                String apiUUID = apiConsumer.getLightweightAPI(subscribedAPI.getApiId()).getUuid();
+                API api = apiConsumer.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
                 if (SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
                     applicationDTO.setSolaceOrganization(SolaceNotifierUtils.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
                 }
@@ -237,9 +245,12 @@ public class ApplicationMappingUtil {
 
     public static boolean containsSolaceApis(Application application) throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(application.getSubscriber(),
+                application.getName(), application.getGroupId());
         for (SubscribedAPI subscribedAPI : subscriptions) {
-            API api = apiConsumer.getAPI(subscribedAPI.getApiId());
+            String apiUUID = apiConsumer.getLightweightAPI(subscribedAPI.getApiId()).getUuid();
+            API api = apiConsumer.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
             if (SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api)) {
                 return true;
             }

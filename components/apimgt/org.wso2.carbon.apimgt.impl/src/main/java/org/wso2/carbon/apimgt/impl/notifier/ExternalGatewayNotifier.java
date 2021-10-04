@@ -66,7 +66,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
 
         if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
             deployApi(deployAPIInGatewayEvent);
-        } else {
+        } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())){
             unDeployApi(deployAPIInGatewayEvent);
         }
     }
@@ -87,7 +87,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiId));
+            API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
             for (String deploymentEnv : gateways) {
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
@@ -126,7 +126,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPI(apiMgtDAO.getAPIIdentifierFromUUID(apiId));
+            API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
             for (String deploymentEnv : gateways) {
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {

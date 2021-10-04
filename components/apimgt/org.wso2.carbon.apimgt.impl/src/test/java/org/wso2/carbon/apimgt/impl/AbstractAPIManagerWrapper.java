@@ -179,16 +179,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return "admin";
     }
 
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        if (identifier != null && identifier.getApiName().equalsIgnoreCase(SAMPLE_API_NAME) && identifier
-                .getProviderName().equalsIgnoreCase(API_PROVIDER) && SAMPLE_API_VERSION
-                .equalsIgnoreCase(identifier.getVersion())) {
-            return new API(identifier);
-        } else {
-            return super.getAPI(identifier);
-        }
-    }
-
     @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return null;

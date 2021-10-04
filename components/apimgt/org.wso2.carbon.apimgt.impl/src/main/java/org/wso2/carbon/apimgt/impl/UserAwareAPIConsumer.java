@@ -134,10 +134,4 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
                 api.getVisibleRoles());
         return api;
     }
-
-    @Override
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        checkAccessControlPermission(identifier);
-        return super.getAPI(identifier);
-    }
 }
