@@ -619,6 +619,8 @@ public class JWTValidator {
                         properties.put(APIConstants.KeyManager.CLAIM_DIALECT,
                                 jwtConfigurationDto.getConsumerDialectUri());
                     }
+                    properties.put(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS,
+                            jwtConfigurationDto.isBindFederatedUserClaims());
                     try {
                         return keyManagerInstance.getUserClaims(jwtInfoDto.getEndUser(), properties);
                     } catch (APIManagementException e) {
