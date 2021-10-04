@@ -300,6 +300,12 @@
                                 <bundleDef>
                                     org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
                                 </bundleDef>
+                                <bundleDef>
+                                    com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    software.amazon.ion:ion-java:${software.amazon.ion.version}
+                                </bundleDef>
                                 <bundleDef>com.damnhandy.wso2:handy-uri-templates</bundleDef>
                                 <bundleDef>commons-validator:commons-validator:${commons-validator.version}</bundleDef>
                             </bundles>
