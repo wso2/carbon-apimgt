@@ -17,7 +17,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,32 +27,32 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APICategoryListDTO;
 
 public class APICategoryMappingUtilTestCase {
-	
-	@Test
-	public void testCategoryDescription() throws Exception {
-		APICategory category = new APICategory();
-		String description = "sample description";
-    	category.setDescription(description);
-    	category.setName("test");
+
+    @Test
+    public void testCategoryDescription() throws Exception {
+        APICategory category = new APICategory();
+        String description = "sample description";
+        category.setDescription(description);
+        category.setName("test");
         List<APICategory> categories = new ArrayList<APICategory>();
         categories.add(category);
-        
+
         APICategoryListDTO ListDto = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categories);
         APICategoryDTO dto = ListDto.getList().get(0);
         Assert.assertEquals("Category description mismatch", description, dto.getDescription());
-	}
-    
+    }
+
     @Test
     public void testCategoryDescriptionNull() throws Exception {
-    	APICategory category = new APICategory();
-    	category.setDescription(null);
-    	category.setName("test");
+        APICategory category = new APICategory();
+        category.setDescription(null);
+        category.setName("test");
         List<APICategory> categories = new ArrayList<APICategory>();
         categories.add(category);
-        
+
         APICategoryListDTO ListDto = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categories);
         APICategoryDTO dto = ListDto.getList().get(0);
         Assert.assertEquals("Category is null", "", dto.getDescription());
-        
+
     }
 }
