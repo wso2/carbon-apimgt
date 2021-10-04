@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import javax.validation.constraints.*;
 
 
@@ -26,9 +30,43 @@ public class APIInfoDTO   {
     private String name = null;
     private String description = null;
     private String context = null;
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private String version = null;
     private String provider = null;
     private String type = null;
+
+    @XmlType(name="AudienceEnum")
+    @XmlEnum(String.class)
+    public enum AudienceEnum {
+        PUBLIC("PUBLIC"),
+        SINGLE("SINGLE");
+        private String value;
+
+        AudienceEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AudienceEnum fromValue(String v) {
+            for (AudienceEnum b : AudienceEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private AudienceEnum audience = null;
     private String lifeCycleStatus = null;
     private String workflowStatus = null;
     private Boolean hasThumbnail = null;
@@ -105,6 +143,43 @@ public class APIInfoDTO   {
   }
 
   /**
+   * Map of custom properties of API
+   **/
+  public APIInfoDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Map of custom properties of API")
+      @Valid
+  @JsonProperty("additionalProperties")
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIInfoDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIInfoAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+  }
+
+  /**
    **/
   public APIInfoDTO version(String version) {
     this.version = version;
@@ -154,6 +229,24 @@ public class APIInfoDTO   {
   }
   public void setType(String type) {
     this.type = type;
+  }
+
+  /**
+   * The audience of the API. Accepted values are PUBLIC, SINGLE
+   **/
+  public APIInfoDTO audience(AudienceEnum audience) {
+    this.audience = audience;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, SINGLE")
+  @JsonProperty("audience")
+  public AudienceEnum getAudience() {
+    return audience;
+  }
+  public void setAudience(AudienceEnum audience) {
+    this.audience = audience;
   }
 
   /**
@@ -272,9 +365,12 @@ public class APIInfoDTO   {
         Objects.equals(name, apIInfo.name) &&
         Objects.equals(description, apIInfo.description) &&
         Objects.equals(context, apIInfo.context) &&
+        Objects.equals(additionalProperties, apIInfo.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, apIInfo.additionalPropertiesMap) &&
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(type, apIInfo.type) &&
+        Objects.equals(audience, apIInfo.audience) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
@@ -285,7 +381,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
   }
 
   @Override
@@ -297,9 +393,12 @@ public class APIInfoDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");

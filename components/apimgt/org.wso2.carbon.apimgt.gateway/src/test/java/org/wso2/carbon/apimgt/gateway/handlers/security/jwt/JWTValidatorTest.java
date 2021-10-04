@@ -33,6 +33,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -41,9 +42,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
@@ -55,7 +55,6 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.cache.Cache;
 
 @RunWith(PowerMockRunner.class)
@@ -101,7 +100,7 @@ public class JWTValidatorTest {
                         "riiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_" +
                         "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
                         "EuSe9w");
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -180,7 +179,7 @@ public class JWTValidatorTest {
                                 "IjoiSm9obm55IiwiU3VybmFtZSI6IlJvY2tldCIsIkVtYWlsIjoianJvY2tldEBleGFtcGxlLmNvbSIsIl" +
                                 "JvbGUiOlsiTWFuYWdlciIsIlByb2plY3QgQWRtaW5pc3RyYXRvciJdfQ.SSQyg_VTxF5drIogztn2SyEK" +
                                 "2wRE07wG6OW3tufD3vo");
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -269,7 +268,7 @@ public class JWTValidatorTest {
                         "riiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_" +
                         "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
                         "EuSe9w");
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -366,7 +365,7 @@ public class JWTValidatorTest {
                         "riiH8AuuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_" +
                         "-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJDMGp" +
                         "EuSe9w");
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -461,7 +460,7 @@ public class JWTValidatorTest {
                         "EuSe9w");
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -550,7 +549,7 @@ public class JWTValidatorTest {
                         "EuSe9w");
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -640,7 +639,7 @@ public class JWTValidatorTest {
                         "EuSe9w");
         SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
                 signedJWT.getJWTClaimsSet());
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);
@@ -789,7 +788,7 @@ public class JWTValidatorTest {
 
     private void testTamperedTokens(SignedJWT originalToken, SignedJWT tamperedToken) throws ParseException, APIManagementException, APISecurityException {
 
-        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
         JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
         APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
         Cache gatewayTokenCache = Mockito.mock(Cache.class);

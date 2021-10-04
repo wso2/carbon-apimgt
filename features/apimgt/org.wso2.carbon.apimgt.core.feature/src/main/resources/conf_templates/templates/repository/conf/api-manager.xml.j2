@@ -21,24 +21,6 @@
          <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
      </HttpClient>
 
-    <!-- Authentication manager configuration for Admin Portal. This is a required configuration as its user
-    authentication logic relies on this. -->
-    <AuthManager>
-        <!-- Server URL of the Authentication service -->
-        <ServerURL>{{apim.auth_manager.service_url}}</ServerURL>
-        <!-- Admin username for the Authentication manager. -->
-        <Username>${admin.username}</Username>
-        <!-- Admin password for the Authentication manager. -->
-        <Password>${admin.password}</Password>
-        <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
-           via a remote service. The check will be done on the local server when false. -->
-        <CheckPermissionsRemotely>{{apim.auth_manager.check_permissions_remotely}}</CheckPermissionsRemotely>
-        <!-- Indicates whether the authentication endpoint has been reverse proxied through the Gateway when using
-             APIM with IS-KM. -->
-        {% if apim.auth_manager.iskm_reverseproxy_enabled is defined %}
-        <ISKMReverseProxyEnabled>{{apim.auth_manager.iskm_reverseproxy_enabled}}</ISKMReverseProxyEnabled>
-        {% endif %}
-    </AuthManager>
 
     {% if apim.idp is defined %}
     <IdentityProvider>
@@ -101,6 +83,7 @@
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
             </ExcludedClaims>
+            <EnableUserClaimRetrievalFromKeyManager>{{apim.jwt.gateway_generator.enable_claim_retrieval}}</EnableUserClaimRetrievalFromKeyManager>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -304,6 +287,14 @@
     </Analytics>
 
     <!--
+        Configurations relevant to enable rate limit feature.
+        This enables to use resources considering subscription levels.
+    -->
+    <ResourceQuotaLimit>
+        <EnableAPIQuotaLimit>{{apim.api_quota_limit.enable}}</EnableAPIQuotaLimit>
+    </ResourceQuotaLimit>
+
+    <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
     -->
@@ -324,6 +315,9 @@
      <EnableKeyManagerConfigurationRetriever>{{apim.key_manager.enable_retriever}}</EnableKeyManagerConfigurationRetriever>
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
+      {% endif %}
+      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
+      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
       {% endif %}
     </APIKeyValidator>
 
@@ -374,6 +368,12 @@
         <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
     </OAuthConfigurations>
+
+    <AccessTokenBinding>
+        {% if apim.access_token_binding.enable is defined %}
+        <Enabled>{{apim.access_token_binding.enable}}</Enabled>
+        {% endif %}
+    </AccessTokenBinding>
 
     <TokenRevocationNotifiers class="{{apim.token.revocation.notifier_impl}}">
         {% if apim.token.revocation.enable_realtime_notifier %}
@@ -456,6 +456,9 @@
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
         <EnableCrossTenantSubscription>{{apim.devportal.enable_cross_tenant_subscriptions}}</EnableCrossTenantSubscription>
         <DefaultReservedUsername>{{apim.devportal.default_reserved_username}}</DefaultReservedUsername>
+        {% if apim.devportal.create_default_application is defined %}
+        <CreateDefaultApplication>{{apim.devportal.create_default_application}}</CreateDefaultApplication>
+        {% endif %}
     </APIStore>
 
     <APIPublisher>
@@ -474,6 +477,9 @@
         <SubscriberClaims>{{apim.publisher.subscriber_claims}}</SubscriberClaims>
          <!--This parameter specifies the alias value of the internal Api Key which will be used for Api Key Authentication-->
         <InternalKeyAlias>{{apim.publisher.key_alias}}</InternalKeyAlias>
+        {% if apim.publisher.supported_document_types is defined %}
+        <SupportedDocumentTypes>{{apim.publisher.supported_document_types}}</SupportedDocumentTypes>
+        {% endif %}
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -514,7 +520,9 @@
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
-    <!-- VelocityLogger>VELOCITY</VelocityLogger -->
+    {% if apim.velocity_log.enabled %}
+        <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
+    {% endif %}
 
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
@@ -802,6 +810,16 @@
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
         </ETagSkipList>
+        {% if apim.rest_api.jwt.audience is defined %}
+        <JWTAudiences>
+        {%- for aud in apim.rest_api.jwt.audience -%}
+            <JWTAudience>
+                <Audience>{{aud.audience}}</Audience>
+                <Basepath>{{aud.basepath}}</Basepath>
+            </JWTAudience>
+         {%- endfor -%}
+        </JWTAudiences>
+        {% endif %}
     </RESTAPI>
     <ThrottlingConfigurations>
         <TrafficManager>
@@ -882,7 +900,7 @@
                 {% if apim.throttling.jms.topic_connection_factory is defined %}
                 <connectionfactory.TopicConnectionFactory>{{apim.throttling.jms.topic_connection_factory}}</connectionfactory.TopicConnectionFactory>
                 {% elif apim.throttling.throttle_decision_endpoints is defined %}
-                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
                 {% elif apim.throttling.jms.username is defined %}
                 {% if apim.throttling.jms.password is defined %}
                 <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
@@ -1229,6 +1247,11 @@
                     <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
                 {% endif %}
             {% endif %}
+        <Properties>
+            {% for key,value in apim.event_hub.publish.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
         </EventPublisherConfiguration>
          <EventReceiverConfiguration>
              <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
@@ -1237,7 +1260,7 @@
              {% if apim.event_hub.event_listening_endpoints is defined %}
              <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.event_hub.username}}]]>:<![CDATA[{{apim.event_hub.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.event_hub.event_listening_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% elif apim.throttling.throttle_decision_endpoints is defined %}
-             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
              {% elif apim.throttling.jms.username is defined %}
              {% if apim.throttling.jms.password is defined %}
              <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
@@ -1336,27 +1359,6 @@
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
-     <ContainerMgt>
-         <DeploymentEnvironments>
-             {% for key,value in ContainerMgtConfig.items() %}
-                 <Property name="{{key}}">{{value}}</Property>
-             {% endfor %}
-         </DeploymentEnvironments>
-
-         {% for cluster in ContainerMgtClusterConfig%}
-         <ContainerMgtInfo>
-             <Type>{{cluster.type}}</Type>
-             <ClassName>{{cluster.class}}</ClassName>
-             <ClusterName>{{cluster.clusterName}}</ClusterName>
-             <DisplayName>{{cluster.displayName}}</DisplayName>
-             <Properties>
-                 {% for key,value in cluster.properties.items() %}
-                     <Property name="{{key}}">{{value}}</Property>
-                 {% endfor %}
-             </Properties>
-         </ContainerMgtInfo>
-         {% endfor %}
-     </ContainerMgt>
     <ProxyConfig>
         <Enable>{{apim.proxy_config.enable}}</Enable>
         <Host>{{apim.proxy_config.host}}</Host>
@@ -1364,6 +1366,7 @@
         <Username>{{apim.proxy_config.username}}</Username>
         <Password>{{apim.proxy_config.password}}</Password>
         <NonProxyHosts>{{apim.proxy_config.nonProxyHosts}}</NonProxyHosts>
+        <Protocol>{{apim.proxy_config.protocol}}</Protocol>
     </ProxyConfig>
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
@@ -1379,4 +1382,14 @@
         {% endfor %}
     </ExtensionListeners>
     {% endif %}
+
+     {% if apim.persistence.properties is defined %}
+     <PersistenceConfigs>
+        <Properties>
+            {% for key,value in apim.persistence.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
+     </PersistenceConfigs>
+     {% endif %}
 </APIManager>

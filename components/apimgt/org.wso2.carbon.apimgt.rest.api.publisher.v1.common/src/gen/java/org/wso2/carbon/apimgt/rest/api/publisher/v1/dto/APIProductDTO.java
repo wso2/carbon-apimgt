@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
@@ -212,8 +215,10 @@ return null;
     }
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-    private List<APIAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIAdditionalPropertiesDTO>();
+    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
+    private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
@@ -702,7 +707,7 @@ return null;
   /**
    * Map of custom properties of API
    **/
-  public APIProductDTO additionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public APIProductDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -711,11 +716,29 @@ return null;
   @ApiModelProperty(value = "Map of custom properties of API")
       @Valid
   @JsonProperty("additionalProperties")
-  public List<APIAdditionalPropertiesDTO> getAdditionalProperties() {
+  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIProductDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalPropertiesMap")
+  public Map<String, APIInfoAdditionalPropertiesMapDTO> getAdditionalPropertiesMap() {
+    return additionalPropertiesMap;
+  }
+  public void setAdditionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+    this.additionalPropertiesMap = additionalPropertiesMap;
   }
 
   /**
@@ -899,6 +922,7 @@ return null;
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, apIProduct.additionalPropertiesMap) &&
         Objects.equals(monetization, apIProduct.monetization) &&
         Objects.equals(businessInformation, apIProduct.businessInformation) &&
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
@@ -911,7 +935,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -947,6 +971,7 @@ return null;
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");

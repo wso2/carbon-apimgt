@@ -27,12 +27,18 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * A Facade for obtaining Subscription related Data.
  */
 public interface SubscriptionDataStore {
+
+    /**
+     * Initialize SubscriptionDataStore.
+     */
+    void init();
 
     /**
      * Gets an {@link Application} by Id
@@ -160,8 +166,18 @@ public interface SubscriptionDataStore {
 
     boolean isScopesInitialized();
 
-    Subscription getSubscriptionsByUUIds(String apiUUID, String applicationUUID);
-
     Subscription getSubscriptionBySubscriptionUUID(String subscriptionUUID);
+
+    List<Application> getApplicationsByName(String name);
+
+    Application getApplicationByUUID(String uuid);
+
+    List<Subscription> getSubscriptionsByAPIId(int apiId);
+
+    List<API> getAPIs();
+
+    Subscription getSubscriptionByUUID(String apiUUID, String appUUID);
+
+    List<ApplicationKeyMapping> getKeyMappingByApplicationId(int applicationId);
 }
 

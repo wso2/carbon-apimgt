@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
@@ -91,4 +92,19 @@ public class RestApiCommonUtilTest {
         Assert.assertEquals(apiConsumer, RestApiCommonUtil.getConsumer(userName));
     }
 
+    @Test
+    public void testGenerateOpenAPI() throws JsonProcessingException {
+
+        String openAPIDefinition = RestApiCommonUtil
+                .generateOpenAPIForAsync("testAPI", "3.14", "hello", "http://www.mocky.io/v2/5185415ba171ea3a00704eed");
+        String expected =
+                "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"testAPI\",\"description\":\"API Definition of testAPI\"," +
+                        "\"version\":\"3.14\"},\"servers\":[{\"url\":\"/\"}],\"paths\":{\"/*\":{\"post\":{\"responses\"" +
+                        ":{\"default\":{\"description\":\"Default response\"}}}}},\"x-wso2-production-endpoints\":" +
+                        "{\"urls\":[\"http://www.mocky.io/v2/5185415ba171ea3a00704eed\"],\"type\":\"http\"}," +
+                        "\"x-wso2-sandbox-endpoints\":{\"urls\":[\"http://www.mocky.io/v2/5185415ba171ea3a00704eed\"]," +
+                        "\"type\":\"http\"},\"x-wso2-auth-header\":\"Authorization\",\"x-wso2-basePath\":\"hello/3.14\"," +
+                        "\"x-wso2-disable-security\":true}";
+        Assert.assertEquals("", expected, openAPIDefinition);
+    }
 }

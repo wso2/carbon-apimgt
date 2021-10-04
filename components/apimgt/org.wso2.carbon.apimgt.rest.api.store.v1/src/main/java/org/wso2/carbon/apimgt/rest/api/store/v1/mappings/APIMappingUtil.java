@@ -81,7 +81,7 @@ import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
-    public static APIDTO fromAPItoDTO(API model, String tenantDomain) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, String organization) throws APIManagementException {
 
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
@@ -132,13 +132,13 @@ public class APIMappingUtil {
         String apiDefinition = null;
         if (model.isAsync()) {
             // for asyncAPI retrieve asyncapi.yml specification
-            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), organization);
         } else {
             // retrieve open API definition
             if (model.getSwaggerDefinition() != null) {
                 apiDefinition = model.getSwaggerDefinition();
             } else {
-                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), organization);
             }
         }
         dto.setApiDefinition(apiDefinition);
@@ -167,8 +167,8 @@ public class APIMappingUtil {
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
         int tenantId = 0;
-        if (!StringUtils.isBlank(tenantDomain)) {
-            tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (!StringUtils.isBlank(organization)) {
+            tenantId = APIUtil.getInternalOrganizationId(organization);
         }
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
@@ -268,7 +268,7 @@ public class APIMappingUtil {
         return dto;
     }
 
-    public static APIDTO fromAPItoDTO(APIProduct model, String tenantDomain) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(APIProduct model, String organization) throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getName());
@@ -300,13 +300,13 @@ public class APIMappingUtil {
         String apiDefinition = null;
         if (model.isAsync()) {
             // for asyncAPI retrieve asyncapi.yml specification
-            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), organization);
         } else {
             // retrieve open API definition
             if (model.getDefinition() != null) {
                 apiDefinition = model.getDefinition();
             } else {
-                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), organization);
             }
         }
         dto.setApiDefinition(apiDefinition);
@@ -320,8 +320,8 @@ public class APIMappingUtil {
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
 
         int tenantId = 0;
-        if (!StringUtils.isBlank(tenantDomain)) {
-            tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (!StringUtils.isBlank(organization)) {
+            tenantId = APIUtil.getInternalOrganizationId(organization);
         }
 
         //set the monetization status of this API (enabled or disabled)
@@ -445,26 +445,26 @@ public class APIMappingUtil {
     }
 
 
-    public static APIDTO fromAPItoDTO(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(ApiTypeWrapper model, String organization) throws APIManagementException {
         APIDTO apidto;
         if (model.isAPIProduct()) {
-            apidto = fromAPItoDTO(model.getApiProduct(), tenantDomain);
+            apidto = fromAPItoDTO(model.getApiProduct(), organization);
         } else {
-            apidto = fromAPItoDTO(model.getApi(), tenantDomain);
+            apidto = fromAPItoDTO(model.getApi(), organization);
         }
 
         if (!AdvertiseInfoDTO.VendorEnum.AWS.toString().equals(apidto.getAdvertiseInfo().getVendor().value())) {
-            apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
+            apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, organization));
         } else {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
-            apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, tenantDomain));
+            apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
         }
         return apidto;
     }
 
-    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization) throws APIManagementException {
         APIDTO apidto;
-        apidto = fromAPItoDTO(model.getApi(), tenantDomain);
+        apidto = fromAPItoDTO(model.getApi(), organization);
         JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
         JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
         JsonArray servers = configObject.getAsJsonArray("servers");
@@ -575,31 +575,30 @@ public class APIMappingUtil {
     /**
      * Returns an API with minimal info given the uuid.
      *
-     * @param apiUUID               API uuid
-     * @param requestedTenantDomain tenant domain of the API
+     * @param apiUUID       API uuid
+     * @param organization  Organization
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+    public static API getAPIInfoFromUUID(String apiUUID, String organization)
             throws APIManagementException {
-        API api;
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        api = apiConsumer.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        API api = apiConsumer.getLightweightAPIByUUID(apiUUID, organization);
         return api;
     }
 
     /**
      * Returns the APIIdentifier given the uuid
      *
-     * @param apiId                 API uuid
-     * @param requestedTenantDomain tenant domain of the API
+     * @param apiId         API uuid
+     * @param organization  Organization
      * @return APIIdentifier which represents the given id
      * @throws APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String organization)
             throws APIManagementException {
-        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
+        return getAPIInfoFromUUID(apiId, organization).getId();
     }
 
     /**
@@ -824,6 +823,7 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
+        apiInfoDTO.setCreatedTime(api.getCreatedTime());
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }
@@ -839,6 +839,7 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         int free = 0, commercial = 0;
         for (Tier tier : throttlingPolicies) {
+            tier = APIUtil.getTierFromCache(tier.getName(), apiTenant);
             if (RestApiConstants.FREE.equalsIgnoreCase(tier.getTierPlan())) {
                 free = free + 1;
             } else if (RestApiConstants.COMMERCIAL.equalsIgnoreCase(tier.getTierPlan())) {

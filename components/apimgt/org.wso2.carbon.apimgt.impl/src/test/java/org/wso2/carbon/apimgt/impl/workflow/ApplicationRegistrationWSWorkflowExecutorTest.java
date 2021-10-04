@@ -103,7 +103,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         workflowDTO.setAppInfoDTO(oAuthAppRequest);
 
         KeyManagerConfigurationDTO kmConfigDTO = new KeyManagerConfigurationDTO();
-        kmConfigDTO.setTenantDomain("carbon.super");
+        kmConfigDTO.setOrganization("carbon.super");
         kmConfigDTO.setName("default");
         PowerMockito.when(apiMgtDAO.getKeyManagerConfigurationByUUID("default")).thenReturn(kmConfigDTO);
     }

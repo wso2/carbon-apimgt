@@ -111,7 +111,8 @@ public class SOAPOperationBindingUtils {
      * @throws APIManagementException if an error occurs when generating swagger
      */
     public static String getSoapOperationMapping(String path) throws APIManagementException {
-        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path);
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(path);
+        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
         WSDLInfo wsdlInfo = processor.getWsdlInfo();
         return getGeneratedSwaggerFromWSDL(wsdlInfo);
     }

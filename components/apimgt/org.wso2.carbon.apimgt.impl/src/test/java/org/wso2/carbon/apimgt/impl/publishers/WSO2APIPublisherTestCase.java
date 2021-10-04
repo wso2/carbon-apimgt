@@ -154,7 +154,8 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(new File(apiArtifactDir)).when(importExportAPI)
                 .exportAPI(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
                         Matchers.anyString(), Matchers.anyBoolean(), Matchers.any(ExportFormat.class),
-                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString());
+                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString(),
+                        Matchers.anyString());
         //Test Unauthenticated scenario for publishing API
         Mockito.doReturn(HttpStatus.SC_UNAUTHORIZED).when(statusLine).getStatusCode();
         String unauthenticatedResponse = "{\"code\":401,\"message\":\"\",\"description\":\"Unauthenticated request\"," +
@@ -191,7 +192,8 @@ public class WSO2APIPublisherTestCase {
         PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(importExportAPI)
                 .exportAPI(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
                         Matchers.anyString(), Matchers.anyBoolean(), Matchers.any(ExportFormat.class),
-                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString());
+                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString(),
+                        Matchers.anyString());
         try {
             wso2APIPublisher.publishToStore(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");

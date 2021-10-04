@@ -55,18 +55,12 @@ public class SearchApiServiceImpl implements SearchApiService {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
 
-
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "*" : query;
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String organization = RestApiUtil.getOrganization(messageContext);
 
         try {
-
-            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
-                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-            }
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
@@ -77,9 +71,9 @@ public class SearchApiServiceImpl implements SearchApiService {
             // Extracting search queries for the recommendation system
             apiConsumer.publishSearchQuery(query, username);
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiConsumer.searchPaginatedContent(query, requestedTenantDomain, offset, limit);
+                result = apiConsumer.searchPaginatedContent(query, organization, offset, limit);
             } else {
-                result = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset, limit);
+                result = apiConsumer.searchPaginatedAPIs(query, organization, offset, limit, null, null);
             }
 
             ArrayList<Object> apis;
@@ -128,7 +122,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             resultListDTO.setCount(allmatchedResults.size());
             SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
 
-        } catch (APIManagementException | UserStoreException e) {
+        } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving search results";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }

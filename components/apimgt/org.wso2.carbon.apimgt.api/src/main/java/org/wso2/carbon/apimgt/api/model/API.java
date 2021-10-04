@@ -69,6 +69,7 @@ public class API implements Serializable {
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+    private String organization;
 
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
@@ -207,6 +208,16 @@ public class API implements Serializable {
      * Property to hold revision id
      */
     private int revisionId;
+    
+    private String audience;
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -1226,6 +1237,14 @@ public class API implements Serializable {
 
     public void setRevisionId(int revisionId) {
         this.revisionId = revisionId;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     @Override

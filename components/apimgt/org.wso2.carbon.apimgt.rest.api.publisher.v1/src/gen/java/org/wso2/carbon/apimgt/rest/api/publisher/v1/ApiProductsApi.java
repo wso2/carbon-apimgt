@@ -53,7 +53,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a New Document to an API Product", notes = "This operation can be used to add a new documentation to an API Product. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API Product document ** API once we obtain a document Id by this operation. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -70,7 +71,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload the Content of an API Product Document", notes = "Thid operation can be used to upload a file or add inline content to an API Product document.  **IMPORTANT:** * Either **file** or **inlineContent** form data parameters should be specified at one time. * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter. * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -88,7 +90,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a New API Product", notes = "This operation can be used to create a new API Product specifying the details of the API Product in the payload. ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -106,7 +109,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Create a new API Product revision", notes = "Create a new API Product revision ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -124,6 +128,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Delete an API Product", notes = "This operation can be used to delete an existing API Product proving the Id of the API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "API Products",  })
@@ -142,7 +147,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Document of an API Product", notes = "This operation can be used to delete a document associated with an API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -160,7 +166,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Delete Revision", notes = "Delete a revision of an API Product ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -178,7 +185,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Deploy Revision", notes = "Deploy an API Product Revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -196,7 +204,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API Product", notes = "This operation can be used to export the details of a particular API Product as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
@@ -213,7 +221,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Details of an API Product", notes = "Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API to retrive it. ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -231,7 +240,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Document of an API Product", notes = "This operation can be used to retrieve a particular document's metadata associated with an API. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -249,7 +259,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Content of an API Product Document", notes = "This operation can be used to retrive the content of an API's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type     _Sample cURL_ : `curl -k -H \"Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51\" -F inlineContent=@\"docs.txt\" -X POST \"https://localhost:9443/api/am/publisher/v2/apis/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content` 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -268,7 +279,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a List of Documents of an API Product", notes = "This operation can be used to retrive a list of documents belonging to an API Product by providing the id of the API Product. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -287,7 +299,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API Product ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -304,7 +317,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "List Deployments", notes = "List available deployed revision deployment details of an API Product ", response = APIRevisionDeploymentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -322,6 +336,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "API Product Revisions",  })
@@ -338,7 +353,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Swagger Definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -356,7 +372,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Thumbnail Image", notes = "This operation can be used to download a thumbnail image of an API product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -374,7 +391,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search API Products ", notes = "This operation provides you a list of available API Products qualifying under a given search condition.  Each retrieved API Product is represented with a minimal amount of attributes. If you want to get complete details of an API Product, you need to use **Get details of an API Product** operation. ", response = APIProductListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -391,7 +409,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Check Whether API Product is Outdated", notes = "This operation can be used to retrieve the status indicating if an API Product is outdated due to updating of dependent APIs (This resource is not supported at the moment) ", response = APIProductOutdatedStatusDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -429,7 +448,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Restore Revision", notes = "Restore a revision to the Current API of the API Product ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -447,6 +467,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "API Product Revisions",  })
@@ -465,7 +486,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update an API Product", notes = "This operation can be used to update an existing API product. But the properties `name`, `provider` and `version` cannot be changed. ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products",  })
     @ApiResponses(value = { 
@@ -485,7 +507,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiOperation(value = "Update Deployment", notes = "Update deployment devportal visibility ", response = APIRevisionDeploymentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Revisions",  })
     @ApiResponses(value = { 
@@ -501,7 +524,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Document of an API Product", notes = "This operation can be used to update metadata of an API's document. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
@@ -519,7 +543,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload a Thumbnail Image", notes = "This operation can be used to upload a thumbnail image of an API Product. The thumbnail to be uploaded should be given as a form data parameter `file`. ", response = FileInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Products" })
     @ApiResponses(value = { 

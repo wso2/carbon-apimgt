@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.196-SNAPSHOT</version>
+        <version>9.0.358-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -30,12 +30,11 @@
     <url>http://wso2.org</url>
 
     <modules>
+        <module>org.wso2.carbon.apimgt.eventing.feature</module>
+        <module>org.wso2.carbon.apimgt.eventing.hub.feature</module>
         <module>org.wso2.carbon.apimgt.core.feature</module>
         <module>org.wso2.carbon.apimgt.gateway.feature</module>
         <module>org.wso2.carbon.apimgt.jms.listener.feature</module>
-        <module>org.wso2.carbon.apimgt.publisher.feature</module>
-        <module>org.wso2.carbon.apimgt.store.feature</module>
-        <module>org.wso2.carbon.apimgt.admin.feature</module>
         <module>org.wso2.carbon.apimgt.keymanager.feature</module>
         <!--<module>org.wso2.carbon.apimgt.micro.gateway.default.feature</module>-->
         <!--<module>org.wso2.carbon.apimgt.micro.gateway.feature</module>-->

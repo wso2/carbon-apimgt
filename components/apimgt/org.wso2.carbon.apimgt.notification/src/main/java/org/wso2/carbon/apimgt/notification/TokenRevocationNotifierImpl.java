@@ -30,6 +30,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.token.TokenRevocationNotifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -74,6 +76,10 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 null, null, objects);
         NotificationUtil.publishEventToStreamService(tokenRevocationMessage);
         log.debug("Successfully sent the revoked token notification on realtime");
+        EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(APIConstants.TOKEN_REVOCATION_STREAM_ID,
+                System.currentTimeMillis(), null, null, objects);
+        APIUtil.publishEvent(EventPublisherType.TOKEN_REVOCATION, tokenRevocationEvent,
+                tokenRevocationEvent.toString());
     }
 
     /**

@@ -221,33 +221,30 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String username = RestApiCommonUtil.getLoggedInUsername();
+    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
 
-            //This will give PolicyNotFoundException if there's no policy exists with UUID
-            APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
-            if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
-            }
-            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(),
-                    PolicyConstants.POLICY_LEVEL_API)) {
-                String message = "Policy " + policyId + " already attached to API/Resource";
-                log.error(message);
-                throw new APIManagementException(message);
-            }
-            apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
-            return Response.ok().build();
+        //This will give PolicyNotFoundException if there's no policy exists with UUID
+        APIPolicy existingPolicy = null;
+        try {
+            existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
-            } else {
-                String errorMessage = "Error while deleting Advanced level policy : " + policyId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, e, log);
         }
-        return null;
+        if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
+        }
+        if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API)) {
+            String message = "Advanced Throttling Policy " + existingPolicy.getPolicyName() + ": " + policyId
+                    + " already attached to API/Resource";
+            throw new APIManagementException(message, ExceptionCodes
+                    .from(ExceptionCodes.ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR,
+                            existingPolicy.getPolicyName()));
+        }
+        apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
+        return Response.ok().build();
     }
 
     /**

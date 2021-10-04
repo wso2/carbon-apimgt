@@ -306,6 +306,6 @@ public class UserAwareAPIProviderTest {
     @Test
     public void testGetLifeCycleEvents() throws APIManagementException {
         Assert.assertTrue("Lifeyclce events is not null for a non-existing API",
-                userAwareAPIProvider.getLifeCycleEvents(apiIdentifier).isEmpty());
+                userAwareAPIProvider.getLifeCycleEvents(apiIdentifier, "org1").isEmpty());
     }
 }

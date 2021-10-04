@@ -31,7 +31,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +44,8 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
 
     private static final Log log = LogFactory.getLog(RecommendationsApiService.class);
 
-    public Response recommendationsGet(MessageContext messageContext) {
+    public Response recommendationsGet(MessageContext messageContext) throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();
@@ -67,7 +70,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                             JSONObject apiObj = apiList.getJSONObject(i);
                             apiId = apiObj.getString("id");
                             ApiTypeWrapper apiWrapper = apiConsumer
-                                    .getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+                                    .getAPIorAPIProductByUUID(apiId, organization);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);

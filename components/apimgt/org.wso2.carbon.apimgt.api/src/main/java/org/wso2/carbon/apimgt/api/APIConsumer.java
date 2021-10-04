@@ -81,15 +81,6 @@ public interface APIConsumer extends APIManager {
     Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns a list of all published APIs. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     *
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
-    /**
      * Returns a paginated list of all published APIs. If a given API has multiple APIs,
      * only the latest version will be included
      * in this list.
@@ -135,10 +126,11 @@ public interface APIConsumer extends APIManager {
     /**
      * Get all tags of published APIs
      *
+     * @param organization organization of the API
      * @return a list of all Tags applied to all APIs published.
      * @throws APIManagementException if failed to get All the tags
      */
-    Set<Tag> getAllTags(String tenantDomain) throws APIManagementException;
+    Set<Tag> getAllTags(String organization) throws APIManagementException;
 
     /**
      * Returns all tags with their descriptions.
@@ -164,7 +156,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void rateAPI(Identifier apiId, APIRating rating, String user) throws APIManagementException;
+    void rateAPI(String apiId, APIRating rating, String user) throws APIManagementException;
     /**
      * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
@@ -172,7 +164,16 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the subscriber providing the rating
      * @throws APIManagementException If an error occurs while rating the API
      */
-    void removeAPIRating(Identifier id, String user) throws APIManagementException;
+    void removeAPIRating(String id, String user) throws APIManagementException;
+
+    /**
+     * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
+     *
+     * @param apiId         The api identifier
+     * @param organization  Identifier of an organization
+     * @throws APIManagementException If an error occurs while rating the API
+     */
+    void checkAPIVisibility(String apiId, String organization) throws APIManagementException;
 
     /** returns the SubscribedAPI object which is related to the subscriptionId
      *
@@ -237,11 +238,12 @@ public interface APIConsumer extends APIManager {
      * @param startSubIndex Starting index of subscriptions to be listed
      * @param endSubIndex Ending index of Subscriptions to be listed
      * @param groupingId the group id of the application
+     * @param organization organization of the API
      * @return
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-                                                  int endSubIndex, String groupingId) throws APIManagementException;
+                                                  int endSubIndex, String groupingId, String organization) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -330,9 +332,10 @@ public interface APIConsumer extends APIManager {
      * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
+     * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(Identifier identifier, String userId, int applicationId) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId, String organization) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId
@@ -341,17 +344,19 @@ public interface APIConsumer extends APIManager {
      * @param userId        id of the user
      * @param applicationId Application Id
      * @param groupId       groupId of user
+     * @param organization  Organization
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId,String groupId) throws
+    void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId, String organization) throws
             APIManagementException;
 
     /** Removes a subscription specified by SubscribedAPI object
      *
      * @param subscription SubscribedAPI object which contains the subscription information
+     * @param organization Organization
      * @throws APIManagementException
      */
-    void removeSubscription(SubscribedAPI subscription) throws APIManagementException;
+    void removeSubscription(SubscribedAPI subscription, String organization) throws APIManagementException;
 
     /**
      * Remove a Subscriber
@@ -374,20 +379,20 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to add a comment.
      *
-     * @param identifier Api identifier
+     * @param uuid Api uuid
      * @param comment    comment object
      * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(String uuid, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier      Api identifier
+     * @param uuid      Api uuid
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
+    Comment[] getComments(String uuid, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
@@ -424,11 +429,11 @@ public interface APIConsumer extends APIManager {
     /**
      * This method is to delete a comment.
      *
-     * @param identifier API Identifier
+     * @param uuid API uuid
      * @param commentId  Comment ID
-     * @throws APIManagementException if failed to delete comment for identifier
+     * @throws APIManagementException if failed to delete comment for api uuid
      */
-    void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+    void deleteComment(String uuid, String commentId) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
@@ -443,12 +448,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Adds an application
      *
-     * @param application Application
-     * @param userId      User Id
+     * @param application  Application
+     * @param userId       User Id
+     * @param organization Identifier of an organization
      * @return Id of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-    int addApplication(Application application, String userId) throws APIManagementException;
+    int addApplication(Application application, String userId, String organization) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -478,25 +484,24 @@ public interface APIConsumer extends APIManager {
      * Creates a request for getting Approval for Application Registration.
      *
      * @param userId Subscriber name.
-     * @param applicationName of the Application.
+     * @param application The Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
      * @param tokenScope Scopes for the requested tokens.
      *
-     * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.
      * @param keyManagerName key manager name
      * @param tenantDomain tenant domain for the app registration request
      * @param isImportMode whether Application is being imported from controller or not
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    Map<String,Object> requestApprovalForApplicationRegistration(String userId, Application application,
                                                                  String tokenType,
                                                                  String callbackUrl, String[] allowedDomains,
                                                                  String validityTime,
-                                                                 String tokenScope, String groupingId,
+                                                                 String tokenScope,
                                                                  String jsonString, String keyManagerName,
                                                                  String tenantDomain, boolean isImportMode)
             throws APIManagementException;
@@ -505,7 +510,7 @@ public interface APIConsumer extends APIManager {
      * Creates a request for getting Approval for Application Registration.
      *
      * @param userId          Subscriber name.
-     * @param applicationName of the Application.
+     * @param application    The Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     callback URL
      * @param allowedDomains  allowedDomains for token.
@@ -516,11 +521,11 @@ public interface APIConsumer extends APIManager {
      * @param keyManagerName  name of the key manager
      * @param tenantDomain    tenant domain for the app registration request
      * @throws APIManagementException if failed to applications for given subscriber
-     * @deprecated Use {@link #requestApprovalForApplicationRegistration(String, String, String, String, String[],
-     * String, String, String, String, String, String, boolean)} instead
+     * @deprecated Use {@link #requestApprovalForApplicationRegistration(String, Application, String, String, String[],
+     * String, String, String, String, String, boolean)} instead
      */
     @Deprecated
-    Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    Map<String, Object> requestApprovalForApplicationRegistration(String userId, Application application,
                                                                  String tokenType,
                                                                  String callbackUrl, String[] allowedDomains,
                                                                  String validityTime,
@@ -533,7 +538,7 @@ public interface APIConsumer extends APIManager {
      * Creates a request for application update.
      *
      * @param userId Subscriber name.
-     * @param applicationName of the Application.
+     * @param application The Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
@@ -544,7 +549,7 @@ public interface APIConsumer extends APIManager {
      * @param keyManagerName
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
+    OAuthApplicationInfo updateAuthClient(String userId, Application application,
                                           String tokenType,
                                           String callbackUrl, String[] allowedDomains,
                                           String validityTime,
@@ -583,16 +588,19 @@ public interface APIConsumer extends APIManager {
 
     /**
      * Returns a list of applications for a given subscriber
-     *  @param subscriber Subscriber
+     *
+     * @param subscriber   Subscriber
      * @param search
      * @param start
      * @param offset
-     * @param groupingId the groupId to which the applications must belong.  @return Applications
+     * @param groupingId   the groupId to which the applications must belong.
+     * @param organization Identifier of an organization
+     * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset ,
-                                                String search, String sortColumn, String sortOrder)
+    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
+                                                String search, String sortColumn, String sortOrder, String organization)
             throws APIManagementException;
 
 
@@ -629,23 +637,24 @@ public interface APIConsumer extends APIManager {
      * @param subscriber the subscriber in relation to the identifiers
      * @param identifier the identifiers of the API's the subscriber is subscribed to
      * @param groupingId the grouping Id the subscriber.
+     * @param organization  organization of the API
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                Identifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId, String organization) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
 
-    int getUserRating(Identifier apiId, String user) throws APIManagementException;
+    int getUserRating(String apiId, String user) throws APIManagementException;
 
-    JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException;
+    JSONObject getUserRatingInfo(String id, String user) throws APIManagementException;
 
-    float getAverageAPIRating(Identifier apiId) throws APIManagementException;
+    float getAverageAPIRating(String apiId) throws APIManagementException;
 
-    JSONArray getAPIRatings(Identifier apiId) throws APIManagementException;
+    JSONArray getAPIRatings(String apiId) throws APIManagementException;
 
     /**
      * Get a list of published APIs by the given provider.
@@ -767,17 +776,20 @@ public interface APIConsumer extends APIManager {
     /**
      * Revokes the oldAccessToken generating a new one.
      *
-     * @param oldAccessToken          Token to be revoked
-     * @param clientId                Consumer Key for the Application
-     * @param clientSecret            Consumer Secret for the Application
-     * @param validityTime            Desired Validity time for the token
-     * @param jsonInput               Additional parameters if Authorization server needs any.
-     * @return Details of the newly generated Access Token.
-     * @throws APIManagementException
+     * @param oldAccessToken  Token to be revoked
+     * @param clientId        Consumer Key for the Application
+     * @param clientSecret    Consumer Secret for the Application
+     * @param validityTime    Desired Validity time for the token
+     * @param requestedScopes Requested Scopes
+     * @param jsonInput       Additional parameters if Authorization server needs any.
+     * @param keyManagerName  Configured Key Manager
+     * @param grantType       Grant Type
+     * @return AccessTokenInfo
+     * @throws APIManagementException Error when renewing access token
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] requestedScopes, String jsonInput,String keyManagerName) throws
-            APIManagementException;
+                                     String[] requestedScopes, String jsonInput, String keyManagerName,
+                                     String grantType) throws APIManagementException;
 
     /**
      * Generates a new api key
@@ -805,23 +817,24 @@ public interface APIConsumer extends APIManager {
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
     /**
-     * Returns a set of scopes associated with a list of API identifiers.
+     * Returns a set of scopes associated with a list of API uuids.
      *
-     * @param identifiers list of API identifiers
+     * @param uuids list of API uuids
      * @return set of scopes.
      * @throws APIManagementException
      */
-    Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException;
+    Set<Scope> getScopesBySubscribedAPIs(List<String> uuids) throws APIManagementException;
 
     /**
      * Returns a set of scopes associated with an application subscription.
      *
      * @param username    subscriber of the application
      * @param applicationId applicationId of the application
+     * @param organization Organization
      * @return set of scopes.
      * @throws APIManagementException
      */
-    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
+    Set<Scope> getScopesForApplicationSubscription(String username, int applicationId, String organization)
             throws APIManagementException;
 
     /**
@@ -864,26 +877,14 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
      *
-     * @param apiIdentifier API Identifier object
-     * @param environmentName environment name
-     * @param environmentType environment type
+     * @param api               API
+     * @param environmentName   environment name
+     * @param environmentType   environment type
+     * @param organization      Identifier of an organization
      * @return WSDL of the API
      * @throws APIManagementException when error occurred while getting the WSDL
      */
-    ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
-            throws APIManagementException;
-
-    /**
-     * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
-     *
-     * @param api API  
-     * @param environmentName environment name
-     * @param environmentType environment type
-     * @param orgId Identifier of an organization
-     * @return WSDL of the API
-     * @throws APIManagementException when error occurred while getting the WSDL
-     */
-    ResourceFile getWSDL(API api, String environmentName, String environmentType, String orgId)
+    ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException;
     /**
      * Returns application attributes defined in configuration
@@ -894,7 +895,7 @@ public interface APIConsumer extends APIManager {
      */
     JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException;
 
-    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
+    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(String organization, Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
@@ -968,17 +969,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
-
-    /**
-     * Returns the AsyncAPI definition of the API for the given gateway environment as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @param environmentName API Gateway environment name
-     * @return AsyncAPI definition string
-     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
-     */
-    String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
-            throws APIManagementException;
 
     /**
      * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string

@@ -112,7 +112,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
-                                                || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
+                                                || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())
+                                                || APIConstants.APITransportType.WEBHOOK.toString()
+                                                        .equals(api.getType()))) {
                                     APIDefinitionValidationResponse apiDefinitionValidationResponse = ImportUtils
                                             .retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                     api.setSwaggerDefinition(apiDefinitionValidationResponse.getContent());

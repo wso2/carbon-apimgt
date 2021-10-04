@@ -37,17 +37,24 @@ public final class RestApiConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
+    public static final String ORGANIZATION = "organization";
+    public static final String MASKED_TOKEN = "maskedToken";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
-    public static final String OAUTH2_AUTHENTICATION = "oauth2";
+    public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
+    public static final String JWT_AUTHENTICATION = "jwt";
+    public static final String DOT = ".";
+    public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+    public static final String API_MANAGE_SCOPE = "apim:api_manage";
     public static final String CREATOR_SCOPE = "apim:api_create";
     public static final String ADMIN_SCOPE = "apim:admin";
     public static final String PUBLISHER_SCOPE = "apim:api_publish";
+
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
@@ -186,7 +193,9 @@ public final class RestApiConstants {
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
     public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
     public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
+    public static final String DEFAULT_SORT_CRITERION = "createdTime";
     public static final String DEFAULT_SORT_ORDER = "asc";
+    public static final String DESCENDING_SORT_ORDER = "desc";
 
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
@@ -305,5 +314,7 @@ public final class RestApiConstants {
 
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
             Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
+
+    public static final String JWKS_URI = "jwksUri";
 
 }

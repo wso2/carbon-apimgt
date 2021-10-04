@@ -34,6 +34,16 @@ public class KeyManagerConfiguration {
     private boolean enabled;
     private String tenantDomain;
 
+    public enum TokenType {
+        EXCHANGED, ORIGINAL
+    }
+
+    public enum IdpTypeOfExchangedTokens {
+        Okta, KeyCloak, Auth0, PingFederate, ForgeRock, Microsoft, Asgardeo
+    }
+
+    private TokenType tokenType = TokenType.ORIGINAL;
+
     private Map<String, Object> configuration = new HashMap<>();
 
     public void addParameter(String name, Object value) {
@@ -94,5 +104,13 @@ public class KeyManagerConfiguration {
     public Map<String, Object> getConfiguration() {
 
         return configuration;
+    }
+
+    public TokenType getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
     }
 }
