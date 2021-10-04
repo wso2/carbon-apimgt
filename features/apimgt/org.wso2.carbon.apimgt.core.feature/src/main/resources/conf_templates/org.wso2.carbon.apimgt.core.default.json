@@ -30,6 +30,7 @@
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
   "apim.jwt.enable_tenant_based_signing": false,
   "apim.jwt.gateway_generator.enable_claim_retrieval": false,
+  "apim.jwt.binding_federated_user_claims": true,
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
   "apim.cache.km_token.enable": false,
