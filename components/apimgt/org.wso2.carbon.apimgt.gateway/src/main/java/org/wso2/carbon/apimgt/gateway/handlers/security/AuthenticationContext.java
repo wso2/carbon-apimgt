@@ -50,6 +50,15 @@ public class AuthenticationContext {
     private String apiPublisher;
     private String apiVersion;
     private String issuer;
+    private List requestTokenScopes;
+
+    public List getRequestTokenScopes() {
+        return requestTokenScopes;
+    }
+
+    public void setRequestTokenScopes(List requestTokenScopes) {
+        this.requestTokenScopes = requestTokenScopes;
+    }
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;

@@ -450,7 +450,7 @@ public class JWTValidator {
     }
 
 
-    public Pair<AuthenticationContext, List<String>> authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
+    public AuthenticationContext authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
                                                                                         String apiVersion)
             throws APISecurityException {
 
@@ -467,7 +467,7 @@ public class JWTValidator {
                         apiVersion, tokenSignature);
                 AuthenticationContext authenticationContext = generateAuthenticationContextForWS(jti, jwtValidationInfo,
                         apiKeyValidationInfoDTO, endUserToken, apiVersion);
-                return Pair.of(authenticationContext, jwtValidationInfo.getScopes());
+                return authenticationContext;
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
                 log.debug(message);

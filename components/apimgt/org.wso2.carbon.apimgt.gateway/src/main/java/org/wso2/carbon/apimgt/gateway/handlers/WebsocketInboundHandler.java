@@ -113,7 +113,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private API api;
     private String electedRoute;
     private AuthenticationContext authContext;
-    private List<String> tokenScopes = new ArrayList<>();
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
     private GraphQLSchema schema = null;
@@ -329,13 +328,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
-                    AuthenticationContext authenticationContext = null;
+                    AuthenticationContext authenticationContext;
                     JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
                     if (APIConstants.GRAPHQL_API.equals(electedAPI.getApiType())) {
-                        Pair<AuthenticationContext, List<String>> authResponse = jwtValidator.
+                        authenticationContext = jwtValidator.
                                 authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
-                        authenticationContext = authResponse.getLeft();
-                        tokenScopes = authResponse.getRight();
                     } else {
                         authenticationContext = jwtValidator.
                                 authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
