@@ -163,17 +163,25 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      * @throws NotifierException if error occurs when renaming applications on the Solace broker
      */
     public void renameSolaceApplication(ApplicationEvent event) throws NotifierException {
-        try {
 
-            Application application = apiMgtDAO.getApplicationByUUID(event.getUuid());
-            Set<SubscribedAPI> subscriptions = application.getSubscribedAPIs();
+        // get list of subscribed APIs in the application
+        Subscriber subscriber = new Subscriber(event.getSubscriber());
+        APIProvider apiProvider;
+
+        try {
+            apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+                    getThreadLocalCarbonContext().getUsername());
+            Application application = apiProvider.getApplicationByUUID(event.getUuid());
+            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, event.getApplicationName(),
+                    event.getGroupId());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
             boolean isContainsSolaceApis = false;
             String organizationNameOfSolaceDeployment = null;
             labelOne:
             //Check whether the application needs to be updated has a Solace API subscription
             for (SubscribedAPI api : subscriptions) {
-                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.getUUID());
+                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiProvider.
+                        getLightweightAPI(api.getApiId()).getUuid());
                 for (APIRevisionDeployment deployment : deployments) {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
                         if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.

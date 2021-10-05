@@ -437,15 +437,17 @@ public class SolaceAdminApis {
      * @param organization name of the Organization
      * @param application  Application object to be renamed
      * @param consumerKey  Consumer key to be used when patching
+     * @param consumerSecret Consumer secret to be used when patching
      * @return HttpResponse of the PATCH call
      */
-    public HttpResponse patchClientIdForApplication(String organization, Application application, String consumerKey) {
+    public HttpResponse patchClientIdForApplication(String organization, Application application, String consumerKey,
+                                                    String consumerSecret) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey);
+        org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey, consumerSecret);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
@@ -762,16 +764,18 @@ public class SolaceAdminApis {
      *
      * @param application Application object to be renamed
      * @param consumerKey Consumer key to be used when patching
+     * @param consumerSecret Consumer secret to be used when patching
      * @return org.json.JSON Object of request body
      */
-    private org.json.JSONObject buildRequestBodyForClientIdPatch(Application application, String consumerKey) {
+    private org.json.JSONObject buildRequestBodyForClientIdPatch(Application application, String consumerKey,
+                                                                 String consumerSecret) {
         org.json.JSONObject requestBody = new org.json.JSONObject();
         org.json.JSONObject credentialsBody = new org.json.JSONObject();
         credentialsBody.put("expiresAt", -1);
         credentialsBody.put("issuedAt", 0);
         org.json.JSONObject credentialsSecret = new org.json.JSONObject();
         credentialsSecret.put("consumerKey", consumerKey);
-        credentialsSecret.put("consumerSecret", application.getName() + "-application-secret");
+        credentialsSecret.put("consumerSecret", consumerSecret);
         credentialsBody.put("secret", credentialsSecret);
         requestBody.put("credentials", credentialsBody);
         return requestBody;

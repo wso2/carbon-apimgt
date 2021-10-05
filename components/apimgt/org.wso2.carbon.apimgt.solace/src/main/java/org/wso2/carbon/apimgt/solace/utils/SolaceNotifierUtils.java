@@ -150,18 +150,19 @@ public class SolaceNotifierUtils {
     /**
      * Get and patch client id for Solace application
      *
-     * @param organization Name of the Organization
-     * @param application  Solace application
-     * @param consumerKey  Consumer key to be used when patching
+     * @param organization   Name of the Organization
+     * @param application    Solace application
+     * @param consumerKey    Consumer key to be used when patching
+     * @param consumerSecret Consumer secret to be used when patching
      * @throws APIManagementException If the Solace env configuration if not provided properly
      */
-    public static void patchSolaceApplicationClientId(String organization, Application application, String consumerKey)
-            throws APIManagementException {
+    public static void patchSolaceApplicationClientId(String organization, Application application, String consumerKey,
+                                                      String consumerSecret) throws APIManagementException {
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-        log.info("Identified as Solace Application. Patching ClientID in solace application.....");
-        HttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application, consumerKey);
+        log.info("Identified as Solace Application. Patching CliendID and Secret in solace application.....");
+        HttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application, consumerKey, consumerSecret);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            log.info("CliendID patched successfully for Solace application");
+            log.info("CliendID and Secret patched successfully for Solace application");
         } else {
             log.error("Error while patching clientID for Solace application");
         }

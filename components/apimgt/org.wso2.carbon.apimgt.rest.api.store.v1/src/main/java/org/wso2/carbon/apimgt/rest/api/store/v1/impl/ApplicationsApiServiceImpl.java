@@ -483,13 +483,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         apiConsumer.updateApplication(application);
 
-//        ApplicationDTO newApp = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-//        if (newApp.isContainsSolaceApis()) {
-//            if (!oldApplication.getName().equalsIgnoreCase(application.getName())) {
-//                SolaceNotifierUtils.renameSolaceApplication(newApp.getSolaceOrganization(), application);
-//            }
-//        }
-
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
     }
@@ -755,10 +748,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
                             jsonParams, keyManagerName, organization, false);
-//                    if (ApplicationMappingUtil.containsSolaceApis(application)) {
-//                        ApplicationDTO appDTO = ApplicationMappingUtil.fromApplicationToDTO(apiConsumer.getApplicationByUUID(applicationId));
-//                        SolaceNotifierUtils.patchSolaceApplicationClientId(appDTO.getSolaceOrganization(), application, keyDetails.get("consumerKey").toString());
-//                    }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
