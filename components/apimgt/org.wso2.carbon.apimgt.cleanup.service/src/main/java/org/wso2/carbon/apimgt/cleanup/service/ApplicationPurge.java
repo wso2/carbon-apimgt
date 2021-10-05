@@ -23,10 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,8 +37,8 @@ import java.util.Map;
         service = OrganizationPurge.class
 )
 public class ApplicationPurge implements OrganizationPurge {
-    protected OrganizationPurgeDAO organizationPurgeDAO;
     private static final Log log = LogFactory.getLog(ApplicationPurge.class);
+    protected OrganizationPurgeDAO organizationPurgeDAO;
     LinkedHashMap<String, String> applicationPurgeTaskMap = new LinkedHashMap<>();
 
     private void initTaskList() {
@@ -113,7 +111,6 @@ public class ApplicationPurge implements OrganizationPurge {
                         applicationPurgeTaskMap.put(task.getKey(), errorMessage);
                         break;
                     }
-
                 }
             }
             if (!isApplicationOrganizationExist) {
