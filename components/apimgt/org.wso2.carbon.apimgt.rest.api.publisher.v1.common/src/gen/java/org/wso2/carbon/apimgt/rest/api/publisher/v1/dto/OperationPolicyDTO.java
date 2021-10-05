@@ -32,7 +32,8 @@ public class OperationPolicyDTO   {
         REWRITE_HTTP_METHOD("REWRITE_HTTP_METHOD"),
         REWRITE_RESOURCE_PATH("REWRITE_RESOURCE_PATH"),
         ADD_QUERY_PARAM("ADD_QUERY_PARAM"),
-        REMOVE_QUERY_PARAM("REMOVE_QUERY_PARAM");
+        REMOVE_QUERY_PARAM("REMOVE_QUERY_PARAM"),
+        MOCK_RESPONSE("MOCK_RESPONSE");
         private String value;
 
         PolicyTypeEnum (String v) {
