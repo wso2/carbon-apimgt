@@ -186,7 +186,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "Authorization Header")
+  @ApiModelProperty(example = "authorization", value = "Authorization Header")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;

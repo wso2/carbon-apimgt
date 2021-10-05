@@ -4630,7 +4630,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribeValid;
     }
 
-    public boolean updateApplicationOwner(String userId, String organizationId, Application application) throws APIManagementException {
+    public boolean updateApplicationOwner(String userId, String organization, Application application) throws APIManagementException {
         boolean isAppUpdated;
         String consumerKey;
         String oldUserName = application.getSubscriber().getName();
@@ -4655,7 +4655,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             String applicationName = application.getName();
-            if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organizationId)) {
+            if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organization)) {
                 for (APIKey apiKey : application.getKeys()) {
                     KeyManager keyManager =
                             KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());

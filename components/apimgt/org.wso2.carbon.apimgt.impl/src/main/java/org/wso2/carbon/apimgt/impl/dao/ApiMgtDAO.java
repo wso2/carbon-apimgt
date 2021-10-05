@@ -3894,7 +3894,7 @@ public class ApiMgtDAO {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public boolean isApplicationOwnedBySubscriber(String appName, String username, String organizationId) throws APIManagementException {
+    public boolean isApplicationOwnedBySubscriber(String appName, String username, String organization) throws APIManagementException {
 
         if (username == null) {
             return false;
@@ -3916,7 +3916,7 @@ public class ApiMgtDAO {
             }
             preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setString(1, appName);
-            preparedStatement.setString(2, organizationId);
+            preparedStatement.setString(2, organization);
             preparedStatement.setString(3, subscriber.getName());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
