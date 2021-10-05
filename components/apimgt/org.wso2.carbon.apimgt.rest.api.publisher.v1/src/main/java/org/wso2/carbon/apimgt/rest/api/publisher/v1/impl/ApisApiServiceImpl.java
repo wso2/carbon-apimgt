@@ -3365,7 +3365,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
                                            MessageContext messageContext) throws APIManagementException {
-        Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
+        Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail, false);
 
         WSDLValidationResponseDTO validationResponseDTO =
                 (WSDLValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
@@ -3379,11 +3379,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param url WSDL url
      * @param fileInputStream file data stream
      * @param fileDetail file details
+     * @param isServiceAPI is service api condition
      * @return the validation response DTO (for REST API) and the intermediate model as a Map
      * @throws APIManagementException if error occurred during validation of the WSDL
      */
-    private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
-        handleInvalidParams(fileInputStream, fileDetail, url, null, false);
+    private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail, Boolean isServiceAPI)
+            throws APIManagementException {
+        handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
 
@@ -3394,7 +3396,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (MalformedURLException e) {
                 RestApiUtil.handleBadRequest("Invalid/Malformed URL : " + url, log);
             }
-        } else if (fileInputStream != null) {
+        } else if (fileInputStream != null && !isServiceAPI) {
             String filename = fileDetail.getContentDisposition().getFilename();
             try {
                 if (filename.endsWith(".zip")) {
@@ -3406,6 +3408,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             } catch (APIManagementException e) {
                 String errorMessage = "Internal error while validating the WSDL from file:" + filename;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } else if (fileInputStream != null) {
+            try {
+                validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
+            } catch (APIManagementException e) {
+                String errorMessage = "Internal error while validating the WSDL definition input stream";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -3463,7 +3472,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API createdApi = null;
             if (isSoapAPI) {
                 createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
-                        apiToAdd, organization);
+                        apiToAdd, organization, null);
             } else if (isSoapToRestConvertedAPI) {
                 String wsdlArchiveExtractedPath = null;
                 if (validationResponse.getWsdlArchiveInfo() != null) {
@@ -3495,7 +3504,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private WSDLValidationResponse validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
             throws APIManagementException {
-        Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
+        Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail, false);
         WSDLValidationResponse validationResponse =
                 (WSDLValidationResponse)validationResponseMap.get(RestApiConstants.RETURN_MODEL);
 
@@ -3530,10 +3539,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param url URL of the WSDL
      * @param apiToAdd API object to be added to the system (which is not added yet)
      * @param organization Organization
+     * @param service service
      * @return API added api
      */
     private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd,
-                              String organization) {
+                              String organization, ServiceEntry service) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -3547,6 +3557,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 PublisherCommonUtils
                         .addWsdl(fileDetail.getContentType().toString(), fileInputStream, apiToAdd, apiProvider,
                                 organization);
+            } else if (service != null && fileInputStream == null) {
+                RestApiUtil.handleBadRequest("Error while importing WSDL to create a SOAP API", log);
+            } else if (service != null) {
+                PublisherCommonUtils.addWsdl(RestApiConstants.APPLICATION_OCTET_STREAM,
+                        fileInputStream, apiToAdd, apiProvider, organization);
             }
 
             //add the generated swagger definition to SOAP
@@ -4810,6 +4825,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 createdApiDTO = importAsyncAPISpecification(service.getEndpointDef(), null, apiDto, null, service,
                         organization);
+            } else if (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
+                apiDto.setProvider(RestApiCommonUtil.getLoggedInUsername());
+                apiDto.setType(APIDTO.TypeEnum.fromValue("SOAP"));
+                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto,
+                        RestApiCommonUtil.getLoggedInUserProvider(), username, organization);
+                apiToAdd.setServiceInfo("key", service.getKey());
+                apiToAdd.setServiceInfo("md5", service.getMd5());
+                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
+                        .getServiceUrl(), null));
+                API api = importSOAPAPI(service.getEndpointDef(), null, null,
+                        apiToAdd, organization, service);
+                createdApiDTO = APIMappingUtil.fromAPItoDTO(api);
             }
             if (createdApiDTO != null) {
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -4867,22 +4894,30 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 validationResponseMap = validateAsyncAPISpecification(null, service.getEndpointDef(),
                         null, true, true);
-            } else {
+            } else if (!ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
                         "API using the service type " + service.getDefinitionType(), log);
             }
-            APIDefinitionValidationResponse validationResponse =
-                    (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-            if (!validationResponse.isValid()) {
-                RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+            APIDefinitionValidationResponse validationAPIResponse = null;
+            if (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
+                PublisherCommonUtils.addWsdl(RestApiConstants.APPLICATION_OCTET_STREAM,
+                        service.getEndpointDef(), api, apiProvider, organization);
+            } else {
+                validationAPIResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+                if (!validationAPIResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationAPIResponse.getErrorItems(), log);
+                }
             }
-            String protocol = validationResponse.getProtocol();
+            String protocol = (validationAPIResponse != null ? validationAPIResponse.getProtocol() : "" );
             if (!APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(protocol)) {
                 api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
                         protocol));
             }
             API updatedApi = apiProvider.updateAPI(api, originalAPI);
-            PublisherCommonUtils.updateAPIDefinition(apiId, validationResponse, service, organization);
+            if (validationAPIResponse != null) {
+                PublisherCommonUtils.updateAPIDefinition(apiId, validationAPIResponse, service, organization);
+            }
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             if (ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION.getErrorCode() == e.getErrorHandler()

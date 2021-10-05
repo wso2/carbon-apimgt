@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.352-SNAPSHOT</version>
+        <version>9.0.360-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,11 +35,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -86,9 +81,6 @@
                             <includedFeatures>
                                 <includedFeatureDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${carbon.apimgt.version}
-                                </includedFeatureDef>
-                                <includedFeatureDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.feature:${carbon.apimgt.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymanager.feature:${carbon.apimgt.version}
