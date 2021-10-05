@@ -52,8 +52,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Application owner changed successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdChangeOwnerPost( @NotNull @ApiParam(value = "",required=true)  @QueryParam("owner") String owner, @ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId,  @ApiParam(value = "")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
-        return delegate.applicationsApplicationIdChangeOwnerPost(owner, applicationId, organizationId, securityContext);
+    public Response applicationsApplicationIdChangeOwnerPost( @NotNull @ApiParam(value = "",required=true)  @QueryParam("owner") String owner, @ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
+        return delegate.applicationsApplicationIdChangeOwnerPost(owner, applicationId, securityContext);
     }
 
     @DELETE

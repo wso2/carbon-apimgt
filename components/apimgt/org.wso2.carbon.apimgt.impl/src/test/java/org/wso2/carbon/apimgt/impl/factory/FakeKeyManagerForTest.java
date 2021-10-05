@@ -47,7 +47,7 @@ public class FakeKeyManagerForTest implements KeyManager {
         return null;
     }
 
-    @Override public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest oAuthAppRequest, String owner, String organizationId)
+    @Override public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest oAuthAppRequest, String owner)
             throws APIManagementException {
         return null;
     }

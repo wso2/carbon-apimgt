@@ -56,14 +56,15 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
 
     @Override
-    public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId,  String organizationId,
+    public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId,
                                                              MessageContext messageContext) {
 
         APIConsumer apiConsumer = null;
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(owner);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organizationId, application);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
             if (applicationUpdated) {
                 return Response.ok().build();
             } else {
