@@ -3700,19 +3700,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      */
     private String getUpdatedGroupIds(String existingGroupIds, String updatedGroupIds) {
-        if (updatedGroupIds == null || updatedGroupIds.isEmpty()) {
+        if (StringUtils.isEmpty(updatedGroupIds)) {
             return updatedGroupIds;
         }
-
         Set<String> existingGroupIdSet = new HashSet<>();
         if (existingGroupIds != null && !existingGroupIds.isEmpty()) {
             existingGroupIdSet.addAll(Arrays.asList(existingGroupIds.split(",")));
         }
         Set<String> updatedGroupIdSet = new HashSet<>();
         updatedGroupIdSet.addAll(Arrays.asList(updatedGroupIds.split(",")));
-
         updatedGroupIdSet.removeAll(existingGroupIdSet);
-
         updatedGroupIds = String.join(",", updatedGroupIdSet);
         return updatedGroupIds;
     }

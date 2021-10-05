@@ -3955,7 +3955,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error while getting application group combination data for application: "+applicationName, e);
+            handleException("Error while getting application group combination data for application: " + applicationName, e);
         }
         return false;
 
