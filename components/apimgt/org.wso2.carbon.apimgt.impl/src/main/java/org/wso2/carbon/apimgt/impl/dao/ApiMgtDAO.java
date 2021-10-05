@@ -1323,8 +1323,8 @@ public class ApiMgtDAO {
                 try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
                     try (ResultSet finalResultSet = statement.executeQuery()) {
                         while (finalResultSet.next()) {
-                            scopeKeyAndTenantIdSet.add(new ImmutablePair<>(finalResultSet.getString(1),
-                                    Integer.parseInt(finalResultSet.getString(2))));
+                            scopeKeyAndTenantIdSet.add(new ImmutablePair<>(finalResultSet.getString("SCOPE_NAME"),
+                                    Integer.parseInt(finalResultSet.getString("TENANT_ID"))));
                         }
                     }
                 }
