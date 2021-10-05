@@ -62,11 +62,9 @@ public class OrganizationPurgeDAO {
      * @return {@link OrganizationPurgeDAO} instance
      */
     public static OrganizationPurgeDAO getInstance() {
-
         if (INSTANCE == null) {
             INSTANCE = new OrganizationPurgeDAO();
         }
-
         return INSTANCE;
     }
 
