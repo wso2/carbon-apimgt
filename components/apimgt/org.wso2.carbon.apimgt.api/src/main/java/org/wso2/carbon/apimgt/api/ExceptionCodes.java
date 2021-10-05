@@ -498,8 +498,15 @@ public enum ExceptionCodes implements ErrorHandler {
             "Unsupported HTTP verb", 400,
             "Unsupported HTTP verb defined in REWRITE_HTTP_METHOD policy"),
 
+    //Resource Endpoints related error codes
+    RESOURCE_ENDPOINT_NAME_NOT_SPECIFIED(900918, "Resource Endpoint name cannot be null or empty", 400,
+            "Resource Endpoint name cannot be null or empty"),
+    RESOURCE_ENDPOINT_NOT_FOUND(900919, "Resource Endpoint not found", 404,
+            "Requested Resource Endpoint with ID  %s could not be found"),
+
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false);
+
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

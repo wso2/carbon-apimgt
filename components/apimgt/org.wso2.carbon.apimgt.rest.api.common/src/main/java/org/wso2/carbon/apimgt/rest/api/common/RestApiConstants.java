@@ -155,6 +155,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
     public static final String RESOURCE_PATH_SWAGGER= "/swagger.yaml";
+    public static final String RESOURCE_PATH_RESOURCE_ENDPOINTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/resource-endpoints";
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
     public static final String RESOURCE_PATH_CATEGORY_THUMBNAIL = RESOURCE_PATH_API_CATEGORIES + "/" + APICATEGORYID_PARAM + "/thumbnail";
@@ -247,6 +248,9 @@ public final class RestApiConstants {
 
     public static final String PRODUCT_DOCUMENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_PRODUCT_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    public static final String RESOURCE_ENDPOINTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_RESOURCE_ENDPOINTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";

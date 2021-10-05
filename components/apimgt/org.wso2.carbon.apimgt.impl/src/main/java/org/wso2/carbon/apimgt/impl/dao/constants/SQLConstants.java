@@ -3633,7 +3633,7 @@ public class SQLConstants {
     }
 
     /**
-     * Static class to hold database queries related to AM_TENANT_THEMES table
+     * Static class to hold database queries related to AM_API_OPERATION_POLICY_MAPPING table
      */
     public static class OperationPolicyConstants {
         public static final String ADD_API_OPERATION_POLICY =
@@ -3682,6 +3682,37 @@ public class SQLConstants {
                 "AM_API_URL_MAPPING AUM INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM " +
                 "ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
                 "WHERE AUM.URL_MAPPING_ID = ?";
+    }
+
+    /**
+     * Static class to hold database queries related to Resource Endpoints
+     */
+    public static class ResourceEndpointConstants {
+        public static final String ADD_RESOURCE_ENDPOINT =
+                "INSERT INTO " +
+                "AM_API_RESOURCE_ENDPOINTS " +
+                "(API_ID, UUID, ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG, TENANT_ID) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        public static final String GET_RESOURCE_ENDPOINT_BY_UUID =
+                "SELECT " +
+                "ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG FROM "+
+                "AM_API_RESOURCE_ENDPOINTS " +
+                "WHERE UUID = ? AND TENANT_ID = ?";
+
+        public static final String GET_RESOURCE_ENDPOINTS_OF_API =
+                "SELECT " +
+                "UUID, ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG FROM "+
+                "AM_API_RESOURCE_ENDPOINTS " +
+                "WHERE API_ID = ? AND TENANT_ID = ?";
+
+        public static final String UPDATE_RESOURCE_ENDPOINT =
+                "UPDATE AM_API_RESOURCE_ENDPOINTS " +
+                "SET ENDPOINT_NAME = ?, ENDPOINT_TYPE = ?, URL = ?, SECURITY_CONFIG = ?, ENDPOINT_CONFIG = ? " +
+                "WHERE UUID = ? AND TENANT_ID = ?";
+
+        public static final String DELETE_RESOURCE_ENDPOINT =
+                "DELETE FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND TENANT_ID = ?";
     }
 
     /**
