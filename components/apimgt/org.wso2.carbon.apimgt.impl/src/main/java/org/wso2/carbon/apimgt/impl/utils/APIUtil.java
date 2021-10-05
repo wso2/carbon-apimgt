@@ -10837,7 +10837,7 @@ public final class APIUtil {
         return scopeToKeyMap;
     }
 
-    public static Scope getScopeFromKeyAndTenantId(String scopeKey, Integer tenantId) throws APIManagementException {
+    private static Scope getScopeFromKeyAndTenantId(String scopeKey, int tenantId) throws APIManagementException {
 
         return ScopesDAO.getInstance().getScope(scopeKey, tenantId);
     }
