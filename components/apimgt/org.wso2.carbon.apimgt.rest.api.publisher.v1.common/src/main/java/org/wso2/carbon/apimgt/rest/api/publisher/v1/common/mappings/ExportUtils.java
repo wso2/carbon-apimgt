@@ -888,11 +888,6 @@ public class ExportUtils {
                         CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION,
                                 exportFormat, ImportExportConstants.GRAPHQL_COMPLEXITY, graphQLQueryComplexityInfoDTO);
                     }
-                    if (new GraphQLSchemaDefinition().checkSubscriptionAvailability(schemaContent)) {
-                        String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
-                        CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
-                                exportFormat, asyncApiJson);
-                    }
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {

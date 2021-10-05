@@ -107,10 +107,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     graphqlSchema = graphQLSchemaDefinition
                                             .buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
                                     api.setGraphQLSchema(graphqlSchema);
-                                    APIDefinitionValidationResponse asyncApiDefinition =
-                                            ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(
-                                                    extractedFolderPath);
-                                    api.setAsyncApiDefinition(asyncApiDefinition.getContent());
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
                                             tenantDomain, apidto, extractedFolderPath);
                                 } else if (api.getType() != null &&

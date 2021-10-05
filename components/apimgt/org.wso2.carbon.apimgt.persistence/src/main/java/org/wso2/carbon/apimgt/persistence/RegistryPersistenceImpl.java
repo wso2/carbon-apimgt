@@ -239,8 +239,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
-            }
-            if (api.getAsyncApiDefinition() != null) {
+            } else if (api.getAsyncApiDefinition() != null) {
                 String resourcePath = RegistryPersistenceUtil
                         .getOpenAPIDefinitionFilePath(api.getId().getName(), api.getId().getVersion(),
                                 api.getId().getProviderName());

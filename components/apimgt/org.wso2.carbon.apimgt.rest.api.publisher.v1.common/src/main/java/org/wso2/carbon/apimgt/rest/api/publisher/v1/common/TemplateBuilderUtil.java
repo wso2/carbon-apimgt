@@ -653,17 +653,6 @@ public class TemplateBuilderUtil {
                 template.setUriTemplate("/*");
                 uriTemplates.add(template);
                 api.setUriTemplates(uriTemplates);
-                gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUuid(),
-                        gatewayAPIDTO.getLocalEntriesToBeRemove()));
-                definition = api.getAsyncApiDefinition();
-                GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
-                apiLocalEntry.setName(api.getUuid());
-                apiLocalEntry.setContent("<localEntry key=\"" + api.getUuid() + "\">" +
-                        definition.replaceAll("&(?!amp;)", "&amp;").
-                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                        + "</localEntry>");
-                gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
-                        gatewayAPIDTO.getLocalEntriesToBeAdd()));
                 addGQLWebSocketTopicMappings(api, apidto);
             }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
