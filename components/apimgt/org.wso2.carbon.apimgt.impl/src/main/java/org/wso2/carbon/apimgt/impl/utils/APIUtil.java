@@ -25,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -80,6 +81,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.xerces.util.SecurityManager;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -149,6 +152,7 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -369,6 +373,12 @@ public final class APIUtil {
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
+    private static Schema tenantConfigJsonSchema;
+
+    private APIUtil() {
+
+    }
+
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
         tenantIdleTimeMillis =
@@ -376,6 +386,12 @@ public final class APIUtil {
                         org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_IDLE_TIME,
                         String.valueOf(DEFAULT_TENANT_IDLE_MINS)))
                         * 60 * 1000;
+        try (InputStream inputStream = APIAdminImpl.class.getResourceAsStream("/tenant/tenant-config-schema.json")) {
+            org.json.JSONObject tenantConfigSchema = new org.json.JSONObject(IOUtils.toString(inputStream));
+            tenantConfigJsonSchema = SchemaLoader.load(tenantConfigSchema);
+        } catch (IOException e) {
+            log.error("Error occurred while reading tenant-config-schema.json", e);
+        }
     }
 
     private static String hostAddress = null;
@@ -3730,15 +3746,23 @@ public final class APIUtil {
     public static void loadAndSyncTenantConf(String organization) throws APIManagementException {
 
         try {
-            byte[] localTenantConfFileData = getLocalTenantConfFileData();
-            String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonParser jsonParser = new JsonParser();
-            JsonElement jsonElement = jsonParser.parse(tenantConfDataStr);
+            JsonElement jsonElement = getFileBaseTenantConfig();
             ServiceReferenceHolder.getInstance().getApimConfigService().addTenantConfig(organization,
                     gson.toJson(jsonElement));
-        } catch (APIManagementException | IOException e) {
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error while saving tenant conf to the registry of tenant " + organization, e);
+        }
+    }
+
+    private static JsonElement getFileBaseTenantConfig() throws APIManagementException{
+        try {
+            byte[] localTenantConfFileData = getLocalTenantConfFileData();
+            String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
+            JsonParser jsonParser = new JsonParser();
+            return jsonParser.parse(tenantConfDataStr);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while retrieving file base tenant-config" , e);
         }
     }
 
@@ -8013,7 +8037,7 @@ public final class APIUtil {
         return false;
     }
 
-    public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
+    public static String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
 
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
@@ -10821,19 +10845,6 @@ public final class APIUtil {
         return claimMappingDtoList;
     }
 
-    /**
-     * This method is used to get deployment clusters' configurations from the api manager configurations
-     *
-     * @return The configuration read from api-manager.xml or else null
-     */
-    public static JSONArray getClusterInfoFromAPIMConfig() {
-
-        //Read the configuration from api-manager.xml
-        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        return apimConfig.getContainerMgtAttributes();
-    }
-
 
     public static String getX509certificateContent(String certificate) {
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
@@ -11231,7 +11242,8 @@ public final class APIUtil {
      * @return validity of given URLs
      */
     public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
-        long validatorOptions = UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
+        long validatorOptions =
+                UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
         RegexValidator authorityValidator = new RegexValidator(".*");
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
@@ -11284,5 +11296,43 @@ public final class APIUtil {
             list = Arrays.asList(defaultType);
         }
         return list.contains(fileType.toLowerCase());
+    }
+    public static void validateRestAPIScopes(String tenantConfig) throws APIManagementException {
+        JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
+        Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
+        Set<String> uploadedTenantConfigScopes = getRestAPIScopes((JsonObject) new JsonParser().parse(tenantConfig));
+        fileBaseScopes.removeAll(uploadedTenantConfigScopes);
+        if (fileBaseScopes.size() > 0) {
+            throw new APIManagementException("Insufficient scopes available in tenant-config", ExceptionCodes.INVALID_TENANT_CONFIG);
+        }
+    }
+
+    private static Set<String> getRestAPIScopes(JsonObject tenantConfig) {
+
+        Set<String> scopes = new HashSet<>();
+        if (tenantConfig.has(APIConstants.REST_API_SCOPES_CONFIG)) {
+            JsonObject restApiScopes = (JsonObject) tenantConfig.get(APIConstants.REST_API_SCOPES_CONFIG);
+            if (restApiScopes.has(APIConstants.REST_API_SCOPE)
+                    && restApiScopes.get(APIConstants.REST_API_SCOPE) instanceof JsonArray) {
+                JsonArray restAPIScopes = (JsonArray) restApiScopes.get(APIConstants.REST_API_SCOPE);
+                if (restAPIScopes != null) {
+                    for (JsonElement scopeElement : restAPIScopes) {
+                        if (scopeElement instanceof JsonObject) {
+                            if (((JsonObject) scopeElement).has(APIConstants.REST_API_SCOPE_NAME)
+                                    && ((JsonObject) scopeElement).get(APIConstants.REST_API_SCOPE_NAME)
+                                    instanceof JsonPrimitive) {
+                                JsonElement name = ((JsonObject) scopeElement).get(APIConstants.REST_API_SCOPE_NAME);
+                                scopes.add(name.toString());
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return scopes;
+    }
+    public static Schema retrieveTenantConfigJsonSchema(){
+        return tenantConfigJsonSchema;
     }
 }

@@ -17,11 +17,11 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvocationType;
@@ -30,16 +30,17 @@ import com.amazonaws.services.lambda.model.InvokeResult;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
-import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import java.io.ByteArrayInputStream;
 import java.util.Set;
 import java.util.TreeMap;
@@ -161,7 +162,7 @@ public class AWSLambdaMediator extends AbstractMediator {
                 if (log.isDebugEnabled()) {
                     log.debug("Using temporary credentials supplied by the IAM role attached to the EC2 instance");
                 }
-                credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+                credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance();
             } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Using user given stored credentials");

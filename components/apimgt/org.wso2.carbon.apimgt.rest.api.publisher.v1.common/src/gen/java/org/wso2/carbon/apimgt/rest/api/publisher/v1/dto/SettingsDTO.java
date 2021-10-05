@@ -32,6 +32,7 @@ public class SettingsDTO   {
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
+    private String authorizationHeader = null;
 
   /**
    * The Developer Portal URL
@@ -176,6 +177,24 @@ public class SettingsDTO   {
     this.crossTenantSubscriptionEnabled = crossTenantSubscriptionEnabled;
   }
 
+  /**
+   * Authorization Header
+   **/
+  public SettingsDTO authorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Authorization Header")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -193,12 +212,13 @@ public class SettingsDTO   {
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
-        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled);
+        Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
+        Objects.equals(authorizationHeader, settings.authorizationHeader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, authorizationHeader);
   }
 
   @Override
@@ -214,6 +234,7 @@ public class SettingsDTO   {
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
+    sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("}");
     return sb.toString();
   }

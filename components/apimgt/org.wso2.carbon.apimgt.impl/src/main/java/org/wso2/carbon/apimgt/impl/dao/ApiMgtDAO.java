@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -8856,6 +8857,25 @@ public class ApiMgtDAO {
 
     }
 
+    public boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException {
+
+        final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE EXTERNAL_REFERENCE_ID  = ? AND ORGANIZATION = ?";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            preparedStatement.setString(1, resourceId);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while checking key manager for " + resourceId + " in organization " + organization, e);
+        }
+        return false;
+    }
+
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
             throws APIManagementException {
 
@@ -17483,6 +17503,35 @@ public class ApiMgtDAO {
             preparedStatement.setString(3, apiUUID);
             preparedStatement.executeUpdate();
         }
+    }
+
+    public ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_APPLICATION_INFO_BY_CK;
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, consumerKey);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                ApplicationInfo applicationInfo = new ApplicationInfo();
+                applicationInfo.setName(rs.getString("NAME"));
+                applicationInfo.setUuid(rs.getString("UUID"));
+                applicationInfo.setOrganizationId(rs.getString("ORGANIZATION"));
+                applicationInfo.setOwner(rs.getString("OWNER"));
+                return applicationInfo;
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining organisation of the application for client id " + consumerKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return null;
     }
 
     private class SubscriptionInfo {

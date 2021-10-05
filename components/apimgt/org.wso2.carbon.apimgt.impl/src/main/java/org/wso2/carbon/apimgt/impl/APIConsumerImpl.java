@@ -2741,7 +2741,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
-        if (APIConstants.PUBLISHED.equals(state)) {
+        if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 

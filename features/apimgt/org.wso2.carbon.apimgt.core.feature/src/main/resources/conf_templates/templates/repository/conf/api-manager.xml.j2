@@ -1359,27 +1359,6 @@
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
-     <ContainerMgt>
-         <DeploymentEnvironments>
-             {% for key,value in ContainerMgtConfig.items() %}
-                 <Property name="{{key}}">{{value}}</Property>
-             {% endfor %}
-         </DeploymentEnvironments>
-
-         {% for cluster in ContainerMgtClusterConfig%}
-         <ContainerMgtInfo>
-             <Type>{{cluster.type}}</Type>
-             <ClassName>{{cluster.class}}</ClassName>
-             <ClusterName>{{cluster.clusterName}}</ClusterName>
-             <DisplayName>{{cluster.displayName}}</DisplayName>
-             <Properties>
-                 {% for key,value in cluster.properties.items() %}
-                     <Property name="{{key}}">{{value}}</Property>
-                 {% endfor %}
-             </Properties>
-         </ContainerMgtInfo>
-         {% endfor %}
-     </ContainerMgt>
     <ProxyConfig>
         <Enable>{{apim.proxy_config.enable}}</Enable>
         <Host>{{apim.proxy_config.host}}</Host>

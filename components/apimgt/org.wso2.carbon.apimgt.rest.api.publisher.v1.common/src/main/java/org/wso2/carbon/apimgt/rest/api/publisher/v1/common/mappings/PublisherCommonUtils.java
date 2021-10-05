@@ -342,7 +342,7 @@ public class PublisherCommonUtils {
      * @throws CryptoException        if an error occurs while encrypting and base64 encode
      * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
-    private static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
+    public static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
             String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto)
             throws CryptoException, APIManagementException {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
@@ -755,8 +755,7 @@ public class PublisherCommonUtils {
         }
 
         // validate sandbox and production endpoints
-        if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_URL_VALIDATION")) &&
-                !PublisherCommonUtils.validateEndpoints(apiDto)) {
+        if (!PublisherCommonUtils.validateEndpoints(apiDto)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
