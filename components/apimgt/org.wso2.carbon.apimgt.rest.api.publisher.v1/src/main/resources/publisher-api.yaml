@@ -8150,6 +8150,194 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
+  /apis/{apiId}/resource-endpoints:
+    post:
+      tags:
+        - Resource Endpoints
+      summary: Add Resource Endpoint
+      operationId: addResourceEndpoint
+      description: |
+        This operation can be used to add resource endpoints for an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      requestBody:
+        description: Resource Endpoint Object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceEndpoint'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with resource endpoint object
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will d be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+
+    get:
+      tags:
+        - Resource Endpoints
+      summary: Get All Available Resource Endpoints of an API
+      description: |
+        This operation can be used to get all the available resource endpoints of an API.
+      operationId: getResourceEndpoints
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource Endpoints list is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceEndpointList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+
+  /apis/{apiId}/resource-endpoints/{endpointId}:
+    get:
+      tags:
+        - Resource Endpoint
+      summary: Get Resource Endpoint
+      description: |
+        This operation can be used to get a resource endpoint by id.
+      operationId: getResourceEndpoint
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource Endpoints is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceEndpoint'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+
+    put:
+      tags:
+        - Resource Endpoint
+      summary: Update Resource Endpoint
+      description: |
+        This operation can be used to update a resource endpoint.
+      operationId: updateResourceEndpoint
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      requestBody:
+        description: Resource Endpoint object with updated details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceEndpoint'
+      responses:
+        200:
+          description: |
+            OK.
+            Updated Resource Endpoints is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceEndpoint'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+
+    delete:
+      tags:
+        - Resource Endpoint
+      summary: Delete Resource Endpoint
+      description: |
+        This operation can be used to delete a resource endpoint.
+      operationId: deleteResourceEndpoint
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      responses:
+        200:
+          description: |
+            OK.
+            Updated Resource Endpoints is returned.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+
 components:
   schemas:
     Comment:
@@ -11610,6 +11798,44 @@ components:
         endpointURI:
           type: string
           example: default
+    ResourceEndpoint:
+      title: Resource Endpoints
+      required:
+        - name
+        - endpointType
+        - url
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        endpointType:
+          type: string
+        url:
+          type: string
+        security:
+          type: object
+          additionalProperties:
+            type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ResourceEndpointList:
+      title: Resource Endpoints List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Resource Endpoints returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceEndpoint'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -12154,6 +12380,7 @@ components:
       in: query
       schema:
         type: string
+
   requestBodies:
     threatProtectionPolicy:
       description: |

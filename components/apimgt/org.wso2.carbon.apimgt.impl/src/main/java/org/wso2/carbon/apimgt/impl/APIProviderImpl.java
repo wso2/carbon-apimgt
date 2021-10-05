@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -9456,7 +9457,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
     }
 
-<<<<<<< HEAD
     @Override
     public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
             EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
@@ -9482,14 +9482,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (env == null) {
             env = apiMgtDAO.getEnvironment(organization, uuid);
             if (env == null) {
-                String errorMessage =
-                        String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
+                String errorMessage = String
+                        .format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
                 throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
                         .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
             }
         }
         return env;
-=======
+    }
+
     /*@Override
     public List<APIOperationPolicy> updateAPIOperationPolicies(String apiId,
             List<APIOperationPolicy> operationPolicyList) throws APIManagementException {
@@ -9533,6 +9534,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
->>>>>>> Add support for operation policies in API create and update flows
+    }
+
+    @Override
+    public String addResourceEndpoint(String uuid, ResourceEndpoint endpoint, String organization)
+            throws APIManagementException {
+        return apiMgtDAO.addResourceEndpoint(uuid, endpoint, organization);
+    }
+
+    @Override
+    public ResourceEndpoint getResourceEndpointByUUID(String uuid, String organization)
+            throws APIManagementException {
+        ResourceEndpoint resourceEndpoint = apiMgtDAO.getResourceEndpointByUUID(uuid, organization);
+        if (resourceEndpoint == null) {
+            throw new APIMgtResourceNotFoundException("Resource Endpoint not found for specified endpoint ID: " + uuid,
+                    ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, uuid));
+        }
+        return resourceEndpoint;
+    }
+
+    @Override
+    public List<ResourceEndpoint> getResourceEndpoints(String uuid, String organization)
+            throws APIManagementException {
+        return apiMgtDAO.getResourceEndpoints(uuid, organization);
+    }
+
+    @Override
+    public void updateResourceEndpoint(ResourceEndpoint endpoint, String organization)
+            throws APIManagementException {
+        apiMgtDAO.updateResourceEndpoint(endpoint, organization);
+    }
+
+    @Override
+    public void deleteResourceEndpoint(String uuid, String organization) throws APIManagementException {
+        apiMgtDAO.deleteResourceEndpoint(uuid, organization);
     }
 }

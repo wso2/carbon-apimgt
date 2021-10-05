@@ -37,6 +37,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListD
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourceEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourceEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -200,6 +202,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PostRequestBodyDTO postRequestBodyDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("replyTo") String replyTo) throws APIManagementException{
         return delegate.addCommentToAPI(apiId, postRequestBodyDTO, replyTo, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/resource-endpoints")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add Resource Endpoint", notes = "This operation can be used to add resource endpoints for an API. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Resource Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with resource endpoint object ", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response addResourceEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Resource Endpoint Object that needs to be added" ,required=true) ResourceEndpointDTO resourceEndpointDTO,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.addResourceEndpoint(apiId, resourceEndpointDTO, ifNoneMatch, securityContext);
     }
 
     @GET
@@ -496,6 +516,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response deleteComment(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.deleteComment(commentId, apiId, ifMatch, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/resource-endpoints/{endpointId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Resource Endpoint", notes = "This operation can be used to delete a resource endpoint. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Resource Endpoint",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Updated Resource Endpoints is returned. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response deleteResourceEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+        return delegate.deleteResourceEndpoint(apiId, endpointId, securityContext);
     }
 
     @POST
@@ -1266,6 +1304,39 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/resource-endpoints/{endpointId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Resource Endpoint", notes = "This operation can be used to get a resource endpoint by id. ", response = ResourceEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Resource Endpoint",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Resource Endpoints is returned. ", response = ResourceEndpointDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getResourceEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+        return delegate.getResourceEndpoint(apiId, endpointId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/resource-endpoints")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get All Available Resource Endpoints of an API", notes = "This operation can be used to get all the available resource endpoints of an API. ", response = ResourceEndpointListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Resource Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Resource Endpoints list is returned. ", response = ResourceEndpointListDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getResourceEndpoints(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+        return delegate.getResourceEndpoints(apiId, limit, offset, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/wsdl-info")
     
     @Produces({ "application/json" })
@@ -1685,6 +1756,26 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response updateGraphQLPolicyComplexityOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added" ) GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) throws APIManagementException{
         return delegate.updateGraphQLPolicyComplexityOfAPI(apiId, graphQLQueryComplexityInfoDTO, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/resource-endpoints/{endpointId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update Resource Endpoint", notes = "This operation can be used to update a resource endpoint. ", response = ResourceEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Resource Endpoint",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Updated Resource Endpoints is returned. ", response = ResourceEndpointDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response updateResourceEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId, @ApiParam(value = "Resource Endpoint object with updated details" ) ResourceEndpointDTO resourceEndpointDTO) throws APIManagementException{
+        return delegate.updateResourceEndpoint(apiId, endpointId, resourceEndpointDTO, securityContext);
     }
 
     @PUT

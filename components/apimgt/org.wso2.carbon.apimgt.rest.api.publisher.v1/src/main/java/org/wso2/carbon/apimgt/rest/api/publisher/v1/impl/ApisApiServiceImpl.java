@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -4885,6 +4886,91 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response addResourceEndpoint(String apiId, ResourceEndpointDTO resourceEndpointDTO,
+            String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        //validate if api exists
+        APIInfo apiInfo = validateAPIExistence(apiId);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
+        String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
+        ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+        ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(createdEndpoint);
+
+        return Response.ok().entity(createdEndpointDTO).build();
+    }
+
+    @Override
+    public Response updateResourceEndpoint(String apiId, String endpointId,
+            ResourceEndpointDTO resourceEndpointDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        ResourceEndpoint resourceEndpoint = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
+        if (StringUtils.isEmpty(resourceEndpoint.getName())) {
+            throw new APIManagementException("Resource Endpoint name cannot be null or empty",
+                    ExceptionCodes.RESOURCE_ENDPOINT_NAME_NOT_SPECIFIED);
+        }
+
+        //todo: check whether resource endpoint exists by ID
+        resourceEndpoint.setId(endpointId);
+        apiProvider.updateResourceEndpoint(resourceEndpoint, organization);
+
+        //get updated resource endpoint
+        ResourceEndpoint updatedResourceEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+        ResourceEndpointDTO updatedEndpointDTO = ResourceEndpointMappingUtil
+                .fromResourceEndpointToDTO(updatedResourceEndpoint);
+        return Response.ok().entity(updatedEndpointDTO).build();
+    }
+
+    @Override
+    public Response deleteResourceEndpoint(String apiId, String endpointId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        //todo: check whether the endpoint is used in a policy
+        apiProvider.deleteResourceEndpoint(endpointId, organization);
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response getResourceEndpoints(String apiId, Integer limit, Integer offset,
+            MessageContext messageContext) throws APIManagementException {
+        validateAPIExistence(apiId);
+        //set default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        List<ResourceEndpoint> resourceEndpoints = apiProvider.getResourceEndpoints(apiId, organization);
+        ResourceEndpointListDTO resourceEndpointListDTO = ResourceEndpointMappingUtil
+                .fromResourceEndpointListToDTO(resourceEndpoints, offset, limit);
+        ResourceEndpointMappingUtil
+                .setPaginationParams(resourceEndpointListDTO, apiId, limit, offset, resourceEndpoints.size());
+        return Response.ok().entity(resourceEndpointListDTO).build();
+    }
+
+    @Override
+    public Response getResourceEndpoint(String apiId, String endpointId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        ResourceEndpoint endpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+        ResourceEndpointDTO endpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(endpoint);
+        if (endpoint != null) {
+            return Response.ok().entity(endpointDTO).build();
+        } else {
+            return Response.noContent().build();
+        }
     }
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
