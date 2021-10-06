@@ -11349,4 +11349,14 @@ public final class APIUtil {
     public static Schema retrieveTenantConfigJsonSchema(){
         return tenantConfigJsonSchema;
     }
+
+    /**
+     * Get gateway environments defined in the configuration: api-manager.xml
+     *
+     * @return map of configured gateway environments against the environment name
+     */
+    public static Map<String, Environment> getReadOnlyGatewayEnvironments() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
 }

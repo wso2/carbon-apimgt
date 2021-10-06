@@ -308,6 +308,7 @@ public final class APIConstants {
     public static final String API_VERSION_LABEL = "Version";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_OVERVIEW_TAG = "tags";
     public static final String API_TAG = "Tag";
     public static final String API_STATUS = "STATUS";
@@ -687,6 +688,10 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
+    public static final String API_GATEWAY_PROVIDER = "Provider";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
+
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";

@@ -24,7 +24,9 @@ import org.wso2.carbon.apimgt.api.APIConstants;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represent an Environment.
@@ -49,6 +51,8 @@ public class Environment implements Serializable {
     private String description;
     private boolean isReadOnly;
     private List<VHost> vhosts = new ArrayList<>();
+    private String provider;
+    private Map<String, String> additionalProperties = new HashMap<>();
 
     public boolean isDefault() {
         return isDefault;
@@ -202,6 +206,22 @@ public class Environment implements Serializable {
                     vhost.getHost(), vhost.getWssPort(), "");
             websocketGatewayEndpoint = gwWssEndpoint + "," + gwWsEndpoint;
         }
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     public void setEndpointsAsVhost() throws APIManagementException {
