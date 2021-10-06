@@ -3578,6 +3578,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "cannot contain leading or trailing white spaces");
         }
 
+        String processedIds;
+
+        if (!existingApp.getName().equals(application.getName())) {
+            processedIds = application.getGroupId();
+        } else {
+            processedIds = getUpdatedGroupIds(existingApp.getGroupId(), application.getGroupId());
+        }
+
+        if (application.getGroupId() != null && APIUtil.isApplicationGroupCombinationExist(
+                application.getSubscriber().getName(), application.getName(), processedIds)) {
+            handleResourceAlreadyExistsException(
+                    "A duplicate application already exists by the name - " + application.getName());
+        }
+
         Subscriber subscriber = application.getSubscriber();
 
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(subscriber.getName());
@@ -3676,6 +3690,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
                 existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+    }
+
+    /**
+     * Function to find newly added group Ids
+     * 
+     * @param existingGroupIds existing GroupIds
+     * @param updatedGroupIds updated GroupIds
+     * @return
+     */
+    private String getUpdatedGroupIds(String existingGroupIds, String updatedGroupIds) {
+        if (StringUtils.isEmpty(updatedGroupIds)) {
+            return updatedGroupIds;
+        }
+        Set<String> existingGroupIdSet = new HashSet<>();
+        if (existingGroupIds != null && !existingGroupIds.isEmpty()) {
+            existingGroupIdSet.addAll(Arrays.asList(existingGroupIds.split(",")));
+        }
+        Set<String> updatedGroupIdSet = new HashSet<>();
+        updatedGroupIdSet.addAll(Arrays.asList(updatedGroupIds.split(",")));
+        updatedGroupIdSet.removeAll(existingGroupIdSet);
+        updatedGroupIds = String.join(",", updatedGroupIdSet);
+        return updatedGroupIds;
     }
 
     /**
