@@ -3719,6 +3719,45 @@ components:
         lastUpdatedTime:
           type: string
           example: 2020-10-31T13:57:16.229
+        gatewayVendor:
+          title: Gateway vendor of the API
+          type: string
+          example:
+            wso2
+        asyncTransportProtocols:
+          type: array
+          description: |
+            Supported transports for the aync API (http and/or https).
+          example:
+            - http
+            - https
+          items:
+            type: string
+        solaceEndpointURLs:
+          type: array
+          items:
+            type: object
+            properties:
+              environmentName:
+                type: string
+                example: Default
+              environmentDisplayName:
+                type: string
+                example: Default
+              environmentOrganization:
+                type: string
+                example: Default
+              solaceURLs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    protocol:
+                      type: string
+                      example: Defalt
+                    endpointURL:
+                      type: string
+                      example: Default
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -3819,6 +3858,49 @@ components:
           type: boolean
           readOnly: true
           example: false
+        containsSolaceApis:
+          type: boolean
+          example: false
+        solaceOrganization:
+          type: string
+          example: default
+        solaceDeployedEnvironments:
+          type: array
+          items:
+            type: object
+            properties:
+              environmentName:
+                type: string
+              environmentDisplayName:
+                type: string
+              organizationName:
+                type: string
+              SolaceTopicsObject:
+                type: object
+                properties:
+                  defaultSyntax:
+                    $ref: '#/components/schemas/SolaceTopics'
+                  mqttSyntax:
+                    $ref: '#/components/schemas/SolaceTopics'
+              publishTopics:
+                type: array
+                items:
+                  type: string
+              subscribeTopics:
+                type: array
+                items:
+                  type: string
+              solaceURLs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    protocol:
+                      type: string
+                      example: Defalt
+                    endpointURL:
+                      type: string
+                      example: Default
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
@@ -5284,6 +5366,18 @@ components:
         newPassword:
           type: string
           example: newpassword1234
+    SolaceTopics:
+      title: SolaceTopics
+      type: object
+      properties:
+        publishTopics:
+          type: array
+          items:
+            type: string
+        subscribeTopics:
+          type: array
+          items:
+            type: string
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
