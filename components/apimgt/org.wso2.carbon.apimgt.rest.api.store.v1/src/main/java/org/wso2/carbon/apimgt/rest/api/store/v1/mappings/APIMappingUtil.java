@@ -24,6 +24,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -64,7 +68,12 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -75,9 +84,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -264,6 +271,16 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNamesList);
         dto.setKeyManagers(model.getKeyManagers());
+
+        if (model.getGatewayVendor() != null) {
+            dto.setGatewayVendor(model.getGatewayVendor());
+        } else {
+            dto.setGatewayVendor("wso2");
+        }
+
+        if (model.getAsyncTransportProtocols() != null) {
+            dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
+        }
 
         return dto;
     }
@@ -459,7 +476,85 @@ public class APIMappingUtil {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
         }
+
+        if (APIConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
+            apidto.setSolaceEndpointURLs(setEndpointURLsForSolaceAPI(model, organization));
+        }
         return apidto;
+    }
+
+    private static List<APISolaceEndpointURLsDTO> setEndpointURLsForSolaceAPI(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+        APIDTO apidto = fromAPItoDTO(model.getApi(), tenantDomain);
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
+        List<APISolaceEndpointURLsDTO> solaceEndpointURLsList = new ArrayList<>();
+        for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
+            if (revisionDeployment.isDisplayOnDevportal()) {
+                if (gatewayEnvironments != null) {
+                    // Deployed environment
+                    Environment environment = gatewayEnvironments.get(revisionDeployment.getDeployment());
+                    if (environment != null) {
+                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
+                            APISolaceEndpointURLsDTO dto = new APISolaceEndpointURLsDTO();
+                            dto.setEnvironmentName(environment.getName());
+                            dto.setEnvironmentDisplayName(environment.getDisplayName());
+                            dto.setEnvironmentOrganization(environment.getAdditionalProperties().get(APIConstants.
+                                    SOLACE_ENVIRONMENT_ORGANIZATION));
+                            dto.setSolaceURLs(getSolaceURLs(environment.getAdditionalProperties().get(APIConstants.
+                                    SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName(), apidto.getAsyncTransportProtocols()));
+                            solaceEndpointURLsList.add(dto);
+                        }
+                    }
+                }
+            }
+        }
+        return solaceEndpointURLsList;
+    }
+
+    private static List<APISolaceURLsDTO> getSolaceURLs(String organizationName, String environmentName,
+                                                        List<String> availableProtocols) throws APIManagementException {
+        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
+        Environment solaceEnvironment = null;
+
+        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
+            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+                solaceEnvironment = entry.getValue();
+            }
+        }
+
+        if (solaceEnvironment != null) {
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
+                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
+                    get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+            List<APISolaceURLsDTO> solaceURLsDTOs = new ArrayList<>();
+            HttpResponse response = solaceAdminApis.environmentGET(organizationName, environmentName);
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String responseString = null;
+                try {
+                    responseString = EntityUtils.toString(response.getEntity());
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
+                    for (int i = 0; i < protocols.length(); i++) {
+                        org.json.JSONObject protocolDetails = protocols.getJSONObject(i);
+                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
+                        if (availableProtocols.contains(protocolName)) {
+                            String endpointURI = protocolDetails.getString("uri");
+                            APISolaceURLsDTO apiSolaceURLsDTO = new APISolaceURLsDTO();
+                            apiSolaceURLsDTO.setProtocol(protocolName);
+                            apiSolaceURLsDTO.setEndpointURL(endpointURI);
+                            solaceURLsDTOs.add(apiSolaceURLsDTO);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return solaceURLsDTOs;
+        } else {
+            throw new APIManagementException("Solace Environment configurations are not provided properly");
+        }
+
     }
 
     private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization) throws APIManagementException {
