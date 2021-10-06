@@ -307,6 +307,7 @@ public final class APIConstants {
     public static final String API_PROVIDER = "Provider";
     public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
     public static final String API_GATEWAY_VENDOR = "gatewayVendor";

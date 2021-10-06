@@ -882,4 +882,13 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return AsyncAPI string
+     * @throws APIManagementException
+     */
+    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
 }

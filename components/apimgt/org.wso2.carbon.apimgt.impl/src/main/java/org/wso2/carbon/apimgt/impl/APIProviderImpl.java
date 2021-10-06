@@ -4759,6 +4759,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiContext = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
                 String apiType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+                String gatewayVendor = apiArtifact.getAttribute(APIConstants.API_GATEWAY_VENDOR);
                 String currentStatus = apiArtifact.getLifecycleState();
                 String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier, organization);
                 int apiId = apiMgtDAO.getAPIID(uuid);
@@ -4784,6 +4785,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setApiType(apiType);
                         apiStateWorkflow.setApiVersion(apiVersion);
                         apiStateWorkflow.setApiProvider(providerName);
+                        apiStateWorkflow.setGatewayVendor(gatewayVendor);
                         apiStateWorkflow.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
                         apiStateWorkflow.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
                         apiStateWorkflow.setTenantId(tenantId);

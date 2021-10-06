@@ -1276,4 +1276,30 @@ public class API implements Serializable {
     public boolean isAsync() {
         return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
+
+    /**
+     * Property to indicate the gateway vendor to deploy API
+     */
+    private String gatewayVendor;
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    /**
+     * Property to hold Async API transport protocols
+     */
+    private String asyncTransportProtocols;
+
+    public String getAsyncTransportProtocols() {
+        return asyncTransportProtocols;
+    }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+    }
 }

@@ -620,6 +620,19 @@ public class APIProduct {
         this.organization = organization;
     }
 
+    /**
+     * Property to indicate the gateway vendor to deploy API Product
+     */
+    private String gatewayVendor;
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
     public String getVersionTimestamp() {
 
         return versionTimestamp;
