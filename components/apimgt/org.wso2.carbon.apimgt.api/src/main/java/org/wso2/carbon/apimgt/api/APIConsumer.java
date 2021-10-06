@@ -573,7 +573,7 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean updateApplicationOwner(String newUserId , Application application ) throws APIManagementException;
+    boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
 
 
     /**
@@ -776,17 +776,20 @@ public interface APIConsumer extends APIManager {
     /**
      * Revokes the oldAccessToken generating a new one.
      *
-     * @param oldAccessToken          Token to be revoked
-     * @param clientId                Consumer Key for the Application
-     * @param clientSecret            Consumer Secret for the Application
-     * @param validityTime            Desired Validity time for the token
-     * @param jsonInput               Additional parameters if Authorization server needs any.
-     * @return Details of the newly generated Access Token.
-     * @throws APIManagementException
+     * @param oldAccessToken  Token to be revoked
+     * @param clientId        Consumer Key for the Application
+     * @param clientSecret    Consumer Secret for the Application
+     * @param validityTime    Desired Validity time for the token
+     * @param requestedScopes Requested Scopes
+     * @param jsonInput       Additional parameters if Authorization server needs any.
+     * @param keyManagerName  Configured Key Manager
+     * @param grantType       Grant Type
+     * @return AccessTokenInfo
+     * @throws APIManagementException Error when renewing access token
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] requestedScopes, String jsonInput,String keyManagerName) throws
-            APIManagementException;
+                                     String[] requestedScopes, String jsonInput, String keyManagerName,
+                                     String grantType) throws APIManagementException;
 
     /**
      * Generates a new api key
@@ -966,17 +969,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
-
-    /**
-     * Returns the AsyncAPI definition of the API for the given gateway environment as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @param environmentName API Gateway environment name
-     * @return AsyncAPI definition string
-     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
-     */
-    String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
-            throws APIManagementException;
 
     /**
      * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string

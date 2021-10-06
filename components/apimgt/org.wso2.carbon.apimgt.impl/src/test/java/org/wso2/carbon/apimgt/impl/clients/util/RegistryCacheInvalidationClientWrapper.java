@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl.clients.util;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceStub;
@@ -33,14 +31,4 @@ public class RegistryCacheInvalidationClientWrapper extends RegistryCacheInvalid
         this.cacheStub = cacheStub;
     }
 
-    @Override
-    protected AuthenticationAdminStub getAuthenticationAdminStub(String serverURL) throws AxisFault {
-        return authStub;
-    }
-
-    @Override
-    protected RegistryCacheInvalidationServiceStub getRegistryCacheInvalidationServiceStub(String serverURL,
-            ConfigurationContext ctx) throws AxisFault {
-        return cacheStub;
-    }
 }

@@ -30,6 +30,7 @@ public class APIInfoDTO   {
     private String context = null;
     private String version = null;
     private String type = null;
+    private String createdTime = null;
     private String provider = null;
     private String lifeCycleStatus = null;
     private String thumbnailUri = null;
@@ -140,6 +141,23 @@ public class APIInfoDTO   {
   }
   public void setType(String type) {
     this.type = type;
+  }
+
+  /**
+   **/
+  public APIInfoDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1614020559444", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
   }
 
   /**
@@ -316,6 +334,7 @@ public class APIInfoDTO   {
         Objects.equals(context, apIInfo.context) &&
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(type, apIInfo.type) &&
+        Objects.equals(createdTime, apIInfo.createdTime) &&
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(thumbnailUri, apIInfo.thumbnailUri) &&
@@ -329,7 +348,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel);
+    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel);
   }
 
   @Override
@@ -343,6 +362,7 @@ public class APIInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");

@@ -124,12 +124,13 @@ public class APIMapperTestCase {
         infoapi.setType("API");
         infoapi.setStatus("PUBLISHED");
         infoapi.setProviderName("admin");
+        infoapi.setDescription("Test API description");
         API mappedAPI = APIMapper.INSTANCE.toApi(infoapi);
         
         Assert.assertEquals("Mapped api name does not match", mappedAPI.getId().getName(), infoapi.getApiName());
         Assert.assertEquals("Mapped api version does not match", mappedAPI.getId().getVersion(), infoapi.getVersion());
         Assert.assertEquals("Mapped api state does not match", mappedAPI.getStatus(), infoapi.getStatus());
-
+        Assert.assertEquals("Mapped api description does not match", mappedAPI.getDescription(), infoapi.getDescription());
     }
     
     @Test
@@ -140,11 +141,13 @@ public class APIMapperTestCase {
         infoapi.setType("API");
         infoapi.setStatus("PUBLISHED");
         infoapi.setProviderName("admin");
+        infoapi.setDescription("Test API description");
         API mappedAPI = APIMapper.INSTANCE.toApi(infoapi);
         
         Assert.assertEquals("Mapped api name does not match", mappedAPI.getId().getName(), infoapi.getApiName());
         Assert.assertEquals("Mapped api version does not match", mappedAPI.getId().getVersion(), infoapi.getVersion());
         Assert.assertEquals("Mapped api state does not match", mappedAPI.getStatus(), infoapi.getStatus());
+        Assert.assertEquals("Mapped api description does not match", mappedAPI.getDescription(), infoapi.getDescription());
 
     } 
     

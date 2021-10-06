@@ -57,7 +57,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -70,6 +69,7 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
@@ -86,7 +86,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
@@ -120,7 +119,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -317,6 +315,18 @@ public class APIMappingUtil {
             }
         }
 
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = dto.getAdditionalPropertiesMap();
+        if (additionalPropertiesMap != null && !additionalPropertiesMap.isEmpty()) {
+            for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : additionalPropertiesMap.entrySet()) {
+                if (entry.getValue().isDisplay()) {
+                    model.addProperty(entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX,
+                            entry.getValue().getValue());
+                } else {
+                    model.addProperty(entry.getKey(), entry.getValue().getValue());
+                }
+            }
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
         APIBusinessInformationDTO apiBusinessInformationDTO = objectMapper.convertValue(dto.getBusinessInformation(),
                 APIBusinessInformationDTO.class);
@@ -401,7 +411,9 @@ public class APIMappingUtil {
                 handleException(msg, e);
             }
         }
-
+        if (dto.getAudience() != null) {
+            model.setAudience(dto.getAudience().toString());
+        }
         return model;
     }
 
@@ -656,13 +668,15 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
         apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
+        if (api.getAudience() != null) {
+            apiInfoDTO.setAudience(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO.AudienceEnum
+                    .valueOf(api.getAudience()));
+        }
         if (api.getCreatedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
             apiInfoDTO.setCreatedTime(String.valueOf(createdTime.getTime()));
         }
         if (api.getLastUpdated() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             Date lastUpdatedTime = api.getLastUpdated();
             apiInfoDTO.setUpdatedTime(String.valueOf(lastUpdatedTime.getTime()));
         }
@@ -1105,7 +1119,10 @@ public class APIMappingUtil {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
             }
 
-            apiOperationsDTO = getOperationsFromAPI(model);
+            //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
+            //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
+            //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
+            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1118,7 +1135,8 @@ public class APIMappingUtil {
             if (model.getAsyncApiDefinition() != null) {
                 asyncAPIDefinition = model.getAsyncApiDefinition();
             } else {
-                asyncAPIDefinition = apiProvider.getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
+                asyncAPIDefinition = apiProvider
+                        .getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
             }
             if (asyncAPIDefinition != null) {
                 List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
@@ -1259,7 +1277,7 @@ public class APIMappingUtil {
         if (null != model.getCreatedTime()) {
             Date created = new Date(Long.parseLong(model.getCreatedTime()));
             Timestamp timeStamp = new Timestamp(created.getTime());
-            dto.setCreatedTime(String.valueOf(timeStamp));
+            dto.setCreatedTime(String.valueOf(timeStamp.getTime()));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 
@@ -1272,7 +1290,10 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
-
+        
+        if (model.getAudience() != null) {
+            dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
+        }
         return dto;
     }
 
@@ -1412,32 +1433,12 @@ public class APIMappingUtil {
     private static boolean checkEndpointSecurityPasswordEnabled(String tenantDomainName) throws APIManagementException {
 
         JSONObject apiTenantConfig;
-        try {
-            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
-            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
-                    APIConstants.API_TENANT_CONF_LOCATION);
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                apiTenantConfig = (JSONObject) parser.parse(content);
-                if (apiTenantConfig != null) {
-                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
-                    if (value != null) {
-                        return Boolean.parseBoolean(value.toString());
-                    }
-                }
+        apiTenantConfig = APIUtil.getTenantConfig(tenantDomainName);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
             }
-        } catch (UserStoreException e) {
-            String msg = "UserStoreException thrown when getting API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "RegistryException thrown when getting API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "ParseException thrown when parsing API tenant config from registry while reading "
-                    + "ExposeEndpointPassword config";
-            throw new APIManagementException(msg, e);
         }
         return false;
     }
@@ -1995,6 +1996,36 @@ public class APIMappingUtil {
                 }
             }
             operationsDTOList.add(operationsDTO);
+        }
+        return operationsDTOList;
+    }
+
+    /**
+     * Returns a set of operations from a API
+     * Returns a set of operations from a given swagger definition
+     *
+     * @param api               API object
+     * @param swaggerDefinition Swagger definition
+     * @return a set of operations from a given swagger definition
+     * @throws APIManagementException error while trying to retrieve URI templates of the given API
+     */
+
+    private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
+         throws APIManagementException {
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
+        Set<URITemplate> uriTemplates;
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            uriTemplates = api.getUriTemplates();
+        } else {
+            uriTemplates = apiDefinition.getURITemplates(swaggerDefinition);
+        }
+
+        List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
+        if (!StringUtils.isEmpty(swaggerDefinition)) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+                operationsDTOList.add(operationsDTO);
+            }
         }
         return operationsDTOList;
     }
@@ -2863,14 +2894,10 @@ public class APIMappingUtil {
             APIProductDTO apiProductDTO = (APIProductDTO) dto;
             apiCategoryNames = apiProductDTO.getCategories();
         }
-        provider = APIUtil.replaceEmailDomainBack(provider);
-        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APICategory> apiCategories = new ArrayList<>();
         for (String categoryName : apiCategoryNames) {
             APICategory category = new APICategory();
             category.setName(categoryName);
-            category.setTenantID(tenantId);
             apiCategories.add(category);
         }
         if (model instanceof API) {
@@ -2955,15 +2982,11 @@ public class APIMappingUtil {
         apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
         if (model.getCreatedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date parsedDate;
             try {
-                parsedDate = dateFormat.parse(model.getCreatedTime());
+                apiRevisionDTO.setCreatedTime(parseStringToDate(model.getCreatedTime()));
             } catch (java.text.ParseException e) {
                 throw new APIManagementException("Error while parsing the created time:" + model.getCreatedTime(), e);
             }
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            apiRevisionDTO.setCreatedTime(timestamp);
         }
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
@@ -3002,29 +3025,25 @@ public class APIMappingUtil {
         }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
         if (model.getDeployedTime() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            Date parsedDate;
             try {
-                parsedDate = dateFormat.parse(model.getDeployedTime());
+                apiRevisionDeploymentDTO.setDeployedTime(parseStringToDate(model.getDeployedTime()));
             } catch (java.text.ParseException e) {
-                throw new APIManagementException("Error while parsing the created time:" + model.getDeployedTime(), e);
+                throw new APIManagementException("Error while parsing the deployed time:" + model.getDeployedTime(), e);
             }
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            apiRevisionDeploymentDTO.setDeployedTime(timestamp);
+        }
+        if (model.getSuccessDeployedTime() != null) {
+            try {
+                apiRevisionDeploymentDTO.setSuccessDeployedTime(parseStringToDate(model.getSuccessDeployedTime()));
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the successfully deployed time:"
+                        + model.getSuccessDeployedTime(), e);
+            }
         }
         return apiRevisionDeploymentDTO;
     }
 
-    public static APIRevisionDeploymentListDTO fromListAPIRevisionDeploymentToDTO(
-            List<APIRevisionDeployment> apiRevisionDeploymentList)
-            throws APIManagementException {
-
-        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTO = new APIRevisionDeploymentListDTO();
-        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentList) {
-            apiRevisionDeploymentDTOS.add(fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
-        }
-        apiRevisionDeploymentListDTO.setList(apiRevisionDeploymentDTOS);
-        return apiRevisionDeploymentListDTO;
+    private static Date parseStringToDate(String time) throws java.text.ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.parse(time);
     }
 }

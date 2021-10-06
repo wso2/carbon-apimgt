@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -67,6 +68,7 @@ import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -76,6 +78,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -779,6 +782,21 @@ public class GatewayUtils {
             throws APISecurityException {
 
         JSONObject api = null;
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+        boolean apiKeySubValidationEnabled = isAPIKeySubscriptionValidationEnabled();
+        JSONObject application;
+        int appId = 0;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
+            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+        }
+        // validate subscription
+        // if the appId is equal to 0 then it's a internal key
+        if (apiKeySubValidationEnabled && appId != 0) {
+            apiKeyValidationInfoDTO =
+                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain());
+        }
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
@@ -791,10 +809,21 @@ public class GatewayUtils {
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
                                 )) {
-                    api = subscribedAPIsJSONObject;
-                    if (log.isDebugEnabled()) {
-                        log.debug("User is subscribed to the API: " + apiContext + ", " +
-                                "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken[0]));
+                    // check whether the subscription is authorized
+                    if (apiKeySubValidationEnabled && appId != 0) {
+                        if (apiKeyValidationInfoDTO.isAuthorized()) {
+                            api = subscribedAPIsJSONObject;
+                            if (log.isDebugEnabled()) {
+                                log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                        "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken[0]));
+                            }
+                        }
+                    } else {
+                        api = subscribedAPIsJSONObject;
+                        if (log.isDebugEnabled()) {
+                            log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                    "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken[0]));
+                        }
                     }
                     break;
                 }
@@ -908,6 +937,18 @@ public class GatewayUtils {
         return true;
     }
 
+    public static boolean isAPIKeySubscriptionValidationEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String subscriptionValidationEnabled = config.getFirstProperty(APIConstants.API_KEY_SUBSCRIPTION_VALIDATION_ENABLED);
+            return Boolean.parseBoolean(subscriptionValidationEnabled);
+        } catch (Exception e) {
+            log.error("Did not find valid API Key Subscription Validation Enabled configuration. " +
+                    "Use default configuration.", e);
+        }
+        return false;
+    }
+
     /**
      * Return tenant domain of the API being invoked.
      *
@@ -943,6 +984,11 @@ public class GatewayUtils {
         if (jwtInfoDto.getJwtValidationInfo() != null) {
             jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
                     apiKeyValidationInfoDTO));
+            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
+                    && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
+                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
+                jwtInfoDto.setSub(MultitenantUtils.getTenantAwareUsername(sub));
+            }
         }
 
         if (apiKeyValidationInfoDTO != null) {
@@ -998,24 +1044,34 @@ public class GatewayUtils {
     }
 
     public static void setAPIRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
-
+        API api = GatewayUtils.getAPI(messageContext);
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
         }
-        Object api = messageContext.getProperty(APIMgtGatewayConstants.API);
         if (api != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, (String) api);
-        }
-        Object version = messageContext.getProperty(APIMgtGatewayConstants.VERSION);
-        if (version != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, (String) version);
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, api.getApiVersion());
         }
         Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
         if (consumerKey != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY, (String) consumerKey);
         }
     }
+
+    public static void setAPIResource(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
+        Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        String httpMethod = (String) axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (StringUtils.isEmpty(httpMethod)) {
+            httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
+        }
+        if (electedResource instanceof String && StringUtils.isNotEmpty((String) electedResource)) {
+            Util.updateOperation(tracingSpan, (httpMethod.toUpperCase().concat("--").concat((String) electedResource)));
+        }
+    }
+
 
     private static void setTracingId(TracingSpan tracingSpan, MessageContext axis2MessageContext) {
 
@@ -1317,5 +1373,9 @@ public class GatewayUtils {
                 }
             }
         }
+    }
+
+    public static TracingTracer getTracingTracer() {
+        return ServiceReferenceHolder.getInstance().getTracer();
     }
 }

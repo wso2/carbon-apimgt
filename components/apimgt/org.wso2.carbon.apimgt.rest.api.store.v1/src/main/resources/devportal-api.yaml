@@ -1101,7 +1101,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-            - apim:admin
+            - apim:admin # special scope added to moderate comments
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3432,6 +3432,9 @@ components:
         type:
           type: string
           example: WS
+        createdTime:
+          type: string
+          example: 1614020559444
         provider:
           type: string
           description: |
@@ -3753,7 +3756,7 @@ components:
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
-          maxLength: 70
+          maxLength: 100
           minLength: 1
           type: string
           example: CalculatorApp
@@ -4543,6 +4546,12 @@ components:
           type: string
           description: Token to be revoked, if any
           example: ""
+        grantType:
+          type: string
+          default: CLIENT_CREDENTIALS
+          enum:
+            - CLIENT_CREDENTIALS
+            - TOKEN_EXCHANGE
         additionalProperties:
           type: object
           properties: {}
@@ -5142,6 +5151,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyManagerApplicationConfiguration'
+        alias:
+          type: string
+          description: |
+            The alias of Identity Provider.
+            If the tokenType is EXCHANGED, the alias value should be inclusive in the audience values of the JWT token
+          example: https://localhost:9443/oauth2/token
         additionalProperties:
           type: object
           properties: {}
@@ -5604,7 +5619,7 @@ components:
             openid: Authorize access to user details
             apim:subscribe: Subscribe API
             apim:api_key: Generate API Keys
-            apim:app_manage: Retrieve, Manage applications
+            apim:app_manage: Retrieve, Manage and Import, Export applications
             apim:sub_manage: Retrieve, Manage subscriptions
             apim:store_settings: Retrieve Developer Portal settings
             apim:sub_alert_manage: Retrieve, subscribe and configure Developer Portal alert types

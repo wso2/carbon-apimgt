@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl.notifier;
 
 import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -30,14 +32,14 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 public abstract class AbstractNotifier implements Notifier {
 
     protected void publishEventToEventHub(Event event) {
-
         byte[] bytesEncoded = Base64.encodeBase64(new Gson().toJson(event).getBytes());
         Object[] objects = new Object[]{event.getType(), event.getTimeStamp(), new String(bytesEncoded)};
         org.wso2.carbon.databridge.commons.Event payload = new org.wso2.carbon.databridge.commons.Event(
                 APIConstants.NOTIFICATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         APIUtil.publishEventToEventHub(null, payload);
-
+        EventPublisherEvent notificationEvent = new EventPublisherEvent(APIConstants.NOTIFICATION_STREAM_ID,
+                System.currentTimeMillis(), null, null, objects);
+        APIUtil.publishEvent(EventPublisherType.NOTIFICATION, notificationEvent, event.toString());
     }
-
 }

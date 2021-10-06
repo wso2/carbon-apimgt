@@ -306,7 +306,7 @@ public class ThrottleHandlerTest {
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
-                + apiVersion;
+                + apiVersion + ":" + authenticationContext.getTier();
         throttleDataHolder.addThrottleData(subscriptionLevelThrottleKey, System.currentTimeMillis() + 10000);
         //Should throttle out and discontinue message flow, when subscription level is throttled out
         //and stop on quota reach is enabled

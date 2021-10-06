@@ -80,6 +80,13 @@ public class SettingsMappingUtil {
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
+            String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
+                    APIConstants.AUTHORIZATION_HEADER);
+
+            if (authorizationHeader == null) {
+                authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
+            }
+            settingsDTO.setAuthorizationHeader(authorizationHeader);
         }
         return settingsDTO;
     }

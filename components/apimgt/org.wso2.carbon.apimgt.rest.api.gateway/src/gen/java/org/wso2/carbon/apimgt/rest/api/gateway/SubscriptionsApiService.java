@@ -10,7 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.gateway.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.gateway.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.dto.SubscriptionDTO;
 
 import java.util.List;
 
@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
-      public Response getSubscriptions(String apiUUID, String applicationUUID, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsGet(String apiUUID, String appUUID, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }

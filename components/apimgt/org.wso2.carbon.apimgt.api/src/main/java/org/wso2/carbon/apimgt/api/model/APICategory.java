@@ -84,6 +84,7 @@ public class APICategory {
      * @return
      */
     public boolean equals(Object obj) {
-        return this.tenantID == ((APICategory)obj).getTenantID() && this.getName().equals(((APICategory) obj).getName());
+        return this.organization == ((APICategory) obj).getOrganization() && this.getName()
+                .equals(((APICategory) obj).getName());
     }
 }

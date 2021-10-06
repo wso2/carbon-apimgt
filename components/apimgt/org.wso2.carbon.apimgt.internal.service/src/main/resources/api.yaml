@@ -476,6 +476,66 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /retrieve-api-artifacts:
+    post:
+      summary: Get API runtime artifacts from ID list
+      description: |
+        This will provide access to API runtime artifacts in database for a given API UUID list.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the APIs
+          type: string
+        - name: type
+          in: query
+          description: |
+             type of gateway
+          type: string
+        - name: uuidList
+          in: body
+          description: 'API UUID list payload'
+          schema:
+            $ref: "#/definitions/UUIDList"
+      tags:
+        - Retrieve API artifacts
+      responses:
+        200:
+          description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /runtime-metadata:
+    get:
+      summary: Metadata information for API runtimes
+      description: |
+        This will provide access to the deployment metadata in json format
+      parameters:
+      - $ref: '#/parameters/requestedTenant'
+      - name: apiId
+        in: query
+        description: |
+          **Search condition**.
+            Api ID
+        type: string
+      - name: gatewayLabel
+        in: query
+        description: |
+          **Search condition**.
+           label associated with the APIs
+        type: string
+      tags:
+      - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: Json file of runtime metadata
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /endpoint-certificates:
     get:
       summary: Get all the endpoint certificates for given alias.
@@ -498,6 +558,31 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # Deployed revision information
+  #--------------------------------------------
+  /apis/deployed-revisions:
+    patch:
+      tags:
+        - API Revisions
+      summary: Deploy Revision
+      description: |
+        Deploy a revision
+      operationId: deployedAPIRevision
+      parameters:
+        - name: deployedAPIRevisionDTOList
+          in: body
+          description: 'Notification event payload'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DeployedAPIRevision'
+      responses:
+        200:
+          description: |
+            Created.
+        default:
+          $ref: '#/definitions/Error'
   /ga-config:
     get:
       summary: Get Google analytics config related to tenant.
@@ -660,6 +745,12 @@ definitions:
         type: array
         items:
           type: string
+  UUIDList:
+    properties:
+      uuids:
+        type: array
+        items:
+          type: string
   RevokedJWTList:
     type: array
     items:
@@ -724,6 +815,36 @@ definitions:
           $ref: '#/definitions/API'
       pagination:
         $ref: '#/definitions/Pagination'
+  DeployedAPIRevision:
+    title: Deployed revision information
+    properties:
+      apiId:
+        maxLength: 255
+        minLength: 0
+        type: string
+        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+      revisionId:
+        type: integer
+        example: 1
+      envInfo:
+        type: array
+        items:
+          $ref: '#/definitions/DeployedEnvInfo'
+  DeployedEnvInfo:
+    title: Environment information
+    properties:
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+        example: default
+      vhost:
+        maxLength: 255
+        minLength: 1
+        # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
+        pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+        type: string
+        example: mg.wso2.com
   #-----------------------------------------------------
   # The API resource
   #-----------------------------------------------------
@@ -863,6 +984,15 @@ definitions:
         type: string
       configuration:
         type: object
+      tokenType:
+        type: string
+        description: The type of the tokens to be used (exchanged or without exchanged).
+          Accepted values are EXCHANGED and ORIGINAL.
+        example: EXCHANGED
+        default: ORIGINAL
+        enum:
+          - EXCHANGED
+          - ORIGINAL
 
   #-----------------------------------------------------
   # The Subscription List resource

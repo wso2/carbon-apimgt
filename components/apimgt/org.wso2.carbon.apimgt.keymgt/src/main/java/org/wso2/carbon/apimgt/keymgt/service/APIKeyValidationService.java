@@ -79,8 +79,8 @@ public class APIKeyValidationService {
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
-                                               String requiredAuthenticationLevel, String clientDomain,
-                                               String matchingResource, String httpVerb,String tenantDomain,
+                                               String requiredAuthenticationLevel,
+                                               String matchingResource, String httpVerb, String tenantDomain,
                                                List keyManagers)
             throws APIKeyMgtException, APIManagementException {
 
@@ -142,7 +142,6 @@ public class APIKeyValidationService {
 
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
-        validationContext.setClientDomain(clientDomain);
         validationContext.setContext(context);
         validationContext.setHttpVerb(httpVerb);
         validationContext.setMatchingResource(matchingResource);
@@ -355,9 +354,14 @@ public class APIKeyValidationService {
                     apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
                             tenantDomain);
                     if (apiPolicy != null) {
-                        store.addOrUpdateApiPolicy(apiPolicy);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        if (apiPolicy.getName() != null) {
+                            store.addOrUpdateApiPolicy(apiPolicy);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                            }
+                        } else {
+                            throw new APIManagementException("Exception while loading api policy for " +
+                                    urlMapping.getThrottlingPolicy() + " for domain " + tenantDomain);
                         }
                     }
 
@@ -367,9 +371,14 @@ public class APIKeyValidationService {
                 apiPolicy = new SubscriptionDataLoaderImpl().getAPIPolicy(urlMapping.getThrottlingPolicy(),
                         tenantDomain);
                 if (apiPolicy != null) {
-                    store.addOrUpdateApiPolicy(apiPolicy);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Update SubscriptionDataStore API Policu for " + apiPolicy.getCacheKey());
+                    if (apiPolicy.getName() != null) {
+                        store.addOrUpdateApiPolicy(apiPolicy);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Update SubscriptionDataStore API Policy for " + apiPolicy.getCacheKey());
+                        }
+                    } else {
+                        throw new APIManagementException("Exception while loading api policy for " +
+                                urlMapping.getThrottlingPolicy() + " for domain " + tenantDomain);
                     }
                 }
             }
@@ -537,6 +546,26 @@ public class APIKeyValidationService {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         return keyValidationHandler.validateScopes(tokenValidationContext);
+    }
+
+    /**
+     * Validates the subscriptions of a particular API.
+     *
+     * @param context     Requested context
+     * @param version Version of the API
+     * @param appId Application ID
+     * @param tenantDomain Tenant Domain
+     * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
+     * authorized, tier information will be <pre>null</pre>
+     * @throws APIKeyMgtException in case of validation failure
+     * @throws APIManagementException in case of APIM Component initialization failure
+     */
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
+                                                        String tenantDomain)
+            throws APIKeyMgtException, APIManagementException {
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        return keyValidationHandler.validateSubscription(context, version, appId);
     }
 
     public Map<String, Scope> retrieveScopes(String tenantDomain) {

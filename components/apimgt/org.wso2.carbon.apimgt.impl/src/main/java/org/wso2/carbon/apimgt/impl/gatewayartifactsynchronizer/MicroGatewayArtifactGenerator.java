@@ -72,7 +72,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         deploymentsMap.put(fileName, apiProjectDto);
                         apiProjectDto.setApiFile(fileName);
                         apiProjectDto.setEnvironments(new HashSet<>());
-                        apiProjectDto.setOrganization(apiRuntimeArtifactDto.getOrganization());
+                        apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                     }
                     // environment is unique for a revision in a deployment
                     // create new environment

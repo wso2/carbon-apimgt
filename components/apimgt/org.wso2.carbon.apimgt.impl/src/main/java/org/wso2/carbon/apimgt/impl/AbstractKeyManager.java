@@ -95,6 +95,11 @@ public abstract class AbstractKeyManager implements KeyManager {
                     tokenRequest.setValidityPeriod(Long.parseLong((String) params.get(ApplicationConstants.VALIDITY_PERIOD)));
                 }
 
+                if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(tokenRequest.getGrantType())) {
+                    tokenRequest.addRequestParam(APIConstants.OAuthConstants.SUBJECT_TOKEN, params.get(APIConstants
+                            .OAuthConstants.SUBJECT_TOKEN));
+                }
+
                 return tokenRequest;
             }
         } catch (ParseException e) {
@@ -273,37 +278,32 @@ public abstract class AbstractKeyManager implements KeyManager {
             throws APIManagementException {
 
         String type = getType();
-        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
-
-            List<String> missedRequiredValues = new ArrayList<>();
-            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
-                    ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
-            if (keyManagerConnectorConfiguration != null) {
-                List<ConfigurationDto> applicationConfigurationDtoList =
-                        keyManagerConnectorConfiguration.getApplicationConfigurations();
-                Object additionalProperties =
-                        oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
-                if (additionalProperties != null) {
-                    JsonObject additionalPropertiesJson =
-                            (JsonObject) new JsonParser().parse((String) additionalProperties);
-                    for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
-                        JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
-                        if (value == null) {
-                            if (configurationDto.isRequired()) {
-                                missedRequiredValues.add(configurationDto.getName());
-                            }
+        List<String> missedRequiredValues = new ArrayList<>();
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(type);
+        if (keyManagerConnectorConfiguration != null) {
+            List<ConfigurationDto> applicationConfigurationDtoList = keyManagerConnectorConfiguration
+                    .getApplicationConfigurations();
+            Object additionalProperties = oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+            if (additionalProperties != null) {
+                JsonObject additionalPropertiesJson = (JsonObject) new JsonParser()
+                        .parse((String) additionalProperties);
+                for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
+                    JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
+                    if (value == null) {
+                        if (configurationDto.isRequired()) {
+                            missedRequiredValues.add(configurationDto.getName());
                         }
                     }
-                    if (!missedRequiredValues.isEmpty()) {
-                        throw new APIManagementException("Missing required properties to create/update oauth " +
-                                "application",
-                                ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
-                    }
                 }
-            } else {
-                throw new APIManagementException("Invalid Key Manager Type " + type,
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                if (!missedRequiredValues.isEmpty()) {
+                    throw new APIManagementException(
+                            "Missing required properties to create/update oauth " + "application",
+                            ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
+                }
             }
+        } else {
+            throw new APIManagementException("Invalid Key Manager Type " + type, ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
     }
 }

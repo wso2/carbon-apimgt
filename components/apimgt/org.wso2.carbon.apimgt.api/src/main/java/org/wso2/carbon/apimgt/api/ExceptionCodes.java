@@ -109,6 +109,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_RESTORING_API_REVISION(900354, "Can not restore API Revision ", 400, "Failed to restore API revision registry artifacts: %s "),
     DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
     EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
+    ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -192,6 +193,12 @@ public enum ExceptionCodes implements ErrorHandler {
     MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
             "users with the same username exist in the system"),
     INVALID_USER_ROLES(900610, "Invalid user roles found", 400, "Invalid user roles found"),
+    IDP_ADDING_FAILED(900611, "Unable to add the identity provider", 400, "Error while adding the identity provider"),
+    IDP_RETRIEVAL_FAILED(900612, "Unable to retrieve the identity provider", 400, "Error while retrieving the "
+            + "identity provider details"),
+    IDP_DELETION_FAILED(900613, "Unable to delete the identity provider", 400, "Error while deleting the "
+            + "identity provider"),
+    INVALID_IDP_TYPE(900614, "Unsupported identity provider type", 400, "Invalid identity provider type. %s"),
 
 
     // Labels related codes
@@ -252,6 +259,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot be blank"),
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
+    INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -295,6 +303,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+    INVALID_APPLICATION_ADDITIONAL_PROPERTIES(900970, "Invalid application additional properties", 400,
+            "Invalid additional properties. %s"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
     TOKEN_SCOPES_NOT_SET(
             900987, "The token information has not been correctly set internally", 400,
@@ -304,6 +314,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot add client certificates to this server"),
     THROTTLING_POLICY_CANNOT_BE_NULL(900989,
             "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
+    ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR(900971, "Cannot delete the advanced throttling policy", 403,
+            "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
@@ -390,7 +402,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Key Manager is not enabled in the system"),
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+    APPLICATION_ALREADY_REGISTERED(901408, "Application already Registered", 409, "Application already Registered"),
+    KEY_MAPPING_ALREADY_EXIST(901409, "Key Mappings already exists", 409, "Key Mappings already exists"),
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
@@ -465,8 +478,10 @@ public enum ExceptionCodes implements ErrorHandler {
                "Definition", 400, "Unsupported protocol specified in Async API Definition"),
 
     //Service Catalog related error codes
-    SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version");
-
+    SERVICE_VERSION_NOT_FOUND(901900, "Cannot find the service version", 404, "Cannot find a service that matches the given version"),
+    INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
+            "Invalid Endpoint Security credentials. %s", false),
+    INVALID_TENANT_CONFIG(9020001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

@@ -42,7 +42,8 @@ RolesApiService delegate = new RolesApiServiceImpl();
     @ApiOperation(value = "Check Whether Given Role Name already Exist", notes = "Using this operation, user can check a given role name exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Roles" })
     @ApiResponses(value = { 

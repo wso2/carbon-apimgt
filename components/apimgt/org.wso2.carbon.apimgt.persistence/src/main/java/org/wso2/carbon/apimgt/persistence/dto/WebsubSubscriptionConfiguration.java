@@ -23,6 +23,9 @@ public class WebsubSubscriptionConfiguration {
     private String signingAlgorithm;
     private String signatureHeader;
 
+    public WebsubSubscriptionConfiguration() {
+
+    }
     public WebsubSubscriptionConfiguration(
             boolean enable, String secret, String signingAlgorithm, String signatureHeader) {
         this.enable = enable;

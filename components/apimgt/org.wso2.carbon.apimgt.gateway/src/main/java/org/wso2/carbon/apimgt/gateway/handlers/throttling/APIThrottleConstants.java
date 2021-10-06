@@ -69,4 +69,5 @@ public class APIThrottleConstants {
     public static final String WS_THROTTLE_POLICY_BOTTOM = "</throttle:MediatorThrottleAssertion>\n" +"</wsp:Policy>";
     public static final String SUBSCRIPTION_TYPE = "subscriptionType";
     public static final String APPLICATION_NAME = "applicationName";
+    public static final String CUSTOM_PROPERTY = "customProperty";
 }

@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -263,11 +263,11 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager configurations for tenant
-     * @param tenantDomain tenant Domain
+     * @param organization organization of the key manager
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain) throws APIManagementException;
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization) throws APIManagementException;
 
     /**
      * This method returns all the key managers registered in all the tenants
@@ -278,21 +278,41 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve key manager with Id in respective tenant
-     * @param tenantDomain tenant domain requested
+     * @param organization organization requested
      * @param id uuid of key manager
      * @return KeyManagerConfigurationDTO for retrieved data
      * @throws APIManagementException
      */
-    KeyManagerConfigurationDTO getKeyManagerConfigurationById(String tenantDomain, String id)
+    KeyManagerConfigurationDTO getKeyManagerConfigurationById(String organization, String id)
             throws APIManagementException;
+
+    /**
+     * This method is used to check IDP is in the given organization
+     *
+     * @param organization organization uuid
+     * @param resourceId   IDP resource ID
+     * @return boolean indication of it's existence
+     * @throws APIManagementException
+     */
+    boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException;
+
+    /**
+     * Used to get organization UUID of a application by giving consumer key.
+     *
+     * @param consumerKey consumer key of the application
+     * @return ApplicationInfo details of a application
+     * @throws APIManagementException
+     */
+    ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException;
+
     /**
      * This method used to check existence of key manager with Id in respective tenant
-     * @param tenantDomain tenant domain requested
+     * @param organization organization requested
      * @param id uuid of key manager
      * @return existence
      * @throws APIManagementException
      */
-    boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException;
+    boolean isKeyManagerConfigurationExistById(String organization, String id) throws APIManagementException;
 
     /**
      * This method used to create key Manager
@@ -312,21 +332,31 @@ public interface APIAdmin  {
             throws APIManagementException;
 
     /**
-     * This method used to delete key manager
-     * @param tenantDomain tenant domain requested
-     * @param id uuid of key manager
+     * hTis method used to delete IDP mapped with key manager
+     * @param organization organization requested
+     * @param keyManagerConfigurationDTO key manager data
      * @throws APIManagementException
      */
-    void deleteKeyManagerConfigurationById(String tenantDomain,String id) throws APIManagementException;
+    void deleteIdentityProvider(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+
+    /**
+     * This method used to delete key manager
+     * @param organization organization requested
+     * @param keyManagerConfigurationDTO  key manager data
+     * @throws APIManagementException
+     */
+    void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
 
     /**
      * This method used to retrieve key manager from name
-     * @param tenantDomain tenant domain requested
+     * @param organization organization requested
      * @param name name requested
      * @return keyManager data
      * @throws APIManagementException
      */
-    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
             throws APIManagementException;
 
     /**
@@ -416,4 +446,9 @@ public interface APIAdmin  {
      * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
      */
     void deleteTenantTheme(int tenantId) throws APIManagementException;
+
+    String getTenantConfig(String organization) throws APIManagementException;
+
+    void updateTenantConfig(String organization, String config) throws APIManagementException;
+
 }
