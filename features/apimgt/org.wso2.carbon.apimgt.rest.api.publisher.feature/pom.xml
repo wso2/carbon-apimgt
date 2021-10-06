@@ -136,6 +136,10 @@
            <artifactId>commons-validator</artifactId>
            <version>${commons-validator.version}</version>
        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.solace</artifactId>
+        </dependency>
     </dependencies>
     <reporting>
         <plugins>
@@ -235,6 +239,7 @@
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.solace</bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}
                                 </bundleDef>
