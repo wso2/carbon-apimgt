@@ -35,6 +35,7 @@ public class APIInfoDTO   {
     private String version = null;
     private String provider = null;
     private String type = null;
+  private String gatewayVendor = null;
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -351,6 +352,23 @@ return null;
     this.updatedTime = updatedTime;
   }
 
+  /**
+   **/
+  public APIInfoDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -376,12 +394,13 @@ return null;
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
         Objects.equals(securityScheme, apIInfo.securityScheme) &&
         Objects.equals(createdTime, apIInfo.createdTime) &&
-        Objects.equals(updatedTime, apIInfo.updatedTime);
+        Objects.equals(updatedTime, apIInfo.updatedTime) &&
+        Objects.equals(gatewayVendor, apIInfo.gatewayVendor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, gatewayVendor);
   }
 
   @Override
@@ -405,6 +424,7 @@ return null;
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("}");
     return sb.toString();
   }
