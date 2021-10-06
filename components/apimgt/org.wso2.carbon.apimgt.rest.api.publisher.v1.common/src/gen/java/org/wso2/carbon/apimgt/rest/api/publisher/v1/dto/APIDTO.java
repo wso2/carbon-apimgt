@@ -60,6 +60,8 @@ public class APIDTO   {
     private String revisionedApiId = null;
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
+    private String gatewayVendor = null;
+    private List<String> asyncTransportProtocols = new ArrayList<String>();
 
     @XmlType(name="TypeEnum")
     @XmlEnum(String.class)
@@ -1232,6 +1234,40 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
+    /**
+     **/
+    public APIDTO gatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+        return this;
+    }
+
+
+    @ApiModelProperty(example = "wso2", value = "")
+    @JsonProperty("gatewayVendor")
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    /**
+     * Supported transports for the async API (http and/or https).
+     **/
+    public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+        return this;
+    }
+
+
+    @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the async API (http and/or https). ")
+    @JsonProperty("asyncTransportProtocols")
+    public List<String> getAsyncTransportProtocols() {
+        return asyncTransportProtocols;
+    }
+    public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+    }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1293,12 +1329,14 @@ return null;
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(serviceInfo, API.serviceInfo) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo);
+        Objects.equals(advertiseInfo, API.advertiseInfo) &&
+        Objects.equals(gatewayVendor, API.gatewayVendor) &&
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+      return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -1358,6 +1396,8 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("}");
     return sb.toString();
   }

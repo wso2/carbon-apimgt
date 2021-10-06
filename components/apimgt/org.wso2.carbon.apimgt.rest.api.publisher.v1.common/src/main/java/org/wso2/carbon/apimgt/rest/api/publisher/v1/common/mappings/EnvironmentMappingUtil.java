@@ -20,15 +20,26 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
+import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -51,8 +62,44 @@ public class EnvironmentMappingUtil {
         environmentDTO.setType(environment.getType());
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
+        environmentDTO.setProvider(environment.getProvider());
         environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
+        environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
+                (environment.getAdditionalProperties()));
+
+        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(environment.getServerURL(),
+                    environment.getUserName(), environment.getPassword(), environment.
+                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+            HttpResponse response = solaceAdminApis.environmentGET(
+                    environment.getAdditionalProperties()
+                            .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName());
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String responseString = null;
+                try {
+                    responseString = EntityUtils.toString(response.getEntity());
+                } catch (IOException e) {
+                    return environmentDTO;
+                }
+                JSONObject jsonObject = new JSONObject(responseString);
+                if (jsonObject.has("messagingProtocols")) {
+                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
+                    List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
+                    for (int i = 0; i < protocols.length(); i++) {
+                        JSONObject protocolDetails = protocols.getJSONObject(i);
+                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
+                        String endpointURI = protocolDetails.getString("uri");
+                        GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURIDTO =
+                                new GatewayEnvironmentProtocolURIDTO();
+                        gatewayEnvironmentProtocolURIDTO.setProtocol(protocolName);
+                        gatewayEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
+                        endpointsList.add(gatewayEnvironmentProtocolURIDTO);
+                    }
+                    environmentDTO.setEndpointURIs(endpointsList);
+                }
+            }
+        }
         return environmentDTO;
     }
 
@@ -96,6 +143,24 @@ public class EnvironmentMappingUtil {
         vHostDTO.setWebsubHttpPort(vHost.getWebsubHttpPort());
         vHostDTO.setWebsubHttpsPort(vHost.getWebsubHttpsPort());
         return vHostDTO;
+    }
+
+    /**
+     * Converts AdditionalProperties into a AdditionalPropertiesDTO.
+     *
+     * @param additionalProperties Set of additional properties
+     * @return List<AdditionalPropertyDTO>
+     */
+    public static List<AdditionalPropertyDTO> fromAdditionalPropertiesToAdditionalPropertiesDTO(Map<String, String>
+                                                                                                        additionalProperties) {
+        List<AdditionalPropertyDTO> additionalPropertyDTOList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+            AdditionalPropertyDTO additionalPropertyDTO = new AdditionalPropertyDTO();
+            additionalPropertyDTO.setKey(entry.getKey());
+            additionalPropertyDTO.setValue(entry.getValue());
+            additionalPropertyDTOList.add(additionalPropertyDTO);
+        }
+        return additionalPropertyDTOList;
     }
 
     /**

@@ -1139,8 +1139,9 @@ public class PublisherCommonUtils {
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
-        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
-                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
+                API_TYPE_WS.equals(existingAPI.getType()) || APIConstants.SOLACE_ENVIRONMENT.equals
+                (existingAPI.getGatewayVendor()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
@@ -1150,6 +1151,7 @@ public class PublisherCommonUtils {
         existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
 
         //updating APi with the new AsyncAPI definition
+        existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
