@@ -50,6 +50,10 @@ public final class ImportExportConstants {
     public static final String ASYNCAPI_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi";
 
+    // Location of the OpenAPI (AsyncAPI) definition file
+    public static final String OPENAPI_FOR_ASYNCAPI_DEFINITION_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger";
+
     // Location of the graphql schema definition file
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "schema.graphql";

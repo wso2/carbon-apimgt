@@ -362,16 +362,6 @@ public interface APIManager {
     Subscriber getSubscriber(int subscriberId) throws APIManagementException;
 
     /**
-     * Returns a set of APIs purchased by the given Subscriber
-     *
-     * @param subscriber   Subscriber
-     * @param organization Organization
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException;
-
-    /**
      * Associates the given icon image with the specified path.
      * @param identifier ID representing the API
      * @param resourcePath a String representing the relative path of a resource.
@@ -445,22 +435,6 @@ public interface APIManager {
      * @throws APIManagementException
      */
     Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
-
-    /**
-     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} in the system
-     *
-     * @return Set of tiers
-     * @throws APIManagementException if failed to get the predefined tiers
-     */
-    Set<Tier> getAllTiers() throws APIManagementException;
-
-    /**
-     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} for the tenant in the system
-     *
-     * @return Set of tiers
-     * @throws APIManagementException if failed to get the predefined tiers
-     */
-    Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException;
 
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
@@ -894,8 +868,8 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
-            throws APIManagementException;
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
+            String sortBy, String sortOrder) throws APIManagementException;
 
     /**
      * Search in content of apis, api products and documents and provide the results
@@ -908,13 +882,4 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
-
-    /**
-     * Returns the AsyncAPI definition as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @return AsyncAPI string
-     * @throws APIManagementException
-     */
-    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
 }

@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -78,9 +79,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_DEFAULT_SUBSCRIBER;
 
 /**
  * This class uses for Export API functionality.
@@ -673,9 +680,9 @@ public class ExportUtils {
         try {
             JSONTokener tokener = new JSONTokener(endpointConfigString);
             JSONObject endpointConfig = new JSONObject(tokener);
-            productionEndpoints = getEndpointURLs(endpointConfig, APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
+            productionEndpoints = getEndpointURLs(endpointConfig, API_DATA_PRODUCTION_ENDPOINTS,
                     apiDto.getName());
-            sandboxEndpoints = getEndpointURLs(endpointConfig, APIConstants.API_DATA_SANDBOX_ENDPOINTS,
+            sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS,
                     apiDto.getName());
             uniqueEndpointURLs.addAll(productionEndpoints); // Remove duplicate and append result
             uniqueEndpointURLs.addAll(sandboxEndpoints);
@@ -865,6 +872,7 @@ public class ExportUtils {
             String apiType = apiDtoToReturn.getType().toString();
             API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
             api.setOrganization(organization);
+            api.setId(apiIdentifier);
             if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
@@ -893,6 +901,35 @@ public class ExportUtils {
                 }
             } else {
                 String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
+                // fetching the callback URL from asyncAPI definition.
+                JsonParser jsonParser = new JsonParser();
+                JsonObject parsedObject = jsonParser.parse(asyncApiJson).getAsJsonObject();
+                if (parsedObject.has(ASYNC_DEFAULT_SUBSCRIBER)) {
+                    String callBackEndpoint = parsedObject.get(ASYNC_DEFAULT_SUBSCRIBER).getAsString();
+                    if (!StringUtils.isEmpty(callBackEndpoint)) {
+                        // add openAPI definition to asyncAPI
+                        String formattedSwaggerJson = RestApiCommonUtil
+                                .generateOpenAPIForAsync(apiDtoToReturn.getName(), apiDtoToReturn.getVersion(),
+                                        apiDtoToReturn.getContext(), callBackEndpoint);
+                        CommonUtil
+                                .writeToYamlOrJson(
+                                        archivePath + ImportExportConstants.OPENAPI_FOR_ASYNCAPI_DEFINITION_LOCATION,
+                                        exportFormat, formattedSwaggerJson);
+                        // Adding endpoint config since adapter validates api.json for endpoint urls.
+                        HashMap<String, Object> endpointConfig = new HashMap<>();
+                        endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+                        endpointConfig.put("failOver", "false");
+                        HashMap<String, Object> productionEndpoint = new HashMap<>();
+                        productionEndpoint.put("template_not_supported", "false");
+                        productionEndpoint.put("url", callBackEndpoint);
+                        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+                        sandboxEndpoint.put("template_not_supported", "false");
+                        sandboxEndpoint.put("url", callBackEndpoint);
+                        endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
+                        endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
+                        apiDtoToReturn.setEndpointConfig(endpointConfig);
+                    }
+                }
                 CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
                         exportFormat, asyncApiJson);
             }

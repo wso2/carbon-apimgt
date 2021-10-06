@@ -39,7 +39,7 @@ public class KeyManagerConfiguration {
     }
 
     public enum IdpTypeOfExchangedTokens {
-        Okta, KeyCloak, Auth0, PingFederate, ForgeRock, AzureAD
+        Okta, KeyCloak, Auth0, PingFederate, ForgeRock, Microsoft, Asgardeo
     }
 
     private TokenType tokenType = TokenType.ORIGINAL;

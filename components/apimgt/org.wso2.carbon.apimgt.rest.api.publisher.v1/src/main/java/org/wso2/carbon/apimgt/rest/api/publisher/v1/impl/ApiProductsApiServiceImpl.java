@@ -94,7 +94,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (log.isDebugEnabled()) {
                 log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
@@ -126,7 +126,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
@@ -179,7 +179,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                               String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent,
                                                                           MessageContext messageContext) {
         try {
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIProduct product = apiProvider.getAPIProductbyUUID(apiProductId, organization);
             APIProductIdentifier productIdentifier = product.getId();
@@ -250,7 +250,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil
@@ -284,7 +284,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             documentation = apiProvider.getDocumentation(apiProductId, documentId, organization);
             APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (documentation == null) {
@@ -314,7 +314,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String sourceUrl = body.getSourceUrl();
             Documentation oldDocument = apiProvider.getDocumentation(apiProductId, documentId, organization);
 
@@ -374,7 +374,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiProductId, organization);
@@ -417,7 +417,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String documentName = body.getName();
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (apiProvider.isDocumentationExist(apiProductId, documentName, organization)) {
@@ -634,8 +634,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber,
                                      String format, Boolean preserveStatus, Boolean exportLatestRevision,
                                      MessageContext messageContext) throws APIManagementException {
-
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
 
@@ -725,12 +724,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
 
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
-        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        // Validate if the USER_REST_API_SCOPES is not set in AbstractOAuthAuthenticator when scopes are validated
         // If the user need to import dependent APIs and the user has the required scope for that, allow the user to do it
         if (tokenScopes == null) {
             RestApiUtil.handleInternalServerError("Error occurred while importing the API Product", log);
@@ -758,9 +757,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
     }
 
-    @Override public Response createAPIProduct(APIProductDTO body, MessageContext messageContext) {
+    @Override public Response createAPIProduct(APIProductDTO body, MessageContext messageContext) throws
+            APIManagementException {
         String provider = body.getProvider();
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
@@ -796,7 +796,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response createAPIProductRevision(String apiProductId, APIRevisionDTO apIRevisionDTO,
                                              MessageContext messageContext) throws APIManagementException {
         try {
-            String organization = RestApiUtil.getOrganization(messageContext);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiProductId);
@@ -827,7 +827,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response deleteAPIProductRevision(String apiProductId, String revisionId,
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         apiProvider.deleteAPIProductRevision(apiProductId, revisionId, organization);
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
@@ -941,7 +941,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response restoreAPIProductRevision(String apiProductId, String revisionId,
                                               MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         apiProvider.restoreAPIProductRevision(apiProductId, revisionId, organization);
         APIProductDTO apiToReturn = getAPIProductByID(apiProductId, apiProvider);
         Response.Status status = Response.Status.CREATED;

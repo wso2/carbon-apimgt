@@ -573,7 +573,7 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean updateApplicationOwner(String newUserId , Application application ) throws APIManagementException;
+    boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
 
 
     /**
@@ -969,17 +969,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
-
-    /**
-     * Returns the AsyncAPI definition of the API for the given gateway environment as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @param environmentName API Gateway environment name
-     * @return AsyncAPI definition string
-     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
-     */
-    String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
-            throws APIManagementException;
 
     /**
      * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string

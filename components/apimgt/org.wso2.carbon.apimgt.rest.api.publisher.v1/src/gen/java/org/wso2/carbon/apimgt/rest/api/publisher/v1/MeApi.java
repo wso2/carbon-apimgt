@@ -41,7 +41,8 @@ MeApiService delegate = new MeApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate Whether the Logged-in User has the Given Role", notes = "Using this operation, logged-in user can check whether he has given role. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Roles" })
     @ApiResponses(value = { 

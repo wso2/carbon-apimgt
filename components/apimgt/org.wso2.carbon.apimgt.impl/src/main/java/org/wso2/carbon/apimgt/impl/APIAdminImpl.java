@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.impl;
 
 import com.google.gson.JsonElement;
@@ -22,9 +22,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
@@ -36,6 +41,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -55,10 +61,13 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.identity.application.common.model.IdentityProvider;
+import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
+import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -87,6 +96,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 
 /**
  * This class provides the core API admin functionality.
@@ -207,9 +217,9 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * @inheritDoc
      **/
-    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit ,
-                                                           int offset, String applicationName, String sortBy,
-                                                           String sortOrder) throws APIManagementException {
+    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
+                                                       int offset, String applicationName, String sortBy,
+                                                       String sortOrder) throws APIManagementException {
 
         return apiMgtDAO.getApplicationsWithPagination(user, owner, tenantId, limit, offset, sortBy, sortOrder,
                 applicationName);
@@ -218,9 +228,9 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * Get count of the applications for the tenantId.
      *
-     * @param tenantId             content to get application count based on tenant_id
-     * @param searchOwner          content to search applications based on owners
-     * @param searchApplication    content to search applications based on application
+     * @param tenantId          content to get application count based on tenant_id
+     * @param searchOwner       content to search applications based on owners
+     * @param searchApplication content to search applications based on application
      * @throws APIManagementException if failed to get application
      */
 
@@ -249,7 +259,7 @@ public class APIAdminImpl implements APIAdmin {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
                 try {
-                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                    monetizationImpl = (Monetization) APIUtil.getClassInstance(monetizationImplClass);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                     APIUtil.handleException("Failed to load monetization implementation class.", e);
                 }
@@ -355,10 +365,34 @@ public class APIAdminImpl implements APIAdmin {
             keyManagerConfigurationsByTenant.addAll(keyManagerConfigurationsByOrganization);
         }
 
+        setAliasForTokenExchangeKeyManagers(keyManagerConfigurationsByTenant, tenantDomain);
+
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         }
         return keyManagerConfigurationsByTenant;
+    }
+
+    private void setAliasForTokenExchangeKeyManagers(List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant,
+                                                     String tenantDomain) throws APIManagementException {
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+            if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType())) {
+                if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
+                    IdentityProvider identityProvider;
+                    try {
+                        identityProvider = IdentityProviderManager.getInstance()
+                                .getIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(), tenantDomain,
+                                        Boolean.FALSE);
+                    } catch (IdentityProviderManagementException e) {
+                        throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
+                                ExceptionCodes.IDP_RETRIEVAL_FAILED);
+                    }
+                    // Set alias value since this will be used from the Devportal side.
+                    keyManagerConfigurationDTO.setAlias(identityProvider.getAlias());
+                }
+            }
+        }
     }
 
     @Override
@@ -403,12 +437,23 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException {
+        return apiMgtDAO.isIDPExistInOrg(organization, resourceId);
+    }
+
+    @Override
+    public ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException {
+        return apiMgtDAO.getLightweightApplicationByConsumerKey(consumerKey);
+    }
+
+    @Override
     public boolean isKeyManagerConfigurationExistById(String organization, String id) throws APIManagementException {
 
         return apiMgtDAO.isKeyManagerConfigurationExistById(organization, id);
     }
 
-    @Override public KeyManagerConfigurationDTO addKeyManagerConfiguration(
+    @Override
+    public KeyManagerConfigurationDTO addKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
         if (apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
@@ -543,16 +588,39 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfigurationDTO;
     }
 
-    @Override
-    public void deleteKeyManagerConfigurationById(String organization, String id) throws APIManagementException {
 
-        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                apiMgtDAO.getKeyManagerConfigurationByID(organization, id);
-        if (keyManagerConfigurationDTO != null) {
-            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
-                apiMgtDAO.deleteKeyManagerConfigurationById(id, organization);
+    @Override
+    public void deleteIdentityProvider(String organization, KeyManagerConfigurationDTO kmConfig)
+            throws APIManagementException {
+        if (kmConfig != null) {
+            if (org.apache.commons.lang3.StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    kmConfig.getTokenType())) {
+                try {
+                    if (kmConfig.getExternalReferenceId() != null) {
+                        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                        if (log.isDebugEnabled()) {
+                            log.debug("Retrieving key manager reference IDP for tenant domain : " + tenantDomain);
+                        }
+                        IdentityProviderManager.getInstance().deleteIdPByResourceId(kmConfig.getExternalReferenceId(),
+                                APIUtil.getInternalOrganizationDomain(organization));
+                    }
+                } catch (IdentityProviderManagementException e) {
+                    throw new APIManagementException("IdP deletion failed. " + e.getMessage(), e,
+                            ExceptionCodes.IDP_DELETION_FAILED);
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO kmConfig)
+            throws APIManagementException {
+        if (kmConfig != null) {
+            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
+                apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
                 new KeyMgtNotificationSender()
-                        .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+                        .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
             } else {
                 throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
                         ExceptionCodes.INTERNAL_ERROR);
@@ -633,7 +701,7 @@ public class APIAdminImpl implements APIAdmin {
      */
     public String extractBotDetectionDataContent(String messageBody) {
 
-        String content;
+        String content = "";
         try {
             //Parse the message body and extract the content in XML form
             DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
@@ -642,11 +710,13 @@ public class APIAdminImpl implements APIAdmin {
             Node bodyContentNode = document.getFirstChild().getFirstChild();
 
             //Convert XML form to String
-            StringWriter writer = new StringWriter();
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
-            String output = writer.toString();
-            content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+            if (bodyContentNode != null) {
+                StringWriter writer = new StringWriter();
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
+                String output = writer.toString();
+                content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>
+            }
         } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
             String errorMessage = "Error while extracting content from " + messageBody;
             log.error(errorMessage, e);
@@ -812,7 +882,7 @@ public class APIAdminImpl implements APIAdmin {
         return jsonObject.toJSONString();
     }
 
-    private void maskValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO){
+    private void maskValues(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                 .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
 
@@ -820,7 +890,7 @@ public class APIAdminImpl implements APIAdmin {
         List<ConfigurationDto> connectionConfigurations =
                 keyManagerConnectorConfiguration.getConnectionConfigurations();
         for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
-            if (connectionConfiguration.isMask()){
+            if (connectionConfiguration.isMask()) {
                 additionalProperties.replace(connectionConfiguration.getName(),
                         APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
             }
@@ -864,8 +934,8 @@ public class APIAdminImpl implements APIAdmin {
         if (workflowConfig.isListTasks()) {
             workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
                     status, tenantDomain);
-        } 
-        
+        }
+
         if (workflow == null) {
             String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
             throw new APIMgtResourceNotFoundException(msg);
@@ -876,17 +946,17 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * This method used to check the existence of the scope name for the particular user
      *
-     * @param username      username to be validated
-     * @param scopeName     scope to be validated
+     * @param username  username to be validated
+     * @param scopeName scope to be validated
      * @throws APIManagementException
      */
     public boolean isScopeExistsForUser(String username, String scopeName) throws APIManagementException {
-        if (APIUtil.isUserExist(username)){
+        if (APIUtil.isUserExist(username)) {
             Map<String, String> scopeRoleMapping =
                     APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
             if (scopeRoleMapping.containsKey(scopeName)) {
                 String[] userRoles = APIUtil.getListOfRoles(username);
-                return getRoleScopeList(userRoles,scopeRoleMapping).contains(scopeName);
+                return getRoleScopeList(userRoles, scopeRoleMapping).contains(scopeName);
             } else {
                 throw new APIManagementException("Scope Not Found.  Scope : " + scopeName + ",",
                         ExceptionCodes.SCOPE_NOT_FOUND);
@@ -894,16 +964,17 @@ public class APIAdminImpl implements APIAdmin {
         } else {
             throw new APIManagementException("User Not Found. Username :" + username + ",",
                     ExceptionCodes.USER_NOT_FOUND);
-         }
+        }
     }
 
     /**
      * This method used to check the existence of the scope name
-     * @param username      tenant username to get tenant-scope mapping
-     * @param scopeName     scope to be validated
+     *
+     * @param username  tenant username to get tenant-scope mapping
+     * @param scopeName scope to be validated
      * @throws APIManagementException
      */
-    public boolean isScopeExists(String username, String scopeName)  {
+    public boolean isScopeExists(String username, String scopeName) {
         Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
                 .getTenantDomain(username));
         return scopeRoleMapping.containsKey(scopeName);
@@ -912,8 +983,8 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * This method used to get the list of scopes of a user roles
      *
-     * @param userRoles             roles of a particular user
-     * @param scopeRoleMapping      scope-role mapping
+     * @param userRoles        roles of a particular user
+     * @param scopeRoleMapping scope-role mapping
      * @return scopeList            scope lost of a particular user
      * @throws APIManagementException
      */
@@ -966,5 +1037,28 @@ public class APIAdminImpl implements APIAdmin {
     public void deleteTenantTheme(int tenantId) throws APIManagementException {
 
         apiMgtDAO.deleteTenantTheme(tenantId);
+    }
+
+    @Override
+    public String getTenantConfig(String organization) throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+    }
+
+    @Override
+    public void updateTenantConfig(String organization, String config) throws APIManagementException {
+
+        Schema schema = APIUtil.retrieveTenantConfigJsonSchema();
+        if (schema != null) {
+            try {
+                org.json.JSONObject uploadedConfig = new org.json.JSONObject(config);
+                schema.validate(uploadedConfig);
+                APIUtil.validateRestAPIScopes(config);
+                ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(organization, config);
+            } catch (ValidationException | JSONException e) {
+                throw new APIManagementException("tenant-config validation failure", e, ExceptionCodes.INVALID_TENANT_CONFIG);
+            }
+        } else {
+            throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 }

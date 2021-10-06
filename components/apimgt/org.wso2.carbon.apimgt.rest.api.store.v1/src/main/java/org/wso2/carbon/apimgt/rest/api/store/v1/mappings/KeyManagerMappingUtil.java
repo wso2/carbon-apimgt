@@ -31,6 +31,7 @@ public class KeyManagerMappingUtil {
         keyManagerInfoDTO.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         keyManagerInfoDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerInfoDTO.setType(keyManagerConfigurationDTO.getType());
+        keyManagerInfoDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
         JsonElement grantTypesElement = jsonObject.get(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE);
         if (grantTypesElement instanceof JsonArray) {
@@ -57,13 +58,27 @@ public class KeyManagerMappingUtil {
             keyManagerInfoDTO.setEnableTokenHashing(
                     jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_HASH).getAsBoolean());
         }
-        if (jsonObject.has(APIConstants.KeyManager.TOKEN_ENDPOINT)){
+        if (jsonObject.has(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT) &&
+                !jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).isJsonNull() &&
+                !jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).getAsString().trim().isEmpty()) {
             keyManagerInfoDTO.setTokenEndpoint(
-                    jsonObject.get(APIConstants.KeyManager.TOKEN_ENDPOINT).getAsString());
+                    jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).getAsString());
+        } else {
+            if (jsonObject.has(APIConstants.KeyManager.TOKEN_ENDPOINT)){
+                keyManagerInfoDTO.setTokenEndpoint(
+                        jsonObject.get(APIConstants.KeyManager.TOKEN_ENDPOINT).getAsString());
+            }
         }
-        if (jsonObject.has(APIConstants.KeyManager.REVOKE_ENDPOINT)){
+        if (jsonObject.has(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT) &&
+                !jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).isJsonNull() &&
+                !jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).getAsString().trim().isEmpty()) {
             keyManagerInfoDTO.setRevokeEndpoint(
-                    jsonObject.get(APIConstants.KeyManager.REVOKE_ENDPOINT).getAsString());
+                    jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).getAsString());
+        } else {
+            if (jsonObject.has(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
+                keyManagerInfoDTO.setRevokeEndpoint(
+                        jsonObject.get(APIConstants.KeyManager.REVOKE_ENDPOINT).getAsString());
+            }
         }
         Map<String,String> additionalProperties = new HashMap<>();
         if (keyManagerConfigurationDTO.getAdditionalProperties()

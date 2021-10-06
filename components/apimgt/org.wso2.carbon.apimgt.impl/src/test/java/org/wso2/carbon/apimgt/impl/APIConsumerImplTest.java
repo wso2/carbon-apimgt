@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -123,7 +124,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
         ApplicationUtils.class, KeyManagerHolder.class, WorkflowExecutorFactory.class,
         AbstractApplicationRegistrationWorkflowExecutor.class, ServiceReferenceHolder.class, MultitenantUtils.class,
         RegistryUtils.class, Caching.class, APIPersistence.class, ApiMgtDAO.class })
-@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
+@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
@@ -187,54 +188,27 @@ public class APIConsumerImplTest {
         });
 
         PowerMockito.when(keyManagerConfigurationDTO.getOrganization()).thenReturn("carbon.super");
+        PowerMockito.when(keyManagerConfigurationDTO.getUuid()).thenReturn("kmv72L9T0oGtQcBwvgROZWCqd7oa");
+        PowerMockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
     }
 
     @Test
-    public void testReadMonetizationConfig() throws UserStoreException, RegistryException,
-            APIManagementException {
+    public void testReadMonetizationConfig() throws Exception {
 
-        APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryService.class);
         String json = "{\"EnableMonetization\":\"true\"}";
-        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString())).thenReturn(json);
+        JSONObject jsonObject = (JSONObject) new JSONParser().parse(json);
+        PowerMockito.when(APIUtil.class, "getTenantConfig", Mockito.anyString()).thenReturn(jsonObject);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        apiConsumer.apimRegistryService = apimRegistryService;
         boolean isEnabled = apiConsumer.isMonetizationEnabled(MultitenantConstants.TENANT_DOMAIN);
         assertTrue("Expected true but returned " + isEnabled, isEnabled);
-        Mockito.reset(apimRegistryService);
-
         // error path UserStoreException
-        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString()))
-                .thenThrow(UserStoreException.class);
+        PowerMockito.when(APIUtil.class, "getTenantConfig", Mockito.anyString()).thenThrow(APIManagementException.class);
         try {
             apiConsumer.isMonetizationEnabled(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             assertFalse(true);
         } catch (APIManagementException e) {
-            assertEquals("UserStoreException thrown when getting API tenant config from registry", e.getMessage());
+            assertTrue(true);
         }
-
-        // error path apimRegistryService
-        Mockito.reset(apimRegistryService);
-        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString()))
-                .thenThrow(RegistryException.class);
-        try {
-            apiConsumer.isMonetizationEnabled(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            assertFalse(true);
-        } catch (APIManagementException e) {
-            assertEquals("RegistryException thrown when getting API tenant config from registry", e.getMessage());
-        }
-
-        // error path ParseException
-        Mockito.reset(apimRegistryService);
-        String jsonInvalid = "{EnableMonetization:true}";
-        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(jsonInvalid);
-        try {
-            apiConsumer.isMonetizationEnabled(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            assertFalse(true);
-        } catch (APIManagementException e) {
-            assertEquals("ParseException thrown when passing API tenant config from registry", e.getMessage());
-        }
-
     }
 
     @Test
@@ -1237,11 +1211,11 @@ public class APIConsumerImplTest {
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
-        Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString(),Mockito.anyString())).thenReturn(true, false);
+        Mockito.when(apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(Mockito.anyInt(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
         keyManagerConfigurationsDto.setUuid(UUID.randomUUID().toString());
         keyManagerConfigurationsDto.setEnabled(true);
@@ -1256,14 +1230,15 @@ public class APIConsumerImplTest {
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT", "default", "carbon" +
-                    ".super");
+            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1",
+                    "refresh", "DEFAULT", "Resident Key Manager", "carbon.super");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("is used for another Application"));
+            Assert.assertTrue(e.getMessage().contains("Key Mappings already exists for application"));
         }
         Assert.assertEquals(8, apiConsumer.mapExistingOAuthClient("", "admin", "1",
-                "app1", "refresh", "DEFAULT", "default", "carbon.super").size());
+                "app1", "PRODUCTION", "DEFAULT", "Resident Key Manager",
+                "carbon.super").size());
     }
 
     @Test

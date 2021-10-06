@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * A subset of org.wso2.carbon.apimgt.persistence.models.PublisherAPI. Minimal API information required only for
@@ -36,6 +37,17 @@ public class PublisherAPIInfo {
     private String thumbnail; // thumbnail is not required for normal ApiGet
     private String createdTime;
     private Date updatedTime;
+    private String audience;
+    private Map<String, String> additionalProperties;
+    private String description;
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
 
     public String getApiName() {
         return apiName;
@@ -109,10 +121,26 @@ public class PublisherAPIInfo {
 
     public void setUpdatedTime(Date updatedTime) { this.updatedTime = updatedTime; }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
-        return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
-                + providerName + ", context=" + context + ", status=" + status + ", type=" + type + ", thumbnail="
-                + thumbnail + "]";
+        return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version=" +
+                version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
+                + type + ", thumbnail=" + thumbnail + "]";
+    }
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 }

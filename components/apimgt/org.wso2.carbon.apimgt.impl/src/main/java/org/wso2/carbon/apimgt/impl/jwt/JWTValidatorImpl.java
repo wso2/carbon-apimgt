@@ -28,15 +28,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 
 import java.io.IOException;
@@ -44,6 +43,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class JWTValidatorImpl implements JWTValidator {
@@ -210,7 +210,7 @@ public class JWTValidatorImpl implements JWTValidator {
 
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
-        jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());
+        jwtValidationInfo.setClaims(new HashMap<>(jwtClaimsSet.getClaims()));
         if (jwtClaimsSet.getExpirationTime() != null){
             jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
         }
@@ -219,10 +219,6 @@ public class JWTValidatorImpl implements JWTValidator {
         }
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
         jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
-        if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null) {
-            jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
-                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
-        }
     }
 
     private JWKSet retrieveJWKSet() throws IOException, ParseException {

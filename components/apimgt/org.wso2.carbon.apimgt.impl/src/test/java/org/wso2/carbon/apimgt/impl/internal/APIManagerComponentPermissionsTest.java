@@ -61,7 +61,7 @@ public class APIManagerComponentPermissionsTest {
         Mockito.when(carbonContext.getUserRealm()).thenReturn(realm);
         PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
         PowerMockito.when(APIUtil.class, "loadTenantExternalStoreConfig",
-                MultitenantConstants.SUPER_TENANT_ID).thenThrow(IndexOutOfBoundsException.class);
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).thenThrow(IndexOutOfBoundsException.class);
     }
 
     @Test

@@ -211,7 +211,7 @@ public class AbstractAPIManagerTestCase {
 
                 @Override
                 public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start,
-                        int end) throws APIManagementException {
+                        int end, String sortBy, String sortOrder) throws APIManagementException {
                     return null;
                 }
 
@@ -254,49 +254,11 @@ public class AbstractAPIManagerTestCase {
         value.setPublisherAPIInfoList(publisherAPIInfoList);
         
         PowerMockito.when(apiPersistenceInstance.searchAPIsForPublisher(any(Organization.class), any(String.class),
-                any(Integer.class), any(Integer.class), any(UserContext.class))).thenReturn(value);
+                any(Integer.class), any(Integer.class), any(UserContext.class), any(String.class), any(String.class))).thenReturn(value);
         List<API> apis = abstractAPIManager.getAllAPIs();
         Assert.assertNotNull(apis);
         Assert.assertEquals(apis.size(), 1);
 
-    }
-
-    @Test
-    public void testGetAPIbyUUID()
-            throws APIManagementException, GovernanceException, org.wso2.carbon.user.api.UserStoreException {
-        Mockito.when(tenantManager.getTenantId("test")).thenThrow(UserStoreException.class).thenReturn(-1234);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
-                tenantManager);
-        try {
-            abstractAPIManager.getAPIbyUUID("1", "test");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get API"));
-        }
-
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "sample");
-        Mockito.when(genericArtifact.getPath()).thenReturn("test");
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(genericArtifactManager.getGenericArtifact("1")).thenThrow(RegistryException.class)
-                .thenReturn(null, genericArtifact);
-
-        try {
-            abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN);
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get API"));
-        }
-        try {
-            abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN);
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("API artifact corresponding to artifactId"));
-        }
-        API api = abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN);
-        Assert.assertNotNull(api);
-        API api1 = abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN_1);
-        Assert.assertNotNull(api1);
-        Assert.assertEquals(api1.getId().getApiName(),SAMPLE_API_NAME);
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(abstractAPIManager.getAPIbyUUID("1", null).getId().getApiName(),SAMPLE_API_NAME);
     }
 
     @Test
@@ -1122,43 +1084,7 @@ public class AbstractAPIManagerTestCase {
         Assert.assertTrue(abstractAPIManager1.getIcon(identifier).getContentType().equals("api"));
     }
 
-    @Test
-    public void testGetSubscriberAPIs() throws APIManagementException, RegistryException {
-        Subscriber subscriber = new Subscriber("sub1");
-        Application application = new Application("app1", subscriber);
-        application.setId(1);
-        SubscribedAPI subscribedAPI1 = new SubscribedAPI(subscriber,
-                getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION));
-        subscribedAPI1.setUUID(SAMPLE_RESOURCE_ID);
-        SubscribedAPI subscribedAPI2 = new SubscribedAPI(subscriber, getAPIIdentifier("sample1", API_PROVIDER, "2.0.0"));
-        Set<SubscribedAPI> subscribedAPIs = new HashSet<SubscribedAPI>();
-        subscribedAPI1.setApplication(application);
-        subscribedAPI2.setApplication(application);
-        subscribedAPIs.add(subscribedAPI1);
-        subscribedAPIs.add(subscribedAPI2);
-        Mockito.when(apiMgtDAO.getSubscribedAPIs(Mockito.anyString(), (Subscriber) Mockito.any(), Mockito.anyString()))
-                .thenReturn(subscribedAPIs);
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, null, registry,
-                null, apiMgtDAO);
-        Resource resource = new ResourceImpl();
-        resource.setUUID(SAMPLE_RESOURCE_ID);
-        Mockito.when(registry.get(Mockito.anyString())).thenThrow(RegistryException.class).thenReturn(resource);
-        try {
-            abstractAPIManager.getSubscriberAPIs(subscriber, "testorg");
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get APIs for subscriber: "));
-        }
-        GenericArtifact artifact = getGenericArtifact(SAMPLE_API_NAME,API_PROVIDER,SAMPLE_API_VERSION,"sample_qname");
-        Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(artifact);
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.getAPI((GovernanceArtifact)Mockito.any(),(Registry)Mockito.any())).thenReturn(new API
-                (getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION)));
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(abstractAPIManager.getSubscriberAPIs(subscriber, "testorg").size(), 1);
 
-    }
 
     @Test
     public void testGetApplicationByUUID() throws APIManagementException {

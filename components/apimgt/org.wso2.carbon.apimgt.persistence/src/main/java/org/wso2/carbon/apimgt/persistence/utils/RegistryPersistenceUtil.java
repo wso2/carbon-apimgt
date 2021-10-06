@@ -17,10 +17,7 @@
 package org.wso2.carbon.apimgt.persistence.utils;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -77,8 +74,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -284,6 +279,7 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
 
+            artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCE, api.getAudience());
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -501,72 +497,6 @@ public class RegistryPersistenceUtil {
         }
 
     }
-    
-    public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
-
-        String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                                        + File.separator + "default-tiers" + File.separator;
-
-        String apiTierFilePath = tierBasePath + APIConstants.DEFAULT_API_TIER_FILE_NAME;
-        String appTierFilePath = tierBasePath + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
-        String resTierFilePath = tierBasePath + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
-
-        loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, apiTierFilePath);
-        loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, appTierFilePath);
-        loadTenantAPIPolicy(tenantID, APIConstants.RES_TIER_LOCATION, resTierFilePath);
-    }
-    /**
-     * Load the throttling policy  to the registry for tenants
-     *
-     * @param tenantID
-     * @param location
-     * @param fileName
-     * @throws APIManagementException
-     */
-    private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
-                                    throws APIManagementException {
-
-        InputStream inputStream = null;
-
-        try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-
-            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
-
-            if (govRegistry.resourceExists(location)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Tier policies already uploaded to the tenant's registry space");
-                }
-                return;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding API tier policies to the tenant's registry");
-            }
-            File defaultTiers = new File(fileName);
-            if (!defaultTiers.exists()) {
-                log.info("Default tier policies not found in : " + fileName);
-                return;
-            }
-            inputStream = FileUtils.openInputStream(defaultTiers);
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            govRegistry.put(location, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving policy information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading policy file content", e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    log.error("Error when closing input stream", e);
-                }
-            }
-        }
-    }
 
     /**
      * This method will return mounted path of the path if the path
@@ -727,6 +657,7 @@ public class RegistryPersistenceUtil {
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
 
             api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
+            api.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -1218,6 +1149,11 @@ public class RegistryPersistenceUtil {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    public static String getAsyncAPIDefinitionFilePath(String apiName, String apipVersion, String apiProvider) {
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apipVersion + RegistryConstants.PATH_SEPARATOR;
     }
     
     public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {

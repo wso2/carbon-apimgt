@@ -34,14 +34,13 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMappingCacheKey;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
-import org.wso2.carbon.apimgt.keymgt.model.entity.Policy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
-import org.wso2.carbon.base.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,23 +70,13 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, Subscription> subscriptionMap;
     private Map<String, Scope> scopesMap;
     private boolean apisInitialized;
-    private boolean applicationsInitialized;
-    private boolean subscriptionsInitialized;
-    private boolean applicationKeysInitialized;
-    private boolean applicationPoliciesInitialized;
-    private boolean subscriptionPoliciesInitialized;
     private boolean apiPoliciesInitialized;
-    private String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    private String tenantDomain;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
 
     public SubscriptionDataStoreImpl(String tenantDomain) {
 
         this.tenantDomain = tenantDomain;
-        initializeStore();
-    }
-
-    public SubscriptionDataStoreImpl() {
-
         initializeStore();
     }
 
@@ -103,6 +92,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.subscriptionMap = new ConcurrentHashMap<>();
         this.scopesMap = new ConcurrentHashMap<>();
         this.apiNameVersionMap = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void init() {
         initializeLoadingTasks();
     }
 
@@ -128,7 +121,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
                 addOrUpdateApplication(application);
             } else {
-                log.debug("Application not found. applicationId = " + application.getId());
+                log.debug("Application not found. applicationId = " + appId);
             }
         }
 
@@ -296,7 +289,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     public void initializeLoadingTasks() {
 
-        Runnable apiTask = new PopulateTask<String, API>(apiMap,
+        Runnable apiTask = new PopulateTask<>(apiMap,
                 () -> {
                     try {
                         log.debug("Calling loadAllApis. ");
@@ -317,14 +310,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         executorService.schedule(apiTask, 0, TimeUnit.SECONDS);
 
-        Runnable subscriptionLoadingTask = new PopulateTask<String, Subscription>(subscriptionMap,
+        Runnable subscriptionLoadingTask = new PopulateTask<>(subscriptionMap,
                 () -> {
                     try {
                         log.debug("Calling loadAllSubscriptions.");
-                        List<Subscription> subscriptionList =
-                                new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantDomain);
-                        subscriptionsInitialized = true;
-                        return subscriptionList;
+                        return new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantDomain);
                     } catch (APIManagementException e) {
                         log.error("Exception while loading Subscriptions " + e);
                     }
@@ -333,14 +323,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         executorService.schedule(subscriptionLoadingTask, 0, TimeUnit.SECONDS);
 
-        Runnable applicationLoadingTask = new PopulateTask<Integer, Application>(applicationMap,
+        Runnable applicationLoadingTask = new PopulateTask<>(applicationMap,
                 () -> {
                     try {
                         log.debug("Calling loadAllApplications.");
-                        List<Application> applicationList =
-                                new SubscriptionDataLoaderImpl().loadAllApplications(tenantDomain);
-                        applicationsInitialized = true;
-                        return applicationList;
+                        return new SubscriptionDataLoaderImpl().loadAllApplications(tenantDomain);
                     } catch (APIManagementException e) {
                         log.error("Exception while loading Applications " + e);
                     }
@@ -350,14 +337,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         executorService.schedule(applicationLoadingTask, 0, TimeUnit.SECONDS);
 
         Runnable keyMappingsTask =
-                new PopulateTask<ApplicationKeyMappingCacheKey, ApplicationKeyMapping>(applicationKeyMappingMap,
+                new PopulateTask<>(applicationKeyMappingMap,
                         () -> {
                             try {
                                 log.debug("Calling loadAllKeyMappings.");
-                                List<ApplicationKeyMapping> applicationKeyMappingList =
-                                        new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantDomain);
-                                applicationKeysInitialized = true;
-                                return applicationKeyMappingList;
+                                return new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantDomain);
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading ApplicationKeyMapping " + e);
                             }
@@ -367,7 +351,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         executorService.schedule(keyMappingsTask, 0, TimeUnit.SECONDS);
 
         Runnable apiPolicyLoadingTask =
-                new PopulateTask<String, ApiPolicy>(apiPolicyMap,
+                new PopulateTask<>(apiPolicyMap,
                         () -> {
                             try {
                                 log.debug("Calling loadAllSubscriptionPolicies.");
@@ -384,14 +368,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         executorService.schedule(apiPolicyLoadingTask, 0, TimeUnit.SECONDS);
 
         Runnable subPolicyLoadingTask =
-                new PopulateTask<String, SubscriptionPolicy>(subscriptionPolicyMap,
+                new PopulateTask<>(subscriptionPolicyMap,
                         () -> {
                             try {
                                 log.debug("Calling loadAllSubscriptionPolicies.");
-                                List<SubscriptionPolicy> subscriptionPolicyList =
-                                        new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantDomain);
-                                subscriptionPoliciesInitialized = true;
-                                return subscriptionPolicyList;
+                                return new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantDomain);
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading Subscription Policies " + e);
                             }
@@ -401,14 +382,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         executorService.schedule(subPolicyLoadingTask, 0, TimeUnit.SECONDS);
 
         Runnable appPolicyLoadingTask =
-                new PopulateTask<String, ApplicationPolicy>(appPolicyMap,
+                new PopulateTask<>(appPolicyMap,
                         () -> {
                             try {
                                 log.debug("Calling loadAllAppPolicies.");
-                                List<ApplicationPolicy> applicationPolicyList =
-                                        new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantDomain);
-                                applicationPoliciesInitialized = true;
-                                return applicationPolicyList;
+                                return new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantDomain);
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading Application Policies " + e);
                             }
@@ -434,40 +412,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         executorService.schedule(scopesLoadingTask, 0, TimeUnit.SECONDS);
     }
 
-    private <T extends Policy> T getPolicy(String policyName, int tenantId,
-                                           Map<String, T> policyMap) {
-
-        return policyMap.get(SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId));
-    }
-
     public boolean isApisInitialized() {
 
         return apisInitialized;
-    }
-
-    public boolean isApplicationsInitialized() {
-
-        return applicationsInitialized;
-    }
-
-    public boolean isSubscriptionsInitialized() {
-
-        return subscriptionsInitialized;
-    }
-
-    public boolean isApplicationKeysInitialized() {
-
-        return applicationKeysInitialized;
-    }
-
-    public boolean isApplicationPoliciesInitialized() {
-
-        return applicationPoliciesInitialized;
-    }
-
-    public boolean isSubscriptionPoliciesInitialized() {
-
-        return subscriptionPoliciesInitialized;
     }
 
     public boolean isApiPoliciesInitialized() {
@@ -475,21 +422,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return apiPoliciesInitialized;
     }
 
-    public boolean isSubscriptionValidationDataInitialized() {
-
-        return apisInitialized &&
-                applicationsInitialized &&
-                subscriptionsInitialized &&
-                applicationKeysInitialized &&
-                applicationPoliciesInitialized &&
-                subscriptionPoliciesInitialized &&
-                apiPoliciesInitialized;
-    }
-
     @Override
     public void addOrUpdateSubscription(Subscription subscription) {
+        String synchronizeKey = "SubscriptionDataStoreImpl-API-" + subscription.getCacheKey();
 
-        synchronized (subscriptionMap) {
+        synchronized (synchronizeKey.intern()) {
             Subscription retrievedSubscription = subscriptionMap.get(subscription.getCacheKey());
             if (retrievedSubscription == null) {
                 subscriptionMap.put(subscription.getCacheKey(), subscription);
@@ -654,18 +591,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         return scopesInitialized;
     }
-
-    @Override
-    public Subscription getSubscriptionsByUUIds(String apiUUID, String applicationUUID) {
-
-        for (Subscription subscription : subscriptionMap.values()) {
-            if (apiUUID.equals(subscription.getApiUUID()) && applicationUUID.equals(subscription.getApplicationUUID())) {
-                return subscription;
-            }
-        }
-        return null;
-    }
-
     @Override
     public Subscription getSubscriptionBySubscriptionUUID(String subscriptionUUID) {
 
@@ -675,6 +600,80 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<Application> getApplicationsByName(String name) {
+
+        List<Application> applicationList = new ArrayList<>();
+        if (applicationMap != null) {
+            for (Application application : applicationMap.values()) {
+                if (application.getName().equals(name)) {
+                    applicationList.add(application);
+                }
+            }
+        }
+        return applicationList;
+    }
+
+    @Override
+    public Application getApplicationByUUID(String uuid) {
+
+        if (applicationMap != null) {
+            for (Application application : applicationMap.values()) {
+                if (application.getUUID().equals(uuid)) {
+                    return application;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsByAPIId(int apiId) {
+
+        List<Subscription> subscriptionList = new ArrayList<>();
+        if (subscriptionMap != null) {
+            for (Subscription subscription : subscriptionMap.values()) {
+                if (subscription.getApiId() == apiId) {
+                    subscriptionList.add(subscription);
+                }
+            }
+        }
+        return subscriptionList;
+    }
+
+    @Override
+    public List<API> getAPIs() {
+
+        return new ArrayList<>(apiMap.values());
+    }
+
+    @Override
+    public Subscription getSubscriptionByUUID(String apiUUID, String appUUID) {
+
+        if (subscriptionMap != null) {
+            for (Subscription subscription : subscriptionMap.values()) {
+                if (subscription.getApiUUID().equals(apiUUID) && subscription.getApplicationUUID().equals(appUUID)) {
+                    return subscription;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<ApplicationKeyMapping> getKeyMappingByApplicationId(int applicationId) {
+
+        List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
+        if (applicationKeyMappingMap != null) {
+            for (ApplicationKeyMapping applicationKeyMapping : applicationKeyMappingMap.values()) {
+                if (applicationKeyMapping.getApplicationId() == applicationId) {
+                    applicationKeyMappings.add(applicationKeyMapping);
+                }
+            }
+        }
+        return applicationKeyMappings;
     }
 
     @Override
@@ -757,7 +756,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         API
     }
 
-    private class PopulateTask<K, V extends CacheableEntity<K>> implements Runnable {
+    private static class PopulateTask<K, V extends CacheableEntity<K>> implements Runnable {
 
         private Map<K, V> entityMap;
         private Supplier<List<V>> supplier;

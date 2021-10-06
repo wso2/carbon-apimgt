@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
@@ -136,8 +137,6 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(realmService.getTenantUserRealm(SUPER_TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
                 Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
-                Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(SUPER_TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(SUPER_TENANT_ID);
@@ -198,8 +197,6 @@ public class RegistryPersistenceImplTestCase {
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
-                Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
                 Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);
@@ -264,8 +261,6 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
         PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadloadTenantAPIRXT", Mockito.any(String.class),
                 Mockito.any(Integer.class));
-        PowerMockito.doNothing().when(RegistryPersistenceUtil.class, "loadTenantAPIPolicy", Mockito.any(String.class),
-                Mockito.any(Integer.class));
 
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(TENANT_ID);
@@ -304,6 +299,7 @@ public class RegistryPersistenceImplTestCase {
         String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
         apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
         String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiDescription = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
         String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
         String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
@@ -315,6 +311,9 @@ public class RegistryPersistenceImplTestCase {
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
         Assert.assertEquals("API UUID does not match", apiUUID, publisherAPI.getId());
+        Assert.assertEquals("API Description does not match", apiDescription, publisherAPI.getDescription());
+        Assert.assertEquals("API audience does not match", artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE),
+                publisherAPI.getAudience());
     }
     
     @Test
@@ -330,12 +329,14 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(registry.getTags(anyString())).thenReturn(tags);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
         String apiUUID = artifact.getId();
-        
+        String apiDescription = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
+
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         DevPortalAPI devAPI = apiPersistenceInstance.getDevPortalAPI(org, apiUUID);
         Assert.assertEquals("API UUID does not match", apiUUID, devAPI.getId());
+        Assert.assertEquals("API Description does not match", apiDescription, devAPI.getDescription());
     }
     
     @Test
@@ -517,6 +518,47 @@ public class RegistryPersistenceImplTestCase {
         Assert.assertEquals("API oas definition does not match", definition, def);
         
     }
+
+    @Test
+    public void testGetAsyncDefinition()
+            throws AsyncSpecPersistenceException, RegistryException, APIPersistenceException, APIManagementException {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
+        Mockito.doNothing().when(manager).updateGenericArtifact(artifact);
+
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
+                + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+
+        String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        PowerMockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
+        String definition = "{\"asyncapi\":\"2.0.0\",\"info\":{\"description\":\"This is a sample Async API\"}}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(definitionPath)).thenReturn(true);
+        Resource asyncResource = new ResourceImpl();
+        asyncResource.setContent(definition.getBytes());
+        Mockito.when(registry.get(definitionPath)).thenReturn(asyncResource);
+
+        String def = apiPersistenceInstance.getAsyncDefinition(org, apiUUID);
+        Assert.assertEquals("API Async definition does not match", definition, def);
+
+    }
     
     @Test
     public void testAddAPI() throws RegistryException, APIPersistenceException, APIManagementException {
@@ -533,7 +575,7 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(registry.get(anyString())).thenReturn(resource);
         Tag[] tags = new Tag[0];
         Mockito.when(registry.getTags(anyString())).thenReturn(tags);
-        
+
         PowerMockito.mockStatic(RegistryPersistenceUtil.class);
         GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
         PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))

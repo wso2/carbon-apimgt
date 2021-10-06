@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.kmclient.KMClientErrorDecoder;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIDConnectDiscoveryClient;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.application.common.model.ClaimConfig;
@@ -97,7 +99,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         keyManagerConfigurationDTO.setEnabled(identityProvider.isEnable());
                     }
                 } catch (IdentityProviderManagementException e) {
-                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
                             ExceptionCodes.IDP_RETRIEVAL_FAILED);
                 }
             }
@@ -115,21 +117,12 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
-        if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfigurationDTO.getTokenType())) {
-            try {
-                if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
-                    IdentityProviderManager.getInstance()
-                            .deleteIdPByResourceId(keyManagerConfigurationDTO.getExternalReferenceId(),
-                                    APIUtil.getInternalOrganizationDomain(organization));
-                }
-            } catch (IdentityProviderManagementException e) {
-                throw new APIManagementException("IdP deletion failed. " + e.getMessage(),
-                        ExceptionCodes.IDP_DELETION_FAILED);
-            }
-        }
-        apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerId);
+        apiAdmin.deleteIdentityProvider(organization, keyManagerConfigurationDTO);
+        apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerConfigurationDTO);
 
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
+                RestApiCommonUtil.getLoggedInUsername());
         return Response.ok().build();
     }
 
@@ -152,7 +145,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         mergeIdpWithKeyManagerConfiguration(identityProvider, keyManagerDTO);
                     }
                 } catch (IdentityProviderManagementException e) {
-                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(),
+                    throw new APIManagementException("IdP retrieval failed. " + e.getMessage(), e,
                             ExceptionCodes.IDP_RETRIEVAL_FAILED);
                 }
             }
@@ -190,6 +183,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 }
                 KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO =
                         apiAdmin.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                        new Gson().toJson(keyManagerConfigurationDTO),
+                        APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
                 return Response.ok(KeyManagerMappingUtil.toKeyManagerDTO(retrievedKeyManagerConfigurationDTO)).build();
             }
         } catch (APIManagementException e) {
@@ -198,7 +194,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                             organization;
             RestApiUtil.handleInternalServerError(error, e, log);
         } catch (IdentityProviderManagementException e) {
-            throw new APIManagementException("IdP adding failed. " + e.getMessage(), ExceptionCodes.IDP_ADDING_FAILED);
+            throw new APIManagementException("IdP adding failed. " + e.getMessage(), e,
+                    ExceptionCodes.IDP_ADDING_FAILED);
         }
         return null;
     }
@@ -221,6 +218,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             }
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
+                    new Gson().toJson(keyManagerConfigurationDTO),
+                    APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
             return Response.created(location)
                     .entity(KeyManagerMappingUtil.toKeyManagerDTO(createdKeyManagerConfiguration)).build();
@@ -228,7 +228,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             String error = "Error while Creating Key Manager configuration in organization " + organization;
             RestApiUtil.handleInternalServerError(error, e, log);
         } catch (IdentityProviderManagementException e) {
-            throw new APIManagementException("IdP adding failed. " + e.getMessage(), ExceptionCodes.IDP_ADDING_FAILED);
+            throw new APIManagementException("IdP adding failed. " + e.getMessage(), e,
+                    ExceptionCodes.IDP_ADDING_FAILED);
         }
         return null;
     }

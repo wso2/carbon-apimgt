@@ -76,12 +76,6 @@ public final class APIConstants {
 
     public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
 
-    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
-
-    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
-
-    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
-
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
     public static final int TIER_API_TYPE = 0;
@@ -89,12 +83,6 @@ public final class APIConstants {
     public static final int TIER_RESOURCE_TYPE = 1;
 
     public static final int TIER_APPLICATION_TYPE = 2;
-
-    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
-
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
-
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
@@ -585,6 +573,7 @@ public final class APIConstants {
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
+    public static final String ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER = "EnableUserClaimRetrievalFromKeyManager";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
@@ -603,6 +592,10 @@ public final class APIConstants {
     public static final String DEFAULT_WEBSUB_SIGNING_ALGO = "SHA1";
     public static final String DEFAULT_WEBSUB_SIGNATURE_HEADER = "x-hub-signature";
     public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
+
+    // Constants for for api quota limit feature
+    public static final String API_QUOTA_LIMIT = "ResourceQuotaLimit.";
+    public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
 
     public static class TokenStatus {
 
@@ -737,6 +730,8 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
+    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -772,6 +767,12 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
+    public static final String JWT_AUDIENCES = "JWTAudiences";
+    public static final String JWT_AUDIENCE = "JWTAudience";
+    public static final String AUDIENCE = "Audience";
+    public static final String BASEPATH = "Basepath";
+    public static final String URN_CHOREO = "urn:choreo:";
+    public static final String BASE_PATH = "http.base.path";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
 
@@ -818,6 +819,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
     public static final String API_PUBLISHER_INTERNAL_API_KEY_ALIAS = API_PUBLISHER + "InternalKeyAlias";
+    public static final String API_PUBLISHER_SUPPORTED_DOC_TYPES = API_PUBLISHER + "SupportedDocumentTypes";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -832,10 +834,6 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
     public static final String EXTERNAL_API_STORE_PASSWORD = "Password";
 
-    public static final String AUTH_MANAGER = "AuthManager.";
-    public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
-    public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
-    public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
     public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
@@ -859,7 +857,7 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
     public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
     public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
-    
+
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
@@ -1240,6 +1238,7 @@ public final class APIConstants {
 
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";
@@ -1410,6 +1409,7 @@ public final class APIConstants {
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
     public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
+    public static final String PROXY_PROTOCOL = "ProxyConfig.Protocol";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -1478,8 +1478,6 @@ public final class APIConstants {
     }
 
     public static class ConfigParameters {
-
-        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
 
         private ConfigParameters() {
 
@@ -1864,6 +1862,7 @@ public final class APIConstants {
 
         public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
         public static final String DATA_PUBLISHER_CONFIGURAION_TYPE = "Type";
+        public static final String PROPERTIES_CONFIGURATION = "Properties";
         public static final String DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP = "ReceiverUrlGroup";
         public static final String DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP = "AuthUrlGroup";
         public static final String USERNAME = "Username";
@@ -1944,9 +1943,11 @@ public final class APIConstants {
         public static final String DELETED = "deleted";
 
         public static final String API = "API";
+        public static final String ORGANIZATION = "Organization";
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
+        public static final String KEY_MANAGER = "KeyManager/IdP";
 
         public static final String NAME = "name";
         public static final String VERSION = "version";
@@ -1980,6 +1981,12 @@ public final class APIConstants {
         public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
         public static final String LIST_PENDING_TASKS = "ListPendingTasks";
 
+    }
+
+    public static class AccessTokenBinding {
+
+        public static final String ACCESS_TOKEN_BINDING = "AccessTokenBinding";
+        public static final String ACCESS_TOKEN_BINDING_ENABLED = ACCESS_TOKEN_BINDING + ".Enabled";
     }
 
     public static class JwtTokenConstants {
@@ -2038,7 +2045,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL, WEBSUB, SSE
+        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK
     }
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
@@ -2235,7 +2242,7 @@ public final class APIConstants {
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
 
-    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "InternalKeyStore";
+    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "KeyStore";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String DEFAULT_API_KEY_GENERATOR_IMPL = "org.wso2.carbon.apimgt.impl.token" +
             ".DefaultApiKeyGenerator";
@@ -2272,10 +2279,10 @@ public final class APIConstants {
                 "/client-registration/" + REST_API_OLD_VERSION + "/register";
     }
 
-    public static final int MAX_LENGTH_API_NAME = 50;
+    public static final int MAX_LENGTH_API_NAME = 60;
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
-    public static final int MAX_LENGTH_CONTEXT = 82; //context becomes context + version + two '/'. so max context is 50
+    public static final int MAX_LENGTH_CONTEXT = 232; //context becomes context + version + two '/'. Max context is 200
     public static final int MAX_LENGTH_MEDIATION_POLICY_NAME = 255;
 
     /**
@@ -2404,7 +2411,9 @@ public final class APIConstants {
         public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
         public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
+        public static final String DISPLAY_TOKEN_ENDPOINT = "display_token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
+        public static final String DISPLAY_REVOKE_ENDPOINT = "display_revoke_endpoint";
         public static final String WELL_KNOWN_ENDPOINT = "well_known_endpoint";
         public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
         public static final String AVAILABLE_GRANT_TYPE = "grant_types";
@@ -2465,6 +2474,9 @@ public final class APIConstants {
         public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
         public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
         public static final String NOT_APPLICABLE_VALUE = "N/A";
+        public static final String PKCE_MANDATORY = "pkceMandatory";
+        public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
+        public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
 
         public static class KeyManagerEvent {
 
@@ -2573,6 +2585,7 @@ public final class APIConstants {
     public static class AsyncApi {
         public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
         public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
+        public static final String ASYNC_DEFAULT_SUBSCRIBER = "x-default-subscriber";
     }
 
     public static class TopicNames {
@@ -2658,6 +2671,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 
     //Constants related to user password
@@ -2692,11 +2706,13 @@ public final class APIConstants {
     public static final String METADATA_FILE_NAME = "metadata";
     public static final String METADATA_FILE = "metadata.yaml";
     public static final String DEFINITION_FILE = "definition.yaml";
+    public static final String DEFINITION_WSDL_FILE = "definition.wsdl";
     public static final String KEY_SEPARATOR = "-";
     public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
+    public static final String PROXY_SERVICE_NAME_SUFFIX = "_proxy";
 
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 
@@ -2743,6 +2759,29 @@ public final class APIConstants {
     public static class GatewayArtifactConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
+    }
+
+    public static class OrganizationDeletion {
+        public static final String API_RETRIEVER = "APIRetriever";
+        public static final String API_DB_DATA_REMOVER = "APIDataRemover";
+        public static final String ARTIFACT_SERVER_DATA_REMOVER = "ArtifactRemover";
+        public static final String GW_ARTIFACT_DATA_REMOVER = "GWArtifactRemover";
+        public static final String API_ARTIFACT_DATA_REMOVER = "APIArtifactRemover";
+        public static final String API_ORG_EXIST = "APIOrganizationExist";
+
+        public static final String PENDING_SUBSCRIPTION_REMOVAL = "PendingSubscriptionRemoval";
+        public static final String APPLICATION_CREATION_WF_REMOVAL = "ApplicationCreationWFRemoval";
+        public static final String APPLICATION_REGISTRATION_REMOVAL = "ApplicationRegistrationRemoval";
+        public static final String APPLICATION_REMOVAL = "ApplicationRemoval";
+        public static final String APPLICATION_ORG_EXIST = "ApplicationOrganizationExist";
+
+        public static final String PENDING = "Pending";
+        public static final String COMPLETED = "Completed";
+        public static final String FAIL = "Fail";
+        public static final String KM_RETRIEVER = "KMRetriever";
+        public static final String IDP_DATA_REMOVER = "IDPDataRemover";
+        public static final String KM_DATA_REMOVER = "KMDataRemover";
+        public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
     }
 
     public static final String  PROPERTY_QUERY_KEY = "query";

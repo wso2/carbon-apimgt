@@ -39,9 +39,7 @@ public class WebhooksExtensionHandler extends APIManagerExtensionHandler {
     private String eventReceiverResourcePath = APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
 
     public boolean handleRequest(MessageContext synCtx) {
-        if (GatewayUtils.isAPIStatusPrototype(synCtx)) {
-            return true;
-        }
+
         String requestSubPath = getRequestSubPath(synCtx);
         if (requestSubPath.startsWith(eventReceiverResourcePath)) {
             return super.handleRequest(synCtx);
