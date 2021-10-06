@@ -60,6 +60,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
+    private String gatewayVendor;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -302,6 +303,10 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
 
 
     @Override
@@ -313,7 +318,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", apiCategories="
+                + ", environments=" + environments + ", gatewayVendor=" + gatewayVendor + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
