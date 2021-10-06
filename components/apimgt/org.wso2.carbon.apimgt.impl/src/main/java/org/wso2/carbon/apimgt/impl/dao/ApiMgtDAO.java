@@ -5558,7 +5558,8 @@ public class ApiMgtDAO {
             prepStmt.setString(10, api.getUUID());
             prepStmt.setString(11, APIConstants.CREATED);
             prepStmt.setString(12, organization);
-            prepStmt.setString(13, api.getVersionTimestamp());
+            prepStmt.setString(13, api.getGatewayVendor());
+            prepStmt.setString(14, api.getVersionTimestamp());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -6914,7 +6915,8 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(6, api.getApiLevelPolicy());
             prepStmt.setString(7, api.getType());
-            prepStmt.setString(8, api.getUuid());
+            prepStmt.setString(8, api.getGatewayVendor());
+            prepStmt.setString(9, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
@@ -8140,6 +8142,41 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error occurred while fetching organization", e);
+        }
+        return organization;
+    }
+
+    /**
+     * Retrieve the gateway vendor of an API by providing the UUID
+     *
+     * @param apiId UUID of the API
+     * @return gatewayVendor of the API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException {
+        String organization = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_GATEWAY_VENDOR_BY_API_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiId);
+                result = ps.executeQuery();
+
+                while (result.next()) {
+                    organization = result.getString("GATEWAY_VENDOR");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching gateway vendor" +
+                        " of the API", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching gateway vendor of the API", e);
         }
         return organization;
     }

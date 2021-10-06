@@ -1421,8 +1421,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION, VERSION_TIMESTAMP)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION, GATEWAY_VENDOR, VERSION_TIMESTAMP)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1634,11 +1634,14 @@ public class SQLConstants {
                     "   UPDATED_BY = ?," +
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
-                    "   API_TYPE = ? " +
+                    "   API_TYPE = ?, " +
+                    "   GATEWAY_VENDOR = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
     public static final String GET_ORGANIZATION_BY_API_ID = "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?";
+
+    public static final String GET_GATEWAY_VENDOR_BY_API_ID = "SELECT GATEWAY_VENDOR FROM AM_API WHERE API_UUID = ?";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
