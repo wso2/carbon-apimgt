@@ -5687,7 +5687,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalAPI);
-                    /// populate relavant external info
+                    // populate relevant external info
                     // environment
                     String environmentString = null;
                     if (api.getEnvironments() != null) {
