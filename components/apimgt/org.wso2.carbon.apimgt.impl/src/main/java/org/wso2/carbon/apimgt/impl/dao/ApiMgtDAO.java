@@ -14322,6 +14322,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.setString(10, apiProduct.getState());
             prepStmtAddAPIProduct.setString(11, organization);
+            prepStmtAddAPIProduct.setString(12, apiProduct.getGatewayVendor());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -14653,10 +14654,11 @@ public class ApiMgtDAO {
             ps.setString(1, product.getProductLevelPolicy());
             ps.setString(2, username);
             ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, product.getGatewayVendor());
             APIProductIdentifier identifier = product.getId();
-            ps.setString(4, identifier.getName());
-            ps.setString(5, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(6, identifier.getVersion());
+            ps.setString(5, identifier.getName());
+            ps.setString(6, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(7, identifier.getVersion());
             ps.executeUpdate();
 
             int productId = getAPIID(product.getUuid(), conn);
