@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -69,6 +70,7 @@ public class ServiceReferenceHolder {
     private ResourceQuotaLimiter resourceQuotaLimiter;
     private EventPublisherFactory eventPublisherFactory;
     private APIMConfigService apimConfigService;
+    private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
 
     private ServiceReferenceHolder() {
 
@@ -319,5 +321,21 @@ public class ServiceReferenceHolder {
             return apimConfigService;
         }
         return new APIMConfigServiceImpl();
+    }
+
+
+    public void addExternalGatewayDeployer(String type, ExternalGatewayDeployer deployer) {
+
+        externalGatewayDeployers.put(type, deployer);
+    }
+
+    public void removeExternalGatewayDeployer(String type) {
+
+        externalGatewayDeployers.remove(type);
+    }
+
+    public ExternalGatewayDeployer getExternalGatewayDeployer(String type) {
+
+        return externalGatewayDeployers.get(type);
     }
 }
