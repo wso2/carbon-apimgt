@@ -685,13 +685,23 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String apiSourcePath = apiPath.substring(0, prependIndex );
                 String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+                String asyncApiDefinitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
 
                 if (registry.resourceExists(definitionPath)) {
                     Resource apiDocResource = registry.get(definitionPath);
                     String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                     api.setSwaggerDefinition(apiDocContent);
                 }
-                
+
+                if (asyncApiDefinitionPath != null) {
+                    if (registry.resourceExists(asyncApiDefinitionPath)) {
+                        Resource apiDocResource = registry.get(asyncApiDefinitionPath);
+                        String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                        api.setAsyncApiDefinition(apiDocContent);
+                    }
+                }
+
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                     List<SOAPToRestSequence> list = getSoapToRestSequences(registry, api, Direction.IN);
                     list.addAll(getSoapToRestSequences(registry, api, Direction.OUT));
@@ -975,6 +985,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
@@ -1324,6 +1335,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                                 apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                                 apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+                                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                                 apiInfo.setStatus(status);
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));

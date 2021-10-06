@@ -279,6 +279,12 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
 
+            //set gateway vendor for the API
+            artifact.setAttribute(APIConstants.API_GATEWAY_VENDOR, api.getGatewayVendor());
+
+            //set async transport protocols for the API
+            artifact.setAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS, api.getAsyncTransportProtocols());
+
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCE, api.getAudience());
 
         } catch (GovernanceException e) {

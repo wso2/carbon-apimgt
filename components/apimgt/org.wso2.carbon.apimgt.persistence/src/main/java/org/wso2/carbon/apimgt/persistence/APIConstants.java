@@ -367,4 +367,7 @@ public final class APIConstants {
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
 
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
+
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
+    public static final String ASYNC_API_TRANSPORT_PROTOCOLS = "asyncTransportProtocols";
 }
