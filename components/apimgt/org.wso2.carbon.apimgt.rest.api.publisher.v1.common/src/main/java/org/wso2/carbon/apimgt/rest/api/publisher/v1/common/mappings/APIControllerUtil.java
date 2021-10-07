@@ -294,12 +294,14 @@ public class APIControllerUtil {
         for (String endpointType : endpointTypes) {
             if (security.has(endpointType)) {
                 JsonObject endpointSecurityDetails = security.get(endpointType).getAsJsonObject();
-                if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_ENABLED)) {
-                    String securityEnabled = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED)
-                            .getAsString();
+                if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_ENABLED) && (
+                        endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED) != null
+                                || !endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED).isJsonNull())) {
+                    boolean securityEnabled = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED)
+                            .getAsBoolean();
 
                     // Set endpoint security details to API
-                    if (Boolean.parseBoolean(securityEnabled)) {
+                    if (securityEnabled) {
                         String endpointSecurityType;
                         if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_TYPE) && (
                                 endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE) != null
@@ -340,17 +342,20 @@ public class APIControllerUtil {
                                     ExceptionCodes.ERROR_READING_PARAMS_FILE);
                         }
                     } else {
-                        // Even though the security field is defined, if either production/sandbox is not defined
-                        // under that,set endpoint security to none. Otherwise the security will be blank if you
-                        // check from the UI.
-                        JsonObject endpointSecurityForNotDefinedEndpointType = new JsonObject();
-                        endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
                                 ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE);
-                        endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED,
-                                Boolean.FALSE);
-                        security.add(endpointType, endpointSecurityForNotDefinedEndpointType);
                     }
                 }
+            } else {
+                // Even though the security field is defined, if either production/sandbox is not defined
+                // under that,set endpoint security to none. Otherwise the security will be blank if you
+                // check from the UI.
+                JsonObject endpointSecurityForNotDefinedEndpointType = new JsonObject();
+                endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE);
+                endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED,
+                        Boolean.FALSE);
+                security.add(endpointType, endpointSecurityForNotDefinedEndpointType);
             }
         }
         endpointConfig.add(APIConstants.ENDPOINT_SECURITY, security);
