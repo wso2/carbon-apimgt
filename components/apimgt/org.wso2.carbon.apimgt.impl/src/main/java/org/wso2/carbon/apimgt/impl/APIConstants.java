@@ -596,6 +596,7 @@ public final class APIConstants {
     // Constants for for api quota limit feature
     public static final String API_QUOTA_LIMIT = "ResourceQuotaLimit.";
     public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
+    public static final String JWKS_URI = "jwksUri";
 
     public static class TokenStatus {
 
