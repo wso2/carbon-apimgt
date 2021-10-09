@@ -126,7 +126,6 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             if (oldKeyManagerConfigurationDTO == null) {
                 throw new APIManagementException("Requested KeyManager not found",
                         ExceptionCodes.KEY_MANAGER_NOT_FOUND);
-
             } else {
                 if (!oldKeyManagerConfigurationDTO.getName().equals(keyManagerConfigurationDTO.getName())) {
                     RestApiUtil.handleBadRequest("Key Manager name couldn't able to change", log);

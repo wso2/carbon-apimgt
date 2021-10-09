@@ -303,7 +303,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                 }
             }
         } else {
-            throw new APIManagementException("Invalid Key Manager Type " + type, ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            throw new APIManagementException("Invalid Key Manager Type " + type, ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
     }
 }
