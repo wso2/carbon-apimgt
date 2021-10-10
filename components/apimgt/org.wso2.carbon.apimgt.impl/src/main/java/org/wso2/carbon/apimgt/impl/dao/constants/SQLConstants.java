@@ -3732,14 +3732,25 @@ public class SQLConstants {
         public static final String IS_RESOURCE_ENDPOINT_USED =
                 "SELECT * FROM AM_API_RESOURCE_ENDPOINT_MAPPING WHERE ENDPOINT_UUID = ?";
 
-        public static final String GET_CHANGE_ENDPOINT_POLICY_UUID =
+        public static final String GET_CHANGE_ENDPOINT_POLICY_UUID_OF_CURRENT_API =
                 "SELECT " +
                 "OPM.OPERATION_POLICY_MAPPING_ID, OPM.DIRECTION, OPM.PARAMETERS " +
                 "FROM AM_API_OPERATION_POLICY_MAPPING OPM " +
                 "LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? " +
-                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "'";
+                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
+                "AND AUM.REVISION_UUID IS NULL";
+
+        public static final String GET_CHANGE_ENDPOINT_POLICY_UUID_OF_REVISION =
+                "SELECT " +
+                "OPM.OPERATION_POLICY_MAPPING_ID, OPM.DIRECTION, OPM.PARAMETERS " +
+                "FROM AM_API_OPERATION_POLICY_MAPPING OPM " +
+                "LEFT JOIN AM_API_URL_MAPPING AUM " +
+                "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                "WHERE AUM.API_ID = ? " +
+                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
+                "AND AUM.REVISION_UUID = ?";
     }
 
     /**
