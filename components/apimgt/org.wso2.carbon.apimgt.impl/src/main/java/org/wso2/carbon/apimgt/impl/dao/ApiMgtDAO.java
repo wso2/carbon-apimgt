@@ -5777,23 +5777,31 @@ public class ApiMgtDAO {
             uriScopeMappingPrepStmt.executeBatch();
             operationPolicyMappingPrepStmt.executeBatch();
             if (changeBackendPolicyExists) {
-                addResourceEndpointMappings(apiId, tenantId, connection);
+                addResourceEndpointMappings(apiId, null, tenantId, connection);
             }
         }
     }
 
-    private void addResourceEndpointMappings(int apiId, int tenantId, Connection connection)
+    private void addResourceEndpointMappings(int apiId, String revisionUUID, int tenantId, Connection connection)
             throws SQLException, APIManagementException {
         OperationPolicy policy = null;
         String endpointId = null;
-        try (PreparedStatement getPolicyStmt = connection
-                .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUID);
+        String query = null;
+
+        if (revisionUUID == null) {
+            query = SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUID_OF_CURRENT_API;
+        } else {
+            query = SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUID_OF_REVISION;
+        }
+        try (PreparedStatement getPoliciesStmt = connection.prepareStatement(query);
             PreparedStatement addResourceEndpointMapping = connection
                     .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT_MAPPING)) {
-            getPolicyStmt.setInt(1, apiId);
-            try (ResultSet rs = getPolicyStmt.executeQuery()) {
-                //there can't be more than one change endpoint policy per resource
-                if (rs.next()) {
+            getPoliciesStmt.setInt(1, apiId);
+            if (revisionUUID != null) {
+                getPoliciesStmt.setString(2, revisionUUID);
+            }
+            try (ResultSet rs = getPoliciesStmt.executeQuery()) {
+                while (rs.next()) {
                     policy = new OperationPolicy();
                     policy.setId(rs.getInt("OPERATION_POLICY_MAPPING_ID"));
                     policy.setDirection(rs.getString("DIRECTION"));
@@ -5812,12 +5820,9 @@ public class ApiMgtDAO {
 
                     addResourceEndpointMapping.setInt(1, policy.getId());
                     addResourceEndpointMapping.setString(2, endpointId);
-                    addResourceEndpointMapping.execute();
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No CHANGE_ENDPOINT policy found for API " + apiId);
-                    }
+                    addResourceEndpointMapping.addBatch();
                 }
+                addResourceEndpointMapping.executeBatch();
             }
         }
     }
@@ -16157,16 +16162,17 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement insertOperationPolicyMappingStatement = connection
                         .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY);
+                boolean changeBackendPolicyExists = false;
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
-                    if (urlMapping.getScopes() != null) {
-                        getRevisionedURLMappingsStatement.setInt(1, apiId);
-                        getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
-                        getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
-                        getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
-                        getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
-                        getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
-                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
-                            while (rs.next()) {
+                    getRevisionedURLMappingsStatement.setInt(1, apiId);
+                    getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                    getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
+                    getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
+                    getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
+                    getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                        while (rs.next()) {
+                            if (urlMapping.getScopes() != null) {
                                 for (Scope scope : urlMapping.getScopes()) {
                                     insertScopeResourceMappingStatement.setString(1, scope.getKey());
                                     insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
@@ -16174,38 +16180,27 @@ public class ApiMgtDAO {
                                     insertScopeResourceMappingStatement.addBatch();
                                 }
                             }
-                        }
-                    }
-                    if (urlMapping.getId() != 0) {
-                        getRevisionedURLMappingsStatement.setInt(1, apiId);
-                        getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
-                        getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
-                        getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
-                        getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
-                        getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
-                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
-                            while (rs.next()) {
+
+                            if (urlMapping.getId() != 0) {
                                 insertProductResourceMappingStatement.setInt(1, urlMapping.getId());
                                 insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
                                 insertProductResourceMappingStatement.addBatch();
                             }
-                        }
-                    }
-                    if (urlMapping.getId() != 0) {
-                        getRevisionedURLMappingsStatement.setInt(1, apiId);
-                        getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
-                        getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
-                        getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
-                        getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
-                        getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
-                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
-                            while (rs.next()) {
+
+                            if (urlMapping.getOperationPolicies().size() > 0) {
                                 for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    String policyType = policy.getPolicyType().toString();
+                                    if (!StringUtils.isEmpty(policyType) && policyType
+                                            .equalsIgnoreCase(OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString())) {
+                                        changeBackendPolicyExists = true;
+                                    }
+
                                     Gson gson = new Gson();
                                     String paramJSON = gson.toJson(policy.getParameters());
 
                                     insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                    insertOperationPolicyMappingStatement.setString(2, policy.getPolicyType().toString());
+                                    insertOperationPolicyMappingStatement
+                                            .setString(2, policyType);
                                     insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                     insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                     insertOperationPolicyMappingStatement.addBatch();
@@ -16217,6 +16212,9 @@ public class ApiMgtDAO {
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
                 insertOperationPolicyMappingStatement.executeBatch();
+                if (changeBackendPolicyExists) {
+                    addResourceEndpointMappings(apiId, apiRevision.getRevisionUUID(), tenantId, connection);
+                }
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 PreparedStatement getClientCertificatesStatement = connection
@@ -16937,6 +16935,7 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement insertOperationPolicyMappingStatement = connection
                         .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY);
+                boolean changeBackendPolicyExists = false;
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     if (urlMapping.getScopes() != null) {
                         getCurrentAPIURLMappingsStatement.setInt(1, apiId);
@@ -16978,11 +16977,16 @@ public class ApiMgtDAO {
                         try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
                             while (rs.next()) {
                                 for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    String policyType = policy.getPolicyType().toString();
+                                    if (!StringUtils.isEmpty(policyType) && policyType
+                                            .equalsIgnoreCase(OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString())) {
+                                        changeBackendPolicyExists = true;
+                                    }
+
                                     Gson gson = new Gson();
                                     String paramJSON = gson.toJson(policy.getParameters());
-
                                     insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                    insertOperationPolicyMappingStatement.setString(2, policy.getPolicyType().toString());
+                                    insertOperationPolicyMappingStatement.setString(2, policyType);
                                     insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
                                     insertOperationPolicyMappingStatement.setString(4, paramJSON);
                                     insertOperationPolicyMappingStatement.addBatch();
@@ -16994,6 +16998,10 @@ public class ApiMgtDAO {
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
                 insertOperationPolicyMappingStatement.executeBatch();
+
+                if (changeBackendPolicyExists) {
+                    addResourceEndpointMappings(apiId, null, tenantId, connection);
+                }
 
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
                 PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
