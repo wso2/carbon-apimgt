@@ -4936,6 +4936,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         //todo: check whether the endpoint is used in a policy
+        if (apiProvider.isResourceEndpointUsed(endpointId)) {
+            throw new APIManagementException("Cannot remove the Resource Endpoint " + endpointId + " as it is used in "
+                    + "an operation level mediation policy",
+                    ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_ALREADY_USED, endpointId));
+        }
         apiProvider.deleteResourceEndpoint(endpointId, organization);
         return Response.ok().build();
     }
