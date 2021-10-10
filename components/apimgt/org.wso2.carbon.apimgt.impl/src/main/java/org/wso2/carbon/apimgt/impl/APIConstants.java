@@ -2867,6 +2867,7 @@ public final class APIConstants {
     public static final String RESOURCE_PATH_PARAM = "resourcePath";
     public static final String QUERY_PARAM_NAME = "paramName";
     public static final String QUERY_PARAM_VALUE = "paramValue";
+    public static final String ENDPOINT_ID_PARAM = "endpointId";
     public static final String PAYLOAD = "payload";
     public static final String CONTENT_TYPE = "contentType";
     public static final String HEADERS = "headers";

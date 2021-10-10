@@ -2514,8 +2514,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 requiredParameters = "'headerName'";
                             }
                             break;
-                        case REWRITE_ENDPOINT:
-                            //todo add correct impl
+                        case CHANGE_ENDPOINT:
+                            if (!parameters.containsKey(APIConstants.ENDPOINT_ID_PARAM) || StringUtils
+                                    .isEmpty(parameters.get(APIConstants.ENDPOINT_ID_PARAM))) {
+                                valid = false;
+                                requiredParameters = "'endpointId'";
+                            } else if (!isAPIResourceEndpointExists(api.getUuid(), parameters.get(APIConstants.ENDPOINT_ID_PARAM),
+                                    tenantDomain)) {
+                                throw new APIManagementException(
+                                        "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM) + "not found for API " + api.getUuid(),
+                                        ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND,
+                                                parameters.get(APIConstants.ENDPOINT_ID_PARAM)));
+                            }
                             break;
                         case REWRITE_HTTP_METHOD:
                             if (!parameters.containsKey(APIConstants.HTTP_METHOD_PARAM) ||
@@ -9577,5 +9587,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void deleteResourceEndpoint(String uuid, String organization) throws APIManagementException {
         apiMgtDAO.deleteResourceEndpoint(uuid, organization);
+    }
+
+    @Override
+    public boolean isAPIResourceEndpointExists(String apiId, String endpointId, String organization) throws APIManagementException {
+        return apiMgtDAO.isAPIResourceEndpointExists(apiId, endpointId, organization);
+    }
+
+    @Override
+    public boolean isResourceEndpointUsed(String uuid) throws APIManagementException {
+        return apiMgtDAO.isResourceEndpointUsed(uuid);
     }
 }

@@ -1906,4 +1906,25 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deleteResourceEndpoint(String uuid, String organization) throws  APIManagementException;
+
+    /**
+     * Checks whether a resource endpoint by the given UUID exists under the API specified by apiId
+     *
+     * @param apiId             API UUID
+     * @param endpointId        Endpoint UUID
+     * @param organization      Organization
+     * @return
+     * @throws APIManagementException
+     */
+    boolean isAPIResourceEndpointExists(String apiId, String endpointId, String organization)
+            throws APIManagementException;
+
+    /**
+     * Checks whether the Resource Endpoint specified by the UUID is used in an API mediation policy
+     *
+     * @param uuid  Resource Endpoint UUID
+     * @return
+     * @throws APIManagementException
+     */
+    boolean isResourceEndpointUsed(String uuid) throws APIManagementException;
 }
