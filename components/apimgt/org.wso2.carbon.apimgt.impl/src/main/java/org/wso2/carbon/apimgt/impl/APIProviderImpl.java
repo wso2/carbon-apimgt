@@ -2519,11 +2519,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     .isEmpty(parameters.get(APIConstants.ENDPOINT_ID_PARAM))) {
                                 valid = false;
                                 requiredParameters = "'endpointId'";
-                            } else if (!isAPIResourceEndpointExists(api.getUuid(), parameters.get(APIConstants.ENDPOINT_ID_PARAM),
-                                    tenantDomain)) {
+                            } else if (api.getUuid() == null || !isAPIResourceEndpointExists(api.getUuid(),
+                                    parameters.get(APIConstants.ENDPOINT_ID_PARAM), tenantDomain)) {
                                 throw new APIManagementException(
-                                        "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM) + "not found for API " + api.getUuid(),
-                                        ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND,
+                                        "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM)
+                                                + " not found for API", ExceptionCodes
+                                        .from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND,
                                                 parameters.get(APIConstants.ENDPOINT_ID_PARAM)));
                             }
                             break;
