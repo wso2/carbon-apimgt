@@ -498,7 +498,9 @@ public enum ExceptionCodes implements ErrorHandler {
     RESOURCE_ENDPOINT_NAME_NOT_SPECIFIED(900918, "Resource Endpoint name cannot be null or empty", 400,
             "Resource Endpoint name cannot be null or empty"),
     RESOURCE_ENDPOINT_NOT_FOUND(900919, "Resource Endpoint not found", 404,
-            "Requested Resource Endpoint with ID  %s could not be found");
+            "Requested Resource Endpoint with ID  %s could not be found"),
+    RESOURCE_ENDPOINT_ALREADY_USED(900920, "Resource Endpoint is used", 409,
+            "Resource Endpoint %s is already used in the APIs");
 
     private final long errorCode;
     private final String errorMessage;
