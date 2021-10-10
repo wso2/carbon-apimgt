@@ -503,6 +503,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Resource Endpoint name cannot be null or empty"),
     RESOURCE_ENDPOINT_NOT_FOUND(900919, "Resource Endpoint not found", 404,
             "Requested Resource Endpoint with ID  %s could not be found"),
+    RESOURCE_ENDPOINT_ALREADY_USED(900920, "Resource Endpoint is used", 409,
+            "Resource Endpoint %s is already used in the APIs"),
 
     SUBSCRIPTION_TIER_NOT_ALLOWED(902002, "Subscription Tier is not allowed for user", 403, "Subscription Tier %s is" +
             " not allowed for user %s ", false);

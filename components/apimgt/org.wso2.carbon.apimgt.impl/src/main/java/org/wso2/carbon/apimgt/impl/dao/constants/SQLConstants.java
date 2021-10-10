@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -3682,6 +3683,13 @@ public class SQLConstants {
                 "AM_API_URL_MAPPING AUM INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM " +
                 "ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID " +
                 "WHERE AUM.URL_MAPPING_ID = ?";
+
+        public static final String GET_OPERATION_POLICY_UUID =
+                "SELECT OPERATION_POLICY_MAPPING_ID FROM AM_API_OPERATION_POLICY_MAPPING WHERE " +
+                "URL_MAPPING_ID = ? AND " +
+                "POLICY_TYPE = ? AND " +
+                "DIRECTION = ? AND " +
+                "PARAMETERS = ? ";
     }
 
     /**
@@ -3713,6 +3721,25 @@ public class SQLConstants {
 
         public static final String DELETE_RESOURCE_ENDPOINT =
                 "DELETE FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND TENANT_ID = ?";
+
+        public static final String IS_API_RESOURCE_ENDPOINT_EXISTS =
+                "SELECT * FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND API_ID = ? AND TENANT_ID = ? ";
+
+        public static final String ADD_RESOURCE_ENDPOINT_MAPPING =
+                "INSERT INTO AM_API_RESOURCE_ENDPOINT_MAPPING " +
+                "(OPERATION_POLICY_MAPPING_ID, ENDPOINT_UUID) VALUES (?, ?)";
+
+        public static final String IS_RESOURCE_ENDPOINT_USED =
+                "SELECT * FROM AM_API_RESOURCE_ENDPOINT_MAPPING WHERE ENDPOINT_UUID = ?";
+
+        public static final String GET_CHANGE_ENDPOINT_POLICY_UUID =
+                "SELECT " +
+                "OPM.OPERATION_POLICY_MAPPING_ID, OPM.DIRECTION, OPM.PARAMETERS " +
+                "FROM AM_API_OPERATION_POLICY_MAPPING OPM " +
+                "LEFT JOIN AM_API_URL_MAPPING AUM " +
+                "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                "WHERE AUM.API_ID = ? " +
+                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "'";
     }
 
     /**

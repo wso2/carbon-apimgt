@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -270,5 +273,27 @@ public final class APIMgtDBUtil {
             }
         }
         return  apiRevisionDeploymentList;
+    }
+
+    /**
+     * Converts a JSON Object String to a String Map
+     *
+     * @param jsonString    JSON String
+     * @return              String Map
+     * @throws APIManagementException if errors occur during parsing the json string
+     */
+    public static Map<String, String> convertJSONStringToMap(String jsonString) throws APIManagementException {
+        Map<String, String> map = null;
+        if (StringUtils.isNotEmpty(jsonString)) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                map = objectMapper.readValue(jsonString, Map.class);
+            } catch (IOException e) {
+                String msg = "Error while parsing JSON string";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return map;
     }
 }

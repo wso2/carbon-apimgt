@@ -8,7 +8,7 @@ public class OperationPolicy {
     public enum PolicyType {
         SET_HEADER,
         REMOVE_HEADER,
-        REWRITE_ENDPOINT,
+        CHANGE_ENDPOINT,
         REWRITE_HTTP_METHOD,
         CALL_VALIDATION_SERVICE,
         MOCK_RESPONSE,
@@ -18,9 +18,9 @@ public class OperationPolicy {
     };
 
     private PolicyType policyType = null;
-
     private String direction;
     private Map<String, String> parameters;
+    private int id;
 
     public PolicyType getPolicyType() {
         return policyType;
@@ -46,16 +46,25 @@ public class OperationPolicy {
         return direction;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
     @Override public boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
         OperationPolicy that = (OperationPolicy) o;
-        return policyType == that.policyType && direction.equals(that.direction) && parameters.equals(that.parameters);
+        return id == that.id && policyType == that.policyType && direction.equals(that.direction) && parameters
+                .equals(that.parameters);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(policyType, direction, parameters);
+        return Objects.hash(policyType, direction, parameters, id);
     }
 }
