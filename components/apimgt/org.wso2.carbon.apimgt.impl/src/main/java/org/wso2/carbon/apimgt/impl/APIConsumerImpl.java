@@ -1269,7 +1269,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 }
             }
             if (keyManagerConfiguration.isEnabled()) {
@@ -2451,7 +2451,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
@@ -2465,7 +2465,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (keyManager == null) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
 
         //Get application ID
@@ -3984,7 +3984,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException(
                         "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                        ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
@@ -4600,7 +4600,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerID);
                 if (keyManagerConfiguration == null) {
                     throw new APIManagementException("Key Manager " + keyManagerID + " couldn't found.",
-                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 } else {
                     keyManagerName = keyManagerID;
                     keyManagerID = keyManagerConfiguration.getUuid();

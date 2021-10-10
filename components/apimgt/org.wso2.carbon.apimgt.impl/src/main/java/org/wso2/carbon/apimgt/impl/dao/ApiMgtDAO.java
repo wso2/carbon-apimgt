@@ -8382,7 +8382,7 @@ public class ApiMgtDAO {
                     workflowDTO.setAppInfoDTO(request);
                 } else {
                     throw new APIManagementException("Error occured while finding the KeyManager from uuid "
-                            + keyManagerUUID + ".", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                            + keyManagerUUID + ".", ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
                 }
             }
         } catch (SQLException | IOException e) {
