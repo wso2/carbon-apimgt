@@ -62,7 +62,8 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //unauthenticated error.
         if (!StringUtils.equals(authScheme, RestApiConstants.OPAQUE_AUTHENTICATION)
                 && !StringUtils.equals(authScheme, RestApiConstants.BASIC_AUTHENTICATION)
-                  && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)) {
+                  && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)
+                    && !StringUtils.equals(authScheme, RestApiConstants.BACKEND_JWT_AUTHENTICATION)) {
             log.error("Authentication failed: Bearer/Basic authentication header is missing");
             throw new AuthenticationException("Unauthenticated request");
         }

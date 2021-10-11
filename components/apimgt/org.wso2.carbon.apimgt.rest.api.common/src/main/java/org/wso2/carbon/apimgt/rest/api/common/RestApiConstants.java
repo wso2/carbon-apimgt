@@ -44,6 +44,9 @@ public final class RestApiConstants {
     public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
     public static final String JWT_AUTHENTICATION = "jwt";
+    public static final String BACKEND_JWT_AUTHENTICATION = "backend-jwt";
+    public static final String JWT_TOKEN = "token";
+    public static final String TOKEN_VALIDATION_REQUIRED = "token_validation_required";
     public static final String DOT = ".";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 
@@ -181,6 +184,7 @@ public final class RestApiConstants {
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String BACKEND_JWT_AUTH_HEADER_NAME = "X-JWT-Assertion";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive

@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.impl.BackendJWTAuthenticationImpl;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthJwtAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.impl.OAuthOpaqueAuthenticatorImpl;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -51,6 +52,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
     {
         authenticatorMap.put(RestApiConstants.JWT_AUTHENTICATION, new OAuthJwtAuthenticatorImpl());
         authenticatorMap.put(RestApiConstants.OPAQUE_AUTHENTICATION, new OAuthOpaqueAuthenticatorImpl());
+        authenticatorMap.put(RestApiConstants.BACKEND_JWT_AUTHENTICATION, new BackendJWTAuthenticationImpl());
     }
 
     public OAuthAuthenticationInterceptor() {
@@ -71,14 +73,23 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //set the request_authentication_scheme property in the message as oauth2.
         String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
                 RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
+        String backendJWT = RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
+                RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.BACKEND_JWT_AUTH_HEADER_NAME);
         //add masked token to the Message
-        inMessage.put(RestApiConstants.MASKED_TOKEN, APIUtil.getMaskedToken(accessToken));
-        if (accessToken == null) {
+        inMessage.put(RestApiConstants.MASKED_TOKEN, accessToken != null ? APIUtil.getMaskedToken(accessToken) :
+                APIUtil.getMaskedToken(backendJWT));
+        if (accessToken == null && backendJWT == null) {
             return;
         }
         //identify Oauth2 and JWT tokens
-        if (accessToken.contains(RestApiConstants.DOT)) {
+        if ((accessToken != null && accessToken.contains(RestApiConstants.DOT))) {
             inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.JWT_AUTHENTICATION);
+            inMessage.put(RestApiConstants.JWT_TOKEN, accessToken);
+            inMessage.put(RestApiConstants.TOKEN_VALIDATION_REQUIRED, true);
+        } else if ((backendJWT != null && backendJWT.contains(RestApiConstants.DOT))) {
+            inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.BACKEND_JWT_AUTHENTICATION);
+            inMessage.put(RestApiConstants.JWT_TOKEN, backendJWT);
+            inMessage.put(RestApiConstants.TOKEN_VALIDATION_REQUIRED, false);
         } else {
             inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OPAQUE_AUTHENTICATION);
         }
