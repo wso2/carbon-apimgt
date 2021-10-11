@@ -230,11 +230,11 @@ public class JWTInfoDto {
 
     public String[] getOrganizations() {
 
-        return Arrays.copyOf(organizations, organizations.length);
+        return SerializationUtils.clone(organizations);
     }
 
     public void setOrganizations(String[] organizations) {
 
-        this.organizations = Arrays.copyOf(organizations, organizations.length);
+        this.organizations = SerializationUtils.clone(organizations);
     }
 }
