@@ -11823,11 +11823,11 @@ components:
           type: string
         name:
           type: string
+        endpointType:
+          type: string
           enum:
             - HTTP
             - ADDRESS
-        endpointType:
-          type: string
         url:
           type: string
         security:

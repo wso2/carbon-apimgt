@@ -25,7 +25,38 @@ public class ResourceEndpointDTO   {
   
     private String id = null;
     private String name = null;
-    private String endpointType = null;
+
+    @XmlType(name="EndpointTypeEnum")
+    @XmlEnum(String.class)
+    public enum EndpointTypeEnum {
+        HTTP("HTTP"),
+        ADDRESS("ADDRESS");
+        private String value;
+
+        EndpointTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static EndpointTypeEnum fromValue(String v) {
+            for (EndpointTypeEnum b : EndpointTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private EndpointTypeEnum endpointType = null;
     private String url = null;
     private Map<String, String> security = new HashMap<String, String>();
     private Map<String, String> config = new HashMap<String, String>();
@@ -67,7 +98,7 @@ public class ResourceEndpointDTO   {
 
   /**
    **/
-  public ResourceEndpointDTO endpointType(String endpointType) {
+  public ResourceEndpointDTO endpointType(EndpointTypeEnum endpointType) {
     this.endpointType = endpointType;
     return this;
   }
@@ -76,10 +107,10 @@ public class ResourceEndpointDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("endpointType")
   @NotNull
-  public String getEndpointType() {
+  public EndpointTypeEnum getEndpointType() {
     return endpointType;
   }
-  public void setEndpointType(String endpointType) {
+  public void setEndpointType(EndpointTypeEnum endpointType) {
     this.endpointType = endpointType;
   }
 
