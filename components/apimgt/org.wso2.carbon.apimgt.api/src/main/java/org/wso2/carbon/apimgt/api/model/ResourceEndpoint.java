@@ -3,9 +3,14 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.Map;
 
 public class ResourceEndpoint {
+    public enum EndpointType {
+        HTTP,
+        ADDRESS
+    };
+
     private String id;
     private String name;
-    private String endpointType;
+    private EndpointType endpointType;
     private String url;
     private Map<String, String> securityConfig;
     private Map<String, String> generalConfig;
@@ -18,7 +23,7 @@ public class ResourceEndpoint {
         return name;
     }
 
-    public String getEndpointType() {
+    public EndpointType getEndpointType() {
         return endpointType;
     }
 
@@ -42,7 +47,7 @@ public class ResourceEndpoint {
         this.name = name;
     }
 
-    public void setEndpointType(String endpointType) {
+    public void setEndpointType(EndpointType endpointType) {
         this.endpointType = endpointType;
     }
 
