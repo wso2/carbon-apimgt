@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.common.gateway.dto;
 
 import org.apache.commons.lang3.SerializationUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -229,11 +230,11 @@ public class JWTInfoDto {
 
     public String[] getOrganizations() {
 
-        return SerializationUtils.clone(organizations);
+        return Arrays.copyOf(organizations, organizations.length);
     }
 
     public void setOrganizations(String[] organizations) {
 
-        this.organizations = SerializationUtils.clone(organizations);
+        this.organizations = Arrays.copyOf(organizations, organizations.length);
     }
 }
