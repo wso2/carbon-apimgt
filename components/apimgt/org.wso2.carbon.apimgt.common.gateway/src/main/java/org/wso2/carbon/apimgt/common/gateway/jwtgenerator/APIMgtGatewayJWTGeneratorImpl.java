@@ -88,6 +88,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (StringUtils.isNotEmpty(jwtInfoDto.getSub())) {
             claims.put("sub", jwtInfoDto.getSub());
         }
+        if (jwtInfoDto.getOrganizations() != null) {
+            claims.put("organizations", jwtInfoDto.getOrganizations());
+        }
         return claims;
     }
 

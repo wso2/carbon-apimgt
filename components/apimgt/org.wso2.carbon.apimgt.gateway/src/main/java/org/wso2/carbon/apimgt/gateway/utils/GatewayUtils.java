@@ -981,16 +981,20 @@ public class GatewayUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
-        if (jwtInfoDto.getJwtValidationInfo() != null) {
-            jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
-                    apiKeyValidationInfoDTO));
-            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
-                    && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
-                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
-                jwtInfoDto.setSub(MultitenantUtils.getTenantAwareUsername(sub));
+        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
+            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+            String subClaim = "sub";
+            String organizationsClaim = "organizations";
+            if (claims.get(subClaim) != null) {
+                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(subClaim);
+                jwtInfoDto.setSub(sub);
+            }
+            if (claims.get(organizationsClaim) != null) {
+                String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
+                        get(organizationsClaim);
+                jwtInfoDto.setOrganizations(organizations);
             }
         }
-
         if (apiKeyValidationInfoDTO != null) {
             jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());

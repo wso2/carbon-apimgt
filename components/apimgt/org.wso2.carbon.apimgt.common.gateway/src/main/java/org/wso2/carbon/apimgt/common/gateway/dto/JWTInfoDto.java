@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.common.gateway.dto;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ public class JWTInfoDto {
     private JWTValidationInfo jwtValidationInfo;
     private Map<String, String> appAttributes = new HashMap<>();
     private String sub;
+    private String[] organizations;
 
     public JWTInfoDto() {
 
@@ -63,6 +66,7 @@ public class JWTInfoDto {
         this.jwtValidationInfo = new JWTValidationInfo(jwtInfoDto.getJwtValidationInfo());
         this.appAttributes = jwtInfoDto.getAppAttributes();
         this.sub = jwtInfoDto.getSub();
+        this.organizations = SerializationUtils.clone(jwtInfoDto.getOrganizations());
     }
 
     public String getApplicationTier() {
@@ -221,5 +225,15 @@ public class JWTInfoDto {
 
     public void setSub(String sub) {
         this.sub = sub;
+    }
+
+    public String[] getOrganizations() {
+
+        return SerializationUtils.clone(organizations);
+    }
+
+    public void setOrganizations(String[] organizations) {
+
+        this.organizations = SerializationUtils.clone(organizations);
     }
 }
