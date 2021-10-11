@@ -17772,7 +17772,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, apiId);
             prepStmt.setString(2, uuid);
             prepStmt.setString(3, endpoint.getName());
-            prepStmt.setString(4, endpoint.getEndpointType());
+            prepStmt.setString(4, endpoint.getEndpointType().toString());
             prepStmt.setString(5, endpoint.getUrl());
             prepStmt.setBinaryStream(6, securityConfigStream);
             prepStmt.setBinaryStream(7, generalConfigStream);
@@ -17797,7 +17797,7 @@ public class ApiMgtDAO {
                     resourceEndpoint = new ResourceEndpoint();
                     resourceEndpoint.setId(uuid);
                     resourceEndpoint.setName(rs.getString("ENDPOINT_NAME"));
-                    resourceEndpoint.setEndpointType(rs.getString("ENDPOINT_TYPE"));
+                    resourceEndpoint.setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
                     resourceEndpoint.setUrl(rs.getString("URL"));
                     resourceEndpoint
                             .setSecurityConfig(convertConfigBlobToStringMap(rs.getBinaryStream("SECURITY_CONFIG")));
@@ -17834,7 +17834,7 @@ public class ApiMgtDAO {
             }
 
             prepStmt.setString(1, endpoint.getName());
-            prepStmt.setString(2, endpoint.getEndpointType());
+            prepStmt.setString(2, endpoint.getEndpointType().toString());
             prepStmt.setString(3, endpoint.getUrl());
             prepStmt.setBinaryStream(4, securityConfigStream);
             prepStmt.setBinaryStream(5, generalConfigStream);
@@ -17917,7 +17917,7 @@ public class ApiMgtDAO {
                     ResourceEndpoint resourceEndpoint = new ResourceEndpoint();
                     resourceEndpoint.setId(rs.getString("UUID"));
                     resourceEndpoint.setName(rs.getString("ENDPOINT_NAME"));
-                    resourceEndpoint.setEndpointType(rs.getString("ENDPOINT_TYPE"));
+                    resourceEndpoint.setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
                     resourceEndpoint.setUrl(rs.getString("URL"));
                     resourceEndpoint
                             .setSecurityConfig(convertConfigBlobToStringMap(rs.getBinaryStream("SECURITY_CONFIG")));
