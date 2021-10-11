@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.common.gateway.dto;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
