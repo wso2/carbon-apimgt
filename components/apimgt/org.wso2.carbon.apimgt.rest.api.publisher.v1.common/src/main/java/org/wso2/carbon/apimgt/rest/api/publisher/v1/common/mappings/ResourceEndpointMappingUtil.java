@@ -19,7 +19,8 @@ public class ResourceEndpointMappingUtil {
     public static ResourceEndpoint fromDTOtoResourceEndpoint(ResourceEndpointDTO endpointDTO) {
         ResourceEndpoint resourceEndpoint = new ResourceEndpoint();
         resourceEndpoint.setId(endpointDTO.getId());
-        resourceEndpoint.setEndpointType(endpointDTO.getEndpointType());
+        resourceEndpoint
+                .setEndpointType(ResourceEndpoint.EndpointType.valueOf(endpointDTO.getEndpointType().toString()));
         resourceEndpoint.setName(endpointDTO.getName());
         resourceEndpoint.setUrl(endpointDTO.getUrl());
         resourceEndpoint.setSecurityConfig(endpointDTO.getSecurity());
@@ -30,7 +31,8 @@ public class ResourceEndpointMappingUtil {
     public static ResourceEndpointDTO fromResourceEndpointToDTO(ResourceEndpoint endpoint) {
         ResourceEndpointDTO endpointDTO = new ResourceEndpointDTO();
         endpointDTO.setId(endpoint.getId());
-        endpointDTO.setEndpointType(endpoint.getEndpointType());
+        endpointDTO
+                .setEndpointType(ResourceEndpointDTO.EndpointTypeEnum.valueOf(endpoint.getEndpointType().toString()));
         endpointDTO.setName(endpoint.getName());
         endpointDTO.setUrl(endpoint.getUrl());
         endpointDTO.setSecurity(endpoint.getSecurityConfig());

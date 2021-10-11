@@ -90,6 +90,10 @@ public final class ImportExportConstants {
 
     public static final String CERTIFICATE_FILE = "certificate";
 
+    public static final String RESOURCE_ENDPOINTS_DIRECTORY = "Resource-endpoints";
+
+    public static final String RESOURCE_ENDPOINTS_FILE_NAME = File.separator + "resource-endpoints";
+
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
@@ -194,6 +198,8 @@ public final class ImportExportConstants {
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+
+    public static final String TYPE_RESOURCE_ENDPOINTS = "resource-endpoints";
 
     public static final String APIM_VERSION = "v4.1.0";
 
