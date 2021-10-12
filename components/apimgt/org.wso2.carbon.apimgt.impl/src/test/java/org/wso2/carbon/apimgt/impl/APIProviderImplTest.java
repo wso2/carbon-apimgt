@@ -244,7 +244,7 @@ public class APIProviderImplTest {
                 .thenReturn(artifactManager);
         artifact = Mockito.mock(GenericArtifact.class);
         gatewayManager = Mockito.mock(APIGatewayManager.class);
-        Mockito.when(APIGatewayManager.getInstance()).thenReturn(gatewayManager);
+        Mockito.when(APIGatewayManager.getInstance("61416403c40f086ad2dc5eed")).thenReturn(gatewayManager);
 
         TestUtils.mockRegistryAndUserRealm(-1234);
         TestUtils.mockAPICacheClearence();

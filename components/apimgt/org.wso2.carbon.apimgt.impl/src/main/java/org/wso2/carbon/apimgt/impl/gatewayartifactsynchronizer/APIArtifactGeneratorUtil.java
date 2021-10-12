@@ -34,7 +34,8 @@ public class APIArtifactGeneratorUtil {
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
     public static RuntimeArtifactDto generateAPIArtifact(List<String> apiUuids, String name, String version,
-                                                             String gatewayLabel, String type, String tenantDomain)
+                                                         String gatewayLabel, String type, String tenantDomain,
+                                                         String organization)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
@@ -68,7 +69,7 @@ public class APIArtifactGeneratorUtil {
             if (gatewayArtifacts == null || gatewayArtifacts.isEmpty()) {
                 return null;
             }
-            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts, organization);
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
                     ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();

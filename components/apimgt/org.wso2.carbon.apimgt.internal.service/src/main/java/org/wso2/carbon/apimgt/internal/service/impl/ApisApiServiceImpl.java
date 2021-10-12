@@ -93,6 +93,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         List<String> revisionUUIDs = new ArrayList<>();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         for (DeployedAPIRevisionDTO deployedAPIRevisionDTO : deployedAPIRevisionDTOList) {
             // get revision uuid
             String revisionUUID = apiProvider.getAPIRevisionUUID(Integer.toString(deployedAPIRevisionDTO.getRevisionId()),
@@ -102,7 +103,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (!revisionUUIDs.contains(revisionUUID)) {
                 revisionUUIDs.add(revisionUUID);
-                Map<String, Environment> environments = APIUtil.getEnvironments();
+                Map<String, Environment> environments = APIUtil.getEnvironments(organization);
                 List<DeployedAPIRevision> deployedAPIRevisions = new ArrayList<>();
                 for (DeployedEnvInfoDTO deployedEnvInfoDTO : deployedAPIRevisionDTO.getEnvInfo()) {
                     DeployedAPIRevision deployedAPIRevision = new DeployedAPIRevision();

@@ -327,6 +327,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     private void updateEndpointsOfSingleWSDL(API api, String environmentName, String environmentType,
                 Description wsdlDescription) throws APIMgtWSDLException {
         Service[] serviceMap = wsdlDescription.getServices();
+        String organization = api.getOrganization();
         try {
             for (Service svc : serviceMap) {
                 Endpoint[] portMap = svc.getEndpoints();
@@ -335,7 +336,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
                     String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
                             api.getTransports());
                     setAddressUrl(element, new URI(APIUtil.getGatewayEndpoint(endpointTransport, environmentName,
-                            environmentType) + api.getContext()));
+                            environmentType, organization) + api.getContext()));
                 }
             }
         } catch (URISyntaxException | APIManagementException e) {

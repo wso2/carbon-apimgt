@@ -3623,7 +3623,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getEnvironments() != null) {
             environmentString = String.join(",", api.getEnvironments());
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
         // workflow status
         APIIdentifier apiId = api.getId();
         WorkflowDTO workflow;
@@ -3781,7 +3781,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getEnvironments() != null) {
             environmentString = String.join(",", api.getEnvironments());
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
         // workflow status
         APIIdentifier apiId = api.getId();
         String currentApiUuid = uuid;
@@ -3959,7 +3959,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getEnvironments() != null) {
             environmentString = String.join(",", apiProduct.getEnvironments());
         }
-        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
 
         // available tier
         String tiers = null;

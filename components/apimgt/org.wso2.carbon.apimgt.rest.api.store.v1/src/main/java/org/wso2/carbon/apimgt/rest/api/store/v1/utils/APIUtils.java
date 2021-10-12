@@ -50,7 +50,8 @@ public class APIUtils {
     public static List<APIEndpointURLsDTO> extractEndpointURLs(API api, String tenantDomain)
             throws APIManagementException {
         List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        String organization = api.getOrganization();
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
 
         Set<String> environmentsPublishedByAPI = new HashSet<>(api.getEnvironments());
         environmentsPublishedByAPI.remove("none");
@@ -142,7 +143,8 @@ public class APIUtils {
     public static List<APIEndpointURLsDTO> extractEndpointURLs(APIProduct apiProduct, String tenantDomain)
             throws APIManagementException {
         List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
-        Map<String, Environment> environments = APIUtil.getEnvironments();
+        String organization = apiProduct.getOrganization();
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
 
         Set<String> environmentsPublishedByAPI = new HashSet<>(apiProduct.getEnvironments());
         environmentsPublishedByAPI.remove("none");

@@ -46,9 +46,10 @@ public class RetrieveApiArtifactsApiServiceImpl implements RetrieveApiArtifactsA
                                              MessageContext messageContext)
             throws APIManagementException {
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         RuntimeArtifactDto runtimeArtifactDto =
                 APIArtifactGeneratorUtil.generateAPIArtifact(uuidList.getUuids(), "", "", gatewayLabel, type,
-                        xWSO2Tenant);
+                        xWSO2Tenant, organization);
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();

@@ -2572,13 +2572,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
                                    Set<String> environmentsToAdd) {
+//        Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
+//        Set<String> environmentsToRemove = new HashSet<>();
+//        for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
+//            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
+//        }
+//        environmentsToRemove.removeAll(environmentsToAdd);
+//        String organization = api.getOrganization();
+//        APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
+//        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
+//        if (log.isDebugEnabled()) {
+//            String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+//                    + " deleted from gateway";
+//            log.debug(logMessage);
+//        }
+        String organization = api.getOrganization();
+        removeFromGateway(api, gatewaysToRemove, environmentsToAdd, organization);
+    }
+
+    private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
+                                   Set<String> environmentsToAdd, String organization) {
         Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(environmentsToAdd);
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        //String organization = api.getOrganization();
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
         gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
@@ -6491,7 +6512,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
                                      Set<String> gatewaysToAdd)
             throws APIManagementException {
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        String organization = apiProduct.getOrganization();
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
@@ -8057,7 +8079,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (api.getEnvironments() != null) {
                     environmentString = String.join(",", api.getEnvironments());
                 }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
                 //CORS . if null is returned, set default config from the configuration
                 if (api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
@@ -8618,7 +8640,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
         API api = getLightweightAPIByUUID(apiId, organization);
         api.setRevisionedApiId(apiRevision.getRevisionUUID());
         api.setRevisionId(apiRevision.getId());
@@ -8790,7 +8812,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         API api = getAPIbyUUID(apiId, apiRevision, organization);
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), organization);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
     }
@@ -8932,7 +8954,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void deployAPIProductRevision(String apiProductId, String apiRevisionId,
-                                         List<APIRevisionDeployment> apiRevisionDeployments)
+                                         List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
         if (apiProductIdentifier == null) {
@@ -8948,7 +8970,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setUuid(apiProductId);
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
         Set<String> environmentsToAdd = new HashSet<>();
         Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();

@@ -24,8 +24,8 @@ import java.util.List;
 
 public interface GatewayArtifactGenerator {
 
-    RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
-            throws APIManagementException;
+    RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList,
+                                               String organization) throws APIManagementException;
 
     String getType();
 
