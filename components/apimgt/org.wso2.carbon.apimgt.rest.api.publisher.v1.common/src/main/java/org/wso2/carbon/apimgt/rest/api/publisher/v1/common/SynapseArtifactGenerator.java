@@ -62,8 +62,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
 
     @Override
-    public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
-            throws APIManagementException {
+    public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList,
+                                                      String organization) throws APIManagementException {
 
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
@@ -71,7 +71,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             if (runTimeArtifact.isFile()) {
                 String tenantDomain = runTimeArtifact.getTenantDomain();
                 String label = runTimeArtifact.getLabel();
-                Environment environment = APIUtil.getEnvironments().get(label);
+                Environment environment = APIUtil.getEnvironments(organization).get(label);
                 GatewayAPIDTO gatewayAPIDTO = null;
                 if (environment != null) {
                     try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
