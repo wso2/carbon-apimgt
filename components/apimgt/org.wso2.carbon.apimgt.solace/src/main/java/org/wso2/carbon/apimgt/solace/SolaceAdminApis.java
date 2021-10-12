@@ -71,10 +71,6 @@ public class SolaceAdminApis {
         return Base64.getEncoder().encodeToString((toEncode).getBytes());
     }
 
-//    private static final String baseUrl = "http://api.solace-apim.net:3000/v1/";
-//    private static final String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
-//    private static final String developerUserName = "dev-1";
-
 
     /**
      * Check whether the environment is available
