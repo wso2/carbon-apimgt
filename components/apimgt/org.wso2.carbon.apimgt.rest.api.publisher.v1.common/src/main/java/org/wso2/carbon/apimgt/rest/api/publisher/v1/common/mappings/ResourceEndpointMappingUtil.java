@@ -23,8 +23,8 @@ public class ResourceEndpointMappingUtil {
                 .setEndpointType(ResourceEndpoint.EndpointType.valueOf(endpointDTO.getEndpointType().toString()));
         resourceEndpoint.setName(endpointDTO.getName());
         resourceEndpoint.setUrl(endpointDTO.getUrl());
-        resourceEndpoint.setSecurityConfig(endpointDTO.getSecurity());
-        resourceEndpoint.setGeneralConfig(endpointDTO.getConfig());
+        resourceEndpoint.setSecurityConfig(endpointDTO.getSecurityConfig());
+        resourceEndpoint.setGeneralConfig(endpointDTO.getGeneralConfig());
         return resourceEndpoint;
     }
 
@@ -35,8 +35,8 @@ public class ResourceEndpointMappingUtil {
                 .setEndpointType(ResourceEndpointDTO.EndpointTypeEnum.valueOf(endpoint.getEndpointType().toString()));
         endpointDTO.setName(endpoint.getName());
         endpointDTO.setUrl(endpoint.getUrl());
-        endpointDTO.setSecurity(endpoint.getSecurityConfig());
-        endpointDTO.setConfig(endpoint.getGeneralConfig());
+        endpointDTO.setSecurityConfig(endpoint.getSecurityConfig());
+        endpointDTO.setGeneralConfig(endpoint.getGeneralConfig());
         return endpointDTO;
     }
 

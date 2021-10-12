@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.template;
 
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 
 public interface APITemplateBuilder {
 
@@ -27,5 +28,7 @@ public interface APITemplateBuilder {
     String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException;
 
     String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
+
+    String getConfigStringForResourceEndpointTemplate(ResourceEndpoint resourceEndpoint) throws APITemplateException;
 
 }

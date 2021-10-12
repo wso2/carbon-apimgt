@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -89,9 +90,8 @@ public class TemplateBuilderUtil {
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
-                                                               List<ClientCertificateDTO> clientCertificateDTOS,
-                                                               List<SoapToRestMediationDto> soapToRestInMediationDtos,
-                                                               List<SoapToRestMediationDto> soapToRestMediationDtos)
+            List<ClientCertificateDTO> clientCertificateDTOS, List<SoapToRestMediationDto> soapToRestInMediationDtos,
+            List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -432,6 +432,7 @@ public class TemplateBuilderUtil {
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.IN);
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
+        List<ResourceEndpoint> resourceEndpoints = ImportUtils.retrieveResourceEndpoints(extractedFolderPath);
 
         JSONObject originalProperties = api.getAdditionalProperties();
         // add new property for entires that has a __display suffix
@@ -440,7 +441,7 @@ public class TemplateBuilderUtil {
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
         GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
-                extractedFolderPath, apidto, clientCertificatesDTOList);
+                extractedFolderPath, apidto, clientCertificatesDTOList, resourceEndpoints);
         // Reset the additional properties to the original values
         if (originalProperties != null) {
             api.setAdditionalProperties(originalProperties);
@@ -588,10 +589,8 @@ public class TemplateBuilderUtil {
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
-                                                                 APITemplateBuilder builder,
-                                                                 String tenantDomain, String extractedPath,
-                                                                 APIDTO apidto,
-                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
+            APITemplateBuilder builder, String tenantDomain, String extractedPath, APIDTO apidto,
+            List<ClientCertificateDTO> clientCertificatesDTOList, List<ResourceEndpoint> resourceEndpoints)
             throws APIManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
@@ -706,6 +705,10 @@ public class TemplateBuilderUtil {
                 if (isWsApi || isGraphQLSubscriptionAPI) {
                     addWebSocketResourceEndpoints(api, builder, gatewayAPIDTO);
                 }
+            }
+
+            if (resourceEndpoints != null && !resourceEndpoints.isEmpty()) {
+                addResourceEndpoints(resourceEndpoints, builder, gatewayAPIDTO);
             }
         }
         setSecureVaultPropertyToBeAdded(null, api, gatewayAPIDTO);
@@ -871,6 +874,22 @@ public class TemplateBuilderUtil {
             endpoint.setContent(endpointConfigContext);
             gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentToList(endpoint,
                     gatewayAPIDTO.getEndpointEntriesToBeAdd()));
+        }
+    }
+
+    private static void addResourceEndpoints(List<ResourceEndpoint> resourceEndpoints, APITemplateBuilder builder,
+            GatewayAPIDTO gatewayAPIDTO) throws APITemplateException {
+        for (ResourceEndpoint resourceEndpoint : resourceEndpoints) {
+            String resourceEndpointConfigContext = builder.getConfigStringForResourceEndpointTemplate(resourceEndpoint);
+            GatewayContentDTO resourceEndpointContentDTO = new GatewayContentDTO();
+            try {
+                resourceEndpointContentDTO.setName(getEndpointName(resourceEndpointConfigContext));
+            } catch (XMLStreamException e) {
+                throw new APITemplateException("Error while reading resource endpoint name from config", e);
+            }
+            resourceEndpointContentDTO.setContent(resourceEndpointConfigContext);
+            gatewayAPIDTO.setResourceEndpointsToBeAdd(addGatewayContentToList(resourceEndpointContentDTO,
+                    gatewayAPIDTO.getResourceEndpointsToBeAdd()));
         }
     }
 
