@@ -86,10 +86,10 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
             claims.put(dialect + "applicationAttributes", appAttributes);
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getSub())) {
-            claims.put("sub", jwtInfoDto.getSub());
+            claims.put(JWTConstants.SUB, jwtInfoDto.getSub());
         }
         if (jwtInfoDto.getOrganizations() != null) {
-            claims.put("organizations", jwtInfoDto.getOrganizations());
+            claims.put(JWTConstants.ORGANIZATIONS, jwtInfoDto.getOrganizations());
         }
         return claims;
     }
