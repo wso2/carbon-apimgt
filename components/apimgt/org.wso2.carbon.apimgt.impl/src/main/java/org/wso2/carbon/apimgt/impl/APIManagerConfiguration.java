@@ -529,7 +529,6 @@ public class APIManagerConfiguration {
      * @param environmentElem OMElement of a single environment in the gateway environments list
      */
     void setEnvironmentConfig(OMElement environmentElem) throws APIManagementException {
-
         Environment environment = new Environment();
         environment.setType(environmentElem.getAttributeValue(new QName("type")));
         String showInConsole = environmentElem.getAttributeValue(new QName("api-console"));
@@ -545,43 +544,32 @@ public class APIManagerConfiguration {
             environment.setDefault(false);
         }
         environment.setName(APIUtil.replaceSystemProperty(
-                environmentElem.getFirstChildWithName(new QName(
-                        APIConstants.API_GATEWAY_NAME)).getText()));
-        environment.setDisplayName(APIUtil.replaceSystemProperty(
-                environmentElem.getFirstChildWithName(new QName(
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
+        environment.setDisplayName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
-        if (StringUtils.isEmpty(environment.getDisplayName())) {
-            environment.setDisplayName(environment.getName());
-        }
-        environment.setServerURL(APIUtil.replaceSystemProperty(
-                environmentElem.getFirstChildWithName(new QName(
+        if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
+        environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));
-        environment.setUserName(APIUtil.replaceSystemProperty(
-                environmentElem.getFirstChildWithName(new QName(
+        environment.setUserName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_USERNAME)).getText()));
-        OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
-                APIConstants.API_GATEWAY_PASSWORD));
-        String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
-        environment.setPassword(APIUtil.replaceSystemProperty(value));
-        environment.setProvider(APIUtil.replaceSystemProperty(
-                environmentElem.getFirstChildWithName(new QName(
+        OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_PASSWORD));
+        String resolvedPassword = MiscellaneousUtil.resolve(passwordElement, secretResolver);
+        environment.setPassword(APIUtil.replaceSystemProperty(resolvedPassword));
+        environment.setProvider(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_PROVIDER)).getText()));
-        environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
-                environmentElem.getFirstChildWithName(new QName(
+        environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_ENDPOINT)).getText()));
-        OMElement websocketGatewayEndpoint = environmentElem
-                .getFirstChildWithName(new QName(APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
+        OMElement websocketGatewayEndpoint = environmentElem.getFirstChildWithName(new QName(
+                APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
         if (websocketGatewayEndpoint != null) {
-            environment.setWebsocketGatewayEndpoint(
-                    APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
+            environment.setWebsocketGatewayEndpoint(APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
         } else {
             environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
         }
         OMElement webSubGatewayEndpoint = environmentElem
                 .getFirstChildWithName(new QName(APIConstants.API_WEBSUB_GATEWAY_ENDPOINT));
         if (webSubGatewayEndpoint != null) {
-            environment.setWebSubGatewayEndpoint(
-                    APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
+            environment.setWebSubGatewayEndpoint(APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
         } else {
             environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
         }
@@ -614,10 +602,8 @@ public class APIManagerConfiguration {
             String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
                     APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
 
-                        /*
-                         Prefix websub endpoints with 'websub_' so that the endpoint URL
-                         would begin with: 'websub_http://', since API type is identified by the URL protocol below.
-                         */
+            //Prefix websub endpoints with 'websub_' so that the endpoint URL
+            // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
             webSubHttpEp = "websub_" + webSubHttpEp;
             webSubHttpsEp = "websub_" + webSubHttpsEp;
 
@@ -643,9 +629,8 @@ public class APIManagerConfiguration {
         if (!apiGatewayEnvironments.containsKey(environment.getName())) {
             apiGatewayEnvironments.put(environment.getName(), environment);
         } else {
-                        /*
-                          This will be happen only on server startup therefore we log and continue the startup
-                         */
+
+            //This will happen only on server startup therefore we log and continue the startup
             log.error("Duplicate environment name found in api-manager.xml " +
                     environment.getName());
         }
