@@ -248,4 +248,12 @@ public abstract class APIDefinition {
      */
     public abstract String processDisableSecurityExtension(String swaggerContent)
             throws APIManagementException;
+
+    /**
+     * This method will extract the vendor provider or the API specification form the extensions list
+     *
+     * @param swaggerContent String
+     * @return String
+     */
+    public abstract String getVendorFromExtension(String swaggerContent);
 }
