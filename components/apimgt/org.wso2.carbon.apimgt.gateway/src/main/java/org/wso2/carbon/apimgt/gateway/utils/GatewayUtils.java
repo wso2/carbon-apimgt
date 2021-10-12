@@ -50,6 +50,7 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -78,7 +79,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -981,20 +981,23 @@ public class GatewayUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
-        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
-            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
-            String subClaim = "sub";
-            String organizationsClaim = "organizations";
-            if (claims.get(subClaim) != null) {
-                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(subClaim);
-                jwtInfoDto.setSub(sub);
-            }
-            if (claims.get(organizationsClaim) != null) {
-                String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
-                        get(organizationsClaim);
-                jwtInfoDto.setOrganizations(organizations);
+        if (jwtInfoDto.getJwtValidationInfo() != null) {
+            jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
+                    apiKeyValidationInfoDTO));
+            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
+                Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+                if (claims.get(JWTConstants.SUB) != null) {
+                    String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+                    jwtInfoDto.setSub(sub);
+                }
+                if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
+                    String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
+                            get(JWTConstants.ORGANIZATIONS);
+                    jwtInfoDto.setOrganizations(organizations);
+                }
             }
         }
+
         if (apiKeyValidationInfoDTO != null) {
             jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
