@@ -28,6 +28,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
@@ -252,6 +253,42 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
+
+            Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
+
+            template.merge(context, writer);
+
+        } catch (Exception e) {
+            log.error("Velocity Error");
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
+
+    @Override public String getConfigStringForResourceEndpointTemplate(ResourceEndpoint resourceEndpoint)
+            throws APITemplateException {
+
+        StringWriter writer = new StringWriter();
+        try {
+            ConfigContext configcontext = new APIConfigContext(this.api);
+            configcontext = new ResourceEndpointConfigContext(configcontext, resourceEndpoint, this.api);
+            configcontext = new TemplateUtilContext(configcontext);
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+
+            context.internalGetKeys();
+
+            VelocityEngine velocityengine = new VelocityEngine();
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+            }
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 

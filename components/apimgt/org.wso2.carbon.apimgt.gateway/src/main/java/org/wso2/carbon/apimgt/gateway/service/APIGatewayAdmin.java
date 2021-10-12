@@ -699,6 +699,21 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Endpoints deployed");
+            log.debug("Start to deploy Resource Endpoint entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+        }
+
+        // Add Resource Endpoints
+        if (gatewayAPIDTO.getResourceEndpointsToBeAdd() != null) {
+            for (GatewayContentDTO resourceEndpointEntry : gatewayAPIDTO.getResourceEndpointsToBeAdd()) {
+                if (endpointAdminServiceProxy.isEndpointExist(resourceEndpointEntry.getName())) {
+                    endpointAdminServiceProxy.deleteEndpoint(resourceEndpointEntry.getName());
+                }
+                endpointAdminServiceProxy.addEndpoint(resourceEndpointEntry.getContent());
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Resource Endpoints deployed");
             log.debug("Start to deploy Client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 

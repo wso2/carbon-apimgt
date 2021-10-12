@@ -58,8 +58,8 @@ return null;
     }
     private EndpointTypeEnum endpointType = null;
     private String url = null;
-    private Map<String, String> security = new HashMap<String, String>();
-    private Map<String, String> config = new HashMap<String, String>();
+    private Map<String, String> securityConfig = new HashMap<String, String>();
+    private Map<String, String> generalConfig = new HashMap<String, String>();
 
   /**
    **/
@@ -134,36 +134,36 @@ return null;
 
   /**
    **/
-  public ResourceEndpointDTO security(Map<String, String> security) {
-    this.security = security;
+  public ResourceEndpointDTO securityConfig(Map<String, String> securityConfig) {
+    this.securityConfig = securityConfig;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("security")
-  public Map<String, String> getSecurity() {
-    return security;
+  @JsonProperty("securityConfig")
+  public Map<String, String> getSecurityConfig() {
+    return securityConfig;
   }
-  public void setSecurity(Map<String, String> security) {
-    this.security = security;
+  public void setSecurityConfig(Map<String, String> securityConfig) {
+    this.securityConfig = securityConfig;
   }
 
   /**
    **/
-  public ResourceEndpointDTO config(Map<String, String> config) {
-    this.config = config;
+  public ResourceEndpointDTO generalConfig(Map<String, String> generalConfig) {
+    this.generalConfig = generalConfig;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("config")
-  public Map<String, String> getConfig() {
-    return config;
+  @JsonProperty("generalConfig")
+  public Map<String, String> getGeneralConfig() {
+    return generalConfig;
   }
-  public void setConfig(Map<String, String> config) {
-    this.config = config;
+  public void setGeneralConfig(Map<String, String> generalConfig) {
+    this.generalConfig = generalConfig;
   }
 
 
@@ -180,13 +180,13 @@ return null;
         Objects.equals(name, resourceEndpoint.name) &&
         Objects.equals(endpointType, resourceEndpoint.endpointType) &&
         Objects.equals(url, resourceEndpoint.url) &&
-        Objects.equals(security, resourceEndpoint.security) &&
-        Objects.equals(config, resourceEndpoint.config);
+        Objects.equals(securityConfig, resourceEndpoint.securityConfig) &&
+        Objects.equals(generalConfig, resourceEndpoint.generalConfig);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpointType, url, security, config);
+    return Objects.hash(id, name, endpointType, url, securityConfig, generalConfig);
   }
 
   @Override
@@ -198,8 +198,8 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    endpointType: ").append(toIndentedString(endpointType)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
-    sb.append("    security: ").append(toIndentedString(security)).append("\n");
-    sb.append("    config: ").append(toIndentedString(config)).append("\n");
+    sb.append("    securityConfig: ").append(toIndentedString(securityConfig)).append("\n");
+    sb.append("    generalConfig: ").append(toIndentedString(generalConfig)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -1760,6 +1761,48 @@ public class ImportUtils {
         } catch (IOException e) {
             throw new APIManagementException("Error in reading certificates file", e);
         }
+    }
+
+    public static List<ResourceEndpoint> retrieveResourceEndpoints(String pathToArchive) throws APIManagementException {
+        String jsonContent = null;
+        List<ResourceEndpoint> resourceEndpoints = new ArrayList<>();
+        String pathToResourceEndpointsDirectory =
+                pathToArchive + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY;
+        String pathToYamlFile = pathToResourceEndpointsDirectory + ImportExportConstants.RESOURCE_ENDPOINTS_FILE_NAME
+                + ImportExportConstants.YAML_EXTENSION;
+        String pathToJsonFile = pathToResourceEndpointsDirectory + ImportExportConstants.RESOURCE_ENDPOINTS_FILE_NAME
+                + ImportExportConstants.JSON_EXTENSION;
+
+        try {
+            // try loading file as YAML
+            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+                log.debug("Found resource-endpoints file " + pathToYamlFile);
+                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+                jsonContent = CommonUtil.yamlToJson(yamlContent);
+            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+                // load as a json fallback
+                log.debug("Found resource-endpoints file " + pathToJsonFile);
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            }
+            if (jsonContent == null) {
+                log.debug("No resource-endpoints file found, skipping");
+            } else {
+                JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject()
+                        .get(APIConstants.DATA);
+                if (configElement != null) {
+                    JsonElement endpointList = configElement.getAsJsonObject().get("list");
+                    if (endpointList != null) {
+                        Gson gson = new Gson();
+                        return gson.fromJson(endpointList.getAsJsonArray(),
+                                new TypeToken<ArrayList<ResourceEndpoint>>() {
+                                }.getType());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error in reading resource-endpoints file", e);
+        }
+        return resourceEndpoints;
     }
 
     /**

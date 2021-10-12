@@ -11817,11 +11817,11 @@ components:
             - ADDRESS
         url:
           type: string
-        security:
+        securityConfig:
           type: object
           additionalProperties:
             type: string
-        config:
+        generalConfig:
           type: object
           additionalProperties:
             type: string
