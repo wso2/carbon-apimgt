@@ -46,7 +46,6 @@ public final class RestApiConstants {
     public static final String JWT_AUTHENTICATION = "jwt";
     public static final String BACKEND_JWT_AUTHENTICATION = "backend-jwt";
     public static final String JWT_TOKEN = "token";
-    public static final String TOKEN_VALIDATION_REQUIRED = "token_validation_required";
     public static final String DOT = ".";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
 

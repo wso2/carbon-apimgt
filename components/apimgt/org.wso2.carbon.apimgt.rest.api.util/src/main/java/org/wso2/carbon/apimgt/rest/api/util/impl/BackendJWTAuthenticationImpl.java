@@ -45,7 +45,8 @@ import java.text.ParseException;
 
 /**
  * This class is for Authenticate API requests that coming with X-JWT-Assertion header. X-JWT-Assertion header transporting
- * the backend JWT.Validating the JWT is not required.
+ * the backend JWT.Validating the JWT against the token issuer is not required since the token coming from well known party
+ * Un-authorize access are denied by network policies.
  * */
 
 public class BackendJWTAuthenticationImpl extends AbstractOAuthAuthenticator {
