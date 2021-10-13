@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
-import org.wso2.carbon.apimgt.rest.api.util.utils.OauthUtils;
+import org.wso2.carbon.apimgt.rest.api.util.jwt.JWTUtil;
 import java.text.ParseException;
 
 /**
@@ -73,8 +73,7 @@ public class BackendJWTAuthenticationImpl extends AbstractOAuthAuthenticator {
                     getRESTAPITokenCache().put(jwtTokenIdentifier, jwtValidationInfo);
                 }
                 //Validating scopes
-                OauthUtils oauthUtils = new OauthUtils();
-                return oauthUtils.handleScopeValidation(message, signedJWTInfo, token);
+                return JWTUtil.handleScopeValidation(message, signedJWTInfo, token);
             } else {
                 log.error("Invalid Signed JWT :" + signedJWTInfo);
                 return false;

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util.utils;
+package org.wso2.carbon.apimgt.rest.api.util.jwt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -44,9 +45,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class OauthUtils {
+public class JWTUtil {
 
-    private static final Log log = LogFactory.getLog(OauthUtils.class);
+    private static final Log log = LogFactory.getLog(JWTUtil.class);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -57,7 +58,7 @@ public class OauthUtils {
      * @param signedJWTInfo : Signed token info
      * @param message       : cxf Message
      */
-    public boolean handleScopeValidation(Message message, SignedJWTInfo signedJWTInfo, String accessToken)
+    public static boolean handleScopeValidation(Message message, SignedJWTInfo signedJWTInfo, String accessToken)
             throws APIManagementException, ParseException {
 
         String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
@@ -123,7 +124,7 @@ public class OauthUtils {
      * else false(means scope validation failed).
      */
     @MethodStats
-    public boolean validateScopes(Message message, OAuthTokenInfo tokenInfo) {
+    public static boolean validateScopes(Message message, OAuthTokenInfo tokenInfo) {
         String basePath = (String) message.get(Message.BASE_PATH);
         // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
         // decoded values of request parameters

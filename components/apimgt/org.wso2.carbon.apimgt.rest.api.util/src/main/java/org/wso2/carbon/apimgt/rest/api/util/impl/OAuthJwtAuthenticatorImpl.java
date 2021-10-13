@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.MethodStats;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
-import org.wso2.carbon.apimgt.rest.api.util.utils.OauthUtils;
+import org.wso2.carbon.apimgt.rest.api.util.jwt.JWTUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -99,8 +99,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                         getRESTAPITokenCache().put(jwtTokenIdentifier, jwtValidationInfo);
                     }
                     //Validating scopes
-                    OauthUtils oauthUtils = new OauthUtils();
-                    return oauthUtils.handleScopeValidation(message, signedJWTInfo, accessToken);
+                    return JWTUtil.handleScopeValidation(message, signedJWTInfo, accessToken);
                 } else {
                     log.error("Invalid JWT token :" + maskedToken);
                     return false;
