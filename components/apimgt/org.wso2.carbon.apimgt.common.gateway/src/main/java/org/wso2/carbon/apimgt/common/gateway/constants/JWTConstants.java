@@ -48,4 +48,7 @@ public class JWTConstants {
     public static final String SCOPE_DELIMITER = " ";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
     public static final String AUTHORIZED_USER_TYPE = "aut";
+
+    public static final String SUB = "sub";
+    public static final String ORGANIZATIONS = "organizations";
 }
