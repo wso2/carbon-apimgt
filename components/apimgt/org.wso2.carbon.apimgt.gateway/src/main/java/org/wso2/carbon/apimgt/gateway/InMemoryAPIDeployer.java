@@ -256,6 +256,8 @@ public class InMemoryAPIDeployer {
                     }
 
                     GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+                    org.wso2.carbon.apimgt.gateway.utils.GatewayUtils
+                            .setResourceEndpointsToBeRemoved(gatewayAPIDTO, gatewayEvent.getTenantDomain());
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
                         GatewayUtils

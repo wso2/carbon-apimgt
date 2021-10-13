@@ -1408,6 +1408,23 @@ public class GatewayUtils {
         }
     }
 
+    public static void setResourceEndpointsToBeRemoved(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
+            throws AxisFault {
+        String apiId = gatewayAPIDTO.getApiId();
+        if (apiId != null) {
+            String prefix = apiId.concat("--");
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+            String[] endpoints = endpointAdminServiceProxy.getEndpoints();
+            for (String endpoint : endpoints) {
+                if (endpoint.startsWith(prefix)) {
+                    gatewayAPIDTO.setResourceEndpointsToBeRemove(
+                            org.wso2.carbon.apimgt.impl.utils.GatewayUtils.addStringToList(endpoint,
+                                    gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+                }
+            }
+        }
+    }
+
     public static TracingTracer getTracingTracer() {
         return ServiceReferenceHolder.getInstance().getTracer();
     }

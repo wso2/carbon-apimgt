@@ -9,7 +9,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
 /**
- *
+ * Set Resource-Endpoint in context
  */
 public class ResourceEndpointConfigContext extends ConfigContextDecorator {
     private ResourceEndpoint resourceEndpoint;
