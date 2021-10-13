@@ -112,6 +112,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -308,7 +309,8 @@ public class ImportUtils {
                     apiProvider.changeAPILCCheckListItems(importedApi.getId(),
                             ImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 }
-                apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction, organization);
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, importedApi.getUuid(), lifecycleAction,
+                        new HashMap<>());
             }
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
