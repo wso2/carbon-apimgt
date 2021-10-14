@@ -70,6 +70,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     private String velocityLogPath = null;
     private List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
     private Map<String, APIDTO> associatedAPIMap = new HashMap<>();
+    private List<ResourceEndpoint> resourceEndpoints = new ArrayList<>();
 
     public APITemplateBuilderImpl(API api) {
 
@@ -84,11 +85,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     public APITemplateBuilderImpl(API api, List<SoapToRestMediationDto> soapToRestInMediationDtoList,
-                                  List<SoapToRestMediationDto> soapToRestOutMediationDtoList) {
+            List<SoapToRestMediationDto> soapToRestOutMediationDtoList, List<ResourceEndpoint> resourceEndpoints) {
 
         this(api);
         this.soapToRestInMediationDtoList = soapToRestInMediationDtoList;
         this.soapToRestOutMediationDtoList = soapToRestOutMediationDtoList;
+        this.resourceEndpoints = resourceEndpoints;
     }
 
     public APITemplateBuilderImpl(API api, APIProduct apiProduct) {
@@ -265,13 +267,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
-    @Override public String getConfigStringForResourceEndpointTemplate(ResourceEndpoint resourceEndpoint)
+    @Override
+    public String getConfigStringForResourceEndpointTemplate(String resourceEndpointId)
             throws APITemplateException {
 
         StringWriter writer = new StringWriter();
         try {
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new ResourceEndpointConfigContext(configcontext, resourceEndpoint, this.api);
+            configcontext = new ResourceEndpointConfigContext(configcontext, this.resourceEndpoints, this.api);
             configcontext = new TemplateUtilContext(configcontext);
             configcontext.validate();
 
@@ -289,6 +292,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
+
+            context.put("endpointId", resourceEndpointId);
+            context.put("type", "resource_endpoints");
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 
@@ -360,6 +366,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new ResponseCacheConfigContext(configcontext, api);
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
+        configcontext = new ResourceEndpointConfigContext(configcontext, this.resourceEndpoints, api);
         configcontext = new TemplateUtilContext(configcontext);
 
         if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()) || !StringUtils.isEmpty(api.getWsdlUrl())) {
