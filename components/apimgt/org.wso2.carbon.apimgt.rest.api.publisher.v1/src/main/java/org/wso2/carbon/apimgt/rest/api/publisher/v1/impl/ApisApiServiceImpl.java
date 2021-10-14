@@ -4913,19 +4913,28 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response addResourceEndpoint(String apiId, ResourceEndpointDTO resourceEndpointDTO,
             MessageContext messageContext) throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        //validate if api exists
-        APIInfo apiInfo = validateAPIExistence(apiId);
-        //validate API update operation permitted based on the LC state
-        validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            //validate if api exists
+            APIInfo apiInfo = validateAPIExistence(apiId);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-        String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
-        ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
-        ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(createdEndpoint);
+            ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
+            String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
+            ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+            ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(createdEndpoint);
 
-        return Response.ok().entity(createdEndpointDTO).build();
+            String createdEndpointURIString = (RestApiConstants.RESOURCE_PATH_RESOURCE_ENDPOINTS + "/"
+                    + RestApiConstants.RESOURCE_ENDPOINT_ID_PARAM)
+                    .replace(RestApiConstants.SHARED_SCOPE_ID_PARAM, createdEndpointDTO.getId());
+            URI createdEndpointURI = new URI(createdEndpointURIString);
+            return Response.created(createdEndpointURI).entity(createdEndpointDTO).build();
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("Error while adding resource endpoint : " + resourceEndpointDTO.getName(),
+                    e);
+        }
     }
 
     @Override
