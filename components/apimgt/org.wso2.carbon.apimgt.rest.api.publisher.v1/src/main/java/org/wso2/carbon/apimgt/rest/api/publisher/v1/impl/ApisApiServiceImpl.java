@@ -4898,7 +4898,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response addResourceEndpoint(String apiId, ResourceEndpointDTO resourceEndpointDTO,
-            String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //validate if api exists
         APIInfo apiInfo = validateAPIExistence(apiId);
