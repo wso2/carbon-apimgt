@@ -17794,19 +17794,22 @@ public class ApiMgtDAO {
                 PreparedStatement prepStmt = connection
                         .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_BY_UUID)) {
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            prepStmt.setString(1, uuid);
-            prepStmt.setInt(2, tenantId);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, uuid);
+            prepStmt.setInt(3, tenantId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     resourceEndpoint = new ResourceEndpoint();
                     resourceEndpoint.setId(uuid);
                     resourceEndpoint.setName(rs.getString("ENDPOINT_NAME"));
-                    resourceEndpoint.setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
+                    resourceEndpoint
+                            .setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
                     resourceEndpoint.setUrl(rs.getString("URL"));
                     resourceEndpoint
                             .setSecurityConfig(convertConfigBlobToStringMap(rs.getBinaryStream("SECURITY_CONFIG")));
                     resourceEndpoint
                             .setGeneralConfig(convertConfigBlobToStringMap(rs.getBinaryStream("ENDPOINT_CONFIG")));
+                    resourceEndpoint.setUsageCount(rs.getInt("USAGES"));
                 }
             }
         } catch (SQLException e) {
@@ -17911,22 +17914,25 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection
-                        .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINTS_OF_API)) {
+                        .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINTS_OF_API_WITH_USAGE_COUNT)) {
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             int apiId = getAPIID(uuid);
-            prepStmt.setInt(1, apiId);
-            prepStmt.setInt(2, tenantId);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setInt(2, apiId);
+            prepStmt.setInt(3, tenantId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     ResourceEndpoint resourceEndpoint = new ResourceEndpoint();
                     resourceEndpoint.setId(rs.getString("UUID"));
                     resourceEndpoint.setName(rs.getString("ENDPOINT_NAME"));
-                    resourceEndpoint.setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
+                    resourceEndpoint
+                            .setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
                     resourceEndpoint.setUrl(rs.getString("URL"));
                     resourceEndpoint
                             .setSecurityConfig(convertConfigBlobToStringMap(rs.getBinaryStream("SECURITY_CONFIG")));
                     resourceEndpoint
                             .setGeneralConfig(convertConfigBlobToStringMap(rs.getBinaryStream("ENDPOINT_CONFIG")));
+                    resourceEndpoint.setUsageCount(rs.getInt("USAGES"));
                     endpointList.add(resourceEndpoint);
                 }
             }

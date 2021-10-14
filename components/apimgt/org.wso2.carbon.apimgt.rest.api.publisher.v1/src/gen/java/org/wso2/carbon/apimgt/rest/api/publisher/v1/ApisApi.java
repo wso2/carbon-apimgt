@@ -208,18 +208,18 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/resource-endpoints")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add Resource Endpoint", notes = "This operation can be used to add resource endpoints for an API. ", response = String.class, authorizations = {
+    @ApiOperation(value = "Add Resource Endpoint", notes = "This operation can be used to add resource endpoints for an API. ", response = ResourceEndpointDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "Resource Endpoints",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with resource endpoint object ", response = String.class),
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created Resource Endpoint object in the body. ", response = ResourceEndpointDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addResourceEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Resource Endpoint Object that needs to be added" ,required=true) ResourceEndpointDTO resourceEndpointDTO,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.addResourceEndpoint(apiId, resourceEndpointDTO, ifNoneMatch, securityContext);
+    public Response addResourceEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Resource Endpoint Object that needs to be added" ,required=true) ResourceEndpointDTO resourceEndpointDTO) throws APIManagementException{
+        return delegate.addResourceEndpoint(apiId, resourceEndpointDTO, securityContext);
     }
 
     @GET

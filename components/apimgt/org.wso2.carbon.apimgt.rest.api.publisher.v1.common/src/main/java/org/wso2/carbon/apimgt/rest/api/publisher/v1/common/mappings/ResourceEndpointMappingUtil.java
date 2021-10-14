@@ -25,6 +25,7 @@ public class ResourceEndpointMappingUtil {
         resourceEndpoint.setUrl(endpointDTO.getUrl());
         resourceEndpoint.setSecurityConfig(endpointDTO.getSecurityConfig());
         resourceEndpoint.setGeneralConfig(endpointDTO.getGeneralConfig());
+        resourceEndpoint.setUsageCount(endpointDTO.getUsageCount());
         return resourceEndpoint;
     }
 
@@ -37,6 +38,7 @@ public class ResourceEndpointMappingUtil {
         endpointDTO.setUrl(endpoint.getUrl());
         endpointDTO.setSecurityConfig(endpoint.getSecurityConfig());
         endpointDTO.setGeneralConfig(endpoint.getGeneralConfig());
+        endpointDTO.setUsageCount(endpoint.getUsageCount());
         return endpointDTO;
     }
 

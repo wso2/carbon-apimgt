@@ -72,7 +72,7 @@ public interface ApisApiService {
       public Response addAPIMediationPolicy(String apiId, String type, String ifMatch, InputStream mediationPolicyFileInputStream, Attachment mediationPolicyFileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response addAPIMonetization(String apiId, APIMonetizationInfoDTO apIMonetizationInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) throws APIManagementException;
-      public Response addResourceEndpoint(String apiId, ResourceEndpointDTO resourceEndpointDTO, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response addResourceEndpoint(String apiId, ResourceEndpointDTO resourceEndpointDTO, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext) throws APIManagementException;

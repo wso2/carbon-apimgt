@@ -60,6 +60,7 @@ return null;
     private String url = null;
     private Map<String, String> securityConfig = new HashMap<String, String>();
     private Map<String, String> generalConfig = new HashMap<String, String>();
+    private Integer usageCount = 0;
 
   /**
    **/
@@ -166,6 +167,24 @@ return null;
     this.generalConfig = generalConfig;
   }
 
+  /**
+   * Usage count of Resource Endpoint 
+   **/
+  public ResourceEndpointDTO usageCount(Integer usageCount) {
+    this.usageCount = usageCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Usage count of Resource Endpoint ")
+  @JsonProperty("usageCount")
+  public Integer getUsageCount() {
+    return usageCount;
+  }
+  public void setUsageCount(Integer usageCount) {
+    this.usageCount = usageCount;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -181,12 +200,13 @@ return null;
         Objects.equals(endpointType, resourceEndpoint.endpointType) &&
         Objects.equals(url, resourceEndpoint.url) &&
         Objects.equals(securityConfig, resourceEndpoint.securityConfig) &&
-        Objects.equals(generalConfig, resourceEndpoint.generalConfig);
+        Objects.equals(generalConfig, resourceEndpoint.generalConfig) &&
+        Objects.equals(usageCount, resourceEndpoint.usageCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpointType, url, securityConfig, generalConfig);
+    return Objects.hash(id, name, endpointType, url, securityConfig, generalConfig, usageCount);
   }
 
   @Override
@@ -200,6 +220,7 @@ return null;
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    securityConfig: ").append(toIndentedString(securityConfig)).append("\n");
     sb.append("    generalConfig: ").append(toIndentedString(generalConfig)).append("\n");
+    sb.append("    usageCount: ").append(toIndentedString(usageCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }
