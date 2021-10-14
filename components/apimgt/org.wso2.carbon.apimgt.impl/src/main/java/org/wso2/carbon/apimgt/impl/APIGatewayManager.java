@@ -133,6 +133,12 @@ public class APIGatewayManager {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
         sendDeploymentEvent(api, tenantDomain, gatewaysToPublish);
+
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            if (debugEnabled) {
+                log.debug("GraphQL Schema of " + api.getId() + " has been updated to DB");
+            }
+        }
     }
 
     public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish) {

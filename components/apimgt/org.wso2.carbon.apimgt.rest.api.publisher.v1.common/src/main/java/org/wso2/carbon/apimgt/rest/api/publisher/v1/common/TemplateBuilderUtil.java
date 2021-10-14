@@ -638,6 +638,7 @@ public class TemplateBuilderUtil {
                     api.getGraphQLSchema() + "</localEntry>");
             gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
+            gatewayAPIDTO.setGraphQLSchema(api.getGraphQLSchema());
             Set<URITemplate> uriTemplates = new HashSet<>();
             URITemplate template = new URITemplate();
             template.setAuthType("Any");

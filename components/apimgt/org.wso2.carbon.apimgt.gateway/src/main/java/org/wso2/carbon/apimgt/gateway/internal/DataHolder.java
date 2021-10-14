@@ -18,15 +18,17 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.*;
 
 public class DataHolder {
 
     private static final DataHolder Instance = new DataHolder();
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
+    private Map<String, Pair<GraphQLSchema, TypeDefinitionRegistry>> apiToGraphQLSchemaMap = new HashMap<>();
 
     private DataHolder() {
 
@@ -57,4 +59,16 @@ public class DataHolder {
         return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
     }
 
+    public Map<String, Pair<GraphQLSchema, TypeDefinitionRegistry>> getApiToGraphQLSchemaMap() {
+        return apiToGraphQLSchemaMap;
+    }
+
+    public void addApiToGraphQLSchema(String apiId, Pair<GraphQLSchema, TypeDefinitionRegistry> schema) {
+        apiToGraphQLSchemaMap.put(apiId, schema);
+    }
+
+    public Pair<GraphQLSchema, TypeDefinitionRegistry> getGraphQLSchemaForAPI(String apiId) {
+
+        return apiToGraphQLSchemaMap.get(apiId);
+    }
 }

@@ -19,10 +19,16 @@
 package org.wso2.carbon.apimgt.gateway;
 
 import com.google.gson.Gson;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
@@ -91,6 +97,7 @@ public class InMemoryAPIDeployer {
                 unDeployAPI(apiGatewayAdmin, gatewayEvent);
                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
+                addDeployedGraphqlQLToAPI(gatewayAPIDTO);
                 if (debugEnabled) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
                             gatewayLabels));
@@ -169,6 +176,7 @@ public class InMemoryAPIDeployer {
                                 log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
                                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
+                                addDeployedGraphqlQLToAPI(gatewayAPIDTO);
                             }
                         } catch (AxisFault axisFault) {
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
@@ -226,6 +234,7 @@ public class InMemoryAPIDeployer {
                                 org.wso2.carbon.apimgt.impl.utils.GatewayUtils
                                         .addStringToList(gatewayEvent.getUuid().concat(
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
+                        DataHolder.getInstance().getApiToGraphQLSchemaMap().remove(gatewayEvent.getUuid());
                     }
                     if (APIConstants.APITransportType.WS.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
                         org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(
@@ -307,6 +316,17 @@ public class InMemoryAPIDeployer {
                 }
             }
             DataHolder.getInstance().addApiToAliasList(apiId, aliasList);
+        }
+    }
+
+    private void addDeployedGraphqlQLToAPI(GatewayAPIDTO gatewayAPIDTO) {
+
+        if (gatewayAPIDTO != null && gatewayAPIDTO.getGraphQLSchema() != null) {
+            String apiId = gatewayAPIDTO.getApiId();
+            SchemaParser schemaParser = new SchemaParser();
+            TypeDefinitionRegistry registry = schemaParser.parse(gatewayAPIDTO.getGraphQLSchema());
+            GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+            DataHolder.getInstance().addApiToGraphQLSchema(apiId, Pair.of(schema, registry));
         }
     }
 
