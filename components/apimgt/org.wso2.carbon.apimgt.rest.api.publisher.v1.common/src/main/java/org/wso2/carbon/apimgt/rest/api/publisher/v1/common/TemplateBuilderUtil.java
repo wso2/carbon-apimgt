@@ -91,12 +91,12 @@ public class TemplateBuilderUtil {
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
             List<ClientCertificateDTO> clientCertificateDTOS, List<SoapToRestMediationDto> soapToRestInMediationDtos,
-            List<SoapToRestMediationDto> soapToRestMediationDtos)
+            List<SoapToRestMediationDto> soapToRestMediationDtos, List<ResourceEndpoint> resourceEndpoints)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APITemplateBuilderImpl vtb =
-                new APITemplateBuilderImpl(api, soapToRestInMediationDtos, soapToRestMediationDtos);
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api, soapToRestInMediationDtos, soapToRestMediationDtos,
+                resourceEndpoints);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
         if (!APIUtil.isStreamingApi(api)) {
@@ -438,8 +438,9 @@ public class TemplateBuilderUtil {
         // add new property for entires that has a __display suffix
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
         api.setAdditionalProperties(modifiedProperties);
-        APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
-                clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
+        APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil
+                .getAPITemplateBuilder(api, tenantDomain, clientCertificatesDTOList, soapToRestInMediationDtoList,
+                        soapToRestOutMediationDtoList, resourceEndpoints);
         GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
                 extractedFolderPath, apidto, clientCertificatesDTOList, resourceEndpoints);
         // Reset the additional properties to the original values
@@ -884,7 +885,8 @@ public class TemplateBuilderUtil {
     private static void addResourceEndpoints(List<ResourceEndpoint> resourceEndpoints, APITemplateBuilder builder,
             GatewayAPIDTO gatewayAPIDTO) throws APITemplateException {
         for (ResourceEndpoint resourceEndpoint : resourceEndpoints) {
-            String resourceEndpointConfigContext = builder.getConfigStringForResourceEndpointTemplate(resourceEndpoint);
+            String resourceEndpointConfigContext = builder
+                    .getConfigStringForResourceEndpointTemplate(resourceEndpoint.getId());
             GatewayContentDTO resourceEndpointContentDTO = new GatewayContentDTO();
             try {
                 resourceEndpointContentDTO.setName(getEndpointName(resourceEndpointConfigContext));
