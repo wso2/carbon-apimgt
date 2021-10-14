@@ -1738,7 +1738,7 @@ public class ImportUtils {
                     JsonElement endpointList = configElement.getAsJsonObject().get("list");
                     if (endpointList != null) {
                         Gson gson = new Gson();
-                        return gson.fromJson(endpointList.getAsJsonArray(),
+                        resourceEndpoints = gson.fromJson(endpointList.getAsJsonArray(),
                                 new TypeToken<ArrayList<ResourceEndpoint>>() {
                                 }.getType());
                     }
