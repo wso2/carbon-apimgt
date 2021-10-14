@@ -465,9 +465,8 @@ public class JWTValidator {
                 log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
                         apiVersion, tokenSignature);
-                AuthenticationContext authenticationContext = generateAuthenticationContextForWS(jti, jwtValidationInfo,
+                return generateAuthenticationContextForWS(jti, jwtValidationInfo,
                         apiKeyValidationInfoDTO, endUserToken, apiVersion);
-                return authenticationContext;
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
                 log.debug(message);
@@ -526,6 +525,42 @@ public class JWTValidator {
             log.debug(message);
             throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, message);
         }
+    }
+
+    public void validateScopesForGraphQLSubscriptions(String apiContext, String apiVersion, String matchingResource,
+                                                      SignedJWTInfo jwtToken,
+                                                      AuthenticationContext authenticationContext)
+            throws APISecurityException {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        // Generate TokenValidationContext
+        TokenValidationContext tokenValidationContext = new TokenValidationContext();
+
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        Set<String> scopeSet = new HashSet<>();
+        scopeSet.addAll(authenticationContext.getRequestTokenScopes());
+        apiKeyValidationInfoDTO.setScopes(scopeSet);
+        tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+
+        tokenValidationContext.setAccessToken(jwtToken.getToken());
+        tokenValidationContext.setHttpVerb(WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME);
+        tokenValidationContext.setMatchingResource(matchingResource);
+        tokenValidationContext.setContext(apiContext);
+        tokenValidationContext.setVersion(apiVersion);
+
+        boolean valid = this.apiKeyValidator.validateScopes(tokenValidationContext, tenantDomain);
+        if (valid) {
+            if (log.isDebugEnabled()) {
+                log.debug("Scope validation successful for the resource: " + matchingResource
+                        + ", user: " + authenticationContext.getUsername());
+            }
+        } else {
+            String message = "User is NOT authorized to access the Resource: " + matchingResource
+                    + ". Scope validation failed.";
+            log.debug(message);
+            throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, message);
+        }
+
     }
 
     /**

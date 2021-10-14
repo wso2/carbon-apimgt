@@ -19,10 +19,12 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import graphql.language.Definition;
+import graphql.language.Document;
+import graphql.language.OperationDefinition;
+import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.schema.idl.UnExecutableSchemaGenerator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -52,7 +54,6 @@ import org.apache.synapse.api.API;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
-import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
@@ -64,16 +65,19 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.graphql.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -98,7 +102,6 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSoc
  */
 public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
-    private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private String tenantDomain;
     private String fullRequestPath;
     private String requestPath; // request path without query param section
@@ -115,8 +118,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private AuthenticationContext authContext;
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
-    private GraphQLSchema schema = null;
-    private String schemaDefinition;
+    private Pair<GraphQLSchema, TypeDefinitionRegistry> apiSchemaToTypeDefRegistry;
+    private SignedJWTInfo signedJWTInfo;
+    private Map<String, String> graphQLMsgIdToOperationList = new HashMap<>();
 
     public WebsocketInboundHandler() {
         initializeDataPublisher();
@@ -210,6 +214,68 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
             ctx.fireChannelRead(msg);
         } else if (msg instanceof WebSocketFrame) {
+            if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)) {
+                if (msg instanceof TextWebSocketFrame) {
+                    Parser parser = new Parser();
+                    String msgText = ((TextWebSocketFrame) msg).text();
+                    JSONObject graphQLMsg = new JSONObject(msgText);
+                    //validate token and subscriptions
+                    if (!authenticateGraphQLJWTToken()) {
+                        ctx.writeAndFlush(new TextWebSocketFrame("UnAuthenticated"));
+                        return;
+                    }
+                    //for gql subscription operation payloads
+                    if (graphQLMsg.getString("type") != null &&
+                            Arrays.asList(new String[]{"start", "subscribe"}).contains(graphQLMsg.getString("type"))) {
+                        if (graphQLMsg.get("payload") != null
+                                && ((JSONObject) graphQLMsg.get("payload")).get("query") != null) {
+                            String graphQLSubscriptionPayload =
+                                    ((JSONObject) graphQLMsg.get("payload")).getString("query");
+                            Document document = parser.parseDocument(graphQLSubscriptionPayload);
+                            // Extract the operation type and operations from the payload
+                            for (Definition definition : document.getDefinitions()) {
+                                if (definition instanceof OperationDefinition) {
+                                    OperationDefinition operation = (OperationDefinition) definition;
+                                    if (operation.getOperation() != null
+                                            && APIConstants.GRAPHQL_SUBSCRIPTION.equals(operation.getOperation()
+                                            .toString()) && graphQLMsg.getString("id") != null) {
+                                        // payload validation
+                                        String validationErrorMessage = GraphQLProcessorUtil
+                                                .validatePayload(apiSchemaToTypeDefRegistry.getLeft(), document);
+                                        if (validationErrorMessage != null) {
+                                            ctx.writeAndFlush(new TextWebSocketFrame("Invalid query: "
+                                                    + validationErrorMessage));
+                                            return;
+                                        }
+                                        String operationList = GraphQLProcessorUtil.getOperationList(operation,
+                                                apiSchemaToTypeDefRegistry.getRight());
+                                        graphQLMsgIdToOperationList.put(graphQLMsg.getString("id"), operationList);
+                                        // validate scopes based on subscription payload
+                                        if (!authorizeGraphQLSubscriptionEvents(operationList)) {
+                                            ctx.writeAndFlush(new TextWebSocketFrame("UnAuthorized"));
+                                            return;
+                                        }
+                                        // analyze query depth and complexity TODO://
+
+                                        //throttling for matching resource TODO://
+                                    } else {
+                                        throw new UnsupportedOperationException("Invalid operation. "
+                                                + "Only subscription type operations with unique operation ids are "
+                                                + "allowed");
+                                    }
+                                } else {
+                                    throw new UnsupportedOperationException("Operation definition cannot be empty");
+                                }
+                            }
+                        } else {
+                            throw new UnsupportedOperationException("Invalid operation payload");
+                        }
+                    }
+                } else {
+                    ctx.fireChannelRead(msg);
+                    return;
+                }
+            }
 
             boolean isAllowed = doThrottle(ctx, (WebSocketFrame) msg);
 
@@ -275,7 +341,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            APIKeyValidationInfoDTO info;
+            APIKeyValidationInfoDTO info = null;
             if (!req.headers().contains(HttpHeaders.AUTHORIZATION)) {
                 QueryStringDecoder decoder = new QueryStringDecoder(fullRequestPath);
                 Map<String, List<String>> requestMap = decoder.parameters();
@@ -302,7 +368,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
                 //Initial guess of a JWT token using the presence of a DOT.
 
-                SignedJWTInfo signedJWTInfo = null;
                 if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                     try {
                         // Check if the header part is decoded
@@ -328,41 +393,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
-                    AuthenticationContext authenticationContext;
-                    JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
                     if (APIConstants.GRAPHQL_API.equals(electedAPI.getApiType())) {
-                        authenticationContext = jwtValidator.
-                                authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
+                        return authenticateGraphQLJWTToken();
                     } else {
-                        authenticationContext = jwtValidator.
-                                authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
+                        return authenticateWSJWTToken(matchingResource);
                     }
-
-                    if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
-                        return false;
-                    }
-                    // The information given by the AuthenticationContext is set to an APIKeyValidationInfoDTO object
-                    // so to feed information analytics and throttle data publishing
-                    info = new APIKeyValidationInfoDTO();
-                    info.setAuthorized(authenticationContext.isAuthenticated());
-                    info.setApplicationTier(authenticationContext.getApplicationTier());
-                    info.setTier(authenticationContext.getTier());
-                    info.setSubscriberTenantDomain(authenticationContext.getSubscriberTenantDomain());
-                    info.setSubscriber(authenticationContext.getSubscriber());
-                    info.setStopOnQuotaReach(authenticationContext.isStopOnQuotaReach());
-                    info.setApiName(authenticationContext.getApiName());
-                    info.setApplicationId(authenticationContext.getApplicationId());
-                    info.setType(authenticationContext.getKeyType());
-                    info.setApiPublisher(authenticationContext.getApiPublisher());
-                    info.setApplicationName(authenticationContext.getApplicationName());
-                    info.setConsumerKey(authenticationContext.getConsumerKey());
-                    info.setEndUserName(authenticationContext.getUsername());
-                    info.setApiTier(authenticationContext.getApiTier());
-
-                    keyType = info.getType();
-                    infoDTO = info;
-                    authContext = authenticationContext;
-                    return authenticationContext.isAuthenticated();
                 } else {
                     log.debug("The token was identified as an OAuth token");
                     //If the key have already been validated
@@ -395,6 +430,64 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
+
+    private boolean authenticateGraphQLJWTToken() throws APIManagementException, APISecurityException {
+        AuthenticationContext authenticationContext;
+        APIKeyValidationInfoDTO info = null;
+        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
+        authenticationContext = jwtValidator.
+                    authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
+        return validateAuthenticationContext(authenticationContext, info);
+    }
+
+    private boolean authenticateWSJWTToken(String matchingResource) throws APIManagementException,
+            APISecurityException {
+        AuthenticationContext authenticationContext;
+        APIKeyValidationInfoDTO info = null;
+        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
+        authenticationContext = jwtValidator.
+                authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
+        return validateAuthenticationContext(authenticationContext, info);
+    }
+
+    private boolean authorizeGraphQLSubscriptionEvents(String matchingResource) throws APIManagementException,
+            APISecurityException {
+
+        JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
+        jwtValidator.validateScopesForGraphQLSubscriptions(apiContext, version, matchingResource,signedJWTInfo,
+                authContext);
+        return true;
+    }
+
+    private boolean validateAuthenticationContext(AuthenticationContext authenticationContext,
+                                                  APIKeyValidationInfoDTO info) {
+        if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
+            return false;
+        }
+        // The information given by the AuthenticationContext is set to an APIKeyValidationInfoDTO object
+        // so to feed information analytics and throttle data publishing
+        info = new APIKeyValidationInfoDTO();
+        info.setAuthorized(authenticationContext.isAuthenticated());
+        info.setApplicationTier(authenticationContext.getApplicationTier());
+        info.setTier(authenticationContext.getTier());
+        info.setSubscriberTenantDomain(authenticationContext.getSubscriberTenantDomain());
+        info.setSubscriber(authenticationContext.getSubscriber());
+        info.setStopOnQuotaReach(authenticationContext.isStopOnQuotaReach());
+        info.setApiName(authenticationContext.getApiName());
+        info.setApplicationId(authenticationContext.getApplicationId());
+        info.setType(authenticationContext.getKeyType());
+        info.setApiPublisher(authenticationContext.getApiPublisher());
+        info.setApplicationName(authenticationContext.getApplicationName());
+        info.setConsumerKey(authenticationContext.getConsumerKey());
+        info.setEndUserName(authenticationContext.getUsername());
+        info.setApiTier(authenticationContext.getApiTier());
+
+        keyType = info.getType();
+        infoDTO = info;
+        authContext = authenticationContext;
+        return authenticationContext.isAuthenticated();
+    }
+
 
     protected String getInboundName(ChannelHandlerContext ctx) {
         return ctx.channel().pipeline().get("ssl") != null ? WS_SECURED_ENDPOINT_NAME : WS_ENDPOINT_NAME;
@@ -639,14 +732,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             handleError(ctx, "No matching resource found to dispatch the request");
         }
         if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)) {
-            Entry localEntryObj = (Entry) synCtx.getConfiguration().getLocalRegistry().get(electedAPI.getUuid() +
-                    GRAPHQL_IDENTIFIER);
-            if (localEntryObj != null) {
-                SchemaParser schemaParser = new SchemaParser();
-                schemaDefinition = localEntryObj.getValue().toString();
-                TypeDefinitionRegistry registry = schemaParser.parse(schemaDefinition);
-                schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
-            }
+            apiSchemaToTypeDefRegistry = DataHolder.getInstance()
+                    .getGraphQLSchemaForAPI(electedAPI.getUuid());
         }
         String resource = selectedResource.getDispatcherHelper().getString();
         if (log.isDebugEnabled()) {
