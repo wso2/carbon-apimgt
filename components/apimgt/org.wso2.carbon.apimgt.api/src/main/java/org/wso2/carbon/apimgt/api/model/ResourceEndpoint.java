@@ -14,6 +14,7 @@ public class ResourceEndpoint {
     private String url;
     private Map<String, String> securityConfig;
     private Map<String, String> generalConfig;
+    private int usageCount;
 
     public String getId() {
         return id;
@@ -61,5 +62,13 @@ public class ResourceEndpoint {
 
     public void setGeneralConfig(Map<String, String> generalConfig) {
         this.generalConfig = generalConfig;
+    }
+
+    public void setUsageCount(int usageCount) {
+        this.usageCount = usageCount;
+    }
+
+    public int getUsageCount() {
+        return usageCount;
     }
 }

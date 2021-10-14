@@ -8160,7 +8160,6 @@ paths:
         This operation can be used to add resource endpoints for an API.
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/If-None-Match'
       requestBody:
         description: Resource Endpoint Object that needs to be added
         content:
@@ -8169,14 +8168,14 @@ paths:
               $ref: '#/components/schemas/ResourceEndpoint'
         required: true
       responses:
-        200:
+        201:
           description: |
-            OK.
-            Successful response with resource endpoint object
+            Created.
+            Successful response with the newly created Resource Endpoint object in the body.
           headers:
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will d be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               schema:
                 type: string
             Last-Modified:
@@ -8193,7 +8192,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ResourceEndpoint'
         400:
           $ref: '#/components/responses/BadRequest'
         415:
@@ -11838,6 +11837,12 @@ components:
           type: object
           additionalProperties:
             type: string
+        usageCount:
+          type: integer
+          description: |
+            Usage count of Resource Endpoint
+          default: 0
+          readOnly: true
     ResourceEndpointList:
       title: Resource Endpoints List
       type: object
