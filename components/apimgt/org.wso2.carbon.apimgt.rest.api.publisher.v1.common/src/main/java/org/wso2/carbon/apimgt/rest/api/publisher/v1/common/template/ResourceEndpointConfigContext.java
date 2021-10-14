@@ -8,44 +8,60 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
+import java.util.List;
+
 /**
  * Set Resource-Endpoint in context
  */
 public class ResourceEndpointConfigContext extends ConfigContextDecorator {
-    private ResourceEndpoint resourceEndpoint;
+    private List<ResourceEndpoint> resourceEndpoints;
     private API api;
     private JSONObject resourceEndpointConfig;
 
 
-    public ResourceEndpointConfigContext(ConfigContext context, ResourceEndpoint resourceEndpoint, API api) {
+    public ResourceEndpointConfigContext(ConfigContext context, List<ResourceEndpoint> resourceEndpoints, API api) {
         super(context);
-        this.resourceEndpoint = resourceEndpoint;
+        this.resourceEndpoints = resourceEndpoints;
         this.api = api;
     }
 
     public void validate() throws APITemplateException, APIManagementException {
-        //construct endpoint config to match with normal api endpoint config
-        JSONObject endpointConfig = new JSONObject();
-        endpointConfig.put("endpoint_type", resourceEndpoint.getEndpointType().toString().toLowerCase());
-        if (!resourceEndpoint.getSecurityConfig().isEmpty()) {
-            Gson gson = new Gson();
-            endpointConfig.put("endpoint_security",
-                    new JSONObject().put("resource", gson.toJson(resourceEndpoint.getSecurityConfig())));
-        }
-        JSONObject resourceEndpointConfig = new JSONObject();
-        resourceEndpointConfig.put("config", resourceEndpoint.getGeneralConfig());
-        resourceEndpointConfig.put("url", resourceEndpoint.getUrl());
-        resourceEndpointConfig.put("endpointKey", this.api.getUuid() + "--" + resourceEndpoint.getId());
-        endpointConfig.put("resource_endpoints", resourceEndpointConfig);
+        super.validate();
+        JSONObject resourceEndpointMap = new JSONObject();
 
-        this.resourceEndpointConfig = endpointConfig;
+        for (ResourceEndpoint resourceEndpoint : resourceEndpoints) {
+            JSONObject resourceEndpointConfig = constructEndpointConfig(resourceEndpoint);
+            resourceEndpointMap.put(resourceEndpoint.getId(), resourceEndpointConfig);
+        }
+        this.resourceEndpointConfig = resourceEndpointMap;
+    }
+
+    private JSONObject constructEndpointConfig(ResourceEndpoint resourceEndpoint) {
+        JSONObject endpointConfig = new JSONObject();
+        JSONObject endpointSecurityConfig = new JSONObject();
+        JSONObject resourceEndpointConfig = new JSONObject();
+
+        endpointConfig.put("endpoint_type", resourceEndpoint.getEndpointType().toString().toLowerCase());
+        endpointConfig.put("endpointKey", this.api.getUuid() + "--" + resourceEndpoint.getId());
+
+        Gson gson = new Gson();
+        if (resourceEndpoint.getSecurityConfig() != null && !resourceEndpoint.getSecurityConfig().isEmpty()) {
+            endpointSecurityConfig.put("resource", gson.toJson(resourceEndpoint.getSecurityConfig()));
+            endpointConfig.put("endpoint_security", endpointSecurityConfig);
+        }
+
+        if (resourceEndpoint.getGeneralConfig() != null && !resourceEndpoint.getGeneralConfig().isEmpty()) {
+            resourceEndpointConfig.put("config", gson.toJson(resourceEndpoint.getGeneralConfig()));
+            resourceEndpointConfig.put("url", resourceEndpoint.getUrl());
+            endpointConfig.put("resource_endpoints", resourceEndpointConfig);
+        }
+
+        return endpointConfig;
     }
 
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
-
-        context.put("type", "resource_endpoints");
-        context.put("endpoint_config", this.resourceEndpointConfig);
+        context.put("resource_endpoint_config", this.resourceEndpointConfig);
 
         return context;
     }
