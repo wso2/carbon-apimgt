@@ -3704,15 +3704,21 @@ public class SQLConstants {
 
         public static final String GET_RESOURCE_ENDPOINT_BY_UUID =
                 "SELECT " +
-                "ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG FROM "+
-                "AM_API_RESOURCE_ENDPOINTS " +
-                "WHERE UUID = ? AND TENANT_ID = ?";
+                "RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, RE.ENDPOINT_CONFIG, " +
+                "(SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM WHERE REM.ENDPOINT_UUID=RE.UUID " +
+                "AND RE.TENANT_ID = ?) USAGES " +
+                "FROM "+
+                "AM_API_RESOURCE_ENDPOINTS RE " +
+                "WHERE RE.UUID = ? AND RE.TENANT_ID = ?";
 
-        public static final String GET_RESOURCE_ENDPOINTS_OF_API =
+        public static final String GET_RESOURCE_ENDPOINTS_OF_API_WITH_USAGE_COUNT =
                 "SELECT " +
-                "UUID, ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG FROM "+
-                "AM_API_RESOURCE_ENDPOINTS " +
-                "WHERE API_ID = ? AND TENANT_ID = ?";
+                "RE.UUID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, RE.ENDPOINT_CONFIG, " +
+                "(SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM WHERE REM.ENDPOINT_UUID=RE.UUID " +
+                "AND RE.TENANT_ID = ?) USAGES " +
+                "FROM "+
+                "AM_API_RESOURCE_ENDPOINTS RE " +
+                "WHERE RE.API_ID = ? AND RE.TENANT_ID = ?";
 
         public static final String UPDATE_RESOURCE_ENDPOINT =
                 "UPDATE AM_API_RESOURCE_ENDPOINTS " +
