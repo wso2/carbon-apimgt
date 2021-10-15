@@ -315,6 +315,5 @@ public final class RestApiConstants {
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
             Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
-    public static final String JWKS_URI = "jwksUri";
 
 }

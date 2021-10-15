@@ -79,10 +79,21 @@ public class KeyManagerMappingUtil {
             keyManagerDTO.setTokenEndpoint(tokenEndpointElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.TOKEN_ENDPOINT);
         }
+        JsonElement displayTokenEndpointElement = jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT);
+        if (displayTokenEndpointElement != null && !displayTokenEndpointElement.getAsString().trim().isEmpty()) {
+            keyManagerDTO.setDisplayTokenEndpoint(displayTokenEndpointElement.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT);
+        }
         JsonElement revokeEndpointElement = jsonObject.get(APIConstants.KeyManager.REVOKE_ENDPOINT);
         if (revokeEndpointElement != null) {
             keyManagerDTO.setRevokeEndpoint(revokeEndpointElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.REVOKE_ENDPOINT);
+        }
+        JsonElement displayRevokeEndpointElement = jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT);
+        if (displayRevokeEndpointElement != null &&
+                !displayRevokeEndpointElement.getAsString().trim().isEmpty()) {
+            keyManagerDTO.setDisplayRevokeEndpoint(displayRevokeEndpointElement.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT);
         }
         JsonElement scopeEndpointElement = jsonObject.get(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT);
         if (scopeEndpointElement != null) {
@@ -210,8 +221,14 @@ public class KeyManagerMappingUtil {
         if (StringUtils.isNotEmpty(keyManagerDTO.getTokenEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.TOKEN_ENDPOINT, keyManagerDTO.getTokenEndpoint());
         }
+        if (StringUtils.isNotEmpty(keyManagerDTO.getDisplayTokenEndpoint())) {
+            additionalProperties.put(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT, keyManagerDTO.getDisplayTokenEndpoint());
+        }
         if (StringUtils.isNotEmpty(keyManagerDTO.getRevokeEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.REVOKE_ENDPOINT, keyManagerDTO.getRevokeEndpoint());
+        }
+        if (StringUtils.isNotEmpty(keyManagerDTO.getDisplayRevokeEndpoint())) {
+            additionalProperties.put(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT, keyManagerDTO.getDisplayRevokeEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getScopeManagementEndpoint())) {
             additionalProperties

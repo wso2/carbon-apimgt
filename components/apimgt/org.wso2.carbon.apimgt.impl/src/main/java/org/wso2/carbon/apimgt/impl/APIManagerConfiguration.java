@@ -101,7 +101,6 @@ public class APIManagerConfiguration {
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
-    private JSONArray containerMgtAttributes = new JSONArray();
 
     private RecommendationEnvironment recommendationEnvironment;
 
@@ -762,10 +761,6 @@ public class APIManagerConfiguration {
     public JSONArray getMonetizationAttributes() {
 
         return monetizationAttributes;
-    }
-
-    public JSONArray getContainerMgtAttributes() {
-        return containerMgtAttributes;
     }
 
     /**
