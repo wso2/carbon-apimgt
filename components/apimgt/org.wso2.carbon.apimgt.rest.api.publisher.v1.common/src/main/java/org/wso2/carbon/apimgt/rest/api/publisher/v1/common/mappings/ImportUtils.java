@@ -1989,8 +1989,7 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments,
-                        organization);
+                apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {
                 log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +
                         " in any of the gateway environments.");
