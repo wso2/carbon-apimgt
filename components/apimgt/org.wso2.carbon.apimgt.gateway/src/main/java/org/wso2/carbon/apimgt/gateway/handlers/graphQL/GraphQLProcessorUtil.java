@@ -15,14 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.graphql;
+package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.GraphQLError;
-import graphql.analysis.FieldComplexityCalculator;
-import graphql.analysis.MaxQueryComplexityInstrumentation;
-import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.language.Document;
 import graphql.language.Field;
 import graphql.language.OperationDefinition;
@@ -34,12 +28,10 @@ import graphql.validation.Validator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 public class GraphQLProcessorUtil {
 
