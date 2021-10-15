@@ -854,7 +854,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.deployAPIProductRevision(apiProductId, revisionId, apiRevisionDeployments, organization);
+        apiProvider.deployAPIProductRevision(apiProductId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {

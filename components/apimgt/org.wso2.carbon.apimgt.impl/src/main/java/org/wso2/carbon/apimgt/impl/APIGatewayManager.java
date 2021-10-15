@@ -44,28 +44,22 @@ public class APIGatewayManager {
     private boolean debugEnabled = log.isDebugEnabled();
     private static APIGatewayManager instance;
 
-    private Map<String, Environment> environments;
     private RecommendationEnvironment recommendationEnvironment;
     private ArtifactSaver artifactSaver;
 
     private static final String PRODUCT_PREFIX = "prod";
 
-    private APIGatewayManager(String organization) {
+    private APIGatewayManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        try {
-            environments = APIUtil.getEnvironments(organization);
-        } catch (APIManagementException e) {
-            // TODO (renuka) do we want to set "environments = APIUtil.getReadOnlyEnvironments();"
-            log.error("Error occurred when reading configured gateway environments", e);
-        }
+
         this.recommendationEnvironment = config.getApiRecommendationEnvironment();
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
     }
 
-    public synchronized static APIGatewayManager getInstance(String organization) {
+    public synchronized static APIGatewayManager getInstance() {
         if (instance == null) {
-            instance = new APIGatewayManager(organization);
+            instance = new APIGatewayManager();
         }
         return instance;
     }
