@@ -58,7 +58,6 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         body.setId(environmentId);
-        //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
         apiAdmin.updateEnvironment(organization, env);
@@ -81,7 +80,6 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      */
     public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);

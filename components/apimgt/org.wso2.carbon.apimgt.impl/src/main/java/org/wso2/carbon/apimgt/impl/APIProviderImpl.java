@@ -2572,20 +2572,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
                                    Set<String> environmentsToAdd) {
-//        Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
-//        Set<String> environmentsToRemove = new HashSet<>();
-//        for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
-//            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
-//        }
-//        environmentsToRemove.removeAll(environmentsToAdd);
-//        String organization = api.getOrganization();
-//        APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
-//        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
-//        if (log.isDebugEnabled()) {
-//            String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
-//                    + " deleted from gateway";
-//            log.debug(logMessage);
-//        }
         String organization = api.getOrganization();
         removeFromGateway(api, gatewaysToRemove, environmentsToAdd, organization);
     }
@@ -2598,7 +2584,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(environmentsToAdd);
-        //String organization = api.getOrganization();
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance(organization);
         gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
         if (log.isDebugEnabled()) {

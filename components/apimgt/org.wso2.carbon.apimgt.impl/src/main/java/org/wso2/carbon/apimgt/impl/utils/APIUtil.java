@@ -6103,26 +6103,6 @@ public final class APIUtil {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         Set<String> environmentStringSet = extractEnvironmentsForAPI(environments, tenantDomain);
 
-//        Set<String> environmentStringSet = null;
-//        if (environments == null) {
-//            environmentStringSet = new HashSet<>(getEnvironments().keySet());
-//        } else {
-//            //handle not to publish to any of the gateways
-//            if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
-//                environmentStringSet = new HashSet<String>();
-//            }
-//            //handle to set published gateways nto api object
-//            else if (!"".equals(environments)) {
-//                String[] publishEnvironmentArray = environments.split(",");
-//                environmentStringSet = new HashSet<String>(Arrays.asList(publishEnvironmentArray));
-//                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
-//            }
-//            //handle to publish to any of the gateways when api creating stage
-//            else if ("".equals(environments)) {
-//                environmentStringSet = new HashSet<>(getEnvironments().keySet());
-//            }
-//        }
-//
         return environmentStringSet;
     }
 
@@ -9235,7 +9215,6 @@ public final class APIUtil {
     }
 
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
-        //String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
