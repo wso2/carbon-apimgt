@@ -64,6 +64,17 @@ public interface APIPersistence {
     /**
      * Add API to the persistence layer
      *
+     * @param org Organization the API is owned by
+     * @param publisherAPI API to add
+     * @param isLatest whether the API is the latest version
+     * @return ID of Added API
+     * @throws APIPersistenceException
+     */
+    PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI, boolean isLatest) throws APIPersistenceException;
+
+    /**
+     * Add API to the persistence layer
+     *
      * @param org          Organization the API is owned by
      * @param publisherAPI API to add
      * @return ID of Added API
@@ -179,7 +190,21 @@ public interface APIPersistence {
      */
     DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
                                     UserContext ctx) throws APIPersistenceException;
-    
+
+    /**
+     * Search APIs to be displayed on Dev Portal API listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      search offset
+     * @param isAllowDisplayMultipleVersions      whether to display multiple versions
+     * @return Dev Portal API Search Result
+     * @throws APIPersistenceException
+     */
+    DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
+            UserContext ctx, boolean isAllowDisplayMultipleVersions) throws APIPersistenceException;
+
     /**
      * Search based on content to display on publisher
      *

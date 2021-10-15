@@ -5604,7 +5604,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
-                    start, end, userCtx);
+                    start, end, userCtx, APIUtil.isAllowDisplayMultipleVersions());
             if (log.isDebugEnabled()) {
                 log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }
@@ -5630,10 +5630,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        if (APIUtil.isAllowDisplayMultipleVersions()) {
-            return result;
-        }
-        return filterMultipleVersionedAPIs(result);
+        return result;
     }
 
     @Override

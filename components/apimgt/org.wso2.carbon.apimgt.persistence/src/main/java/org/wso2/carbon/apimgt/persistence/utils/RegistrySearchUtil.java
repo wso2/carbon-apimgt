@@ -76,7 +76,8 @@ public class RegistrySearchUtil {
             NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
-            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase() };
+            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase(), "sort", "group", "group.sort", "group.field",
+            "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -391,7 +392,8 @@ public class RegistrySearchUtil {
         return null;
     }
     
-    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus) throws APIPersistenceException {
+    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus,
+                            boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
@@ -402,7 +404,13 @@ public class RegistrySearchUtil {
             }
             if ("".equals(searchQuery)) { // normal listing
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+                if (isAllowDisplayMultipleVersions) {
+                    modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+                } else {
+                    // solr result grouping is used when displayMultipleVersions is not enabled(default).
+                    modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria +
+                            "&group=true&group.field=name&group.ngroups=true&group.sort=versionTimestamp desc";
+                }
             }
             
             String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;

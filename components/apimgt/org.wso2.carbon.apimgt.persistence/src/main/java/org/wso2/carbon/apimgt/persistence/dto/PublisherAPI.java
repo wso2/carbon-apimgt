@@ -92,7 +92,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
-    
+    private String versionTimestamp;
     private String audience;
 
     public String getAudience() {
@@ -559,6 +559,16 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.asyncApiDefinition = asyncApiDefinition;
     }
 
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
     @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
@@ -584,6 +594,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl
                 + ", accessControlRoles=" + accessControlRoles + ", additionalProperties=" + additionalProperties
                 + ", thumbnail=" + thumbnail + ", createdTime=" + createdTime + ", lastUpdated=" + lastUpdated
+                + ", versionTimestamp=" + versionTimestamp
                 + ", toString()=" + super.toString() + "]";
     }
 }

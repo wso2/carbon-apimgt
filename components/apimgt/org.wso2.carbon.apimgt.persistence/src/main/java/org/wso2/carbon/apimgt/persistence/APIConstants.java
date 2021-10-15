@@ -120,6 +120,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String API_OVERVIEW_VERSION_TIMESTAMP = "overview_versionTimestamp";
+
 
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
@@ -230,6 +232,7 @@ public final class APIConstants {
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
+    public static final String DEFAULT_GROUP_SORT_BY = "version_imestamp";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
     public static final String TAGS_EQ_SEARCH_TYPE_PREFIX = "tags=";
     public static final String TAG_SEARCH_TYPE_PREFIX = "tag";

@@ -19,6 +19,8 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleExc
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -168,6 +170,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         
+        return addAPI(org, publisherAPI, false);
+    }
+
+    @Override
+    public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI, boolean isLatest) throws APIPersistenceException {
+
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         boolean transactionCommitted = false;
         boolean tenantFlowStarted = false;
@@ -191,6 +199,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
+            if (isLatest) {
+                genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, System.currentTimeMillis() + "");
+            } else {
+                //add 1 year old timestamp since it is not the latest
+                LocalDateTime now = LocalDateTime.now().minusDays(365);
+                Timestamp timestamp = Timestamp.valueOf(now);
+                genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, timestamp.getTime() + "");
+
+            }
+
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
             //Attach the API lifecycle
@@ -258,7 +276,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
             }
-            
+
             //Set permissions to doc path
             String docLocation = RegistryPersistenceDocUtil.getDocumentPath(api.getId().getProviderName(),
                     api.getId().getApiName(), api.getId().getVersion());
@@ -266,7 +284,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                     visibleRoles, docLocation);
-            
+
             registry.commitTransaction();
             api.setUuid(artifact.getId());
             transactionCommitted = true;
@@ -1000,7 +1018,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
-            UserContext ctx) throws APIPersistenceException {
+           UserContext ctx, boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
         boolean isTenantFlowStarted = false;
         DevPortalAPISearchResult result = null;
@@ -1011,7 +1029,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             log.debug("Requested query for devportal search: " + searchQuery);
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
-                    isAllowDisplayAPIsWithMultipleStatus());
+                    isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayMultipleVersions);
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
             String userNameLocal;
@@ -1036,6 +1054,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
         return result;
+    }
+    @Override
+    public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
+            UserContext ctx) throws APIPersistenceException {
+
+        return searchAPIsForDevPortal(org, searchQuery, start, offset, ctx, true);
     }
 
     private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(Registry userRegistry, int tenantIDLocal,

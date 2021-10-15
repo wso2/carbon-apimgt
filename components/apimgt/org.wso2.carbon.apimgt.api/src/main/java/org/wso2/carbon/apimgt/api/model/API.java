@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +69,8 @@ public class API implements Serializable {
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
+    private String versionTimestamp;
+    private boolean isNewVersion = false;
 
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
@@ -1245,6 +1246,26 @@ public class API implements Serializable {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public String getVersionTimestamp() {
+
+        return versionTimestamp;
+    }
+
+    public void setVersionTimestamp(String versionTimestamp) {
+
+        this.versionTimestamp = versionTimestamp;
+    }
+
+    public boolean getIsNewVersion() {
+
+        return isNewVersion;
+    }
+
+    public void setIsNewVersion(boolean isNewVersion) {
+
+        this.isNewVersion = isNewVersion;
     }
 
     @Override

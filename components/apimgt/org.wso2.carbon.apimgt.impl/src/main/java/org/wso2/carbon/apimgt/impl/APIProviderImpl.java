@@ -683,10 +683,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (XMLStreamException e) {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
+        //mark for the latest version
+        boolean isLatestVersion = Boolean.TRUE;
+        if (api.getIsNewVersion()) {
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            Set<String> versions = getAPIVersions(
+                    APIUtil.replaceEmailDomain(api.getId().getProviderName()),
+                    api.getId().getName(), api.getOrganization());
+            String latestversion = api.getId().getVersion();
+            for (String tempVersion : versions) {
+                latestversion = (comparator.compare(tempVersion, latestversion) < 0) ?
+                        latestversion : tempVersion;
+            }
+            if (!latestversion.equals(api.getId().getVersion())) {
+                isLatestVersion = Boolean.FALSE;
+            }
+        }
 
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
-                    APIMapper.INSTANCE.toPublisherApi(api));
+                    APIMapper.INSTANCE.toPublisherApi(api), isLatestVersion);
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {
@@ -1358,6 +1374,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
+        api.setVersionTimestamp(existingAPI.getVersionTimestamp());
         updateEndpointSecurity(existingAPI, api);
 
         if (!existingAPI.getContext().equals(api.getContext())) {
@@ -2604,6 +2621,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
         String existingContext = existingAPI.getContext();
+        String existingVersionTimestamp = existingAPI.getVersionTimestamp();
 
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
@@ -2611,13 +2629,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(newApiId);
         existingAPI.setStatus(APIConstants.CREATED);
         existingAPI.setDefaultVersion(isDefaultVersion);
+        existingAPI.setVersionTimestamp("");
 
         // We need to change the context by setting the new version
         // This is a change that is coming with the context version strategy
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
 
-
+        existingAPI.setIsNewVersion(Boolean.TRUE);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
 
@@ -2671,6 +2690,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
+        existingAPI.setVersionTimestamp(existingVersionTimestamp);
         // update existing api with setLatest to false
         existingAPI.setLatest(false);
         if (isDefaultVersion) {

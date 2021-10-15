@@ -658,6 +658,7 @@ public class RegistryPersistenceUtil {
 
             api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
             api.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
+            api.setVersionTimestamp(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -1628,5 +1629,12 @@ public class RegistryPersistenceUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
+    public static String getVersionScore(String versionStr) {
+        if (StringUtils.isEmpty(versionStr)) {
+            return "";
+        }
+        APIVersionTokenizer apiVersionTokenizer = new APIVersionTokenizer(versionStr);
+        return apiVersionTokenizer.getVersionScore();
 
+    }
 }

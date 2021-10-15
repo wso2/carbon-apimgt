@@ -24,6 +24,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
+import org.apache.synapse.unittest.testcase.data.classes.AssertNotNull;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1139,7 +1140,8 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
 
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class))).thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         
         try {
             apiProvider.addAPI(api);
@@ -1355,8 +1357,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
@@ -1403,6 +1405,8 @@ public class APIProviderImplTest {
         api.setVisibility("Public");
         api.setStatus(APIConstants.CREATED);
         api.setWsdlUrl("https://localhost:9443/services/echo?wsdl");
+        long time = System.currentTimeMillis();
+        api.setVersionTimestamp(String.valueOf(time));
 
         String newVersion = "1.0.1";
         //Create new API object
@@ -1411,6 +1415,8 @@ public class APIProviderImplTest {
         newApi.setStatus(APIConstants.CREATED);
         newApi.setContext("/test");
         newApi.setWsdlUrl("/registry/resource/_system/governance/apimgt/applicationdata/wsdls/admin--API11.0.0.wsdl");
+        newApi.setIsNewVersion(true);
+        newApi.setVersionTimestamp(String.valueOf(System.currentTimeMillis() + 1));
 
 
         //Create Documentation List
@@ -1434,11 +1440,14 @@ public class APIProviderImplTest {
 
         GenericArtifact artifactNew = Mockito.mock(GenericArtifact.class);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, newApi)).thenReturn(artifactNew);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
-        apiProvider.addAPI(api);
+        Mockito.when(publisherAPI.getVersionTimestamp()).thenReturn(String.valueOf(time));
+
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
+        API returnedAPI = apiProvider.addAPI(api);
+        Assert.assertEquals(returnedAPI.getVersionTimestamp(), String.valueOf(time));
         
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 api.getId().getProviderName() +
@@ -1574,6 +1583,8 @@ public class APIProviderImplTest {
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
         PowerMockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
+
+        Assert.assertTrue(Long.valueOf(newApi.getVersionTimestamp()) > time);
     }
 
     @Ignore
@@ -1619,8 +1630,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1763,8 +1774,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1901,8 +1912,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         
         apiProvider.addAPI(oldApi);
 
@@ -2003,8 +2014,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         
         apiProvider.addAPI(oldApi);
 
@@ -2169,8 +2180,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(oldApi);
 
         RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
@@ -2365,8 +2376,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2420,8 +2431,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2479,8 +2490,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -2539,8 +2550,8 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
         apiProvider.addAPI(api);
 
         //Mock Updating API
@@ -3523,8 +3534,8 @@ public class APIProviderImplTest {
         
         
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
-        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
-                .thenReturn(publisherAPI);
+        PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class),
+                any(Boolean.class))).thenReturn(publisherAPI);
  
         apiProvider.addAPI(api);
 
