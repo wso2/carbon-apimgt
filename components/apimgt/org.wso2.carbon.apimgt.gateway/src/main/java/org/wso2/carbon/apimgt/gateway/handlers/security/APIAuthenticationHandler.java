@@ -457,7 +457,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private void handleNoAuthentication(MessageContext messageContext){
 
-        //Using existing constant in Message context removing the additional constant in the API Constants
+        //Using existing constant in Message context removing the additional constant in API Constants
         String clientIP = null;
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
