@@ -5785,17 +5785,21 @@ public class ApiMgtDAO {
     private void addResourceEndpointMappings(int apiId, String revisionUUID, int tenantId, Connection connection)
             throws SQLException, APIManagementException {
         OperationPolicy policy = null;
-        String endpointId = null;
+        String endpointUUID = null;
         String query = null;
+        String getResourceEndpointQuery = null;
 
         if (revisionUUID == null) {
-            query = SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUID_OF_CURRENT_API;
+            query = SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUIDS_OF_CURRENT_API;
+            getResourceEndpointQuery = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_OF_CURRENT_API_BY_UUID;
         } else {
-            query = SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUID_OF_REVISION;
+            query = SQLConstants.ResourceEndpointConstants.GET_CHANGE_ENDPOINT_POLICY_UUIDS_OF_REVISION;
+            getResourceEndpointQuery = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_OF_REVISION_BY_UUID;
         }
         try (PreparedStatement getPoliciesStmt = connection.prepareStatement(query);
-            PreparedStatement addResourceEndpointMapping = connection
-                    .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT_MAPPING)) {
+                PreparedStatement getResourceEndpointByUUIDStmt = connection.prepareStatement(getResourceEndpointQuery);
+                PreparedStatement addResourceEndpointMapping = connection
+                        .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT_MAPPING)) {
             getPoliciesStmt.setInt(1, apiId);
             if (revisionUUID != null) {
                 getPoliciesStmt.setString(2, revisionUUID);
@@ -5807,20 +5811,31 @@ public class ApiMgtDAO {
                     policy.setDirection(rs.getString("DIRECTION"));
                     policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
 
+                    int endpointId = -1;
                     Map<String, String> policyParams = policy.getParameters();
                     if (policyParams != null) {
-                        endpointId = policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
-                        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-                        if (!isAPIResourceEndpointExists(apiId, endpointId, tenantDomain)) {
-                            throw new APIManagementException(
-                                    "Resource endpoint not found " + endpointId + " for API " + apiId,
-                                    ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, endpointId));
+                        endpointUUID = policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
+                        getResourceEndpointByUUIDStmt.setInt(1, tenantId);
+                        getResourceEndpointByUUIDStmt.setString(2, endpointUUID);
+                        getResourceEndpointByUUIDStmt.setInt(3, tenantId);
+                        if (!StringUtils.isEmpty(revisionUUID)) {
+                            getResourceEndpointByUUIDStmt.setString(4, revisionUUID);
+                        }
+                        try (ResultSet epRs = getResourceEndpointByUUIDStmt.executeQuery()) {
+                            if (epRs.next()) {
+                                endpointId = epRs.getInt("RESOURCE_ENDPOINT_ID");
+                                addResourceEndpointMapping.setInt(1, policy.getId());
+                                addResourceEndpointMapping.setInt(2, endpointId);
+                                addResourceEndpointMapping.addBatch();
+                            } else {
+                                String msg = "Resource endpoint " + endpointUUID + " not found " + ((revisionUUID == null) ?
+                                        "for API " + apiId :
+                                        "for API revision " + revisionUUID);
+                                throw new APIManagementException(msg,
+                                        ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, endpointUUID));
+                            }
                         }
                     }
-
-                    addResourceEndpointMapping.setInt(1, policy.getId());
-                    addResourceEndpointMapping.setString(2, endpointId);
-                    addResourceEndpointMapping.addBatch();
                 }
                 addResourceEndpointMapping.executeBatch();
             }
@@ -16075,6 +16090,26 @@ public class ApiMgtDAO {
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
 
+                //Adding to AM_API_RESOURCE_ENDPOINTS table
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+                List<ResourceEndpoint> resourceEndpointsOfCurrentAPI = getResourceEndpoints(apiRevision.getApiUUID(),
+                        tenantDomain, connection);
+                PreparedStatement addResourceEndpointPrepStmt = connection
+                        .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT);
+                for (ResourceEndpoint resourceEndpoint : resourceEndpointsOfCurrentAPI) {
+                    addResourceEndpointPrepStmt.setInt(1, apiId);
+                    addResourceEndpointPrepStmt.setString(2, resourceEndpoint.getId());
+                    addResourceEndpointPrepStmt.setString(3, resourceEndpoint.getName());
+                    addResourceEndpointPrepStmt.setString(4, resourceEndpoint.getEndpointType().toString());
+                    addResourceEndpointPrepStmt.setString(5, resourceEndpoint.getUrl());
+                    addResourceEndpointPrepStmt.setBinaryStream(6, fromMapToJSONStringInputStream(resourceEndpoint.getSecurityConfig()));
+                    addResourceEndpointPrepStmt.setBinaryStream(7, fromMapToJSONStringInputStream(resourceEndpoint.getGeneralConfig()));
+                    addResourceEndpointPrepStmt.setInt(8, tenantId);
+                    addResourceEndpointPrepStmt.setString(9, apiRevision.getRevisionUUID());
+                    addResourceEndpointPrepStmt.addBatch();
+                }
+                addResourceEndpointPrepStmt.executeBatch();
+
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID);
@@ -16847,6 +16882,32 @@ public class ApiMgtDAO {
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+
+                // Removing related Current API entries from AM_API_RESOURCE_ENDPOINTS table
+                PreparedStatement removeResourceEndpointsStatement = connection.prepareStatement(SQLConstants
+                        .ResourceEndpointConstants.REMOVE_CURRENT_API_ENTRIES_FROM_RESOURCE_ENDPOINTS_TABLE);
+                removeResourceEndpointsStatement.setInt(1, apiId);
+                removeResourceEndpointsStatement.executeUpdate();
+
+                //Restoring AM_API_RESOURCE_ENDPOINTS table
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+                List<ResourceEndpoint> resourceEndpointsOfRevision = getResourceEndpoints(apiRevision.getRevisionUUID(),
+                        tenantDomain, connection);
+                PreparedStatement addResourceEndpointPrepStmt = connection
+                        .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT);
+                for (ResourceEndpoint resourceEndpoint : resourceEndpointsOfRevision) {
+                    addResourceEndpointPrepStmt.setInt(1, apiId);
+                    addResourceEndpointPrepStmt.setString(2, resourceEndpoint.getId());
+                    addResourceEndpointPrepStmt.setString(3, resourceEndpoint.getName());
+                    addResourceEndpointPrepStmt.setString(4, resourceEndpoint.getEndpointType().toString());
+                    addResourceEndpointPrepStmt.setString(5, resourceEndpoint.getUrl());
+                    addResourceEndpointPrepStmt.setBinaryStream(6, fromMapToJSONStringInputStream(resourceEndpoint.getSecurityConfig()));
+                    addResourceEndpointPrepStmt.setBinaryStream(7, fromMapToJSONStringInputStream(resourceEndpoint.getGeneralConfig()));
+                    addResourceEndpointPrepStmt.setInt(8, tenantId);
+                    addResourceEndpointPrepStmt.setString(9, null);
+                    addResourceEndpointPrepStmt.addBatch();
+                }
+                addResourceEndpointPrepStmt.executeBatch();
 
                 // Removing related Current API entries from AM_API_URL_MAPPING table
                 PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
@@ -17709,13 +17770,27 @@ public class ApiMgtDAO {
     }
 
     public Set<URITemplate> getURITemplatesWithOperationPolicies(String apiUUID) throws APIManagementException {
+        String query;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+
+        if (apiRevision == null) {
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+        } else {
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+        }
+
         Map<String, URITemplate> uriTemplates = new HashMap<>();
         Set<URITemplate> uriTemplateList = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection
-                        .prepareStatement(SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL)) {
-            int apiId = getAPIID(apiUUID, connection);
-            prepStmt.setInt(1, apiId);
+                PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            if (apiRevision == null) {
+                int apiId = getAPIID(apiUUID, connection);
+                prepStmt.setInt(1, apiId);
+            } else {
+                int apiId = getAPIID(apiRevision.getApiUUID(), connection);
+                prepStmt.setInt(1, apiId);
+                prepStmt.setString(2, apiRevision.getRevisionUUID());
+            }
             try (ResultSet rs = prepStmt.executeQuery()) {
                 URITemplate uriTemplate;
                 while (rs.next()) {
@@ -17754,29 +17829,15 @@ public class ApiMgtDAO {
             int apiId = getAPIID(apiUUID, connection);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-            Gson gson = new Gson();
-            InputStream securityConfigStream = null;
-            InputStream generalConfigStream = null;
-            if (!endpoint.getSecurityConfig().isEmpty()) {
-                String securityConfig = gson.toJson(endpoint.getSecurityConfig());
-                if (securityConfig != null && !securityConfig.isEmpty()) {
-                    securityConfigStream = new ByteArrayInputStream(securityConfig.getBytes(StandardCharsets.UTF_8));
-                }
-            }
-
-            if (!endpoint.getGeneralConfig().isEmpty()) {
-                String generalConfig = gson.toJson(endpoint.getGeneralConfig());
-                generalConfigStream = new ByteArrayInputStream(generalConfig.getBytes(StandardCharsets.UTF_8));
-            }
-
             prepStmt.setInt(1, apiId);
             prepStmt.setString(2, uuid);
             prepStmt.setString(3, endpoint.getName());
             prepStmt.setString(4, endpoint.getEndpointType().toString());
             prepStmt.setString(5, endpoint.getUrl());
-            prepStmt.setBinaryStream(6, securityConfigStream);
-            prepStmt.setBinaryStream(7, generalConfigStream);
+            prepStmt.setBinaryStream(6, fromMapToJSONStringInputStream(endpoint.getSecurityConfig()));
+            prepStmt.setBinaryStream(7, fromMapToJSONStringInputStream(endpoint.getGeneralConfig()));
             prepStmt.setInt(8, tenantId);
+            prepStmt.setString(9, null);
             prepStmt.executeUpdate();
         } catch (SQLException e) {
             handleException("Error while adding resource endpoint to API " + uuid, e);
@@ -17784,19 +17845,30 @@ public class ApiMgtDAO {
         return uuid;
     }
 
-    public ResourceEndpoint getResourceEndpointByUUID(String uuid, String tenantDomain) throws  APIManagementException {
+    public ResourceEndpoint getResourceEndpointByUUID(String apiId, String endpointId, String tenantDomain)
+            throws APIManagementException {
         ResourceEndpoint resourceEndpoint = null;
+
+        String query;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiId);
+
+        if (apiRevision == null) {
+            query = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_OF_CURRENT_API_BY_UUID;
+        } else {
+            query = "";
+            //query = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_;
+        }
+
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection
-                        .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_BY_UUID)) {
+                PreparedStatement prepStmt = connection.prepareStatement(query)) {
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, uuid);
+            prepStmt.setString(2, endpointId);
             prepStmt.setInt(3, tenantId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     resourceEndpoint = new ResourceEndpoint();
-                    resourceEndpoint.setId(uuid);
+                    resourceEndpoint.setId(endpointId);
                     resourceEndpoint.setName(rs.getString("ENDPOINT_NAME"));
                     resourceEndpoint
                             .setEndpointType(ResourceEndpoint.EndpointType.valueOf(rs.getString("ENDPOINT_TYPE")));
@@ -17809,7 +17881,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while fetching resource endpoint " + uuid, e);
+            handleException("Error while fetching resource endpoint " + endpointId, e);
         }
         return resourceEndpoint;
     }
@@ -17821,26 +17893,11 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.ResourceEndpointConstants.UPDATE_RESOURCE_ENDPOINT)) {
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-            Gson gson = new Gson();
-            InputStream securityConfigStream = null;
-            InputStream generalConfigStream = null;
-            if (!endpoint.getSecurityConfig().isEmpty()) {
-                String securityConfig = gson.toJson(endpoint.getSecurityConfig());
-                if (securityConfig != null && !securityConfig.isEmpty()) {
-                    securityConfigStream = new ByteArrayInputStream(securityConfig.getBytes(StandardCharsets.UTF_8));
-                }
-            }
-
-            if (!endpoint.getGeneralConfig().isEmpty()) {
-                String generalConfig = gson.toJson(endpoint.getGeneralConfig());
-                generalConfigStream = new ByteArrayInputStream(generalConfig.getBytes(StandardCharsets.UTF_8));
-            }
-
             prepStmt.setString(1, endpoint.getName());
             prepStmt.setString(2, endpoint.getEndpointType().toString());
             prepStmt.setString(3, endpoint.getUrl());
-            prepStmt.setBinaryStream(4, securityConfigStream);
-            prepStmt.setBinaryStream(5, generalConfigStream);
+            prepStmt.setBinaryStream(4, fromMapToJSONStringInputStream(endpoint.getSecurityConfig()));
+            prepStmt.setBinaryStream(5, fromMapToJSONStringInputStream(endpoint.getGeneralConfig()));
             prepStmt.setString(6, endpoint.getId());
             prepStmt.setInt(7, tenantId);
 
@@ -17863,15 +17920,24 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isAPIResourceEndpointExists(int apiId, String endpointId, String tenantDomain) throws APIManagementException {
+    //todo: update for revision flow
+    public boolean isAPIResourceEndpointExists(int apiId, String revisionUUID, String endpointId, String tenantDomain) throws APIManagementException {
         boolean exists = false;
+        boolean isRevision = false;
+        String query = SQLConstants.ResourceEndpointConstants.IS_API_RESOURCE_ENDPOINT_EXISTS;
+        if (!StringUtils.isEmpty(revisionUUID)) {
+            query = SQLConstants.ResourceEndpointConstants.IS_REVISION_RESOURCE_ENDPOINT_EXISTS;
+            isRevision = true;
+        }
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection
-                        .prepareStatement(SQLConstants.ResourceEndpointConstants.IS_API_RESOURCE_ENDPOINT_EXISTS)) {
+                PreparedStatement prepStmt = connection.prepareStatement(query)) {
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             prepStmt.setString(1, endpointId);
             prepStmt.setInt(2, apiId);
             prepStmt.setInt(3, tenantId);
+            if (isRevision) {
+                prepStmt.setString(4, revisionUUID);
+            }
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     exists = true;
@@ -17883,9 +17949,9 @@ public class ApiMgtDAO {
         return exists;
     }
 
-    public boolean isAPIResourceEndpointExists(String apiUUID, String endpointId, String tenantDomain) throws APIManagementException {
+    public boolean isAPIResourceEndpointExists(String apiUUID, String revisionUUID, String endpointId, String tenantDomain) throws APIManagementException {
         int apiId = getAPIID(apiUUID);
-        return isAPIResourceEndpointExists(apiId, endpointId, tenantDomain);
+        return isAPIResourceEndpointExists(apiId, revisionUUID, endpointId, tenantDomain);
     }
 
     public boolean isResourceEndpointUsed(String endpointId) throws APIManagementException {
@@ -17905,17 +17971,50 @@ public class ApiMgtDAO {
         return isUsed;
     }
 
-    public List<ResourceEndpoint> getResourceEndpoints(String uuid, String tenantDomain) throws APIManagementException {
+    public List<ResourceEndpoint> getResourceEndpoints(String uuid, String tenantDomain)
+            throws APIManagementException {
         List<ResourceEndpoint> endpointList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            endpointList = getResourceEndpoints(uuid, tenantDomain, connection);
+        } catch (SQLException e) {
+            handleException("Error while fetching resource endpoints of API " + uuid, e);
+        }
+        return endpointList;
+    }
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection
-                        .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINTS_OF_API_WITH_USAGE_COUNT)) {
+    private List<ResourceEndpoint> getResourceEndpoints(String uuid, String tenantDomain, Connection connection)
+            throws APIManagementException {
+        List<ResourceEndpoint> endpointList = new ArrayList<>();
+        boolean isNewConnection = false;
+        PreparedStatement prepStmt = null;
+        String query;
+
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision == null) {
+            query = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINTS_OF_API_WITH_USAGE_COUNT;
+        } else {
+            query = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINTS_OF_API_REVISION_WITH_USAGE_COUNT;
+        }
+
+        try {
+            if (connection == null) {
+                connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
+            }
+
+            prepStmt = connection.prepareStatement(query);
             int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            int apiId = getAPIID(uuid);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setInt(2, apiId);
             prepStmt.setInt(3, tenantId);
+            int apiId;
+            if (apiRevision == null) {
+                apiId = getAPIID(uuid);
+            } else {
+                apiId = getAPIID(apiRevision.getApiUUID());
+                prepStmt.setString(4, uuid);
+            }
+            prepStmt.setInt(2, apiId);
+
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     ResourceEndpoint resourceEndpoint = new ResourceEndpoint();
@@ -17934,6 +18033,11 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while fetching resource endpoints of API " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, null, null);
+            if (isNewConnection) {
+                APIMgtDBUtil.closeAllConnections(null, connection, null);
+            }
         }
         return endpointList;
     }
@@ -17946,6 +18050,19 @@ public class ApiMgtDAO {
             map = APIMgtDBUtil.convertJSONStringToMap(blobString);
         }
         return map;
+    }
+
+    private InputStream fromMapToJSONStringInputStream(Map<String, String> map) {
+        Gson gson = new Gson();
+        InputStream inputStream = null;
+
+        if (map != null && !map.isEmpty()) {
+            String jsonString = gson.toJson(map);
+            if (!StringUtils.isEmpty(jsonString)) {
+                inputStream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        return inputStream;
     }
 
     private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
