@@ -867,6 +867,13 @@ public class PublisherCommonUtils {
         ArrayList<String> endpoints = new ArrayList<>();
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject((Map) apiDto.getEndpointConfig());
 
+        if (!endpointConfiguration.isNull(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) && StringUtils.equals(
+                endpointConfiguration.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).toString(),
+                APIConstants.ENDPOINT_TYPE_DEFAULT)) {
+            // if the endpoint type is dynamic, then the validation should be skipped
+            return true;
+        }
+
         // extract sandbox endpoint URL
         if (!endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
             endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
