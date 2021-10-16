@@ -1916,7 +1916,7 @@ public interface APIProvider extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean isAPIResourceEndpointExists(String apiId, String endpointId, String organization)
+    boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId, String organization)
             throws APIManagementException;
 
     /**
