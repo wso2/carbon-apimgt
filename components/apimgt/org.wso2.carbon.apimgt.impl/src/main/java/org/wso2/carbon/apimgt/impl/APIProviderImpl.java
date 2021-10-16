@@ -2486,7 +2486,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    //todo if possible make this useable for both APIs and products
+    //todo if possible make this usable for both APIs and products
     private void validateOperationPolicyParameters(API api) throws APIManagementException {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
@@ -2519,7 +2519,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     .isEmpty(parameters.get(APIConstants.ENDPOINT_ID_PARAM))) {
                                 valid = false;
                                 requiredParameters = "'endpointId'";
-                            } else if (api.getUuid() == null || !isAPIResourceEndpointExists(api.getUuid(),
+                            } else if (api.getUuid() == null || !isAPIResourceEndpointExists(api.getUuid(), null,
                                     parameters.get(APIConstants.ENDPOINT_ID_PARAM), tenantDomain)) {
                                 throw new APIManagementException(
                                         "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM)
@@ -9565,7 +9565,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public ResourceEndpoint getResourceEndpointByUUID(String uuid, String organization)
             throws APIManagementException {
-        ResourceEndpoint resourceEndpoint = apiMgtDAO.getResourceEndpointByUUID(uuid, organization);
+        ResourceEndpoint resourceEndpoint = apiMgtDAO.getResourceEndpointByUUID(null, uuid, organization);
         if (resourceEndpoint == null) {
             throw new APIMgtResourceNotFoundException("Resource Endpoint not found for specified endpoint ID: " + uuid,
                     ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, uuid));
@@ -9591,8 +9591,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean isAPIResourceEndpointExists(String apiId, String endpointId, String organization) throws APIManagementException {
-        return apiMgtDAO.isAPIResourceEndpointExists(apiId, endpointId, organization);
+    public boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId, String organization) throws APIManagementException {
+        return apiMgtDAO.isAPIResourceEndpointExists(apiId, revisionUUID, endpointId, organization);
     }
 
     @Override

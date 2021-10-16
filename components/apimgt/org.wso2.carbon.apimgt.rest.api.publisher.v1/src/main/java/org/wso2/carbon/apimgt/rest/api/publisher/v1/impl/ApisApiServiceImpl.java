@@ -4924,11 +4924,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
             String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
             ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
-            ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(createdEndpoint);
+            ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil
+                    .fromResourceEndpointToDTO(createdEndpoint);
 
             String createdEndpointURIString = (RestApiConstants.RESOURCE_PATH_RESOURCE_ENDPOINTS + "/"
-                    + RestApiConstants.RESOURCE_ENDPOINT_ID_PARAM)
-                    .replace(RestApiConstants.SHARED_SCOPE_ID_PARAM, createdEndpointDTO.getId());
+                    + RestApiConstants.RESOURCE_ENDPOINT_ID_PARAM).replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.RESOURCE_ENDPOINT_ID_PARAM, endpointId);
             URI createdEndpointURI = new URI(createdEndpointURIString);
             return Response.created(createdEndpointURI).entity(createdEndpointDTO).build();
         } catch (URISyntaxException e) {
@@ -4966,7 +4967,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        //todo: check whether the endpoint is used in a policy
         if (apiProvider.isResourceEndpointUsed(endpointId)) {
             throw new APIManagementException("Cannot remove the Resource Endpoint " + endpointId + " as it is used in "
                     + "an operation level mediation policy",
