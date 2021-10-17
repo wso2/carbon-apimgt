@@ -44,7 +44,6 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     @Override
     public Response keyManagersDiscoverPost(String url, String type, MessageContext messageContext)
             throws APIManagementException {
-
         if (StringUtils.isNotEmpty(url)) {
             Gson gson = new GsonBuilder().serializeNulls().create();
             OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient =
