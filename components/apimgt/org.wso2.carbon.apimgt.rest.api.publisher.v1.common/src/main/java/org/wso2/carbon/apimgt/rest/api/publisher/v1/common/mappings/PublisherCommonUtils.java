@@ -79,6 +79,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -1481,6 +1482,14 @@ public class PublisherCommonUtils {
                                               APIProvider apiProvider, String username, String orgId)
             throws APIManagementException, FaultGatewaysException {
 
+        //check whether any of the provided APIs are advertise only API
+        for (ProductAPIDTO productAPIDTO : apiProductDtoToUpdate.getApis()) {
+            API api = apiProvider.getAPIbyUUID(productAPIDTO.getApiId(), orgId);
+            if (api.isAdvertiseOnly()) {
+                throw new APIManagementException("Advertise Only APIs cannot be included in API products.");
+            }
+        }
+
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
@@ -1565,6 +1574,14 @@ public class PublisherCommonUtils {
         } else {
             // Set username in case provider is null or empty
             provider = username;
+        }
+
+        //check whether any of the provided APIs are advertise only API
+        for (ProductAPIDTO productAPIDTO : apiProductDTO.getApis()) {
+            API api = apiProvider.getAPIbyUUID(productAPIDTO.getApiId(), organization);
+            if (api.isAdvertiseOnly()) {
+                throw new APIManagementException("Advertise Only APIs cannot be included in API products.");
+            }
         }
 
         List<String> tiersFromDTO = apiProductDTO.getPolicies();
