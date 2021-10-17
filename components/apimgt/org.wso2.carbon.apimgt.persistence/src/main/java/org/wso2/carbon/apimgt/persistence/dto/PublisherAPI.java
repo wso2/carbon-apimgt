@@ -57,10 +57,6 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String faultSequence;
     private String responseCache;
     private int cacheTimeout;
-    private String redirectURL;  // check ??
-    private String apiOwner;
-    private boolean advertiseOnly;
-    private String vendor;
 
     private String endpointConfig;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
@@ -285,38 +281,6 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setCacheTimeout(int cacheTimeout) {
         this.cacheTimeout = cacheTimeout;
-    }
-
-    public String getRedirectURL() {
-        return redirectURL;
-    }
-
-    public void setRedirectURL(String redirectURL) {
-        this.redirectURL = redirectURL;
-    }
-
-    public String getApiOwner() {
-        return apiOwner;
-    }
-
-    public void setApiOwner(String apiOwner) {
-        this.apiOwner = apiOwner;
-    }
-
-    public boolean isAdvertiseOnly() {
-        return advertiseOnly;
-    }
-
-    public void setAdvertiseOnly(boolean advertiseOnly) {
-        this.advertiseOnly = advertiseOnly;
-    }
-
-    public String getAdvertiseOnlyAPIVendor() {
-        return vendor;
-    }
-
-    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
-        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public String getEndpointConfig() {
@@ -569,8 +533,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", endpointAuthDigest=" + endpointAuthDigest + ", endpointUTUsername=" + endpointUTUsername
                 + ", endpointUTPassword=" + endpointUTPassword + ", transports=" + transports + ", inSequence="
                 + inSequence + ", outSequence=" + outSequence + ", faultSequence=" + faultSequence + ", responseCache="
-                + responseCache + ", cacheTimeout=" + cacheTimeout + ", redirectURL=" + redirectURL + ", apiOwner="
-                + apiOwner + ", advertiseOnly=" + advertiseOnly + ", endpointConfig=" + endpointConfig
+                + responseCache + ", cacheTimeout=" + cacheTimeout + ", endpointConfig=" + endpointConfig
                 + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
                 + subscriptionAvailableOrgs + ", implementation=" + implementation + ", productionMaxTps="
                 + productionMaxTps + ", sandboxMaxTps=" + sandboxMaxTps + ", authorizationHeader=" + authorizationHeader

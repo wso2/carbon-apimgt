@@ -974,6 +974,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
+                apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
+                        .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1326,6 +1328,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setUpdatedTime(resource.getLastModified());
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                                apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
+                                        .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
                                 publisherAPIInfoList.add(apiInfo);
                             }
 

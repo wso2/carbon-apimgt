@@ -69,6 +69,7 @@ public class RegistrySearchUtil {
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
     public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
+    public static final String ADVERTISE_ONLY_SEARCH_TYPE_PREFIX = "advertiseOnly";
     public static final String ENABLE_STORE = "enableStore";
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
@@ -78,7 +79,7 @@ public class RegistrySearchUtil {
             CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
             CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
-            ENABLE_STORE.toLowerCase() };
+            ENABLE_STORE.toLowerCase(), ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase() };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);

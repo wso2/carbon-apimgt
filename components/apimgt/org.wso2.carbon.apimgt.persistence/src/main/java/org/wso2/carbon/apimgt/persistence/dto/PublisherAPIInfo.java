@@ -40,6 +40,10 @@ public class PublisherAPIInfo {
     private String audience;
     private Map<String, String> additionalProperties;
     private String description;
+    private boolean advertiseOnly;
+    private String redirectURL;  // check ??
+    private String apiOwner;
+    private String vendor;
 
     public String getAudience() {
         return audience;
@@ -129,11 +133,44 @@ public class PublisherAPIInfo {
         this.description = description;
     }
 
+    public boolean isAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getRedirectURL() {
+        return redirectURL;
+    }
+
+    public void setRedirectURL(String redirectURL) {
+        this.redirectURL = redirectURL;
+    }
+
+    public String getApiOwner() {
+        return apiOwner;
+    }
+
+    public void setApiOwner(String apiOwner) {
+        this.apiOwner = apiOwner;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
+    }
+
     @Override
     public String toString() {
-        return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version=" +
-                version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
-                + type + ", thumbnail=" + thumbnail + "]";
+        return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version="
+                + version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
+                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + ", originalDevportalURL"
+                + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor + "]";
     }
 
     public Map<String, String> getAdditionalProperties() {
