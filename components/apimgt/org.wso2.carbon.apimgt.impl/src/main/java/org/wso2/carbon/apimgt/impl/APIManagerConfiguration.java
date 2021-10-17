@@ -620,8 +620,8 @@ public class APIManagerConfiguration {
             while (gatewayAdditionalProperties.hasNext()) {
                 OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
                 String propName = propertyElem.getAttributeValue(new QName("name"));
-                String propValue = propertyElem.getText();
-                additionalProperties.put(propName, propValue);
+                String resolvedValue = MiscellaneousUtil.resolve(propertyElem, secretResolver);
+                additionalProperties.put(propName, resolvedValue);
             }
         }
         environment.setAdditionalProperties(additionalProperties);
