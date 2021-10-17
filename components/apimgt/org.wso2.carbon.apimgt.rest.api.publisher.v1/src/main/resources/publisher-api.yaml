@@ -8062,6 +8062,9 @@ components:
         updatedTime:
           type: string
           example : 2021-02-11 09:57:25
+        advertiseOnly:
+          type: boolean
+          example: true
 
     Topic:
       title: Topic object
@@ -8188,7 +8191,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, OTHER
           example: HTTP
           default: HTTP
           enum:
@@ -8200,6 +8203,8 @@ components:
             - WEBSUB
             - SSE
             - WEBHOOK
+            - ASYNC
+            - OTHER
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -10717,6 +10722,9 @@ components:
             thumbnailUri:
               type: string
               example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+            advertiseOnly:
+              type: boolean
+              example: true
     APIProductSearchResult:
       title: API Result
       allOf:
