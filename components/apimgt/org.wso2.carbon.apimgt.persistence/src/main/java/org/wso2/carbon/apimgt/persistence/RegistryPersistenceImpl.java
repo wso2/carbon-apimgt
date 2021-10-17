@@ -1495,6 +1495,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setType(type);
                                 content.setVersion(pubAPI.getVersion());
                                 content.setStatus(pubAPI.getStatus());
+                                content.setAdvertiseOnly(pubAPI.isAdvertiseOnly());
                                 contentData.add(content);
                             } else {
                                 throw new GovernanceException("artifact id is null for " + resourcePath);
