@@ -2046,8 +2046,11 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK
+        HTTP, WS, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, OTHER
     }
+
+    public static final String API_TYPE_ASYNC = "ASYNC";
+    public static final String API_TYPE_OTHER = "OTHER";
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";

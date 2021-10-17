@@ -291,6 +291,133 @@ public class PublisherCommonUtils {
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
 
+        updateDefinitions(isAsyncAPI, isGraphql, apiProvider, originalAPI, apiToUpdate);
+        apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
+
+        //validate API categories
+        validateAPICategories(originalAPI, apiToUpdate);
+
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        // TODO use returend api
+    }
+
+    /**
+     * Update an Advertise Only API.
+     *
+     * @param originalAPI    Existing API
+     * @param apiDtoToUpdate New API DTO to update
+     * @param apiProvider    API Provider
+     * @param tokenScopes    Scopes of the token
+     * @throws APIManagementException If an error occurs while updating the API
+     * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
+     */
+    public static API updateAdvertiseOnlyApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+                                             String[] tokenScopes)
+            throws APIManagementException, FaultGatewaysException {
+
+        APIIdentifier apiIdentifier = originalAPI.getId();
+        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        if (tokenScopes == null) {
+            throw new APIManagementException("Error occurred while updating the  API " + originalAPI.getUUID()
+                    + " as the token information hasn't been correctly set internally",
+                    ExceptionCodes.TOKEN_SCOPES_NOT_SET);
+        }
+        boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
+                .equals(originalAPI.getType());
+        boolean isAsyncAPI = originalAPI.getType() != null
+                && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
+
+        boolean isOtherAPI = originalAPI.getType() != null && APIConstants.APITransportType.OTHER.toString()
+                .equals(originalAPI.getType());
+
+        //Overriding some properties:
+        //API Name change not allowed if OnPrem
+        if (APIUtil.isOnPremResolver()) {
+            apiDtoToUpdate.setName(apiIdentifier.getApiName());
+        }
+        apiDtoToUpdate.setVersion(apiIdentifier.getVersion());
+        apiDtoToUpdate.setProvider(apiIdentifier.getProviderName());
+        apiDtoToUpdate.setContext(originalAPI.getContextTemplate());
+        apiDtoToUpdate.setLifeCycleStatus(originalAPI.getStatus());
+        apiDtoToUpdate.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
+
+        List<APIResource> removedProductResources = getRemovedProductResources(apiDtoToUpdate, originalAPI);
+
+        if (!removedProductResources.isEmpty()) {
+            throw new APIManagementException(
+                    "Cannot remove following resource paths " + removedProductResources.toString()
+                            + " because they are used by one or more API Products", ExceptionCodes
+                    .from(ExceptionCodes.API_PRODUCT_USED_RESOURCES, originalAPI.getId().getApiName(),
+                            originalAPI.getId().getVersion()));
+        }
+
+        if (apiDtoToUpdate.getAccessControlRoles() != null) {
+            String errorMessage = validateUserRoles(apiDtoToUpdate.getAccessControlRoles());
+            if (!errorMessage.isEmpty()) {
+                throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
+            }
+        }
+        if (apiDtoToUpdate.getVisibleRoles() != null) {
+            String errorMessage = validateRoles(apiDtoToUpdate.getVisibleRoles());
+            if (!errorMessage.isEmpty()) {
+                throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
+            }
+        }
+        if (apiDtoToUpdate.getAdditionalProperties() != null) {
+            String errorMessage = validateAdditionalProperties(apiDtoToUpdate.getAdditionalProperties());
+            if (!errorMessage.isEmpty()) {
+                throw new APIManagementException(errorMessage, ExceptionCodes
+                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiDtoToUpdate.getName(),
+                                apiDtoToUpdate.getVersion()));
+            }
+        }
+
+        API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
+        if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(apiToUpdate.getVisibility())) {
+            apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
+        }
+        apiToUpdate.setUUID(originalAPI.getUUID());
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
+        apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
+
+        if (!isOtherAPI) {
+            updateDefinitions(isAsyncAPI, isGraphql, apiProvider, originalAPI, apiToUpdate);
+        }
+
+        apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
+
+        //validate API categories
+        validateAPICategories(originalAPI, apiToUpdate);
+
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
+        apiProvider.updateAdvertiseOnlyAPI(apiToUpdate, originalAPI);
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+    }
+
+    private static void validateAPICategories(API originalAPI, API apiToUpdate) throws APIManagementException {
+        List<APICategory> apiCategories = apiToUpdate.getApiCategories();
+        List<APICategory> apiCategoriesList = new ArrayList<>();
+        for (APICategory category : apiCategories) {
+            category.setOrganization(originalAPI.getOrganization());
+            apiCategoriesList.add(category);
+        }
+        apiToUpdate.setApiCategories(apiCategoriesList);
+        if (apiCategoriesList.size() > 0) {
+            if (!APIUtil.validateAPICategories(apiCategoriesList, originalAPI.getOrganization())) {
+                throw new APIManagementException("Invalid API Category name(s) defined",
+                        ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
+            }
+        }
+    }
+
+    private static void updateDefinitions(boolean isAsyncAPI, boolean isGraphql, APIProvider apiProvider,
+                                          API originalAPI, API apiToUpdate) throws APIManagementException {
         if (!isAsyncAPI) {
             String oldDefinition = apiProvider
                     .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
@@ -308,28 +435,6 @@ public class PublisherCommonUtils {
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
-        apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
-
-        //validate API categories
-        List<APICategory> apiCategories = apiToUpdate.getApiCategories();
-        List<APICategory> apiCategoriesList = new ArrayList<>();
-        for (APICategory category : apiCategories) {
-            category.setOrganization(originalAPI.getOrganization());
-            apiCategoriesList.add(category);
-        }
-        apiToUpdate.setApiCategories(apiCategoriesList);
-        if (apiCategoriesList.size() > 0) {
-            if (!APIUtil.validateAPICategories(apiCategoriesList, originalAPI.getOrganization())) {
-                throw new APIManagementException("Invalid API Category name(s) defined",
-                        ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
-            }
-        }
-
-        apiToUpdate.setOrganization(originalAPI.getOrganization());
-        apiProvider.updateAPI(apiToUpdate, originalAPI);
-
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        // TODO use returend api
     }
 
     /**
@@ -789,19 +894,7 @@ public class PublisherCommonUtils {
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organization);
         validateScopes(apiToAdd);
         //validate API categories
-        List<APICategory> apiCategories = apiToAdd.getApiCategories();
-        List<APICategory> apiCategoriesList = new ArrayList<>();
-        for (APICategory category : apiCategories) {
-            category.setOrganization(organization);
-            apiCategoriesList.add(category);
-        }
-        apiToAdd.setApiCategories(apiCategoriesList);
-        if (apiCategoriesList.size() > 0) {
-            if (!APIUtil.validateAPICategories(apiCategoriesList, organization)) {
-                throw new APIManagementException("Invalid API Category name(s) defined",
-                        ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
-            }
-        }
+        validateAPICategories(apiToAdd, organization);
 
         if (!isAsyncAPI) {
             APIDefinition oasParser;
@@ -829,6 +922,63 @@ public class PublisherCommonUtils {
         //adding the api
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
+    }
+
+    /**
+     * Add API without generating swagger from the DTO.
+     *
+     * @param apiDto     API DTO of the API
+     * @param username   Username
+     * @param organization  Organization Identifier
+     * @return Created API object
+     * @throws APIManagementException Error while creating the API
+     * @throws CryptoException        Error while encrypting
+     */
+    public static API addAPIWithoutGeneratingDefinition(APIDTO apiDto, String username, String organization)
+            throws APIManagementException, CryptoException {
+        if (!APIDTO.TypeEnum.OTHER.equals(apiDto.getType())) {
+            throw new APIManagementException("API creation of type " + apiDto.getType() + " is not supported for " +
+                    "Advertise Only APIs");
+        }
+        if (APIUtil.isOnPremResolver()) {
+            String name = apiDto.getName();
+            //replace all white spaces in the API Name
+            apiDto.setName(name.replaceAll("\\s+", ""));
+        }
+        username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+
+        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organization);
+        //validate API categories
+        validateAPICategories(apiToAdd, organization);
+        apiToAdd.setOrganization(organization);
+
+        //adding the api
+        apiProvider.addAdvertiesOnlyAPI(apiToAdd);
+        return apiToAdd;
+    }
+
+    /**
+     * Validate API categories.
+     *
+     * @param apiToAdd API object
+     * @param organization Organization identifier
+     * @throws APIManagementException Error while creating the API
+     */
+    private static void validateAPICategories(API apiToAdd, String organization) throws APIManagementException {
+        List<APICategory> apiCategories = apiToAdd.getApiCategories();
+        List<APICategory> apiCategoriesList = new ArrayList<>();
+        for (APICategory category : apiCategories) {
+            category.setOrganization(organization);
+            apiCategoriesList.add(category);
+        }
+        apiToAdd.setApiCategories(apiCategoriesList);
+        if (apiCategoriesList.size() > 0) {
+            if (!APIUtil.validateAPICategories(apiCategoriesList, organization)) {
+                throw new APIManagementException("Invalid API Category name(s) defined",
+                        ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
+            }
+        }
     }
 
     /**
@@ -1048,20 +1198,22 @@ public class PublisherCommonUtils {
             provider = username;
         }
 
-        List<String> tiersFromDTO = body.getPolicies();
+        if (body.getAdvertiseInfo() == null || !body.getAdvertiseInfo().isAdvertised()) {
+            List<String> tiersFromDTO = body.getPolicies();
 
-        //check whether the added API's tiers are all valid
-        Set<Tier> definedTiers = apiProvider.getTiers();
-        List<String> invalidTiers = getInvalidTierNames(definedTiers, tiersFromDTO);
-        if (invalidTiers.size() > 0) {
-            throw new APIManagementException(
-                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
-                    ExceptionCodes.TIER_NAME_INVALID);
-        }
-        APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
-        if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
-            throw new APIManagementException("Specified policy " + body.getApiThrottlingPolicy() + " is invalid",
-                    ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
+            //check whether the added API's tiers are all valid
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                throw new APIManagementException(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
+                        ExceptionCodes.TIER_NAME_INVALID);
+            }
+            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
+            if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
+                throw new APIManagementException("Specified policy " + body.getApiThrottlingPolicy() + " is invalid",
+                        ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
+            }
         }
 
         API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);

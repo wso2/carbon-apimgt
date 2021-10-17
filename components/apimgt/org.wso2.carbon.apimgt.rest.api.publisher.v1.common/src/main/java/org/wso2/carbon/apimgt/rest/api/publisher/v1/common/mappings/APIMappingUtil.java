@@ -1106,11 +1106,14 @@ public class APIMappingUtil {
 
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
-                || APIDTO.TypeEnum.SSE.toString().equals(model.getType());
+                || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
+                || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
+
+        boolean isOtherAPI = APIDTO.TypeEnum.OTHER.toString().equals(model.getType());
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
-        if (!isAsyncAPI) {
+        if (!isAsyncAPI && !isOtherAPI) {
             // Get from swagger definition
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition;
@@ -1123,11 +1126,13 @@ public class APIMappingUtil {
             //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
-            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-            dto.setOperations(apiOperationsDTO);
-            List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
-            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
-        } else {
+            if (!model.isAdvertiseOnly()) {
+                apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+                dto.setOperations(apiOperationsDTO);
+                List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+                dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+            }
+        } else if (!isOtherAPI) {
             // Get from asyncapi definition
             List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
@@ -1164,14 +1169,15 @@ public class APIMappingUtil {
             dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
 
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())
+                && !APIConstants.APITransportType.ASYNC.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
                 transports.add(APIConstants.HTTPS_PROTOCOL);
-
                 dto.setTransport(transports);
+            } else {
+                dto.setTransport(Arrays.asList(model.getTransports().split(",")));
             }
-            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         if (StringUtils.isEmpty(model.getTransports())) {
             dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
@@ -1291,7 +1297,7 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
-        
+
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }

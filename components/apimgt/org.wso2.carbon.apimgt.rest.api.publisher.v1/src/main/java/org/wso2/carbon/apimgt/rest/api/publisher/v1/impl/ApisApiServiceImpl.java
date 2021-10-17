@@ -300,9 +300,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            API createdApi = PublisherCommonUtils
-                    .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
-                            organization);
+            API createdApi;
+            if (body.getAdvertiseInfo() != null && body.getAdvertiseInfo().isAdvertised()) {
+                createdApi = PublisherCommonUtils
+                        .addAPIWithoutGeneratingDefinition(body, RestApiCommonUtil.getLoggedInUsername(),
+                                organization);
+            } else {
+                createdApi = PublisherCommonUtils
+                        .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
+                                organization);
+            }
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -792,7 +799,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             originalAPI.setOrganization(organization);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
-            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
+            API updatedApi;
+            if (body.getAdvertiseInfo().isAdvertised()) {
+                updatedApi = PublisherCommonUtils.updateAdvertiseOnlyApi(originalAPI, body, apiProvider, tokenScopes);
+            } else {
+                updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
+            }
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -3316,24 +3328,28 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
-        // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
-            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
-                    ExceptionCodes.INVALID_ENDPOINT_URL);
+        if (!apiDTOFromProperties.getAdvertiseInfo().isAdvertised()) {
+            // validate sandbox and production endpoints
+            if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
+                throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
+                        ExceptionCodes.INVALID_ENDPOINT_URL);
+            }
         }
 
         try {
-            LinkedHashMap endpointConfig = (LinkedHashMap) apiDTOFromProperties.getEndpointConfig();
-
-            // OAuth 2.0 backend protection: API Key and API Secret encryption
-            PublisherCommonUtils
-                    .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
-                            StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
-
-            // Import the API and Definition
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
-                    apiDTOFromProperties, fileDetail, null, organization);
+            APIDTO createdApiDTO;
+            if (!apiDTOFromProperties.getAdvertiseInfo().isAdvertised()) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) apiDTOFromProperties.getEndpointConfig();
+
+                // OAuth 2.0 backend protection: API Key and API Secret encryption
+                PublisherCommonUtils
+                        .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
+                                StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+            }
+            // Import the API and Definition
+            createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition, apiDTOFromProperties,
+                    fileDetail, null, organization);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3473,7 +3489,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isSoapAPI) {
                 createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
                         apiToAdd, organization, null);
-            } else if (isSoapToRestConvertedAPI) {
+            } else if (isSoapToRestConvertedAPI && !apiToAdd.isAdvertiseOnly()) {
                 String wsdlArchiveExtractedPath = null;
                 if (validationResponse.getWsdlArchiveInfo() != null) {
                     wsdlArchiveExtractedPath = validationResponse.getWsdlArchiveInfo().getLocation()
@@ -3548,7 +3564,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //adding the api
-            apiProvider.addAPI(apiToAdd);
+            if (apiToAdd.isAdvertiseOnly()) {
+                apiProvider.addAdvertiesOnlyAPI(apiToAdd);
+            } else {
+                apiProvider.addAPI(apiToAdd);
+            }
 
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
@@ -3565,10 +3585,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //add the generated swagger definition to SOAP
-            APIDefinition oasParser = new OAS2Parser();
-            SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
-            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, organization);
+            //TODO: Need to check whether this is required
+            if (!apiToAdd.isAdvertiseOnly()) {
+                APIDefinition oasParser = new OAS2Parser();
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                String apiDefinition = generateSOAPAPIDefinition(oasParser.generateAPIDefinition(swaggerData));
+                apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, organization);
+            }
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
@@ -3931,15 +3954,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
 
-
-            //Save swagger definition of graphQL
-            APIDefinition parser = new OAS3Parser();
-            SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiToAdd.setSwaggerDefinition(apiDefinition);
-            //adding the api
-            API createdApi = apiProvider.addAPI(apiToAdd);
-
+            API createdApi;
+            if (apiToAdd.isAdvertiseOnly()) {
+                createdApi = apiProvider.addAdvertiesOnlyAPI(apiToAdd);
+            } else {
+                //Save swagger definition of graphQL
+                APIDefinition parser = new OAS3Parser();
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                String apiDefinition = parser.generateAPIDefinition(swaggerData);
+                apiToAdd.setSwaggerDefinition(apiDefinition);
+                //adding the api
+                createdApi = apiProvider.addAPI(apiToAdd);
+            }
             apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema, organization);
 
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
@@ -4676,12 +4702,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
-        //validate websocket url and change transport types
-        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
-            ArrayList<String> websocketTransports = new ArrayList<>();
-            websocketTransports.add(APIConstants.WS_PROTOCOL);
-            websocketTransports.add(APIConstants.WSS_PROTOCOL);
-            apiDTOFromProperties.setTransport(websocketTransports);
+        if (!apiDTOFromProperties.getAdvertiseInfo().isAdvertised()) {
+            //validate websocket url and change transport types
+            if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
+                ArrayList<String> websocketTransports = new ArrayList<>();
+                websocketTransports.add(APIConstants.WS_PROTOCOL);
+                websocketTransports.add(APIConstants.WSS_PROTOCOL);
+                apiDTOFromProperties.setTransport(websocketTransports);
+            }
         }
 
         //Only WS type APIs should be allowed
@@ -5002,7 +5030,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Set extensions from API definition to API object
             apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
             if (!syncOperations) {
-                PublisherCommonUtils.validateScopes(apiToAdd);
+                if (!apiToAdd.isAdvertiseOnly()) {
+                    PublisherCommonUtils.validateScopes(apiToAdd);
+                }
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
@@ -5010,7 +5040,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            API addedAPI = apiProvider.addAPI(apiToAdd);
+            API addedAPI;
+            if (apiToAdd.isAdvertiseOnly()) {
+                addedAPI = apiProvider.addAdvertiesOnlyAPI(apiToAdd);
+            } else {
+                addedAPI = apiProvider.addAPI(apiToAdd);
+            }
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
@@ -5074,7 +5109,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setOrganization(organization);
             apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
-            apiProvider.addAPI(apiToAdd);
+            if (apiToAdd.isAdvertiseOnly()) {
+                apiProvider.addAdvertiesOnlyAPI(apiToAdd);
+            } else {
+                apiProvider.addAPI(apiToAdd);
+            }
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
