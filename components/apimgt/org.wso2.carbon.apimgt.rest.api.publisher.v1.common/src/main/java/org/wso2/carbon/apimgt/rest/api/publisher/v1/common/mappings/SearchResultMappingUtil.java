@@ -72,6 +72,7 @@ public class SearchResultMappingUtil {
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
+        apiResultDTO.setAdvertiseOnly(api.isAdvertiseOnly());
         return apiResultDTO;
     }
 
