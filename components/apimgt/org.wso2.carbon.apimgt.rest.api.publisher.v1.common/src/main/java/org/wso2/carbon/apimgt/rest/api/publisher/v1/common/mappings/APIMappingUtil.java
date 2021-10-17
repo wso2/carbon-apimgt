@@ -207,6 +207,7 @@ public class APIMappingUtil {
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
+            model.setAccessibleEndpointURL(advertiseInfoDTO.getAccessibleEndpointUrl());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
             model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
@@ -937,6 +938,7 @@ public class APIMappingUtil {
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+        advertiseInfoDTO.setAccessibleEndpointUrl(model.getAccessibleEndpointURL());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
         if (model.getAdvertiseOnlyAPIVendor() != null) {

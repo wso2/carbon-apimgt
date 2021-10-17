@@ -41,6 +41,7 @@ public class PublisherAPIInfo {
     private Map<String, String> additionalProperties;
     private String description;
     private boolean advertiseOnly;
+    private String accessibleEndpointURL;
     private String redirectURL;  // check ??
     private String apiOwner;
     private String vendor;
@@ -141,6 +142,14 @@ public class PublisherAPIInfo {
         this.advertiseOnly = advertiseOnly;
     }
 
+    public String getAccessibleEndpointURL() {
+        return accessibleEndpointURL;
+    }
+
+    public void setAccessibleEndpointURL(String accessibleEndpointURL) {
+        this.accessibleEndpointURL = accessibleEndpointURL;
+    }
+
     public String getRedirectURL() {
         return redirectURL;
     }
@@ -169,8 +178,9 @@ public class PublisherAPIInfo {
     public String toString() {
         return "PublisherAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version="
                 + version + ", providerName=" + providerName + ", context=" + context + ", status=" + status + ", type="
-                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + ", originalDevportalURL"
-                + redirectURL + ", apiOwner" + apiOwner + ", vendor" + vendor + "]";
+                + type + ", thumbnail=" + thumbnail + ", advertiseOnly=" + advertiseOnly + ", accessibleEndpointURL="
+                + accessibleEndpointURL + ", originalDevportalURL" + redirectURL + ", apiOwner" + apiOwner
+                + ", vendor" + vendor + "]";
     }
 
     public Map<String, String> getAdditionalProperties() {

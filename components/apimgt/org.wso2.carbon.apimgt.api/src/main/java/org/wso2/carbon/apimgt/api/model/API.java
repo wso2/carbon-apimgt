@@ -110,6 +110,7 @@ public class API implements Serializable {
 
     private boolean advertiseOnly;
     private String apiOwner;
+    private String accessibleEndpointURL;
     private String redirectURL;
     private String vendor;
 
@@ -458,6 +459,14 @@ public class API implements Serializable {
 
     public void setApiOwner(String apiOwner) {
         this.apiOwner = apiOwner;
+    }
+
+    public String getAccessibleEndpointURL() {
+        return accessibleEndpointURL;
+    }
+
+    public void setAccessibleEndpointURL(String accessibleEndpointURL) {
+        this.accessibleEndpointURL = accessibleEndpointURL;
     }
 
     public String getRedirectURL() {

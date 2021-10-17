@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class AdvertiseInfoDTO   {
   
     private Boolean advertised = null;
+    private String accessibleEndpointUrl = null;
     private String originalDevPortalUrl = null;
     private String apiOwner = null;
 
@@ -71,6 +72,23 @@ return null;
   }
   public void setAdvertised(Boolean advertised) {
     this.advertised = advertised;
+  }
+
+  /**
+   **/
+  public AdvertiseInfoDTO accessibleEndpointUrl(String accessibleEndpointUrl) {
+    this.accessibleEndpointUrl = accessibleEndpointUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9443/devportal", value = "")
+  @JsonProperty("accessibleEndpointUrl")
+  public String getAccessibleEndpointUrl() {
+    return accessibleEndpointUrl;
+  }
+  public void setAccessibleEndpointUrl(String accessibleEndpointUrl) {
+    this.accessibleEndpointUrl = accessibleEndpointUrl;
   }
 
   /**
@@ -135,6 +153,7 @@ return null;
     }
     AdvertiseInfoDTO advertiseInfo = (AdvertiseInfoDTO) o;
     return Objects.equals(advertised, advertiseInfo.advertised) &&
+        Objects.equals(accessibleEndpointUrl, advertiseInfo.accessibleEndpointUrl) &&
         Objects.equals(originalDevPortalUrl, advertiseInfo.originalDevPortalUrl) &&
         Objects.equals(apiOwner, advertiseInfo.apiOwner) &&
         Objects.equals(vendor, advertiseInfo.vendor);
@@ -142,7 +161,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(advertised, originalDevPortalUrl, apiOwner, vendor);
+    return Objects.hash(advertised, accessibleEndpointUrl, originalDevPortalUrl, apiOwner, vendor);
   }
 
   @Override
@@ -151,6 +170,7 @@ return null;
     sb.append("class AdvertiseInfoDTO {\n");
     
     sb.append("    advertised: ").append(toIndentedString(advertised)).append("\n");
+    sb.append("    accessibleEndpointUrl: ").append(toIndentedString(accessibleEndpointUrl)).append("\n");
     sb.append("    originalDevPortalUrl: ").append(toIndentedString(originalDevPortalUrl)).append("\n");
     sb.append("    apiOwner: ").append(toIndentedString(apiOwner)).append("\n");
     sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");

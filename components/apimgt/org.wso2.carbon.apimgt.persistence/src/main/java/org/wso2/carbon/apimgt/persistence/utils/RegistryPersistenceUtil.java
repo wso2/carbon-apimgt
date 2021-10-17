@@ -147,6 +147,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ACCESSIBLE_ENDPOINT_URL, api.getAccessibleEndpointURL());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR, api.getAdvertiseOnlyAPIVendor());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
@@ -603,6 +604,7 @@ public class RegistryPersistenceUtil {
 
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
+            api.setAccessibleEndpointURL(artifact.getAttribute(APIConstants.API_OVERVIEW_ACCESSIBLE_ENDPOINT_URL));
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setAdvertiseOnlyAPIVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));

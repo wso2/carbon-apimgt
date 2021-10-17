@@ -1779,6 +1779,7 @@ public class APIUtilTest {
         api.setOutSequence(UUID.randomUUID().toString());
         api.setFaultSequence(UUID.randomUUID().toString());
         api.setDescription(UUID.randomUUID().toString());
+        api.setAccessibleEndpointURL(UUID.randomUUID().toString());
         api.setRedirectURL(UUID.randomUUID().toString());
         api.setBusinessOwner(UUID.randomUUID().toString());
         api.setApiOwner(UUID.randomUUID().toString());
