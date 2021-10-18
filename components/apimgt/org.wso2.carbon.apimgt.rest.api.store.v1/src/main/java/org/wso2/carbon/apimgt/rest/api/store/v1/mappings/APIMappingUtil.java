@@ -129,11 +129,12 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         }
 
+        boolean isOtherAPI = APIConstants.APITransportType.OTHER.toString().equals(model.getType());
         String apiDefinition = null;
         if (model.isAsync()) {
             // for asyncAPI retrieve asyncapi.yml specification
             apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), organization);
-        } else {
+        } else if (!isOtherAPI) {
             // retrieve open API definition
             if (model.getSwaggerDefinition() != null) {
                 apiDefinition = model.getSwaggerDefinition();
@@ -204,7 +205,9 @@ public class APIMappingUtil {
         }
         dto.setTiers(tiersToReturn);
 
-        dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        if (model.getTransports() != null) {
+            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        }
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
