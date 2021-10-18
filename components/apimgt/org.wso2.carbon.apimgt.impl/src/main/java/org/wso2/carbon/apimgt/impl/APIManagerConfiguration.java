@@ -381,112 +381,9 @@ public class APIManagerConfiguration {
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
                 apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-
                 while (environmentIterator.hasNext()) {
-                    Environment environment = new Environment();
                     OMElement environmentElem = (OMElement) environmentIterator.next();
-                    environment.setType(environmentElem.getAttributeValue(new QName("type")));
-                    String showInConsole = environmentElem.getAttributeValue(new QName("api-console"));
-                    if (showInConsole != null) {
-                        environment.setShowInConsole(Boolean.parseBoolean(showInConsole));
-                    } else {
-                        environment.setShowInConsole(true);
-                    }
-                    String isDefault = environmentElem.getAttributeValue(new QName("isDefault"));
-                    if (isDefault != null) {
-                        environment.setDefault(Boolean.parseBoolean(isDefault));
-                    } else {
-                        environment.setDefault(false);
-                    }
-                    environment.setName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_NAME)).getText()));
-                    environment.setDisplayName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
-                    if (StringUtils.isEmpty(environment.getDisplayName())) {
-                        environment.setDisplayName(environment.getName());
-                    }
-                    environment.setServerURL(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_SERVER_URL)).getText()));
-                    environment.setUserName(APIUtil.replaceSystemProperty(
-
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_USERNAME)).getText()));
-                    OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
-                            APIConstants.API_GATEWAY_PASSWORD));
-                    String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
-                    environment.setPassword(APIUtil.replaceSystemProperty(value));
-                    environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName(
-                                    APIConstants.API_GATEWAY_ENDPOINT)).getText()));
-                    OMElement websocketGatewayEndpoint = environmentElem
-                            .getFirstChildWithName(new QName(APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
-                    if (websocketGatewayEndpoint != null) {
-                        environment.setWebsocketGatewayEndpoint(
-                                APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
-                    } else {
-                        environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
-                    }
-                    OMElement webSubGatewayEndpoint = environmentElem
-                            .getFirstChildWithName(new QName(APIConstants.API_WEBSUB_GATEWAY_ENDPOINT));
-                    if (webSubGatewayEndpoint != null) {
-                        environment.setWebSubGatewayEndpoint(
-                                APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
-                    } else {
-                        environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
-                    }
-                    OMElement description =
-                            environmentElem.getFirstChildWithName(new QName("Description"));
-                    if (description != null) {
-                        environment.setDescription(description.getText());
-                    } else {
-                        environment.setDescription("");
-                    }
-                    environment.setReadOnly(true);
-                    List<VHost> vhosts = new LinkedList<>();
-                    environment.setVhosts(vhosts);
-                    environment.setEndpointsAsVhost();
-                    Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
-                            APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
-                            APIConstants.API_GATEWAY_VIRTUAL_HOST);
-                    while (vhostIterator.hasNext()) {
-                        OMElement vhostElem = (OMElement) vhostIterator.next();
-                        String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
-                        String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
-                        String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
-                        String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
-                        String webSubHttpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT)).getText());
-                        String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
-
-                        /*
-                         Prefix websub endpoints with 'websub_' so that the endpoint URL
-                         would begin with: 'websub_http://', since API type is identified by the URL protocol below.
-                         */
-                        webSubHttpEp = "websub_" + webSubHttpEp;
-                        webSubHttpsEp = "websub_" + webSubHttpsEp;
-
-                        VHost vhost = VHost.fromEndpointUrls(new String[]{
-                                httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
-                        vhosts.add(vhost);
-                    }
-
-                    if (!apiGatewayEnvironments.containsKey(environment.getName())) {
-                        apiGatewayEnvironments.put(environment.getName(), environment);
-                    } else {
-                        /*
-                          This will be happen only on server startup therefore we log and continue the startup
-                         */
-                        log.error("Duplicate environment name found in api-manager.xml " +
-                                environment.getName());
-                    }
+                    setEnvironmentConfig(environmentElem);
                 }
             } else if (APIConstants.EXTERNAL_API_STORES
                     .equals(localName)) {  //Initialize 'externalAPIStores' config elements
@@ -624,6 +521,120 @@ public class APIManagerConfiguration {
             readChildElements(element, nameStack);
             nameStack.pop();
         }
+    }
+
+    /**
+     * Set property values for each gateway environments defined in the api-manager.xml config file
+     *
+     * @param environmentElem OMElement of a single environment in the gateway environments list
+     */
+    void setEnvironmentConfig(OMElement environmentElem) throws APIManagementException {
+        Environment environment = new Environment();
+        environment.setType(environmentElem.getAttributeValue(new QName("type")));
+        String showInConsole = environmentElem.getAttributeValue(new QName("api-console"));
+        if (showInConsole != null) {
+            environment.setShowInConsole(Boolean.parseBoolean(showInConsole));
+        } else {
+            environment.setShowInConsole(true);
+        }
+        String isDefault = environmentElem.getAttributeValue(new QName("isDefault"));
+        if (isDefault != null) {
+            environment.setDefault(Boolean.parseBoolean(isDefault));
+        } else {
+            environment.setDefault(false);
+        }
+        environment.setName(APIUtil.replaceSystemProperty(
+                environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
+        environment.setDisplayName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+        if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
+        environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_SERVER_URL)).getText()));
+        environment.setUserName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_USERNAME)).getText()));
+        OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_PASSWORD));
+        String resolvedPassword = MiscellaneousUtil.resolve(passwordElement, secretResolver);
+        environment.setPassword(APIUtil.replaceSystemProperty(resolvedPassword));
+        environment.setProvider(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_PROVIDER)).getText()));
+        environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
+                        APIConstants.API_GATEWAY_ENDPOINT)).getText()));
+        OMElement websocketGatewayEndpoint = environmentElem.getFirstChildWithName(new QName(
+                APIConstants.API_WEBSOCKET_GATEWAY_ENDPOINT));
+        if (websocketGatewayEndpoint != null) {
+            environment.setWebsocketGatewayEndpoint(APIUtil.replaceSystemProperty(websocketGatewayEndpoint.getText()));
+        } else {
+            environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
+        }
+        OMElement webSubGatewayEndpoint = environmentElem
+                .getFirstChildWithName(new QName(APIConstants.API_WEBSUB_GATEWAY_ENDPOINT));
+        if (webSubGatewayEndpoint != null) {
+            environment.setWebSubGatewayEndpoint(APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
+        } else {
+            environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
+        }
+        OMElement description =
+                environmentElem.getFirstChildWithName(new QName("Description"));
+        if (description != null) {
+            environment.setDescription(description.getText());
+        } else {
+            environment.setDescription("");
+        }
+        environment.setReadOnly(true);
+        List<VHost> vhosts = new LinkedList<>();
+        environment.setVhosts(vhosts);
+        environment.setEndpointsAsVhost();
+        Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
+                APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
+                APIConstants.API_GATEWAY_VIRTUAL_HOST);
+        while (vhostIterator.hasNext()) {
+            OMElement vhostElem = (OMElement) vhostIterator.next();
+            String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
+            String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
+            String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
+            String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+            String webSubHttpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT)).getText());
+            String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                    APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
+
+            //Prefix websub endpoints with 'websub_' so that the endpoint URL
+            // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
+            webSubHttpEp = "websub_" + webSubHttpEp;
+            webSubHttpsEp = "websub_" + webSubHttpsEp;
+
+            VHost vhost = VHost.fromEndpointUrls(new String[]{
+                    httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
+            vhosts.add(vhost);
+        }
+        OMElement properties = environmentElem.getFirstChildWithName(new
+                QName(APIConstants.API_GATEWAY_ADDITIONAL_PROPERTIES));
+        Map<String, String> additionalProperties = new HashMap<>();
+        if (properties != null) {
+            Iterator gatewayAdditionalProperties = properties.getChildrenWithLocalName
+                    (APIConstants.API_GATEWAY_ADDITIONAL_PROPERTY);
+            while (gatewayAdditionalProperties.hasNext()) {
+                OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
+                String propName = propertyElem.getAttributeValue(new QName("name"));
+                String resolvedValue = MiscellaneousUtil.resolve(propertyElem, secretResolver);
+                additionalProperties.put(propName, resolvedValue);
+            }
+        }
+        environment.setAdditionalProperties(additionalProperties);
+
+        if (!apiGatewayEnvironments.containsKey(environment.getName())) {
+            apiGatewayEnvironments.put(environment.getName(), environment);
+        } else {
+
+            //This will happen only on server startup therefore we log and continue the startup
+            log.error("Duplicate environment name found in api-manager.xml " +
+                    environment.getName());
+        }
+
     }
 
     private void setSkipListConfigurations(OMElement element) {
@@ -1981,5 +1992,9 @@ public class APIManagerConfiguration {
             audienceForPath.add(jwtAudienceElement.getFirstChildWithName(new QName(APIConstants.AUDIENCE)).getText());
             restApiJWTAuthAudiences.put(basePath, audienceForPath);
         }
+    }
+
+    public Map<String, Environment> getGatewayEnvironments() {
+        return apiGatewayEnvironments;
     }
 }
