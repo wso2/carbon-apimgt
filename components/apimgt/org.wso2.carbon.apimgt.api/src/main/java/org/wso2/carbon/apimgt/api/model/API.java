@@ -1264,6 +1264,6 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type) || "ASYNC".equals(type);
     }
 }
