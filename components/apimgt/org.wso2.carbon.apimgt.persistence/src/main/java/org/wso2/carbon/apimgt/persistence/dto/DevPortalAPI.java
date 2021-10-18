@@ -38,7 +38,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String transports;
     private String redirectURL;  // (originalStoreUrl)
     private String apiOwner;
-    private boolean advertiseOnly;
     private String vendor;
 
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
@@ -163,14 +162,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setApiOwner(String apiOwner) {
         this.apiOwner = apiOwner;
-    }
-
-    public boolean isAdvertiseOnly() {
-        return advertiseOnly;
-    }
-
-    public void setAdvertiseOnly(boolean advertiseOnly) {
-        this.advertiseOnly = advertiseOnly;
     }
 
     public String getAdvertiseOnlyAPIVendor() {
@@ -310,11 +301,10 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + description + ", wsdlUrl=" + wsdlUrl + ", technicalOwner=" + technicalOwner + ", technicalOwnerEmail="
                 + technicalOwnerEmail + ", businessOwner=" + businessOwner + ", businessOwnerEmail="
                 + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL + ", apiOwner="
-                + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
-                + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
-                + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", apiCategories="
-                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
+                + apiOwner + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
+                + subscriptionAvailableOrgs + ", authorizationHeader=" + authorizationHeader + ", securityScheme="
+                + securityScheme + ", environments=" + environments + ", apiCategories=" + apiCategories
+                + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
                 + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate

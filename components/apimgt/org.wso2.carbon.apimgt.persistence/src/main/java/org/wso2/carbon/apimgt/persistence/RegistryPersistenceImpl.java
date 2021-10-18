@@ -1626,7 +1626,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setStatus(devAPI.getStatus());
                                 content.setBusinessOwner(devAPI.getBusinessOwner());
                                 content.setBusinessOwnerEmail(devAPI.getBusinessOwnerEmail());
-                                
+                                content.setAdvertiseOnly(devAPI.isAdvertiseOnly());
                                 contentData.add(content);
                             } else {
                                 throw new GovernanceException("artifact id is null for " + resourcePath);

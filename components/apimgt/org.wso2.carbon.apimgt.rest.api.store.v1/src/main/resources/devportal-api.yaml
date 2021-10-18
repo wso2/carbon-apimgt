@@ -4787,6 +4787,9 @@ components:
               type: string
               description: Average rating of the API
               example: "4.5"
+            advertiseOnly:
+              type: boolean
+              example: true
     DocumentSearchResult:
       title: Document Result
       allOf:

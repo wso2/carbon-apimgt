@@ -31,6 +31,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     private String thumbnailUri = null;
     private APIBusinessInformationDTO businessInformation = null;
     private String avgRating = null;
+    private Boolean advertiseOnly = null;
 
   /**
    * A brief description about the API
@@ -175,6 +176,23 @@ public class APISearchResultDTO extends SearchResultDTO  {
     this.avgRating = avgRating;
   }
 
+  /**
+   **/
+  public APISearchResultDTO advertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("advertiseOnly")
+  public Boolean isAdvertiseOnly() {
+    return advertiseOnly;
+  }
+  public void setAdvertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -192,12 +210,13 @@ public class APISearchResultDTO extends SearchResultDTO  {
         Objects.equals(status, apISearchResult.status) &&
         Objects.equals(thumbnailUri, apISearchResult.thumbnailUri) &&
         Objects.equals(businessInformation, apISearchResult.businessInformation) &&
-        Objects.equals(avgRating, apISearchResult.avgRating);
+        Objects.equals(avgRating, apISearchResult.avgRating) &&
+        Objects.equals(advertiseOnly, apISearchResult.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating, advertiseOnly);
   }
 
   @Override
@@ -213,6 +232,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
+    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();
   }

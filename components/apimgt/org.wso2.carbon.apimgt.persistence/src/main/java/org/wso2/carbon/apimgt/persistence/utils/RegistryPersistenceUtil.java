@@ -1378,6 +1378,7 @@ public class RegistryPersistenceUtil {
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
             api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));;
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+            api.setAdvertisedOnly(Boolean.valueOf(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
@@ -1419,6 +1420,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
             artifact.setAttribute(
                     APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(apiProduct.getCacheTimeout()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, String.valueOf(false));
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : apiProduct.getAvailableTiers()) {

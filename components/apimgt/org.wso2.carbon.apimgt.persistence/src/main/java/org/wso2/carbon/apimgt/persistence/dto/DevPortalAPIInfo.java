@@ -37,7 +37,7 @@ public class DevPortalAPIInfo {
     private String subscriptionAvailableOrgs;
     private String createdTime;
     private String description;
-
+    private boolean advertiseOnly;
 
     public String getDescription() {
         return description;
@@ -129,13 +129,22 @@ public class DevPortalAPIInfo {
         this.subscriptionAvailability = subscriptionAvailability;
     }
 
+    public boolean isAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
+
     @Override
     public String toString() {
         return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", description=" + description + ", version="
                 + version + ", providerName=" + providerName + ", context=" + context + ", type=" + type + ", " +
                 "thumbnail=" + thumbnail + ", businessOwner=" + businessOwner + ", status=" + status + ", " +
                 "availableTierNames=" + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
-                + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + "]";
+                + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + ", advertiseOnly" + advertiseOnly +
+                "]";
     }
 
 }

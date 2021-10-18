@@ -32,6 +32,7 @@ public class DevPortalSearchContent implements SearchContent {
     String technicalOwner;
     String technicalOwnerEmail;
     String avgRating;
+    boolean advertiseOnly;
 
     @Override
     public String getId() {
@@ -155,4 +156,11 @@ public class DevPortalSearchContent implements SearchContent {
         this.avgRating = avgRating;
     }
 
+    public boolean isAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
 }
