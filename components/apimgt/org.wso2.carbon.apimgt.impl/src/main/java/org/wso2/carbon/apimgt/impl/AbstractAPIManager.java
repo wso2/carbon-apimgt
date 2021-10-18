@@ -4057,7 +4057,6 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
-
         String apiTenantDomain = getTenantDomain(apiId);
         String asyncApiDoc;
         boolean tenantFlowStarted = false;
@@ -4070,9 +4069,8 @@ public abstract class AbstractAPIManager implements APIManager {
                     tenantFlowStarted = true;
                 }
                 int tenantId = getTenantManager().getTenantId(apiTenantDomain);
-                registryType = getRegistryService().getGovernanceUserRegistry(
-                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId
-                );
+                registryType = getRegistryService().getGovernanceUserRegistry(CarbonConstants.
+                        REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
             }
