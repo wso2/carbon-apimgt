@@ -343,7 +343,7 @@ public class SolaceNotifierUtils {
                     throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine()
                             .getReasonPhrase());
                 }
-            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 
                 String responseString = EntityUtils.toString(response2.getEntity());
                 if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
