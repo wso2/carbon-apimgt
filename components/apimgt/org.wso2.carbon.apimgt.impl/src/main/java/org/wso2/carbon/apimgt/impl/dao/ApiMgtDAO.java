@@ -8169,14 +8169,13 @@ public class ApiMgtDAO {
                 }
                 connection.commit();
             } catch (SQLException e) {
-                connection.rollback();
                 APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching gateway vendor" +
                         " of the API", e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Error occurred while fetching gateway vendor of the API", e);
+            handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
         }
         return organization;
     }
