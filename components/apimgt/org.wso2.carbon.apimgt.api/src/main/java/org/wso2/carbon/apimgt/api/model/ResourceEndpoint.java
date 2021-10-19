@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class ResourceEndpoint {
     public enum EndpointType {
@@ -70,5 +71,20 @@ public class ResourceEndpoint {
 
     public int getUsageCount() {
         return usageCount;
+    }
+
+    @Override public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        ResourceEndpoint that = (ResourceEndpoint) o;
+        return usageCount == that.usageCount && id.equals(that.id) && name.equals(that.name)
+                && endpointType == that.endpointType && url.equals(that.url) && Objects
+                .equals(securityConfig, that.securityConfig) && Objects.equals(generalConfig, that.generalConfig);
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(id, name, endpointType, url, securityConfig, generalConfig, usageCount);
     }
 }
