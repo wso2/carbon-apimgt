@@ -1861,16 +1861,17 @@ public interface APIProvider extends APIManager {
      * Adds ResourceEndpoint to an API
      *
      * @param uuid                API Identifier
+     * @param revisionId          Revision Id
      * @param endpoint            Resource Endpoint
      * @param organization        Identifier of an organization
      * @return UUID of the resource endpoint
      * @throws APIManagementException if failed to add resource endpoint
      */
-    String addResourceEndpoint(String uuid, ResourceEndpoint endpoint, String organization)
+    String addResourceEndpoint(String uuid, String revisionId, ResourceEndpoint endpoint, String organization)
             throws APIManagementException;
 
     /**
-     * Gets Resource Endpoint by UUID
+     * Gets API Resource Endpoint by UUID
      *
      * @param uuid          Resource Endpoint UUID
      * @param organization  Organization

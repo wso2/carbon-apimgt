@@ -4922,7 +4922,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-            String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
+            String endpointId = apiProvider.addResourceEndpoint(apiId, null, endpointToAdd, organization);
             ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
             ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil
                     .fromResourceEndpointToDTO(createdEndpoint);

@@ -9557,9 +9557,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addResourceEndpoint(String uuid, ResourceEndpoint endpoint, String organization)
+    public String addResourceEndpoint(String uuid, String revisionId, ResourceEndpoint endpoint, String organization)
             throws APIManagementException {
-        return apiMgtDAO.addResourceEndpoint(uuid, endpoint, organization);
+        return apiMgtDAO.addResourceEndpoint(uuid, revisionId, endpoint, organization);
     }
 
     @Override
