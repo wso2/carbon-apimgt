@@ -165,8 +165,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     if (getGatewayInternalKeyDataCache().get(cacheKey) != null) {
                         // Token is found in the key cache
                         payloadInfo = (JWTTokenPayloadInfo) getGatewayInternalKeyDataCache().get(cacheKey);
-                        String rawPayload = payloadInfo.getRawPayload();
-                        isVerified = rawPayload.equals(splitToken[1]);
+                        String accessToken = payloadInfo.getAccessToken();
+                        isVerified = accessToken.equals(internalKey);
                     }
                 } else if (getInvalidGatewayInternalKeyCache().get(tokenIdentifier) != null) {
                     if (log.isDebugEnabled()) {
@@ -231,7 +231,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         }
                         JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
                         jwtTokenPayloadInfo.setPayload(payload);
-                        jwtTokenPayloadInfo.setRawPayload(splitToken[1]);
+                        jwtTokenPayloadInfo.setAccessToken(internalKey);
                         getGatewayInternalKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
                     }
                     JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,

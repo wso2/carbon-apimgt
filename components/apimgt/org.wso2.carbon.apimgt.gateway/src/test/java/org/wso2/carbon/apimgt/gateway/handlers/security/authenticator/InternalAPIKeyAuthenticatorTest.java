@@ -383,7 +383,7 @@ public class InternalAPIKeyAuthenticatorTest {
         PowerMockito.when(CacheProvider.getGatewayInternalKeyDataCache()).thenReturn(internalKeyDataCache);
         JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
         jwtTokenPayloadInfo.setPayload(signedJWT.getJWTClaimsSet());
-        jwtTokenPayloadInfo.setRawPayload(internalKey.split("\\.")[1]);
+        jwtTokenPayloadInfo.setAccessToken(internalKey);
         String cacheKey = GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
                 "1.0.0", "/resource", "GET");
         JSONObject subscribedAPI = Mockito.mock(JSONObject.class);
@@ -485,7 +485,7 @@ public class InternalAPIKeyAuthenticatorTest {
         PowerMockito.when(CacheProvider.getInvalidGatewayInternalKeyCache()).thenReturn(invalidCache);
         JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
         jwtTokenPayloadInfo.setPayload(signedJWT.getJWTClaimsSet());
-        jwtTokenPayloadInfo.setRawPayload(internalKey.split("\\.")[1]);
+        jwtTokenPayloadInfo.setAccessToken(internalKey);
         String cacheKey = GatewayUtils.getAccessTokenCacheKey("28f8d7b0-9e62-4341-bf17-094453d5ffa4", "/api1/1.0.0",
                 "1.0.0", "/resource", "GET");
         JSONObject subscribedAPI = Mockito.mock(JSONObject.class);
