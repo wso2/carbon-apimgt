@@ -67,10 +67,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
-import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
@@ -277,7 +274,7 @@ public class APIMappingUtil {
         } else {
             dto.setGatewayVendor("wso2");
         }
-
+        
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
@@ -477,85 +474,14 @@ public class APIMappingUtil {
             apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, organization));
         }
 
+        // Set Async protocols of API based on the gateway vendor
         if (APIConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
-            apidto.setSolaceEndpointURLs(setEndpointURLsForSolaceAPI(model, organization));
+            apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
+                    model.getApi(), organization));
         }
         return apidto;
     }
 
-    private static List<APISolaceEndpointURLsDTO> setEndpointURLsForSolaceAPI(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
-        APIDTO apidto = fromAPItoDTO(model.getApi(), tenantDomain);
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
-        List<APISolaceEndpointURLsDTO> solaceEndpointURLsList = new ArrayList<>();
-        for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
-            if (revisionDeployment.isDisplayOnDevportal()) {
-                if (gatewayEnvironments != null) {
-                    // Deployed environment
-                    Environment environment = gatewayEnvironments.get(revisionDeployment.getDeployment());
-                    if (environment != null) {
-                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
-                            APISolaceEndpointURLsDTO dto = new APISolaceEndpointURLsDTO();
-                            dto.setEnvironmentName(environment.getName());
-                            dto.setEnvironmentDisplayName(environment.getDisplayName());
-                            dto.setEnvironmentOrganization(environment.getAdditionalProperties().get(APIConstants.
-                                    SOLACE_ENVIRONMENT_ORGANIZATION));
-                            dto.setSolaceURLs(getSolaceURLs(environment.getAdditionalProperties().get(APIConstants.
-                                    SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName(), apidto.getAsyncTransportProtocols()));
-                            solaceEndpointURLsList.add(dto);
-                        }
-                    }
-                }
-            }
-        }
-        return solaceEndpointURLsList;
-    }
-
-    private static List<APISolaceURLsDTO> getSolaceURLs(String organizationName, String environmentName,
-                                                        List<String> availableProtocols) throws APIManagementException {
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        Environment solaceEnvironment = null;
-
-        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
-                solaceEnvironment = entry.getValue();
-            }
-        }
-
-        if (solaceEnvironment != null) {
-            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
-                    getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
-                    get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
-            List<APISolaceURLsDTO> solaceURLsDTOs = new ArrayList<>();
-            HttpResponse response = solaceAdminApis.environmentGET(organizationName, environmentName);
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                String responseString = null;
-                try {
-                    responseString = EntityUtils.toString(response.getEntity());
-                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
-                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
-                    for (int i = 0; i < protocols.length(); i++) {
-                        org.json.JSONObject protocolDetails = protocols.getJSONObject(i);
-                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
-                        if (availableProtocols.contains(protocolName)) {
-                            String endpointURI = protocolDetails.getString("uri");
-                            APISolaceURLsDTO apiSolaceURLsDTO = new APISolaceURLsDTO();
-                            apiSolaceURLsDTO.setProtocol(protocolName);
-                            apiSolaceURLsDTO.setEndpointURL(endpointURI);
-                            solaceURLsDTOs.add(apiSolaceURLsDTO);
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return solaceURLsDTOs;
-        } else {
-            throw new APIManagementException("Solace Environment configurations are not provided properly");
-        }
-
-    }
 
     private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String organization) throws APIManagementException {
         APIDTO apidto;

@@ -38,19 +38,16 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AdditionalSubscriptionInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -539,4 +536,63 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         return subscribedAPI;
     }
 
+    /**
+     * Get additional Info details of subscriptions attached with given API
+     *
+     * @param apiId         apiId
+     * @param offset        starting index of the subscription list
+     * @param limit         max num of subscriptions returned
+     * @param ifNoneMatch   If-None-Match header value
+     * @param messageContext message context
+     * @return Response with additional Info of the GraphQL API
+     */
+    @Override
+    public Response getAdditionalInfoOfAPISubscriptions(String apiId, String groupId, String xWSO2Tenant, Integer offset,
+                    Integer limit, String ifNoneMatch, MessageContext messageContext) {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Subscriber subscriber = new Subscriber(username);
+        Set<SubscribedAPI> subscriptions;
+        List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
+
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO;
+
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+
+            if (apiTypeWrapper.isAPIProduct()) {
+                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
+                        apiTypeWrapper.getApiProduct().getId(), groupId, organization);
+            } else {
+                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
+                        apiTypeWrapper.getApi().getId(), groupId, organization);
+            }
+
+            //Sort subscriptions by application name
+            subscribedAPIList.addAll(subscriptions);
+            subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
+            additionalSubscriptionInfoListDTO = AdditionalSubscriptionInfoMappingUtil
+                    .fromAdditionalSubscriptionInfoListToDTO(subscribedAPIList, limit, offset, organization);
+            AdditionalSubscriptionInfoMappingUtil.setPaginationParams(additionalSubscriptionInfoListDTO, apiId,
+                    "", limit, offset, subscribedAPIList.size());
+
+            return Response.ok().entity(additionalSubscriptionInfoListDTO).build();
+
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving additional information details of the API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving additional information details of the API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
 }

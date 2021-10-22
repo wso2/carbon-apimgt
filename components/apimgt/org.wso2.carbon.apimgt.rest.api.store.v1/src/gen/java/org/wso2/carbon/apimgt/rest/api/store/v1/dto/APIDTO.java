@@ -11,7 +11,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISolaceEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
@@ -64,7 +63,6 @@ public class APIDTO   {
     private String lastUpdatedTime = null;
     private String gatewayVendor = null;
     private List<String> asyncTransportProtocols = new ArrayList<String>();
-    private List<APISolaceEndpointURLsDTO> solaceEndpointURLs = new ArrayList<APISolaceEndpointURLsDTO>();
 
   /**
    * UUID of the api 
@@ -633,7 +631,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
   public String getGatewayVendor() {
@@ -644,39 +642,21 @@ public class APIDTO   {
   }
 
   /**
-   * Supported transports for the aync API (http and/or https).
+   * Supported transports for the aync API. 
    **/
   public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
     this.asyncTransportProtocols = asyncTransportProtocols;
     return this;
   }
 
-
-  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the aync API (http and/or https). ")
+  
+  @ApiModelProperty(example = "[\"http\",\"mqtt\"]", value = "Supported transports for the aync API. ")
   @JsonProperty("asyncTransportProtocols")
   public List<String> getAsyncTransportProtocols() {
     return asyncTransportProtocols;
   }
   public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
     this.asyncTransportProtocols = asyncTransportProtocols;
-  }
-
-  /**
-   **/
-  public APIDTO solaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
-    this.solaceEndpointURLs = solaceEndpointURLs;
-    return this;
-  }
-
-
-  @ApiModelProperty(value = "")
-  @Valid
-  @JsonProperty("solaceEndpointURLs")
-  public List<APISolaceEndpointURLsDTO> getSolaceEndpointURLs() {
-    return solaceEndpointURLs;
-  }
-  public void setSolaceEndpointURLs(List<APISolaceEndpointURLsDTO> solaceEndpointURLs) {
-    this.solaceEndpointURLs = solaceEndpointURLs;
   }
 
 
@@ -721,13 +701,12 @@ public class APIDTO   {
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(gatewayVendor, API.gatewayVendor) &&
-        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
-        Objects.equals(solaceEndpointURLs, API.solaceEndpointURLs);
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, solaceEndpointURLs);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -768,7 +747,6 @@ public class APIDTO   {
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
-    sb.append("    solaceEndpointURLs: ").append(toIndentedString(solaceEndpointURLs)).append("\n");
     sb.append("}");
     return sb.toString();
   }
