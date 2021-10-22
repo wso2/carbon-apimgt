@@ -18,14 +18,14 @@ import javax.validation.Valid;
 
 
 
-public class APISolaceURLsDTO   {
+public class AdditionalSubscriptionInfoSolaceURLsDTO   {
   
     private String protocol = null;
     private String endpointURL = null;
 
   /**
    **/
-  public APISolaceURLsDTO protocol(String protocol) {
+  public AdditionalSubscriptionInfoSolaceURLsDTO protocol(String protocol) {
     this.protocol = protocol;
     return this;
   }
@@ -42,7 +42,7 @@ public class APISolaceURLsDTO   {
 
   /**
    **/
-  public APISolaceURLsDTO endpointURL(String endpointURL) {
+  public AdditionalSubscriptionInfoSolaceURLsDTO endpointURL(String endpointURL) {
     this.endpointURL = endpointURL;
     return this;
   }
@@ -66,9 +66,9 @@ public class APISolaceURLsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APISolaceURLsDTO apISolaceURLs = (APISolaceURLsDTO) o;
-    return Objects.equals(protocol, apISolaceURLs.protocol) &&
-        Objects.equals(endpointURL, apISolaceURLs.endpointURL);
+    AdditionalSubscriptionInfoSolaceURLsDTO additionalSubscriptionInfoSolaceURLs = (AdditionalSubscriptionInfoSolaceURLsDTO) o;
+    return Objects.equals(protocol, additionalSubscriptionInfoSolaceURLs.protocol) &&
+        Objects.equals(endpointURL, additionalSubscriptionInfoSolaceURLs.endpointURL);
   }
 
   @Override
@@ -79,7 +79,7 @@ public class APISolaceURLsDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APISolaceURLsDTO {\n");
+    sb.append("class AdditionalSubscriptionInfoSolaceURLsDTO {\n");
     
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpointURL: ").append(toIndentedString(endpointURL)).append("\n");

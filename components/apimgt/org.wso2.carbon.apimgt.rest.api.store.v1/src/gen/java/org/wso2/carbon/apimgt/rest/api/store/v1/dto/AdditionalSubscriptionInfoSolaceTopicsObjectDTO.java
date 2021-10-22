@@ -19,14 +19,14 @@ import javax.validation.Valid;
 
 
 
-public class ApplicationSolaceTopicsObjectDTO   {
+public class AdditionalSubscriptionInfoSolaceTopicsObjectDTO   {
   
     private SolaceTopicsDTO defaultSyntax = null;
     private SolaceTopicsDTO mqttSyntax = null;
 
   /**
    **/
-  public ApplicationSolaceTopicsObjectDTO defaultSyntax(SolaceTopicsDTO defaultSyntax) {
+  public AdditionalSubscriptionInfoSolaceTopicsObjectDTO defaultSyntax(SolaceTopicsDTO defaultSyntax) {
     this.defaultSyntax = defaultSyntax;
     return this;
   }
@@ -44,7 +44,7 @@ public class ApplicationSolaceTopicsObjectDTO   {
 
   /**
    **/
-  public ApplicationSolaceTopicsObjectDTO mqttSyntax(SolaceTopicsDTO mqttSyntax) {
+  public AdditionalSubscriptionInfoSolaceTopicsObjectDTO mqttSyntax(SolaceTopicsDTO mqttSyntax) {
     this.mqttSyntax = mqttSyntax;
     return this;
   }
@@ -69,9 +69,9 @@ public class ApplicationSolaceTopicsObjectDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApplicationSolaceTopicsObjectDTO applicationSolaceTopicsObject = (ApplicationSolaceTopicsObjectDTO) o;
-    return Objects.equals(defaultSyntax, applicationSolaceTopicsObject.defaultSyntax) &&
-        Objects.equals(mqttSyntax, applicationSolaceTopicsObject.mqttSyntax);
+    AdditionalSubscriptionInfoSolaceTopicsObjectDTO additionalSubscriptionInfoSolaceTopicsObject = (AdditionalSubscriptionInfoSolaceTopicsObjectDTO) o;
+    return Objects.equals(defaultSyntax, additionalSubscriptionInfoSolaceTopicsObject.defaultSyntax) &&
+        Objects.equals(mqttSyntax, additionalSubscriptionInfoSolaceTopicsObject.mqttSyntax);
   }
 
   @Override
@@ -82,7 +82,7 @@ public class ApplicationSolaceTopicsObjectDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationSolaceTopicsObjectDTO {\n");
+    sb.append("class AdditionalSubscriptionInfoSolaceTopicsObjectDTO {\n");
     
     sb.append("    defaultSyntax: ").append(toIndentedString(defaultSyntax)).append("\n");
     sb.append("    mqttSyntax: ").append(toIndentedString(mqttSyntax)).append("\n");
