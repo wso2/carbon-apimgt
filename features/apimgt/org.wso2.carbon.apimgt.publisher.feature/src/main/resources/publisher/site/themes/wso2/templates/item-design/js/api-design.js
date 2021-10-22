@@ -25,7 +25,7 @@ var apiLevelPolicy = {
 };
 
 const SWAGGER_CONTENT = "swagger-editor-content"
-const SWAGGER_CONTENT_CACHE = "swagger-editor-content-cache"
+var swaggerContentCache;
 
 Handlebars.registerHelper('countKeys', function(value){
     return Object.keys(value).length * 2 + 1;
@@ -601,7 +601,7 @@ APIDesigner.prototype.init_controllers = function(){
                             for(var method in pathObj){
                                 if(pathObj.hasOwnProperty(method)){
                                     var methodObj = pathObj[method];
-                                    
+
                                     //If the scope is added to the resource, remove it.
                                     if(methodObj['x-scope'] && methodObj['x-scope'] === scopeKeyToDelete){
                                         methodObj['x-scope'] = "";
@@ -732,8 +732,9 @@ APIDesigner.prototype.load_api_document = function(api_document){
 APIDesigner.prototype.load_swagger_editor_content = function (){
     if(this.api_doc != ""){
        var swagYaml = jsyaml.safeDump(this.api_doc);
+       //Load swagger definition into cache
+       swaggerContentCache = swagYaml;
        window.localStorage.setItem(SWAGGER_CONTENT, swagYaml);
-       window.localStorage.setItem(SWAGGER_CONTENT_CACHE, swagYaml);
     }
 };
 
@@ -1225,9 +1226,8 @@ APIDesigner.prototype.close_swagger_editor = function(){
     $('#swaggerEditer').append($('.swagger_editer_header'));
     $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");
-    var swagYaml = window.localStorage.getItem(SWAGGER_CONTENT_CACHE);
-    window.localStorage.setItem(SWAGGER_CONTENT, swagYaml);
-
+    //Discarding unsaved changes
+    window.localStorage.setItem(SWAGGER_CONTENT, swaggerContentCache);
 };
 
 APIDesigner.prototype.update_swagger = function () {
@@ -1529,7 +1529,7 @@ $(document).ready(function(){
             output.src = URL.createObjectURL(this.files[0]);
         }
     });
-    
+
     if($("#wsdl").val()) {
         var wsdlInputVal = $("#wsdl").val();
         if(wsdlInputVal.endsWith(".zip")) {
