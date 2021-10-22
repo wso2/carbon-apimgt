@@ -653,6 +653,22 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /api-logging-configs:
+    get:
+      summary: Retrieve persisted per API logging data.
+      description: |
+        This retrieve the persisted API logging data for API logging support.
+      tags:
+        - 'Logging'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/APILoggingConfigList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -1501,4 +1517,22 @@ definitions:
             description: Maximum number of events allowed
             format: int64
             example: 3000
-
+  #-----------------------------------------------------
+  # API Logging detail list
+  #-----------------------------------------------------
+  APILoggingConfigList:
+    title: apis
+    properties:
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/APILoggingConfig'
+  APILoggingConfig:
+    title: API Info object with log details
+    properties:
+      context:
+        type: string
+        example: pizashack/v1.0.0
+      logLevel:
+        type: string
+        example: all

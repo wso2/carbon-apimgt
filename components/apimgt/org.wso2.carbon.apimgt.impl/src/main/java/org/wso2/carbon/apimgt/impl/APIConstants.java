@@ -2551,7 +2551,8 @@ public final class APIConstants {
         ENDPOINT_CERTIFICATE_ADD,
         ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
-        GA_CONFIG_UPDATE
+        GA_CONFIG_UPDATE,
+        UDATE_API_LOG_LEVEL
     }
 
     public static class GatewayArtifactSynchronizer {
@@ -2785,4 +2786,13 @@ public final class APIConstants {
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
+
+    public static class APILogHandler {
+        public static final String DELETE = "delete";
+        public static final String DELETE_ALL = "deleteAll";
+        public static final String OFF = "OFF";
+        public static final String BASIC = "BASIC";
+        public static final String STANDARD = "STANDARD";
+        public static final String FULL = "FULL";
+    }
 }
