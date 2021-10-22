@@ -17277,33 +17277,117 @@ public class ApiMgtDAO {
                 int tenantId =
                         APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
 
-                // Removing related current API product entries from AM_API_PRODUCT_MAPPING table
-                PreparedStatement removeProductMappingsStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_API_PRODUCT_ID);
-                removeProductMappingsStatement.setInt(1, apiId);
-                removeProductMappingsStatement.executeUpdate();
+                //Remove Current API Product entries from AM_API_URL_MAPPING table
+                PreparedStatement removeURLMappingsFromCurrentAPIProduct = connection.prepareStatement(
+                        SQLConstants.APIRevisionSqlConstants.REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING);
+                removeURLMappingsFromCurrentAPIProduct.setString(1, Integer.toString(apiId));
+                removeURLMappingsFromCurrentAPIProduct.executeUpdate();
 
-                // Restoring to AM_API_PRODUCT_MAPPING table
-                PreparedStatement getProductMappingsStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.GET_PRODUCT_RESOURCES_BY_REVISION_UUID);
-                getProductMappingsStatement.setInt(1, apiId);
-                getProductMappingsStatement.setString(2, apiRevision.getRevisionUUID());
-                List<Integer> urlMappingIds = new ArrayList<>();
-                try (ResultSet rs = getProductMappingsStatement.executeQuery()) {
+                //Copy Revision resources
+                PreparedStatement getURLMappingsFromRevisionedAPIProduct = connection.prepareStatement(
+                        SQLConstants.APIRevisionSqlConstants.GET_API_PRODUCT_REVISION_URL_MAPPINGS_BY_REVISION_UUID);
+                getURLMappingsFromRevisionedAPIProduct.setString(1, apiRevision.getRevisionUUID());
+                Map<String, URITemplate> urlMappingList = new HashMap<>();
+                try (ResultSet rs = getURLMappingsFromRevisionedAPIProduct.executeQuery()) {
+                    String key, httpMethod, urlPattern;
                     while (rs.next()) {
-                        urlMappingIds.add(rs.getInt(1));
+                        String script = null;
+                        URITemplate uriTemplate = new URITemplate();
+                        httpMethod = rs.getString("HTTP_METHOD");
+                        urlPattern = rs.getString("URL_PATTERN");
+                        uriTemplate.setHTTPVerb(httpMethod);
+                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                        uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                        uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
+                        if (rs.getInt("API_ID") != 0) {
+                            // Adding product id to uri template id just to store value
+                            uriTemplate.setId(rs.getInt("API_ID"));
+                        }
+                        key = urlPattern + httpMethod;
+                        urlMappingList.put(key, uriTemplate);
                     }
                 }
 
+                //Populate Scope Mappings
+                PreparedStatement getScopeMappingsFromRevisionedAPIProduct = connection.prepareStatement(
+                        SQLConstants.APIRevisionSqlConstants.GET_API_PRODUCT_REVISION_SCOPE_MAPPINGS_BY_REVISION_UUID);
+                getScopeMappingsFromRevisionedAPIProduct.setString(1, apiRevision.getRevisionUUID());
+                try (ResultSet rs = getScopeMappingsFromRevisionedAPIProduct.executeQuery()) {
+                    while (rs.next()) {
+                        String key = rs.getString("URL_PATTERN") + rs.getString("HTTP_METHOD");
+                        if (urlMappingList.containsKey(key)) {
+                            URITemplate uriTemplate = urlMappingList.get(key);
+
+                            Scope scope = new Scope();
+                            scope.setKey(rs.getString("SCOPE_NAME"));
+                            uriTemplate.setScope(scope);
+
+                            uriTemplate.setScopes(scope);
+                        }
+                    }
+                }
+
+                PreparedStatement insertURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                for (URITemplate urlMapping : urlMappingList.values()) {
+                    insertURLMappingsStatement.setInt(1, urlMapping.getId());
+                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.setString(6, Integer.toString(apiId));
+                    insertURLMappingsStatement.addBatch();
+                }
+                insertURLMappingsStatement.executeBatch();
+
+                //Insert Scope Mappings
+                PreparedStatement getRevisionedURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                PreparedStatement addResourceScopeMapping = connection.prepareStatement(
+                        SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
+                for (URITemplate urlMapping : urlMappingList.values()) {
+                    getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
+                    getRevisionedURLMappingsStatement.setString(2, Integer.toString(apiId));
+                    getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
+                    getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
+                    getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
+                    getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                        if (rs.next()) {
+                            int newURLMappingId = rs.getInt("URL_MAPPING_ID");
+                            if (urlMapping.getScopes() != null && urlMapping.getScopes().size() > 0) {
+                                for (Scope scope : urlMapping.getScopes()) {
+                                    addResourceScopeMapping.setString(1, scope.getKey());
+                                    addResourceScopeMapping.setInt(2, newURLMappingId);
+                                    addResourceScopeMapping.setInt(3, tenantId);
+                                    addResourceScopeMapping.addBatch();
+                                }
+                            }
+                        }
+                    }
+                }
+                addResourceScopeMapping.executeBatch();
+
+                //Get URL_MAPPING_IDs from table and add records to product mapping table
+                PreparedStatement getURLMappingOfAPIProduct = connection.prepareStatement(
+                        SQLConstants.GET_URL_MAPPING_IDS_OF_API_PRODUCT_SQL);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
-                for (int urlMappingId : urlMappingIds) {
-                    insertProductResourceMappingStatement.setInt(1, apiId);
-                    insertProductResourceMappingStatement.setInt(2, urlMappingId);
-                    insertProductResourceMappingStatement.setString(3, "Current API");
-                    insertProductResourceMappingStatement.addBatch();
+                getURLMappingOfAPIProduct.setString(1, Integer.toString(apiId));
+                try (ResultSet rs = getURLMappingOfAPIProduct.executeQuery()) {
+                    while (rs.next()) {
+                        insertProductResourceMappingStatement.setInt(1, apiId);
+                        insertProductResourceMappingStatement.setInt(2, rs.getInt("URL_MAPPING_ID"));
+                        insertProductResourceMappingStatement.setString(3, "Current API");
+                        insertProductResourceMappingStatement.addBatch();
+                    }
+                    insertProductResourceMappingStatement.executeBatch();
                 }
-                insertProductResourceMappingStatement.executeBatch();
 
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
                 PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
