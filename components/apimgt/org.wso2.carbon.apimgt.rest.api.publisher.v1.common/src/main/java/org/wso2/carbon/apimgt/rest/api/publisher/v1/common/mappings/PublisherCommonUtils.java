@@ -1289,7 +1289,7 @@ public class PublisherCommonUtils {
                     validationResponse.setIsValid(Boolean.TRUE);
                     GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
                     GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(schema, null);
+                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(typeRegistry, null);
                     List<APIOperationsDTO> operationArray = APIMappingUtil
                             .fromURITemplateListToOprationList(operationList);
                     graphQLInfo.setOperations(operationArray);

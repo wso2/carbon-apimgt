@@ -23,8 +23,7 @@ import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.OperationDefinition;
 import graphql.parser.Parser;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.validation.Validator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -44,7 +43,6 @@ import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -58,7 +56,11 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
+import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.SubscriptionAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -76,7 +78,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLProcessorUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -117,7 +119,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private AuthenticationContext authContext;
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
-    private Pair<GraphQLSchema, TypeDefinitionRegistry> apiSchemaToTypeDefRegistry;
+    private GraphQLSchemaDTO graphQLSchemaDTO;
     private SignedJWTInfo signedJWTInfo;
     private Map<String, String> graphQLMsgIdToOperationList = new HashMap<>();
 
@@ -238,16 +240,20 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                     if (operation.getOperation() != null
                                             && APIConstants.GRAPHQL_SUBSCRIPTION.equals(operation.getOperation()
                                             .toString()) && graphQLMsg.getString("id") != null) {
+                                        QueryAnalyzer graphQLSubscriptionProcessor =
+                                                new SubscriptionAnalyzer(graphQLSchemaDTO.getGraphQLSchema());
+                                        QueryValidator queryValidator = new QueryValidator(new Validator());
                                         // payload validation
-                                        String validationErrorMessage = GraphQLProcessorUtil
-                                                .validatePayload(apiSchemaToTypeDefRegistry.getLeft(), document);
+                                        String validationErrorMessage = queryValidator
+                                                .validatePayload(graphQLSchemaDTO.getGraphQLSchema(), document);
                                         if (validationErrorMessage != null) {
                                             ctx.writeAndFlush(new TextWebSocketFrame("Invalid query: "
                                                     + validationErrorMessage));
                                             return;
                                         }
-                                        String operationList = GraphQLProcessorUtil.getOperationList(operation,
-                                                apiSchemaToTypeDefRegistry.getRight());
+                                        String operationList = GraphQLProcessorUtil
+                                                .getOperationList(operation,
+                                                        graphQLSchemaDTO.getTypeDefinitionRegistry());
                                         graphQLMsgIdToOperationList.put(graphQLMsg.getString("id"), operationList);
                                         // validate scopes based on subscription payload
                                         if (!authorizeGraphQLSubscriptionEvents(operationList)) {
@@ -731,8 +737,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             handleError(ctx, "No matching resource found to dispatch the request");
         }
         if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)) {
-            apiSchemaToTypeDefRegistry = DataHolder.getInstance()
-                    .getGraphQLSchemaForAPI(electedAPI.getUuid());
+            graphQLSchemaDTO = DataHolder.getInstance().getGraphQLSchemaDTOForAPI(electedAPI.getUuid());
         }
         String resource = selectedResource.getDispatcherHelper().getString();
         if (log.isDebugEnabled()) {

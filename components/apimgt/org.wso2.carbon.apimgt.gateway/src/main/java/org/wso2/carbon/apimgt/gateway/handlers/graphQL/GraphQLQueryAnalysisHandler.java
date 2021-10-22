@@ -24,10 +24,6 @@ import graphql.analysis.FieldComplexityCalculator;
 import graphql.analysis.MaxQueryComplexityInstrumentation;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -36,6 +32,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.wso2.carbon.apimgt.common.gateway.graphql.FieldComplexityCalculatorImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -193,7 +190,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
     private boolean analyseQueryComplexity(MessageContext messageContext, String payload) {
-        FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(messageContext);
+        FieldComplexityCalculator fieldComplexityCalculator = new GraphQLComplexityCalculator(messageContext);
         int maxQueryComplexity = getMaxQueryComplexity(messageContext);
 
         if (maxQueryComplexity > 0) {

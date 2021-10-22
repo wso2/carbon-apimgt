@@ -15,16 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
+package org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils;
 
-import graphql.language.Document;
 import graphql.language.Field;
 import graphql.language.OperationDefinition;
 import graphql.language.Selection;
-import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.validation.ValidationError;
-import graphql.validation.Validator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -36,8 +32,6 @@ import java.util.List;
 public class GraphQLProcessorUtil {
 
     private static final Log log = LogFactory.getLog(GraphQLProcessorUtil.class);
-    private static final Validator validator = new Validator();
-
 
     /**
      * This method used to extract operation List
@@ -45,7 +39,8 @@ public class GraphQLProcessorUtil {
      * @param operation operation
      * @return operationList
      */
-    public static String getOperationList(OperationDefinition operation, TypeDefinitionRegistry typeDefinitionRegistry) {
+    public static String getOperationList(OperationDefinition operation,
+                                          TypeDefinitionRegistry typeDefinitionRegistry) {
         String operationList;
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         ArrayList<String> operationArray = new ArrayList<>();
@@ -98,22 +93,5 @@ public class GraphQLProcessorUtil {
             supportedFields.add(template.getUriTemplate());
         }
         return supportedFields;
-    }
-
-    public static String validatePayload(GraphQLSchema schema, Document document) {
-
-        String validationErrorMessage = null;
-        ArrayList<String> validationErrorMessageList = new ArrayList<>();
-        List<ValidationError> validationErrors = validator.validateDocument(schema, document);
-        if (validationErrors != null && validationErrors.size() > 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Validation failed for " + document);
-            }
-            for (ValidationError error : validationErrors) {
-                validationErrorMessageList.add(error.getDescription());
-            }
-            validationErrorMessage = String.join(",", validationErrorMessageList);
-        }
-        return validationErrorMessage;
     }
 }
