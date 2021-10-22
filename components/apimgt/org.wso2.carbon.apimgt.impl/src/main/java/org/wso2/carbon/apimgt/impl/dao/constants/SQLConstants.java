@@ -3659,6 +3659,21 @@ public class SQLConstants {
                 " AUM.REVISION_UUID IS NULL " +
                 " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
+        public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_PRODUCT_SQL =
+                " SELECT " +
+                " AUM.URL_MAPPING_ID," +
+                " AUM.URL_PATTERN," +
+                " AUM.HTTP_METHOD," +
+                " OPM.POLICY_TYPE," +
+                " OPM.PARAMETERS," +
+                " OPM.DIRECTION" +
+                " FROM " +
+                " AM_API_URL_MAPPING AUM " +
+                " INNER JOIN AM_API_OPERATION_POLICY_MAPPING OPM ON AUM.URL_MAPPING_ID = OPM.URL_MAPPING_ID" +
+                " WHERE " +
+                " AUM.REVISION_UUID = ? " +
+                " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
         public static final String GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL =
                 " SELECT " +
                 " AUM.URL_MAPPING_ID," +
@@ -3720,7 +3735,7 @@ public class SQLConstants {
 
         public static final String GET_RESOURCE_ENDPOINT_OF_REVISION_BY_UUID =
                 "SELECT " +
-                "RE.RESOURCE_ENDPOINT_ID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, RE.ENDPOINT_CONFIG, " +
+                "RE.API_ID, RE.RESOURCE_ENDPOINT_ID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, RE.ENDPOINT_CONFIG, " +
                 "(SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM WHERE REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID " +
                 "AND RE.TENANT_ID = ?) USAGES " +
                 "FROM "+

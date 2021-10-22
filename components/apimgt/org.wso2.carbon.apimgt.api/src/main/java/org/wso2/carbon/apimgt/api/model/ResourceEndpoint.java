@@ -16,6 +16,7 @@ public class ResourceEndpoint {
     private Map<String, String> securityConfig;
     private Map<String, String> generalConfig;
     private int usageCount;
+    private int apiId;
 
     public String getId() {
         return id;
@@ -71,6 +72,14 @@ public class ResourceEndpoint {
 
     public int getUsageCount() {
         return usageCount;
+    }
+
+    public int getApiId() {
+        return apiId;
+    }
+
+    public void setApiId(int apiId) {
+        this.apiId = apiId;
     }
 
     @Override public boolean equals(Object o) {
