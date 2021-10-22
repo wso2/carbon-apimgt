@@ -28,7 +28,9 @@ import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.logging.PerAPILogHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * This Handler can be used to log all external calls done by the api manager via synapse
+ * This Handler can be used to log all external calls done by the api manager via synapse.
  */
 public class LogsHandler extends AbstractSynapseHandler {
     private static final Log log = LogFactory.getLog(APIConstants.CORRELATION_LOGGER);
@@ -52,11 +54,21 @@ public class LogsHandler extends AbstractSynapseHandler {
     private static final String APP_ID_HEADER = "APP_ID_HEADER";
     private static final String UUID_HEADER = "UUID_HEADER";
     private static final String CORRELATION_ID_HEADER = "CORRELATION_ID_HEADER";
+    protected static final String LOG_LEVEL = "LOG_LEVEL";
 
     private static final String REQUEST_BODY_SIZE_ERROR = "Error occurred while building the message to calculate" +
             " the response body size";
     private static final String REQUEST_EVENT_PUBLICATION_ERROR = "Cannot publish request event. ";
     private static final String RESPONSE_EVENT_PUBLICATION_ERROR = "Cannot publish response event. ";
+
+    private static final String REQUEST_IN = "request-in";
+    private static final String REQUEST_OUT = "request-out";
+    private static final String RESPONSE_IN = "response-in";
+    private static final String RESPONSE_OUT = "response-out";
+
+    public LogsHandler() {
+        log.info("Started log handler");
+    }
 
     private boolean isEnabled() {
         if(!isSet) {
@@ -77,6 +89,12 @@ public class LogsHandler extends AbstractSynapseHandler {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                 return false;
             }
+        }
+        // Get the log level of if logs are enabled to the API belongs to current API request
+        String log = getAPILogLevel(messageContext);
+        // If it presents log the details
+        if ((log) != null) {
+            PerAPILogHandler.logAPI(REQUEST_IN, messageContext);
         }
         return true;
     }
@@ -110,6 +128,10 @@ public class LogsHandler extends AbstractSynapseHandler {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                 return false;
             }
+        }
+        String log = (String) messageContext.getProperty(LOG_LEVEL);
+        if (log != null) {
+            PerAPILogHandler.logAPI(REQUEST_OUT, messageContext);
         }
         return true;
     }
@@ -146,10 +168,20 @@ public class LogsHandler extends AbstractSynapseHandler {
                 }
             }
         }
+        // if PER API logging is available
+        String log = (String) messageContext.getProperty(LOG_LEVEL);
+        if (log != null) {
+            PerAPILogHandler.logAPI(RESPONSE_IN, messageContext);
+        }
         return true;
     }
 
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        // if PER API logging is available
+        String log = (String) messageContext.getProperty(LOG_LEVEL);
+        if (log != null) {
+            PerAPILogHandler.logAPI(RESPONSE_OUT, messageContext);
+        }
         return true;
     }
 
@@ -218,5 +250,68 @@ public class LogsHandler extends AbstractSynapseHandler {
             // request size is left as -1 if chunking is enabled. this is to avoid building the message
         }
         return requestSize;
+    }
+
+    private long buildResponseMessage(org.apache.synapse.MessageContext messageContext) {
+        long responseSize = 0;
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
+        if (contentLength != null) {
+            responseSize = Integer.parseInt(contentLength);
+        } else {
+            // When chunking is enabled
+            try {
+                RelayUtils.buildMessage(axis2MC);
+            } catch (IOException | XMLStreamException ex) {
+                // In case of an exception, it won't be propagated up,and set response size to 0
+                log.error(REQUEST_BODY_SIZE_ERROR, ex);
+            }
+        }
+        SOAPEnvelope env = messageContext.getEnvelope();
+        if (env != null) {
+            SOAPBody soapbody = env.getBody();
+            if (soapbody != null) {
+                byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
+                responseSize = size.length;
+            }
+
+        }
+        return responseSize;
+
+    }
+    /**
+     * Sync the node's map based on the user given values.
+     *
+     * @param map Map containing API context and logLevel
+     */
+    public static Map<String, String> syncAPILogData(Map<String, Object> map) {
+        String apictx = (String) map.get("context");
+        String logLevel = (String) map.get("value");
+        log.debug("Log level for " + apictx + " is changed to " + logLevel);
+        return APILoggerManager.getInstance().getPerAPILoggerList();
+    }
+    public static String getLogData(String context) {
+        return APILoggerManager.getInstance().getPerAPILoggerList().get(context);
+    }
+
+    public static Map<String, String> getLogData() {
+        return APILoggerManager.getInstance().getPerAPILoggerList();
+    }
+
+    /**
+     * Check if the incoming API need to be logged, if yes return the loglevel, if not return null
+     *
+     * @param ctx MessageContext of the incoming request
+     * @return log level of the API or null if not
+     */
+    private String getAPILogLevel(MessageContext ctx) {
+        Map<String, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
+        // if the logging API data holder is empty or null return null
+        if (!logProperties.isEmpty()) {
+            return LogUtils.getMatchingLogLevel(ctx, logProperties);
+        }
+        return null;
     }
 }

@@ -839,6 +839,28 @@
           }
         }
       }
+    },
+    "/api-logging-configs" : {
+      "get" : {
+        "tags" : [ "Logging" ],
+        "summary" : "Retrieve persisted per API logging data.",
+        "description" : "This retrieve the persisted API logging data for API logging support.\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Event Received success",
+            "schema" : {
+              "$ref" : "#/definitions/APILoggingConfigList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -1816,6 +1838,30 @@
           }
         }
       } ]
+    },
+    "APILoggingConfigList" : {
+      "properties" : {
+        "apis" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/APILoggingConfig"
+          }
+        }
+      },
+      "title" : "apis"
+    },
+    "APILoggingConfig" : {
+      "properties" : {
+        "context" : {
+          "type" : "string",
+          "example" : "pizashack/v1.0.0"
+        },
+        "logLevel" : {
+          "type" : "string",
+          "example" : "all"
+        }
+      },
+      "title" : "API Info object with log details"
     }
   },
   "parameters" : {

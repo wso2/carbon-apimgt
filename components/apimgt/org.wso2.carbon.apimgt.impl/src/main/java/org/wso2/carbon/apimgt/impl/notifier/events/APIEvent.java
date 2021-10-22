@@ -33,6 +33,14 @@ public class APIEvent extends Event {
     private String apiProvider;
     private String apiType;
     private String apiStatus;
+    private String logLevel;
+
+    public APIEvent(String uuid, String logLevel, String type, String apiContext) {
+        this.uuid = uuid;
+        this.logLevel = logLevel;
+        this.type = type;
+        this.apiContext = apiContext;
+    }
 
     public APIEvent(String uuid, String apiName, String apiVersion, String apiProvider, String apiType,
                     String apiStatus) {
@@ -178,5 +186,9 @@ public class APIEvent extends Event {
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
     }
 }

@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
@@ -292,6 +293,9 @@ public class GatewayJMSMessageListener implements MessageListener {
             } catch (APIManagementException e) {
                 log.error(e);
             }
+        } else if (EventType.UDATE_API_LOG_LEVEL.toString().equals(eventType)) {
+            APIEvent apiEvent = new Gson().fromJson(eventJson, APIEvent.class);
+            APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel());
         }
     }
 
