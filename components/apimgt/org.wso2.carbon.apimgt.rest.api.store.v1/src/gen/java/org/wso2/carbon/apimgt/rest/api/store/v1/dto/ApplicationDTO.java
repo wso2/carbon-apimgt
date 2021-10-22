@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationSolaceDeployedEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
@@ -31,9 +30,6 @@ public class ApplicationDTO   {
     private String name = null;
     private String throttlingPolicy = null;
     private String description = null;
-    private Boolean containsSolaceApis = null;
-    private String solaceOrganization = null;
-    private List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments = new ArrayList<ApplicationSolaceDeployedEnvironmentsDTO>();
 
     @XmlType(name="TokenTypeEnum")
     @XmlEnum(String.class)
@@ -302,58 +298,6 @@ return null;
     this.hashEnabled = hashEnabled;
   }
 
-    /**
-     **/
-    public ApplicationDTO containsSolaceApis(Boolean containsSolaceApis) {
-        this.containsSolaceApis = containsSolaceApis;
-        return this;
-    }
-
-
-    @ApiModelProperty(example = "false", value = "")
-    @JsonProperty("containsSolaceApis")
-    public Boolean isContainsSolaceApis() {
-        return containsSolaceApis;
-    }
-    public void setContainsSolaceApis(Boolean containsSolaceApis) {
-        this.containsSolaceApis = containsSolaceApis;
-    }
-
-    /**
-     **/
-    public ApplicationDTO solaceOrganization(String solaceOrganization) {
-        this.solaceOrganization = solaceOrganization;
-        return this;
-    }
-
-
-    @ApiModelProperty(example = "default", value = "")
-    @JsonProperty("solaceOrganization")
-    public String getSolaceOrganization() {
-        return solaceOrganization;
-    }
-    public void setSolaceOrganization(String solaceOrganization) {
-        this.solaceOrganization = solaceOrganization;
-    }
-
-    /**
-     **/
-    public ApplicationDTO solaceDeployedEnvironments(List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments) {
-        this.solaceDeployedEnvironments = solaceDeployedEnvironments;
-        return this;
-    }
-
-
-    @ApiModelProperty(value = "")
-    @Valid
-    @JsonProperty("solaceDeployedEnvironments")
-    public List<ApplicationSolaceDeployedEnvironmentsDTO> getSolaceDeployedEnvironments() {
-        return solaceDeployedEnvironments;
-    }
-    public void setSolaceDeployedEnvironments(List<ApplicationSolaceDeployedEnvironmentsDTO> solaceDeployedEnvironments) {
-        this.solaceDeployedEnvironments = solaceDeployedEnvironments;
-    }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -376,15 +320,12 @@ return null;
         Objects.equals(attributes, application.attributes) &&
         Objects.equals(subscriptionScopes, application.subscriptionScopes) &&
         Objects.equals(owner, application.owner) &&
-        Objects.equals(hashEnabled, application.hashEnabled) &&
-        Objects.equals(containsSolaceApis, application.containsSolaceApis) &&
-        Objects.equals(solaceOrganization, application.solaceOrganization) &&
-        Objects.equals(solaceDeployedEnvironments, application.solaceDeployedEnvironments);
+        Objects.equals(hashEnabled, application.hashEnabled);
   }
 
   @Override
   public int hashCode() {
-      return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, containsSolaceApis, solaceOrganization, solaceDeployedEnvironments);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled);
   }
 
   @Override
@@ -405,9 +346,6 @@ return null;
     sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    hashEnabled: ").append(toIndentedString(hashEnabled)).append("\n");
-    sb.append("    containsSolaceApis: ").append(toIndentedString(containsSolaceApis)).append("\n");
-    sb.append("    solaceOrganization: ").append(toIndentedString(solaceOrganization)).append("\n");
-    sb.append("    solaceDeployedEnvironments: ").append(toIndentedString(solaceDeployedEnvironments)).append("\n");
     sb.append("}");
     return sb.toString();
   }
