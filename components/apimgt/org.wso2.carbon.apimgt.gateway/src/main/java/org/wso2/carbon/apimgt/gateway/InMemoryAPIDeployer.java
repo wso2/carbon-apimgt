@@ -27,14 +27,13 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -234,7 +233,7 @@ public class InMemoryAPIDeployer {
                                 org.wso2.carbon.apimgt.impl.utils.GatewayUtils
                                         .addStringToList(gatewayEvent.getUuid().concat(
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
-                        DataHolder.getInstance().getApiToGraphQLSchemaMap().remove(gatewayEvent.getUuid());
+                        DataHolder.getInstance().getApiToGraphQLSchemaDTOMap().remove(gatewayEvent.getUuid());
                     }
                     if (APIConstants.APITransportType.WS.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
                         org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(
@@ -326,7 +325,8 @@ public class InMemoryAPIDeployer {
             SchemaParser schemaParser = new SchemaParser();
             TypeDefinitionRegistry registry = schemaParser.parse(gatewayAPIDTO.getGraphQLSchema());
             GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
-            DataHolder.getInstance().addApiToGraphQLSchema(apiId, Pair.of(schema, registry));
+            GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
+            DataHolder.getInstance().addApiToGraphQLSchemaDTO(apiId,  schemaDTO);
         }
     }
 

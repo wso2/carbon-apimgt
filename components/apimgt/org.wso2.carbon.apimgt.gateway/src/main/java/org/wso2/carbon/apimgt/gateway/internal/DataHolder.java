@@ -18,9 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import org.apache.commons.lang3.tuple.Pair;
+import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 
 import java.util.*;
 
@@ -28,8 +26,8 @@ public class DataHolder {
 
     private static final DataHolder Instance = new DataHolder();
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
-    private Map<String, Pair<GraphQLSchema, TypeDefinitionRegistry>> apiToGraphQLSchemaMap = new HashMap<>();
-
+    private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
+    
     private DataHolder() {
 
     }
@@ -59,16 +57,15 @@ public class DataHolder {
         return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
     }
 
-    public Map<String, Pair<GraphQLSchema, TypeDefinitionRegistry>> getApiToGraphQLSchemaMap() {
-        return apiToGraphQLSchemaMap;
+    public Map<String, GraphQLSchemaDTO> getApiToGraphQLSchemaDTOMap() {
+        return apiToGraphQLSchemaDTOMap;
     }
 
-    public void addApiToGraphQLSchema(String apiId, Pair<GraphQLSchema, TypeDefinitionRegistry> schema) {
-        apiToGraphQLSchemaMap.put(apiId, schema);
+    public GraphQLSchemaDTO getGraphQLSchemaDTOForAPI(String apiId) {
+        return apiToGraphQLSchemaDTOMap.get(apiId);
     }
 
-    public Pair<GraphQLSchema, TypeDefinitionRegistry> getGraphQLSchemaForAPI(String apiId) {
-
-        return apiToGraphQLSchemaMap.get(apiId);
+    public void addApiToGraphQLSchemaDTO(String apiId, GraphQLSchemaDTO graphQLSchemaDTO) {
+        apiToGraphQLSchemaDTOMap.put(apiId, graphQLSchemaDTO);
     }
 }
