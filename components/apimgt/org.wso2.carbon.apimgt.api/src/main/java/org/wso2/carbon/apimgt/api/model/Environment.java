@@ -224,22 +224,6 @@ public class Environment implements Serializable {
         }
     }
 
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public Map<String, String> getAdditionalProperties() {
-        return additionalProperties;
-    }
-
-    public void setAdditionalProperties(Map<String, String> additionalProperties) {
-        this.additionalProperties = additionalProperties;
-    }
-
     public void setEndpointsAsVhost() throws APIManagementException {
         // Prefix websub endpoints with 'websub_', since API type will be identified with this URL.
         String modifiedWebSubGatewayEndpoint = webSubGatewayEndpoint.replaceAll("http://", "websub_http://")
