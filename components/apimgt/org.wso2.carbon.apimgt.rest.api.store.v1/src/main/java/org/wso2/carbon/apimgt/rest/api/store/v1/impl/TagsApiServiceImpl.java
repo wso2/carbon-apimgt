@@ -47,8 +47,8 @@ public class TagsApiServiceImpl implements TagsApiService {
     public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         //pre-processing
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        limit = limit != null ? limit : RestApiConstants.TAG_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.TAG_OFFSET_DEFAULT;
 
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();

@@ -63,7 +63,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(owner);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, application);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
             if (applicationUpdated) {
                 return Response.ok().build();
             } else {

@@ -1535,7 +1535,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!configuredMissingKeyManagers.isEmpty()) {
             throw new APIManagementException(
                     "Key Manager(s) Not found :" + String.join(" , ", configuredMissingKeyManagers),
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
     }
 
