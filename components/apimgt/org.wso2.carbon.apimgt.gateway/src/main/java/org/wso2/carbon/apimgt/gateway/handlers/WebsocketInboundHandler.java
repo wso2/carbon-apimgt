@@ -57,6 +57,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -240,8 +241,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                     if (operation.getOperation() != null
                                             && APIConstants.GRAPHQL_SUBSCRIPTION.equals(operation.getOperation()
                                             .toString()) && graphQLMsg.getString("id") != null) {
-                                        QueryAnalyzer graphQLSubscriptionProcessor =
-                                                new SubscriptionAnalyzer(graphQLSchemaDTO.getGraphQLSchema());
                                         QueryValidator queryValidator = new QueryValidator(new Validator());
                                         // payload validation
                                         String validationErrorMessage = queryValidator
@@ -260,8 +259,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                             ctx.writeAndFlush(new TextWebSocketFrame("UnAuthorized"));
                                             return;
                                         }
-                                        // analyze query depth and complexity TODO://
-
+                                        // analyze query depth and complexity
+                                        SubscriptionAnalyzer subscriptionAnalyzer =
+                                                new SubscriptionAnalyzer(graphQLSchemaDTO.getGraphQLSchema());
+                                        QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
+                                                subscriptionAnalyzer.analyseQueryComplexity(graphQLSubscriptionPayload,
+                                                        infoDTO.getGraphQLMaxComplexity());
+                                        if (!queryAnalyzerResponseDTO.isSuccess()) {
+                                            ctx.writeAndFlush(queryAnalyzerResponseDTO.getErrorList().toString());
+                                            return;
+                                        }
                                         //throttling for matching resource TODO://
                                     } else {
                                         throw new UnsupportedOperationException("Invalid operation. "

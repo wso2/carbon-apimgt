@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer;
 
+import graphql.analysis.FieldComplexityCalculator;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +25,9 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
+import org.wso2.carbon.apimgt.common.gateway.graphql.FieldComplexityCalculatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
@@ -49,13 +53,12 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      */
     public boolean analyseQueryDepth(MessageContext messageContext, String payload) {
 
-        List<String> errorList = new ArrayList<>();
         int maxQueryDepth = getMaxQueryDepth(messageContext);
-
-        if (!super.analyseQueryDepth(maxQueryDepth, payload, errorList) && !errorList.isEmpty()) {
+        QueryAnalyzerResponseDTO responseDTO = super.analyseQueryDepth(maxQueryDepth, payload);
+        if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
-                    GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
-            log.error(errorList.toString());
+                    GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, responseDTO.getErrorList().toString());
+            log.error(responseDTO.getErrorList().toString());
             return false;
         }
         return true;
@@ -70,7 +73,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
     private int getMaxQueryDepth(MessageContext messageContext) {
         Object maxQueryDepth = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
         if (maxQueryDepth != null) {
-            int maxDepth = ((Integer) maxQueryDepth).intValue();
+            int maxDepth = (Integer) maxQueryDepth;
             if (maxDepth > 0) {
                 return maxDepth;
             } else {
@@ -79,6 +82,58 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
             }
         } else {
             log.debug("Maximum query depth not applicable");
+            return -1;
+        }
+    }
+
+    /**
+     * This method analyses the query complexity
+     *
+     * @param messageContext message context of the request
+     * @param payload        payload of the request
+     * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
+     */
+    public boolean analyseQueryComplexity(MessageContext messageContext, String payload) {
+
+        List<String> errorList = new ArrayList<>();
+        FieldComplexityCalculator fieldComplexityCalculator = null;
+        try {
+            fieldComplexityCalculator = new FieldComplexityCalculatorImpl((String) messageContext
+                    .getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY));
+        } catch (ParseException e) {
+            String errorMessage = "Policy definition parsing failed. ";
+            handleFailure(GraphQLConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
+        }
+        int maxQueryComplexity = getMaxQueryComplexity(messageContext);
+        QueryAnalyzerResponseDTO responseDTO = super.analyseQueryComplexity(maxQueryComplexity, payload,
+                fieldComplexityCalculator);
+        if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
+            handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
+                    GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
+            log.error(errorList.toString());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This method returns the maximum query complexity value
+     *
+     * @param messageContext message context of the request
+     * @return maximum query complexity value if exists, or -1 to denote no complexity limitation
+     */
+    private int getMaxQueryComplexity(MessageContext messageContext) {
+        Object maxQueryComplexity = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
+        if (maxQueryComplexity != null) {
+            int maxComplexity = (Integer) maxQueryComplexity;
+            if (maxComplexity > 0) {
+                return maxComplexity;
+            } else {
+                log.debug("Maximum query complexity value is 0");
+                return -1;
+            }
+        } else {
+            log.debug("Maximum query complexity not applicable");
             return -1;
         }
     }

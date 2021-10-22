@@ -25,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -35,6 +37,15 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
     private static final Log log = LogFactory.getLog(FieldComplexityCalculatorImpl.class);
     protected JSONParser jsonParser = new JSONParser();
     protected JSONObject policyDefinition;
+
+    public FieldComplexityCalculatorImpl(String accessControlPolicy) throws ParseException {
+        if (accessControlPolicy == null) {
+            policyDefinition = new JSONObject();
+        } else {
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(accessControlPolicy);
+            policyDefinition = (JSONObject) jsonObject.get(GraphQLConstants.QUERY_ANALYSIS_COMPLEXITY);
+        }
+    }
 
     @Override
     public int calculate(FieldComplexityEnvironment fieldComplexityEnvironment, int childComplexity) {
