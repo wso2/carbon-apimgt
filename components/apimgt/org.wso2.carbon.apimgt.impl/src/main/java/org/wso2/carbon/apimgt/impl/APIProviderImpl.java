@@ -229,6 +229,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2486,7 +2487,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    //todo if possible make this usable for both APIs and products
     private void validateOperationPolicyParameters(API api) throws APIManagementException {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
@@ -9526,11 +9526,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }*/
 
     @Override
-    public Set<URITemplate> getURITemplatesWithOperationPolicies(String apiId) throws APIManagementException {
-        return apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
-    }
-
-    @Override
     public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
         Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
@@ -9554,6 +9549,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
+    }
+
+    @Override
+    public int addOperationPolicy(int urlMappingId, OperationPolicy policy) throws APIManagementException {
+        return apiMgtDAO.addOperationPolicy(urlMappingId, policy);
     }
 
     @Override
@@ -9598,5 +9598,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean isResourceEndpointUsed(String uuid) throws APIManagementException {
         return apiMgtDAO.isResourceEndpointUsed(uuid);
+    }
+
+    @Override
+    public void addResourceEndpointMapping(int policyId, String endpointUUID) throws APIManagementException {
+        try {
+            apiMgtDAO.addResourceEndpointMapping(policyId, endpointUUID, null);
+        } catch (SQLException e) {
+            handleException("Error while adding resource endpoint mapping.", e);
+        }
+    }
+
+    @Override
+    public Set<URITemplate> getURITemplatesOfAPI(String uuid) throws APIManagementException {
+        return apiMgtDAO.getURITemplatesOfAPI(uuid);
     }
 }

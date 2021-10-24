@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -1108,8 +1109,9 @@ public class APIMappingUtil {
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
 
-            //set operation mediation policies
-            OperationPolicyMappingUtil.setOperationPoliciesToOperationsDTO(dto.getId(), apiOperationsDTO);
+            //since the operation details goes missing after fetching operations list from the swagger definition, we
+            //have to set them back from the original API model.
+            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
 
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
@@ -1599,7 +1601,7 @@ public class APIMappingUtil {
                 template.setAuthTypes(authType);
                 if (operation.getOperationPolicies() != null) {
                     template.setOperationPolicies(OperationPolicyMappingUtil
-                            .fromDTOToAPIOpeationPoliciesList(operation.getOperationPolicies()));
+                            .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
                 }
                 uriTemplates.add(template);
             } else {
@@ -2044,6 +2046,31 @@ public class APIMappingUtil {
             }
         }
         return operationsDTOList;
+    }
+
+    /**
+     * Reads the operationPolicies from the API object passed in, and sets them back to the API Operations DTO
+     *
+     * @param api               API object
+     * @param apiOperationsDTO  List of API Operations DTO
+     */
+    private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb();
+            uriTemplateMap.put(key, uriTemplate);
+        }
+
+        for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
+            String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
+            List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+            if (!operationPolicies.isEmpty()) {
+                operationsDTO.setOperationPolicies(
+                        OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+            }
+        }
     }
 
     /**
