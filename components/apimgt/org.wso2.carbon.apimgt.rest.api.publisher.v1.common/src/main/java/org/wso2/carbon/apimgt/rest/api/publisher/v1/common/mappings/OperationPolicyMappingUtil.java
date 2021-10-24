@@ -1,20 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class is responsible for mapping Operation Policy Objects into REST API Operation Policy related DTOs
@@ -67,7 +59,7 @@ public class OperationPolicyMappingUtil {
         return dto;
     }
 
-    public static List<OperationPolicy> fromDTOToAPIOpeationPoliciesList(
+    public static List<OperationPolicy> fromDTOToAPIOperationPoliciesList(
             APIOperationPoliciesDTO apiOperationPoliciesDTO) {
         List<OperationPolicy> operationPoliciesList = new ArrayList<>();
 
@@ -85,27 +77,5 @@ public class OperationPolicyMappingUtil {
             operationPoliciesList.add(operationPolicy);
         }
         return operationPoliciesList;
-    }
-
-    public static void setOperationPoliciesToOperationsDTO(String apiId, List<APIOperationsDTO> apiOperationsDTO)
-            throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        Set<URITemplate> uriTemplatesWithOperationPolicies = apiProvider.getURITemplatesWithOperationPolicies(apiId);
-        Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
-        if (!uriTemplatesWithOperationPolicies.isEmpty()) {
-            for (URITemplate uriTemplate : uriTemplatesWithOperationPolicies) {
-                String uriTemplateKey = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                operationPoliciesPerURITemplate.put(uriTemplateKey, uriTemplate.getOperationPolicies());
-            }
-        }
-
-        for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
-            String uriTemplateKey = operationsDTO.getVerb() + ":" + operationsDTO.getTarget();
-            if (operationPoliciesPerURITemplate.containsKey(uriTemplateKey)) {
-                List<OperationPolicy> operationPolicies = operationPoliciesPerURITemplate.get(uriTemplateKey);
-                operationsDTO.setOperationPolicies(fromOperationPolicyListToDTO(operationPolicies));
-            }
-        }
     }
 }
