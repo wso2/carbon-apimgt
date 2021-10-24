@@ -5792,6 +5792,26 @@ public class ApiMgtDAO {
         }
     }
 
+    public void addResourceEndpointMapping(int policyId, String endpointUUID, Connection connection)
+            throws SQLException, APIManagementException {
+        boolean isNewConnection = false;
+        if (connection == null) {
+            connection = APIMgtDBUtil.getConnection();
+            isNewConnection = true;
+        }
+        try (PreparedStatement prepstmt = connection
+                .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT_MAPPING)) {
+            int endpointId = getResourceEndpointId(endpointUUID, null, connection);
+            prepstmt.setInt(1, policyId);
+            prepstmt.setInt(2, endpointId);
+            prepstmt.execute();
+        } finally {
+            if (isNewConnection) {
+                APIMgtDBUtil.closeAllConnections(null, connection, null);
+            }
+        }
+    }
+
     private void addResourceEndpointMappings(int apiId, String revisionUUID, int tenantId, Connection connection)
             throws SQLException, APIManagementException {
         OperationPolicy policy = null;
@@ -7156,6 +7176,7 @@ public class ApiMgtDAO {
                         uriTemplate.setAuthTypes(authType);
                         uriTemplate.setThrottlingTier(throttlingTier);
                         uriTemplate.setThrottlingTiers(throttlingTier);
+                        uriTemplate.setId(uriTemplateId);
 
                         InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                         if (mediationScriptBlob != null) {
@@ -7169,7 +7190,7 @@ public class ApiMgtDAO {
                 }
 
                 setAssociatedAPIProducts(currentApiUuid, uriTemplates);
-                //todo: set operation policies
+                setOperationPolicies(currentApiUuid, uriTemplates);
             } catch (SQLException e) {
                 handleException("Failed to get URI Templates of API with UUID " + uuid, e);
             }
@@ -7213,6 +7234,7 @@ public class ApiMgtDAO {
                         uriTemplate.setAuthTypes(authType);
                         uriTemplate.setThrottlingTier(throttlingTier);
                         uriTemplate.setThrottlingTiers(throttlingTier);
+                        uriTemplate.setId(uriTemplateId);
 
                         InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                         if (mediationScriptBlob != null) {
@@ -7340,20 +7362,36 @@ public class ApiMgtDAO {
         }
         return operationPolicies;
     }
-    
-    private void setOperationPoliciesToURITemplatesMap(int apiId, String revisionId,
-            Map<String, URITemplate> uriTemplates) throws SQLException, APIManagementException {
+
+    /**
+     * Sets operation policies to uriTemplates map
+     *
+     * @param uuid          UUID of API or API Revision
+     * @param uriTemplates  URI Templates map with 'URL_PATTERN + HTTP_METHOD' as the map key
+     * @throws SQLException
+     * @throws APIManagementException
+     */
+    private void setOperationPoliciesToURITemplatesMap(String uuid, Map<String, URITemplate> uriTemplates)
+            throws SQLException, APIManagementException {
+        String currentApiUuid;
         String query;
-        if (!StringUtils.isEmpty(revisionId)) {
+        boolean isRevision = false;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
             query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+            isRevision = true;
         } else {
             query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+            currentApiUuid = uuid;
         }
+
         try (Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(query)) {
+            int apiId = getAPIID(currentApiUuid);
             ps.setInt(1, apiId);
-            if (!StringUtils.isEmpty(revisionId)) {
-                ps.setString(2, revisionId);
+            if (isRevision) {
+                ps.setString(2, uuid);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -7372,13 +7410,35 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Sets operation policies to uriTemplates map
+     *
+     * @param uuid          UUID of API or API Revision
+     * @param uriTemplates  URI Templates map with URL_MAPPING_ID as the map key
+     * @throws SQLException
+     * @throws APIManagementException
+     */
     private void setOperationPolicies(String uuid, Map<Integer, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
+        String currentApiUuid;
+        String query;
+        boolean isRevision = false;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_REVISION_SQL;
+            isRevision = true;
+        } else {
+            query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL;
+            currentApiUuid = uuid;
+        }
         try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(
-                        SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_SQL)) {
-            int apiId = getAPIID(uuid);
+                PreparedStatement ps = conn.prepareStatement(query)) {
+            int apiId = getAPIID(currentApiUuid);
             ps.setInt(1, apiId);
+            if (isRevision) {
+                ps.setString(2, uuid);
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -16264,7 +16324,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setOperationPoliciesToURITemplatesMap(apiId, null, uriTemplateMap);
+                setOperationPoliciesToURITemplatesMap(apiRevision.getApiUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
@@ -17063,7 +17123,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setOperationPoliciesToURITemplatesMap(apiId, apiRevision.getRevisionUUID(), uriTemplateMap);
+                setOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
@@ -18094,6 +18154,34 @@ public class ApiMgtDAO {
         return resourceEndpoint;
     }
 
+    public int addOperationPolicy(int urlMappingId, OperationPolicy policy) throws APIManagementException {
+        int policyMappingId = -1;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY,
+                                new String[] { DBUtils.
+                                        getConvertedAutoGeneratedColumnName(
+                                        connection.getMetaData().getDatabaseProductName(),
+                                        "OPERATION_POLICY_MAPPING_ID") })) {
+            Gson gson = new Gson();
+            String paramJSON = gson.toJson(policy.getParameters());
+
+            prepStmt.setInt(1, urlMappingId);
+            prepStmt.setString(2, policy.getPolicyType().toString());
+            prepStmt.setString(3, policy.getDirection());
+            prepStmt.setString(4, paramJSON);
+            prepStmt.execute();
+
+            ResultSet generatedKeys = prepStmt.getGeneratedKeys();
+            if (generatedKeys != null && generatedKeys.next()) {
+                policyMappingId = generatedKeys.getInt(1);
+            }
+        } catch (SQLException e) {
+            handleException("Error while adding operation policy", e);
+        }
+        return policyMappingId;
+    }
+
     public void updateResourceEndpoint(ResourceEndpoint endpoint, String tenantDomain)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -18253,10 +18341,15 @@ public class ApiMgtDAO {
     private int getResourceEndpointId(String endpointId, String revisionId, Connection connection)
             throws APIManagementException {
         int id = 0;
-        try (PreparedStatement prepStmt = connection
-                .prepareStatement(SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_ID)) {
+        String query = SQLConstants.ResourceEndpointConstants.GET_RESOURCE_ENDPOINT_ID;
+        if (revisionId == null) {
+            query = SQLConstants.ResourceEndpointConstants.GET_CURRENT_API_RESOURCE_ENDPOINT_ID;
+        }
+        try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
             prepStmt.setString(1, endpointId);
-            prepStmt.setString(2, revisionId);
+            if (revisionId != null) {
+                prepStmt.setString(2, revisionId);
+            }
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     id = rs.getInt("RESOURCE_ENDPOINT_ID");
