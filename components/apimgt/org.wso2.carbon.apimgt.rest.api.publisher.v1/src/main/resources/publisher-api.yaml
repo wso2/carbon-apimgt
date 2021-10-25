@@ -10701,6 +10701,10 @@ components:
               type: string
               description: A string that represents the context of the user's request
               example: CalculatorAPI
+            contextTemplate:
+              type: string
+              description: The templated context of the API
+              example: CalculatorAPI/{version}
             version:
               type: string
               description: The version of the API
