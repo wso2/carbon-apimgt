@@ -808,15 +808,7 @@ public class APIManagerComponent {
      */
     private void configureNotificationEventPublisher() throws APIManagementException {
 
-        // TODO: (binod)
-        //  - replace adapter configuration code with EventPublisherFactory configuration code
-        //  - remove feature flag check
-        //  - change var name adapterParameters to factoryConfig
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-        Map<String, String> adapterParameters = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -826,31 +818,21 @@ public class APIManagerComponent {
                 EventHubConfigurationDto eventHubConfigurationDto = configuration.getEventHubConfigurationDto();
                 EventHubConfigurationDto.EventHubPublisherConfiguration eventHubPublisherConfiguration =
                         eventHubConfigurationDto.getEventHubPublisherConfiguration();
-                adapterParameters.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
-                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
-                adapterParameters.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
-                adapterParameters.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
-                adapterParameters.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
-                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
-                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
-                adapterConfiguration.setStaticProperties(adapterParameters);
-                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-                    for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
-                        adapterParameters.put(key, eventHubPublisherConfiguration.getProperties().get(key));
-                    }
-                    adapterParameters.put("is_enabled",
-                            Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
-                    try {
-                        ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(adapterParameters);
-                    } catch (EventPublisherException e) {
-                        throw new APIManagementException(e);
-                    }
+                properties.put(APIConstants.RECEIVER_URL, eventHubPublisherConfiguration.getReceiverUrlGroup());
+                properties.put(APIConstants.AUTHENTICATOR_URL, eventHubPublisherConfiguration.getAuthUrlGroup());
+                properties.put(APIConstants.USERNAME, eventHubConfigurationDto.getUsername());
+                properties.put(APIConstants.PASSWORD, eventHubConfigurationDto.getPassword());
+                properties.put(APIConstants.PROTOCOL, eventHubPublisherConfiguration.getType());
+                properties.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                properties.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                for (String key : eventHubPublisherConfiguration.getProperties().keySet()) {
+                    properties.put(key, eventHubPublisherConfiguration.getProperties().get(key));
                 }
+                properties.put("is_enabled", Boolean.toString(configuration.getEventHubConfigurationDto().isEnabled()));
                 try {
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-                } catch (OutputEventAdapterException e) {
-                    log.warn("Exception occurred while creating WSO2 Event Adapter. Event notification may not work "
-                            + "properly", e);
+                    ServiceReferenceHolder.getInstance().getEventPublisherFactory().configure(properties);
+                } catch (EventPublisherException e) {
+                    throw new APIManagementException(e);
                 }
             } else {
                 log.info("Wso2Event Publisher not enabled.");

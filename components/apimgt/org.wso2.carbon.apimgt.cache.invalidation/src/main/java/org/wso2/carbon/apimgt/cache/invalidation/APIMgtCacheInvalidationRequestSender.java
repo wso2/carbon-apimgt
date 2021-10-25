@@ -26,10 +26,6 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.CacheInvalidationConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
-import org.wso2.carbon.databridge.commons.Event;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 import javax.cache.CacheEntryInfo;
 import javax.cache.CacheInvalidationRequestSender;
@@ -68,14 +64,11 @@ public class APIMgtCacheInvalidationRequestSender implements CacheEntryRemovedLi
                         constructCacheKeyString(cacheInfo.getCacheKey()), cacheInfo.getTenantDomain(),
                         cacheInfo.getTenantId(),
                         cacheInvalidationConfiguration.getDomain(), DataHolder.getNodeId()};
-                Event cacheInvalidationMessage =
-                        new Event(cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null,
-                                objects);
-                APIUtil.publishEventToEventHub(Collections.emptyMap(), cacheInvalidationMessage);
-                EventPublisherEvent globalCacheInvalidationEvent = new EventPublisherEvent(
-                        cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(), null, null, objects);
+                EventPublisherEvent globalCacheInvalidationEvent =
+                        new EventPublisherEvent(cacheInvalidationConfiguration.getStream(),
+                                System.currentTimeMillis(), null, null, objects);
                 APIUtil.publishEvent(EventPublisherType.GLOBAL_CACHE_INVALIDATION, globalCacheInvalidationEvent,
-                        Arrays.toString(globalCacheInvalidationEvent.getPayloadData()));
+                        globalCacheInvalidationEvent.toString());
             }
         }
     }
