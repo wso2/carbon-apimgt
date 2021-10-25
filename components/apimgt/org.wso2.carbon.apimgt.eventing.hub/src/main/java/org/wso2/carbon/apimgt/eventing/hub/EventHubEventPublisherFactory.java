@@ -51,6 +51,12 @@ public class EventHubEventPublisherFactory implements EventPublisherFactory {
 
     @Override
     public EventPublisher getEventPublisher(EventPublisherType eventPublisherType) {
-        return new EventHubEventPublisher();
+        switch (eventPublisherType) {
+            case TOKEN_REVOCATION:
+            case ASYNC_WEBHOOKS:
+                return new EventHubEventStreamServiceEventPublisher();
+            default:
+                return new EventHubOutputEventAdapterServiceEventPublisher();
+        }
     }
 }

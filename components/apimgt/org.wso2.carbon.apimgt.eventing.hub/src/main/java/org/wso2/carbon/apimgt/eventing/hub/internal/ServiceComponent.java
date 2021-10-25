@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.eventing.hub.EventHubEventPublisherFactory;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.event.stream.core.EventStreamService;
 
 /**
  * This class is used to activate eventing hub bundle.
@@ -51,9 +52,9 @@ public class ServiceComponent {
     }
 
     /**
-     * Initialize the OutputEventAdapter service dependency.
+     * Initialize the OutputEventAdapterService dependency.
      *
-     * @param outputEventAdapterService OutputEventAdapter service reference
+     * @param outputEventAdapterService OutputEventAdapterService reference
      */
     @Reference(
             name = "event.output.adapter.service",
@@ -66,11 +67,35 @@ public class ServiceComponent {
     }
 
     /**
-     * De-reference the OutputEventAdapter service dependency.
+     * De-reference the OutputEventAdapterService dependency.
      *
      * @param outputEventAdapterService OutputEventAdapter service object to be unset
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
+
+    /**
+     * Initialize the EventStreamService dependency.
+     *
+     * @param eventStreamService EventStreamService service reference
+     */
+    @Reference(
+            name = "apimgt.event.stream.service.reference",
+            service = org.wso2.carbon.event.stream.core.EventStreamService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventStreamService")
+    protected void setEventStreamService(EventStreamService eventStreamService) {
+        ServiceReferenceHolder.getInstance().setEventStreamService(eventStreamService);
+    }
+
+    /**
+     * De-reference the EventStreamService dependency.
+     *
+     * @param eventStreamService EventStreamService object to be unset
+     */
+    protected void unsetEventStreamService(EventStreamService eventStreamService) {
+        ServiceReferenceHolder.getInstance().setEventStreamService(null);
     }
 }

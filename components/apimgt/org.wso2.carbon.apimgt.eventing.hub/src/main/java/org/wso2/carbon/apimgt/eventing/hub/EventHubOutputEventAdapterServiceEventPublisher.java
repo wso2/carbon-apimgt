@@ -26,14 +26,14 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 /**
- * Event hub event publisher class.
+ * EventHubOutputEventAdapterServiceEventPublisher class.
  */
-public class EventHubEventPublisher implements EventPublisher {
-    private static final Log log = LogFactory.getLog(EventHubEventPublisher.class);
+public class EventHubOutputEventAdapterServiceEventPublisher implements EventPublisher {
+    private static final Log log = LogFactory.getLog(EventHubOutputEventAdapterServiceEventPublisher.class);
 
     @Override
     public void init() {
-        log.info("EventHubEventPublisher is initialized.");
+        log.info("EventHubOutputEventAdapterServiceEventPublisher is initialized.");
     }
 
     @Override
