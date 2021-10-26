@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>carbon-apimgt</artifactId>
+        <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <version>9.0.360-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -60,6 +60,9 @@
                         <Bundle-SymbolicName>
                             ${project.artifactId}
                         </Bundle-SymbolicName>
+                        <Private-Package>
+                            org.wso2.carbon.apimgt.solace.internal.*
+                        </Private-Package>
                         <Import-Package>
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
@@ -71,6 +74,10 @@
                         </Export-Package>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
