@@ -33,6 +33,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -874,17 +875,35 @@ public class PublisherCommonUtils {
             return true;
         }
 
-        // extract sandbox endpoint URL
-        if (!endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL));
-        }
-        // extract production endpoint URL
-        if (!endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-            endpoints.add(endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL));
-        }
+        // extract sandbox endpoint URL(s)
+        extractURLsFromEndpointConfig(endpointConfiguration, APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpoints);
+
+        // extract production endpoint URL(s)
+        extractURLsFromEndpointConfig(endpointConfiguration, APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpoints);
+
         return APIUtil.validateEndpointURLs(endpoints);
+    }
+
+    /**
+     * Extract sandbox or production endpoint URLs from endpoint config object.
+     *
+     * @param endpointConfigObj Endpoint config JSON object
+     * @param endpointType      Indicating whether Sandbox or Production endpoints are to be extracted
+     * @param endpoints         List of URLs. Extracted URL(s), if any, are added to this list.
+     */
+    private static void extractURLsFromEndpointConfig(org.json.JSONObject endpointConfigObj, String endpointType,
+            ArrayList<String> endpoints) {
+        if (!endpointConfigObj.isNull(endpointType)) {
+            org.json.JSONObject endpointObj = endpointConfigObj.optJSONObject(endpointType);
+            if (endpointObj != null) {
+                endpoints.add(endpointConfigObj.getJSONObject(endpointType).getString(APIConstants.API_DATA_URL));
+            } else {
+                JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
+                for (int i = 0; i < endpointArray.length(); i++) {
+                    endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
+                }
+            }
+        }
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
