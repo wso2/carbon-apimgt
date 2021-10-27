@@ -33,8 +33,13 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+
+/**
+ * This class controls the Solace Broker deployed API subscription flows
+ */
 public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(SolaceSubscriptionsNotifier.class);
@@ -103,14 +108,19 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                                 solaceApiProducts.add(SolaceNotifierUtils.generateApiProductNameForSolaceBroker
                                         (api, environment.getName()));
                             }
-                            SolaceNotifierUtils.deployApplicationToSolaceBroker(application, solaceApiProducts, applicationOrganizationName);
+                            SolaceNotifierUtils.deployApplicationToSolaceBroker(application, solaceApiProducts,
+                                    applicationOrganizationName);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                 } else {
-                    log.error("Cannot create solace application with API product deployed in different organizations...");
-                    throw new APIManagementException("Cannot create solace application with API product deployed in different organizations...");
+                    if (log.isDebugEnabled()) {
+                        log.error("Cannot create solace application " + application.getName() + "with API product "
+                                + "deployed in different organizations...");
+                    }
+                    throw new APIManagementException("Cannot create solace application " + application.getName() +
+                            "with API product deployed in different organizations...");
                 }
             }
         } catch (APIManagementException e) {
@@ -154,13 +164,15 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                                     applicationOrganizationName);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                 } else {
-                    log.error("Cannot create solace application with API product deployed in " +
-                            "different organizations...");
-                    throw new APIManagementException("Cannot create solace application with API product deployed " +
-                            "in different organizations...");
+                    if (log.isDebugEnabled()) {
+                        log.error("Cannot create solace application " + application.getName() + "with API product "
+                                + "deployed in different organizations...");
+                    }
+                    throw new APIManagementException("Cannot create solace application " + application.getName() +
+                            "with API product deployed in different organizations...");
                 }
             }
         } catch (APIManagementException e) {
