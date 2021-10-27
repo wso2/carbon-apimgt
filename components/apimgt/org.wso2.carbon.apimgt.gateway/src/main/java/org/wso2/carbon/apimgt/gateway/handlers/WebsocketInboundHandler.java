@@ -56,9 +56,10 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
-import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.SubscriptionAnalyzer;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
@@ -78,12 +80,14 @@ import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -122,16 +126,23 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
     private GraphQLSchemaDTO graphQLSchemaDTO;
     private SignedJWTInfo signedJWTInfo;
-    private Map<String, String> graphQLMsgIdToOperationList = new HashMap<>();
+    private Map<String, VerbInfoDTO> graphQLMsgIdToVerbInfo = new HashMap<>();
+    private APIInfoDTO graphQLAPIInfo;
+    private WSAPIKeyDataStore dataStore;
 
     public WebsocketInboundHandler() {
         initializeDataPublisher();
+        initializeDataStore();
     }
 
     private void initializeDataPublisher() {
         if (APIUtil.isAnalyticsEnabled()) {
             metricsHandler = new WebSocketAnalyticsMetricsHandler();
         }
+    }
+
+    private void initializeDataStore() {
+        dataStore = new WSAPIKeyDataStore();
     }
 
     @SuppressWarnings("unchecked")
@@ -174,6 +185,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
             if (isOAuthHeaderValid) {
                 setApiAuthPropertiesToChannel(ctx);
+                setAPIInfoDTO();
                 if (StringUtils.isNotEmpty(token)) {
                     ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
                 }
@@ -193,13 +205,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 APIMgtGoogleAnalyticsUtils gaUtils = new APIMgtGoogleAnalyticsUtils();
                 gaUtils.init(tenantDomain);
                 gaUtils.publishGATrackingData(gaData, req.headers().get(HttpHeaders.USER_AGENT),
-                                              headers.get(HttpHeaders.AUTHORIZATION));
+                        headers.get(HttpHeaders.AUTHORIZATION));
             } else {
                 String errorMessage = APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE;
                 FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                                                                            HttpResponseStatus.UNAUTHORIZED,
-                                                                            Unpooled.copiedBuffer(errorMessage,
-                                                                                                  CharsetUtil.UTF_8));
+                        HttpResponseStatus.UNAUTHORIZED,
+                        Unpooled.copiedBuffer(errorMessage,
+                                CharsetUtil.UTF_8));
                 httpResponse.headers().set("content-type", "text/plain; charset=UTF-8");
                 httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
@@ -210,12 +222,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     log.debug("Authentication Failure for the websocket context: " + apiContext);
                 }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                               APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
         } else if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PingWebSocketFrame)) {
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
             ctx.fireChannelRead(msg);
         } else if (msg instanceof WebSocketFrame) {
+            boolean isAllowed = false;
             if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)) {
                 if (msg instanceof TextWebSocketFrame) {
                     Parser parser = new Parser();
@@ -250,15 +263,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                                     + validationErrorMessage));
                                             return;
                                         }
-                                        String operationList = GraphQLProcessorUtil
+                                        String subscriptionOperation = GraphQLProcessorUtil
                                                 .getOperationList(operation,
                                                         graphQLSchemaDTO.getTypeDefinitionRegistry());
-                                        graphQLMsgIdToOperationList.put(graphQLMsg.getString("id"), operationList);
                                         // validate scopes based on subscription payload
-                                        if (!authorizeGraphQLSubscriptionEvents(operationList)) {
+                                        if (!authorizeGraphQLSubscriptionEvents(subscriptionOperation)) {
                                             ctx.writeAndFlush(new TextWebSocketFrame("UnAuthorized"));
                                             return;
                                         }
+                                        VerbInfoDTO verbInfoDTO = findMatchingVerb(subscriptionOperation);
+                                        graphQLMsgIdToVerbInfo.put(graphQLMsg.getString("id"), verbInfoDTO);
                                         // analyze query depth and complexity
                                         SubscriptionAnalyzer subscriptionAnalyzer =
                                                 new SubscriptionAnalyzer(graphQLSchemaDTO.getGraphQLSchema());
@@ -269,7 +283,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                             ctx.writeAndFlush(queryAnalyzerResponseDTO.getErrorList().toString());
                                             return;
                                         }
-                                        //throttling for matching resource TODO://
+                                        //throttling for matching resource
+                                        isAllowed = doThrottleForGraphQL(ctx, (WebSocketFrame) msg, verbInfoDTO);
                                     } else {
                                         throw new UnsupportedOperationException("Invalid operation. "
                                                 + "Only subscription type operations with unique operation ids are "
@@ -287,9 +302,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     ctx.fireChannelRead(msg);
                     return;
                 }
+            } else {
+                isAllowed = doThrottle(ctx, (WebSocketFrame) msg);
             }
-
-            boolean isAllowed = doThrottle(ctx, (WebSocketFrame) msg);
 
             if (isAllowed) {
                 ctx.fireChannelRead(msg);
@@ -322,7 +337,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         URI uriTemp = new URI(fullRequestPath);
 
         requestPath = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(), null,
-                                  uriTemp.getFragment()).toString();
+                uriTemp.getFragment()).toString();
         if (requestPath.endsWith(URL_SEPARATOR)) {
             requestPath = requestPath.substring(0, requestPath.length() - 1);
         }
@@ -349,7 +364,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @throws APISecurityException if authentication fails
      */
     private boolean validateOAuthHeader(FullHttpRequest req, String matchingResource) throws APISecurityException,
-            APIManagementException  {
+            APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -359,7 +374,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 Map<String, List<String>> requestMap = decoder.parameters();
                 if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
                     req.headers().add(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT + ' '
-                                    + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
+                            + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
                     removeTokenFromQuery(requestMap);
                     req.setUri(fullRequestPath);
                 } else {
@@ -386,7 +401,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
                             log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
                             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                                           "Invalid JWT token");
+                                    "Invalid JWT token");
                         }
                         signedJWTInfo = getSignedJwtInfo(apiKey);
                         String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
@@ -399,7 +414,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     } catch (APIManagementException e) {
                         log.error("error while check validation of JWt", e);
                         throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                                                       APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
                     }
                 }
                 // Find the authentication scheme based on the token type
@@ -448,7 +463,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         APIKeyValidationInfoDTO info = null;
         JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
         authenticationContext = jwtValidator.
-                    authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
+                authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
         return validateAuthenticationContext(authenticationContext, info);
     }
 
@@ -466,7 +481,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             APISecurityException {
 
         JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
-        jwtValidator.validateScopesForGraphQLSubscriptions(apiContext, version, matchingResource,signedJWTInfo,
+        jwtValidator.validateScopesForGraphQLSubscriptions(apiContext, version, matchingResource, signedJWTInfo,
                 authContext);
         return true;
     }
@@ -511,7 +526,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         apiPropertiesMap.put(RESTConstants.PROCESSED_API, api);
         apiPropertiesMap.put(RESTConstants.REST_API_CONTEXT, apiContext);
         apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API_VERSION, version);
-        if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)){
+        if (electedAPI.getApiType().equals(APIConstants.GRAPHQL_API)) {
             apiPropertiesMap.put(APIMgtGatewayConstants.API_OBJECT, electedAPI);
             apiPropertiesMap.put(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST, true);
         }
@@ -574,7 +589,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             boolean isThrottled = WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
-                                                            applicationLevelThrottleKey);
+                    applicationLevelThrottleKey);
             if (isThrottled) {
                 return false;
             }
@@ -582,20 +597,106 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             PrivilegedCarbonContext.endTenantFlow();
         }
         Object[] objects =
-                new Object[] { messageId, applicationLevelThrottleKey, applicationLevelTier, apiLevelThrottleKey,
+                new Object[]{messageId, applicationLevelThrottleKey, applicationLevelTier, apiLevelThrottleKey,
                         apiLevelTier, subscriptionLevelThrottleKey, subscriptionLevelTier, resourceLevelThrottleKey,
                         resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, apiName,
-                        jsonObMap.toString() };
+                        jsonObMap.toString()};
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(
                 "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null, null, objects);
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher "
-                              + "has not been initialised");
+                    + "has not been initialised");
             return true;
         }
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
         return true;
     }
+
+    /**
+     * Checks if the request is throttled
+     *
+     * @param ctx ChannelHandlerContext
+     * @return false if throttled
+     * @throws APIManagementException
+     */
+    public boolean doThrottleForGraphQL(ChannelHandlerContext ctx, WebSocketFrame msg, VerbInfoDTO verbInfoDTO) {
+
+        String applicationLevelTier = infoDTO.getApplicationTier();
+        String apiLevelTier = infoDTO.getApiTier();
+        String subscriptionLevelTier = infoDTO.getTier();
+        String resourceLevelTier = verbInfoDTO.getThrottling();
+        boolean isUnlimitedResourceTier = APIConstants.UNLIMITED_TIER.equalsIgnoreCase(resourceLevelTier);
+        String authorizedUser;
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(infoDTO.getSubscriberTenantDomain())) {
+            authorizedUser = infoDTO.getSubscriber() + "@" + infoDTO.getSubscriberTenantDomain();
+        } else {
+            authorizedUser = infoDTO.getSubscriber();
+        }
+        String apiName = infoDTO.getApiName();
+        String apiVersion = version;
+        String appTenant = infoDTO.getSubscriberTenantDomain();
+        String apiTenant = tenantDomain;
+        String appId = infoDTO.getApplicationId();
+        String applicationLevelThrottleKey = appId + ":" + authorizedUser;
+        String apiLevelThrottleKey = apiContext + ":" + apiVersion;
+        String resourceLevelThrottleKey = null;
+        boolean apiLevelThrottledTriggered = false;
+        //If API level throttle policy is present then it will apply and no resource level policy will apply for it
+        if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
+            resourceLevelThrottleKey = apiLevelThrottleKey;
+            apiLevelThrottledTriggered = true;
+        }
+        //If verbInfo is present then only we will do resource level throttling
+        if (isUnlimitedResourceTier && !apiLevelThrottledTriggered) {
+            //If unlimited tier throttling will not apply at resource level and pass it
+            if (log.isDebugEnabled()) {
+                log.debug("Resource level throttling set as unlimited and request will pass " +
+                        "resource level");
+            }
+        } else {
+            resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
+        }
+        String subscriptionLevelThrottleKey = appId + ":" + apiContext + ":" + apiVersion;
+        String messageId = UIDGenerator.generateURNString();
+        String remoteIP = getRemoteIP(ctx);
+        if (log.isDebugEnabled()) {
+            log.debug("Remote IP address : " + remoteIP);
+        }
+        if (remoteIP.indexOf(":") > 0) {
+            remoteIP = remoteIP.substring(1, remoteIP.indexOf(":"));
+        }
+        JSONObject jsonObMap = new JSONObject();
+        Utils.setRemoteIp(jsonObMap, remoteIP);
+        jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, msg.content().capacity());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            boolean isThrottled = WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
+                    applicationLevelThrottleKey);
+            if (isThrottled) {
+                return false;
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        Object[] objects =
+                new Object[]{messageId, applicationLevelThrottleKey, applicationLevelTier, apiLevelThrottleKey,
+                        apiLevelTier, subscriptionLevelThrottleKey, subscriptionLevelTier, resourceLevelThrottleKey,
+                        resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, apiName,
+                        jsonObMap.toString()};
+        org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(
+                "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null, null, objects);
+        if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
+            log.error("Cannot publish events to traffic manager because ThrottleDataPublisher "
+                    + "has not been initialised");
+            return true;
+        }
+        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
+        return true;
+    }
+
+
+
 
     protected String getRemoteIP(ChannelHandlerContext ctx) {
         return ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().getHostAddress();
@@ -767,8 +868,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
         log.error(error, new Throwable());
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                                                                    HttpResponseStatus.BAD_REQUEST,
-                                                                    Unpooled.copiedBuffer(error, CharsetUtil.UTF_8));
+                HttpResponseStatus.BAD_REQUEST,
+                Unpooled.copiedBuffer(error, CharsetUtil.UTF_8));
         httpResponse.headers().set("content-type", "text/plain; charset=UTF-8");
         httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
         ctx.writeAndFlush(httpResponse);
@@ -799,4 +900,81 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         }
         return null;
     }
+
+    private ArrayList<URITemplate> getAllUriTemplates()
+            throws APISecurityException {
+        return this.dataStore.getAllURITemplates(apiContext, version);
+    }
+
+    private void setAPIInfoDTO() throws APISecurityException {
+
+        ArrayList<URITemplate> uriTemplates = getAllUriTemplates();
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+
+        apiInfoDTO.setApiName(apiName);
+        apiInfoDTO.setContext(apiContext);
+        apiInfoDTO.setVersion(version);
+        apiInfoDTO.setResources(new LinkedHashSet<>());
+
+        ResourceInfoDTO resourceInfoDTO;
+        VerbInfoDTO verbInfoDTO;
+
+        // The following map is used to retrieve already created ResourceInfoDTO rather than iterating -
+        // the resource Set in apiInfoDTO.
+        LinkedHashMap<String, ResourceInfoDTO> resourcesMap = new LinkedHashMap<String, ResourceInfoDTO>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            resourceInfoDTO = resourcesMap.get(uriTemplate.getUriTemplate());
+            if (null == resourceInfoDTO) {
+                resourceInfoDTO = new ResourceInfoDTO();
+                resourceInfoDTO.setUrlPattern(uriTemplate.getUriTemplate());
+                resourceInfoDTO.setHttpVerbs(new LinkedHashSet());
+                apiInfoDTO.getResources().add(resourceInfoDTO);
+                resourcesMap.put(uriTemplate.getUriTemplate(), resourceInfoDTO);
+            }
+            verbInfoDTO = new VerbInfoDTO();
+            verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
+            verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+            verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+            verbInfoDTO.setContentAware(uriTemplate.checkContentAwareFromThrottlingTiers());
+            verbInfoDTO.setThrottlingConditions(uriTemplate.getThrottlingConditions());
+            verbInfoDTO.setConditionGroups(uriTemplate.getConditionGroups());
+            verbInfoDTO.setApplicableLevel(uriTemplate.getApplicableLevel());
+            resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
+        }
+        this.graphQLAPIInfo = apiInfoDTO;
+    }
+
+    private VerbInfoDTO findMatchingVerb(String operation) {
+        String resourceCacheKey;
+        VerbInfoDTO verbInfoDTO = null;
+        boolean isVerbFound = false;
+        if (graphQLAPIInfo.getResources() != null) {
+            for (ResourceInfoDTO resourceInfoDTO : graphQLAPIInfo.getResources()) {
+                Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
+                for (VerbInfoDTO verb : verbDTOList) {
+                    if (verb.getHttpVerb().equals("SUBSCRIPTION")) {
+                        if (isResourcePathMatching(operation, resourceInfoDTO)) {
+                            verbInfoDTO = verb;
+                            resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, version,
+                                    operation, "SUBSCRIPTION");
+                            verb.setRequestKey(resourceCacheKey);
+                            isVerbFound = true;
+                            break;
+                        }
+                    }
+                }
+                if (isVerbFound) {
+                    break;
+                }
+            }
+        }
+        return verbInfoDTO;
+    }
+
+    private boolean isResourcePathMatching(String resourceString, ResourceInfoDTO resourceInfoDTO) {
+        String resource = resourceString.trim();
+        String urlPattern = resourceInfoDTO.getUrlPattern().trim();
+        return resource.equalsIgnoreCase(urlPattern);
+    }
+
 }

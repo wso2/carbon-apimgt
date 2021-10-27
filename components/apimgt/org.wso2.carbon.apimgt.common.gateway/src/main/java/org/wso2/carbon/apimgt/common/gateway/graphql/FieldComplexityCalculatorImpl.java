@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator {
 
@@ -79,7 +80,7 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
                 // The below list of slicing arguments (keywords) effect query complexity to multiply by the factor
                 // given as the value of the argument.
                 List<String> slicingArguments = Arrays.asList("first", "last", "limit");
-                if (slicingArguments.contains(argumentName.toLowerCase())) {
+                if (slicingArguments.contains(argumentName.toLowerCase(Locale.ROOT))) {
                     BigInteger value = null;
                     if (object.getValue() instanceof IntValue) {
                         value = ((IntValue) object.getValue()).getValue();
