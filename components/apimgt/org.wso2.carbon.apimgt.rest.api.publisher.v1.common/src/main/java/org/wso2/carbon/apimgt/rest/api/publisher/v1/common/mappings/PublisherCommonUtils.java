@@ -1643,7 +1643,7 @@ public class PublisherCommonUtils {
     public static boolean isStreamingAPI(APIDTO apidto) {
 
         return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
-                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType());
     }
 
     /**
