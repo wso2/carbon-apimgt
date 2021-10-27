@@ -573,7 +573,7 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean updateApplicationOwner(String newUserId , Application application ) throws APIManagementException;
+    boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
 
 
     /**

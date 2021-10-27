@@ -81,12 +81,6 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
-        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-            if (log.isDebugEnabled()){
-                log.debug("Skipping prototype APIs as analytics does not support this type of API");
-            }
-            return true;
-        }
         AnalyticsDataProvider provider;
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
         if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {

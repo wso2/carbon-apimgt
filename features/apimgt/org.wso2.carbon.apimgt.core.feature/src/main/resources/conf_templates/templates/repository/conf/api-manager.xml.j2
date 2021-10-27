@@ -21,24 +21,6 @@
          <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
      </HttpClient>
 
-    <!-- Authentication manager configuration for Admin Portal. This is a required configuration as its user
-    authentication logic relies on this. -->
-    <AuthManager>
-        <!-- Server URL of the Authentication service -->
-        <ServerURL>{{apim.auth_manager.service_url}}</ServerURL>
-        <!-- Admin username for the Authentication manager. -->
-        <Username>${admin.username}</Username>
-        <!-- Admin password for the Authentication manager. -->
-        <Password>${admin.password}</Password>
-        <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
-           via a remote service. The check will be done on the local server when false. -->
-        <CheckPermissionsRemotely>{{apim.auth_manager.check_permissions_remotely}}</CheckPermissionsRemotely>
-        <!-- Indicates whether the authentication endpoint has been reverse proxied through the Gateway when using
-             APIM with IS-KM. -->
-        {% if apim.auth_manager.iskm_reverseproxy_enabled is defined %}
-        <ISKMReverseProxyEnabled>{{apim.auth_manager.iskm_reverseproxy_enabled}}</ISKMReverseProxyEnabled>
-        {% endif %}
-    </AuthManager>
 
     {% if apim.idp is defined %}
     <IdentityProvider>
@@ -140,6 +122,8 @@
                 <Username>{{environment_name.username}}</Username>
                 <!-- Admin password for the API gateway.-->
                 <Password>{{environment_name.password}}</Password>
+                <!-- Provider Vendor of the API gateway.-->
+                <Provider>{{environment_name.provider}}</Provider>
                 <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
                 {% if environment_name.http_endpoint is defined and environment_name.https_endpoint is defined %}
                 <GatewayEndpoint>{{environment_name.https_endpoint}},{{environment_name.http_endpoint}}</GatewayEndpoint>
@@ -149,6 +133,14 @@
                 <GatewayEndpoint>{{environment_name.http_endpoint}}</GatewayEndpoint>
                 {% else %}
                 <GatewayEndpoint></GatewayEndpoint>
+                {% endif %}
+                <!-- Additional properties for External Gateways -->
+                {% if environment_name.properties %}
+                <Properties>
+                    {% for key,value in environment_name.properties.items() %}
+                    <Property name="{{key}}">{{value}}</Property>
+                    {% endfor %}
+                </Properties>
                 {% endif %}
                 <!-- Endpoint URLs of the WebSocket APIs hosted in this API Gateway -->
                 {% if environment_name.ws_endpoint is defined and environment_name.wss_endpoint is defined %}
@@ -1377,27 +1369,6 @@
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
-     <ContainerMgt>
-         <DeploymentEnvironments>
-             {% for key,value in ContainerMgtConfig.items() %}
-                 <Property name="{{key}}">{{value}}</Property>
-             {% endfor %}
-         </DeploymentEnvironments>
-
-         {% for cluster in ContainerMgtClusterConfig%}
-         <ContainerMgtInfo>
-             <Type>{{cluster.type}}</Type>
-             <ClassName>{{cluster.class}}</ClassName>
-             <ClusterName>{{cluster.clusterName}}</ClusterName>
-             <DisplayName>{{cluster.displayName}}</DisplayName>
-             <Properties>
-                 {% for key,value in cluster.properties.items() %}
-                     <Property name="{{key}}">{{value}}</Property>
-                 {% endfor %}
-             </Properties>
-         </ContainerMgtInfo>
-         {% endfor %}
-     </ContainerMgt>
     <ProxyConfig>
         <Enable>{{apim.proxy_config.enable}}</Enable>
         <Host>{{apim.proxy_config.host}}</Host>

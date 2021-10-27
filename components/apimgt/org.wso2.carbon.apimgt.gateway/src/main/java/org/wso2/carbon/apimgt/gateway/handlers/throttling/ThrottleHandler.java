@@ -365,13 +365,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     //if resource level not throttled then move to subscription level
                     if (!isResourceLevelThrottled) {
                         //Subscription Level Throttling
-                        if (authContext.getProductName() != null && authContext.getProductProvider() != null) {
-                            subscriptionLevelThrottleKey =
-                                    authContext.getApplicationId() + ":" + authContext.getProductName() + ":"
-                                            + authContext.getProductProvider();
-                        } else {
-                            subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion;
-                        }
+                        subscriptionLevelThrottleKey = getSubscriptionLevelThrottleKey(subscriptionLevelTier,
+                                authContext, apiContext, apiVersion);
                         isSubscriptionLevelThrottled = getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
                         if (!isSubscriptionLevelThrottled && authContext.getSpikeArrestLimit() > 0) {
@@ -487,6 +482,20 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         return isThrottled;
     }
 
+    private String getSubscriptionLevelThrottleKey(String subscriptionLevelTier, AuthenticationContext authContext,
+                                                   String apiContext, String apiVersion) {
+
+        String subscriptionLevelThrottleKey;
+        if (authContext.getProductName() != null && authContext.getProductProvider() != null) {
+            subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + authContext.getProductName() + ":"
+                    + authContext.getProductProvider() + ":" + subscriptionLevelTier;
+        } else {
+            subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion + ":"
+                    + subscriptionLevelTier;
+        }
+        return subscriptionLevelThrottleKey;
+    }
+
     protected ThrottleConditionEvaluator getThrottleConditionEvaluator() {
         return ThrottleConditionEvaluator.getInstance();
     }
@@ -509,9 +518,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-            return true;
-        }
+//        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+//            return true;
+//        }
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -532,7 +541,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         TracingSpan throttleLatencySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESOURCE_SPAN);
             TracingTracer tracer = Util.getGlobalTracer();
             throttleLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
         }
@@ -840,14 +849,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     private void initThrottleForSubscriptionLevelSpikeArrest(MessageContext synCtx,
                                                              AuthenticationContext authenticationContext) {
-        AuthenticationContext authContext = authenticationContext;
-        policyKey = authContext.getTier();
+
+        policyKey = authenticationContext.getTier();
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion;
-        int maxRequestCount = authContext.getSpikeArrestLimit();
+        String subscriptionLevelThrottleKey = getSubscriptionLevelThrottleKey(policyKey, authenticationContext,
+                apiContext, apiVersion);
+        int maxRequestCount = authenticationContext.getSpikeArrestLimit();
         if (maxRequestCount != 0) {
-            String unitTime = authContext.getSpikeArrestUnit();
+            String unitTime = authenticationContext.getSpikeArrestUnit();
             int spikeArrestWindowUnitTime;
             if (APIThrottleConstants.MIN.equalsIgnoreCase(unitTime)) {
                 spikeArrestWindowUnitTime = 60000;

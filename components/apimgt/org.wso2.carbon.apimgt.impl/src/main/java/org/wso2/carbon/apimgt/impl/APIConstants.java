@@ -76,12 +76,6 @@ public final class APIConstants {
 
     public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
 
-    public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
-
-    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
-
-    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
-
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
     public static final int TIER_API_TYPE = 0;
@@ -89,12 +83,6 @@ public final class APIConstants {
     public static final int TIER_RESOURCE_TYPE = 1;
 
     public static final int TIER_APPLICATION_TYPE = 2;
-
-    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
-
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
-
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
@@ -320,6 +308,7 @@ public final class APIConstants {
     public static final String API_VERSION_LABEL = "Version";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
+    public static final String API_GATEWAY_VENDOR = "gatewayVendor";
     public static final String API_OVERVIEW_TAG = "tags";
     public static final String API_TAG = "Tag";
     public static final String API_STATUS = "STATUS";
@@ -608,6 +597,7 @@ public final class APIConstants {
     // Constants for for api quota limit feature
     public static final String API_QUOTA_LIMIT = "ResourceQuotaLimit.";
     public static final String API_QUOTA_LIMIT_ENABLE = API_QUOTA_LIMIT + "EnableAPIQuotaLimit";
+    public static final String JWKS_URI = "jwksUri";
 
     public static class TokenStatus {
 
@@ -698,6 +688,10 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
+    public static final String API_GATEWAY_PROVIDER = "Provider";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
+    public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
+
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
@@ -846,10 +840,6 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
     public static final String EXTERNAL_API_STORE_PASSWORD = "Password";
 
-    public static final String AUTH_MANAGER = "AuthManager.";
-    public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
-    public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
-    public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
     public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
@@ -873,7 +863,7 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_REG_ENABLED = "EnableSignup";
     public static final String SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT = "RoleName";
     public static final String SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL = "IsExternalRole";
-    
+
     public static final String ORG_RESOLVER = "OrganizationResolver";
 
     public static final String STATUS_OBSERVERS = "StatusObservers.";
@@ -1495,8 +1485,6 @@ public final class APIConstants {
     }
 
     public static class ConfigParameters {
-
-        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
 
         private ConfigParameters() {
 
@@ -2298,7 +2286,7 @@ public final class APIConstants {
                 "/client-registration/" + REST_API_OLD_VERSION + "/register";
     }
 
-    public static final int MAX_LENGTH_API_NAME = 50;
+    public static final int MAX_LENGTH_API_NAME = 60;
     public static final int MAX_LENGTH_VERSION = 30;
     public static final int MAX_LENGTH_PROVIDER = 50;
     public static final int MAX_LENGTH_CONTEXT = 232; //context becomes context + version + two '/'. Max context is 200
@@ -2430,7 +2418,9 @@ public final class APIConstants {
         public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
         public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
         public static final String TOKEN_ENDPOINT = "token_endpoint";
+        public static final String DISPLAY_TOKEN_ENDPOINT = "display_token_endpoint";
         public static final String REVOKE_ENDPOINT = "revoke_endpoint";
+        public static final String DISPLAY_REVOKE_ENDPOINT = "display_revoke_endpoint";
         public static final String WELL_KNOWN_ENDPOINT = "well_known_endpoint";
         public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
         public static final String AVAILABLE_GRANT_TYPE = "grant_types";
@@ -2491,6 +2481,9 @@ public final class APIConstants {
         public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
         public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
         public static final String NOT_APPLICABLE_VALUE = "N/A";
+        public static final String PKCE_MANDATORY = "pkceMandatory";
+        public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
+        public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
 
         public static class KeyManagerEvent {
 
@@ -2685,6 +2678,7 @@ public final class APIConstants {
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
+        public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
     }
 
     //Constants related to user password
@@ -2719,11 +2713,13 @@ public final class APIConstants {
     public static final String METADATA_FILE_NAME = "metadata";
     public static final String METADATA_FILE = "metadata.yaml";
     public static final String DEFINITION_FILE = "definition.yaml";
+    public static final String DEFINITION_WSDL_FILE = "definition.wsdl";
     public static final String KEY_SEPARATOR = "-";
     public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
+    public static final String PROXY_SERVICE_NAME_SUFFIX = "_proxy";
 
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 

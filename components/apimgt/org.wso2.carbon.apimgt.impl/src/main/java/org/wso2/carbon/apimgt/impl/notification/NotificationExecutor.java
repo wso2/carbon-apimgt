@@ -21,18 +21,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 
@@ -47,22 +39,11 @@ public class NotificationExecutor {
      */
     public void sendAsyncNotifications(NotificationDTO notificationDTO) throws NotificationException {
 
-        Registry registry = null;
-        int tenantId = notificationDTO.getTenantID();
-        String content = null;
         JSONObject notificationConfig;
         String notificationType = notificationDTO.getType();
 
         try {
-            registry = getRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            }
-
-            if (content != null) {
-                JSONParser parser = new JSONParser();
-                notificationConfig = (JSONObject) parser.parse(content);
+                notificationConfig = APIUtil.getTenantConfig(notificationDTO.getTenantDomain());
                 JSONArray notificationArray = (JSONArray) notificationConfig.get(NotifierConstants.Notifications_KEY);
 
                 for (Object notification : notificationArray) {
@@ -83,7 +64,7 @@ public class NotificationExecutor {
                             //starting Notifier threads
                             if (notifierClass != null && !notifierClass.isEmpty()) {
 
-                                Notifier notfier = (Notifier) APIUtil.getClassForName(notifierClass).newInstance();
+                                Notifier notfier = (Notifier) APIUtil.getClassInstance(notifierClass);
                                 notfier.setNotificationDTO(notificationDTO);
                                 notfier.setTenantDomain(notificationDTO.getTenantDomain());
                                 Thread notificationThread = new Thread(notfier);
@@ -92,22 +73,10 @@ public class NotificationExecutor {
                         }
                     }
                 }
-            }
 
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException | APIManagementException e) {
             throw new NotificationException("Error while Initializing the notifier class",e);
-        } catch (InstantiationException e) {
-            throw new NotificationException("Error while Initializing the notifier class",e);
-        } catch (ClassNotFoundException e) {
-            throw new NotificationException("Error while Initializing the notifier class",e);
-        } catch (RegistryException e) {
-            throw new NotificationException("Error while Reading notification Configuration",e);
-        } catch (ParseException e) {
-            throw new NotificationException("Error while passing notification Configuration",e);
         }
     }
 
-    protected Registry getRegistry(int tenantId) throws RegistryException {
-        return ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-    }
 }

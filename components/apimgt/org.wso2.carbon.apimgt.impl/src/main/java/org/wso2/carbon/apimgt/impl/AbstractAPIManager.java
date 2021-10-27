@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -84,7 +83,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -158,7 +156,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -223,7 +220,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT(tenantUserName, tenantId);
-                APIUtil.loadTenantAPIPolicy(tenantUserName, tenantId);
 
                 //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
                 APIManagerConfiguration configuration = getAPIManagerConfiguration();
@@ -1725,7 +1721,7 @@ public abstract class AbstractAPIManager implements APIManager {
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
-                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
+                    !APIUtil.isDefaultApplicationCreationDisabledForTenant(getTenantDomain(username))) {
                 // Add a default application once subscriber is added
                 addDefaultApplicationForSubscriber(subscriber);
             }
@@ -1841,52 +1837,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return null;
-    }
-
-    public Set<API> getSubscriberAPIs(Subscriber subscriber, String organization) throws APIManagementException {
-
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(organization, subscriber, null);
-        for (SubscribedAPI subscribedApi : subscribedAPIs) {
-            Application application = subscribedApi.getApplication();
-            if (application != null) {
-                int applicationId = application.getId();
-                Set<APIKey> keys = getApplicationKeys(applicationId);
-                for (APIKey key : keys) {
-                    application.addKey(key);
-                }
-            }
-        }
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                startTenantFlow(tenantDomain);
-            }
-            for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                String apiPath = APIUtil.getAPIPath(subscribedAPI.getApiId());
-                Resource resource;
-                try {
-                    resource = registry.get(apiPath);
-                    GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                            APIConstants.API_KEY);
-                    GenericArtifact artifact = artifactManager.getGenericArtifact(
-                            resource.getUUID());
-                    API api = getAPI(artifact);
-                    if (api != null) {
-                        apiSortedSet.add(api);
-                    }
-                } catch (RegistryException e) {
-                    String msg = "Failed to get APIs for subscriber: " + subscriber.getName();
-                    throw new APIManagementException(msg, e);
-                }
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-        return apiSortedSet;
     }
 
     /**
@@ -2010,7 +1960,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return Collections.emptySet();
     }
 
-    @Override
     public Set<Tier> getAllTiers() throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
@@ -2037,7 +1986,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return tiers;
     }
 
-    @Override
     public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
 
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
@@ -2809,31 +2757,6 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 }
             }
-
-            // setting scope
-            if (!apiIdsString.isEmpty() && !reducedPublisherAPIInfo) {
-
-                Map<String, Set<Scope>> apiScopeSet = getScopesForAPIS(apiIdsString);
-                if (apiScopeSet.size() > 0) {
-                    for (int i = 0; i < apiCount; i++) {
-                        Object api = apiList.get(i);
-                        String apiId = "";
-                        if (api instanceof API) {
-                            apiId = ((API) api).getId().getApplicationId();
-                        } else if (api instanceof APIProduct) {
-                            apiId = ((APIProduct) api).getId().getApplicationId();
-                        }
-                        if (apiId != null && apiId != "") {
-                            Set<Scope> scopes = apiScopeSet.get(apiId);
-                            if (api instanceof API) {
-                                ((API) api).setScopes(scopes);
-                            } else if (api instanceof APIProduct) {
-                                ((APIProduct) api).setScopes(scopes);
-                            }
-                        }
-                    }
-                }
-            }
             apiSet.addAll(apiList);
         } catch (RegistryException e) {
             String msg = "Failed to search APIs with type";
@@ -2845,22 +2768,6 @@ public abstract class AbstractAPIManager implements APIManager {
         result.put("length", totalLength);
         result.put("isMore", isMore);
         return result;
-    }
-
-    private Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
-
-        Map<String, Set<Scope>> apiToScopeMapping = new HashMap<>();
-        Map<String, Set<String>> apiToScopeKeyMapping = apiMgtDAO.getScopesForAPIS(apiIdsString);
-        for (String apiId : apiToScopeKeyMapping.keySet()) {
-            Set<Scope> apiScopes = new LinkedHashSet<>();
-            Set<String> scopeKeys = apiToScopeKeyMapping.get(apiId);
-            for (String scopeKey : scopeKeys) {
-                Scope scope = scopesDAO.getScope(scopeKey, tenantId);
-                apiScopes.add(scope);
-            }
-            apiToScopeMapping.put(apiId, apiScopes);
-        }
-        return apiToScopeMapping;
     }
 
     /**

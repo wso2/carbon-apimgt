@@ -50,6 +50,7 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -78,7 +79,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -985,10 +985,17 @@ public class GatewayUtils {
         if (jwtInfoDto.getJwtValidationInfo() != null) {
             jwtInfoDto.setEndUser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
                     apiKeyValidationInfoDTO));
-            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
-                    && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
-                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
-                jwtInfoDto.setSub(MultitenantUtils.getTenantAwareUsername(sub));
+            if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
+                Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+                if (claims.get(JWTConstants.SUB) != null) {
+                    String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+                    jwtInfoDto.setSub(sub);
+                }
+                if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
+                    String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
+                            get(JWTConstants.ORGANIZATIONS);
+                    jwtInfoDto.setOrganizations(organizations);
+                }
             }
         }
 
@@ -1045,24 +1052,34 @@ public class GatewayUtils {
     }
 
     public static void setAPIRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
-
+        API api = GatewayUtils.getAPI(messageContext);
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
         }
-        Object api = messageContext.getProperty(APIMgtGatewayConstants.API);
         if (api != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, (String) api);
-        }
-        Object version = messageContext.getProperty(APIMgtGatewayConstants.VERSION);
-        if (version != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, (String) version);
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, api.getApiName());
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, api.getApiVersion());
         }
         Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
         if (consumerKey != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY, (String) consumerKey);
         }
     }
+
+    public static void setAPIResource(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
+        Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        String httpMethod = (String) axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (StringUtils.isEmpty(httpMethod)) {
+            httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
+        }
+        if (electedResource instanceof String && StringUtils.isNotEmpty((String) electedResource)) {
+            Util.updateOperation(tracingSpan, (httpMethod.toUpperCase().concat("--").concat((String) electedResource)));
+        }
+    }
+
 
     private static void setTracingId(TracingSpan tracingSpan, MessageContext axis2MessageContext) {
 

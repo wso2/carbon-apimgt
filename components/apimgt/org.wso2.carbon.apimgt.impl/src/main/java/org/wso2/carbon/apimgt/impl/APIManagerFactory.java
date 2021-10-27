@@ -53,7 +53,7 @@ public class APIManagerFactory {
         if (username.equals(ANONYMOUS_USER)) {
             username = null;
         }
-        return new UserAwareAPIConsumer(username, new APIMRegistryServiceImpl());
+        return new UserAwareAPIConsumer(username);
 
     }
 

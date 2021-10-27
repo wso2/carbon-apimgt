@@ -20,14 +20,18 @@ package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DataHolder {
 
     private static final DataHolder Instance = new DataHolder();
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
+    private Map<String,String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
-    
+
     private DataHolder() {
 
     }
@@ -55,6 +59,17 @@ public class DataHolder {
     public List<String> getCertificateAliasListForAPI(String apiId) {
 
         return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
+    }
+    public void addGoogleAnalyticsConfig(String tenantDomain, String config) {
+
+        googleAnalyticsConfigMap.put(tenantDomain, config);
+    }
+    public void removeGoogleAnalyticsConfig(String tenantDomain) {
+
+        googleAnalyticsConfigMap.remove(tenantDomain);
+    }
+    public String getGoogleAnalyticsConfig(String tenantDomain){
+        return googleAnalyticsConfigMap.get(tenantDomain);
     }
 
     public Map<String, GraphQLSchemaDTO> getApiToGraphQLSchemaDTOMap() {

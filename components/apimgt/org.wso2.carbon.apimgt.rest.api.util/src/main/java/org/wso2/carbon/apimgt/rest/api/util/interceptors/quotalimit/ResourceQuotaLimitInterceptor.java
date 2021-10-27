@@ -53,6 +53,7 @@ public class ResourceQuotaLimitInterceptor extends AbstractPhaseInterceptor {
      */
     @Override
     public void handleMessage(Message message) {
+        log.debug("Handling the request from quota limit interceptor");
         if (getQuotaLimitEnabled()) {
             try {
                 String pathToMatch = (String) message.get(PATH_TO_MATCH_SLASH);
@@ -62,7 +63,12 @@ public class ResourceQuotaLimitInterceptor extends AbstractPhaseInterceptor {
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("requestPayload", payloadData);
                 ResourceQuotaLimiter quotaLimiter = APIUtil.getResourceQuotaLimiter();
-                if (quotaLimiter.getQuotaLimitStatus(orgID, httpMethod, pathToMatch, properties)) {
+                boolean isQuotaLimited = quotaLimiter.getQuotaLimitStatus(orgID, httpMethod, pathToMatch, properties);
+                if (log.isDebugEnabled()) {
+                    log.debug("Quota limit status:" + isQuotaLimited + " returned by limiter "
+                            + quotaLimiter.getClass().getName());
+                }
+                if (isQuotaLimited) {
                     Response response = Response.status(Response.Status.TOO_MANY_REQUESTS).build();
                     message.getExchange().put(Response.class, response);
                 }

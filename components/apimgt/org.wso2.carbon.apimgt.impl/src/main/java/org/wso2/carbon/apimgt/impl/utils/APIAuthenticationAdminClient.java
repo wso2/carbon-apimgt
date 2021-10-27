@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.databridge.commons.Event;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -55,10 +54,7 @@ public class APIAuthenticationAdminClient {
         Object[] objectData = new Object[]{APIConstants.RESOURCE_CACHE_NAME,
                 StringEscapeUtils.escapeJava(api.toJSONString())};
         log.debug("Sending Resource Invalidation Message");
-        Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
-                null, null, objectData);
-        APIUtil.publishEventToEventHub(null, event);
-        publishEvent(event);
+        publishEvent(objectData);
     }
 
     /**
@@ -71,10 +67,7 @@ public class APIAuthenticationAdminClient {
         tokenArray.addAll(activeTokens);
         Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME,
                 StringEscapeUtils.escapeJava(tokenArray.toJSONString())};
-        Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
-                null, null, objectData);
-        APIUtil.publishEventToEventHub(null, event);
-        publishEvent(event);
+        publishEvent(objectData);
     }
 
     /**
@@ -98,22 +91,19 @@ public class APIAuthenticationAdminClient {
         userArray.addAll(Arrays.asList(username_list));
         Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME,
                 StringEscapeUtils.escapeJava(userArray.toJSONString())};
-        Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
-                null, null, objectData);
-        APIUtil.publishEventToEventHub(null, event);
-        publishEvent(event);
+        publishEvent(objectData);
     }
 
     /**
      * Publishes events through event publisher
      *
-     * @param event - The event to be published.
+     * @param objectData - The event payload data.
      */
-    private void publishEvent(Event event) {
+    private void publishEvent(Object[] objectData) {
 
-        EventPublisherEvent cacheInvalidationEvent = new EventPublisherEvent(event.getStreamId(),
-                event.getTimeStamp(), event.getMetaData(), event.getCorrelationData(), event.getPayloadData());
+        EventPublisherEvent cacheInvalidationEvent = new EventPublisherEvent(APIConstants.CACHE_INVALIDATION_STREAM_ID,
+                System.currentTimeMillis(), null, null, objectData);
         APIUtil.publishEvent(EventPublisherType.CACHE_INVALIDATION, cacheInvalidationEvent,
-                Arrays.toString(cacheInvalidationEvent.getPayloadData()));
+                cacheInvalidationEvent.toString());
     }
 }
