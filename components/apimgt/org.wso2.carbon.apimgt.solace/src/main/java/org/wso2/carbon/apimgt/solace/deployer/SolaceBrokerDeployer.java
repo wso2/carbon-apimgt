@@ -19,8 +19,8 @@ import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -83,41 +83,41 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         }
 
         // check availability of environment
-        HttpResponse response1 = solaceAdminApis.environmentGET(environment.getAdditionalProperties().get(APIConstants.
-                SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName());
+        CloseableHttpResponse response1 = solaceAdminApis.environmentGET(environment.getAdditionalProperties().get(
+                APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName());
         if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             if (log.isDebugEnabled()) {
                 log.info("environment '" + environment.getName() + "' found in Solace broker");
             }
 
             // check api product already exists in solace
-            HttpResponse response4 = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(
+            CloseableHttpResponse response4 = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(
                     APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
             if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // api Product Already found in solace. No need to deploy again into Solace
                 if (log.isDebugEnabled()) {
-                    log.info("API product '" + apiNameWithContext + "' already found in Solace. No need to create " +
-                            "again");
+                    log.info("API product '" + apiNameWithContext + "' already found in Solace. No need to create "
+                            + "again");
                 }
                 return true;
             } else if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 // api product not found in solace. check existence of registered API in solace
                 if (log.isDebugEnabled()) {
-                    log.info("API product '" + apiNameWithContext + "' not found in Solace. Checking the existence " +
-                            "of API");
+                    log.info("API product '" + apiNameWithContext + "' not found in Solace. Checking the existence "
+                            + "of API");
                 }
-                HttpResponse response5 = solaceAdminApis.registeredAPIGet(environment.getAdditionalProperties().get
-                        (APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameForRegistration);
+                CloseableHttpResponse response5 = solaceAdminApis.registeredAPIGet(environment.getAdditionalProperties()
+                        .get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameForRegistration);
                 if (response5.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     if (log.isDebugEnabled()) {
-                        log.info("API '" + apiNameForRegistration + "' already registered in Solace. Creating API " +
-                                "product using registered API");
+                        log.info("API '" + apiNameForRegistration + "' already registered in Solace. Creating API "
+                                + "product using registered API");
                     }
 
                     // create API product only
-                    HttpResponse response3 = solaceAdminApis.createAPIProduct(environment.getAdditionalProperties().
-                                    get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName(),
-                            aai20Document, apiNameWithContext, apiNameForRegistration);
+                    CloseableHttpResponse response3 = solaceAdminApis.createAPIProduct(environment.
+                                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
+                            environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                     if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         log.info("API product " + apiNameWithContext + " has been created in Solace broker");
                         return true;
@@ -130,21 +130,21 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                     }
                 } else if (response5.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                     if (log.isDebugEnabled()) {
-                        log.info("API '" + apiNameForRegistration + "' not registered in Solace. Creating both API and "
-                                + "API product. : " + response5.getStatusLine().toString());
+                        log.info("API '" + apiNameForRegistration + "' not registered in Solace. Creating both API " +
+                                "and API product. : " + response5.getStatusLine().toString());
                     }
 
                     // register the API in Solace Broker
-                    HttpResponse response2 = solaceAdminApis.registerAPI(environment.getAdditionalProperties().get(
-                            APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameForRegistration, apiDefinition);
+                    CloseableHttpResponse response2 = solaceAdminApis.registerAPI(environment.getAdditionalProperties().
+                            get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameForRegistration, apiDefinition);
                     if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         if (log.isDebugEnabled()) {
                             log.info("API '" + apiNameForRegistration + "' has been registered in Solace broker");
                         }
                         //create API Product in Solace broker
-                        HttpResponse response3 = solaceAdminApis.createAPIProduct(environment.getAdditionalProperties().
-                                        get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName(),
-                                aai20Document, apiNameWithContext, apiNameForRegistration);
+                        CloseableHttpResponse response3 = solaceAdminApis.createAPIProduct(environment.
+                                        getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
+                                environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                         if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                             log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
                             return true;
@@ -155,7 +155,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                             }
 
                             // delete registered API in solace
-                            HttpResponse response6 = solaceAdminApis.deleteRegisteredAPI(environment.
+                            CloseableHttpResponse response6 = solaceAdminApis.deleteRegisteredAPI(environment.
                                     getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
                                     apiNameForRegistration);
                             if (response6.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
@@ -224,13 +224,13 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
             throw new DeployerException(e.getMessage());
         }
         //delete API product from Solace
-        HttpResponse response1 = solaceAdminApis.deleteApiProduct(environment.getAdditionalProperties().get(APIConstants
-                .SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
+        CloseableHttpResponse response1 = solaceAdminApis.deleteApiProduct(environment.getAdditionalProperties().
+                get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
         if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
             log.info("API product '" + apiNameWithContext + "' has been deleted from Solace Broker");
 
             //delete registered API from Solace
-            HttpResponse response2 = solaceAdminApis.deleteRegisteredAPI(environment.getAdditionalProperties().
+            CloseableHttpResponse response2 = solaceAdminApis.deleteRegisteredAPI(environment.getAdditionalProperties().
                     get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameForRegistration);
             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
                 if (log.isDebugEnabled()) {

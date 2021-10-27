@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -40,6 +41,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -87,17 +89,17 @@ public class SolaceAdminApis {
      *
      * @param organization name of the Organization
      * @param environment  name of the Environment
-     * @return HttpResponse of the GET call
+     * @return CloseableHttpResponse of the GET call
      */
-    public HttpResponse environmentGET(String organization, String environment) {
+    public CloseableHttpResponse environmentGET(String organization, String environment) {
 
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + environment);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpGet);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpGet, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -109,9 +111,9 @@ public class SolaceAdminApis {
      * @param organization  name of the Organization
      * @param title         name of the Solace API
      * @param apiDefinition Async definition of the Solace API
-     * @return HttpResponse of the PUT call
+     * @return CloseableHttpResponse of the PUT call
      */
-    public HttpResponse registerAPI(String organization, String title, String apiDefinition) {
+    public CloseableHttpResponse registerAPI(String organization, String title, String apiDefinition) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPut httpPut = new HttpPut(baseUrl + "/" + organization + "/apis/" + title);
@@ -136,8 +138,8 @@ public class SolaceAdminApis {
             }
             httpPut.setEntity(params);
             try {
-                return httpClient.execute(httpPut);
-            } catch (IOException e) {
+                return APIUtil.executeHTTPRequest(httpPut, httpClient);
+            } catch (IOException | APIManagementException e) {
                 log.error(e.getMessage());
             }
         }
@@ -152,9 +154,9 @@ public class SolaceAdminApis {
      * @param apiProductName         name of the API product
      * @param apiNameForRegistration name of the Solace API product
      * @param aai20Document          Async definition of the Solace API
-     * @return HttpResponse of the POST call
+     * @return CloseableHttpResponse of the POST call
      */
-    public HttpResponse createAPIProduct(String organization, String environment, Aai20Document aai20Document,
+    public CloseableHttpResponse createAPIProduct(String organization, String environment, Aai20Document aai20Document,
                                          String apiProductName, String apiNameForRegistration) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
@@ -172,8 +174,8 @@ public class SolaceAdminApis {
             log.error(e.getMessage());
         }
         try {
-            return httpClient.execute(httpPost);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpPost, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -184,16 +186,16 @@ public class SolaceAdminApis {
      *
      * @param organization name of the Organization
      * @param apiTitle     name of the API
-     * @return HttpResponse of the GET call
+     * @return CloseableHttpResponse of the GET call
      */
-    public HttpResponse registeredAPIGet(String organization, String apiTitle) {
+    public CloseableHttpResponse registeredAPIGet(String organization, String apiTitle) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpGet);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpGet, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -204,16 +206,16 @@ public class SolaceAdminApis {
      *
      * @param organization   name of the Organization
      * @param apiProductName name of the API Product
-     * @return HttpResponse of the GET call
+     * @return CloseableHttpResponse of the GET call
      */
-    public HttpResponse apiProductGet(String organization, String apiProductName) {
+    public CloseableHttpResponse apiProductGet(String organization, String apiProductName) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpGet);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpGet, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -223,16 +225,16 @@ public class SolaceAdminApis {
      * Check existence of the developer in Solace
      *
      * @param organization name of the Organization
-     * @return HttpResponse of the GET call
+     * @return CloseableHttpResponse of the GET call
      */
-    public HttpResponse developerGet(String organization) {
+    public CloseableHttpResponse developerGet(String organization) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpGet);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpGet, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -244,9 +246,9 @@ public class SolaceAdminApis {
      * @param organization name of the Organization
      * @param uuid  Application UUID to be checked in solace
      * @param syntax       protocol type
-     * @return HttpResponse of the GET call
+     * @return CloseableHttpResponse of the GET call
      */
-    public HttpResponse applicationGet(String organization, String uuid, String syntax) {
+    public CloseableHttpResponse applicationGet(String organization, String uuid, String syntax) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet;
@@ -259,8 +261,8 @@ public class SolaceAdminApis {
         }
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpGet);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpGet, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -272,10 +274,10 @@ public class SolaceAdminApis {
      * @param organization name of the Organization
      * @param application  Application to be checked in solace
      * @param apiProducts  API products to add as subscriptions
-     * @return HttpResponse of the PATCH call
+     * @return CloseableHttpResponse of the PATCH call
      */
-    public HttpResponse applicationPatchAddSubscription(String organization, Application application, ArrayList<String>
-            apiProducts) {
+    public CloseableHttpResponse applicationPatchAddSubscription(String organization, Application application,
+                                                                 ArrayList<String> apiProducts) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
@@ -294,8 +296,8 @@ public class SolaceAdminApis {
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
-            return httpClient.execute(httpPatch);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpPatch, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -307,9 +309,9 @@ public class SolaceAdminApis {
      * @param organization        name of the Organization
      * @param application         Application to be checked in solace
      * @param apiProductsToRemove List of API products to remove from subscriptions
-     * @return HttpResponse of the PATCH call
+     * @return CloseableHttpResponse of the PATCH call
      */
-    public HttpResponse applicationPatchRemoveSubscription(String organization, Application application,
+    public CloseableHttpResponse applicationPatchRemoveSubscription(String organization, Application application,
                                                            List<String> apiProductsToRemove) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
@@ -333,8 +335,8 @@ public class SolaceAdminApis {
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
-            return httpClient.execute(httpPatch);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpPatch, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -346,9 +348,10 @@ public class SolaceAdminApis {
      * @param organization name of the Organization
      * @param application  Application to be created in Solace
      * @param apiProducts  List of API products to add as subscriptions
-     * @return HttpResponse of the POST call
+     * @return CloseableHttpResponse of the POST call
      */
-    public HttpResponse createApplication(String organization, Application application, ArrayList<String> apiProducts) {
+    public CloseableHttpResponse createApplication(String organization, Application application,
+                                                   ArrayList<String> apiProducts) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
@@ -359,8 +362,8 @@ public class SolaceAdminApis {
         try {
             params = new StringEntity(requestBody.toString());
             httpPost.setEntity(params);
-            return httpClient.execute(httpPost);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpPost, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -371,16 +374,16 @@ public class SolaceAdminApis {
      *
      * @param organization   name of the Organization
      * @param apiProductName name of the API product
-     * @return HttpResponse of the DELETE call
+     * @return CloseableHttpResponse of the DELETE call
      */
-    public HttpResponse deleteApiProduct(String organization, String apiProductName) {
+    public CloseableHttpResponse deleteApiProduct(String organization, String apiProductName) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
         httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpDelete);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpDelete, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -391,16 +394,16 @@ public class SolaceAdminApis {
      *
      * @param organization name of the Organization
      * @param title        name of the API
-     * @return HttpResponse of the DELETE call
+     * @return CloseableHttpResponse of the DELETE call
      */
-    public HttpResponse deleteRegisteredAPI(String organization, String title) {
+    public CloseableHttpResponse deleteRegisteredAPI(String organization, String title) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/apis/" + title);
         httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpDelete);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpDelete, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -411,9 +414,9 @@ public class SolaceAdminApis {
      *
      * @param organization name of the Organization
      * @param uuid         UUID of Application object to be deleted
-     * @return HttpResponse of the DELETE call
+     * @return CloseableHttpResponse of the DELETE call
      */
-    public HttpResponse deleteApplication(String organization, String uuid) {
+    public CloseableHttpResponse deleteApplication(String organization, String uuid) {
 
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
@@ -421,8 +424,8 @@ public class SolaceAdminApis {
                 "/apps/" + uuid);
         httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(httpDelete);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpDelete, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -433,9 +436,9 @@ public class SolaceAdminApis {
      *
      * @param organization name of the Organization
      * @param application  Application object to be renamed
-     * @return HttpResponse of the DELETE call
+     * @return CloseableHttpResponse of the DELETE call
      */
-    public HttpResponse renameApplication(String organization, Application application) {
+    public CloseableHttpResponse renameApplication(String organization, Application application) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
@@ -447,8 +450,8 @@ public class SolaceAdminApis {
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
-            return httpClient.execute(httpPatch);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpPatch, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;
@@ -461,10 +464,10 @@ public class SolaceAdminApis {
      * @param application  Application object to be renamed
      * @param consumerKey  Consumer key to be used when patching
      * @param consumerSecret Consumer secret to be used when patching
-     * @return HttpResponse of the PATCH call
+     * @return CloseableHttpResponse of the PATCH call
      */
-    public HttpResponse patchClientIdForApplication(String organization, Application application, String consumerKey,
-                                                    String consumerSecret) {
+    public CloseableHttpResponse patchClientIdForApplication(String organization, Application application,
+                                                             String consumerKey, String consumerSecret) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
@@ -476,8 +479,8 @@ public class SolaceAdminApis {
         try {
             params = new StringEntity(requestBody.toString());
             httpPatch.setEntity(params);
-            return httpClient.execute(httpPatch);
-        } catch (IOException e) {
+            return APIUtil.executeHTTPRequest(httpPatch, httpClient);
+        } catch (IOException | APIManagementException e) {
             log.error(e.getMessage());
         }
         return null;

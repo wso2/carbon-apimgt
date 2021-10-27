@@ -18,8 +18,8 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
@@ -120,7 +120,7 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                 SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
 
                 // check existence of application in Solace Broker
-                HttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment,
+                CloseableHttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment,
                         event.getUuid(), "default");
                 if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     applicationFoundInSolaceBroker = true;
@@ -147,7 +147,7 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                 log.info("Deleting application from Solace Broker");
                 // delete application from solace
                 SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-                HttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment,
+                CloseableHttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment,
                         event.getUuid());
                 if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
                     log.info("Successfully deleted application '" + event.getApplicationName() + "' " +
