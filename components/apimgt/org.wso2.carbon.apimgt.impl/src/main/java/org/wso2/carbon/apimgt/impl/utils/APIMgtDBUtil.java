@@ -282,7 +282,29 @@ public final class APIMgtDBUtil {
      * @return              String Map
      * @throws APIManagementException if errors occur during parsing the json string
      */
-    public static Map<String, String> convertJSONStringToMap(String jsonString) throws APIManagementException {
+    public static Map<String, Object> convertJSONStringToMap(String jsonString) throws APIManagementException {
+        Map<String, Object> map = null;
+        if (StringUtils.isNotEmpty(jsonString)) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                map = objectMapper.readValue(jsonString, Map.class);
+            } catch (IOException e) {
+                String msg = "Error while parsing JSON string";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Converts a JSON Object String to a String Map
+     *
+     * @param jsonString    JSON String
+     * @return              String Map
+     * @throws APIManagementException if errors occur during parsing the json string
+     */
+    public static Map<String, String> convertJSONStringToStringMap(String jsonString) throws APIManagementException {
         Map<String, String> map = null;
         if (StringUtils.isNotEmpty(jsonString)) {
             try {
