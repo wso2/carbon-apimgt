@@ -11773,7 +11773,7 @@ components:
         parameters:
           type: object
           additionalProperties:
-            type: string
+            type: object
     APIOperationPolicies:
       title: API Operation Level Policies
       properties:
