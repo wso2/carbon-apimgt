@@ -7187,7 +7187,7 @@ public class ApiMgtDAO {
                 }
 
                 setAssociatedAPIProducts(currentApiUuid, uriTemplates);
-                setOperationPolicies(currentApiUuid, uriTemplates);
+                setOperationPolicies(apiRevision.getRevisionUUID(), uriTemplates);
             } catch (SQLException e) {
                 handleException("Failed to get URI Templates of API with UUID " + uuid, e);
             }
