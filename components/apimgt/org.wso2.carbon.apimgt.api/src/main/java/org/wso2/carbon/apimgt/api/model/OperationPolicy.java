@@ -19,7 +19,7 @@ public class OperationPolicy {
 
     private PolicyType policyType = null;
     private String direction;
-    private Map<String, String> parameters;
+    private Map<String, Object> parameters;
     private int id;
 
     public PolicyType getPolicyType() {
@@ -30,11 +30,11 @@ public class OperationPolicy {
         this.policyType = policyType;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<String, Object> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
 

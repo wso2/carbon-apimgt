@@ -6084,9 +6084,9 @@ public class ApiMgtDAO {
                     policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
 
                     int endpointId = -1;
-                    Map<String, String> policyParams = policy.getParameters();
+                    Map<String, Object> policyParams = policy.getParameters();
                     if (policyParams != null) {
-                        endpointUUID = policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
+                        endpointUUID = (String) policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
                         getResourceEndpointByUUIDStmt.setInt(1, tenantId);
                         getResourceEndpointByUUIDStmt.setString(2, endpointUUID);
                         getResourceEndpointByUUIDStmt.setInt(3, tenantId);
@@ -6112,10 +6112,6 @@ public class ApiMgtDAO {
                 addResourceEndpointMapping.executeBatch();
             }
         }
-    }
-
-    private void addProductResourceEndpointMappings(int apiId, String revisionUUID, int tenantId, Connection connection) {
-
     }
 
     /**
@@ -7646,7 +7642,7 @@ public class ApiMgtDAO {
                     if (uriTemplate != null) {
                         OperationPolicy policy = new OperationPolicy();
                         policy.setPolicyType(OperationPolicy.PolicyType.valueOf(rs.getString("POLICY_TYPE")));
-                        policy.setParameters( APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
+                        policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
                     }
@@ -7715,7 +7711,7 @@ public class ApiMgtDAO {
                     if (uriTemplate != null) {
                         OperationPolicy policy = new OperationPolicy();
                         policy.setPolicyType(OperationPolicy.PolicyType.valueOf(rs.getString("POLICY_TYPE")));
-                        policy.setParameters( APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
+                        policy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
                         policy.setDirection(rs.getString("DIRECTION"));
                         uriTemplate.addOperationPolicy(policy);
                     }
@@ -14584,8 +14580,6 @@ public class ApiMgtDAO {
     public void addAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
             Connection connection) throws APIManagementException {
         Set<String> addedResourceEndpoints = new HashSet<>();
-        //add product-api resource mappings
-        PreparedStatement prepStmtAddResourceMapping = null;
 
         String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
 
@@ -14740,7 +14734,7 @@ public class ApiMgtDAO {
                                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                                 if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policyType)) {
                                     //copy duplicate resource endpoint record for API Product
-                                    String endpointId = policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
+                                    String endpointId = (String) policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
                                     int resourceEndpointId = 0;
                                     if (!addedResourceEndpoints.contains(endpointId)) {
                                         ResourceEndpoint baseAPIEndpoint = getResourceEndpointByUUID(
@@ -14794,7 +14788,6 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while adding API product Resources", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
             if (isNewConnection) {
                 APIMgtDBUtil.closeAllConnections(null, connection, null);
             }
@@ -17681,7 +17674,7 @@ public class ApiMgtDAO {
                                 String policyType = policy.getPolicyType().toString();
                                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                                 if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policyType)) {
-                                    String endpointId = policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
+                                    String endpointId = (String) policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
                                     int resourceEndpointId = 0;
                                     if (!addedResourceEndpoints.contains(endpointId)) {
                                         ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(apiId,
@@ -18537,7 +18530,7 @@ public class ApiMgtDAO {
 
         if (inputStream != null) {
             String blobString = APIMgtDBUtil.getStringFromInputStream(inputStream);
-            map = APIMgtDBUtil.convertJSONStringToMap(blobString);
+            map = APIMgtDBUtil.convertJSONStringToStringMap(blobString);
         }
         return map;
     }

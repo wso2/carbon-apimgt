@@ -294,7 +294,7 @@ public class ImportUtils {
                     operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_IN);
                     int policyId = apiProvider.addOperationPolicy(uriTemplate.getId(), operationPolicy);
 
-                    String endpointUUID = operationPolicy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
+                    String endpointUUID = (String) operationPolicy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
                     ResourceEndpoint resourceEndpoint = apiProvider
                             .getResourceEndpointByUUID(endpointUUID, organization);
                     apiProvider.addResourceEndpointMapping(policyId, resourceEndpoint.getId());
@@ -449,8 +449,8 @@ public class ImportUtils {
             Map<String, OperationPolicyDTO> operationsWithChangeEndpointPolicies, String oldEndpointId,
             String newEndpointId) {
         for (OperationPolicyDTO operationPolicy : operationsWithChangeEndpointPolicies.values()) {
-            Map<String, String> policyParams = operationPolicy.getParameters();
-            String endpointId = policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
+            Map<String, Object> policyParams = operationPolicy.getParameters();
+            String endpointId = (String) policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
             if (StringUtils.isNotEmpty(endpointId) && endpointId.equals(oldEndpointId)) {
                 policyParams.put(APIConstants.ENDPOINT_ID_PARAM, newEndpointId);
             }
@@ -470,8 +470,8 @@ public class ImportUtils {
                 while (iterator.hasNext()) {
                     OperationPolicyDTO policy = iterator.next();
                     if (policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CHANGE_ENDPOINT)) {
-                        Map<String, String> policyParameters = policy.getParameters();
-                        String endpointId = policyParameters.get(APIConstants.ENDPOINT_ID_PARAM);
+                        Map<String, Object> policyParameters = policy.getParameters();
+                        String endpointId = (String) policyParameters.get(APIConstants.ENDPOINT_ID_PARAM);
                         if (isResourceEndpointExists(endpointId, resourceEndpoints)) {
                             operationsWithChangeEndpointPolicy
                                     .put(operation.getTarget() + ":" + operation.getVerb(), policy);
