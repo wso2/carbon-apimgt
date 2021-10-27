@@ -78,9 +78,9 @@ public class ResourceConfigContext extends ConfigContextDecorator {
                                 APIConstants.HEADER_EXPRESSION_PARAM :
                                 APIConstants.QUERY_PARAM_EXPRESSION;
 
-                        Map<String, String> parameters = policy.getParameters();
-                        String value = parameters.get(paramValue);
-                        String expression = parameters.get(paramExpression);
+                        Map<String, Object> parameters = policy.getParameters();
+                        String value = (String) parameters.get(paramValue);
+                        String expression = (String) parameters.get(paramExpression);
                         if (value == null && expression != null) {
                             String xpathExpression = null;
                             String[] exp = expression.split("\\.");

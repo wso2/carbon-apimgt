@@ -61,7 +61,7 @@ return null;
         }
     }
     private PolicyTypeEnum policyType = null;
-    private Map<String, String> parameters = new HashMap<String, String>();
+    private Map<String, Object> parameters = new HashMap<String, Object>();
 
   /**
    **/
@@ -83,7 +83,7 @@ return null;
 
   /**
    **/
-  public OperationPolicyDTO parameters(Map<String, String> parameters) {
+  public OperationPolicyDTO parameters(Map<String, Object> parameters) {
     this.parameters = parameters;
     return this;
   }
@@ -91,10 +91,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("parameters")
-  public Map<String, String> getParameters() {
+  public Map<String, Object> getParameters() {
     return parameters;
   }
-  public void setParameters(Map<String, String> parameters) {
+  public void setParameters(Map<String, Object> parameters) {
     this.parameters = parameters;
   }
 
