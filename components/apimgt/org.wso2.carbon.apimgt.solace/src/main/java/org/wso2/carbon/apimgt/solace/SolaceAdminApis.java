@@ -25,34 +25,40 @@ import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
 import io.apicurio.datamodels.asyncapi.models.AaiParameter;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import org.apache.axis2.util.URL;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashMap;
 
-
+/**
+ * This class consists the internal Admin REST API requests to communicate with Solace broker
+ */
 public class SolaceAdminApis {
+    
+    private static final Log log = LogFactory.getLog(SolaceAdminApis.class);
 
     String baseUrl;
     String password;
@@ -66,7 +72,7 @@ public class SolaceAdminApis {
         this.developerUserName = developerUserName;
     }
 
-    private String getEncoding(){
+    private String getEncoding() {
         String toEncode = userName + ":" + password;
         return Base64.getEncoder().encodeToString((toEncode).getBytes());
     }
@@ -84,13 +90,15 @@ public class SolaceAdminApis {
      * @return HttpResponse of the GET call
      */
     public HttpResponse environmentGET(String organization, String environment) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + environment);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + environment);
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpGet);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -104,10 +112,11 @@ public class SolaceAdminApis {
      * @return HttpResponse of the PUT call
      */
     public HttpResponse registerAPI(String organization, String title, String apiDefinition) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPut request = new HttpPut(baseUrl + "/" + organization + "/apis/" + title);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPut httpPut = new HttpPut(baseUrl + "/" + organization + "/apis/" + title);
+        httpPut.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPut.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
         JsonNode jsonNodeTree;
         String jsonAsYaml = null;
         // convert json to yaml
@@ -115,7 +124,7 @@ public class SolaceAdminApis {
             jsonNodeTree = new ObjectMapper().readTree(apiDefinition);
             jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         //add definition to request body
         if (jsonAsYaml != null) {
@@ -123,13 +132,13 @@ public class SolaceAdminApis {
             try {
                 params = new StringEntity(jsonAsYaml);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
-            request.setEntity(params);
+            httpPut.setEntity(params);
             try {
-                return httpClient.execute(request);
+                return httpClient.execute(httpPut);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
         return null;
@@ -147,23 +156,25 @@ public class SolaceAdminApis {
      */
     public HttpResponse createAPIProduct(String organization, String environment, Aai20Document aai20Document,
                                          String apiProductName, String apiNameForRegistration) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPost request = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         //setRequestBody
-        org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName, apiNameForRegistration);
+        org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName,
+                apiNameForRegistration);
         try {
             StringEntity params2;
             params2 = new StringEntity(requestBody.toString());
-            request.setEntity(params2);
+            httpPost.setEntity(params2);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpPost);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -176,13 +187,14 @@ public class SolaceAdminApis {
      * @return HttpResponse of the GET call
      */
     public HttpResponse registeredAPIGet(String organization, String apiTitle) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpGet);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -195,13 +207,14 @@ public class SolaceAdminApis {
      * @return HttpResponse of the GET call
      */
     public HttpResponse apiProductGet(String organization, String apiProductName) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpGet);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -213,13 +226,14 @@ public class SolaceAdminApis {
      * @return HttpResponse of the GET call
      */
     public HttpResponse developerGet(String organization) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpGet);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -233,18 +247,21 @@ public class SolaceAdminApis {
      * @return HttpResponse of the GET call
      */
     public HttpResponse applicationGet(String organization, String uuid, String syntax) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpGet request;
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpGet httpGet;
         if ("MQTT".equalsIgnoreCase(syntax)) {
-            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + uuid + "?topicSyntax=mqtt");
+            httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/"
+                    + uuid + "?topicSyntax=mqtt");
         } else {
-            request = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + uuid);
+            httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/"
+                    + uuid);
         }
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpGet);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -259,26 +276,27 @@ public class SolaceAdminApis {
      */
     public HttpResponse applicationPatchAddSubscription(String organization, Application application, ArrayList<String>
             apiProducts) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         try {
-            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(), "default"
-            ), apiProducts);
+            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(),
+                    "default"), apiProducts);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         org.json.JSONObject requestBody = buildRequestBodyForApplicationPatchSubscriptions(apiProducts);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
-            request.setEntity(params);
-            return httpClient.execute(request);
+            httpPatch.setEntity(params);
+            return httpClient.execute(httpPatch);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -293,18 +311,19 @@ public class SolaceAdminApis {
      */
     public HttpResponse applicationPatchRemoveSubscription(String organization, Application application,
                                                            List<String> apiProductsToRemove) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         ArrayList<String> apiProducts = new ArrayList<>();
         try {
-            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(), "default"
-            ), apiProducts);
+            apiProducts = retrieveApiProductsInAnApplication(applicationGet(organization, application.getUUID(),
+                    "default"), apiProducts);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         // remove API product from arrayList
         apiProducts.removeAll(apiProductsToRemove);
@@ -313,10 +332,10 @@ public class SolaceAdminApis {
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
-            request.setEntity(params);
-            return httpClient.execute(request);
+            httpPatch.setEntity(params);
+            return httpClient.execute(httpPatch);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -330,18 +349,19 @@ public class SolaceAdminApis {
      * @return HttpResponse of the POST call
      */
     public HttpResponse createApplication(String organization, Application application, ArrayList<String> apiProducts) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPost request = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
-            request.setEntity(params);
-            return httpClient.execute(request);
+            httpPost.setEntity(params);
+            return httpClient.execute(httpPost);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -354,13 +374,14 @@ public class SolaceAdminApis {
      * @return HttpResponse of the DELETE call
      */
     public HttpResponse deleteApiProduct(String organization, String apiProductName) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
+        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpDelete);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -373,18 +394,17 @@ public class SolaceAdminApis {
      * @return HttpResponse of the DELETE call
      */
     public HttpResponse deleteRegisteredAPI(String organization, String title) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/apis/" + title);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/apis/" + title);
+        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpDelete);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
-
-    // delete application from Solace
 
     /**
      * Delete application from Solace Broker
@@ -394,14 +414,16 @@ public class SolaceAdminApis {
      * @return HttpResponse of the DELETE call
      */
     public HttpResponse deleteApplication(String organization, String uuid) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpDelete request = new HttpDelete(baseUrl + "/" + organization + "/developers/" + developerUserName +
+
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + uuid);
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
         try {
-            return httpClient.execute(request);
+            return httpClient.execute(httpDelete);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -414,19 +436,20 @@ public class SolaceAdminApis {
      * @return HttpResponse of the DELETE call
      */
     public HttpResponse renameApplication(String organization, Application application) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForRenamingApp(application);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
-            request.setEntity(params);
-            return httpClient.execute(request);
+            httpPatch.setEntity(params);
+            return httpClient.execute(httpPatch);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -442,19 +465,20 @@ public class SolaceAdminApis {
      */
     public HttpResponse patchClientIdForApplication(String organization, Application application, String consumerKey,
                                                     String consumerSecret) {
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPatch request = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
+        URL serviceEndpointURL = new URL(baseUrl);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey, consumerSecret);
         StringEntity params = null;
         try {
             params = new StringEntity(requestBody.toString());
-            request.setEntity(params);
-            return httpClient.execute(request);
+            httpPatch.setEntity(params);
+            return httpClient.execute(httpPatch);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -518,7 +542,8 @@ public class SolaceAdminApis {
                 if (!parameters1.contains(parameterName)) {
                     AaiParameter parameterObject = channel.parameters.get(parameterName);
                     if (parameterObject.schema != null) {
-                        org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName, parameterObject);
+                        org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
+                                parameterObject);
                         if (attributeObj != null) {
                             attributes1.put(attributeObj);
                             parameters1.add(parameterName);
@@ -679,17 +704,28 @@ public class SolaceAdminApis {
      */
     private String getProtocolVersion(String protocol) {
         HashMap<String, String> protocolsWithVersions = new HashMap<>();
-        protocolsWithVersions.put(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME, APIConstants.HTTP_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME, APIConstants.MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME, APIConstants.AMQP_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.AMQPS_TRANSPORT_PROTOCOL_NAME, APIConstants.AMQPS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_NAME, APIConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.WS_MQTT_TRANSPORT_PROTOCOL_NAME, APIConstants.WS_MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_NAME, APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME, APIConstants.JMS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME, APIConstants.HTTPS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SMF_TRANSPORT_PROTOCOL_NAME, APIConstants.SMF_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SMFS_TRANSPORT_PROTOCOL_NAME, APIConstants.SMFS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.HTTP_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.AMQP_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.AMQPS_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.AMQPS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.WS_MQTT_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.WS_MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.JMS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.HTTPS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.SMF_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.SMF_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(APIConstants.SMFS_TRANSPORT_PROTOCOL_NAME,
+                APIConstants.SMFS_TRANSPORT_PROTOCOL_VERSION);
         if (protocolsWithVersions.get(protocol) != null) {
             return protocolsWithVersions.get(protocol);
         }

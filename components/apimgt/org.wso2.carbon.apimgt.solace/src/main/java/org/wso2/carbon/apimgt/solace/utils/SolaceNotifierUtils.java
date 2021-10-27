@@ -26,6 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class controls the Solace Broker util methods
+ */
 public class SolaceNotifierUtils {
     protected static ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(SolaceNotifierUtils.class);
@@ -81,12 +84,12 @@ public class SolaceNotifierUtils {
      */
     private boolean isSolaceEnvironmentAdded() {
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        if (gatewayEnvironments.isEmpty()){
+        if (gatewayEnvironments.isEmpty()) {
             return false;
         }
         Environment solaceEnvironment = null;
 
-        for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
+        for (Map.Entry<String, Environment> entry: gatewayEnvironments.entrySet()) {
             if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
@@ -117,7 +120,7 @@ public class SolaceNotifierUtils {
                 return false;
             } else {
                 if (StringUtil.isEmpty(additionalProperties.get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
-                        StringUtil.isEmpty(additionalProperties.get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME)) ) {
+                        StringUtil.isEmpty(additionalProperties.get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
                     return false;
                 }
             }
@@ -134,14 +137,21 @@ public class SolaceNotifierUtils {
      * @param application  Solace application
      * @throws APIManagementException is error occurs when renaming the application
      */
-    public static void renameSolaceApplication(String organization, Application application) throws APIManagementException {
+    public static void renameSolaceApplication(String organization, Application application) throws
+            APIManagementException {
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-        log.info("Renaming solace application display name....");
+        if (log.isDebugEnabled()) {
+            log.info("Renaming solace application display name....");
+        }
+
         HttpResponse response = solaceAdminApis.renameApplication(organization, application);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             log.info("Renamed solace application display name into '" + application.getName() + "'");
         } else {
-            log.error("Error while renaming solace Application display name....");
+            if (log.isDebugEnabled()) {
+                log.error("Error while renaming solace Application display name. : " + response.getStatusLine().
+                        toString());
+            }
             throw new APIManagementException(response.getStatusLine().getStatusCode() + "-" + response.getStatusLine().
                     getReasonPhrase());
         }
@@ -159,12 +169,17 @@ public class SolaceNotifierUtils {
     public static void patchSolaceApplicationClientId(String organization, Application application, String consumerKey,
                                                       String consumerSecret) throws APIManagementException {
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-        log.info("Identified as Solace Application. Patching CliendID and Secret in solace application.....");
-        HttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application, consumerKey, consumerSecret);
+        if (log.isDebugEnabled()) {
+            log.info("Identified as Solace Application. Patching CliendID and Secret in solace application.....");
+        }
+
+        HttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application, consumerKey,
+                consumerSecret);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             log.info("CliendID and Secret patched successfully for Solace application");
         } else {
-            log.error("Error while patching clientID for Solace application");
+            log.error("Error while patching clientID for Solace application. : " + response.getStatusLine().
+                    toString());
         }
     }
 
@@ -200,7 +215,8 @@ public class SolaceNotifierUtils {
      * @return String of the name of organization in Solace broker
      * @throws APIManagementException is error occurs when getting the name of the organization name
      */
-    public static String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws APIManagementException {
+    public static String getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(API api) throws
+            APIManagementException {
         apiMgtDAO = ApiMgtDAO.getInstance();
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.getUuid());
@@ -245,15 +261,16 @@ public class SolaceNotifierUtils {
         Map<String, Environment> environmentMap = APIUtil.getReadOnlyGatewayEnvironments();
         Environment solaceEnvironment = environmentMap.get(APIConstants.SOLACE_ENVIRONMENT);
         if (solaceEnvironment != null) {
-            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.getUserName(),
-                    solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().get(APIConstants.
-                    SOLACE_ENVIRONMENT_DEV_NAME));
+            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(),
+                    solaceEnvironment.getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.
+                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
             String apiNameWithContext = generateApiProductNameForSolaceBroker(api,
                     getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(api));
             HttpResponse response = solaceAdminApis.apiProductGet(organization, apiNameWithContext);
 
             if (response != null) {
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
                     log.info("API product found in Solace Broker");
                     return true;
                 } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
@@ -289,19 +306,25 @@ public class SolaceNotifierUtils {
         for (Environment environment : environments) {
             String apiNameWithContext = generateApiProductNameForSolaceBroker(api, environment.getName());
             SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-            HttpResponse response = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(APIConstants.
-                    SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
+            HttpResponse response = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(
+                    APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                log.info("API product found in Solace Broker");
+                if (log.isDebugEnabled()) {
+                    log.info("API product found in Solace Broker");
+                }
                 numberOfDeployedEnvironmentsInSolace++;
             } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                log.error("API product not found in Solace broker");
-                log.error(EntityUtils.toString(response.getEntity()));
+                if (log.isDebugEnabled()) {
+                    log.error("API product not found in Solace broker");
+                    log.error(EntityUtils.toString(response.getEntity()));
+                }
                 throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().
                         getReasonPhrase());
             } else {
-                log.error("Cannot find API product in Solace Broker");
-                log.error(EntityUtils.toString(response.getEntity()));
+                if (log.isDebugEnabled()) {
+                    log.error("Cannot find API product in Solace Broker");
+                    log.error(EntityUtils.toString(response.getEntity()));
+                }
                 throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().
                         getReasonPhrase());
             }
@@ -318,7 +341,8 @@ public class SolaceNotifierUtils {
      * @throws IOException            If an error occurs when deploying the application
      * @throws APIManagementException if an error occurs when getting Solace config
      */
-    public static void deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts, String organization)
+    public static void deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts,
+                                                       String organization)
             throws IOException, APIManagementException {
 
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
@@ -326,20 +350,29 @@ public class SolaceNotifierUtils {
         // check existence of the developer
         HttpResponse response1 = solaceAdminApis.developerGet(organization);
         if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            log.info("Developer found in Solace Broker");
+            if (log.isDebugEnabled()) {
+                log.info("Developer found in Solace Broker");
+            }
 
             //check application status
-            HttpResponse response2 = solaceAdminApis.applicationGet(organization, application.getUUID(), "default");
+            HttpResponse response2 = solaceAdminApis.applicationGet(organization, application.getUUID(),
+                    "default");
             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // app already exists
-                log.info("Solace application '" + application.getName() + "' already exists in Solace." +
-                        " Updating Application......");
+                if (log.isDebugEnabled()) {
+                    log.info("Solace application '" + application.getName() + "' already exists in Solace." +
+                            " Updating Application......");
+                }
+
                 HttpResponse response3 = solaceAdminApis.applicationPatchAddSubscription(organization, application,
                         apiProducts);
                 if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     log.info("Solace application '" + application.getName() + "' updated successfully");
                 } else {
-                    log.error("Error while updating Solace application '" + application.getName() + "'");
+                    if (log.isDebugEnabled()) {
+                        log.error("Error while updating Solace application '" + application.getName() + ". : " +
+                                response3.getStatusLine().toString());
+                    }
                     throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine()
                             .getReasonPhrase());
                 }
@@ -348,33 +381,48 @@ public class SolaceNotifierUtils {
                 String responseString = EntityUtils.toString(response2.getEntity());
                 if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
                     // create new app
-                    log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
-                            "Creating new application......");
+                    if (log.isDebugEnabled()) {
+                        log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
+                                "Creating new application......");
+                    }
                     HttpResponse response4 = solaceAdminApis.createApplication(organization, application,
                             apiProducts);
                     if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         log.info("Solace application '" + application.getName() + "' created successfully");
                     } else {
-                        log.error("Error while creating Solace application '" + application.getName() + "'");
+                        if (log.isDebugEnabled()) {
+                            log.error("Error while creating Solace application '" + application.getName() + ". : " +
+                                    response4.getStatusLine().toString());
+                        }
                         throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.
                                 getStatusLine().getReasonPhrase());
                     }
                 } else {
-                    log.error("Error while searching for application '" + application.getName() + "'");
+                    if (log.isDebugEnabled()) {
+                        log.error("Error while searching for application '" + application.getName() + ". : " +
+                                response2.getStatusLine().toString());
+                    }
                     throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.
                             getStatusLine().getReasonPhrase());
                 }
             } else {
-                log.error("Error while searching for application '" + application.getName() + "'");
+                if (log.isDebugEnabled()) {
+                    log.error("Error while searching for application '" + application.getName() + ". : " +
+                            response2.getStatusLine().toString());
+                }
                 throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.
                         getStatusLine().getReasonPhrase());
             }
         } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-            log.error("Developer not found in Solace Broker");
+            if (log.isDebugEnabled()) {
+                log.error("Developer not found in Solace Broker");
+            }
             throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
                     getReasonPhrase());
         } else {
-            log.error("Error while finding developer in Solace Broker");
+            if (log.isDebugEnabled()) {
+                log.error("Developer not found in Solace Broker");
+            }
             throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().
                     getReasonPhrase());
         }
@@ -422,7 +470,8 @@ public class SolaceNotifierUtils {
         HashSet<String> organizationNames = new HashSet<>();
         for (Environment environment : environments) {
             if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
-                organizationNames.add(environment.getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
+                organizationNames.add(environment.getAdditionalProperties().get(APIConstants.
+                        SOLACE_ENVIRONMENT_ORGANIZATION));
             }
         }
         if (organizationNames.size() == 1) {
@@ -489,7 +538,8 @@ public class SolaceNotifierUtils {
      * @param application Solace application
      * @throws APIManagementException is error occurs when unsubscribing the API from application
      */
-    public static void unsubscribeAPIProductFromSolaceApplication(API api, Application application) throws APIManagementException {
+    public static void unsubscribeAPIProductFromSolaceApplication(API api, Application application)
+            throws APIManagementException {
         List<Environment> deployedSolaceEnvironments = getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
         String applicationOrganizationName = getSolaceOrganizationName(deployedSolaceEnvironments);
         ArrayList<String> solaceApiProducts = new ArrayList<>();
@@ -514,20 +564,25 @@ public class SolaceNotifierUtils {
                                 log.info("Successfully deleted application '" + application.getName() + "' in " +
                                         "Solace Broker");
                             } else {
-                                log.error("Error while deleting application '" + application.getName() + "' in Solace");
+                                if (log.isDebugEnabled()) {
+                                    log.error("Error while deleting application '" + application.getName() + "' " +
+                                            "in Solace. : " + response2.getStatusLine().toString());
+                                }
                                 throw new APIManagementException("Error while deleting application '" +
                                         application.getName() + "' in Solace");
                             }
                         }
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
             } else {
-                log.error("Error while unsubscribing API product from Solace Application '" + application.getName()
-                        + "'");
-                throw new APIManagementException(response.getStatusLine().getStatusCode() + "-" + response.getStatusLine()
-                        .getReasonPhrase());
+                if (log.isDebugEnabled()) {
+                    log.error("Error while unsubscribing API product from Solace Application '" + application.getName()
+                            + " : " + response.getStatusLine().toString());
+                }
+                throw new APIManagementException(response.getStatusLine().getStatusCode() + "-" +
+                        response.getStatusLine().getReasonPhrase());
             }
         } else {
             throw new APIManagementException("Multiple Solace organizations found");

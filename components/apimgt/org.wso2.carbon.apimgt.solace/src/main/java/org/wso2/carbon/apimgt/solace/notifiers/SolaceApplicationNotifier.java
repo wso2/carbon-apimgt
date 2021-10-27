@@ -22,8 +22,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -44,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class controls the Solace Broker deployed Application deletion and update flows
+ */
 public class SolaceApplicationNotifier extends ApplicationNotifier {
 
     protected ApiMgtDAO apiMgtDAO;
@@ -84,14 +87,11 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      * @param event ApplicationEvent to remove Solace applications
      * @throws NotifierException if error occurs when removing applications from Solace broker
      */
-    public void removeSolaceApplication(ApplicationEvent event) throws NotifierException {
+    private void removeSolaceApplication(ApplicationEvent event) throws NotifierException {
         // get list of subscribed APIs in the application
         Subscriber subscriber = new Subscriber(event.getSubscriber());
-        APIProvider apiProvider;
         try {
-            apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            Application application = apiProvider.getApplicationByUUID(event.getUuid());
+
             Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, event.getApplicationName(),
                     event.getGroupId());
             List<SubscribedAPI> subscribedApiList = new ArrayList<>(subscriptions);
@@ -124,14 +124,20 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                         event.getUuid(), "default");
                 if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     applicationFoundInSolaceBroker = true;
-                    log.info("Found application '" + event.getApplicationName() + "' in Solace broker");
-                    log.info("Waiting until application removing workflow gets finished");
+                    // TODO: Have debug logs with the time to execute
+                    if (log.isDebugEnabled()) {
+                        log.info("Found application '" + event.getApplicationName() + "' in Solace broker");
+                        log.info("Waiting until application removing workflow gets finished");
+                    }
+
                 } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                    log.error("Application '" + event.getApplicationName() + "' cannot be found in Solace Broker");
                     throw new NotifierException("Application '" + event.getApplicationName() + "' cannot be found in " +
                             "Solace Broker");
                 } else {
-                    log.error("Error while searching for application '" + event.getApplicationName() + "' in Solace Broker");
+                    if (log.isDebugEnabled()) {
+                        log.error("Error while searching for application '" + event.getApplicationName() + "'" +
+                                " in Solace Broker. : " + response1.getStatusLine().toString());
+                    }
                     throw new NotifierException("Error while searching for application '" + event.getApplicationName() +
                             "' in Solace Broker");
                 }
@@ -144,9 +150,13 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                 HttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment,
                         event.getUuid());
                 if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                    log.info("Successfully deleted application '" + event.getApplicationName() + "' in Solace Broker");
+                    log.info("Successfully deleted application '" + event.getApplicationName() + "' " +
+                            "in Solace Broker");
                 } else {
-                    log.error("Error while deleting application '" + event.getApplicationName() + "' in Solace");
+                    if (log.isDebugEnabled()) {
+                        log.error("Error while deleting application " + event.getApplicationName() + " in Solace. :"
+                        + response2.getStatusLine().toString());
+                    }
                     throw new NotifierException("Error while deleting application '" + event.getApplicationName() +
                             "' in Solace");
                 }
@@ -162,7 +172,7 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      * @param event ApplicationEvent to rename Solace applications
      * @throws NotifierException if error occurs when renaming applications on the Solace broker
      */
-    public void renameSolaceApplication(ApplicationEvent event) throws NotifierException {
+    private void renameSolaceApplication(ApplicationEvent event) throws NotifierException {
 
         // get list of subscribed APIs in the application
         Subscriber subscriber = new Subscriber(event.getSubscriber());

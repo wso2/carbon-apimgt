@@ -19,9 +19,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -39,6 +39,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class controls the Solace Broker deployed Application Key generation flow
+ */
 public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
 
     protected ApiMgtDAO apiMgtDAO;
@@ -76,7 +79,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
      * @param event ApplicationEvent to sync Solace applications with dev portal applications
      * @throws NotifierException if error occurs when patching applications on the Solace broker
      */
-    public void syncSolaceApplicationClientId(ApplicationRegistrationEvent event) throws NotifierException {
+    private void syncSolaceApplicationClientId(ApplicationRegistrationEvent event) throws NotifierException {
 
         // get list of subscribed APIs in the application
         APIProvider apiProvider;
