@@ -265,12 +265,11 @@ public class TemplateBuilderUtil {
     }
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(APIProduct apiProduct, String tenantDomain,
-                                                               List<ClientCertificateDTO> clientCertificateDTOS,
-                                                               Map<String, APIDTO> associatedAPIMap)
-            throws APIManagementException {
+            List<ClientCertificateDTO> clientCertificateDTOS, Map<String, APIDTO> associatedAPIMap,
+            List<ResourceEndpoint> resourceEndpoints) throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct, associatedAPIMap);
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct, associatedAPIMap, resourceEndpoints);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, apiProduct.getUuid());
         if (!APIUtil.isStreamingApi(apiProduct)) {
@@ -491,6 +490,7 @@ public class TemplateBuilderUtil {
 
         List<ClientCertificateDTO> clientCertificatesDTOList =
                 ImportUtils.retrieveClientCertificates(extractedFolderPath);
+        List<ResourceEndpoint> resourceEndpoints = ImportUtils.retrieveProductResourceEndpoints(extractedFolderPath);
         Map<String, APIDTO> apidtoMap = retrieveAssociatedApis(extractedFolderPath);
         Map<String, APIDTO> associatedAPIsMap = convertAPIIdToDto(apidtoMap.values());
         for (APIProductResource productResource : apiProduct.getProductResources()) {
@@ -526,16 +526,14 @@ public class TemplateBuilderUtil {
         APITemplateBuilder
                 apiTemplateBuilder =
                 TemplateBuilderUtil.getAPITemplateBuilder(apiProduct, tenantDomain, clientCertificatesDTOList,
-                        convertAPIIdToDto(associatedAPIsMap.values()));
+                        convertAPIIdToDto(associatedAPIsMap.values()), resourceEndpoints);
         return createAPIGatewayDTOtoPublishAPI(environment, apiProduct, apiTemplateBuilder, tenantDomain,
-                apidtoMap, clientCertificatesDTOList);
+                apidtoMap, clientCertificatesDTOList, resourceEndpoints);
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
-                                                                 APITemplateBuilder builder,
-                                                                 String tenantDomain,
-                                                                 Map<String, APIDTO> associatedAPIsMap,
-                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
+            APITemplateBuilder builder, String tenantDomain, Map<String, APIDTO> associatedAPIsMap,
+            List<ClientCertificateDTO> clientCertificatesDTOList, List<ResourceEndpoint> resourceEndpoints)
             throws APITemplateException, XMLStreamException, APIManagementException {
 
         APIProductIdentifier id = apiProduct.getId();
@@ -571,6 +569,10 @@ public class TemplateBuilderUtil {
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
             String prefix = id.getName() + "--v" + id.getVersion();
             setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
+        }
+
+        if (resourceEndpoints != null && !resourceEndpoints.isEmpty()) {
+            addResourceEndpoints(resourceEndpoints, builder, productAPIDto);
         }
 
         return productAPIDto;

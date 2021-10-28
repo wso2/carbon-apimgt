@@ -1891,6 +1891,28 @@ public class ImportUtils {
         }
     }
 
+    public static List<ResourceEndpoint> retrieveProductResourceEndpoints(String pathToArchive)
+            throws APIManagementException {
+        List<ResourceEndpoint> resourceEndpoints = new ArrayList<>();
+        String apisDirectoryPath = pathToArchive + File.separator + ImportExportConstants.APIS_DIRECTORY;
+
+        File apisDirectory = new File(apisDirectoryPath);
+        File[] apisDirectoryListing = apisDirectory.listFiles();
+
+        if (apisDirectoryListing != null) {
+            for (File apiDirectory : apisDirectoryListing) {
+                String apiDirectoryPath = apisDirectoryPath + File.separator + apiDirectory.getName();
+                String resourceEndpointsDirectoryPath =
+                        apiDirectoryPath + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY;
+                boolean isResourceEndpointsAvailable = CommonUtil.checkFileExistence(resourceEndpointsDirectoryPath);
+                if (isResourceEndpointsAvailable) {
+                    resourceEndpoints.addAll(retrieveResourceEndpoints(apiDirectoryPath));
+                }
+            }
+        }
+        return resourceEndpoints;
+    }
+
     public static List<ResourceEndpoint> retrieveResourceEndpoints(String pathToArchive) throws APIManagementException {
         String jsonContent = null;
         List<ResourceEndpoint> resourceEndpoints = new ArrayList<>();

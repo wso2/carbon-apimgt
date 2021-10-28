@@ -2531,8 +2531,11 @@ public class APIMappingUtil {
 
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
+                template.setHttpVerbs(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
                 template.setUriTemplate(resourceItem.getTarget());
+                template.setOperationPolicies(OperationPolicyMappingUtil
+                        .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());
