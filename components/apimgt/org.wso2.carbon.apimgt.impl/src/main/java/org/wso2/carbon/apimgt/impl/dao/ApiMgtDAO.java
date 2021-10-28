@@ -8157,7 +8157,6 @@ public class ApiMgtDAO {
         String gatewayVendor = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_GATEWAY_VENDOR_BY_API_ID)) {
-            boolean initialAutoCommit = connection.getAutoCommit();
             ResultSet result = null;
             try {
                 connection.setAutoCommit(false);
