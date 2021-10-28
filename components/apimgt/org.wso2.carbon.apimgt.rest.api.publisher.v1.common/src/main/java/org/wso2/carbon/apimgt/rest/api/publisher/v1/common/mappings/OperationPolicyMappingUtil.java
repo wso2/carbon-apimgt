@@ -63,18 +63,20 @@ public class OperationPolicyMappingUtil {
             APIOperationPoliciesDTO apiOperationPoliciesDTO) {
         List<OperationPolicy> operationPoliciesList = new ArrayList<>();
 
-        List<OperationPolicyDTO> in = apiOperationPoliciesDTO.getIn();
-        List<OperationPolicyDTO> out = apiOperationPoliciesDTO.getOut();
-        for (OperationPolicyDTO op : in) {
-            OperationPolicy operationPolicy =  fromDTOToOperationPolicy(op);
-            operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_IN);
-            operationPoliciesList.add(operationPolicy);
-        }
+        if (apiOperationPoliciesDTO != null) {
+            List<OperationPolicyDTO> in = apiOperationPoliciesDTO.getIn();
+            List<OperationPolicyDTO> out = apiOperationPoliciesDTO.getOut();
+            for (OperationPolicyDTO op : in) {
+                OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
+                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_IN);
+                operationPoliciesList.add(operationPolicy);
+            }
 
-        for (OperationPolicyDTO op : out) {
-            OperationPolicy operationPolicy =  fromDTOToOperationPolicy(op);
-            operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_OUT);
-            operationPoliciesList.add(operationPolicy);
+            for (OperationPolicyDTO op : out) {
+                OperationPolicy operationPolicy = fromDTOToOperationPolicy(op);
+                operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_OUT);
+                operationPoliciesList.add(operationPolicy);
+            }
         }
         return operationPoliciesList;
     }
