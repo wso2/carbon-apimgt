@@ -237,6 +237,8 @@ public class InMemoryAPIDeployer {
                         GatewayUtils.setEndpointsToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
                                 gatewayAPIDTO);
                     }
+                    org.wso2.carbon.apimgt.gateway.utils.GatewayUtils
+                            .setResourceEndpointsToBeRemoved(gatewayAPIDTO, gatewayEvent.getTenantDomain());
                 } else {
                     API api = new API(new APIIdentifier(gatewayEvent.getProvider(), gatewayEvent.getName(),
                             gatewayEvent.getVersion()));

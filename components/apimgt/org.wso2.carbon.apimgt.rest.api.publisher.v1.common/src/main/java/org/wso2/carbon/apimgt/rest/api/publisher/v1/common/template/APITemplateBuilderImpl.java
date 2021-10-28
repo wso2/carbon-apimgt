@@ -78,10 +78,11 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     public APITemplateBuilderImpl(APIProduct apiProduct,
-                                  Map<String, APIDTO> associatedAPIMap) {
+                                  Map<String, APIDTO> associatedAPIMap, List<ResourceEndpoint> resourceEndpoints) {
 
         this.apiProduct = apiProduct;
         this.associatedAPIMap = associatedAPIMap;
+        this.resourceEndpoints = resourceEndpoints;
     }
 
     public APITemplateBuilderImpl(API api, List<SoapToRestMediationDto> soapToRestInMediationDtoList,
@@ -268,13 +269,20 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForResourceEndpointTemplate(String resourceEndpointId)
-            throws APITemplateException {
+    public String getConfigStringForResourceEndpointTemplate(String resourceEndpointId) throws APITemplateException {
 
         StringWriter writer = new StringWriter();
         try {
-            ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new ResourceEndpointConfigContext(configcontext, this.resourceEndpoints, this.api);
+            ConfigContext configcontext;
+            if (this.api != null) {
+                configcontext = new APIConfigContext(this.api);
+                configcontext = new ResourceEndpointConfigContext(configcontext, this.resourceEndpoints, this.api);
+            } else {
+                configcontext = new APIConfigContext(this.apiProduct);
+                configcontext = new ResourceEndpointConfigContext(configcontext, this.resourceEndpoints,
+                        this.apiProduct);
+            }
+
             configcontext = new TemplateUtilContext(configcontext);
             configcontext.validate();
 
@@ -391,6 +399,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new ResponseCacheConfigContext(configcontext, apiProduct);
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
+        configcontext = new ResourceEndpointConfigContext(configcontext, this.resourceEndpoints, apiProduct);
         configcontext = new TemplateUtilContext(configcontext);
         configcontext = new SecurityConfigContext(configcontext, apiProduct, associatedAPIMap);
 
