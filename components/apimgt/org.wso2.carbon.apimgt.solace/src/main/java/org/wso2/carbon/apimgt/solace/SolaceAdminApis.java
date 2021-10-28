@@ -762,8 +762,14 @@ public class SolaceAdminApis {
         credentialsBody.put("expiresAt", -1);
         credentialsBody.put("issuedAt", 0);
         org.json.JSONObject credentialsSecret = new org.json.JSONObject();
-        credentialsSecret.put("consumerKey", appName + "-application-key");
-        credentialsSecret.put("consumerSecret", appName + "-application-secret");
+        // Set consumer key and secret for new application
+        if (application.getKeys().isEmpty()) {
+            credentialsSecret.put("consumerKey", appName + "-application-key");
+            credentialsSecret.put("consumerSecret", appName + "-application-secret");
+        } else {
+            credentialsSecret.put("consumerKey", application.getKeys().get(0).getConsumerKey());
+            credentialsSecret.put("consumerSecret", application.getKeys().get(0).getConsumerSecret());
+        }
         credentialsBody.put("secret", credentialsSecret);
         requestBody.put("credentials", credentialsBody);
 
