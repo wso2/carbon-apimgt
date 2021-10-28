@@ -8154,7 +8154,7 @@ public class ApiMgtDAO {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException {
-        String organization = null;
+        String gatewayVendor = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_GATEWAY_VENDOR_BY_API_ID)) {
             boolean initialAutoCommit = connection.getAutoCommit();
@@ -8165,19 +8165,17 @@ public class ApiMgtDAO {
                 result = ps.executeQuery();
 
                 while (result.next()) {
-                    organization = result.getString("GATEWAY_VENDOR");
+                    gatewayVendor = result.getString("GATEWAY_VENDOR");
                 }
                 connection.commit();
             } catch (SQLException e) {
                 APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching gateway vendor" +
                         " of the API", e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
         }
-        return organization;
+        return gatewayVendor;
     }
 
     /**
