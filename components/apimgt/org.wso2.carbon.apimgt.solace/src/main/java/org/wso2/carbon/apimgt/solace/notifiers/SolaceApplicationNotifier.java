@@ -124,7 +124,7 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                         event.getUuid(), "default");
                 if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     applicationFoundInSolaceBroker = true;
-                    // TODO: Have debug logs with the time to execute
+
                     if (log.isDebugEnabled()) {
                         log.info("Found application '" + event.getApplicationName() + "' in Solace broker");
                         log.info("Waiting until application removing workflow gets finished");
