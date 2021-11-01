@@ -351,6 +351,10 @@ public class APIKeyValidator {
             for (String resourceString : resourceArray) {
                 VerbInfoDTO verbInfo;
                 if (isGatewayAPIResourceValidationEnabled) {
+                    String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+                    if (!getResourceCache().containsKey(apiCacheKey)) {
+                        break;
+                    }
                     resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
                             resourceString, httpMethod);
                     verbInfo = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);

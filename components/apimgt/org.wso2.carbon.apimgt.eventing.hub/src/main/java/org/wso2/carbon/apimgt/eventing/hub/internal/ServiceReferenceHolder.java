@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.eventing.hub.internal;
 
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.event.stream.core.EventStreamService;
 
 /**
  * Service reference holder for eventing hub.
@@ -25,6 +26,7 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private OutputEventAdapterService outputEventAdapterService;
+    private EventStreamService eventStreamService;
 
     private ServiceReferenceHolder() {
 
@@ -40,5 +42,13 @@ public class ServiceReferenceHolder {
 
     public OutputEventAdapterService getOutputEventAdapterService() {
         return outputEventAdapterService;
+    }
+
+    public void setEventStreamService(EventStreamService eventStreamService) {
+        this.eventStreamService = eventStreamService;
+    }
+
+    public EventStreamService getEventStreamService() {
+        return eventStreamService;
     }
 }

@@ -50,7 +50,7 @@ public class APICategoryMappingUtil {
             APICategoryDTO categoryDTO = new APICategoryDTO();
             categoryDTO.setId(category.getId());
             categoryDTO.setName(category.getName());
-            categoryDTO.setDescription(category.getDescription());
+            categoryDTO.setDescription(category.getDescription() == null ? "" : category.getDescription());
             categoryDTOs.add(categoryDTO);
         }
         return categoryDTOs;
