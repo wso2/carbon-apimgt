@@ -623,11 +623,12 @@ public class TemplateBuilderUtil {
 
             GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
             if (graphql.checkSubscriptionAvailability(api.getGraphQLSchema())) {
+                // if subscriptions are available add new URI template with wild card resource without http verb.
                 template = new URITemplate();
                 template.setUriTemplate("/*");
                 uriTemplates.add(template);
                 api.setUriTemplates(uriTemplates);
-                addGQLWebSocketTopicMappings(api, apidto);
+                addGQLWebSocketTopicMappings(api);
             }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
@@ -733,11 +734,12 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * TODO://
-     * @param api
-     * @param apidto
+     * This method is used to add websocket topic mappings for GraphQL subscription. Here both production and sandbox
+     * endpoint urls are added under single wild card resource.
+     *
+     * @param api GraphQL API
      */
-    private static void addGQLWebSocketTopicMappings(API api, APIDTO apidto) {
+    private static void addGQLWebSocketTopicMappings(API api) {
 
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig()).getJSONObject("ws");
         String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
@@ -834,8 +836,15 @@ public class TemplateBuilderUtil {
         }
     }
 
+    /**
+     * This method is used to add the list of GatewayContentDTO as an array of GatewayContentDTOs.
+     *
+     * @param gatewayContentDTOList List of GatewayContentDTOs to add
+     * @param gatewayContents       Array of gateway contents to add
+     * @return An array of GatewayContentDTOs
+     */
     private static GatewayContentDTO[] addGatewayContentsToList(List<GatewayContentDTO> gatewayContentDTOList,
-                                                               GatewayContentDTO[] gatewayContents) {
+                                                                GatewayContentDTO[] gatewayContents) {
 
         if (gatewayContents != null) {
             Collections.addAll(gatewayContentDTOList, gatewayContents);

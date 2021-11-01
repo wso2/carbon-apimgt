@@ -413,6 +413,15 @@ public class JWTValidator {
         return jwtValidationInfo;
     }
 
+    /**
+     * This method is used to validate subscriptions for WS API requests.
+     *
+     * @param jwtValidationInfo JWTValidationInfo
+     * @param apiContext        API Context
+     * @param apiVersion        API Version
+     * @return APIKeyValidationInfoDTO
+     * @throws APISecurityException if an error occurs.
+     */
     private APIKeyValidationInfoDTO validateSubscriptionsForWS(JWTValidationInfo jwtValidationInfo, String apiContext, String apiVersion)
             throws APISecurityException {
         log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
@@ -425,6 +434,17 @@ public class JWTValidator {
         return apiKeyValidationInfoDTO;
     }
 
+    /**
+     * Generate backend JWT for WS API requests.
+     *
+     * @param jwtValidationInfo       JWTValidationInfo
+     * @param apiKeyValidationInfoDTO APIKeyValidationInfoDTO
+     * @param apiContext              API Context
+     * @param apiVersion              API Version
+     * @param tokenSignature          Token signature
+     * @return Backend JWT String
+     * @throws APISecurityException if an error ocurrs
+     */
     private String generateBackendJWTForWS(JWTValidationInfo jwtValidationInfo,
                                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                            String apiContext, String apiVersion, String tokenSignature)
@@ -440,6 +460,16 @@ public class JWTValidator {
         return endUserToken;
     }
 
+    /**
+     * Generate Authentication Context for WS API requests.
+     *
+     * @param jti                     JTI
+     * @param jwtValidationInfo       JWTValidationInfo
+     * @param apiKeyValidationInfoDTO APIKeyValidationInfoDTO
+     * @param endUserToken            Enduser token
+     * @param apiVersion              API Version
+     * @return AuthenticationContext
+     */
     private AuthenticationContext generateAuthenticationContextForWS(String jti, JWTValidationInfo jwtValidationInfo,
                                                                      APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                                      String endUserToken, String apiVersion) {
@@ -451,6 +481,16 @@ public class JWTValidator {
     }
 
 
+    /**
+     * Authenticate for GraphQL subscriptions API requests. This method validates the token signature, expire time and
+     * subscription. The token request scopes are added to the AuthenticationContxt to validate later.
+     *
+     * @param signedJWTInfo SignedJWTInfo
+     * @param apiContext    API context
+     * @param apiVersion    API version
+     * @return AuthenticationContext
+     * @throws APISecurityException if an error occurs
+     */
     public AuthenticationContext authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
                                                                                         String apiVersion)
             throws APISecurityException {
@@ -528,6 +568,16 @@ public class JWTValidator {
         }
     }
 
+    /**
+     * Validate scopes for GraphQL subscription API calls using token scopes in authentication context.
+     *
+     * @param apiContext            API Context
+     * @param apiVersion            API Version
+     * @param matchingResource      Matching resource
+     * @param jwtToken              JWT Token
+     * @param authenticationContext AuthenticationContext
+     * @throws APISecurityException if an error occurs
+     */
     public void validateScopesForGraphQLSubscriptions(String apiContext, String apiVersion, String matchingResource,
                                                       SignedJWTInfo jwtToken,
                                                       AuthenticationContext authenticationContext)
