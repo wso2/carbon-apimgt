@@ -622,7 +622,7 @@ public class TemplateBuilderUtil {
             api.setUriTemplates(uriTemplates);
 
             GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-            if (graphql.checkSubscriptionAvailability(api.getGraphQLSchema())) {
+            if (graphql.isSubscriptionAvailable(api.getGraphQLSchema())) {
                 // if subscriptions are available add new URI template with wild card resource without http verb.
                 template = new URITemplate();
                 template.setUriTemplate("/*");

@@ -61,7 +61,7 @@ public class GraphQLProcessorUtil {
      * @param supportedFields supportedFields
      * @param operationArray  operationArray
      */
-    private static void getNestedLevelOperations(List<Selection> selectionList, ArrayList<String> supportedFields,
+    public static void getNestedLevelOperations(List<Selection> selectionList, ArrayList<String> supportedFields,
                                                  ArrayList<String> operationArray) {
         for (Selection selection : selectionList) {
             if (!(selection instanceof Field)) {

@@ -71,7 +71,7 @@ public class APIUtils {
                 } else if (APIConstants.GRAPHQL_API.equalsIgnoreCase(api.getType())) {
                     gwEndpoints = environment.getApiGatewayEndpoint().split(",");
                     GraphQLSchemaDefinition gqlSchema = new GraphQLSchemaDefinition();
-                    if (gqlSchema.checkSubscriptionAvailability(api.getGraphQLSchema())) {
+                    if (gqlSchema.isSubscriptionAvailable(api.getGraphQLSchema())) {
                         String[] gwWSEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
                         gwEndpoints = ArrayUtils.addAll(gwEndpoints, gwWSEndpoints);
                     }

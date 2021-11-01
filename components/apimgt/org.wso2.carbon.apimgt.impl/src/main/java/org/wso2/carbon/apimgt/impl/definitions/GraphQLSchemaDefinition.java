@@ -63,11 +63,11 @@ public class GraphQLSchemaDefinition {
     protected Log log = LogFactory.getLog(getClass());
 
     /**
-     * Extract GraphQL Operations from given schema
+     * Extract GraphQL Operations from given schema.
      *
      * @param typeRegistry graphQL Schema Type Registry
-     * @param type
-     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
+     * @param type operation type string
+     * @return the arrayList of APIOperationsDTO
      */
     public List<URITemplate> extractGraphQLOperationList(TypeDefinitionRegistry typeRegistry, String type) {
         List<URITemplate> operationArray = new ArrayList<>();
@@ -101,12 +101,12 @@ public class GraphQLSchemaDefinition {
     }
 
     /**
-     * Ckeck subscription operation availability from given graphql schema
+     * Check subscription operation availability from given graphql schema.
      *
      * @param schema graphQL Schema
      * @return the boolean value of subscription operation availability
      */
-    public boolean checkSubscriptionAvailability(String schema) {
+    public boolean isSubscriptionAvailable(String schema) {
         boolean isSubscriptionAvailable = false;
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);

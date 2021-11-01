@@ -149,7 +149,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                     boolean isSubscriptionAvailable = false;
                     GraphQLSchemaDefinition graphQLSchemaDefinition = new GraphQLSchemaDefinition();
-                    if (graphQLSchemaDefinition.checkSubscriptionAvailability(api.getGraphQLSchema())) {
+                    if (graphQLSchemaDefinition.isSubscriptionAvailable(api.getGraphQLSchema())) {
                         isSubscriptionAvailable = true;
                         context.put("topicMappings", this.api.getWebSocketTopicMappingConfiguration().getMappings());
                     }
