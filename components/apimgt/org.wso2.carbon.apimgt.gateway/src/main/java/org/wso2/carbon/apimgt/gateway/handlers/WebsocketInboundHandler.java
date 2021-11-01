@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLSubscriptionDataHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.SubscriptionAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -86,8 +87,6 @@ import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
-import org.wso2.carbon.metrics.manager.MetricManager;
-import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -126,7 +125,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
     private GraphQLSchemaDTO graphQLSchemaDTO;
     private SignedJWTInfo signedJWTInfo;
-    private Map<String, VerbInfoDTO> graphQLMsgIdToVerbInfo = new HashMap<>();
     private APIInfoDTO graphQLAPIInfo;
     private WSAPIKeyDataStore dataStore;
 
@@ -252,7 +250,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                 if (definition instanceof OperationDefinition) {
                                     OperationDefinition operation = (OperationDefinition) definition;
                                     if (operation.getOperation() != null
-                                            && APIConstants.GRAPHQL_SUBSCRIPTION.equals(operation.getOperation()
+                                            && APIConstants.GRAPHQL_SUBSCRIPTION
+                                            .equalsIgnoreCase(operation.getOperation()
                                             .toString()) && graphQLMsg.getString("id") != null) {
                                         QueryValidator queryValidator = new QueryValidator(new Validator());
                                         // payload validation
@@ -272,7 +271,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                             return;
                                         }
                                         VerbInfoDTO verbInfoDTO = findMatchingVerb(subscriptionOperation);
-                                        graphQLMsgIdToVerbInfo.put(graphQLMsg.getString("id"), verbInfoDTO);
+                                        GraphQLSubscriptionDataHolder.getInstance()
+                                                .addVerbInfoForGraphQLMsgId(graphQLMsg.getString("id"), verbInfoDTO);
                                         // analyze query depth and complexity
                                         SubscriptionAnalyzer subscriptionAnalyzer =
                                                 new SubscriptionAnalyzer(graphQLSchemaDTO.getGraphQLSchema());
@@ -297,6 +297,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         } else {
                             throw new UnsupportedOperationException("Invalid operation payload");
                         }
+                    } else {
+                        ctx.fireChannelRead(msg);
+                        return;
                     }
                 } else {
                     ctx.fireChannelRead(msg);
@@ -461,6 +464,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private boolean authenticateGraphQLJWTToken() throws APIManagementException, APISecurityException {
         AuthenticationContext authenticationContext;
         APIKeyValidationInfoDTO info = null;
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), tenantDomain);
         authenticationContext = jwtValidator.
                 authenticateForGraphQLSubscription(signedJWTInfo, apiContext, version);
@@ -625,7 +630,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         String apiLevelTier = infoDTO.getApiTier();
         String subscriptionLevelTier = infoDTO.getTier();
         String resourceLevelTier = verbInfoDTO.getThrottling();
-        boolean isUnlimitedResourceTier = APIConstants.UNLIMITED_TIER.equalsIgnoreCase(resourceLevelTier);
         String authorizedUser;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(infoDTO.getSubscriberTenantDomain())) {
             authorizedUser = infoDTO.getSubscriber() + "@" + infoDTO.getSubscriberTenantDomain();
@@ -640,20 +644,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         String applicationLevelThrottleKey = appId + ":" + authorizedUser;
         String apiLevelThrottleKey = apiContext + ":" + apiVersion;
         String resourceLevelThrottleKey = null;
-        boolean apiLevelThrottledTriggered = false;
         //If API level throttle policy is present then it will apply and no resource level policy will apply for it
-        if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
+        if (StringUtils.isNotEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
             resourceLevelThrottleKey = apiLevelThrottleKey;
-            apiLevelThrottledTriggered = true;
-        }
-        //If verbInfo is present then only we will do resource level throttling
-        if (isUnlimitedResourceTier && !apiLevelThrottledTriggered) {
-            //If unlimited tier throttling will not apply at resource level and pass it
-            if (log.isDebugEnabled()) {
-                log.debug("Resource level throttling set as unlimited and request will pass " +
-                        "resource level");
-            }
-        } else {
+        } else if (StringUtils.isNotEmpty(resourceLevelTier)) {
             resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
         }
         String subscriptionLevelThrottleKey = appId + ":" + apiContext + ":" + apiVersion;

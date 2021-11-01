@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -543,7 +544,7 @@ public class JWTValidator {
         tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
 
         tokenValidationContext.setAccessToken(jwtToken.getToken());
-        tokenValidationContext.setHttpVerb(WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME);
+        tokenValidationContext.setHttpVerb(GraphQLConstants.GRAPHQL_SUBSCRIPTION_HTTP_METHOD_NAME);
         tokenValidationContext.setMatchingResource(matchingResource);
         tokenValidationContext.setContext(apiContext);
         tokenValidationContext.setVersion(apiVersion);

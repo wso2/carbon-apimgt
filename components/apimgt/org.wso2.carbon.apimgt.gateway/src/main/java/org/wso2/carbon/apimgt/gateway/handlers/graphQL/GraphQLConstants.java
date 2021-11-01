@@ -33,4 +33,6 @@ public class GraphQLConstants {
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
     public static final String GRAPHQL_INVALID_QUERY_MESSAGE= "INVALID QUERY";
 
+    public static final String GRAPHQL_SUBSCRIPTION_HTTP_METHOD_NAME = "SUBSCRIPTION";
+
 }
