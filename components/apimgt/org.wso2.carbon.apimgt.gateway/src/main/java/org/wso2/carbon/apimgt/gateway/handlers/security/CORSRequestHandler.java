@@ -132,6 +132,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             CORSRequestHandlerSpan =
                     Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
         }
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
+        }
         try {
             if (!initializeHeaderValues) {
                 initializeHeaders();
@@ -144,9 +150,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
             Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            if (headers == null && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)) {
-                return true;
-            }
             String corsRequestMethod = (String) headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_REQUEST_METHOD);
 
             Resource selectedResource = null;

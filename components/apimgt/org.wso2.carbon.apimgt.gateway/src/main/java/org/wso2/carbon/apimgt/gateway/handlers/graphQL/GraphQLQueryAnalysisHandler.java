@@ -41,10 +41,10 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     private QueryMutationAnalyzer queryMutationAnalyzer;
 
     public boolean handleRequest(MessageContext messageContext) {
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        if ((axis2MC.getIncomingTransportName().equals("ws") || axis2MC.getIncomingTransportName().equals("wss")) &&
-                (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)) {
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
             return true;
         }
         GraphQLSchema schema = (GraphQLSchema) messageContext.getProperty(APIConstants.GRAPHQL_SCHEMA);

@@ -335,6 +335,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         long endTime;
         long difference;
 
+        if (Utils.isGraphQLSubscriptionRequest(messageContext)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping GraphQL subscription handshake request.");
+            }
+            return true;
+        }
+
         try {
             if (isAnalyticsEnabled()) {
                 long currentTime = System.currentTimeMillis();
@@ -342,7 +349,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
-
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
@@ -421,14 +427,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
-
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        if ((axis2MC.getIncomingTransportName().equals("ws") || axis2MC.getIncomingTransportName().equals("wss"))
-                && (boolean) messageContext.getProperty(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST)){
-            AuthenticationContext authCtx = (AuthenticationContext) messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT);
-            return authCtx.isAuthenticated();
-        }
 
         for (Authenticator authenticator : authenticators) {
             authenticationResponse = authenticator.authenticate(messageContext);
