@@ -41,7 +41,6 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +56,6 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -110,7 +108,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -694,18 +691,21 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     api.setSwaggerDefinition(apiDocContent);
                 }
 
-                if (asyncApiDefinitionPath != null) {
-                    if (registry.resourceExists(asyncApiDefinitionPath)) {
-                        Resource apiDocResource = registry.get(asyncApiDefinitionPath);
-                        String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                        api.setAsyncApiDefinition(apiDocContent);
-                    }
-                }
-
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                     List<SOAPToRestSequence> list = getSoapToRestSequences(registry, api, Direction.IN);
                     list.addAll(getSoapToRestSequences(registry, api, Direction.OUT));
                     api.setSoapToRestSequences(list);
+                } else if (APIConstants.API_TYPE_WEBSUB.equals(api.getType()) ||
+                        APIConstants.API_TYPE_WS.equals(api.getType()) ||
+                        APIConstants.API_TYPE_SSE.equals(api.getType()) ||
+                        APIConstants.API_TYPE_WEBHOOK.equals(api.getType())) {
+                    if (asyncApiDefinitionPath != null) {
+                        if (registry.resourceExists(asyncApiDefinitionPath)) {
+                            Resource apiDocResource = registry.get(asyncApiDefinitionPath);
+                            String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                            api.setAsyncApiDefinition(apiDocContent);
+                        }
+                    }
                 }
 
                 PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ; 
@@ -985,10 +985,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
+                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1335,11 +1335,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                                 apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                                 apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                                 apiInfo.setStatus(status);
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));
                                 apiInfo.setUpdatedTime(resource.getLastModified());
+                                apiInfo.setGatewayVendor(String.valueOf(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR)));
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                                 publisherAPIInfoList.add(apiInfo);

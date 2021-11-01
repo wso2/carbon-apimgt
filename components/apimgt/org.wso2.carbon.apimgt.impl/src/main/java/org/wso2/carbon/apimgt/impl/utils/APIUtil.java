@@ -857,7 +857,7 @@ public final class APIUtil {
                 tags.add(tag1.getTagName());
             }
             api.addTags(tags);
-            api.setGatewayVendor(artifact.getAttribute(APIConstants.API_GATEWAY_VENDOR));
+            api.setGatewayVendor(ApiMgtDAO.getInstance().getGatewayVendorByAPIUUID(apiIdentifier.getUUID()));
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
