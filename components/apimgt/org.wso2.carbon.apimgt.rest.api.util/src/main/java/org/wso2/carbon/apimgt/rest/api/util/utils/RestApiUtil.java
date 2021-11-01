@@ -1432,4 +1432,14 @@ public class RestApiUtil {
         String organization = resolver.resolve(properties);
         return  organization;
     }
+
+    public static String resolveOrganization (HashMap<String,Object> message) throws APIManagementException{
+        OrganizationResolver resolver = APIUtil.getOrganizationResolver();
+        // populate properties needed for the resolver.
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+        properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
+        properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+        String organization = resolver.resolve(properties);
+        return  organization;
+    }
 }
