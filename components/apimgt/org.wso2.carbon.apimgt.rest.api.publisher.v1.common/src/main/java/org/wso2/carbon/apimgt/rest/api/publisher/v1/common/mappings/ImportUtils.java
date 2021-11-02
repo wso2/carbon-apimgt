@@ -402,6 +402,9 @@ public class ImportUtils {
      * @param importedApiDTO API DTO to import
      */
     public static boolean isAdvertiseOnlyAPI(APIDTO importedApiDTO) {
+        if (importedApiDTO.getAdvertiseInfo() != null && importedApiDTO.getAdvertiseInfo().isAdvertised() == null) {
+            importedApiDTO.getAdvertiseInfo().setAdvertised(Boolean.FALSE);
+        }
         return importedApiDTO.getAdvertiseInfo() != null && importedApiDTO.getAdvertiseInfo().isAdvertised();
     }
     
