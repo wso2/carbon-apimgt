@@ -14610,6 +14610,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         PreparedStatement removeURLMappingsStatement = null;
+        PreparedStatement removeResourceEndpoints = null;
         try {
             // Retrieve Product Resources
             PreparedStatement getProductMappingsStatement = connection.prepareStatement(SQLConstants.
@@ -14630,6 +14631,13 @@ public class ApiMgtDAO {
                 removeURLMappingsStatement.addBatch();
             }
             removeURLMappingsStatement.executeBatch();
+
+            //Remove records from AM_API_RESOURCE_ENDPOINTS table
+            removeResourceEndpoints = connection
+                    .prepareStatement(SQLConstants.ResourceEndpointConstants.DELETE_RESOURCE_ENDPOINTS_OF_API_PRODUCT);
+            removeResourceEndpoints.setString(1, new Integer(productId).toString());
+            removeResourceEndpoints.execute();
+
             //Add new resources
             addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
         } catch (SQLException e) {
