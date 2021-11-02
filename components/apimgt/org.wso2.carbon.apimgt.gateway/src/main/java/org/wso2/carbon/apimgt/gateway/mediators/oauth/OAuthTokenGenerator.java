@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.OAuthClient;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -55,8 +56,8 @@ public class OAuthTokenGenerator {
             TokenResponse tokenResponse = null;
             if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
                 Object previousResponseObject =
-                        ServiceReferenceHolder.getInstance().getRedisCacheUtils().getObject(oAuthEndpoint.getId(),
-                        TokenResponse.class);
+                        new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
+                                .getObject(oAuthEndpoint.getId(), TokenResponse.class);
                 if (previousResponseObject != null) {
                     tokenResponse = (TokenResponse) previousResponseObject;
                 }
@@ -119,7 +120,8 @@ public class OAuthTokenGenerator {
         assert tokenResponse != null;
         if (tokenResponse.getExpiresIn() != null) {
             if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
-                ServiceReferenceHolder.getInstance().getRedisCacheUtils().addObject(oAuthEndpoint.getId(), tokenResponse);
+                new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
+                        .addObject(oAuthEndpoint.getId(), tokenResponse);
             } else {
                 TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), tokenResponse);
             }

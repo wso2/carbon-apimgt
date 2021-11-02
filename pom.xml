@@ -792,6 +792,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.synapse</groupId>
+                <artifactId>synapse-commons</artifactId>
+                <version>${synapse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.synapse</groupId>
                 <artifactId>synapse-extensions</artifactId>
                 <version>${synapse.version}</version>
             </dependency>
@@ -1959,7 +1964,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v227</synapse.version>
+	    <synapse.version>2.1.7-wso2v232</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
