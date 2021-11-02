@@ -405,6 +405,25 @@ public class CommonUtil {
     }
 
     /**
+     * Add the type and the version to the artifact file when exporting.
+     *
+     * @param type        Type of the artifact to be exported
+     * @param version     API Manager version
+     * @param rootName    element name @{jsonElement} is added
+     * @param jsonElement JSON element to be added as data
+     * @return The artifact object with the type and version added to it
+     */
+    public static JsonObject addTypeAndVersionToFile(String type, String version, String rootName,
+            JsonElement jsonElement) {
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(APIConstants.TYPE, type);
+        jsonObject.addProperty(APIConstants.API_DATA_VERSION, version);
+        jsonObject.add(rootName, jsonElement);
+        return jsonObject;
+    }
+
+    /**
      * Write the file content of an API or API related artifact based on the format.
      *
      * @param filePath     Path to the location where the file content should be written
@@ -440,6 +459,27 @@ public class CommonUtil {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonObject jsonObject = addTypeAndVersionToFile(type, ImportExportConstants.APIM_VERSION,
                 gson.toJsonTree(dtoObject));
+        String jsonContent = gson.toJson(jsonObject);
+        writeToYamlOrJson(filePath, exportFormat, jsonContent);
+    }
+
+    /**
+     * Write the DTO an artifact based on the format.
+     *
+     * @param filePath     Path to the location where the file content should be written
+     * @param exportFormat Format to be exported
+     * @param type         Type of the file to be written
+     * @param rootName     element name @{dtoObject} is added
+     * @param dtoObject    DTO object
+     * @throws APIImportExportException if an error occurs while writing the file to YAML or JSON
+     * @throws IOException              if an error occurs while converting the file from JSON to YAML
+     */
+    public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, String rootName,
+            Object dtoObject) throws APIImportExportException, IOException {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject jsonObject =
+                addTypeAndVersionToFile(type, ImportExportConstants.APIM_VERSION, rootName, gson.toJsonTree(dtoObject));
         String jsonContent = gson.toJson(jsonObject);
         writeToYamlOrJson(filePath, exportFormat, jsonContent);
     }

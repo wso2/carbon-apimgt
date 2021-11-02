@@ -27,6 +27,8 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
@@ -61,6 +63,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -5123,4 +5126,35 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         return Response.status(status).entity(apiRevisionDeploymentDTO).build();
     }
+
+    @Override
+    public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiUuid, String envId, String ifMatch,
+            MessageContext messageContext) throws APIManagementException {
+        String props = getEnvironmentSpecificAPIProperties(apiUuid, envId);
+        return Response.ok().entity(props)
+                .header("Content-Disposition", "attachment; filename=\"swagger.json\"")
+                .build();
+    }
+
+    @Override
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiUuid, String envId, String body, String ifMatch,
+            MessageContext messageContext) throws APIManagementException {
+        addEnvironmentSpecificAPIProperties(apiUuid, envId, body);
+        String props = getEnvironmentSpecificAPIProperties(apiUuid, envId);
+        return Response.ok().entity(props)
+                .header("Content-Disposition", "attachment; filename=\"swagger.json\"")
+                .build();
+    }
+
+    private String getEnvironmentSpecificAPIProperties(String apiUuid, String envId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        return apiProvider.getEnvironmentSpecificAPIProperties(apiUuid, envId);
+    }
+
+    private void addEnvironmentSpecificAPIProperties(String apiUuid, String envId, String body)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.addEnvironmentSpecificAPIProperties(apiUuid, envId, body);
+    }
+
 }

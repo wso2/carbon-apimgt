@@ -2763,6 +2763,8 @@ public final class APIConstants {
     public static class GatewayArtifactConstants {
         public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
         public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
+        public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE = "env_properties";
+        public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "environments";
     }
 
     public static class OrganizationDeletion {

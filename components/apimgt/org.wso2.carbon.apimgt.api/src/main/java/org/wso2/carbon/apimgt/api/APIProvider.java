@@ -1823,4 +1823,9 @@ public interface APIProvider extends APIManager {
     String generateApiKey(String apiId) throws APIManagementException;
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
+
+    void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
+            throws APIManagementException;
+
+    String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException;
 }
