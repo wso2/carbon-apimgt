@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -601,7 +603,6 @@ public class TemplateBuilderUtil {
         boolean isGraphQLSubscriptionAPI = false;
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-            isGraphQLSubscriptionAPI = true;
             //Build schema with additional info
             gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUUID() + "_graphQL",
                     gatewayAPIDTO.getLocalEntriesToBeRemove()));
@@ -623,11 +624,13 @@ public class TemplateBuilderUtil {
 
             GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
             if (graphql.isSubscriptionAvailable(api.getGraphQLSchema())) {
+                isGraphQLSubscriptionAPI = true;
                 // if subscriptions are available add new URI template with wild card resource without http verb.
                 template = new URITemplate();
                 template.setUriTemplate("/*");
                 uriTemplates.add(template);
                 api.setUriTemplates(uriTemplates);
+                api.setEndpointConfig(populateSubscriptionEndpointConfig(api.getEndpointConfig()));
                 addGQLWebSocketTopicMappings(api);
             }
         } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
@@ -741,7 +744,8 @@ public class TemplateBuilderUtil {
      */
     private static void addGQLWebSocketTopicMappings(API api) {
 
-        org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig()).getJSONObject("ws");
+        org.json.JSONObject endpointConfiguration =
+                new org.json.JSONObject(api.getEndpointConfig()).getJSONObject("ws");
         String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
                 endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url") : null;
         String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
@@ -1314,6 +1318,60 @@ public class TemplateBuilderUtil {
             }
         }
         return modifiedProperties;
+    }
+
+    /**
+     * This method is update the existing GraphQL API endpoint config with ws endpoint config and
+     * existing http endpoint config.
+     *
+     * @param endpointConfig Current endpoint config
+     * @return Updated endpoint config
+     * @throws APIManagementException if an error occurs
+     */
+    private static String populateSubscriptionEndpointConfig(String endpointConfig) throws APIManagementException {
+
+        try {
+            JSONObject newEndpointConfigJson = new JSONObject();
+            newEndpointConfigJson.put("endpoint_type", "graphql");
+            JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+            newEndpointConfigJson.put("http", oldEndpointConfigJson);
+            JSONObject wsEndpointConfig = new JSONObject();
+            wsEndpointConfig.put("endpoint_type", "ws");
+            if (oldEndpointConfigJson.get("production_endpoints") != null &&
+                    ((JSONObject) oldEndpointConfigJson.get("production_endpoints")).get("url") != null) {
+                JSONObject prodWSEndpointConfig;
+                String httpProdEndpoint = (String)
+                        ((JSONObject) oldEndpointConfigJson.get("production_endpoints")).get("url");
+                String prodWsEndpoint = "";
+                if (httpProdEndpoint.indexOf("http://") == 0) {
+                    prodWsEndpoint = httpProdEndpoint.replace("http://", "ws://");
+                } else if (httpProdEndpoint.indexOf("https://") == 0) {
+                    prodWsEndpoint = httpProdEndpoint.replace("https://", "wss://");
+                }
+                prodWSEndpointConfig = new JSONObject();
+                prodWSEndpointConfig.put("url", prodWsEndpoint);
+                wsEndpointConfig.put("production_endpoints", prodWSEndpointConfig);
+            }
+            if (oldEndpointConfigJson.get("sandbox_endpoints") != null
+                    && ((JSONObject) oldEndpointConfigJson.get("sandbox_endpoints")).get("url") != null) {
+                JSONObject sandboxWSEndpointConfig;
+                String sandboxWsEndpoint = "";
+                String httpSandboxEndpoint = (String)
+                        ((JSONObject) oldEndpointConfigJson.get("sandbox_endpoints")).get("url");
+                if (httpSandboxEndpoint.indexOf("http://") == 0) {
+                    sandboxWsEndpoint = httpSandboxEndpoint.replace("http://", "ws://");
+                } else if (httpSandboxEndpoint.indexOf("https://") == 0) {
+                    sandboxWsEndpoint = httpSandboxEndpoint.replace("https://", "wss://");
+                }
+                sandboxWSEndpointConfig = new JSONObject();
+                sandboxWSEndpointConfig.put("url", sandboxWsEndpoint);
+                wsEndpointConfig.put("sandbox_endpoints", sandboxWSEndpointConfig);
+            }
+            newEndpointConfigJson.put("ws", wsEndpointConfig);
+            return newEndpointConfigJson.toJSONString();
+        } catch (ParseException e) {
+            throw new APIManagementException(e.getMessage());
+        }
     }
 
 }
