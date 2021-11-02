@@ -38,9 +38,11 @@ public class ResourceEndpointConfigContext extends ConfigContextDecorator {
         super.validate();
         JSONObject resourceEndpointMap = new JSONObject();
 
-        for (ResourceEndpoint resourceEndpoint : resourceEndpoints) {
-            JSONObject resourceEndpointConfig = constructEndpointConfig(resourceEndpoint);
-            resourceEndpointMap.put(resourceEndpoint.getId(), resourceEndpointConfig);
+        if (resourceEndpoints != null) {
+            for (ResourceEndpoint resourceEndpoint : resourceEndpoints) {
+                JSONObject resourceEndpointConfig = constructEndpointConfig(resourceEndpoint);
+                resourceEndpointMap.put(resourceEndpoint.getId(), resourceEndpointConfig);
+            }
         }
         this.resourceEndpointConfig = resourceEndpointMap;
     }
