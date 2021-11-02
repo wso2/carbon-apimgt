@@ -11227,13 +11227,15 @@ public final class APIUtil {
     public static boolean isStreamingApi(API api) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(api.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(api.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType());
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType()) ||
+                APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(api.getType());
     }
 
     public static boolean isStreamingApi(APIProduct apiProduct) {
         return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
                 APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType()) ||
+                APIConstants.APITransportType.ASYNC.toString().equalsIgnoreCase(apiProduct.getType());
     }
 
     /**

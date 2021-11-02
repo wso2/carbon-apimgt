@@ -1108,7 +1108,8 @@ public class APIMappingUtil {
 
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
-                || APIDTO.TypeEnum.SSE.toString().equals(model.getType());
+                || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
+                || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());

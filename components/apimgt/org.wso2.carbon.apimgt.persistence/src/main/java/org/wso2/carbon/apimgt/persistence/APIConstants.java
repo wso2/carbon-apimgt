@@ -294,7 +294,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static final String[] API_SUPPORTED_TYPE_LIST =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK"};
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
