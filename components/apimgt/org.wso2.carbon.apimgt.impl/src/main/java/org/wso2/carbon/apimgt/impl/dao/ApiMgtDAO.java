@@ -13913,7 +13913,7 @@ public class ApiMgtDAO {
 
                     VHost vhost = new VHost();
                     vhost.setHost(host);
-                    vhost.setHttpContext(httpContext);
+                    vhost.setHttpContext(httpContext == null ? "" : httpContext);
                     vhost.setHttpPort(httpPort);
                     vhost.setHttpsPort(httpsPort);
                     vhost.setWsPort(wsPort);
