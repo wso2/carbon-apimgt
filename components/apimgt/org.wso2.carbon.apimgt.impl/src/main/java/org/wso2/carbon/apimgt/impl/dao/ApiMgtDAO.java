@@ -7452,12 +7452,12 @@ public class ApiMgtDAO {
         }
     }
 
-    private void setAPIProductOperationPoliciesToURITemplatesMap(int productId, Map<String, URITemplate> uriTemplates)
+    private void setAPIProductOperationPoliciesToURITemplatesMap(String productRevisionId, Map<String, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
         try (Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
                         SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_URL_TEMPLATES_OF_API_PRODUCT_SQL)) {
-            ps.setString(1, new Integer(productId).toString());
+            ps.setString(1, productRevisionId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String key = rs.getString("URL_PATTERN") + rs.getString("HTTP_METHOD");
@@ -17439,7 +17439,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                setAPIProductOperationPoliciesToURITemplatesMap(apiId, uriTemplateMap);
+                setAPIProductOperationPoliciesToURITemplatesMap(new Integer(apiId).toString(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
@@ -17514,7 +17514,7 @@ public class ApiMgtDAO {
                                     String endpointId = (String) policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
                                     int resourceEndpointId = 0;
                                     if (!addedResourceEndpoints.contains(endpointId)) {
-                                        ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(apiId,
+                                        ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(new Integer(apiId).toString(),
                                                 endpointId, tenantDomain);
                                         if (baseAPIEndpoint != null) {
                                             insertResourceEndpoint
@@ -17639,6 +17639,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs when restoring an API revision
      */
     public void restoreAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+        Set<String> addedResourceEndpoints = new HashSet<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
@@ -17655,6 +17656,12 @@ public class ApiMgtDAO {
                         SQLConstants.APIRevisionSqlConstants.REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING);
                 removeURLMappingsFromCurrentAPIProduct.setString(1, Integer.toString(apiId));
                 removeURLMappingsFromCurrentAPIProduct.executeUpdate();
+
+                //Remove Current API Product entries from AM_API_RESOURCE_ENDPOINTS table
+                PreparedStatement removeResourceEndpointsFromCurrentAPIProduct = connection.prepareStatement(
+                        SQLConstants.APIRevisionSqlConstants.REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_RESOURCE_ENDPOINTS_TABLE);
+                removeResourceEndpointsFromCurrentAPIProduct.setString(1, Integer.toString(apiId));
+                removeResourceEndpointsFromCurrentAPIProduct.executeUpdate();
 
                 //Copy Revision resources
                 PreparedStatement getURLMappingsFromRevisionedAPIProduct = connection.prepareStatement(
@@ -17705,6 +17712,8 @@ public class ApiMgtDAO {
                     }
                 }
 
+                setAPIProductOperationPoliciesToURITemplatesMap(apiRevision.getRevisionUUID(), urlMappingList);
+
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : urlMappingList.values()) {
@@ -17718,11 +17727,21 @@ public class ApiMgtDAO {
                 }
                 insertURLMappingsStatement.executeBatch();
 
-                //Insert Scope Mappings
+                //Insert Scope Mappings and operation policy mappings
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
                 PreparedStatement addResourceScopeMapping = connection.prepareStatement(
                         SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
+                PreparedStatement addOperationPolicyStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY);
+                String dbProductName = connection.getMetaData().getDatabaseProductName();
+                PreparedStatement insertOperationPolicyMappingStatement = connection
+                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY, new String[]{
+                                DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "OPERATION_POLICY_MAPPING_ID")});
+                PreparedStatement insertResourceEndpoint = connection
+                        .prepareStatement(SQLConstants.ResourceEndpointConstants.ADD_RESOURCE_ENDPOINT, new String[]{
+                                DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "RESOURCE_ENDPOINT_ID")});
+                boolean changeBackendPolicyExists = false;
                 for (URITemplate urlMapping : urlMappingList.values()) {
                     getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
                     getRevisionedURLMappingsStatement.setString(2, Integer.toString(apiId));
@@ -17741,10 +17760,76 @@ public class ApiMgtDAO {
                                     addResourceScopeMapping.addBatch();
                                 }
                             }
+
+                            changeBackendPolicyExists = false;
+                            if (urlMapping.getOperationPolicies().size() > 0) {
+                                for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    Gson gson = new Gson();
+                                    String paramJSON = gson.toJson(policy.getParameters());
+
+                                    addOperationPolicyStatement.setInt(1, rs.getInt(1));
+                                    addOperationPolicyStatement.setString(2, policy.getPolicyType().toString());
+                                    addOperationPolicyStatement.setString(3, policy.getDirection());
+                                    addOperationPolicyStatement.setString(4, paramJSON);
+                                    addOperationPolicyStatement.executeUpdate();
+
+                                    String policyType = policy.getPolicyType().toString();
+                                    String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+                                    if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policyType)) {
+                                        String endpointId = (String) policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
+                                        int resourceEndpointId = 0;
+                                        if (!addedResourceEndpoints.contains(endpointId)) {
+                                            ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(apiRevision.getRevisionUUID(),
+                                                    endpointId, tenantDomain);
+                                            if (baseAPIEndpoint != null) {
+                                                insertResourceEndpoint
+                                                        .setInt(1, baseAPIEndpoint.getApiId());
+                                                insertResourceEndpoint.setString(2, endpointId);
+                                                insertResourceEndpoint.setString(3, baseAPIEndpoint.getName());
+                                                insertResourceEndpoint
+                                                        .setString(4, baseAPIEndpoint.getEndpointType().toString());
+                                                insertResourceEndpoint.setString(5, baseAPIEndpoint.getUrl());
+                                                insertResourceEndpoint.setBinaryStream(6, fromMapToJSONStringInputStream(
+                                                        baseAPIEndpoint.getSecurityConfig()));
+                                                insertResourceEndpoint.setBinaryStream(7,
+                                                        fromMapToJSONStringInputStream(baseAPIEndpoint.getGeneralConfig()));
+                                                insertResourceEndpoint.setInt(8, tenantId);
+                                                insertResourceEndpoint.setString(9, Integer.toString(apiId));
+                                                insertResourceEndpoint.executeUpdate();
+                                                addedResourceEndpoints.add(endpointId);
+
+                                                try (ResultSet rers = insertResourceEndpoint.getGeneratedKeys()) {
+                                                    if (rers.next()) {
+                                                        resourceEndpointId = rers.getInt(1);
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            resourceEndpointId = getResourceEndpointId(endpointId,
+                                                    apiRevision.getRevisionUUID(), connection);
+                                        }
+
+                                        int operationPolicyId = 0;
+                                        try (ResultSet oprs = insertOperationPolicyMappingStatement.getGeneratedKeys()) {
+                                            if (oprs.next()) {
+                                                operationPolicyId = oprs.getInt(1);
+                                            }
+                                        }
+
+                                        if (resourceEndpointId != 0 && operationPolicyId != 0) {
+                                            addResourceEndpointMapping(operationPolicyId, resourceEndpointId, connection);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 addResourceScopeMapping.executeBatch();
+
+                if (changeBackendPolicyExists) {
+                    addResourceEndpointMappings(apiId, apiRevision.getRevisionUUID(), tenantId, connection);
+                }
 
                 //Get URL_MAPPING_IDs from table and add records to product mapping table
                 PreparedStatement getURLMappingOfAPIProduct = connection.prepareStatement(
@@ -18120,7 +18205,7 @@ public class ApiMgtDAO {
         return resourceEndpoint;
     }
 
-    public ResourceEndpoint getProductResourceEndpointByUUID(int productId, String endpointId, String tenantDomain)
+    public ResourceEndpoint getProductResourceEndpointByUUID(String productId, String endpointId, String tenantDomain)
             throws APIManagementException {
         ResourceEndpoint resourceEndpoint = null;
 
@@ -18132,7 +18217,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, tenantId);
             prepStmt.setString(2, endpointId);
             prepStmt.setInt(3, tenantId);
-            prepStmt.setString(4, new Integer(productId).toString());
+            prepStmt.setString(4, productId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     resourceEndpoint = new ResourceEndpoint();
