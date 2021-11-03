@@ -82,7 +82,7 @@ public class APIMRestAPICommonComponent {
 
     @Reference(
             name = "rest.api.authentication.service",
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             service = RestAPIAuthenticator.class,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetRestAPIAuthenticationService"

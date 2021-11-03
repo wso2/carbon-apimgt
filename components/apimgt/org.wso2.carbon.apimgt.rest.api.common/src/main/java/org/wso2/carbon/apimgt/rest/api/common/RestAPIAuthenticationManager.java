@@ -29,7 +29,7 @@ public class RestAPIAuthenticationManager {
         if (authenticator == null) {
             ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
             if (serviceReferenceHolder.getAuthenticator() != null) {
-                log.info("Authenticating in Back-end JWT");
+                log.debug("Authenticating in Back-end JWT");
                 authenticator = serviceReferenceHolder.getAuthenticator();
             }
         }
