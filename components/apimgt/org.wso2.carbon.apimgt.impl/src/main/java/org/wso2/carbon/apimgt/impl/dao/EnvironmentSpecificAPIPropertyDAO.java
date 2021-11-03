@@ -109,7 +109,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 preparedStatement.execute();
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when adding environment specific api properties", e);
+            throw new APIManagementException("Error occurred when updating environment specific api properties", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
@@ -155,7 +155,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting environment specific api properties", e);
+            throw new APIManagementException("Error occurred when checking environment specific api properties", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
@@ -206,7 +206,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting environment specific api properties", e);
+            throw new APIManagementException("Error occurred when getting MG environment specific api properties", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
@@ -250,7 +250,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting environment specific api properties", e);
+            throw new APIManagementException("Error occurred when getting default environment specific api properties", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
@@ -258,25 +258,25 @@ public class EnvironmentSpecificAPIPropertyDAO {
     }
 
     private String getMgEnvironmentSpecificAPIPropertiesOfAPIsQuery(String apiIds) {
-        return "SELECT AM_GATEWAY_ENVIRONMENT.UUID ENV_ID,\n"
-                        + "       AM_GATEWAY_ENVIRONMENT.NAME ENV_NAME,\n"
-                        + "       AM_API.API_UUID API_ID,\n"
-                        + "       AM_API_ENVIRONMENT_KEYS.PROPERTY_CONFIG CONFIG\n"
-                        + "FROM AM_API_ENVIRONMENT_KEYS,AM_GATEWAY_ENVIRONMENT,AM_API\n"
-                        + "WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID = AM_GATEWAY_ENVIRONMENT.UUID AND\n"
-                        + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND\n"
-                        + "        AM_API.API_UUID IN (" + apiIds + ")\n"
-                        + "ORDER BY ENV_ID, ENV_NAME, API_ID;";
+        return "SELECT AM_GATEWAY_ENVIRONMENT.UUID ENV_ID,"
+                        + "       AM_GATEWAY_ENVIRONMENT.NAME ENV_NAME,"
+                        + "       AM_API.API_UUID API_ID,"
+                        + "       AM_API_ENVIRONMENT_KEYS.PROPERTY_CONFIG CONFIG"
+                        + " FROM AM_API_ENVIRONMENT_KEYS,AM_GATEWAY_ENVIRONMENT,AM_API"
+                        + " WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID = AM_GATEWAY_ENVIRONMENT.UUID AND"
+                        + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND"
+                        + "        AM_API.API_UUID IN (" + apiIds + ")"
+                        + " ORDER BY ENV_ID, ENV_NAME, API_ID";
     }
 
     private String getDefaultEnvironmentSpecificAPIPropertiesOfAPIsQuery(String apiIds, String envIds) {
-        return "SELECT AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID ENV_ID,\n"
-                + "       AM_API.API_UUID API_ID,\n"
-                + "       AM_API_ENVIRONMENT_KEYS.PROPERTY_CONFIG CONFIG\n"
-                + "FROM AM_API_ENVIRONMENT_KEYS,AM_API\n"
-                + "WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID IN (" + envIds + ") AND\n"
-                + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND\n"
-                + "        AM_API.API_UUID IN (" + apiIds + ")\n"
-                + "ORDER BY ENV_ID, API_ID;";
+        return "SELECT AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID ENV_ID,"
+                + "       AM_API.API_UUID API_ID,"
+                + "       AM_API_ENVIRONMENT_KEYS.PROPERTY_CONFIG CONFIG"
+                + " FROM AM_API_ENVIRONMENT_KEYS,AM_API"
+                + " WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID IN (" + envIds + ") AND"
+                + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND"
+                + "        AM_API.API_UUID IN (" + apiIds + ")"
+                + " ORDER BY ENV_ID, API_ID";
     }
 }
