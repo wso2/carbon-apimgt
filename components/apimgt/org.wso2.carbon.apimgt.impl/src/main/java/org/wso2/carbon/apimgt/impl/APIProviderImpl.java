@@ -5004,7 +5004,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (newStatus != null) { // only allow the executor to be used with default LC states transition
             // check only the newStatus so this executor can be used for LC state change from
             // custom state to default api state
-            if (isStateTransitionToPublished) {
+            if (isStateTransitionToPublished && !api.isAdvertiseOnly()) {
                 Set<Tier> tiers = api.getAvailableTiers();
                 String endPoint = api.getEndpointConfig();
                 String apiSecurity = api.getApiSecurity();

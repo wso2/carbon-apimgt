@@ -217,6 +217,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);
 
+            // check whether the API is advertise only
+            if (apiTypeWrapper.getApi().isAdvertiseOnly()) {
+                RestApiUtil.handleBadRequest("Subscription is not supported for advertise only APIs", log);
+            }
+
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
             RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper, body.getThrottlingPolicy());

@@ -4350,6 +4350,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //validate if api exists
             APIInfo apiInfo = validateAPIExistence(apiId);
+
+            //validate whether the API is advertise only
+            APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+            if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
+                throw new APIMgtResourceNotFoundException("Couldn't create API revision for advertise only API: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_SUPPORTED_FOR_ADVERTISE_ONLY_APIS,
+                        apiId));
+            }
+
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
@@ -4674,6 +4683,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+        }
+
+        // validate whether ASYNC APIs created without advertise only enabled
+        if (APIDTO.TypeEnum.ASYNC.equals(apiDTOFromProperties.getType()) &&
+                (apiDTOFromProperties.getAdvertiseInfo() == null ||
+                        !apiDTOFromProperties.getAdvertiseInfo().isAdvertised())) {
+            RestApiUtil.handleBadRequest("ASYNC API type supports only advertise only APIs", log);
         }
 
         //validate websocket url and change transport types

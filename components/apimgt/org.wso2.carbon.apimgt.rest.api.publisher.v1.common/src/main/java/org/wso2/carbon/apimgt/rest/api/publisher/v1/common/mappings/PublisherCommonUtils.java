@@ -743,6 +743,12 @@ public class PublisherCommonUtils {
             //replace all white spaces in the API Name
             apiDto.setName(name.replaceAll("\\s+", ""));
         }
+
+        if (APIDTO.TypeEnum.ASYNC.equals(apiDto.getType())) {
+            throw new APIManagementException("ASYNC API type does not support API creation from scratch",
+                    ExceptionCodes.API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS);
+        }
+
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
