@@ -43,8 +43,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -78,11 +78,6 @@ public class SolaceAdminApis {
         String toEncode = userName + ":" + password;
         return Base64.getEncoder().encodeToString((toEncode).getBytes());
     }
-
-//    private static final String baseUrl = "http://api.solace-apim.net:3000/v1/";
-//    private static final String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
-//    private static final String developerUserName = "dev-1";
-
 
     /**
      * Check whether the environment is available
@@ -653,43 +648,43 @@ public class SolaceAdminApis {
         HashSet<String> protocolsFromBindings = new HashSet<>();
 
         if (bindings.http != null) {
-            protocolsFromBindings.add(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.ws != null) {
-            protocolsFromBindings.add(APIConstants.WS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.WS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.kafka != null) {
-            protocolsFromBindings.add(APIConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.amqp != null) {
-            protocolsFromBindings.add(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.amqp1 != null) {
-            protocolsFromBindings.add(APIConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.mqtt != null) {
-            protocolsFromBindings.add(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.mqtt5 != null) {
-            protocolsFromBindings.add(APIConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.nats != null) {
-            protocolsFromBindings.add(APIConstants.NATS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.NATS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.jms != null) {
-            protocolsFromBindings.add(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.JMS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.sns != null) {
-            protocolsFromBindings.add(APIConstants.SNS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.SNS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.sqs != null) {
-            protocolsFromBindings.add(APIConstants.SQS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.SQS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.stomp != null) {
-            protocolsFromBindings.add(APIConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.redis != null) {
-            protocolsFromBindings.add(APIConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(SolaceConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
         }
 
         if (bindings.hasExtraProperties()) {
@@ -707,28 +702,28 @@ public class SolaceAdminApis {
      */
     private String getProtocolVersion(String protocol) {
         HashMap<String, String> protocolsWithVersions = new HashMap<>();
-        protocolsWithVersions.put(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.HTTP_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.AMQP_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.AMQPS_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.AMQPS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.WS_MQTT_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.WS_MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.WSS_MQTT_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.JMS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.HTTPS_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SMF_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.SMF_TRANSPORT_PROTOCOL_VERSION);
-        protocolsWithVersions.put(APIConstants.SMFS_TRANSPORT_PROTOCOL_NAME,
-                APIConstants.SMFS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.HTTP_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.HTTP_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.AMQP_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.AMQP_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.AMQPS_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.AMQPS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.SECURE_MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.WS_MQTT_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.WS_MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.WSS_MQTT_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.WSS_MQTT_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.JMS_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.JMS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.HTTPS_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.HTTPS_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.SMF_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.SMF_TRANSPORT_PROTOCOL_VERSION);
+        protocolsWithVersions.put(SolaceConstants.SMFS_TRANSPORT_PROTOCOL_NAME,
+                SolaceConstants.SMFS_TRANSPORT_PROTOCOL_VERSION);
         if (protocolsWithVersions.get(protocol) != null) {
             return protocolsWithVersions.get(protocol);
         }

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -68,11 +69,7 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      */
     private void process(Event event) throws NotifierException {
         ApplicationEvent applicationEvent;
-        try {
-            applicationEvent = (ApplicationEvent) event;
-        } catch (ExceptionInInitializerError e) {
-            throw new NotifierException("Event types is not provided correctly");
-        }
+        applicationEvent = (ApplicationEvent) event;
 
         if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
             removeSolaceApplication(applicationEvent);
@@ -104,11 +101,11 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                 List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.getUUID());
                 for (APIRevisionDeployment deployment : deployments) {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
-                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
+                        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
                             hasSubscribedAPIDeployedInSolace = true;
                             organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
-                                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
+                                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
                             break labelOne;
                         }
                     }
@@ -194,11 +191,11 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                         getLightweightAPI(api.getApiId()).getUuid());
                 for (APIRevisionDeployment deployment : deployments) {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
-                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
+                        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
                             isContainsSolaceApis = true;
                             organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
-                                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
+                                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
                             break labelOne;
                         }
                     }

@@ -1,3 +1,18 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.wso2.carbon.apimgt.solace.utils;
 
 import com.hazelcast.aws.utility.StringUtil;
@@ -15,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
@@ -45,7 +59,7 @@ public class SolaceNotifierUtils {
         Environment solaceEnvironment = null;
 
         for (Map.Entry<String, Environment> entry : thirdPartyEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
         }
@@ -53,7 +67,7 @@ public class SolaceNotifierUtils {
         if (solaceEnvironment != null) {
             return new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
                     getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
-                    get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+                    get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
         } else {
             throw new APIManagementException("Solace Environment configurations are not provided properly");
         }
@@ -90,7 +104,7 @@ public class SolaceNotifierUtils {
         Environment solaceEnvironment = null;
 
         for (Map.Entry<String, Environment> entry: gatewayEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
         }
@@ -110,7 +124,7 @@ public class SolaceNotifierUtils {
         Environment solaceEnvironment = null;
 
         for (Map.Entry<String, Environment> entry : gatewayEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
         }
@@ -119,8 +133,8 @@ public class SolaceNotifierUtils {
             if (additionalProperties.isEmpty()) {
                 return false;
             } else {
-                if (StringUtil.isEmpty(additionalProperties.get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
-                        StringUtil.isEmpty(additionalProperties.get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
+                if (StringUtil.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION)) ||
+                        StringUtil.isEmpty(additionalProperties.get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME))) {
                     return false;
                 }
             }
@@ -200,7 +214,7 @@ public class SolaceNotifierUtils {
                 String environmentName = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(environmentName)) {
                     Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
-                    if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
+                    if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
                         return true;
                     }
                 }
@@ -226,9 +240,9 @@ public class SolaceNotifierUtils {
                 String environmentName = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(environmentName)) {
                     Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
-                    if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
+                    if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
                         return deployedEnvironment.getAdditionalProperties().
-                                get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
+                                get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
                     }
                 }
             }
@@ -260,11 +274,11 @@ public class SolaceNotifierUtils {
             APIManagementException {
 
         Map<String, Environment> environmentMap = APIUtil.getReadOnlyGatewayEnvironments();
-        Environment solaceEnvironment = environmentMap.get(APIConstants.SOLACE_ENVIRONMENT);
+        Environment solaceEnvironment = environmentMap.get(SolaceConstants.SOLACE_ENVIRONMENT);
         if (solaceEnvironment != null) {
             SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(),
                     solaceEnvironment.getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.
-                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
             String apiNameWithContext = generateApiProductNameForSolaceBroker(api,
                     getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(api));
             CloseableHttpResponse response = solaceAdminApis.apiProductGet(organization, apiNameWithContext);
@@ -308,7 +322,7 @@ public class SolaceNotifierUtils {
             String apiNameWithContext = generateApiProductNameForSolaceBroker(api, environment.getName());
             SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
             CloseableHttpResponse response = solaceAdminApis.apiProductGet(environment.getAdditionalProperties().get(
-                    APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
+                    SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION), apiNameWithContext);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 if (log.isDebugEnabled()) {
                     log.info("API product found in Solace Broker");
@@ -470,8 +484,8 @@ public class SolaceNotifierUtils {
     public static String getSolaceOrganizationName(List<Environment> environments) {
         HashSet<String> organizationNames = new HashSet<>();
         for (Environment environment : environments) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
-                organizationNames.add(environment.getAdditionalProperties().get(APIConstants.
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
+                organizationNames.add(environment.getAdditionalProperties().get(SolaceConstants.
                         SOLACE_ENVIRONMENT_ORGANIZATION));
             }
         }
@@ -498,7 +512,7 @@ public class SolaceNotifierUtils {
             String environmentName = deployment.getDeployment();
             if (gatewayEnvironments.containsKey(environmentName)) {
                 Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
-                if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
                     return environmentName;
                 }
             }
@@ -524,7 +538,7 @@ public class SolaceNotifierUtils {
             String environmentName = deployment.getDeployment();
             if (gatewayEnvironments.containsKey(environmentName)) {
                 Environment deployedEnvironment = gatewayEnvironments.get(environmentName);
-                if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(deployedEnvironment.getProvider())) {
                     deployedSolaceEnvironments.add(deployedEnvironment);
                 }
             }
