@@ -116,6 +116,28 @@
         }
       }
     },
+    "/server-startup-healthcheck" : {
+      "get" : {
+        "summary" : "Health check to check if all the API are deployed during the server startup\n",
+        "description" : "Health check to check if all the API are deployed during the server startup\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\n"
+          },
+          "500" : {
+            "description" : "Internal Server Error.\n"
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ ]
+        } ],
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k \"https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck\""
+        } ]
+      }
+    },
     "/api-artifact" : {
       "get" : {
         "summary" : "Get API artifact from the storage",
@@ -300,21 +322,83 @@
         }
       }
     },
-    "/subscriptions" : {
+    "/apis" : {
       "get" : {
-        "summary" : "Get Subscriptions stored in in-memory",
-        "description" : "This operation is used to get the Subscriptions from the storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
-        "operationId" : "getSubscriptions",
+        "tags" : [ "Get API Info" ],
+        "summary" : "Get the list of APIS by providing context and version.",
+        "description" : "This operation is used to get the API information from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
         "parameters" : [ {
-          "name" : "apiUUID",
+          "name" : "context",
           "in" : "query",
-          "description" : "UUID of the API\n",
-          "required" : true,
+          "description" : "Context of the API\n",
+          "required" : false,
           "type" : "string"
         }, {
-          "name" : "applicationUUID",
+          "name" : "version",
           "in" : "query",
-          "description" : "UUID of the Application\n",
+          "description" : "version of the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPIS successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/APIList"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/apis?context=/pizza/1.0.0&version=1.0&tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/apis/{apiId}" : {
+      "get" : {
+        "tags" : [ "Get API Info" ],
+        "summary" : "Get the subscription information of an api by providing the api uuid.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "path",
+          "description" : "API ID of the API\n",
           "required" : true,
           "type" : "string"
         }, {
@@ -326,24 +410,182 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK.\nSubscriptions successfully Retrieved From the Storage.\n",
+            "description" : "OK.\nAPIS successfully retrieved from the storage for the API.\n",
             "schema" : {
-              "$ref" : "#/definitions/SubscriptionList"
+              "$ref" : "#/definitions/APIInfo"
             }
           },
           "400" : {
-            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           },
           "404" : {
-            "description" : "Not Found.\nRequested API does not exist.\n",
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f?tenantDomain=registry.com\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/applications" : {
+      "get" : {
+        "tags" : [ "Get Application Info" ],
+        "summary" : "Get the applications information by providing the application name or uuid.",
+        "description" : "This operation is used to get the application information from storage. If the Tenant domain is not\nprovided carbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "description" : "Name of the Application\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "uuid",
+          "in" : "query",
+          "description" : "UUID of the Application\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the Application\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nApplications successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/ApplicationList"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/applications?name=PizzaAPP&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/subscriptions" : {
+      "get" : {
+        "tags" : [ "Get Subscription Info" ],
+        "summary" : "Get the subscriptions meta information of an api by providing the api uuid and application uuid.",
+        "description" : "This operation is used to get the subscription information of an API from storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "parameters" : [ {
+          "name" : "apiUUID",
+          "in" : "query",
+          "description" : "UUID of the API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "appUUID",
+          "in" : "query",
+          "description" : "UUID of the Application\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the Application\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSubscriptions successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Subscription"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request. Invalid request or validation error.",
+            "examples" : {
+              "application/json" : {
+                "code" : 400,
+                "message" : "Bad Request",
+                "description" : "Invalid request or validation error",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found. The specified resource does not exist.",
+            "examples" : {
+              "application/json" : {
+                "code" : 404,
+                "message" : "Not Found",
+                "description" : "The specified resource does not exist",
+                "moreInfo" : "",
+                "error" : [ ]
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/subscriptions?apiUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&appUUID=d290f1ee-6c54-4b01-90e6-d701748f0851&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     }
   },
@@ -457,17 +699,246 @@
       },
       "title" : "Description of individual errors that may have occurred during a request."
     },
-    "SubscriptionList" : {
+    "APIInfo" : {
+      "properties" : {
+        "apiUUID" : {
+          "type" : "string",
+          "example" : "d290f1ee-6c54-4b01-90e6-d701748f0851",
+          "description" : "UUID of API."
+        },
+        "apiId" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "provider" : {
+          "type" : "string",
+          "example" : "admin",
+          "description" : "API Provider name."
+        },
+        "name" : {
+          "type" : "string",
+          "example" : "PizzaAPI",
+          "description" : "Name of the API"
+        },
+        "version" : {
+          "type" : "string",
+          "example" : "v1.0.0",
+          "description" : "Version of the API."
+        },
+        "context" : {
+          "type" : "string",
+          "example" : "/pizza/v1.0.0",
+          "description" : "Context of the API."
+        },
+        "policy" : {
+          "type" : "string",
+          "example" : "Gold",
+          "description" : "API level throttling policy."
+        },
+        "apiType" : {
+          "type" : "string",
+          "example" : "APIProduct",
+          "description" : "Type of the API."
+        },
+        "isDefaultVersion" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether this is the default version of the API."
+        },
+        "urlMappings" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/URLMapping"
+          }
+        },
+        "subscripitons" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SubscriptionInfo"
+          }
+        }
+      },
+      "title" : "Subscription Information for API."
+    },
+    "SubscriptionInfo" : {
+      "properties" : {
+        "subscriptionUUID" : {
+          "type" : "string",
+          "example" : "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        },
+        "subscriptionPolicy" : {
+          "type" : "string",
+          "example" : "Gold"
+        },
+        "status" : {
+          "type" : "string",
+          "example" : "UnBlocked"
+        },
+        "application" : {
+          "$ref" : "#/definitions/ApplicationInfo"
+        }
+      }
+    },
+    "ApplicationInfo" : {
+      "properties" : {
+        "uuid" : {
+          "type" : "string",
+          "example" : "d290f1ee-6c54-4b01-90e6-d701848f0851"
+        },
+        "id" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "name" : {
+          "type" : "string",
+          "example" : "PizzaAPP"
+        },
+        "subName" : {
+          "type" : "string",
+          "example" : "admin"
+        },
+        "policy" : {
+          "type" : "string",
+          "example" : "Gold",
+          "description" : "Application level throtting policy."
+        },
+        "tokenType" : {
+          "type" : "string",
+          "example" : "JWT",
+          "description" : "type of the token."
+        },
+        "attributes" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        },
+        "keys" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationKeyMapping"
+          }
+        }
+      }
+    },
+    "ApplicationKeyMapping" : {
+      "properties" : {
+        "consumerKey" : {
+          "type" : "string",
+          "example" : "d290f1ee-6c54-4b01-90e6-d701848f0851"
+        },
+        "keyType" : {
+          "type" : "string",
+          "example" : "Production"
+        },
+        "keyManager" : {
+          "type" : "string",
+          "example" : "Resident Key Manager"
+        }
+      }
+    },
+    "URLMapping" : {
+      "properties" : {
+        "authScheme" : {
+          "type" : "string",
+          "example" : "Application & Application User"
+        },
+        "throttlingPolicy" : {
+          "type" : "string",
+          "example" : "Unlimited"
+        },
+        "httpMethod" : {
+          "type" : "string",
+          "example" : "GET"
+        },
+        "urlPattern" : {
+          "type" : "string",
+          "example" : "/menu"
+        },
+        "scopes" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "read"
+          }
+        }
+      }
+    },
+    "APIList" : {
       "properties" : {
         "count" : {
           "type" : "integer",
           "example" : 1,
-          "description" : "Number of Subscriptions returned.\n"
+          "description" : "Number of APIs returned.\n"
         },
         "list" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Subscription"
+            "$ref" : "#/definitions/APIMetaData"
+          }
+        }
+      },
+      "title" : "API List"
+    },
+    "APIMetaData" : {
+      "properties" : {
+        "apiUUID" : {
+          "type" : "string",
+          "example" : "d290f1ee-6c54-4b01-90e6-d701748f0851",
+          "description" : "UUID of API."
+        },
+        "apiId" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "provider" : {
+          "type" : "string",
+          "example" : "admin",
+          "description" : "API Provider name."
+        },
+        "name" : {
+          "type" : "string",
+          "example" : "PizzaAPI",
+          "description" : "Name of the API"
+        },
+        "version" : {
+          "type" : "string",
+          "example" : "v1.0.0",
+          "description" : "Version of the API."
+        },
+        "context" : {
+          "type" : "string",
+          "example" : "/pizza/v1.0.0",
+          "description" : "Context of the API."
+        },
+        "policy" : {
+          "type" : "string",
+          "example" : "Gold",
+          "description" : "API level throttling policy."
+        },
+        "apiType" : {
+          "type" : "string",
+          "example" : "APIProduct",
+          "description" : "Type of the API."
+        },
+        "isDefaultVersion" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether this is the default version of the API."
+        }
+      }
+    },
+    "ApplicationList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Applications returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationInfo"
           }
         }
       },
@@ -475,23 +946,14 @@
     },
     "Subscription" : {
       "properties" : {
-        "subscriptionUUID" : {
-          "type" : "string"
-        },
         "subscriptionId" : {
           "type" : "integer"
         },
         "policyId" : {
           "type" : "string"
         },
-        "apiUUID" : {
-          "type" : "string"
-        },
         "apiId" : {
           "type" : "integer"
-        },
-        "applicationUUID" : {
-          "type" : "string"
         },
         "appId" : {
           "type" : "integer"
@@ -510,20 +972,6 @@
       "required" : true,
       "type" : "string"
     },
-    "apiUUID" : {
-      "name" : "apiUUID",
-      "in" : "query",
-      "description" : "UUID of the API\n",
-      "required" : true,
-      "type" : "string"
-    },
-    "applicationUUID" : {
-      "name" : "applicationUUID",
-      "in" : "query",
-      "description" : "UUID of the Application\n",
-      "required" : true,
-      "type" : "string"
-    },
     "version" : {
       "name" : "version",
       "in" : "query",
@@ -537,6 +985,38 @@
       "description" : "Tenant Domain of the API\n",
       "required" : false,
       "type" : "string"
+    }
+  },
+  "responses" : {
+    "BadRequest" : {
+      "description" : "Bad Request. Invalid request or validation error.",
+      "examples" : {
+        "application/json" : {
+          "code" : 400,
+          "message" : "Bad Request",
+          "description" : "Invalid request or validation error",
+          "moreInfo" : "",
+          "error" : [ ]
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Error"
+      }
+    },
+    "NotFound" : {
+      "description" : "Not Found. The specified resource does not exist.",
+      "examples" : {
+        "application/json" : {
+          "code" : 404,
+          "message" : "Not Found",
+          "description" : "The specified resource does not exist",
+          "moreInfo" : "",
+          "error" : [ ]
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Error"
+      }
     }
   }
 }
