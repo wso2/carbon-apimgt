@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -62,11 +63,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
      */
     private void process(Event event) throws NotifierException {
         ApplicationRegistrationEvent applicationRegistrationEvent;
-        try {
-            applicationRegistrationEvent = (ApplicationRegistrationEvent) event;
-        } catch (ExceptionInInitializerError e) {
-            throw new NotifierException("Event types is not provided correctly");
-        }
+        applicationRegistrationEvent = (ApplicationRegistrationEvent) event;
 
         if (APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name().equals(event.getType())) {
             syncSolaceApplicationClientId(applicationRegistrationEvent);
@@ -99,11 +96,11 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                         getLightweightAPI(api.getApiId()).getUuid());
                 for (APIRevisionDeployment deployment : deployments) {
                     if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
-                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
+                        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
                                 getDeployment()).getProvider())) {
                             isContainsSolaceApis = true;
                             organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
-                                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
+                                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
                             break labelOne;
                         }
                     }

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -60,11 +61,8 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      */
     private void process(Event event) throws NotifierException {
         SubscriptionEvent subscriptionEvent;
-        try {
-            subscriptionEvent = (SubscriptionEvent) event;
-        } catch (ExceptionInInitializerError e) {
-            throw new NotifierException("Event type is not provided correctly");
-        }
+        subscriptionEvent = (SubscriptionEvent) event;
+
 
         if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
             crateSubscription(subscriptionEvent);
@@ -93,7 +91,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
                 ArrayList<String> solaceApiProducts = new ArrayList<>();
                 List<Environment> deployedSolaceEnvironments = SolaceNotifierUtils.
                         getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
@@ -145,7 +143,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
                 ArrayList<String> solaceApiProducts = new ArrayList<>();
                 List<Environment> deployedSolaceEnvironments =
                         SolaceNotifierUtils.getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
@@ -197,7 +195,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
             Application application = apiProvider.getApplicationByUUID(applicationUUID);
 
             //Check whether the subscription is belongs to an API deployed in Solace
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
                 SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
             }
         } catch (APIManagementException e) {
