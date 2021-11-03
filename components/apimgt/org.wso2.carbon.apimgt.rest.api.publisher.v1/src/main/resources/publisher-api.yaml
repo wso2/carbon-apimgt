@@ -8555,6 +8555,12 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        hasSubscriptions:
+          type: boolean
+          example: false
+        isProductized:
+          type: boolean
+          example: false
       x-scopes:
         - apim:api_create
         - apim:api_import_export

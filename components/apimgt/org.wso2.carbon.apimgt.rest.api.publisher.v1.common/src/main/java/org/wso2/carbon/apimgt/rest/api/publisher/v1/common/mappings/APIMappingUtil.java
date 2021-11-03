@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
@@ -1298,6 +1299,9 @@ public class APIMappingUtil {
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
+        List<SubscribedAPI> subscriptions = apiProvider.getAPIUsageByAPIId(model.getUuid(), model.getOrganization());
+        dto.setHasSubscriptions(subscriptions.size() > 0);
+        dto.setIsProductized(apiProvider.isAPIProductized(model.getUuid()));
         return dto;
     }
 

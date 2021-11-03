@@ -7436,6 +7436,34 @@ public class ApiMgtDAO {
         return uriTemplates;
     }
 
+    public Boolean isAPIProductized(String uuid) throws APIManagementException {
+        Map<Integer, URITemplate> uriTemplatesOfAPI = getURITemplatesForAPI(uuid);
+        try {
+            return isUriTemplateAssociatedWithAPIProduct(uuid, uriTemplatesOfAPI);
+        } catch (SQLException e) {
+            handleException("Failed to get API Products associate with the URI templates of API " + uuid, e);
+        }
+        return null;
+    }
+
+    private boolean isUriTemplateAssociatedWithAPIProduct(String uuid, Map<Integer, URITemplate> uriTemplates)
+            throws SQLException {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL)) {
+            ps.setString(1, uuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                    URITemplate uriTemplate = uriTemplates.get(uriTemplateId);
+                    if (uriTemplate != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private void setAssociatedAPIProducts(String uuid, Map<Integer, URITemplate> uriTemplates)
             throws SQLException {
 
@@ -10157,7 +10185,7 @@ public class ApiMgtDAO {
      * Check whether the given scope key is already assigned locally to another API which are different from the given
      * API or its versioned APIs under given tenant.
      *
-     * @param uuid API uuid
+     * @param apiName       API name
      * @param scopeKey      candidate scope key
      * @param tenantId      tenant id
      * @param organization identifier of the organization
@@ -14222,6 +14250,45 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             handleException("Error while obtaining details of the URI Template for api " + api.getId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return templatesMap;
+    }
+
+    /**
+     * Retrieve URI Templates for the given API UUID
+     *
+     * @param apiUUID UUID of the API
+     * @return Map of URITemplate with key as Method:resourcepath
+     * @throws APIManagementException exception
+     */
+    public Map<Integer, URITemplate> getURITemplatesForAPI(String apiUUID) throws APIManagementException {
+        Map<Integer, URITemplate> templatesMap = new HashMap<>();
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_URL_TEMPLATES_FOR_API_WITH_UUID_FOR_ALL_REVISIONS;
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiUUID);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                URITemplate template = new URITemplate();
+                String urlPattern = rs.getString("URL_PATTERN");
+                String httpMethod = rs.getString("HTTP_METHOD");
+
+                template.setHTTPVerb(httpMethod);
+                template.setResourceURI(urlPattern);
+                int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                template.setId(uriTemplateId);
+                templatesMap.put(uriTemplateId, template);
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the URI Template for api " + apiUUID, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }

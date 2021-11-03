@@ -311,6 +311,8 @@ return null;
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+    private Boolean hasSubscriptions = null;
+    private Boolean isProductized = null;
 
   /**
    * UUID of the api registry artifact 
@@ -1233,6 +1235,40 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
+  /**
+   **/
+  public APIDTO hasSubscriptions(Boolean hasSubscriptions) {
+    this.hasSubscriptions = hasSubscriptions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("hasSubscriptions")
+  public Boolean isHasSubscriptions() {
+    return hasSubscriptions;
+  }
+  public void setHasSubscriptions(Boolean hasSubscriptions) {
+    this.hasSubscriptions = hasSubscriptions;
+  }
+
+  /**
+   **/
+  public APIDTO isProductized(Boolean isProductized) {
+    this.isProductized = isProductized;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isProductized")
+  public Boolean isIsProductized() {
+    return isProductized;
+  }
+  public void setIsProductized(Boolean isProductized) {
+    this.isProductized = isProductized;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1294,12 +1330,14 @@ return null;
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(serviceInfo, API.serviceInfo) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo);
+        Objects.equals(advertiseInfo, API.advertiseInfo) &&
+        Objects.equals(hasSubscriptions, API.hasSubscriptions) &&
+        Objects.equals(isProductized, API.isProductized);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, type, audience, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, hasSubscriptions, isProductized);
   }
 
   @Override
@@ -1359,6 +1397,8 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    hasSubscriptions: ").append(toIndentedString(hasSubscriptions)).append("\n");
+    sb.append("    isProductized: ").append(toIndentedString(isProductized)).append("\n");
     sb.append("}");
     return sb.toString();
   }

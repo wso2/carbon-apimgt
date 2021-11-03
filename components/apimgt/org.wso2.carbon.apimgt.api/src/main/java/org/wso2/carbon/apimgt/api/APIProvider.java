@@ -1503,6 +1503,15 @@ public interface APIProvider extends APIManager {
     List<APIResource> getUsedProductResources(String uuid) throws APIManagementException ;
 
     /**
+     * Check whether the API is included in an API Product or not
+     *
+     * @param uuid UUID of the API
+     * @return Boolean true if API is used in API product
+     * @throws APIManagementException exception if failed to check API, API product association
+     */
+    Boolean isAPIProductized(String uuid) throws APIManagementException ;
+
+    /**
      * Delete API
      * @param apiUuid API uuid to delete
      * @param organization organization id of the deleting API

@@ -8098,6 +8098,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public Boolean isAPIProductized(String uuid) throws APIManagementException {
+        Boolean isProductized = apiMgtDAO.isAPIProductized(uuid);
+        if (isProductized == null) {
+            throw new APIManagementException("Failed to get API Products associate with the URI templates of API "
+                    + uuid);
+        } else {
+            return isProductized;
+        }
+    }
+
+    @Override
     public void addDocumentationContent(String uuid, String docId, String organization, DocumentationContent content)
             throws APIManagementException {
         DocumentContent mappedContent = null;
