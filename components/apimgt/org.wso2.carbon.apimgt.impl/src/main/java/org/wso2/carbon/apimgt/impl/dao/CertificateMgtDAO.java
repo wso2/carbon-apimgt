@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -268,6 +269,10 @@ public class CertificateMgtDAO {
                 String apiUuid;
                 if (apiIdentifier.getUUID() != null) {
                     apiUuid = apiIdentifier.getUUID();
+                    APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiUuid);
+                    if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                        apiUuid = apiRevision.getApiUUID();
+                    }
                 } else {
                     apiUuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, organization);
                 }

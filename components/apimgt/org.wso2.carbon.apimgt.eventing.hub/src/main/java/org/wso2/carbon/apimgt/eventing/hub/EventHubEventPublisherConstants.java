@@ -24,13 +24,6 @@ public class EventHubEventPublisherConstants {
     public static final String EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER = "eventHubNotificationEventPublisher";
     public static final String BLOCKING_EVENT_TYPE = "wso2event";
     public static final String BLOCKING_EVENT_FORMAT = "wso2event";
-    public static final String RECEIVER_URL = "receiverURL";
-    public static final String AUTHENTICATOR_URL = "authenticatorURL";
-    public static final String USERNAME = "username";
-    public static final String PASSWORD = "password";
-    public static final String PROTOCOL = "protocol";
-    public static final String PUBLISHING_MODE = "publishingMode";
-    public static final String PUBLISHING_TIME_OUT = "publishTimeout";
 
     private EventHubEventPublisherConstants() {
 

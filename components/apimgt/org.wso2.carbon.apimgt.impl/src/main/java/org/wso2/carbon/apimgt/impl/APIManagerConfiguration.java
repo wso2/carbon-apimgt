@@ -354,25 +354,54 @@ public class APIManagerConfiguration {
                 }
                 
                 persistenceProperties = persistenceProps;
-            } else if ("RedisConfig".equals(localName)) {
-                OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
-                OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
-                OMElement redisUser = element.getFirstChildWithName(new QName("RedisUser"));
-                OMElement redisPassword = element.getFirstChildWithName(new QName("RedisPassword"));
-                OMElement redisDatabaseId = element.getFirstChildWithName(new QName("RedisDatabaseId"));
-                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName("RedisConnectionTimeout"));
-                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName("RedisIsSslEnabled"));
-                redisConfig = new RedisConfig();
+            } else if (APIConstants.REDIS_CONFIG.equals(localName)) {
+                OMElement redisHost = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_HOST));
+                OMElement redisPort = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PORT));
+                OMElement redisUser = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_USER));
+                OMElement redisPassword = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PASSWORD));
+                OMElement redisDatabaseId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_DATABASE_ID));
+                OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
+                OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
+                OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
                 redisConfig.setRedisEnabled(true);
                 redisConfig.setHost(redisHost.getText());
                 redisConfig.setPort(Integer.parseInt(redisPort.getText()));
                 if (redisUser != null && redisPassword != null && redisDatabaseId != null
                         && redisConnectionTimeout != null && redisIsSslEnabled != null) {
                     redisConfig.setUser(redisUser.getText());
-                    redisConfig.setPassword(redisPassword.getText().toCharArray());
+                    redisConfig.setPassword(MiscellaneousUtil.resolve(redisPassword, secretResolver).toCharArray());
                     redisConfig.setDatabaseId(Integer.parseInt(redisDatabaseId.getText()));
                     redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
                     redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
+                }
+                if (propertiesElement !=null){
+                    Iterator<OMElement> properties = propertiesElement.getChildElements();
+                    if (properties != null) {
+                        while (properties.hasNext()) {
+                            OMElement propertyNode = properties.next();
+                            if (APIConstants.CONFIG_REDIS_MAX_TOTAL.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMaxTotal(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MAX_IDLE.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MIN_IDLE.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMinIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TEST_ON_BORROW.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTestOnBorrow(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TEST_ON_RETURN.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTestOnReturn(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TEST_WHILE_IDLE.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTestWhileIdle(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_BLOCK_WHEN_EXHAUSTED.equals(propertyNode.getLocalName())) {
+                                redisConfig.setBlockWhenExhausted(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setMinEvictableIdleTimeMillis(Long.parseLong(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
+                            } else if (APIConstants.CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
+                                redisConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                            }
+                        }
+                    }
                 }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
@@ -1522,7 +1551,7 @@ public class APIManagerConfiguration {
         return workflowProperties;
     }
 
-    public RedisConfig getRedisConfigProperties() {
+    public RedisConfig getRedisConfig() {
 
         return redisConfig;
     }
@@ -1788,10 +1817,8 @@ public class APIManagerConfiguration {
                 if (eventTypeElement != null) {
                     eventHubPublisherConfiguration.setType(eventTypeElement.getText().trim());
                 }
-                if (Boolean.parseBoolean(System.getenv("FEATURE_FLAG_REPLACE_EVENT_HUB"))) {
-                    log.info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] extracting Hub publisher parameters with: \n"
-                            + eventPublisherElement.toString());
-                    Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
+                Map<String, String> publisherProps = extractPublisherProperties(eventPublisherElement);
+                if (publisherProps != null) {
                     eventHubPublisherConfiguration.setProperties(publisherProps);
                 }
                 eventHubConfigurationDto.setEventHubPublisherConfiguration(eventHubPublisherConfiguration);

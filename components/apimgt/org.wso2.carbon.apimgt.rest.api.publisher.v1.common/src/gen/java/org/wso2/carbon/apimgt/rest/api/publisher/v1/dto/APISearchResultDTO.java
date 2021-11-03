@@ -24,6 +24,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
   
     private String description = null;
     private String context = null;
+    private String contextTemplate = null;
     private String version = null;
     private String provider = null;
     private String status = null;
@@ -63,6 +64,24 @@ public class APISearchResultDTO extends SearchResultDTO  {
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   * The templated context of the API
+   **/
+  public APISearchResultDTO contextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI/{version}", value = "The templated context of the API")
+  @JsonProperty("contextTemplate")
+  public String getContextTemplate() {
+    return contextTemplate;
+  }
+  public void setContextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
   }
 
   /**
@@ -148,6 +167,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     APISearchResultDTO apISearchResult = (APISearchResultDTO) o;
     return Objects.equals(description, apISearchResult.description) &&
         Objects.equals(context, apISearchResult.context) &&
+        Objects.equals(contextTemplate, apISearchResult.contextTemplate) &&
         Objects.equals(version, apISearchResult.version) &&
         Objects.equals(provider, apISearchResult.provider) &&
         Objects.equals(status, apISearchResult.status) &&
@@ -156,7 +176,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri);
   }
 
   @Override
@@ -166,6 +186,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
