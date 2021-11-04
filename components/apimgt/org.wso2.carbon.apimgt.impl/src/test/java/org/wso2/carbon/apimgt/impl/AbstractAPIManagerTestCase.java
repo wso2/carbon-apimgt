@@ -971,8 +971,8 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getInternalOrganizationId(organization)).thenReturn(-1234);
-        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample", "carbon.super"));
-        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(uuid, "sample1", "carbon.super"));
+        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(SAMPLE_API_NAME, "sample", "carbon.super"));
+        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(SAMPLE_API_NAME, "sample1", "carbon.super"));
     }
 
     @Test
@@ -1482,95 +1482,6 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(true);
 
         Assert.assertEquals(4, abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length);
-    }
-    @Test
-    public void testSearchPaginatedAPIs()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException,
-            XMLStreamException {
-        Map<String, Object> subContextResult = new HashMap<String, Object>();
-        subContextResult.put("1", new Object());
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(null, registryService, registry,
-                tenantManager);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
-                .thenThrow(RegistryException.class).thenReturn(registry);
-
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
-            Object[] args = invocation.getArguments();
-            return (String) args[0];
-        });
-
-        try {
-            abstractAPIManager.searchPaginatedAPIs("search", API_PROVIDER, 0, 5, false);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to Search APIs"));
-        }
-        API api = new API(getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION));
-        Documentation documentation = new Documentation(DocumentationType.HOWTO, "DOC1");
-        Map<Documentation, API> documentationAPIMap = new HashMap<>();
-        BDDMockito.when(APIUtil
-                .searchAPIsByDoc(Mockito.any(), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString())).thenReturn(documentationAPIMap);
-        Assert.assertEquals(
-                abstractAPIManager.searchPaginatedAPIs("doc=search", SAMPLE_TENANT_DOMAIN_1, 0, 5, false).get("length"),
-                0);
-        documentationAPIMap.put(documentation, api);
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("doc=search", null, 0, 5, false).get("length"), 5);
-
-        // Test related with searches with custom properties
-        Map<String, Object> actualAPIs = abstractAPIManager
-                .searchPaginatedAPIs("secured=*true*", SAMPLE_TENANT_DOMAIN_1, 0, 5, false);
-        List<API> retrievedAPIs = (List<API>) actualAPIs.get("apis");
-        Assert.assertEquals("Searching with additional property failed", 1, actualAPIs.get("length"));
-        Assert.assertNotNull("Search with additional property failed", retrievedAPIs);
-        Assert.assertEquals("Search with additional property failed", 1, retrievedAPIs.size());
-        Assert.assertEquals("Search with additional property failed", "sxy", retrievedAPIs.get(0).getId().getApiName());
-
-        actualAPIs = abstractAPIManager
-                .searchPaginatedAPIs("name=*test*&secured=*true*", SAMPLE_TENANT_DOMAIN_1, 0, 5, false);
-        retrievedAPIs = (List<API>) actualAPIs.get("apis");
-        Assert.assertEquals("Searching with additional property failed", 1, actualAPIs.get("length"));
-        Assert.assertNotNull("Search with additional property failed", retrievedAPIs);
-        Assert.assertEquals("Search with additional property failed", 1, retrievedAPIs.size());
-        Assert.assertEquals("Search with additional property failed", "sxy12",
-                retrievedAPIs.get(0).getId().getApiName());
-
-        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, null, -1234);
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("search", null, 0, 5, false).get("length"), 0);
-        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, "5", -1234);
-        GovernanceArtifact governanceArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "qname");
-        List<GovernanceArtifact> governanceArtifactList = new ArrayList<GovernanceArtifact>();
-        governanceArtifactList.add(governanceArtifact);
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("search", null, 0, 5, false).get("length"), 0);
-        Assert.assertEquals(
-                abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false)
-                        .get("length"), 0);
-        BDDMockito.when(GovernanceUtils
-                .findGovernanceArtifacts(Mockito.anyString(), Mockito.any(Registry.class), Mockito.anyString(),
-                        Mockito.anyBoolean())).thenThrow(RegistryException.class).thenReturn(governanceArtifactList);
-        try {
-            abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false);
-            Assert.fail("APIM exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to Search APIs"));
-        }
-        API api1 = new API(getAPIIdentifier("api1", API_PROVIDER, "v1"));
-        BDDMockito.when(APIUtil.getAPI((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any())).thenReturn(api1);
-        BDDMockito.when(APIUtil.getAPIIdentifierFromUUID((String) Mockito.any())).thenReturn(getAPIIdentifier("api1", API_PROVIDER, "v1"));
-        SortedSet<API> apiSet = (SortedSet<API>) abstractAPIManager
-                .searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false).get("apis");
-        Assert.assertEquals(apiSet.size(), 1);
-        Assert.assertEquals(apiSet.first().getId().getApiName(), "api1");
-        Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, true)
-                .get("length"), 0);
-        PowerMockito.when(paginationContext.getLength()).thenReturn(12);
-        Assert.assertTrue(
-                (Boolean) abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, true)
-                        .get("isMore"));
     }
 
     @Test

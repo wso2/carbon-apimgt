@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -1384,5 +1385,9 @@ public class GatewayUtils {
 
     public static TracingTracer getTracingTracer() {
         return ServiceReferenceHolder.getInstance().getTracer();
+    }
+
+    public static boolean isAllApisDeployed () {
+        return DataHolder.getInstance().isAllApisDeployed();
     }
 }

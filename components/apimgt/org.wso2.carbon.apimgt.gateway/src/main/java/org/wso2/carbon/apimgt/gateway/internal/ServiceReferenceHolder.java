@@ -45,6 +45,7 @@ import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import redis.clients.jedis.JedisPool;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -85,8 +86,7 @@ public class ServiceReferenceHolder {
     private SubscriptionsDataService subscriptionsDataService;
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
-    private RedisCacheUtils redisCacheUtils;
-
+    private JedisPool redisPool;
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -366,21 +366,25 @@ public class ServiceReferenceHolder {
 
     public void setRedisCacheUtil(RedisCacheUtils redisCacheUtils) {
 
-        this.redisCacheUtils = redisCacheUtils;
-    }
-
-    public RedisCacheUtils getRedisCacheUtils() {
-
-        return redisCacheUtils;
     }
 
     public boolean isRedisEnabled() {
 
-        RedisConfig redisConfigProperties = getAPIManagerConfiguration().getRedisConfigProperties();
+        RedisConfig redisConfigProperties = getAPIManagerConfiguration().getRedisConfig();
         if (redisConfigProperties != null && redisConfigProperties.isRedisEnabled()) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public JedisPool getRedisPool() {
+
+        return redisPool;
+    }
+
+    public void setRedisPool(JedisPool redisPool) {
+
+        this.redisPool = redisPool;
     }
 }

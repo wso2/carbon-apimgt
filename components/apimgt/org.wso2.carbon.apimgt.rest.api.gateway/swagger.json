@@ -116,6 +116,28 @@
         }
       }
     },
+    "/server-startup-healthcheck" : {
+      "get" : {
+        "summary" : "Health check to check if all the API are deployed during the server startup\n",
+        "description" : "Health check to check if all the API are deployed during the server startup\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\n"
+          },
+          "500" : {
+            "description" : "Internal Server Error.\n"
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ ]
+        } ],
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "curl -k \"https://localhost:9443/api/am/gateway/v2/server-startup-healthcheck\""
+        } ]
+      }
+    },
     "/api-artifact" : {
       "get" : {
         "summary" : "Get API artifact from the storage",

@@ -37,7 +37,6 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
@@ -190,7 +189,6 @@ import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -208,7 +206,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
@@ -387,40 +384,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to get Subscribers for : " + providerId, e);
         }
         return subscriberSet;
-    }
-
-    /**
-     * get details of provider
-     *
-     * @param providerName name of the provider
-     * @return Provider
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Provider
-     */
-    @Override
-    public Provider getProvider(String providerName) throws APIManagementException {
-        Provider provider = null;
-        String providerPath = APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                APIConstants.PROVIDERS_PATH + RegistryConstants.PATH_SEPARATOR + providerName;
-        try {
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.PROVIDER_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when getting provider " + providerName;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            Resource providerResource = registry.get(providerPath);
-            String artifactId = providerResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact it is null");
-            }
-            GenericArtifact providerArtifact = artifactManager.getGenericArtifact(artifactId);
-            provider = APIUtil.getProvider(providerArtifact);
-
-        } catch (RegistryException e) {
-            handleException("Failed to get Provider form : " + providerName, e);
-        }
-        return provider;
     }
 
     /**
@@ -746,7 +709,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
         int apiId = apiMgtDAO.addAPI(api, tenantId, api.getOrganization());
-        addLocalScopes(api.getUuid(), api.getUriTemplates(), api.getOrganization());
+        addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -761,19 +724,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Add local scopes for the API if the scopes does not exist as shared scopes. The local scopes to add will be
      * take from the URI templates.
      *
-     * @param uuid API uuid
+     * @param apiName API name
      * @param uriTemplates  URI Templates
      * @param organization  Organization
      * @throws APIManagementException if fails to add local scopes for the API
      */
-    private void addLocalScopes(String uuid, Set<URITemplate> uriTemplates, String organization)
+    private void addLocalScopes(String apiName, Set<URITemplate> uriTemplates, String organization)
             throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         //Get the local scopes set to register for the API from URI templates
-        Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(uuid, organization, uriTemplates);
+        Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiName, organization, uriTemplates);
         //Register scopes
         for (Scope scope : scopesToRegister) {
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -806,13 +769,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Extract the scopes set from URI templates which needs to be registered as local scopes for the API.
      *
-     * @param uuid API uuid
+     * @param apiName API name
      * @param organization  Organization
      * @param uriTemplates  URI templates
      * @return Local Scopes set to register
      * @throws APIManagementException if fails to extract Scopes from URI templates
      */
-    private Set<Scope> getScopesToRegisterFromURITemplates(String uuid, String organization,
+    private Set<Scope> getScopesToRegisterFromURITemplates(String apiName, String organization,
             Set<URITemplate> uriTemplates) throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
@@ -836,10 +799,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!isSharedScopeNameExists(scopeKey, tenantId)) {
                 // Check if scope key is already assigned locally to a different API (Other than different versions of
                 // the same API).
-                if (!isScopeKeyAssignedLocally(uuid, scope.getKey(), organization)) {
+                if (!isScopeKeyAssignedLocally(apiName, scope.getKey(), organization)) {
                     scopesToRegister.add(scope);
                 } else {
-                    throw new APIManagementException("Error while adding local scopes for API with UUID " + uuid
+                    throw new APIManagementException("Error while adding local scopes for API " + apiName
                             + ". Scope: " + scopeKey + " already assigned locally for a different API.");
                 }
             } else if (log.isDebugEnabled()) {
@@ -1574,7 +1537,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the existing URI templates for the API
         Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
         // Get the new local scope keys from URI templates
-        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getUuid(), api.getOrganization(), uriTemplates);
+        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId().getApiName(), api.getOrganization(), uriTemplates);
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
         // Get the existing versioned local scope keys attached for the API
         Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
@@ -5391,132 +5354,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-    }
-
-    @Override
-    public Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end)
-            throws APIManagementException {
-        Map<String, Object> result = new HashMap<String, Object>();
-        List<API> apiSortedList = new ArrayList<API>();
-        int totalLength = 0;
-        boolean isTenantFlowStarted = false;
-
-        try {
-            String paginationLimit = getAPIManagerConfiguration()
-                    .getFirstProperty(APIConstants.API_PUBLISHER_APIS_PER_PAGE);
-
-            // If the Config exists use it to set the pagination limit
-            final int maxPaginationLimit;
-            if (paginationLimit != null) {
-                // The additional 1 added to the maxPaginationLimit is to help us determine if more
-                // APIs may exist so that we know that we are unable to determine the actual total
-                // API count. We will subtract this 1 later on so that it does not interfere with
-                // the logic of the rest of the application
-                int pagination = Integer.parseInt(paginationLimit);
-                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
-                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
-                // leading to some of the APIs not being displayed
-                if (pagination < 11) {
-                    pagination = 11;
-                    log.warn(
-                            "Value of '" + APIConstants.API_PUBLISHER_APIS_PER_PAGE + "' is too low, defaulting to 11");
-                }
-
-                maxPaginationLimit = start + pagination + 1;
-            }
-            // Else if the config is not specifed we go with default functionality and load all
-            else {
-                maxPaginationLimit = Integer.MAX_VALUE;
-            }
-            Registry userRegistry;
-            boolean isTenantMode = (tenantDomain != null);
-            if ((isTenantMode && this.tenantDomain == null) ||
-                    (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                    isTenantFlowStarted = true;
-                }
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME,
-                        tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                        .setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-            } else {
-                userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-            }
-            PaginationContext.init(start, end, "ASC", APIConstants.PROVIDER_OVERVIEW_NAME, maxPaginationLimit);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-
-            if (artifactManager != null) {
-                List<GovernanceArtifact> genericArtifacts = null;
-
-                if (isAccessControlRestrictionEnabled && !APIUtil.hasPermission(userNameWithoutChange, APIConstants
-                        .Permissions.APIM_ADMIN)) {
-                    genericArtifacts = GovernanceUtils.findGovernanceArtifacts(getUserRoleListQuery(), userRegistry,
-                            APIConstants.API_RXT_MEDIA_TYPE, true);
-                } else {
-                    genericArtifacts = GovernanceUtils
-                            .findGovernanceArtifacts(new HashMap<String, List<String>>(), userRegistry,
-                                    APIConstants.API_RXT_MEDIA_TYPE);
-                }
-                totalLength = PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.isEmpty()) {
-                    result.put("apis", apiSortedList);
-                    result.put("totalLength", totalLength);
-                    return result;
-                }
-                // Check to see if we can speculate that there are more APIs to be loaded
-                if (maxPaginationLimit == totalLength) {
-                    // performance hit
-                    --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
-                }
-                int tempLength = 0;
-                for (GovernanceArtifact artifact : genericArtifacts) {
-
-                    API api = APIUtil.getAPI(artifact);
-
-                    if (api != null) {
-                        apiSortedList.add(api);
-                    }
-                    tempLength++;
-                    if (tempLength >= totalLength) {
-                        break;
-                    }
-                }
-                Collections.sort(apiSortedList, new APINameComparator());
-            } else {
-                String errorMessage =
-                        "Failed to retrieve artifact manager when getting paginated APIs of tenant " + tenantDomain;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to get all APIs", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all APIs", e);
-        } finally {
-            PaginationContext.destroy();
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-        result.put("apis", apiSortedList);
-        result.put("totalLength", totalLength);
-        return result;
-    }
-
-    private boolean isTenantDomainNotMatching(String tenantDomain) {
-        if (this.tenantDomain != null) {
-            return !(this.tenantDomain.equals(tenantDomain));
-        }
-        return true;
     }
 
     /**
