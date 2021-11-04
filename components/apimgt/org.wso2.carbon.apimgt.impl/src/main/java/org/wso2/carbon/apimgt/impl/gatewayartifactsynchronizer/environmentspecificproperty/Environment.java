@@ -19,15 +19,13 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspeci
 
 import com.google.gson.JsonObject;
 
-import java.util.Map;
-
 /**
  * This represent environment specific api properties of a environment.
  */
 public class Environment {
     private String envId;
     private String envName;
-    private Map<String, JsonObject> configs;
+    private JsonObject configs;
 
     public String getEnvName() {
         return envName;
@@ -37,11 +35,11 @@ public class Environment {
         this.envName = envName;
     }
 
-    public Map<String, JsonObject> getConfigs() {
+    public JsonObject getConfigs() {
         return configs;
     }
 
-    public void setConfigs(Map<String, JsonObject> configs) {
+    public void setConfigs(JsonObject configs) {
         this.configs = configs;
     }
 

@@ -94,7 +94,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                     APIConstants.GatewayArtifactConstants.DEPLOYMENT_DESCRIPTOR_FILE_TYPE, descriptorDto);
 
             // adding env_properties.json
-            Map<String, Environment> environmentSpecificAPIProperties =
+            Map<String, Map<String, Environment>> environmentSpecificAPIProperties =
                     getEnvironmentSpecificAPIProperties(apiRuntimeArtifactDtoList);
             String environmentSpecificAPIPropertyFile = Paths.get(tempDirectory.getAbsolutePath(),
                     APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE).toString();
@@ -114,13 +114,14 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         }
     }
 
-    private Map<String, Environment> getEnvironmentSpecificAPIProperties(
+    private Map<String, Map<String, Environment>> getEnvironmentSpecificAPIProperties(
             List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList) throws APIManagementException {
         List<String> apiIds = apiRuntimeArtifactDtoList.stream()
                 .map(APIRuntimeArtifactDto::getApiId)
                 .collect(Collectors.toList());
         return environmentSpecificAPIPropertyDao.getEnvironmentSpecificAPIPropertiesOfAPIs(apiIds);
     }
+
     @Override
     public String getType() {
 

@@ -162,20 +162,19 @@ public class EnvironmentSpecificAPIPropertyDAO {
         return false;
     }
 
-    public Map<String, Environment> getEnvironmentSpecificAPIPropertiesOfAPIs(List<String> apiUuidS)
+    public Map<String, Map<String, Environment>> getEnvironmentSpecificAPIPropertiesOfAPIs(List<String> apiUuidS)
             throws APIManagementException {
         String idsAsList = apiUuidS.stream()
                 .map(id -> "'" + id + "'")
                 .collect(Collectors.joining(","));
-        Map<String, Environment> mgEnvs = getMGEnvironmentSpecificAPIPropertiesOfAPIs(idsAsList);
-        Map<String, Environment> defaultEnvs = getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(idsAsList);
-        mgEnvs.putAll(defaultEnvs);
-        return mgEnvs;
+        Map<String, Map<String, Environment>> mgEnvs = getMGEnvironmentSpecificAPIPropertiesOfAPIs(idsAsList);
+        return getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(idsAsList, mgEnvs);
     }
 
-    private Map<String, Environment> getMGEnvironmentSpecificAPIPropertiesOfAPIs(String apiUuidS) throws APIManagementException {
+    private Map<String, Map<String, Environment>> getMGEnvironmentSpecificAPIPropertiesOfAPIs(String apiUuidS)
+            throws APIManagementException {
         final String query = getMgEnvironmentSpecificAPIPropertiesOfAPIsQuery(apiUuidS);
-        Map<String, Environment> environmentListMap= new HashMap<>();
+        Map<String, Map<String, Environment>> apiEnvironmentMap= new HashMap<>();
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -191,18 +190,20 @@ public class EnvironmentSpecificAPIPropertyDAO {
                         String apiJsonConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
                         jsonConfig = new Gson().fromJson(apiJsonConfig, JsonObject.class);
                     }
+
+                    Map<String, Environment> environmentMap;
                     Environment environment;
-                    if (environmentListMap.containsKey(envName)) {
-                        environment = environmentListMap.get(envName);
+                    if (apiEnvironmentMap.containsKey(apiId)) {
+                        environmentMap = apiEnvironmentMap.get(apiId);
                     } else {
-                        environment = new Environment();
-                        environment.setEnvId(envId);
-                        environment.setEnvName(envName);
-                        environment.setConfigs(new HashMap<>());
-                        environmentListMap.put(envName, environment);
+                        environmentMap = new HashMap<>();
+                        apiEnvironmentMap.put(apiId, environmentMap);
                     }
-                    Map<String, JsonObject> apiConfigs = environment.getConfigs();
-                    apiConfigs.put(apiId, jsonConfig);
+                    environment = new Environment();
+                    environment.setEnvId(envId);
+                    environment.setEnvName(envName);
+                    environment.setConfigs(jsonConfig);
+                    environmentMap.put(envName, environment);
                 }
             }
         } catch (SQLException e) {
@@ -210,17 +211,16 @@ public class EnvironmentSpecificAPIPropertyDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
-        return environmentListMap;
+        return apiEnvironmentMap;
     }
 
-    private Map<String, Environment> getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(String apiUuidS)
-            throws APIManagementException {
+    private Map<String, Map<String, Environment>> getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(String apiUuidS,
+            Map<String, Map<String, Environment>> apiEnvironmentMap) throws APIManagementException {
         Map<String, org.wso2.carbon.apimgt.api.model.Environment> defaultEnvs = APIUtil.getReadOnlyEnvironments();
         String envsAsList = defaultEnvs.values().stream()
                 .map(env -> "'" + env.getUuid() + "'")
                 .collect(Collectors.joining(","));
         final String query = getDefaultEnvironmentSpecificAPIPropertiesOfAPIsQuery(apiUuidS, envsAsList);
-        Map<String, Environment> environmentListMap = new HashMap<>();
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -228,6 +228,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                     ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String envId = resultSet.getString(1);
+                    String envName = envId; // for default envs envId and envName is same
                     String apiId = resultSet.getString(2);
                     JsonObject jsonConfig = null;
                     InputStream propertyConfigBlob = resultSet.getBinaryStream(3);
@@ -235,18 +236,19 @@ public class EnvironmentSpecificAPIPropertyDAO {
                         String apiJsonConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
                         jsonConfig = new Gson().fromJson(apiJsonConfig, JsonObject.class);
                     }
+                    Map<String, Environment> environmentMap;
                     Environment environment;
-                    if (environmentListMap.containsKey(envId)) {
-                        environment = environmentListMap.get(envId);
+                    if (apiEnvironmentMap.containsKey(apiId)) {
+                        environmentMap = apiEnvironmentMap.get(apiId);
                     } else {
-                        environment = new Environment();
-                        environment.setEnvId(envId);
-                        environment.setEnvName(envId); // If env uuid is empty, it take uuid as env name
-                        environment.setConfigs(new HashMap<>());
-                        environmentListMap.put(envId, environment);
+                        environmentMap = new HashMap<>();
+                        apiEnvironmentMap.put(apiId, environmentMap);
                     }
-                    Map<String, JsonObject> apiConfigs = environment.getConfigs();
-                    apiConfigs.put(apiId, jsonConfig);
+                    environment = new Environment();
+                    environment.setEnvId(envId);
+                    environment.setEnvName(envName);
+                    environment.setConfigs(jsonConfig);
+                    environmentMap.put(envName, environment);
                 }
             }
         } catch (SQLException e) {
@@ -254,7 +256,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
-        return environmentListMap;
+        return apiEnvironmentMap;
     }
 
     private String getMgEnvironmentSpecificAPIPropertiesOfAPIsQuery(String apiIds) {
@@ -266,7 +268,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                         + " WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID = AM_GATEWAY_ENVIRONMENT.UUID AND"
                         + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND"
                         + "        AM_API.API_UUID IN (" + apiIds + ")"
-                        + " ORDER BY ENV_ID, ENV_NAME, API_ID";
+                        + " ORDER BY API_ID, ENV_NAME, ENV_ID";
     }
 
     private String getDefaultEnvironmentSpecificAPIPropertiesOfAPIsQuery(String apiIds, String envIds) {
@@ -277,6 +279,6 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 + " WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID IN (" + envIds + ") AND"
                 + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND"
                 + "        AM_API.API_UUID IN (" + apiIds + ")"
-                + " ORDER BY ENV_ID, API_ID";
+                + " ORDER BY API_ID, ENV_ID";
     }
 }
