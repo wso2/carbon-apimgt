@@ -131,7 +131,8 @@ public class PublisherCommonUtils {
         boolean isAsyncAPI = originalAPI.getType() != null
                 && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType()));
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -231,8 +232,8 @@ public class PublisherCommonUtils {
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
         String originalStatus = originalAPI.getStatus();
-        if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
-                .contains(APIConstants.API_SECURITY_API_KEY)) {
+        if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                .contains(APIConstants.API_SECURITY_API_KEY)) && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised()) {
             if (tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
                     || APIConstants.PROTOTYPED.equals(originalStatus))) {
                 throw new APIManagementException(
