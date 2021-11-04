@@ -392,7 +392,15 @@ public class JWTValidator {
     }
 
 
-
+    /**
+     * Validates token for Websocket requests.
+     *
+     * @param signedJWTInfo  SignedJWT Info
+     * @param tokenSignature Token Signature
+     * @param jti            JTI
+     * @return JWT Validation Info
+     * @throws APISecurityException If an error occurs
+     */
     private JWTValidationInfo validateTokenForWS(SignedJWTInfo signedJWTInfo, String tokenSignature, String jti)
             throws APISecurityException {
 
@@ -422,6 +430,7 @@ public class JWTValidator {
      */
     private APIKeyValidationInfoDTO validateSubscriptionsForWS(JWTValidationInfo jwtValidationInfo, String apiContext, String apiVersion)
             throws APISecurityException {
+
         log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(apiContext,
                 apiVersion, jwtValidationInfo);
@@ -490,8 +499,7 @@ public class JWTValidator {
      * @throws APISecurityException if an error occurs
      */
     public AuthenticationContext authenticateForGraphQLSubscription(SignedJWTInfo signedJWTInfo, String apiContext,
-                                                                                        String apiVersion)
-            throws APISecurityException {
+                                                                    String apiVersion) throws APISecurityException {
 
         String tokenSignature = signedJWTInfo.getSignedJWT().getSignature().toString();
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
@@ -514,8 +522,7 @@ public class JWTValidator {
                 throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(), message);
             }
         } else if (!jwtValidationInfo.isValid()) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);

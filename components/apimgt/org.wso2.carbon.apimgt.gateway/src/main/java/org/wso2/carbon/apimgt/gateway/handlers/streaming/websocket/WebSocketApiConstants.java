@@ -29,6 +29,7 @@ public class WebSocketApiConstants {
     public static final String URL_SEPARATOR = "/";
     public static final String DEFAULT_RESOURCE_NAME = "/_default_resource_of_api_";
 
+    //Constants for Websocket frame error codes and messages
     public static class FrameErrorConstants {
         public static final int API_AUTH_GENERAL_ERROR = 4000;
         public static final String API_AUTH_GENERAL_MESSAGE = "Unclassified Authentication Failure";
@@ -46,6 +47,7 @@ public class WebSocketApiConstants {
         public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
     }
 
+    //Constants for Websocket handshake error codes and messages
     public static class HandshakeErrorConstants {
         public static final int API_AUTH_ERROR = 401;
         public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";

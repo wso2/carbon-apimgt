@@ -24,7 +24,6 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.QueryMutationAnalyzer;
@@ -71,8 +70,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     private boolean analyseQuery(MessageContext messageContext, String payload) {
 
         try {
-            return queryMutationAnalyzer.analyseQueryDepth(messageContext, payload) &&
-                    queryMutationAnalyzer.analyseQueryComplexity(messageContext, payload);
+            return queryMutationAnalyzer.analyseQueryMutationDepth(messageContext, payload) &&
+                    queryMutationAnalyzer.analyseQueryMutationComplexity(messageContext, payload);
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
             log.error(errorMessage, e);

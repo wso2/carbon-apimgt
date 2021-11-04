@@ -33,6 +33,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Implementation for GraphQL query field complexity calculator.
+ */
 public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator {
 
     private static final Log log = LogFactory.getLog(FieldComplexityCalculatorImpl.class);
@@ -48,8 +51,15 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
         }
     }
 
+    /**
+     * Calculate complexity.
+     *
+     * @param fieldComplexityEnvironment FieldComplexityEnvironment
+     * @param childComplexity            Child Complexity value
+     */
     @Override
     public int calculate(FieldComplexityEnvironment fieldComplexityEnvironment, int childComplexity) {
+
         String fieldName = fieldComplexityEnvironment.getField().getName();
         String parentType = fieldComplexityEnvironment.getParentType().getName();
         List<Argument> ArgumentList = fieldComplexityEnvironment.getField().getArguments();
@@ -60,9 +70,9 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
     }
 
     private int getCustomComplexity(String fieldName, String parentType, JSONObject policyDefinition) {
+
         JSONObject customComplexity = (JSONObject) policyDefinition.get(parentType);
         if (customComplexity != null && customComplexity.get(fieldName) != null) {
-            //TODO:chnge as interger
             return ((Long) customComplexity.get(fieldName)).intValue(); // Returns custom complexity value
         } else {
             if (log.isDebugEnabled()) {
@@ -73,13 +83,14 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
     }
 
     private int getArgumentsValue(List<Argument> argumentList) {
+
         int argumentValue = 0;
         if (argumentList.size() > 0) {
             for (Argument object : argumentList) {
                 String argumentName = object.getName();
                 // The below list of slicing arguments (keywords) effect query complexity to multiply by the factor
                 // given as the value of the argument.
-                List<String> slicingArguments = Arrays.asList("first", "last", "limit");
+                List<String> slicingArguments = GraphQLConstants.QUERY_COMPLEXITY_SLICING_ARGS;
                 if (slicingArguments.contains(argumentName.toLowerCase(Locale.ROOT))) {
                     BigInteger value = null;
                     if (object.getValue() instanceof IntValue) {

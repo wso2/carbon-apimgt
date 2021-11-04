@@ -250,6 +250,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private boolean validatePayloadWithSchema(MessageContext messageContext, Document document) {
 
         String validationErrorMessage;
+        // Get GraphQL schema data from gateway internal data holder
         graphQLSchemaDTO = DataHolder.getInstance().getApiToGraphQLSchemaDTOMap().get(apiUUID);
         validationErrorMessage = queryValidator.validatePayload(graphQLSchemaDTO.getGraphQLSchema(), document);
         if (validationErrorMessage != null) {

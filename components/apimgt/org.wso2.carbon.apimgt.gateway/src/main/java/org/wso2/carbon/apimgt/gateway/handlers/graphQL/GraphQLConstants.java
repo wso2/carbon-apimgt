@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * GraphQL related gateway constants
+ * GraphQL related gateway constants.
  */
 public class GraphQLConstants {
     public static final int GRAPHQL_QUERY_TOO_DEEP = APIThrottleConstants.GRAPHQL_QUERY_TOO_DEEP;
@@ -34,8 +34,9 @@ public class GraphQLConstants {
 
     public static final int GRAPHQL_INVALID_QUERY = 900422;
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
-    public static final String GRAPHQL_INVALID_QUERY_MESSAGE= "INVALID QUERY";
+    public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
 
+    //GraphQL Constants related to GraphQL Subscription operations
     public static class SubscriptionConstants {
         public static final String HTTP_METHOD_NAME = "SUBSCRIPTION";
         public static final String PAYLOAD_FIELD_NAME_TYPE = "type";

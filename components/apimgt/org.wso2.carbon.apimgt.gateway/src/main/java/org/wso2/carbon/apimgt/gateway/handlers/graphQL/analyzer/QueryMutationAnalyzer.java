@@ -36,6 +36,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * QueryAnalyzer class extension for GraphQL query and mutation operations.
+ */
 public class QueryMutationAnalyzer extends QueryAnalyzer {
 
     private static final Log log = LogFactory.getLog(QueryMutationAnalyzer.class);
@@ -51,10 +54,10 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      * @param payload        payload of the request
      * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
-    public boolean analyseQueryDepth(MessageContext messageContext, String payload) {
+    public boolean analyseQueryMutationDepth(MessageContext messageContext, String payload) {
 
         int maxQueryDepth = getMaxQueryDepth(messageContext);
-        QueryAnalyzerResponseDTO responseDTO = super.analyseQueryDepth(maxQueryDepth, payload);
+        QueryAnalyzerResponseDTO responseDTO = analyseQueryDepth(maxQueryDepth, payload);
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
                     GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, responseDTO.getErrorList().toString());
@@ -71,6 +74,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      * @return maximum query depth value if exists, or -1 to denote no complexity limitation
      */
     private int getMaxQueryDepth(MessageContext messageContext) {
+
         Object maxQueryDepth = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
         if (maxQueryDepth != null) {
             int maxDepth = (Integer) maxQueryDepth;
@@ -93,7 +97,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      * @param payload        payload of the request
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
-    public boolean analyseQueryComplexity(MessageContext messageContext, String payload) {
+    public boolean analyseQueryMutationComplexity(MessageContext messageContext, String payload) {
 
         List<String> errorList = new ArrayList<>();
         FieldComplexityCalculator fieldComplexityCalculator = null;
@@ -105,7 +109,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
             handleFailure(GraphQLConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
         }
         int maxQueryComplexity = getMaxQueryComplexity(messageContext);
-        QueryAnalyzerResponseDTO responseDTO = super.analyseQueryComplexity(maxQueryComplexity, payload,
+        QueryAnalyzerResponseDTO responseDTO = analyseQueryComplexity(maxQueryComplexity, payload,
                 fieldComplexityCalculator);
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
@@ -123,6 +127,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      * @return maximum query complexity value if exists, or -1 to denote no complexity limitation
      */
     private int getMaxQueryComplexity(MessageContext messageContext) {
+
         Object maxQueryComplexity = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
         if (maxQueryComplexity != null) {
             int maxComplexity = (Integer) maxQueryComplexity;
@@ -139,7 +144,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
     }
 
     /**
-     * This method handle the failure
+     * This method handle the query mutation analysis failures.
      *
      * @param errorCodeValue   error code of the failure
      * @param messageContext   message context of the request
@@ -148,6 +153,7 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      */
     private void handleFailure(int errorCodeValue, MessageContext messageContext, String errorMessage,
                                String errorDescription) {
+
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCodeValue);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);

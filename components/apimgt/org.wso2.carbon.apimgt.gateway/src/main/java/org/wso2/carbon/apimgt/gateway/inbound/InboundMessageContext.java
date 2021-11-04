@@ -21,7 +21,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.synapse.api.API;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLOperationDTO;
+import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
@@ -29,6 +29,9 @@ import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Message context to hold information of an intercepted single inbound connection.
+ */
 public class InboundMessageContext {
 
     private MessageContext axis2MessageContext;
@@ -50,11 +53,12 @@ public class InboundMessageContext {
     private String electedRoute;
     private AuthenticationContext authContext;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
-    private GraphQLSchemaDTO graphQLSchemaDTO;
     private SignedJWTInfo signedJWTInfo;
     private Map<String, ResourceInfoDTO> resourcesMap = new HashMap<>();
-    private Map<String, GraphQLOperationDTO> graphQLMsgIdToVerbInfo = new HashMap<>();
     private String userIP;
+    //Graphql Subscription specific connection context information
+    private GraphQLSchemaDTO graphQLSchemaDTO;
+    private Map<String, GraphQLOperationDTO> graphQLMsgIdToVerbInfo = new HashMap<>();
 
     public void addVerbInfoForGraphQLMsgId(String msgId, GraphQLOperationDTO graphQLOperationDTO) {
         this.graphQLMsgIdToVerbInfo.put(msgId, graphQLOperationDTO);

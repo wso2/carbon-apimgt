@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.api.gateway;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.TypeDefinitionRegistry;
 
+/**
+ * This contains GraphQL Schema related data to deploy in Gateway.
+ */
 public class GraphQLSchemaDTO {
 
     private GraphQLSchema graphQLSchema;

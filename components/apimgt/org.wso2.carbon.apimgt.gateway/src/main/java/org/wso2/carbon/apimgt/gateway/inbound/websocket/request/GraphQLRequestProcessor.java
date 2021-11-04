@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer.SubscriptionAnal
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLOperationDTO;
+import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -172,15 +172,15 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         try {
             QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
-                    subscriptionAnalyzer.analyseQueryComplexity(payload,
+                    subscriptionAnalyzer.analyseSubscriptionQueryComplexity(payload,
                             inboundMessageContext.getInfoDTO().getGraphQLMaxComplexity());
             if (!queryAnalyzerResponseDTO.isSuccess() && !queryAnalyzerResponseDTO.getErrorList().isEmpty()) {
                 List<String> errorList = queryAnalyzerResponseDTO.getErrorList();
                 log.error("Query complexity validation failed for: " + payload + " errors: " + errorList.toString());
                 responseDTO.setError(true);
                 responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX);
-                responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX +
-                        " : " + queryAnalyzerResponseDTO.getErrorList().toString());
+                responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE
+                        + " : " + queryAnalyzerResponseDTO.getErrorList().toString());
                 return responseDTO;
             }
         } catch (APIManagementException e) {
@@ -197,24 +197,17 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                                            String payload) {
 
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
-        try {
-            QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
-                    subscriptionAnalyzer.analyseQueryComplexity(payload,
-                            inboundMessageContext.getInfoDTO().getGraphQLMaxComplexity());
-            if (!queryAnalyzerResponseDTO.isSuccess() && !queryAnalyzerResponseDTO.getErrorList().isEmpty()) {
-                List<String> errorList = queryAnalyzerResponseDTO.getErrorList();
-                log.error("Query depth validation failed for: " + payload + " errors: " + errorList.toString());
-                responseDTO.setError(true);
-                responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX);
-                responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE
-                        + " : " + queryAnalyzerResponseDTO.getErrorList().toString());
-                return responseDTO;
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while validating query depth for: " + payload, e);
+        QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
+                subscriptionAnalyzer.analyseSubscriptionQueryDepth(inboundMessageContext.getInfoDTO().
+                                getGraphQLMaxDepth(), payload);
+        if (!queryAnalyzerResponseDTO.isSuccess() && !queryAnalyzerResponseDTO.getErrorList().isEmpty()) {
+            List<String> errorList = queryAnalyzerResponseDTO.getErrorList();
+            log.error("Query depth validation failed for: " + payload + " errors: " + errorList.toString());
             responseDTO.setError(true);
-            responseDTO.setErrorMessage(e.getMessage());
-            responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.INTERNAL_SERVER_ERROR);
+            responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP);
+            responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE
+                    + " : " + queryAnalyzerResponseDTO.getErrorList().toString());
+            return responseDTO;
         }
         return responseDTO;
     }

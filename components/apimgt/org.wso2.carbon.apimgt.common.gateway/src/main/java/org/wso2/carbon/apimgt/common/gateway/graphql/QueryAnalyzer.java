@@ -31,6 +31,9 @@ import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 
 import java.util.List;
 
+/**
+ * This class contains methods using for Graphql query depth and complexity analysis.
+ */
 public class QueryAnalyzer {
 
     private static final Log log = LogFactory.getLog(QueryAnalyzer.class);
@@ -41,9 +44,10 @@ public class QueryAnalyzer {
     }
 
     /**
-     * This method analyses the query depth
+     * This method analyses the query depth.
      *
-     * @param payload payload of the request
+     * @param maxQueryDepth maximum query depth
+     * @param payload       payload of the request
      * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
     public QueryAnalyzerResponseDTO analyseQueryDepth(int maxQueryDepth, String payload) {
@@ -90,7 +94,9 @@ public class QueryAnalyzer {
     /**
      * This method analyses the query complexity.
      *
-     * @param payload payload of the request
+     * @param fieldComplexityCalculator Field Complexity Calculator
+     * @param maxQueryComplexity        Maximum query complexity value
+     * @param payload                   payload of the request
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
     public QueryAnalyzerResponseDTO analyseQueryComplexity(int maxQueryComplexity, String payload,

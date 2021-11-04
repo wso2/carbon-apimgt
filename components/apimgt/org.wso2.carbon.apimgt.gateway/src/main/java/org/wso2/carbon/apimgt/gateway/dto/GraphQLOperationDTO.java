@@ -15,10 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.inbound.websocket;
+package org.wso2.carbon.apimgt.gateway.dto;
 
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 
+/**
+ * Holds information related to GraphQL operation and its Verb Info DTO. Currently, used to hold verb information such
+ * as throttle policy values of GraphQL subscription operations.
+ */
 public class GraphQLOperationDTO {
 
     VerbInfoDTO verbInfoDTO;

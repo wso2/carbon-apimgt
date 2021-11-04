@@ -27,6 +27,9 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class contains methods using for Graphql query payload validation using schema.
+ */
 public class QueryValidator {
 
     private static final Log log = LogFactory.getLog(QueryValidator.class);
@@ -36,6 +39,13 @@ public class QueryValidator {
         this.validator = validator;
     }
 
+    /**
+     * Validate query payload.
+     *
+     * @param schema   GraphQL Schema
+     * @param document GraphQL payload as a Document
+     * @return Validation Error Message if any
+     */
     public String validatePayload(GraphQLSchema schema, Document document) {
 
         String validationErrorMessage = null;

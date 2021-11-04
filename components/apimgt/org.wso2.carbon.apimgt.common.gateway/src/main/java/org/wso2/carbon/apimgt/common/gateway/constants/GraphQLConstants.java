@@ -17,11 +17,14 @@
  */
 package org.wso2.carbon.apimgt.common.gateway.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Constants related to GraphQL operations.
  */
 public class GraphQLConstants {
 
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
-
+    public static final List<String> QUERY_COMPLEXITY_SLICING_ARGS = Arrays.asList("first", "last", "limit");
 }

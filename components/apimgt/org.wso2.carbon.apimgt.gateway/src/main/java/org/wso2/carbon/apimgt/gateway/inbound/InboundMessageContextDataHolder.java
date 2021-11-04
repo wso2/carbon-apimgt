@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.gateway.inbound;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A gateway data holder to hold information of InboundMessageContext and connection which it associates with.
+ */
 public class InboundMessageContextDataHolder {
 
     private static final InboundMessageContextDataHolder instance = new InboundMessageContextDataHolder();
@@ -28,11 +31,7 @@ public class InboundMessageContextDataHolder {
     public static InboundMessageContextDataHolder getInstance() {
         return instance;
     }
-
-    private InboundMessageContextDataHolder() {
-
-    }
-
+    
     public Map<String, InboundMessageContext> getInboundMessageContextMap() {
         return inboundMessageContextMap;
     }

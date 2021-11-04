@@ -29,14 +29,18 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Util class to handle graphQL specific API request processing.
+ */
 public class GraphQLProcessorUtil {
 
     private static final Log log = LogFactory.getLog(GraphQLProcessorUtil.class);
 
     /**
-     * This method used to extract operation List
+     * This method used to extract operation List.
      *
-     * @param operation operation
+     * @param operation              operation
+     * @param typeDefinitionRegistry TypeDefinitionRegistry
      * @return operationList
      */
     public static String getOperationList(OperationDefinition operation,
@@ -55,14 +59,14 @@ public class GraphQLProcessorUtil {
     }
 
     /**
-     * This method support to extracted nested level operations
+     * This method support to extracted nested level operations.
      *
      * @param selectionList   selection List
      * @param supportedFields supportedFields
      * @param operationArray  operationArray
      */
     public static void getNestedLevelOperations(List<Selection> selectionList, ArrayList<String> supportedFields,
-                                                 ArrayList<String> operationArray) {
+                                                ArrayList<String> operationArray) {
         for (Selection selection : selectionList) {
             if (!(selection instanceof Field)) {
                 continue;
@@ -82,7 +86,7 @@ public class GraphQLProcessorUtil {
     }
 
     /**
-     * This method helps to extract only supported operation names
+     * This method helps to extract only supported operation names.
      *
      * @param list URITemplates
      * @return supported Fields
