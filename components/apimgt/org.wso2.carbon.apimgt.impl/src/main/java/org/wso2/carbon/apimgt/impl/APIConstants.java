@@ -1375,23 +1375,25 @@ public final class APIConstants {
     }
 
     // For Redis Configuration
-    public static final String REDIS_CONFIG = "RedisConfig.";
-    public static final String CONFIG_REDIS_HOST = REDIS_CONFIG + "RedisHost";
-    public static final String CONFIG_REDIS_PORT = REDIS_CONFIG + "RedisPort";
-    public static final String CONFIG_REDIS_USER = REDIS_CONFIG + "RedisUser";
-    public static final String CONFIG_REDIS_PASSWORD = REDIS_CONFIG + "RedisPassword";
-    public static final String CONFIG_REDIS_DATABASE_ID = REDIS_CONFIG + "RedisDatabaseId";
-    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT = REDIS_CONFIG + "RedisConnectionTimeout";
-    public static final String CONFIG_REDIS_IS_SSL_ENABLED = REDIS_CONFIG + "RedisIsSslEnabled";
-
-    public static final String IS_REDIS_ENABLED = "isRedisEnabled";
-    public static final String REDIS_HOST = "redisHost";
-    public static final String REDIS_PORT = "redisPort";
-    public static final String REDIS_USER = "redisUser";
-    public static final String REDIS_PASSWORD = "redisPassword";
-    public static final String REDIS_DATABASE_ID = "redisDatabaseId";
-    public static final String REDIS_CONNECTION_TIMEOUT = "redisConnectionTimeout";
-    public static final String REDIS_IS_SSL_ENABLED = "redisIsSslEnabled";
+    public static final String REDIS_CONFIG = "RedisConfig";
+    public static final String CONFIG_REDIS_HOST = "RedisHost";
+    public static final String CONFIG_REDIS_PORT =  "RedisPort";
+    public static final String CONFIG_REDIS_USER =  "RedisUser";
+    public static final String CONFIG_REDIS_PASSWORD =  "RedisPassword";
+    public static final String CONFIG_REDIS_DATABASE_ID =  "RedisDatabaseId";
+    public static final String CONFIG_REDIS_CONNECTION_TIMEOUT =  "RedisConnectionTimeout";
+    public static final String CONFIG_REDIS_IS_SSL_ENABLED =  "RedisIsSslEnabled";
+    public static final String CONFIG_REDIS_PROPERTIES = "Properties";
+    public static final String CONFIG_REDIS_MAX_TOTAL = "maxTotal";
+    public static final String CONFIG_REDIS_MAX_IDLE = "maxIdle";
+    public static final String CONFIG_REDIS_MIN_IDLE = "minIdle";
+    public static final String CONFIG_REDIS_TEST_ON_BORROW = "testOnBorrow";
+    public static final String CONFIG_REDIS_TEST_ON_RETURN = "testOnReturn";
+    public static final String CONFIG_REDIS_TEST_WHILE_IDLE = "testWhileIdle";
+    public static final String CONFIG_REDIS_BLOCK_WHEN_EXHAUSTED = "blockWhenExhausted";
+    public static final String CONFIG_REDIS_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "minEvictableIdleTimeMillis";
+    public static final String CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "timeBetweenEvictionRunsMillis";
+    public static final String CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS = "numTestsPerEvictionRun";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -2688,10 +2690,6 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
-
-    public static class APPLICATION {
-        public static final String OVERRIDE_SP_NAME = "override.sp.name";
-    }
 
     public class SkipListConstants {
 

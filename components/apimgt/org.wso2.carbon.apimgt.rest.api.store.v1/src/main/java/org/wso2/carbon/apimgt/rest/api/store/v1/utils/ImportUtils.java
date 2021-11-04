@@ -174,8 +174,8 @@ public class ImportUtils {
                     }
                 }
                 Map matchedAPIs;
-                matchedAPIs = apiConsumer
-                        .searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0, Integer.MAX_VALUE, false);
+                matchedAPIs = apiConsumer.searchPaginatedAPIs(searchQuery.toString(), organization, 0,
+                        Integer.MAX_VALUE, null, null);
                 Set<Object> apiSet = (Set<Object>) matchedAPIs.get("apis");
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();

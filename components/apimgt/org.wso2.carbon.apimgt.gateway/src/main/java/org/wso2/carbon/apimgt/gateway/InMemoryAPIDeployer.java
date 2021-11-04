@@ -159,6 +159,7 @@ public class InMemoryAPIDeployer {
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (artifactRetriever != null) {
                 try {
+                    int errorCount = 0;
                     String labelString = String.join("|", assignedGatewayLabels);
                     String encodedString = Base64.encodeBase64URLSafeString(labelString.getBytes());
                     APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
@@ -167,6 +168,9 @@ public class InMemoryAPIDeployer {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                     List<String> gatewayRuntimeArtifacts =
                             ServiceReferenceHolder.getInstance().getArtifactRetriever().retrieveAllArtifacts(encodedString, tenantDomain);
+                    if (gatewayRuntimeArtifacts.size() == 0) {
+                        return true;
+                    }
                     for (String runtimeArtifact : gatewayRuntimeArtifacts) {
                         GatewayAPIDTO gatewayAPIDTO = null;
                         try {
@@ -179,6 +183,7 @@ public class InMemoryAPIDeployer {
                             }
                         } catch (AxisFault axisFault) {
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
+                            errorCount++;
                         }
                     }
                     // reload dynamic profiles to avoid delays in loading certs in mutual ssl enabled APIs upon
@@ -188,6 +193,10 @@ public class InMemoryAPIDeployer {
                         log.debug("APIs deployed in gateway with the labels of " + labelString);
                     }
                     result = true;
+                    //Setting the result to false only if all the API deployments are failed
+                    if (gatewayRuntimeArtifacts.size() == errorCount) {
+                        return false;
+                    }
                 } catch (ArtifactSynchronizerException | AxisFault e) {
                     String msg = "Error  deploying APIs to the Gateway ";
                     log.error(msg, e);

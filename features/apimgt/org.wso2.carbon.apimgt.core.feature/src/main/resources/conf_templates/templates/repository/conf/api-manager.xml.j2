@@ -1072,6 +1072,13 @@
             {% if apim.redis_config.ssl is defined %}
             <RedisIsSslEnabled>{{apim.redis_config.ssl}}</RedisIsSslEnabled>
             {% endif %}
+            <Properties>
+                {% if apim.redis_config.pool_options is defined %}
+                {% for property_name,property_value in apim.redis_config.pool_options.items() %}
+                 <{{property_name}}>{{property_value}}</{{property_name}}>
+                {% endfor %}
+                {% endif %}
+            <Properties>
         </RedisConfig>
     {% endif %}
 

@@ -31,6 +31,7 @@ public class DataHolder {
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
     private Map<String,String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
+    private boolean isAllApisDeployed = false;
 
     private DataHolder() {
 
@@ -60,6 +61,7 @@ public class DataHolder {
 
         return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
     }
+
     public void addGoogleAnalyticsConfig(String tenantDomain, String config) {
 
         googleAnalyticsConfigMap.put(tenantDomain, config);
@@ -82,5 +84,13 @@ public class DataHolder {
 
     public void addApiToGraphQLSchemaDTO(String apiId, GraphQLSchemaDTO graphQLSchemaDTO) {
         apiToGraphQLSchemaDTOMap.put(apiId, graphQLSchemaDTO);
+    }
+
+    public boolean isAllApisDeployed() {
+        return isAllApisDeployed;
+    }
+
+    public void setAllApisDeployed(boolean allApisDeployed) {
+        isAllApisDeployed = allApisDeployed;
     }
 }

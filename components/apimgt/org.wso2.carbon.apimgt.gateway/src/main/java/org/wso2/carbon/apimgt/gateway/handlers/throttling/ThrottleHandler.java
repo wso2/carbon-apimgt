@@ -953,16 +953,14 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
 
             if (subscriptionLevelSpikeArrestThrottleContext != null && authContext.getKeyType() != null) {
-                AccessInformation info = null;
-                if (isClusteringEnabled()) {
-                    org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
                             getAxis2MessageContext();
                     ConfigurationContext cc = axis2MC.getConfigurationContext();
                     subscriptionLevelSpikeArrestThrottleContext.setConfigurationContext(cc);
-                }
 
                 subscriptionLevelSpikeArrestThrottleContext.setThrottleId(id + APIThrottleConstants.SUBSCRIPTION_BURST_LIMIT);
-                info = getAccessInformation(subscriptionLevelSpikeArrestThrottleContext, throttleKey, throttleKey);
+                AccessInformation info = getAccessInformation(subscriptionLevelSpikeArrestThrottleContext,
+                        throttleKey, throttleKey);
                 if (log.isDebugEnabled()) {
                     log.debug("Throttle by subscription level burst limit " + throttleKey);
                     log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
@@ -1079,10 +1077,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 if (hardThrottleContext != null && authContext.getKeyType() != null) {
                     String throttleKey = apiContext + ':' + apiVersion + ':' + authContext.getKeyType();
                     AccessInformation info = null;
-                    if (isClusteringEnabled()) {
-                        hardThrottleContext.setConfigurationContext(cc);
-                    }
-
+                    hardThrottleContext.setConfigurationContext(cc);
                     if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
                             hardThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                         info = getAccessInformation(hardThrottleContext, throttleKey, APIThrottleConstants.PRODUCTION_HARD_LIMIT);
