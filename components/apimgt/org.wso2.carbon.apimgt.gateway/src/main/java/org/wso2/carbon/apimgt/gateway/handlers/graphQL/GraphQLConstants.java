@@ -19,6 +19,9 @@ package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * GraphQL related gateway constants
  */
@@ -33,6 +36,13 @@ public class GraphQLConstants {
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
     public static final String GRAPHQL_INVALID_QUERY_MESSAGE= "INVALID QUERY";
 
-    public static final String GRAPHQL_SUBSCRIPTION_HTTP_METHOD_NAME = "SUBSCRIPTION";
-
+    public static class SubscriptionConstants {
+        public static final String HTTP_METHOD_NAME = "SUBSCRIPTION";
+        public static final String PAYLOAD_FIELD_NAME_TYPE = "type";
+        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_SUBSCRIBE = Arrays.asList("start", "subscribe");
+        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_DATA = Arrays.asList("data", "next");
+        public static final String PAYLOAD_FIELD_NAME_PAYLOAD = "payload";
+        public static final String PAYLOAD_FIELD_NAME_QUERY = "query";
+        public static final String PAYLOAD_FIELD_NAME_ID = "id";
+    }
 }

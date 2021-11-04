@@ -22,23 +22,47 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.CombinedChannelDuplexHandler;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInboundHandler, WebsocketOutboundHandler> {
 
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
+    private WebSocketAnalyticsMetricsHandler metricsHandler;
 
     public WebsocketHandler() {
         super(new WebsocketInboundHandler(), new WebsocketOutboundHandler());
+        if (APIUtil.isAnalyticsEnabled()) {
+            metricsHandler = new WebSocketAnalyticsMetricsHandler();
+        }
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+
+        String channelId = ctx.channel().id().asLongText();
+        InboundMessageContext inboundMessageContext;
+        if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
+            inboundMessageContext = InboundMessageContextDataHolder.getInstance()
+                    .getInboundMessageContextForConnectionId(channelId);
+            InboundMessageContextDataHolder.getInstance()
+                    .addInboundMessageContextForConnection(channelId, inboundMessageContext);
+        } else {
+            inboundMessageContext = new InboundMessageContext();
+        }
+
         if (APIUtil.isAnalyticsEnabled()) {
             WebSocketUtils.setApiPropertyToChannel(ctx,
                     org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
@@ -50,30 +74,56 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
             outboundHandler().write(ctx, msg, promise);
 
         } else if (msg instanceof WebSocketFrame) {
-            if (isAllowed(ctx, (WebSocketFrame) msg)) {
-                outboundHandler().write(ctx, msg, promise);
-                // publish analytics events if analytics is enabled
-                if (APIUtil.isAnalyticsEnabled()) {
-                    inboundHandler().publishSubscribeEvent(ctx);
+            InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
+                    (WebSocketFrame) msg, inboundMessageContext);
+            if (responseDTO.isError()) {
+                if (responseDTO.isCloseConnection()) {
+                    outboundHandler().write(ctx, new CloseWebSocketFrame(responseDTO.getErrorCode(),
+                            responseDTO.getErrorMessage() + "!" + StringUtils.SPACE + "Connection closed"), promise);
+                    ctx.close();
+                } else {
+                    String errorMessage = "Error code: " + responseDTO.getErrorCode() + " reason: "
+                            + responseDTO.getErrorMessage();
+                    outboundHandler().write(ctx, new TextWebSocketFrame(errorMessage), promise);
+                    if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Outbound Websocket frame is throttled. " + ctx.channel().toString());
+                        }
+                        publishSubscribeThrottledEvent(ctx);
+                    }
                 }
             } else {
-                if (APIUtil.isAnalyticsEnabled())  {
-                    inboundHandler().publishSubscribeThrottledEvent(ctx);
-                }
-                if (log.isDebugEnabled()){
-                    log.debug("Outbound Websocket frame is throttled. " + ctx.channel().toString());
-                }
+                outboundHandler().write(ctx, msg, promise);
+                // publish analytics events if analytics is enabled
+                publishSubscribeEvent(ctx);
             }
+
+
         } else {
             outboundHandler().write(ctx, msg, promise);
         }
     }
 
-    protected boolean isAllowed(ChannelHandlerContext ctx, WebSocketFrame msg) throws APIManagementException {
-        return inboundHandler().doThrottle(ctx, msg);
+    public void publishSubscribeEvent(ChannelHandlerContext ctx) {
+        if (APIUtil.isAnalyticsEnabled()) {
+            metricsHandler.handleSubscribe(ctx);
+        }
     }
 
-    protected String getClientIp(ChannelHandlerContext ctx) {
-        return inboundHandler().getRemoteIP(ctx);
+    public void publishSubscribeThrottledEvent(ChannelHandlerContext ctx) {
+        addThrottledErrorPropertiesToChannel(ctx);
+        metricsHandler.handleSubscribe(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void addThrottledErrorPropertiesToChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, "Message Throttled Out");
+    }
+
+    private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
     }
 }

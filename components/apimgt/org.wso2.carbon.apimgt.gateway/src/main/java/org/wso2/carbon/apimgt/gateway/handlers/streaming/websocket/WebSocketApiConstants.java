@@ -28,4 +28,29 @@ public class WebSocketApiConstants {
     public static final String WS_SECURED_ENDPOINT_NAME = "SecureWebSocketEP";
     public static final String URL_SEPARATOR = "/";
     public static final String DEFAULT_RESOURCE_NAME = "/_default_resource_of_api_";
+
+    public static class FrameErrorConstants {
+        public static final int API_AUTH_GENERAL_ERROR = 4000;
+        public static final String API_AUTH_GENERAL_MESSAGE = "Unclassified Authentication Failure";
+        public static final int API_AUTH_INVALID_CREDENTIALS = 4001;
+        public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
+        public static final int RESOURCE_FORBIDDEN_ERROR = 4007;
+        public static final String RESOURCE_FORBIDDEN_ERROR_MESSAGE = "User NOT authorized to access the resource";
+        public static final int THROTTLED_OUT_ERROR = 4008;
+        public static final String THROTTLED_OUT_ERROR_MESSAGE = "Websocket frame throttled out";
+        public static final int INTERNAL_SERVER_ERROR = 4009;
+        public static final int BAD_REQUEST = 4010;
+        public static final int GRAPHQL_QUERY_TOO_DEEP = 4020;
+        public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
+        public static final int GRAPHQL_QUERY_TOO_COMPLEX = 4021;
+        public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
+    }
+
+    public static class HandshakeErrorConstants {
+        public static final int API_AUTH_ERROR = 401;
+        public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
+        public static final String API_AUTH_GENERAL_MESSAGE = "Unclassified Authentication Failure";
+        public static final int INTERNAL_SERVER_ERROR = 500;
+        public static final int RESOURCE_NOT_FOUND_ERROR = 404;
+    }
 }

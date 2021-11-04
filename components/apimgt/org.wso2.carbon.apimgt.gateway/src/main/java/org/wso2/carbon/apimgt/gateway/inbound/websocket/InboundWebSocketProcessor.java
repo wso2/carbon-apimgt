@@ -1,0 +1,380 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.wso2.carbon.apimgt.gateway.inbound.websocket;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.api.Resource;
+import org.apache.synapse.api.dispatch.RESTDispatcher;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.ResourceNotFoundException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.handshake.HandshakeProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.GraphQLRequestProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.GraphQLResponseProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.RequestProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.ResponseProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.URL_SEPARATOR;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME;
+
+public class InboundWebSocketProcessor {
+
+    private static final Log log = LogFactory.getLog(InboundWebSocketProcessor.class);
+    private WebSocketAnalyticsMetricsHandler metricsHandler;
+
+    public InboundWebSocketProcessor() {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            metricsHandler = new WebSocketAnalyticsMetricsHandler();
+        }
+    }
+
+    public InboundProcessorResponseDTO handleHandshake(FullHttpRequest req, ChannelHandlerContext ctx,
+                                                       InboundMessageContext inboundMessageContext) {
+
+        InboundProcessorResponseDTO inboundProcessorResponseDTO;
+        try {
+            HandshakeProcessor handshakeProcessor = new HandshakeProcessor();
+            setUris(req, inboundMessageContext);
+            inboundMessageContext.setInboundName(getInboundName(ctx));
+            InboundWebsocketProcessorUtil.setTenantDomainToContext(inboundMessageContext);
+            String matchingResource = getMatchingResource(ctx, req, inboundMessageContext);
+            String userAgent = req.headers().get(HttpHeaders.USER_AGENT);
+
+            // '-' is used for empty values to avoid possible errors in DAS side.
+            // Required headers are stored one by one as validateOAuthHeader()
+            // removes some headers from the request
+            userAgent = userAgent != null ? userAgent : "-";
+            inboundMessageContext.getRequestHeaders().put(HttpHeaders.USER_AGENT, userAgent);
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                    inboundMessageContext.getTenantDomain(), true);
+            if (validateOAuthHeader(req, inboundMessageContext)) {
+                setRequestHeaders(req, inboundMessageContext);
+                inboundMessageContext.getRequestHeaders().put(HttpHeaders.AUTHORIZATION, req.headers()
+                        .get(HttpHeaders.AUTHORIZATION));
+                inboundProcessorResponseDTO =
+                        handshakeProcessor.processHandshake(matchingResource, inboundMessageContext);
+                if (!inboundProcessorResponseDTO.isError()) {
+                    setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
+                    if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
+                        req.headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, inboundMessageContext.getToken());
+                    }
+                    ctx.fireChannelRead(req);
+                    publishHandshakeEvent(ctx, inboundMessageContext, matchingResource);
+                    InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
+                            ctx.channel().remoteAddress().toString());
+                    return inboundProcessorResponseDTO;
+                }
+            } else {
+                String errorMessage = "No Authorization Header or access_token query parameter present";
+                log.error(errorMessage + " in request for the websocket context "
+                        + inboundMessageContext.getApiContext());
+                inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
+                        WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, errorMessage);
+            }
+            publishHandshakeAuthErrorEvent(ctx, inboundProcessorResponseDTO.getErrorMessage());
+            return inboundProcessorResponseDTO;
+        } catch (APISecurityException e) {
+            log.error("Authentication Failure for the websocket context: " + inboundMessageContext.getApiContext()
+                    + e.getMessage());
+            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
+                    WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR, e.getMessage());
+            publishHandshakeAuthErrorEvent(ctx, e.getMessage());
+        } catch (WebSocketApiException e) {
+            log.error(e.getMessage());
+            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
+                    WebSocketApiConstants.HandshakeErrorConstants.INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            log.error(e.getMessage());
+            inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
+                    WebSocketApiConstants.HandshakeErrorConstants.RESOURCE_NOT_FOUND_ERROR, e.getMessage());
+            publishResourceNotFoundEvent(ctx);
+        }
+        return inboundProcessorResponseDTO;
+    }
+
+    public InboundProcessorResponseDTO handleRequest(WebSocketFrame msg, InboundMessageContext inboundMessageContext) {
+
+        RequestProcessor requestProcessor;
+        String msgText = null;
+        if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)
+                && msg instanceof TextWebSocketFrame) {
+            requestProcessor = new GraphQLRequestProcessor();
+            msgText = ((TextWebSocketFrame) msg).text();
+        } else {
+            requestProcessor = new RequestProcessor();
+        }
+        return requestProcessor.handleRequest(msg.content().capacity(), msgText, inboundMessageContext);
+    }
+
+    public InboundProcessorResponseDTO handleResponse(WebSocketFrame msg, InboundMessageContext inboundMessageContext)
+            throws Exception {
+
+        ResponseProcessor responseProcessor;
+        String msgText = null;
+        if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)
+                && msg instanceof TextWebSocketFrame) {
+            responseProcessor = new GraphQLResponseProcessor();
+            msgText = ((TextWebSocketFrame) msg).text();
+        } else {
+            responseProcessor = new ResponseProcessor();
+        }
+        return responseProcessor.handleResponse(msg.content().capacity(), msgText, inboundMessageContext);
+
+    }
+
+    private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
+            throws APISecurityException {
+        if (!inboundMessageContext.getRequestHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+            QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
+            Map<String, List<String>> requestMap = decoder.parameters();
+            if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
+                inboundMessageContext.getHeadersToAdd().put(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT
+                        + ' ' + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
+                InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext);
+                req.setUri(inboundMessageContext.getFullRequestPath());
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
+    }
+
+    /**
+     * Extract full request path from the request and update.
+     *
+     * @param req Request object
+     */
+    protected void setUris(FullHttpRequest req, InboundMessageContext inboundMessageContext)
+            throws WebSocketApiException {
+
+        try {
+            String fullRequestPath = req.uri();
+            inboundMessageContext.setFullRequestPath(req.uri());
+            URI uriTemp;
+            uriTemp = new URI(fullRequestPath);
+            String requestPath = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(), null,
+                    uriTemp.getFragment()).toString();
+            if (requestPath.endsWith(URL_SEPARATOR)) {
+                requestPath = requestPath.substring(0, requestPath.length() - 1);
+            }
+            inboundMessageContext.setRequestPath(requestPath);
+            if (log.isDebugEnabled()) {
+                log.debug("Websocket API fullRequestPath = " + inboundMessageContext.getRequestPath());
+            }
+        } catch (URISyntaxException e) {
+            throw new WebSocketApiException("Error while parsing uri");
+        }
+    }
+
+    protected String getInboundName(ChannelHandlerContext ctx) {
+        return ctx.channel().pipeline().get("ssl") != null ? WS_SECURED_ENDPOINT_NAME : WS_ENDPOINT_NAME;
+    }
+
+    protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
+                                         InboundMessageContext inboundMessageContext) throws WebSocketApiException,
+            ResourceNotFoundException {
+
+        String matchingResource;
+        try {
+            MessageContext synCtx = getMessageContext(inboundMessageContext);
+            API api = InboundWebsocketProcessorUtil.getApi(synCtx, inboundMessageContext);
+            if (api == null) {
+                throw new ResourceNotFoundException("No matching API found to dispatch the request");
+            }
+            inboundMessageContext.setApi(api);
+            reConstructFullUriWithVersion(req, synCtx, inboundMessageContext);
+            inboundMessageContext.setApiContext(api.getContext());
+            Resource selectedResource = null;
+            Utils.setSubRequestPath(api, synCtx);
+            Set<Resource> acceptableResources = new LinkedHashSet<>(Arrays.asList(api.getResources()));
+            if (!acceptableResources.isEmpty()) {
+                for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
+                    Resource resource = dispatcher.findResource(synCtx, acceptableResources);
+                    if (resource != null) {
+                        selectedResource = resource;
+                        if (APIUtil.isAnalyticsEnabled()) {
+                            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS,
+                                    WebSocketUtils.getEndpointUrl(resource, synCtx));
+                        }
+                        break;
+                    }
+                }
+            }
+            setApiPropertiesToChannel(ctx, inboundMessageContext);
+            if (selectedResource == null) {
+                throw new ResourceNotFoundException("No matching resource found to dispatch the request");
+            }
+            if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)) {
+                inboundMessageContext.setGraphQLSchemaDTO(DataHolder.getInstance()
+                        .getGraphQLSchemaDTOForAPI(inboundMessageContext.getElectedAPI().getUuid()));
+            }
+            matchingResource = selectedResource.getDispatcherHelper().getString();
+            if (log.isDebugEnabled()) {
+                log.info("Selected resource for API dispatch : " + matchingResource);
+            }
+        } catch (AxisFault | URISyntaxException e) {
+            throw new WebSocketApiException("Error while getting matching resource for Websocket API");
+        }
+        return matchingResource;
+    }
+
+    private MessageContext getMessageContext(InboundMessageContext inboundMessageContext)
+            throws AxisFault, URISyntaxException {
+
+        String tenantDomain = inboundMessageContext.getTenantDomain();
+        MessageContext synCtx = WebsocketUtil.getSynapseMessageContext(tenantDomain);
+        org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        msgCtx.setIncomingTransportName(new URI(inboundMessageContext.getFullRequestPath()).getScheme());
+        msgCtx.setProperty(Constants.Configuration.TRANSPORT_IN_URL, inboundMessageContext.getFullRequestPath());
+        inboundMessageContext.setAxis2MessageContext(msgCtx);
+        return synCtx;
+    }
+
+    protected void setApiPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
+        apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API, inboundMessageContext.getApiName());
+        apiPropertiesMap.put(RESTConstants.PROCESSED_API, inboundMessageContext.getApi());
+        apiPropertiesMap.put(RESTConstants.REST_API_CONTEXT, inboundMessageContext.getApiContext());
+        apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API_VERSION, inboundMessageContext.getVersion());
+        if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)) {
+            apiPropertiesMap.put(APIMgtGatewayConstants.API_OBJECT, inboundMessageContext.getElectedAPI());
+            apiPropertiesMap.put(APIConstants.GRAPHQL_SUBSCRIPTION_REQUEST, true);
+        }
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
+    }
+
+    private void reConstructFullUriWithVersion(FullHttpRequest req, MessageContext synCtx,
+                                               InboundMessageContext inboundMessageContext) {
+
+        String fullRequestPath = inboundMessageContext.getFullRequestPath().replace(
+                inboundMessageContext.getElectedRoute(), inboundMessageContext.getElectedAPI().getContext());
+        req.setUri(fullRequestPath);
+        org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        axis2MsgCtx.setProperty(Constants.Configuration.TRANSPORT_IN_URL, fullRequestPath);
+        inboundMessageContext.getAxis2MessageContext().setProperty(Constants.Configuration.TRANSPORT_IN_URL,
+                fullRequestPath);
+        if (log.isDebugEnabled()) {
+            log.debug("Updated full request uri : " + fullRequestPath);
+        }
+    }
+
+    private void publishResourceNotFoundEvent(ChannelHandlerContext ctx) {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE);
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE,
+                    "No matching resource found to dispatch the request");
+            metricsHandler.handleHandshake(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
+    private void publishHandshakeAuthErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
+            metricsHandler.handleHandshake(ctx);
+            removeErrorPropertiesFromChannel(ctx);
+        }
+    }
+
+    private void publishHandshakeEvent(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
+                                       String matchingResource) {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_AGENT_PROPERTY,
+                    inboundMessageContext.getRequestHeaders().get(HttpHeaders.USER_AGENT));
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE, matchingResource);
+            metricsHandler.handleHandshake(ctx);
+        }
+    }
+
+    private void setApiAuthPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
+        apiPropertiesMap.put(APIConstants.API_KEY_TYPE, inboundMessageContext.getKeyType());
+        apiPropertiesMap.put(APISecurityUtils.API_AUTH_CONTEXT, inboundMessageContext.getAuthContext());
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
+    }
+
+    private void setRequestHeaders(FullHttpRequest request, InboundMessageContext inboundMessageContext) {
+        Map<String, String> headersToAdd = inboundMessageContext.getHeadersToAdd();
+        Map<String, String> headersToRemove = inboundMessageContext.getHeadersToRemove();
+        for (Map.Entry<String, String> header : headersToAdd.entrySet()) {
+            request.headers().add(header.getKey(), header.getValue());
+        }
+        for (Map.Entry<String, String> header : headersToRemove.entrySet()) {
+            request.headers().remove(header.getKey());
+        }
+        inboundMessageContext.setHeadersToRemove(new HashMap<>());
+    }
+
+}

@@ -20,7 +20,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -65,7 +64,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
@@ -407,8 +405,8 @@ public class JWTValidator {
                         getMaskedToken(jwtHeader));
             }
             log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
+            jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+            jwtValidationInfo.setValid(false);
         }
         return jwtValidationInfo;
     }
@@ -503,14 +501,16 @@ public class JWTValidator {
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
                     apiVersion);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
-                log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
+                if (log.isDebugEnabled()) {
+                    log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
+                }
                 String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
                         apiVersion, tokenSignature);
                 return generateAuthenticationContextForWS(jti, jwtValidationInfo,
                         apiKeyValidationInfoDTO, endUserToken, apiVersion);
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
-                log.debug(message);
+                log.error(message);
                 throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(), message);
             }
         } else if (!jwtValidationInfo.isValid()) {
@@ -594,7 +594,7 @@ public class JWTValidator {
         tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
 
         tokenValidationContext.setAccessToken(jwtToken.getToken());
-        tokenValidationContext.setHttpVerb(GraphQLConstants.GRAPHQL_SUBSCRIPTION_HTTP_METHOD_NAME);
+        tokenValidationContext.setHttpVerb(GraphQLConstants.SubscriptionConstants.HTTP_METHOD_NAME);
         tokenValidationContext.setMatchingResource(matchingResource);
         tokenValidationContext.setContext(apiContext);
         tokenValidationContext.setVersion(apiVersion);

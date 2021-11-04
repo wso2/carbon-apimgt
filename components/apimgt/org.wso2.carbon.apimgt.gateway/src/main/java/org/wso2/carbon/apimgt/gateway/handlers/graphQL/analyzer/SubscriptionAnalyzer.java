@@ -22,6 +22,7 @@ import graphql.schema.GraphQLSchema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.FieldComplexityCalculatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
@@ -75,13 +76,14 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
      * @param payload payload of the request
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
-    public QueryAnalyzerResponseDTO analyseQueryComplexity(String payload, int maxQueryComplexityFromContext) {
+    public QueryAnalyzerResponseDTO analyseQueryComplexity(String payload, int maxQueryComplexityFromContext)
+            throws APIManagementException {
 
-        FieldComplexityCalculator fieldComplexityCalculator = null;
+        FieldComplexityCalculator fieldComplexityCalculator;
         try {
             fieldComplexityCalculator = new FieldComplexityCalculatorImpl(null);
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new APIManagementException("Error while parsing policy definition.");
         }
         int maxQueryComplexity = getMaxQueryComplexity(maxQueryComplexityFromContext);
         QueryAnalyzerResponseDTO responseDTO = super.analyseQueryComplexity(maxQueryComplexity, payload,
