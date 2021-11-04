@@ -123,6 +123,15 @@ public interface APIProvider extends APIManager {
     Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException;
 
     /**
+     * get details of provider
+     *
+     * @param providerName name of the provider
+     * @return Provider
+     * @throws APIManagementException if failed to get Provider
+     */
+    Provider getProvider(String providerName) throws APIManagementException;
+
+    /**
      * Return Usage of given APIIdentifier
      *
      * @param apiIdentifier APIIdentifier
@@ -946,6 +955,18 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Get the paginated APIs from publisher
+     *
+     * @param tenantDomain tenant domain
+     * @param start        starting number
+     * @param end          ending number
+     * @return set of API
+     * @throws APIManagementException if failed to get Apis
+     */
+    Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
+
 
     /**
      * Get a policy names for given policy level and user name
