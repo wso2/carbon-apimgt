@@ -946,6 +946,7 @@ public class APIMappingUtil {
     public static AdvertiseInfoDTO extractAdvertiseInfo(API api) {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
+        advertiseInfoDTO.setAccessibleEndpointUrl(api.getAccessibleEndpointURL());
         advertiseInfoDTO.setOriginalDevPortalUrl(api.getRedirectURL());
         advertiseInfoDTO.setApiOwner(api.getApiOwner());
         if (api.getAdvertiseOnlyAPIVendor() != null) {

@@ -37,6 +37,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String businessOwnerEmail;
     private String transports;
     private String redirectURL;  // (originalStoreUrl)
+    private String accessibleEndpointURL;
     private String apiOwner;
     private boolean advertiseOnly;
     private String vendor;
@@ -155,6 +156,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setRedirectURL(String redirectURL) {
         this.redirectURL = redirectURL;
+    }
+
+    public String getAccessibleEndpointURL() {
+        return accessibleEndpointURL;
+    }
+
+    public void setAccessibleEndpointURL(String accessibleEndpointURL) {
+        this.accessibleEndpointURL = accessibleEndpointURL;
     }
 
     public String getApiOwner() {
@@ -309,17 +318,17 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         return "DevPortalAPI [status=" + status + ", isDefaultVersion=" + isDefaultVersion + ", description="
                 + description + ", wsdlUrl=" + wsdlUrl + ", technicalOwner=" + technicalOwner + ", technicalOwnerEmail="
                 + technicalOwnerEmail + ", businessOwner=" + businessOwner + ", businessOwnerEmail="
-                + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL + ", apiOwner="
-                + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
-                + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
-                + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", apiCategories="
-                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
-                + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
-                + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
-                + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate
-                + ", apiSecurity=" + apiSecurity + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
-                + "]";
+                + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL
+                + ", accessibleEndpointURL=" + accessibleEndpointURL + ", apiOwner=" + apiOwner + ", advertiseOnly="
+                + advertiseOnly + ", subscriptionAvailability=" + subscriptionAvailability
+                + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + ", authorizationHeader="
+                + authorizationHeader + ", securityScheme=" + securityScheme + ", environments=" + environments
+                + ", apiCategories=" + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled
+                + ", keyManagers=" + keyManagers + ", deploymentEnvironments=" + deploymentEnvironments
+                + ", tags=" + tags + ", additionalProperties=" + additionalProperties + ", endpointConfig="
+                + endpointConfig + ", type=" + type + ", advertisedOnly=" + advertisedOnly + ", swaggerDefinition="
+                + swaggerDefinition + ", contextTemplate=" + contextTemplate + ", apiSecurity=" + apiSecurity
+                + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles + "]";
     }
 
     public String getApiSecurity() {
