@@ -1304,7 +1304,7 @@ public class TemplateBuilderUtil {
         }
         return "";
     }
-    
+
     public static JSONObject getModifiedProperties(JSONObject originalProperties) {
         JSONObject modifiedProperties = new JSONObject();
         if (originalProperties.size() > 0) {
@@ -1332,42 +1332,49 @@ public class TemplateBuilderUtil {
 
         try {
             JSONObject newEndpointConfigJson = new JSONObject();
-            newEndpointConfigJson.put("endpoint_type", "graphql");
+            newEndpointConfigJson.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE,
+                    APIConstants.ENDPOINT_TYPE_GRAPHQL);
             JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
-            newEndpointConfigJson.put("http", oldEndpointConfigJson);
+            newEndpointConfigJson.put(APIConstants.ENDPOINT_TYPE_HTTP, oldEndpointConfigJson);
             JSONObject wsEndpointConfig = new JSONObject();
-            wsEndpointConfig.put("endpoint_type", "ws");
-            if (oldEndpointConfigJson.get("production_endpoints") != null &&
-                    ((JSONObject) oldEndpointConfigJson.get("production_endpoints")).get("url") != null) {
+            wsEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, APIConstants.WS_PROTOCOL);
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null &&
+                    ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                            .get(APIConstants.ENDPOINT_URL) != null) {
                 JSONObject prodWSEndpointConfig;
                 String httpProdEndpoint = (String)
-                        ((JSONObject) oldEndpointConfigJson.get("production_endpoints")).get("url");
+                        ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                                .get(APIConstants.ENDPOINT_URL);
                 String prodWsEndpoint = "";
-                if (httpProdEndpoint.indexOf("http://") == 0) {
-                    prodWsEndpoint = httpProdEndpoint.replace("http://", "ws://");
-                } else if (httpProdEndpoint.indexOf("https://") == 0) {
-                    prodWsEndpoint = httpProdEndpoint.replace("https://", "wss://");
+                if (httpProdEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
+                    prodWsEndpoint = httpProdEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                            APIConstants.WS_PROTOCOL_URL_PREFIX);
+                } else if (httpProdEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
+                    prodWsEndpoint = httpProdEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                            APIConstants.WSS_PROTOCOL_URL_PREFIX);
                 }
                 prodWSEndpointConfig = new JSONObject();
-                prodWSEndpointConfig.put("url", prodWsEndpoint);
-                wsEndpointConfig.put("production_endpoints", prodWSEndpointConfig);
+                prodWSEndpointConfig.put(APIConstants.ENDPOINT_URL, prodWsEndpoint);
+                wsEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, prodWSEndpointConfig);
             }
-            if (oldEndpointConfigJson.get("sandbox_endpoints") != null
-                    && ((JSONObject) oldEndpointConfigJson.get("sandbox_endpoints")).get("url") != null) {
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null
+                    && ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                    .get(APIConstants.ENDPOINT_URL) != null) {
                 JSONObject sandboxWSEndpointConfig;
                 String sandboxWsEndpoint = "";
                 String httpSandboxEndpoint = (String)
-                        ((JSONObject) oldEndpointConfigJson.get("sandbox_endpoints")).get("url");
-                if (httpSandboxEndpoint.indexOf("http://") == 0) {
-                    sandboxWsEndpoint = httpSandboxEndpoint.replace("http://", "ws://");
-                } else if (httpSandboxEndpoint.indexOf("https://") == 0) {
-                    sandboxWsEndpoint = httpSandboxEndpoint.replace("https://", "wss://");
+                        ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                                .get(APIConstants.ENDPOINT_URL);
+                if (httpSandboxEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
+                    sandboxWsEndpoint = httpSandboxEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, APIConstants.WS_PROTOCOL_URL_PREFIX);
+                } else if (httpSandboxEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
+                    sandboxWsEndpoint = httpSandboxEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, APIConstants.WSS_PROTOCOL_URL_PREFIX);
                 }
                 sandboxWSEndpointConfig = new JSONObject();
-                sandboxWSEndpointConfig.put("url", sandboxWsEndpoint);
-                wsEndpointConfig.put("sandbox_endpoints", sandboxWSEndpointConfig);
+                sandboxWSEndpointConfig.put(APIConstants.ENDPOINT_URL, sandboxWsEndpoint);
+                wsEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS, sandboxWSEndpointConfig);
             }
-            newEndpointConfigJson.put("ws", wsEndpointConfig);
+            newEndpointConfigJson.put(APIConstants.WS_PROTOCOL, wsEndpointConfig);
             return newEndpointConfigJson.toJSONString();
         } catch (ParseException e) {
             throw new APIManagementException(e.getMessage());

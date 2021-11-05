@@ -1644,6 +1644,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
     public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
