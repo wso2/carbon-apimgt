@@ -3858,7 +3858,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
                                         String providerName, String format, Boolean preserveStatus,
-                                        Boolean exportLatestRevision, MessageContext messageContext) {
+                                        Boolean exportLatestRevision, MessageContext messageContext)
+            throws APIManagementException {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -3875,10 +3876,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                             Boolean.TRUE, Boolean.FALSE, exportLatestRevision, StringUtils.EMPTY, organization);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
-        } catch (APIManagementException | APIImportExportException e) {
-            RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
         }
-        return null;
     }
 
     @Override

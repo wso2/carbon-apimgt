@@ -650,11 +650,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException | APIImportExportException e) {
-            RestApiUtil.handleInternalServerError("Error while exporting " +
-                    RestApiConstants.RESOURCE_API_PRODUCT, e, log);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API_PRODUCT, e);
         }
-        return null;
     }
 
     @Override
