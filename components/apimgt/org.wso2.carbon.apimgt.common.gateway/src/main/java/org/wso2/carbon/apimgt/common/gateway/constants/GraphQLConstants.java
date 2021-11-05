@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.constants;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,5 +27,6 @@ import java.util.List;
 public class GraphQLConstants {
 
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
-    public static final List<String> QUERY_COMPLEXITY_SLICING_ARGS = Arrays.asList("first", "last", "limit");
+    public static final List<String> QUERY_COMPLEXITY_SLICING_ARGS = Collections.unmodifiableList(
+            Arrays.asList("first", "last", "limit"));
 }

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,8 +41,10 @@ public class GraphQLConstants {
     public static class SubscriptionConstants {
         public static final String HTTP_METHOD_NAME = "SUBSCRIPTION";
         public static final String PAYLOAD_FIELD_NAME_TYPE = "type";
-        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_SUBSCRIBE = Arrays.asList("start", "subscribe");
-        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_DATA = Arrays.asList("data", "next");
+        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_SUBSCRIBE =
+                Collections.unmodifiableList(Arrays.asList("start", "subscribe"));
+        public static final List<String> PAYLOAD_FIELD_NAME_ARRAY_FOR_DATA =
+                Collections.unmodifiableList(Arrays.asList("data", "next"));
         public static final String PAYLOAD_FIELD_NAME_PAYLOAD = "payload";
         public static final String PAYLOAD_FIELD_NAME_QUERY = "query";
         public static final String PAYLOAD_FIELD_NAME_ID = "id";

@@ -78,13 +78,15 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                 OperationDefinition operation = getOperationFromPayload(document);
                 if (operation != null) {
                     if (checkIfValidSubscribeOperation(operation, graphQLMsg)) {
-                        if (!validateQueryPayload(inboundMessageContext, document).isError()) {
+                        responseDTO = validateQueryPayload(inboundMessageContext, document);
+                        if (!responseDTO.isError()) {
                             // subscription operation name
                             String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation,
                                     inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
                             // validate scopes based on subscription payload
-                            if (!InboundWebsocketProcessorUtil
-                                    .validateScopes(inboundMessageContext, subscriptionOperation).isError()) {
+                            responseDTO = InboundWebsocketProcessorUtil
+                                    .validateScopes(inboundMessageContext, subscriptionOperation);
+                            if (!responseDTO.isError()) {
                                 // extract verb info dto with throttle policy for matching verb
                                 VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil.findMatchingVerb(
                                         subscriptionOperation, inboundMessageContext);
@@ -97,8 +99,9 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                         new SubscriptionAnalyzer(inboundMessageContext.getGraphQLSchemaDTO()
                                                 .getGraphQLSchema());
                                 // analyze query depth and complexity
-                                if (!validateQueryDepthAndComplexity(subscriptionAnalyzer, inboundMessageContext,
-                                        graphQLSubscriptionPayload).isError()) {
+                                responseDTO = validateQueryDepthAndComplexity(subscriptionAnalyzer, inboundMessageContext,
+                                        graphQLSubscriptionPayload);
+                                if (!responseDTO.isError()) {
                                     //throttle for matching resource
                                     return InboundWebsocketProcessorUtil.doThrottle(msgSize, verbInfoDTO,
                                             inboundMessageContext);

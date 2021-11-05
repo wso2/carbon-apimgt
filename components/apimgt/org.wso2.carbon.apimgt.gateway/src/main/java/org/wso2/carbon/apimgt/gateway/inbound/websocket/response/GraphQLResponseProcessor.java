@@ -52,8 +52,9 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
                         inboundMessageContext.getVerbInfoForGraphQLMsgId(
                                 graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
                 // validate scopes based on subscription payload
-                if (!InboundWebsocketProcessorUtil
-                        .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation()).isError()) {
+                responseDTO = InboundWebsocketProcessorUtil
+                        .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation());
+                if (!responseDTO.isError()) {
                     //throttle for matching resource
                     return InboundWebsocketProcessorUtil.doThrottle(msgSize, graphQLOperationDTO.getVerbInfoDTO(),
                             inboundMessageContext);

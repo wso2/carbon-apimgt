@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.gateway.inbound.websocket.response;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
@@ -26,6 +28,8 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketPr
  * (subscribe messages).
  */
 public class ResponseProcessor {
+
+    private static final Log log = LogFactory.getLog(ResponseProcessor.class);
 
     /**
      * Handles responses (subscribe messages) during outbound websocket execution. For websocket API subscribe messages,
@@ -39,6 +43,9 @@ public class ResponseProcessor {
     public InboundProcessorResponseDTO handleResponse(int msgSize, String msgText,
                                                       InboundMessageContext inboundMessageContext) throws Exception {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Perform websocket response throttling for: " + inboundMessageContext.getApiContext());
+        }
         return InboundWebsocketProcessorUtil.doThrottle(msgSize, null, inboundMessageContext);
     }
 }
