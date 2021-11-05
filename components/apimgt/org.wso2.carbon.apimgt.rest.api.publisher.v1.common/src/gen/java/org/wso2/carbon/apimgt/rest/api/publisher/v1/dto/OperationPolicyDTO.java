@@ -34,7 +34,8 @@ public class OperationPolicyDTO   {
         ADD_QUERY_PARAM("ADD_QUERY_PARAM"),
         REMOVE_QUERY_PARAM("REMOVE_QUERY_PARAM"),
         MOCK_RESPONSE("MOCK_RESPONSE"),
-        CHANGE_ENDPOINT("CHANGE_ENDPOINT");
+        CHANGE_ENDPOINT("CHANGE_ENDPOINT"),
+        CALL_VALIDATION_SERVICE("CALL_VALIDATION_SERVICE");
         private String value;
 
         PolicyTypeEnum (String v) {

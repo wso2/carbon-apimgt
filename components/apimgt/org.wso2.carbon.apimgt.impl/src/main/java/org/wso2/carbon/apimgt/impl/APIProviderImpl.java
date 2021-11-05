@@ -2526,10 +2526,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     } else if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.equals(policy.getPolicyType())) {
                         if (++changeEndpointPolicyCount > 1) {
                             throw new APIManagementException(
-                                    "Resource" + uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb() +
-                                            " has more than one CHANGE_ENDPOINT policy");
+                                    "Resource" + uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb()
+                                            + " has more than one CHANGE_ENDPOINT policy");
                         }
-                        validateChangeEndpointPolicy(apiId, policy);
+                        validateEndpointPolicy(apiId, policy);
+                    } else if (OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.equals(policy.getPolicyType())) {
+                        validateEndpointPolicy(apiId, policy);
                     } else {
                         throw new APIManagementException("Unsupported Operation Policy Type " + policy.getPolicyType());
                     }
@@ -2697,15 +2699,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void validateChangeEndpointPolicy(String apiId, OperationPolicy policy) throws APIManagementException {
+    /**
+     * Validates parameters for CHANGE_ENDPOINT and CALL_VALIDATION_SERVICE policies
+     *
+     * @param apiId
+     * @param policy
+     * @throws APIManagementException
+     */
+    private void validateEndpointPolicy(String apiId, OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
         String endpointId;
         if (!parameters.containsKey(APIConstants.ENDPOINT_ID_PARAM)) {
             throw new APIManagementException(
-                    "Required 'endpointId' parameter for CHANGE_ENDPOINT operation policy is either missing or empty",
+                    "Required 'endpointId' parameter for " + policy.getPolicyType() + " operation policy is either missing or empty",
                     ExceptionCodes
                             .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
-                                    "CHANGE_ENDPOINT"));
+                                    policy.getPolicyType().toString()));
         } else {
             endpointId = (String) parameters.get(APIConstants.ENDPOINT_ID_PARAM);
             if (StringUtils.isEmpty(endpointId) && !isAPIResourceEndpointExists(apiId, null, endpointId,
