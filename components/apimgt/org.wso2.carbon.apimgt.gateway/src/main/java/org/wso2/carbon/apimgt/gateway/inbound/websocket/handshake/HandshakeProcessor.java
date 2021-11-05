@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -33,10 +33,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class intercepts the inbound websocket handshake process and perform authentication etc.
+ */
 public class HandshakeProcessor {
 
     private static final Log log = LogFactory.getLog(HandshakeProcessor.class);
 
+    /**
+     * This method process websocket handshake and perform authentication using the inbound message context.
+     * For successful authentications, it sets the resource map of the invoking API to the context.
+     *
+     * @param matchingResource      Matching websocket resource
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO with handshake processing response
+     */
     public InboundProcessorResponseDTO processHandshake(String matchingResource,
                                                         InboundMessageContext inboundMessageContext) {
 
@@ -66,6 +77,11 @@ public class HandshakeProcessor {
         return inboundProcessorResponseDTO;
     }
 
+    /**
+     * Set the resource map with VerbInfoDTOs to the context using URL mappings from the InboundMessageContext.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     */
     private void setResourcesMapToContext(InboundMessageContext inboundMessageContext) {
 
         List<URLMapping> urlMappings = inboundMessageContext.getElectedAPI().getResources();

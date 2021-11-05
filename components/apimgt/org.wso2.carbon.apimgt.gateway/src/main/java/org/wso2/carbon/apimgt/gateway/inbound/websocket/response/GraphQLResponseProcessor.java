@@ -21,11 +21,24 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 
+/**
+ * A GraphQL subscriptions specific extension of ResponseProcessor. This class intercepts the inbound websocket
+ * execution path of graphQL subscription responses (subscribe messages).
+ */
 public class GraphQLResponseProcessor extends ResponseProcessor {
 
+    /**
+     * Handle inbound websocket responses of GraphQL subscriptions and perform authentication, authorization
+     * and throttling. This identifies operation from the subscription responses using the unique message id parameter.
+     *
+     * @param msgSize               Message size of graphQL subscription response payload
+     * @param msgText               The GraphQL subscription response payload text
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO
+     */
     @Override
     public InboundProcessorResponseDTO handleResponse(int msgSize, String msgText,
                                                       InboundMessageContext inboundMessageContext) {
@@ -53,6 +66,14 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
         return responseDTO;
     }
 
+    /**
+     * Check if messages is valid subscription operation execution result. Payload should consist 'type' field and its
+     * value equal to either of 'data' or 'next'. The value 'data' is used in 'subscriptions-transport-ws'
+     * protocol and 'next' is used in 'graphql-ws' protocol.
+     *
+     * @param graphQLMsg GraphQL message
+     * @return true if valid operation
+     */
     private boolean checkIfSubscribeMessageResponse(JSONObject graphQLMsg) {
         return graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE) != null
                 && GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ARRAY_FOR_DATA.contains(

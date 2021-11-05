@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.handshake.HandshakeProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.GraphQLRequestProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.GraphQLResponseProcessor;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.RequestProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.ResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
@@ -69,10 +68,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.URL_SEPARATOR;
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME;
-
+/**
+ * This class intercepts the inbound websocket handler execution during handshake, request messaging, response
+ * messaging phases. This processor depends on netty inbound websocket channel pipleline.
+ */
 public class InboundWebSocketProcessor {
 
     private static final Log log = LogFactory.getLog(InboundWebSocketProcessor.class);
@@ -85,6 +84,15 @@ public class InboundWebSocketProcessor {
         }
     }
 
+    /**
+     * This method process websocket handshake and extract necessary API information from the channel context and
+     * request. Finally, hand over the processing to relevant handshake processor for authentication etc.
+     *
+     * @param req                   Handshake request
+     * @param ctx                   Channel pipleline context
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO with handshake processing response
+     */
     public InboundProcessorResponseDTO handleHandshake(FullHttpRequest req, ChannelHandlerContext ctx,
                                                        InboundMessageContext inboundMessageContext) {
 
@@ -151,6 +159,15 @@ public class InboundWebSocketProcessor {
         return inboundProcessorResponseDTO;
     }
 
+    /**
+     * This method process websocket request messages (publish messages) and
+     * hand over the processing to relevant request intercepting processor for authentication, scope validation,
+     * throttling etc.
+     *
+     * @param msg                   Websocket request message frame
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO with handshake processing response
+     */
     public InboundProcessorResponseDTO handleRequest(WebSocketFrame msg, InboundMessageContext inboundMessageContext) {
 
         RequestProcessor requestProcessor;
@@ -165,6 +182,15 @@ public class InboundWebSocketProcessor {
         return requestProcessor.handleRequest(msg.content().capacity(), msgText, inboundMessageContext);
     }
 
+    /**
+     * This method process websocket response messages (subscribe messages) and
+     * hand over the processing to relevant response intercepting processor for authentication, scope validation,
+     * throttling etc.
+     *
+     * @param msg                   Websocket request message frame
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO with handshake processing response
+     */
     public InboundProcessorResponseDTO handleResponse(WebSocketFrame msg, InboundMessageContext inboundMessageContext)
             throws Exception {
 
@@ -181,6 +207,14 @@ public class InboundWebSocketProcessor {
 
     }
 
+    /**
+     * Validates access_token query param and reset OAuth header in the handshake request.
+     *
+     * @param req                   Handshake request
+     * @param inboundMessageContext InboundMessageContext
+     * @return if validation success
+     * @throws APISecurityException if an error occurs
+     */
     private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
         if (!inboundMessageContext.getRequestHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
@@ -188,7 +222,7 @@ public class InboundWebSocketProcessor {
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
                 inboundMessageContext.getHeadersToAdd().put(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT
-                        + ' ' + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
+                        + StringUtils.SPACE + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
                 InboundWebsocketProcessorUtil.removeTokenFromQuery(requestMap, inboundMessageContext);
                 req.setUri(inboundMessageContext.getFullRequestPath());
             } else {
@@ -198,15 +232,11 @@ public class InboundWebSocketProcessor {
         return true;
     }
 
-    private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
-        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
-        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
-    }
-
     /**
-     * Extract full request path from the request and update.
+     * Extract full request path from the request and update InboundMessageContext.
      *
-     * @param req Request object
+     * @param req                   Request object
+     * @param inboundMessageContext InboundMessageContext
      */
     protected void setUris(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws WebSocketApiException {
@@ -218,7 +248,7 @@ public class InboundWebSocketProcessor {
             uriTemp = new URI(fullRequestPath);
             String requestPath = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(), null,
                     uriTemp.getFragment()).toString();
-            if (requestPath.endsWith(URL_SEPARATOR)) {
+            if (requestPath.endsWith(WebSocketApiConstants.URL_SEPARATOR)) {
                 requestPath = requestPath.substring(0, requestPath.length() - 1);
             }
             inboundMessageContext.setRequestPath(requestPath);
@@ -230,10 +260,27 @@ public class InboundWebSocketProcessor {
         }
     }
 
+    /**
+     * Get inbound websocket protocol name.
+     *
+     * @param ctx Netty websocket channel context
+     * @return WS protocol
+     */
     protected String getInboundName(ChannelHandlerContext ctx) {
-        return ctx.channel().pipeline().get("ssl") != null ? WS_SECURED_ENDPOINT_NAME : WS_ENDPOINT_NAME;
+        return ctx.channel().pipeline().get(WebSocketApiConstants.WS_SSL_CHANNEL_HANDLER_NAME) != null
+                ? WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME : WebSocketApiConstants.WS_ENDPOINT_NAME;
     }
 
+    /**
+     * Get matching resource for invoking handshake request.
+     *
+     * @param ctx                   Channel context
+     * @param req                   Handshake request
+     * @param inboundMessageContext InboundMessageContext
+     * @return resource
+     * @throws WebSocketApiException     If an error occurs
+     * @throws ResourceNotFoundException If no matching API or resource found
+     */
     protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
                                          InboundMessageContext inboundMessageContext) throws WebSocketApiException,
             ResourceNotFoundException {
@@ -282,6 +329,14 @@ public class InboundWebSocketProcessor {
         return matchingResource;
     }
 
+    /**
+     * Get synapse message context from tenant domain.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @return MessageContext
+     * @throws AxisFault          if an error occurs getting context
+     * @throws URISyntaxException if an error occurs getting transport scheme
+     */
     private MessageContext getMessageContext(InboundMessageContext inboundMessageContext)
             throws AxisFault, URISyntaxException {
 
@@ -290,11 +345,18 @@ public class InboundWebSocketProcessor {
         org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         msgCtx.setIncomingTransportName(new URI(inboundMessageContext.getFullRequestPath()).getScheme());
         msgCtx.setProperty(Constants.Configuration.TRANSPORT_IN_URL, inboundMessageContext.getFullRequestPath());
+        //Sets axis2 message context in InboundMessageContext for later use
         inboundMessageContext.setAxis2MessageContext(msgCtx);
         return synCtx;
     }
 
-    protected void setApiPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+    /**
+     * Set API properties to netty channel context.
+     *
+     * @param ctx                   ChannelHandlerContext
+     * @param inboundMessageContext InboundMessageContext
+     */
+    private void setApiPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
         Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
         apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API, inboundMessageContext.getApiName());
         apiPropertiesMap.put(RESTConstants.PROCESSED_API, inboundMessageContext.getApi());
@@ -307,6 +369,13 @@ public class InboundWebSocketProcessor {
         ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
+    /**
+     * Reconstruct WS full request uri with version for default API requests.
+     *
+     * @param req                   Http Handshake request
+     * @param synCtx                Synapse request
+     * @param inboundMessageContext InboundMessageContext
+     */
     private void reConstructFullUriWithVersion(FullHttpRequest req, MessageContext synCtx,
                                                InboundMessageContext inboundMessageContext) {
 
@@ -322,6 +391,11 @@ public class InboundWebSocketProcessor {
         }
     }
 
+    /**
+     * Publish resource not found event if analytics enabled.
+     *
+     * @param ctx Channel context
+     */
     private void publishResourceNotFoundEvent(ChannelHandlerContext ctx) {
 
         if (APIUtil.isAnalyticsEnabled()) {
@@ -334,6 +408,11 @@ public class InboundWebSocketProcessor {
         }
     }
 
+    /**
+     * Publish handshake auth error event if analytics enabled.
+     *
+     * @param ctx Channel context
+     */
     private void publishHandshakeAuthErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
 
         if (APIUtil.isAnalyticsEnabled()) {
@@ -345,6 +424,11 @@ public class InboundWebSocketProcessor {
         }
     }
 
+    /**
+     * Publish handshake event if analytics enabled.
+     *
+     * @param ctx Channel context
+     */
     private void publishHandshakeEvent(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
                                        String matchingResource) {
 
@@ -357,6 +441,22 @@ public class InboundWebSocketProcessor {
         }
     }
 
+    /**
+     * Remove error properties from channel properties.
+     *
+     * @param ctx Channel context
+     */
+    private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
+    }
+
+    /**
+     * Set API auth properties to channel.
+     *
+     * @param ctx                   Channel context
+     * @param inboundMessageContext InboundMessageContext
+     */
     private void setApiAuthPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
 
         Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
@@ -365,6 +465,12 @@ public class InboundWebSocketProcessor {
         ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
+    /**
+     * Update and remove request headers using headersToAdd and headersToRemove set in InboundMessageContext.
+     *
+     * @param request               Handshake request
+     * @param inboundMessageContext InboundMessageContext
+     */
     private void setRequestHeaders(FullHttpRequest request, InboundMessageContext inboundMessageContext) {
         Map<String, String> headersToAdd = inboundMessageContext.getHeadersToAdd();
         Map<String, String> headersToRemove = inboundMessageContext.getHeadersToRemove();

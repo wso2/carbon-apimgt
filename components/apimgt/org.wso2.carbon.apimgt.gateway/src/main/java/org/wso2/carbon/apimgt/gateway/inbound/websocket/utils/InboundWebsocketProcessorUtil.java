@@ -42,7 +42,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiC
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -67,10 +67,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * The util class to handle inbound websocket processor execution.
+ */
 public class InboundWebsocketProcessorUtil {
 
     private static final Log log = LogFactory.getLog(InboundWebsocketProcessorUtil.class);
 
+    /**
+     * Validates AuthenticationContext and set APIKeyValidationInfoDTO to InboundMessageContext.
+     *
+     * @param authenticationContext Validated AuthenticationContext
+     * @param inboundMessageContext InboundMessageContext
+     * @return true if authenticated
+     */
     public static boolean validateAuthenticationContext(AuthenticationContext authenticationContext,
                                                         InboundMessageContext inboundMessageContext) {
 
@@ -102,6 +112,14 @@ public class InboundWebsocketProcessorUtil {
         return authenticationContext.isAuthenticated();
     }
 
+    /**
+     * Authenticates JWT token in incoming GraphQL subscription requests.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @return true if authenticated
+     * @throws APIManagementException if an internal error occurs
+     * @throws APISecurityException   if authentication fails
+     */
     public static boolean authenticateGraphQLJWTToken(InboundMessageContext inboundMessageContext)
             throws APIManagementException, APISecurityException {
 
@@ -116,6 +134,15 @@ public class InboundWebsocketProcessorUtil {
         return validateAuthenticationContext(authenticationContext, inboundMessageContext);
     }
 
+    /**
+     * Authenticates JWT token in incoming Websocket handshake requests.
+     *
+     * @param matchingResource      Websocket API resource
+     * @param inboundMessageContext InboundMessageContext
+     * @return true if authenticated
+     * @throws APIManagementException if an internal error occurs
+     * @throws APISecurityException   if authentication fails
+     */
     public static boolean authenticateWSJWTToken(String matchingResource, InboundMessageContext inboundMessageContext)
             throws APIManagementException, APISecurityException {
 
@@ -127,6 +154,15 @@ public class InboundWebsocketProcessorUtil {
         return validateAuthenticationContext(authenticationContext, inboundMessageContext);
     }
 
+    /**
+     * Validate scopes of JWT token for incoming GraphQL subscription messages.
+     *
+     * @param matchingResource      Invoking GraphQL subscription operation
+     * @param inboundMessageContext InboundMessageContext
+     * @return true if authorized
+     * @throws APIManagementException if an internal error occurs
+     * @throws APISecurityException   if authorization fails
+     */
     public static boolean authorizeGraphQLSubscriptionEvents(String matchingResource,
                                                              InboundMessageContext inboundMessageContext)
             throws APIManagementException, APISecurityException {
@@ -138,6 +174,13 @@ public class InboundWebsocketProcessorUtil {
         return true;
     }
 
+    /**
+     * Finds matching VerbInfoDTO for the subscription operation.
+     *
+     * @param operation             subscription operation name
+     * @param inboundMessageContext InboundMessageContext
+     * @return VerbInfoDTO
+     */
     public static VerbInfoDTO findMatchingVerb(String operation, InboundMessageContext inboundMessageContext) {
         String resourceCacheKey;
         VerbInfoDTO verbInfoDTO = null;
@@ -160,6 +203,13 @@ public class InboundWebsocketProcessorUtil {
         return verbInfoDTO;
     }
 
+    /**
+     * Check if resource path matches.
+     *
+     * @param resourceString  Resource string
+     * @param resourceInfoDTO ResourceInfoDTO
+     * @return true if matches
+     */
     private static boolean isResourcePathMatching(String resourceString, ResourceInfoDTO resourceInfoDTO) {
         String resource = resourceString.trim();
         String urlPattern = resourceInfoDTO.getUrlPattern().trim();
@@ -167,8 +217,11 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
-     * Checks if the request is throttled
+     * Checks if the request is throttled.
      *
+     * @param msgSize               Websocket msg size
+     * @param verbInfoDTO           VerbInfoDTO for invoking operation. Pass null for websocket API throttling.
+     * @param inboundMessageContext InboundMessageContext
      * @return false if throttled
      */
     public static InboundProcessorResponseDTO doThrottle(int msgSize, VerbInfoDTO verbInfoDTO,
@@ -243,6 +296,11 @@ public class InboundWebsocketProcessorUtil {
         return responseDTO;
     }
 
+    /**
+     * Set tenant domain to InboundMessageContext.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     */
     public static void setTenantDomainToContext(InboundMessageContext inboundMessageContext) {
 
         String tenantDomain;
@@ -255,11 +313,11 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
-     * Get the name of the matching api for the request path.
+     * Get the matching API for the request and set API information to InboundMessageContext.
      *
-     * @param inboundMessageContext Inbound Message context
-     * @param synCtx                The Synapse Message Context
-     * @return String The api name
+     * @param inboundMessageContext InboundMessageContext
+     * @param synCtx                Synapse MessageContext
+     * @return API
      */
     public static API getApi(MessageContext synCtx, InboundMessageContext inboundMessageContext) {
 
@@ -281,6 +339,12 @@ public class InboundWebsocketProcessorUtil {
         return null;
     }
 
+    /**
+     * Remove token query parameter from full request path in InboundMessageContext.
+     *
+     * @param parameters            Query parameters
+     * @param inboundMessageContext InboundMessageContext
+     */
     public static void removeTokenFromQuery(Map<String, List<String>> parameters,
                                             InboundMessageContext inboundMessageContext) {
 
@@ -299,11 +363,13 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
-     * Authenticate request.
+     * Authenticate inbound websocket request handshake.
      *
-     * @param matchingResource resource template matching invocation
+     * @param matchingResource      resource template matching invocation
+     * @param inboundMessageContext InboundMessageContext
      * @return whether authenticated or not
-     * @throws APISecurityException if authentication fails
+     * @throws APIManagementException if an internal error occurs
+     * @throws APISecurityException   if authentication fails
      */
     public static boolean isAuthenticated(String matchingResource, InboundMessageContext inboundMessageContext)
             throws APISecurityException, APIManagementException {
@@ -315,7 +381,7 @@ public class InboundWebsocketProcessorUtil {
             APIKeyValidationInfoDTO info;
             String authorizationHeader = inboundMessageContext.getRequestHeaders().get(HttpHeaders.AUTHORIZATION);
             inboundMessageContext.getRequestHeaders().put(HttpHeaders.AUTHORIZATION, authorizationHeader);
-            String[] auth = authorizationHeader.split(" ");
+            String[] auth = authorizationHeader.split(StringUtils.SPACE);
             if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
                 String cacheKey;
                 boolean isJwtToken = false;
@@ -325,7 +391,6 @@ public class InboundWebsocketProcessorUtil {
                 }
 
                 //Initial guess of a JWT token using the presence of a DOT.
-
                 if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                     try {
                         // Check if the header part is decoded
@@ -392,6 +457,13 @@ public class InboundWebsocketProcessorUtil {
         }
     }
 
+    /**
+     * Get signed JWT info for access token
+     *
+     * @param accessToken Access token
+     * @return SignedJWTInfo
+     * @throws ParseException if an error occurs
+     */
     private static SignedJWTInfo getSignedJwtInfo(String accessToken) throws ParseException {
 
         String signature = accessToken.split("\\.")[2];
@@ -416,12 +488,29 @@ public class InboundWebsocketProcessorUtil {
         return signedJWTInfo;
     }
 
+    /**
+     * Get Websocket API Key data from webservice client.
+     *
+     * @param key           API key
+     * @param domain        tenant domain
+     * @param apiContextUri API context
+     * @param apiVersion    API version
+     * @return APIKeyValidationInfoDTO
+     * @throws APISecurityException if validation fails
+     */
     private static APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
                                                                     String apiVersion) throws APISecurityException {
 
         return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain);
     }
 
+    /**
+     * Publish Google Analytics data.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @param remoteAddress         Remote IP address
+     * @throws WebSocketApiException if an  error occurs
+     */
     public static void publishGoogleAnalyticsData(InboundMessageContext inboundMessageContext, String remoteAddress)
             throws WebSocketApiException {
         // publish Google Analytics data
@@ -442,6 +531,13 @@ public class InboundWebsocketProcessorUtil {
         }
     }
 
+    /**
+     * Get handshake error DTO for error code and message. The closeConnection parameter is false.
+     *
+     * @param errorCode    Error code
+     * @param errorMessage Error message
+     * @return InboundProcessorResponseDTO
+     */
     public static InboundProcessorResponseDTO getHandshakeErrorDTO(int errorCode, String errorMessage) {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
@@ -451,6 +547,14 @@ public class InboundWebsocketProcessorUtil {
         return inboundProcessorResponseDTO;
     }
 
+    /**
+     * Get error frame DTO for error code and message closeConnection parameters.
+     *
+     * @param errorCode       Error code
+     * @param errorMessage    Error message
+     * @param closeConnection Whether to close connection after throwing the error frame
+     * @return InboundProcessorResponseDTO
+     */
     public static InboundProcessorResponseDTO getFrameErrorDTO(int errorCode, String errorMessage,
                                                                boolean closeConnection) {
 
@@ -462,6 +566,12 @@ public class InboundWebsocketProcessorUtil {
         return inboundProcessorResponseDTO;
     }
 
+    /**
+     * Get bad request (error code 4010) error frame DTO for error message. The closeConnection parameter is false.
+     *
+     * @param errorMessage Error message
+     * @return InboundProcessorResponseDTO
+     */
     public static InboundProcessorResponseDTO getBadRequestFrameErrorDTO(String errorMessage) {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
@@ -471,6 +581,12 @@ public class InboundWebsocketProcessorUtil {
         return inboundProcessorResponseDTO;
     }
 
+    /**
+     * Authenticate token during inbound websocket request (frame) execution.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO
+     */
     public static InboundProcessorResponseDTO authenticateToken(InboundMessageContext inboundMessageContext) {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
@@ -495,6 +611,13 @@ public class InboundWebsocketProcessorUtil {
         return inboundProcessorResponseDTO;
     }
 
+    /**
+     * Validates scopes for subscription operations.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @param subscriptionOperation Subscription operation
+     * @return InboundProcessorResponseDTO
+     */
     public static InboundProcessorResponseDTO validateScopes(InboundMessageContext inboundMessageContext,
                                                              String subscriptionOperation) {
 

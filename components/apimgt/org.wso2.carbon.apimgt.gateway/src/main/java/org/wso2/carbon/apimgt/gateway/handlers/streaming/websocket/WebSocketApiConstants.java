@@ -28,6 +28,7 @@ public class WebSocketApiConstants {
     public static final String WS_SECURED_ENDPOINT_NAME = "SecureWebSocketEP";
     public static final String URL_SEPARATOR = "/";
     public static final String DEFAULT_RESOURCE_NAME = "/_default_resource_of_api_";
+    public static final String WS_SSL_CHANNEL_HANDLER_NAME = "ssl";
 
     //Constants for Websocket frame error codes and messages
     public static class FrameErrorConstants {

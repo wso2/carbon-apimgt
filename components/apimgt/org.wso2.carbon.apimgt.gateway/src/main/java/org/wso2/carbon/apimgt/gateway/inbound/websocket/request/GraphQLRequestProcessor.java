@@ -34,16 +34,30 @@ import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUti
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 
 import java.util.List;
 
+/**
+ * A GraphQL subscriptions specific extension of RequestProcessor. This class intercepts the inbound websocket
+ * execution path of graphQL subscription requests.
+ */
 public class GraphQLRequestProcessor extends RequestProcessor {
 
     private static final Log log = LogFactory.getLog(GraphQLRequestProcessor.class);
 
+    /**
+     * Handle inbound websocket requests for GraphQL subscriptions and perform authentication, authorization,
+     * payload validation, query depth and complexity analysis and throttling.
+     *
+     * @param msgSize               Message size of graphQL subscription payload
+     * @param msgText               The GraphQL subscription payload text
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO
+     */
     @Override
     public InboundProcessorResponseDTO handleRequest(int msgSize, String msgText,
                                                      InboundMessageContext inboundMessageContext) {
@@ -65,6 +79,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                 if (operation != null) {
                     if (checkIfValidSubscribeOperation(operation, graphQLMsg)) {
                         if (!validateQueryPayload(inboundMessageContext, document).isError()) {
+                            // subscription operation name
                             String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation,
                                     inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
                             // validate scopes based on subscription payload
@@ -73,6 +88,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                 // extract verb info dto with throttle policy for matching verb
                                 VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil.findMatchingVerb(
                                         subscriptionOperation, inboundMessageContext);
+                                // add verb info dto for the invoking subscription operation request
                                 inboundMessageContext
                                         .addVerbInfoForGraphQLMsgId(graphQLMsg.getString(
                                                         GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID),
@@ -105,18 +121,39 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         return responseDTO;
     }
 
+    /**
+     * Check if message has mandatory graphql subscription payload fields. Payload should consist 'type' field and its
+     * value equal to either of 'start' or 'subscribe'. The value 'start' is used in 'subscriptions-transport-ws'
+     * protocol and 'subscribe' is used in 'graphql-ws' protocol.
+     *
+     * @param graphQLMsg GraphQL message JSON object
+     * @return true if valid subscribe message
+     */
     private boolean checkIfSubscribeMessage(JSONObject graphQLMsg) {
         return graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE) != null
                 && GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ARRAY_FOR_SUBSCRIBE.contains(
                 graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_TYPE));
     }
 
+    /**
+     * Validate message fields 'payload' and 'query'.
+     * Example valid payload: 'payload":{"query":"subscription { greetings }'
+     *
+     * @param graphQLMsg GraphQL message JSON object
+     * @return true if valid payload fields present
+     */
     private boolean validatePayloadFields(JSONObject graphQLMsg) {
         return graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD) != null
                 && ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD))
                 .get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY) != null;
     }
 
+    /**
+     * Get GraphQL Operation from payload.
+     *
+     * @param document GraphQL payload
+     * @return Operation definition
+     */
     private OperationDefinition getOperationFromPayload(Document document) {
 
         OperationDefinition operation = null;
@@ -130,12 +167,27 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         return operation;
     }
 
+    /**
+     * Check if graphql operation is a Subscription operation and the message payload includes the mandatory id
+     * parameter.
+     *
+     * @param operation  GraphQL operation
+     * @param graphQLMsg GraphQL message
+     * @return true if valid operation and id
+     */
     private boolean checkIfValidSubscribeOperation(OperationDefinition operation, JSONObject graphQLMsg) {
         return operation.getOperation() != null
                 && APIConstants.GRAPHQL_SUBSCRIPTION.equalsIgnoreCase(operation.getOperation().toString())
                 && graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null;
     }
 
+    /**
+     * Validates GraphQL query payload using QueryValidator and graphql schema of the invoking API.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @param document              Graphql payload
+     * @return InboundProcessorResponseDTO
+     */
     private InboundProcessorResponseDTO validateQueryPayload(InboundMessageContext inboundMessageContext,
                                                              Document document) {
 
@@ -154,6 +206,14 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         return responseDTO;
     }
 
+    /**
+     * Validate query depth and complexity of graphql subscription payload.
+     *
+     * @param subscriptionAnalyzer  Query complexity and depth analyzer for subscription operations
+     * @param inboundMessageContext InboundMessageContext
+     * @param payload               GraphQL payload
+     * @return InboundProcessorResponseDTO
+     */
     private InboundProcessorResponseDTO validateQueryDepthAndComplexity(SubscriptionAnalyzer subscriptionAnalyzer,
                                                                         InboundMessageContext inboundMessageContext,
                                                                         String payload) {
@@ -165,6 +225,14 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         return responseDTO;
     }
 
+    /**
+     * Validate query complexity of graphql subscription payload.
+     *
+     * @param subscriptionAnalyzer  Query complexity and depth analyzer for subscription operations
+     * @param inboundMessageContext InboundMessageContext
+     * @param payload               GraphQL payload
+     * @return InboundProcessorResponseDTO
+     */
     private InboundProcessorResponseDTO validateQueryComplexity(SubscriptionAnalyzer subscriptionAnalyzer,
                                                                 InboundMessageContext inboundMessageContext,
                                                                 String payload) {
@@ -192,6 +260,14 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         return responseDTO;
     }
 
+    /**
+     * Validate query depth of graphql subscription payload.
+     *
+     * @param subscriptionAnalyzer  Query complexity and depth analyzer for subscription operations
+     * @param inboundMessageContext InboundMessageContext
+     * @param payload               GraphQL payload
+     * @return InboundProcessorResponseDTO
+     */
     private InboundProcessorResponseDTO validateQueryDepth(SubscriptionAnalyzer subscriptionAnalyzer,
                                                            InboundMessageContext inboundMessageContext,
                                                            String payload) {
@@ -199,7 +275,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         QueryAnalyzerResponseDTO queryAnalyzerResponseDTO =
                 subscriptionAnalyzer.analyseSubscriptionQueryDepth(inboundMessageContext.getInfoDTO().
-                                getGraphQLMaxDepth(), payload);
+                        getGraphQLMaxDepth(), payload);
         if (!queryAnalyzerResponseDTO.isSuccess() && !queryAnalyzerResponseDTO.getErrorList().isEmpty()) {
             List<String> errorList = queryAnalyzerResponseDTO.getErrorList();
             log.error("Query depth validation failed for: " + payload + " errors: " + errorList.toString());

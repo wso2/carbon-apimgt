@@ -41,7 +41,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.InetSocketAddress;

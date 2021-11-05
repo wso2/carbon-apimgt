@@ -20,12 +20,26 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.request;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 
+/**
+ * This class intercepts the inbound websocket execution path of request frames sent from client to server
+ * (publish messages).
+ */
 public class RequestProcessor {
 
     private static final Log log = LogFactory.getLog(RequestProcessor.class);
 
+    /**
+     * Handles requests (publish messages) during inbound websocket execution. For websocket API publish messages,
+     * this method performs throttling.
+     *
+     * @param msgSize               Message size of websocket frame payload
+     * @param msgText               The Websocket frame payload text
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO
+     */
     public InboundProcessorResponseDTO handleRequest(int msgSize, String msgText,
                                                      InboundMessageContext inboundMessageContext) {
 

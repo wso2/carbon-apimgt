@@ -18,11 +18,24 @@
 package org.wso2.carbon.apimgt.gateway.inbound.websocket.response;
 
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 
+/**
+ * This class intercepts the outbound websocket execution path of response frames sent from server to client
+ * (subscribe messages).
+ */
 public class ResponseProcessor {
 
+    /**
+     * Handles responses (subscribe messages) during outbound websocket execution. For websocket API subscribe messages,
+     * this method performs throttling.
+     *
+     * @param msgSize               Message size of websocket frame payload
+     * @param msgText               The Websocket frame payload text
+     * @param inboundMessageContext InboundMessageContext
+     * @return InboundProcessorResponseDTO
+     */
     public InboundProcessorResponseDTO handleResponse(int msgSize, String msgText,
                                                       InboundMessageContext inboundMessageContext) throws Exception {
 
