@@ -29,7 +29,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,9 +61,9 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
 
         String fieldName = fieldComplexityEnvironment.getField().getName();
         String parentType = fieldComplexityEnvironment.getParentType().getName();
-        List<Argument> ArgumentList = fieldComplexityEnvironment.getField().getArguments();
+        List<Argument> argumentList = fieldComplexityEnvironment.getField().getArguments();
 
-        int argumentsValue = getArgumentsValue(ArgumentList);
+        int argumentsValue = getArgumentsValue(argumentList);
         int customFieldComplexity = getCustomComplexity(fieldName, parentType, policyDefinition);
         return (argumentsValue * (customFieldComplexity + childComplexity));
     }

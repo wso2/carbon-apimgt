@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.common.gateway.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DTO class to hold GraphQL query analyzer response information.
+ */
 public class QueryAnalyzerResponseDTO {
 
     boolean isSuccess;
