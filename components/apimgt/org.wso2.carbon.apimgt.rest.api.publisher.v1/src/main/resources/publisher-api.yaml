@@ -11783,6 +11783,7 @@ components:
             - REMOVE_QUERY_PARAM
             - MOCK_RESPONSE
             - CHANGE_ENDPOINT
+            - CALL_VALIDATION_SERVICE
         parameters:
           type: object
           additionalProperties:
