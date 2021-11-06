@@ -9680,20 +9680,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return env;
     }
 
-    /*@Override
-    public List<APIOperationPolicy> updateAPIOperationPolicies(String apiId,
-            List<APIOperationPolicy> operationPolicyList) throws APIManagementException {
-        apiMgtDAO.updateAPIOperationPolicies(apiId, operationPolicyList);
-
-        return apiMgtDAO.getAllAPIOperationPolicies(apiId);
-    }
-
-    @Override
-    public List<APIOperationPolicy> getAllAPIOperationPoliciesOfAPI(String apiId)
-            throws APIManagementException {
-        return apiMgtDAO.getAllAPIOperationPolicies(apiId);
-    }*/
-
     @Override
     public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
