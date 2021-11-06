@@ -239,6 +239,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -648,10 +649,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
+        String apiName = api.getId().getApiName();
+        String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
 
         if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
-            String errorMessage = "Empty password is given for endpointSecurity when creating API "
-                    + api.getId().getApiName();
+            String errorMessage = "Empty password is given for endpointSecurity when creating API " + apiName;
             throw new APIManagementException(errorMessage);
         }
         //Validate Transports
@@ -683,26 +685,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (XMLStreamException e) {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
-        //mark for the latest version
-        boolean isLatestVersion = Boolean.TRUE;
-        if (api.getIsNewVersion()) {
+
+        TreeMap<String, API> apiSortedMap = new TreeMap<>();
+
+        List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName, api.getOrganization());
+            for (API mappedAPI : apiList) {
+                apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
+            }
+
             APIVersionStringComparator comparator = new APIVersionStringComparator();
-            Set<String> versions = getAPIVersions(
-                    APIUtil.replaceEmailDomain(api.getId().getProviderName()),
-                    api.getId().getName(), api.getOrganization());
-            String latestversion = api.getId().getVersion();
-            for (String tempVersion : versions) {
-                latestversion = (comparator.compare(tempVersion, latestversion) < 0) ?
-                        latestversion : tempVersion;
+            String latestVersion = api.getId().getVersion();
+            long previousTimestamp = 0L;
+            String latestTimestamp = "";
+            for (API tempAPI : apiSortedMap.values()) {
+                if (comparator.compare(tempAPI.getId().getVersion(), latestVersion) > 0){
+                    latestTimestamp = String.valueOf((previousTimestamp + Long.valueOf(tempAPI.getVersionTimestamp()))/2) ;
+                    break;
+                } else {
+                    previousTimestamp = Long.valueOf(tempAPI.getVersionTimestamp());
+
+                }
+
             }
-            if (!latestversion.equals(api.getId().getVersion())) {
-                isLatestVersion = Boolean.FALSE;
-            }
+        if (StringUtils.isEmpty(latestTimestamp)) {
+            latestTimestamp = String.valueOf(System.currentTimeMillis());
         }
+        api.setVersionTimestamp(latestTimestamp);
 
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
-                    APIMapper.INSTANCE.toPublisherApi(api), isLatestVersion);
+                    APIMapper.INSTANCE.toPublisherApi(api));
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {
@@ -2636,7 +2648,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
 
-        existingAPI.setIsNewVersion(Boolean.TRUE);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
 
@@ -2690,9 +2701,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
+        // update existing api with the original timestamp
         existingAPI.setVersionTimestamp(existingVersionTimestamp);
-        // update existing api with setLatest to false
-        existingAPI.setLatest(false);
         if (isDefaultVersion) {
             existingAPI.setDefaultVersion(false);
         } else {
@@ -5126,27 +5136,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private List<API> getAPIVersionsByProviderAndName(String provider, String apiName, String organization)
             throws APIManagementException {
-        Set<String> list = apiMgtDAO.getUUIDsOfAPIVersions(apiName, provider);
-        List<API> apiVersions = new ArrayList<API>();
-        for (String uuid : list) {
-            try {
-                PublisherAPI publisherAPI = apiPersistenceInstance
-                        .getPublisherAPI(new Organization(organization), uuid);
-                if (APIConstants.API_PRODUCT.equals(publisherAPI.getType())) {
-                    // skip api products
-                    continue;
-                }
-                API api = new API(new APIIdentifier(publisherAPI.getProviderName(), publisherAPI.getApiName(),
-                        publisherAPI.getVersion()));
-
-                api.setUuid(uuid);
-                api.setStatus(publisherAPI.getStatus());
-                apiVersions.add(api);
-            } catch (APIPersistenceException e) {
-                throw new APIManagementException("Error while retrieving the api ", e);
-            }
-        }
-        return apiVersions;
+        return apiMgtDAO.getAllAPIVersions(apiName, provider);
     }
     /**
      * To get the API artifact from the registry

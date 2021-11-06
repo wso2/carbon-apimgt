@@ -70,7 +70,6 @@ public interface APIPersistence {
      * @return ID of Added API
      * @throws APIPersistenceException
      */
-    PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI, boolean isLatest) throws APIPersistenceException;
 
     /**
      * Add API to the persistence layer

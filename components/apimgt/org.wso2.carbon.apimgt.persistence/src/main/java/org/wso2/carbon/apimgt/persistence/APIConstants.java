@@ -232,7 +232,6 @@ public final class APIConstants {
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
-    public static final String DEFAULT_GROUP_SORT_BY = "version_imestamp";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
     public static final String TAGS_EQ_SEARCH_TYPE_PREFIX = "tags=";
     public static final String TAG_SEARCH_TYPE_PREFIX = "tag";

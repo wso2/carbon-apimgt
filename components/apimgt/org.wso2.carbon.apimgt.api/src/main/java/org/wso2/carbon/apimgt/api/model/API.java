@@ -70,7 +70,6 @@ public class API implements Serializable {
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
     private String organization;
     private String versionTimestamp;
-    private boolean isNewVersion = false;
 
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
@@ -1256,16 +1255,6 @@ public class API implements Serializable {
     public void setVersionTimestamp(String versionTimestamp) {
 
         this.versionTimestamp = versionTimestamp;
-    }
-
-    public boolean getIsNewVersion() {
-
-        return isNewVersion;
-    }
-
-    public void setIsNewVersion(boolean isNewVersion) {
-
-        this.isNewVersion = isNewVersion;
     }
 
     @Override

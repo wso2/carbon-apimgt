@@ -1421,8 +1421,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS, ORGANIZATION, VERSION_TIMESTAMP)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -3387,8 +3387,8 @@ public class SQLConstants {
     public static final String GET_API_VERSIONS =
             "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND ORGANIZATION = ?";
     public static final String GET_API_VERSIONS_UUID =
-            "SELECT API.API_UUID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
-
+            "SELECT API.API_UUID, API.STATUS, API.API_VERSION, API.API_TYPE, API.VERSION_TIMESTAMP FROM AM_API API WHERE " +
+                    "API.API_PROVIDER = ? AND API.API_NAME = ? ";
     public static class APIRevisionSqlConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +

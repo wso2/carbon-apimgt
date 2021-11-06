@@ -165,16 +165,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
     protected RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        
-        return addAPI(org, publisherAPI, false);
-    }
 
     @Override
-    public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI, boolean isLatest) throws APIPersistenceException {
+    public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
 
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         boolean transactionCommitted = false;
@@ -199,15 +192,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
-            if (isLatest) {
-                genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, System.currentTimeMillis() + "");
-            } else {
-                //add 1 year old timestamp since it is not the latest
-                LocalDateTime now = LocalDateTime.now().minusDays(365);
-                Timestamp timestamp = Timestamp.valueOf(now);
-                genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, timestamp.getTime() + "");
-
-            }
+            genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, api.getVersionTimestamp());
 
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
