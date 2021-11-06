@@ -1629,12 +1629,4 @@ public class RegistryPersistenceUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-    public static String getVersionScore(String versionStr) {
-        if (StringUtils.isEmpty(versionStr)) {
-            return "";
-        }
-        APIVersionTokenizer apiVersionTokenizer = new APIVersionTokenizer(versionStr);
-        return apiVersionTokenizer.getVersionScore();
-
-    }
 }
