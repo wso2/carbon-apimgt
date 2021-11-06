@@ -14567,7 +14567,8 @@ public class ApiMgtDAO {
                                             }
                                         }
                                     } else {
-                                        resourceEndpointId = getResourceEndpointId(endpointId, Integer.toString(productId), connection);
+                                        resourceEndpointId = getResourceEndpointId(endpointId,
+                                                Integer.toString(productId), connection);
                                     }
 
                                     int operationPolicyId = 0;
@@ -14832,7 +14833,8 @@ public class ApiMgtDAO {
                             }
 
                             try (PreparedStatement policiesStatement = connection.
-                                    prepareStatement(SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                                    prepareStatement(
+                                            SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
                                 policiesStatement.setInt(1, uriTemplateId);
                                 try (ResultSet policiesResult = policiesStatement.executeQuery()) {
                                     List<OperationPolicy> operationPolicies = new ArrayList<>();
@@ -14892,7 +14894,8 @@ public class ApiMgtDAO {
                             }
 
                             try (PreparedStatement policiesStatement = connection.
-                                    prepareStatement(SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                                prepareStatement(
+                                    SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
                                 policiesStatement.setInt(1, uriTemplateId);
                                 try (ResultSet policiesResult = policiesStatement.executeQuery()) {
                                     List<OperationPolicy> operationPolicies = new ArrayList<>();
@@ -17510,11 +17513,10 @@ public class ApiMgtDAO {
                                     String endpointId = (String) policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
                                     int resourceEndpointId = 0;
                                     if (!addedResourceEndpoints.contains(endpointId)) {
-                                        ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(new Integer(apiId).toString(),
-                                                endpointId, tenantDomain);
+                                        ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(
+                                                new Integer(apiId).toString(), endpointId, tenantDomain);
                                         if (baseAPIEndpoint != null) {
-                                            insertResourceEndpoint
-                                                    .setInt(1, baseAPIEndpoint.getApiId());
+                                            insertResourceEndpoint.setInt(1, baseAPIEndpoint.getApiId());
                                             insertResourceEndpoint.setString(2, endpointId);
                                             insertResourceEndpoint.setString(3, baseAPIEndpoint.getName());
                                             insertResourceEndpoint
@@ -17775,8 +17777,8 @@ public class ApiMgtDAO {
                                         String endpointId = (String) policy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
                                         int resourceEndpointId = 0;
                                         if (!addedResourceEndpoints.contains(endpointId)) {
-                                            ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(apiRevision.getRevisionUUID(),
-                                                    endpointId, tenantDomain);
+                                            ResourceEndpoint baseAPIEndpoint = getProductResourceEndpointByUUID(
+                                                    apiRevision.getRevisionUUID(), endpointId, tenantDomain);
                                             if (baseAPIEndpoint != null) {
                                                 insertResourceEndpoint
                                                         .setInt(1, baseAPIEndpoint.getApiId());
@@ -18298,8 +18300,8 @@ public class ApiMgtDAO {
         }
     }
 
-    //todo: update for revision flow
-    public boolean isAPIResourceEndpointExists(int apiId, String revisionUUID, String endpointId, String tenantDomain) throws APIManagementException {
+    public boolean isAPIResourceEndpointExists(int apiId, String revisionUUID, String endpointId, String tenantDomain)
+            throws APIManagementException {
         boolean exists = false;
         boolean isRevision = false;
         String query = SQLConstants.ResourceEndpointConstants.IS_API_RESOURCE_ENDPOINT_EXISTS;
@@ -18327,7 +18329,8 @@ public class ApiMgtDAO {
         return exists;
     }
 
-    public boolean isAPIResourceEndpointExists(String apiUUID, String revisionUUID, String endpointId, String tenantDomain) throws APIManagementException {
+    public boolean isAPIResourceEndpointExists(String apiUUID, String revisionUUID, String endpointId,
+            String tenantDomain) throws APIManagementException {
         int apiId = getAPIID(apiUUID);
         return isAPIResourceEndpointExists(apiId, revisionUUID, endpointId, tenantDomain);
     }

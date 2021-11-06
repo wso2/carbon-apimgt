@@ -68,7 +68,6 @@ public class ResourceEndpointMappingUtil {
      * @param offset            starting index
      * @param size              max offset
      */
-
     public static void setPaginationParams(ResourceEndpointListDTO endpointListDTO, String apiId, int limit, int offset,
             int size) {
 
