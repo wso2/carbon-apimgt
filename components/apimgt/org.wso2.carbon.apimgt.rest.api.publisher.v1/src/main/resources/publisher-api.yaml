@@ -8190,6 +8190,10 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints"'
 
     get:
       tags:
@@ -8222,11 +8226,15 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints"'
 
   /apis/{apiId}/resource-endpoints/{endpointId}:
     get:
       tags:
-        - Resource Endpoint
+        - Resource Endpoints
       summary: Get Resource Endpoint
       description: |
         This operation can be used to get a resource endpoint by id.
@@ -8256,10 +8264,14 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints/01234567-0123-0123-0123-012345678901"'
 
     put:
       tags:
-        - Resource Endpoint
+        - Resource Endpoints
       summary: Update Resource Endpoint
       description: |
         This operation can be used to update a resource endpoint.
@@ -8300,10 +8312,15 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints/01234567-0123-0123-0123-012345678901"'
+
 
     delete:
       tags:
-        - Resource Endpoint
+        - Resource Endpoints
       summary: Delete Resource Endpoint
       description: |
         This operation can be used to delete a resource endpoint.
@@ -8325,6 +8342,11 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/resource-endpoints/01234567-0123-0123-0123-012345678901"'
+
 
 components:
   schemas:
@@ -11810,15 +11832,19 @@ components:
       properties:
         id:
           type: string
+          readOnly: true
         name:
           type: string
+          example: EP1
         endpointType:
           type: string
           enum:
             - HTTP
             - ADDRESS
+          example: HTTP
         url:
           type: string
+          example: http://localhost:8080/example
         securityConfig:
           type: object
           additionalProperties:
@@ -11832,6 +11858,7 @@ components:
           description: |
             Usage count of Resource Endpoint
           default: 0
+          example: 1
           readOnly: true
     ResourceEndpointList:
       title: Resource Endpoints List
