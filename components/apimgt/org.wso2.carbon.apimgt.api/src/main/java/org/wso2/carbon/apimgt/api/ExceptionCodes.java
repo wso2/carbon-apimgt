@@ -499,7 +499,7 @@ public enum ExceptionCodes implements ErrorHandler {
     //Operation Policies related error codes
     INVALID_OPERATION_POLICY_PARAMETERS(900915,
             "Missing required parameters for operation policy", 400,
-            "Required parameter(s) %s for operation policy %s is/are either missing or empty"),
+            "Required parameter(s) %s for operation policy %s are either missing or empty"),
     OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW(900916,
             "Policy is not allowed in response flow", 400,
             "%s policy is not allowed in response flow"),
