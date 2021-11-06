@@ -8173,17 +8173,6 @@ paths:
             Created.
             Successful response with the newly created Resource Endpoint object in the body.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modified the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
