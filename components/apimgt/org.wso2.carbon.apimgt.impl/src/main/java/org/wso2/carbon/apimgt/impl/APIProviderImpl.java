@@ -2602,6 +2602,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateRewriteHTTPMethodPolicy(OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
+
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+            throw new APIManagementException("REWRITE_HTTP_METHOD policy is not allowed in response flow",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
+                            policy.getPolicyType().toString()));
+        }
+
         if (!parameters.containsKey(APIConstants.HTTP_METHOD_PARAM) ||
                 StringUtils.isEmpty((String)parameters.get(APIConstants.HTTP_METHOD_PARAM))) {
             throw new APIManagementException(
@@ -2618,6 +2625,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateRewriteResourcePathPolicy(OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
+
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+            throw new APIManagementException("REWRITE_RESOURCE_PATH policy is not allowed in response flow",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
+                            policy.getPolicyType().toString()));
+        }
+
         if (!parameters.containsKey(APIConstants.RESOURCE_PATH_PARAM) || StringUtils
                 .isEmpty((String) parameters.get(APIConstants.RESOURCE_PATH_PARAM))) {
             throw new APIManagementException("Required 'resourcePath' parameter for REWRITE_RESOURCE_PATH "
@@ -2628,6 +2642,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateAddQueryParamPolicy(OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
+
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+            throw new APIManagementException("ADD_QUERY_PARAM policy is not allowed in response flow",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
+                            policy.getPolicyType().toString()));
+        }
+
         if (!parameters.containsKey(APIConstants.QUERY_PARAM_NAME) ||
                 StringUtils.isEmpty((String) parameters.get(APIConstants.QUERY_PARAM_NAME))){
             throw new APIManagementException("Required 'paramName' parameter for ADD_QUERY_PARAM "
@@ -2660,6 +2681,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateRemoveQueryParamPolicy(OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
+
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+            throw new APIManagementException("REMOVE_QUERY_PARAM policy is not allowed in response flow",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
+                            policy.getPolicyType().toString()));
+        }
+
         if (!parameters.containsKey(APIConstants.QUERY_PARAM_NAME) || StringUtils
                 .isEmpty((String) parameters.get(APIConstants.QUERY_PARAM_NAME))) {
             throw new APIManagementException(
@@ -2671,6 +2699,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateMockResponsePolicy(OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
+
+        if (APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+            throw new APIManagementException("MOCK_RESPONSE policy is not allowed in response flow",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
+                            policy.getPolicyType().toString()));
+        }
 
         if (!parameters.containsKey(APIConstants.PAYLOAD) ||
                 StringUtils.isEmpty((String) parameters.get(APIConstants.PAYLOAD)) ||
@@ -2707,6 +2741,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     private void validateEndpointPolicy(String apiId, OperationPolicy policy) throws APIManagementException {
+        if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.equals(policy.getPolicyType().toString())
+                && APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
+            throw new APIManagementException("CHANGE_ENDPOINT policy is not allowed in response flow",
+                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
+                            policy.getPolicyType().toString()));
+        }
+
         Map<String, Object> parameters = policy.getParameters();
         String endpointId;
         if (!parameters.containsKey(APIConstants.ENDPOINT_ID_PARAM)) {
