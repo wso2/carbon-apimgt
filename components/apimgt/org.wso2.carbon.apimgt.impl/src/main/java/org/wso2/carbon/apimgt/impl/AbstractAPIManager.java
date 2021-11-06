@@ -3758,6 +3758,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 // and fill out missing attributes before attaching the list to the api
                 List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfOrganization(organization);
 
+                // todo-category: optimize this loop with breaks
                 for (String categoryName : categoriesOfAPI) {
                     for (APICategory category : allCategories) {
                         if (categoryName.equals(category.getName())) {

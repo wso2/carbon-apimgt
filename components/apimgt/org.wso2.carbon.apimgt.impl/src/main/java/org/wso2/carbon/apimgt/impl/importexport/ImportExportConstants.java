@@ -95,7 +95,8 @@ public final class ImportExportConstants {
     public static final String RESOURCE_ENDPOINTS_FILE_NAME = File.separator + "resource-endpoints";
 
     // Location of the API definition file
-    public static final String RESOURCE_ENDPOINTS_FILE_LOCATION = File.separator + RESOURCE_ENDPOINTS_DIRECTORY + RESOURCE_ENDPOINTS_FILE_NAME ;
+    public static final String RESOURCE_ENDPOINTS_FILE_LOCATION =
+            File.separator + RESOURCE_ENDPOINTS_DIRECTORY + RESOURCE_ENDPOINTS_FILE_NAME;
 
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
