@@ -1841,12 +1841,20 @@ public interface APIProvider extends APIManager {
     /**
      * Set existing operation policy mapping to the URI Templates
      *
-     * @param apiId API UUID
-     * @param uriTemplates Set of URI Templates
+     * @param apiId         API UUID
+     * @param uriTemplates  Set of URI Templates
      * @throws APIManagementException
      */
     void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
+    /**
+     * Add Operation Policy
+     *
+     * @param urlMappingId  URL Mapping ID
+     * @param policy        Operation Policy to be added
+     * @return              Policy Id
+     * @throws APIManagementException
+     */
     int addOperationPolicy(int urlMappingId, OperationPolicy policy) throws APIManagementException;
 
     /**
@@ -1861,6 +1869,24 @@ public interface APIProvider extends APIManager {
      */
     String addResourceEndpoint(String uuid, String revisionId, ResourceEndpoint endpoint, String organization)
             throws APIManagementException;
+
+    /**
+     * Update Resource Endpoint
+     *
+     * @param endpoint      Resource endpoint
+     * @param organization  Organization
+     * @throws APIManagementException
+     */
+    void updateResourceEndpoint(ResourceEndpoint endpoint, String organization) throws APIManagementException;
+
+    /**
+     * Deletes Resource Endpoint
+     *
+     * @param uuid          Resource Endpoint UUID
+     * @param organization  Organization
+     * @throws APIManagementException
+     */
+    void deleteResourceEndpoint(String uuid, String organization) throws  APIManagementException;
 
     /**
      * Gets API Resource Endpoint by UUID
@@ -1883,24 +1909,6 @@ public interface APIProvider extends APIManager {
     List<ResourceEndpoint> getResourceEndpoints(String apiId, String organization) throws APIManagementException;
 
     /**
-     * Update Resource Endpoint
-     *
-     * @param endpoint      Resource endpoint
-     * @param organization  Organization
-     * @throws APIManagementException
-     */
-    void updateResourceEndpoint(ResourceEndpoint endpoint, String organization) throws APIManagementException;
-
-    /**
-     * Deletes Resource Endpoint
-     *
-     * @param uuid          Resource Endpoint UUID
-     * @param organization  Organization
-     * @throws APIManagementException
-     */
-    void deleteResourceEndpoint(String uuid, String organization) throws  APIManagementException;
-
-    /**
      * Checks whether a resource endpoint by the given UUID exists under the API specified by apiId
      *
      * @param apiId             API UUID
@@ -1915,13 +1923,27 @@ public interface APIProvider extends APIManager {
     /**
      * Checks whether the Resource Endpoint specified by the UUID is used in an API mediation policy
      *
-     * @param uuid  Resource Endpoint UUID
+     * @param uuid      Resource Endpoint UUID
      * @return
      * @throws APIManagementException
      */
     boolean isResourceEndpointUsed(String uuid) throws APIManagementException;
 
+    /**
+     * Adds Resource Endpoint to CHANGE_ENDPOINT policy mapping
+     *
+     * @param policyId          Operation Policy ID
+     * @param endpointUUID      Resource Endpoint UUID
+     * @throws APIManagementException
+     */
     void addResourceEndpointMapping(int policyId, String endpointUUID) throws APIManagementException;
 
+    /**
+     * Get URI Templates of API identified by the UUID
+     *
+     * @param uuid      API UUID
+     * @return
+     * @throws APIManagementException
+     */
     Set<URITemplate> getURITemplatesOfAPI(String uuid) throws APIManagementException;
 }
