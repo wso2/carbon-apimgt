@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
@@ -244,40 +245,38 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/environments/{envId}/keys")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "get environment specific api properties", notes = "This operation can be used to add environment specific api properties to an existing API. ", response = String.class, authorizations = {
+    @ApiOperation(value = "get environment specific API properties", notes = "This operation can be used to retrieve environment specific API properties from an existing API. ", response = EnvironmentPropertiesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with environment specific api properties ", response = String.class),
+        @ApiResponse(code = 200, message = "OK. Successful response with environment specific API properties ", response = EnvironmentPropertiesDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdEnvironmentsEnvIdKeysGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdEnvironmentsEnvIdKeysGet(apiId, envId, ifMatch, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdEnvironmentsEnvIdKeysGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId) throws APIManagementException{
+        return delegate.apisApiIdEnvironmentsEnvIdKeysGet(apiId, envId, securityContext);
     }
 
     @PUT
     @Path("/{apiId}/environments/{envId}/keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update environment specific api properties", notes = "This operation can be used to update the environment specific api properties of an existing API. ", response = String.class, authorizations = {
+    @ApiOperation(value = "Update environment specific API properties", notes = "This operation can be used to update the environment specific API properties of an existing API. ", response = EnvironmentPropertiesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with environment specific api properties ", response = String.class),
+        @ApiResponse(code = 200, message = "OK. Successful response with environment specific API properties ", response = EnvironmentPropertiesDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdEnvironmentsEnvIdKeysPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId, @ApiParam(value = "" ,required=true) String body,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdEnvironmentsEnvIdKeysPut(apiId, envId, body, ifMatch, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId, @ApiParam(value = "" ,required=true) EnvironmentPropertiesDTO environmentPropertiesDTO) throws APIManagementException{
+        return delegate.apisApiIdEnvironmentsEnvIdKeysPut(apiId, envId, environmentPropertiesDTO, securityContext);
     }
 
     @POST

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dao.constants.EnvironmentSpecificAPIPropertyConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -31,6 +32,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,18 +43,6 @@ import java.util.stream.Collectors;
  * This class implements the DAO operations related to environment specific api properties.
  */
 public class EnvironmentSpecificAPIPropertyDAO {
-
-    public static final String ADD_ENVIRONMENT_SPECIFIC_API_PROPERTIES =
-            "INSERT INTO AM_API_ENVIRONMENT_KEYS(UUID, API_ID, ENVIRONMENT_ID, PROPERTY_CONFIG) VALUES(?,?,?,?)";
-
-    public static final String UPDATE_ENVIRONMENT_SPECIFIC_API_PROPERTIES =
-            "UPDATE AM_API_ENVIRONMENT_KEYS SET PROPERTY_CONFIG = ? WHERE API_ID=? AND ENVIRONMENT_ID=?";
-
-    public static final String GET_ENVIRONMENT_SPECIFIC_API_PROPERTIES =
-            "SELECT PROPERTY_CONFIG FROM AM_API_ENVIRONMENT_KEYS WHERE API_ID=? AND ENVIRONMENT_ID=?";
-
-    public static final String IS_ENVIRONMENT_SPECIFIC_API_PROPERTIES_EXIST =
-            "SELECT 1 FROM AM_API_ENVIRONMENT_KEYS WHERE API_ID=? AND ENVIRONMENT_ID=?";
 
     private static EnvironmentSpecificAPIPropertyDAO INSTANCE = null;
 
@@ -67,119 +57,113 @@ public class EnvironmentSpecificAPIPropertyDAO {
         return INSTANCE;
     }
 
-    public void addOrUpdateEnvironmentSpecificAPIProperties(int apiId, String envUuid, String content)
+    public void addOrUpdateEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
-        boolean isConfigExist = isEnvironmentSpecificAPIPropertiesExist(apiId, envUuid);
+        boolean isConfigExist = isEnvironmentSpecificAPIPropertiesExist(apiUuid, envUuid);
         if (isConfigExist) {
-            updateEnvironmentSpecificAPIProperties(apiId, envUuid, content);
+            updateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
         } else {
-            addEnvironmentSpecificAPIProperties(apiId, envUuid, content);
+            addEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
         }
     }
 
-    private void addEnvironmentSpecificAPIProperties(int apiId, String envUuid, String content)
+    private void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            try (PreparedStatement preparedStatement = conn.prepareStatement(ADD_ENVIRONMENT_SPECIFIC_API_PROPERTIES)) {
-                preparedStatement.setString(1, UUID.randomUUID().toString());
-                preparedStatement.setInt(2, apiId);
-                preparedStatement.setString(3, envUuid);
-                preparedStatement.setBlob(4, new ByteArrayInputStream(content.getBytes()));
-                preparedStatement.execute();
-            }
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(
+                        EnvironmentSpecificAPIPropertyConstants.ADD_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
+            preparedStatement.setString(1, UUID.randomUUID().toString());
+            preparedStatement.setString(2, apiUuid);
+            preparedStatement.setString(3, envUuid);
+            preparedStatement.setBlob(4, new ByteArrayInputStream(content.getBytes()));
+            preparedStatement.execute();
         } catch (SQLException e) {
             throw new APIManagementException("Error occurred when adding environment specific api properties", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
 
-    private void updateEnvironmentSpecificAPIProperties(int apiId, String envUuid, String content)
+    private void updateEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            try (PreparedStatement preparedStatement = conn
-                    .prepareStatement(UPDATE_ENVIRONMENT_SPECIFIC_API_PROPERTIES)) {
-                preparedStatement.setBlob(1, new ByteArrayInputStream(content.getBytes()));
-                preparedStatement.setInt(2, apiId);
-                preparedStatement.setString(3, envUuid);
-                preparedStatement.execute();
-            }
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(
+                        EnvironmentSpecificAPIPropertyConstants.UPDATE_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
+            preparedStatement.setBlob(1, new ByteArrayInputStream(content.getBytes()));
+            preparedStatement.setString(2, apiUuid);
+            preparedStatement.setString(3, envUuid);
+            preparedStatement.execute();
         } catch (SQLException e) {
             throw new APIManagementException("Error occurred when updating environment specific api properties", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
 
-    public String getEnvironmentSpecificAPIProperties(int apiId, String envUuid) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            try (PreparedStatement preparedStatement = conn.prepareStatement(GET_ENVIRONMENT_SPECIFIC_API_PROPERTIES)) {
-                preparedStatement.setInt(1, apiId);
-                preparedStatement.setString(2, envUuid);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    String propertyConfig = null;
-                    if (resultSet.next()) {
-                        InputStream propertyConfigBlob = resultSet.getBinaryStream(1);
-                        if (propertyConfigBlob != null) {
-                            propertyConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
-                        }
+    public String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(
+                        EnvironmentSpecificAPIPropertyConstants.GET_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
+            preparedStatement.setString(1, apiUuid);
+            preparedStatement.setString(2, envUuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                String propertyConfig = null;
+                if (resultSet.next()) {
+                    InputStream propertyConfigBlob = resultSet.getBinaryStream(1);
+                    if (propertyConfigBlob != null) {
+                        propertyConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
                     }
-                    return propertyConfig;
                 }
+                return propertyConfig;
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error occurred when getting environment specific api properties", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
 
-    private boolean isEnvironmentSpecificAPIPropertiesExist(int apiId, String envUuid) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            try (PreparedStatement preparedStatement = conn
-                    .prepareStatement(IS_ENVIRONMENT_SPECIFIC_API_PROPERTIES_EXIST)) {
-                preparedStatement.setInt(1, apiId);
-                preparedStatement.setString(2, envUuid);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        return true;
-                    }
+    private boolean isEnvironmentSpecificAPIPropertiesExist(String apiUuid, String envUuid)
+            throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(
+                        EnvironmentSpecificAPIPropertyConstants.IS_ENVIRONMENT_SPECIFIC_API_PROPERTIES_EXIST_SQL)) {
+            preparedStatement.setString(1, apiUuid);
+            preparedStatement.setString(2, envUuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
                 }
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error occurred when checking environment specific api properties", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
         return false;
     }
 
     public Map<String, Map<String, Environment>> getEnvironmentSpecificAPIPropertiesOfAPIs(List<String> apiUuidS)
             throws APIManagementException {
-        String idsAsList = apiUuidS.stream()
-                .map(id -> "'" + id + "'")
-                .collect(Collectors.joining(","));
-        Map<String, Map<String, Environment>> mgEnvs = getMGEnvironmentSpecificAPIPropertiesOfAPIs(idsAsList);
-        return getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(idsAsList, mgEnvs);
+        Map<String, org.wso2.carbon.apimgt.api.model.Environment> defaultEnvs = APIUtil.getReadOnlyEnvironments();
+        List<String> envIds = defaultEnvs.values().stream().map(org.wso2.carbon.apimgt.api.model.Environment::getUuid)
+                .collect(Collectors.toList());
+        Map<String, Map<String, Environment>> mgEnvs = getMGEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS);
+        return getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS, envIds, mgEnvs);
     }
 
-    private Map<String, Map<String, Environment>> getMGEnvironmentSpecificAPIPropertiesOfAPIs(String apiUuidS)
+    /**
+     * Getting the api configs related MGs
+     *
+     * @param apiUuidS
+     * @return
+     * @throws APIManagementException
+     */
+    private Map<String, Map<String, Environment>> getMGEnvironmentSpecificAPIPropertiesOfAPIs(List<String> apiUuidS)
             throws APIManagementException {
-        final String query = getMgEnvironmentSpecificAPIPropertiesOfAPIsQuery(apiUuidS);
-        Map<String, Map<String, Environment>> apiEnvironmentMap= new HashMap<>();
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            try (PreparedStatement preparedStatement = conn.prepareStatement(query);
-                    ResultSet resultSet = preparedStatement.executeQuery()) {
+        final String query = EnvironmentSpecificAPIPropertyConstants.GET_ENVIRONMENT_SPECIFIC_API_PROPERTIES_BY_APIS_SQL
+                .replaceAll("_API_ID_LIST_", String.join(",", Collections.nCopies(apiUuidS.size(), "?")));
+
+        Map<String, Map<String, Environment>> apiEnvironmentMap = new HashMap<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            int index = 1;
+            for (String apiId : apiUuidS) {
+                preparedStatement.setString(index++, apiId);
+            }
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String envId = resultSet.getString(1);
                     String envName = resultSet.getString(2);
@@ -208,24 +192,37 @@ public class EnvironmentSpecificAPIPropertyDAO {
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error occurred when getting MG environment specific api properties", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
         return apiEnvironmentMap;
     }
 
-    private Map<String, Map<String, Environment>> getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(String apiUuidS,
-            Map<String, Map<String, Environment>> apiEnvironmentMap) throws APIManagementException {
-        Map<String, org.wso2.carbon.apimgt.api.model.Environment> defaultEnvs = APIUtil.getReadOnlyEnvironments();
-        String envsAsList = defaultEnvs.values().stream()
-                .map(env -> "'" + env.getUuid() + "'")
-                .collect(Collectors.joining(","));
-        final String query = getDefaultEnvironmentSpecificAPIPropertiesOfAPIsQuery(apiUuidS, envsAsList);
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            try (PreparedStatement preparedStatement = conn.prepareStatement(query);
-                    ResultSet resultSet = preparedStatement.executeQuery()) {
+    /**
+     * Getting the api configs related to default environments.
+     *
+     * @param apiUuidS
+     * @param envIds
+     * @param apiEnvironmentMap
+     * @return
+     * @throws APIManagementException
+     */
+    private Map<String, Map<String, Environment>> getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(
+            List<String> apiUuidS, List<String> envIds, Map<String, Map<String, Environment>> apiEnvironmentMap)
+            throws APIManagementException {
+        final String query =
+                EnvironmentSpecificAPIPropertyConstants.GET_ENVIRONMENT_SPECIFIC_API_PROPERTIES_BY_APIS_ENVS_SQL
+                        .replaceAll("_ENV_ID_LIST_", String.join(",", Collections.nCopies(envIds.size(), "?")))
+                        .replaceAll("_API_ID_LIST_", String.join(",", Collections.nCopies(apiUuidS.size(), "?")));
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            int index = 1;
+            for (String envId : envIds) {
+                preparedStatement.setString(index++, envId);
+            }
+            for (String apiId : apiUuidS) {
+                preparedStatement.setString(index++, apiId);
+            }
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String envId = resultSet.getString(1);
                     String envName = envId; // for default envs envId and envName is same
@@ -252,33 +249,9 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting default environment specific api properties", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
+            throw new APIManagementException("Error occurred when getting default environment specific api properties",
+                    e);
         }
         return apiEnvironmentMap;
-    }
-
-    private String getMgEnvironmentSpecificAPIPropertiesOfAPIsQuery(String apiIds) {
-        return "SELECT AM_GATEWAY_ENVIRONMENT.UUID ENV_ID,"
-                        + "       AM_GATEWAY_ENVIRONMENT.NAME ENV_NAME,"
-                        + "       AM_API.API_UUID API_ID,"
-                        + "       AM_API_ENVIRONMENT_KEYS.PROPERTY_CONFIG CONFIG"
-                        + " FROM AM_API_ENVIRONMENT_KEYS,AM_GATEWAY_ENVIRONMENT,AM_API"
-                        + " WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID = AM_GATEWAY_ENVIRONMENT.UUID AND"
-                        + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND"
-                        + "        AM_API.API_UUID IN (" + apiIds + ")"
-                        + " ORDER BY API_ID, ENV_NAME, ENV_ID";
-    }
-
-    private String getDefaultEnvironmentSpecificAPIPropertiesOfAPIsQuery(String apiIds, String envIds) {
-        return "SELECT AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID ENV_ID,"
-                + "       AM_API.API_UUID API_ID,"
-                + "       AM_API_ENVIRONMENT_KEYS.PROPERTY_CONFIG CONFIG"
-                + " FROM AM_API_ENVIRONMENT_KEYS,AM_API"
-                + " WHERE AM_API_ENVIRONMENT_KEYS.ENVIRONMENT_ID IN (" + envIds + ") AND"
-                + "        AM_API_ENVIRONMENT_KEYS.API_ID = AM_API.API_ID AND"
-                + "        AM_API.API_UUID IN (" + apiIds + ")"
-                + " ORDER BY API_ID, ENV_ID";
     }
 }

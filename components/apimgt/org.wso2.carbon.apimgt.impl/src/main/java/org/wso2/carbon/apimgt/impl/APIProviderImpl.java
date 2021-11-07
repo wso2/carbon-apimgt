@@ -77,7 +77,6 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -9142,55 +9141,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
-        int apiId = getAPIId(apiUuid);
-        // check give env uuid is present
-        validateEnvironment(envUuid);
-        // check the thee given json config is valid
-        validateEnvironmentSpecificAPIProperties(content);
-        environmentSpecificAPIPropertyDAO.addOrUpdateEnvironmentSpecificAPIProperties(apiId, envUuid, content);
-    }
-
-    private int getAPIId(String apiUuid) throws APIManagementException {
-        try {
-            return apiMgtDAO.getAPIID(apiUuid);
-        } catch (APIManagementException e) {
-            if (e.getMessage().contains("Unable to find the API with UUID")) {
-                throw new APIManagementException(e.getMessage(),
-                        ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiUuid));
-            }
-            throw e;
-        }
-    }
-
-    private void validateEnvironment(String uuid) throws APIManagementException {
-        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
-        if (env == null) {
-            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
-            if (env == null) {
-                String errorMessage =
-                        String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
-                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
-            }
-        }
-    }
-
-    private void validateEnvironmentSpecificAPIProperties(String body) throws APIManagementException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
-        try {
-            objectMapper.readTree(body);
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error parsing environment specific api property json.", e,
-                    ExceptionCodes.INVALID_ENV_API_PROP_CONFIG);
-        }
+        environmentSpecificAPIPropertyDAO.addOrUpdateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
     }
 
     @Override
     public String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException {
-        int apiId = getAPIId(apiUuid);
-        validateEnvironment(envUuid);
-        String content = environmentSpecificAPIPropertyDAO.getEnvironmentSpecificAPIProperties(apiId, envUuid);
+        String content = environmentSpecificAPIPropertyDAO.getEnvironmentSpecificAPIProperties(apiUuid, envUuid);
         if (content == null) {
             content = "{}";
         }

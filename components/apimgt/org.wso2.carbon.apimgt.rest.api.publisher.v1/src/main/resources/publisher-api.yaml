@@ -7883,48 +7883,27 @@ paths:
     get:
       tags:
         - APIs
-      summary: get environment specific api properties
+      summary: get environment specific API properties
       description: |
-        This operation can be used to add environment specific api properties to an existing API.
+        This operation can be used to retrieve environment specific API properties from an existing API.
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/envId'
-        - $ref: '#/components/parameters/If-Match'
       responses:
         '200':
           description: |
             OK.
-            Successful response with environment specific api properties
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has beed modified the last time.
-                Use =d by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
+            Successful response with environment specific API properties
           content:
             application/json:
               schema:
-                type: string
-                example: ''
+                $ref: '#/components/schemas/EnvironmentProperties'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        '412':
-          $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
             - apim:api_create
@@ -7932,55 +7911,33 @@ paths:
     put:
       tags:
         - APIs
-      summary: Update environment specific api properties
+      summary: Update environment specific API properties
       description: |
-        This operation can be used to update the environment specific api properties of an existing API.
+        This operation can be used to update the environment specific API properties of an existing API.
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/envId'
-        - $ref: '#/components/parameters/If-Match'
       requestBody:
         content:
           application/json:
             schema:
-              type: string
-              example: ''
+              $ref: '#/components/schemas/EnvironmentProperties'
         required: true
       responses:
         '200':
           description: |
             OK.
-            Successful response with environment specific api properties
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has beed modified the last time.
-                Use =d by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
+            Successful response with environment specific API properties
           content:
             application/json:
               schema:
-                type: string
-                example: ''
+                $ref: '#/components/schemas/EnvironmentProperties'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        '412':
-          $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
             - apim:api_create
@@ -9944,12 +9901,15 @@ components:
       title: Environment
       required:
         - endpoints
+        - id
         - name
         - serverUrl
         - showInApiConsole
         - type
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
           example: default
@@ -11271,6 +11231,18 @@ components:
           type: integer
           format: int32
           example: 3600
+    EnvironmentProperties:
+      title: Environment specific API properties
+      type: object
+      properties:
+        productionEndpoint:
+          type: string
+          description: Production endpoints
+          example: https://localhost:9443/am/sample/pizzashack/v1/api/
+        sandboxEndpoint:
+          type: string
+          description: Sandbox endpoints
+          example: https://localhost:9443/am/sample/pizzashack/v1/api/
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:

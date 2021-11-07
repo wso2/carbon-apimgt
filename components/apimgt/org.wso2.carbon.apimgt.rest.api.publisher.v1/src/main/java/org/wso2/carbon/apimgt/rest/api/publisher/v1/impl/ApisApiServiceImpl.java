@@ -27,8 +27,6 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
@@ -63,7 +61,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -157,6 +154,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
@@ -183,6 +181,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -5128,33 +5127,49 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiUuid, String envId, String ifMatch,
-            MessageContext messageContext) throws APIManagementException {
-        String props = getEnvironmentSpecificAPIProperties(apiUuid, envId);
-        return Response.ok().entity(props)
-                .header("Content-Disposition", "attachment; filename=\"swagger.json\"")
-                .build();
+    public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext)
+            throws APIManagementException {
+        // validate api UUID
+        validateAPIExistence(apiId);
+        // validate environment UUID
+        validateEnvironment(envId);
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        // get properties
+        String properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
+        return Response.ok().entity(properties).build();
     }
 
     @Override
-    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiUuid, String envId, String body, String ifMatch,
-            MessageContext messageContext) throws APIManagementException {
-        addEnvironmentSpecificAPIProperties(apiUuid, envId, body);
-        String props = getEnvironmentSpecificAPIProperties(apiUuid, envId);
-        return Response.ok().entity(props)
-                .header("Content-Disposition", "attachment; filename=\"swagger.json\"")
-                .build();
-    }
-
-    private String getEnvironmentSpecificAPIProperties(String apiUuid, String envId) throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        return apiProvider.getEnvironmentSpecificAPIProperties(apiUuid, envId);
-    }
-
-    private void addEnvironmentSpecificAPIProperties(String apiUuid, String envId, String body)
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId,
+            EnvironmentPropertiesDTO environmentPropertyDTO, MessageContext messageContext)
             throws APIManagementException {
+        // validate api UUID
+        validateAPIExistence(apiId);
+        // validate environment UUID
+        validateEnvironment(envId);
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.addEnvironmentSpecificAPIProperties(apiUuid, envId, body);
+        // adding properties
+        String properties = new Gson().toJson(environmentPropertyDTO);
+        apiProvider.addEnvironmentSpecificAPIProperties(apiId, envId, properties);
+        // get properties
+        properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
+        return Response.ok().entity(properties).build();
+    }
+
+    private void validateEnvironment(String envId) throws APIManagementException {
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        Environment env = APIUtil.getReadOnlyEnvironments().get(envId);
+        if (env == null) {
+            env = ApiMgtDAO.getInstance().getEnvironment(tenantDomain, envId);
+            if (env == null) {
+                String errorMessage =
+                        String.format("Failed to retrieve Environment with ID %s. Environment not found", envId);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
+                        .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("Env ID '%s'", envId)));
+            }
+        }
     }
 
 }
