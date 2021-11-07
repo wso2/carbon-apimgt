@@ -64,6 +64,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     private static final Log log = LogFactory.getLog(OAuthJwtAuthenticatorImpl.class);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    private static final String ENV_ORG_BASED_TOKEN_FEATURE = "FEATURE_FLAG_ORG_BASED_TOKEN_ENABLED";
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
     private java.util.Map<String, List<String>> audiencesMap;
@@ -141,9 +142,21 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         if (scopeClaim != null) {
             String orgId = RestApiUtil.resolveOrganization(message);
             String[] scopes = scopeClaim.split(JwtTokenConstants.SCOPE_DELIMITER);
-            scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
-                    .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
-                    .toArray(size -> new String[size]);
+            if (isOrgBasedTokenFeatureEnabled()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("$" + ENV_ORG_BASED_TOKEN_FEATURE + " is enabled.");
+                }
+                // check organization claim and orgId
+                String orgClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim("organization");
+                if (!orgId.equals(orgClaim)) {
+                    log.error("OrgId and organization claim mismatch!");
+                    return false;
+                }
+            } else {
+                scopes = java.util.Arrays.stream(scopes).filter(s -> s.contains(orgId))
+                        .map(s -> s.replace(APIConstants.URN_CHOREO + orgId + ":", ""))
+                        .toArray(size -> new String[size]);
+            }
             oauthTokenInfo.setScopes(scopes);
 
             if (validateScopes(message, oauthTokenInfo)) {
@@ -188,6 +201,14 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         }
         log.error("scopes validation failed for the token" + maskedToken);
         return false;
+    }
+
+    private static boolean isOrgBasedTokenFeatureEnabled() {
+        String featureEnabled = System.getenv(ENV_ORG_BASED_TOKEN_FEATURE);
+        if (featureEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(featureEnabled);
     }
 
     /**
