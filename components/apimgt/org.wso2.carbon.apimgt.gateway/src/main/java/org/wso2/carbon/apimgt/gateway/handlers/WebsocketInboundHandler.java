@@ -108,6 +108,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
             }
+            ctx.fireChannelRead(msg);
         } else if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PingWebSocketFrame)) {
             //remove inbound message context from data holder
             InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);

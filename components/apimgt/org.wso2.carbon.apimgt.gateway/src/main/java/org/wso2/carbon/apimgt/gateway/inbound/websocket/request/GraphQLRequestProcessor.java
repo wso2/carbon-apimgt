@@ -68,7 +68,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         Parser parser = new Parser();
 
         //for gql subscription operation payloads
-        if (checkIfSubscribeMessage(graphQLMsg)) {
+        if (!responseDTO.isError() && checkIfSubscribeMessage(graphQLMsg)) {
             if (validatePayloadFields(graphQLMsg)) {
                 String graphQLSubscriptionPayload =
                         ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD))
