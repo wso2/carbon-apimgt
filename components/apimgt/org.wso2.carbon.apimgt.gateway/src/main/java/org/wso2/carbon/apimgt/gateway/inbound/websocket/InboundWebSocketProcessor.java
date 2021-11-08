@@ -50,8 +50,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtil
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.handshake.HandshakeProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.GraphQLRequestProcessor;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.GraphQLResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.RequestProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.GraphQLResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.ResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -61,8 +61,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ import java.util.Set;
 
 /**
  * This class intercepts the inbound websocket handler execution during handshake, request messaging, response
- * messaging phases. This processor depends on netty inbound websocket channel pipleline.
+ * messaging phases. This processor depends on netty inbound websocket channel pipeline.
  */
 public class InboundWebSocketProcessor {
 
@@ -89,7 +89,7 @@ public class InboundWebSocketProcessor {
      * request. Finally, hand over the processing to relevant handshake processor for authentication etc.
      *
      * @param req                   Handshake request
-     * @param ctx                   Channel pipleline context
+     * @param ctx                   Channel pipeline context
      * @param inboundMessageContext InboundMessageContext
      * @return InboundProcessorResponseDTO with handshake processing response
      */
@@ -473,14 +473,14 @@ public class InboundWebSocketProcessor {
      */
     private void setRequestHeaders(FullHttpRequest request, InboundMessageContext inboundMessageContext) {
         Map<String, String> headersToAdd = inboundMessageContext.getHeadersToAdd();
-        Map<String, String> headersToRemove = inboundMessageContext.getHeadersToRemove();
+        List<String> headersToRemove = inboundMessageContext.getHeadersToRemove();
         for (Map.Entry<String, String> header : headersToAdd.entrySet()) {
             request.headers().add(header.getKey(), header.getValue());
         }
-        for (Map.Entry<String, String> header : headersToRemove.entrySet()) {
-            request.headers().remove(header.getKey());
+        for (String header : headersToRemove) {
+            request.headers().remove(header);
         }
-        inboundMessageContext.setHeadersToRemove(new HashMap<>());
+        inboundMessageContext.setHeadersToRemove(new ArrayList<>());
     }
 
 }

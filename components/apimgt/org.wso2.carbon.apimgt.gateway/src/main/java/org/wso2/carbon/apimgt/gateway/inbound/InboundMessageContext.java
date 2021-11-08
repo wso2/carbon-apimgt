@@ -26,7 +26,9 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,7 +44,7 @@ public class InboundMessageContext {
     private String version;
     private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
     private Map<String, String> requestHeaders = new HashMap<>();
-    private Map<String, String> headersToRemove = new HashMap<>();
+    private List<String> headersToRemove = new ArrayList<>();
     private Map<String, String> headersToAdd = new HashMap<>();
     private String token;
     private String apiContext;
@@ -216,11 +218,11 @@ public class InboundMessageContext {
         return resourcesMap;
     }
 
-    public Map<String, String> getHeadersToRemove() {
+    public List<String> getHeadersToRemove() {
         return headersToRemove;
     }
 
-    public void setHeadersToRemove(Map<String, String> headersToRemove) {
+    public void setHeadersToRemove(List<String> headersToRemove) {
         this.headersToRemove = headersToRemove;
     }
 

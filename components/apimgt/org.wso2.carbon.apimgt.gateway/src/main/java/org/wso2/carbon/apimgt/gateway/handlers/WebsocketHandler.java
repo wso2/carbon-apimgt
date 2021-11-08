@@ -57,10 +57,10 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
             inboundMessageContext = InboundMessageContextDataHolder.getInstance()
                     .getInboundMessageContextForConnectionId(channelId);
-            InboundMessageContextDataHolder.getInstance()
-                    .addInboundMessageContextForConnection(channelId, inboundMessageContext);
         } else {
             inboundMessageContext = new InboundMessageContext();
+            InboundMessageContextDataHolder.getInstance()
+                    .addInboundMessageContextForConnection(channelId, inboundMessageContext);
         }
 
         if (APIUtil.isAnalyticsEnabled()) {
@@ -80,7 +80,8 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 if (responseDTO.isCloseConnection()) {
                     outboundHandler().write(ctx, new CloseWebSocketFrame(responseDTO.getErrorCode(),
                             responseDTO.getErrorMessage() + "!" + StringUtils.SPACE + "Connection closed"), promise);
-                    ctx.close();
+                    outboundHandler().flush(ctx);
+                    outboundHandler().close(ctx, promise);
                 } else {
                     String errorMessage = "Error code: " + responseDTO.getErrorCode() + " reason: "
                             + responseDTO.getErrorMessage();
