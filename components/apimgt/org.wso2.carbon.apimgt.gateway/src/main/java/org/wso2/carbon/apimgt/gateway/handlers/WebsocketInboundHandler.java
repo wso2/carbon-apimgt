@@ -40,8 +40,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtil
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.InetSocketAddress;
@@ -121,7 +121,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             if (responseDTO.isError()) {
                 if (responseDTO.isCloseConnection()) {
                     ctx.writeAndFlush(new CloseWebSocketFrame(responseDTO.getErrorCode(),
-                            responseDTO.getErrorMessage() + "!" + StringUtils.SPACE + "Connection closed"));
+                            responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"));
                     ctx.close();
                 } else {
                     String errorMessage = "Error code: " + responseDTO.getErrorCode() + " reason: "

@@ -79,7 +79,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
             if (responseDTO.isError()) {
                 if (responseDTO.isCloseConnection()) {
                     outboundHandler().write(ctx, new CloseWebSocketFrame(responseDTO.getErrorCode(),
-                            responseDTO.getErrorMessage() + "!" + StringUtils.SPACE + "Connection closed"), promise);
+                            responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"), promise);
                     outboundHandler().flush(ctx);
                     outboundHandler().close(ctx, promise);
                 } else {
