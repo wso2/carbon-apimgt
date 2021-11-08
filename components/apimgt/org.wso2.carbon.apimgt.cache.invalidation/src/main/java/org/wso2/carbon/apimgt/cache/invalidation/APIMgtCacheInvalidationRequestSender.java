@@ -65,8 +65,8 @@ public class APIMgtCacheInvalidationRequestSender implements CacheEntryRemovedLi
                         cacheInfo.getTenantId(),
                         cacheInvalidationConfiguration.getDomain(), DataHolder.getNodeId()};
                 EventPublisherEvent globalCacheInvalidationEvent =
-                        new EventPublisherEvent(cacheInvalidationConfiguration.getStream(),
-                                System.currentTimeMillis(), null, null, objects);
+                        new EventPublisherEvent(cacheInvalidationConfiguration.getStream(), System.currentTimeMillis(),
+                                                objects);
                 APIUtil.publishEvent(EventPublisherType.GLOBAL_CACHE_INVALIDATION, globalCacheInvalidationEvent,
                         globalCacheInvalidationEvent.toString());
             }
