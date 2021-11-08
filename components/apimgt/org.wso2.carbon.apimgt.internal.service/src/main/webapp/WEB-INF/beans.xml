@@ -9,7 +9,8 @@
 	  <property name="environment">
 	    <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
 	  </property> 
-    </bean> 
+    </bean>
+    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
@@ -53,6 +54,7 @@
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
+            <ref bean="OrganizationInterceptor"/>
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="gZipInterceptor"/>
