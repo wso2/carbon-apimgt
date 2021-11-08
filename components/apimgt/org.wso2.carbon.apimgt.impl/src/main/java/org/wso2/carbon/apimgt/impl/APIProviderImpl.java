@@ -9147,7 +9147,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException {
         String content = environmentSpecificAPIPropertyDAO.getEnvironmentSpecificAPIProperties(apiUuid, envUuid);
-        if (content == null) {
+        if (StringUtils.isBlank(content)) {
             content = "{}";
         }
         return content;
