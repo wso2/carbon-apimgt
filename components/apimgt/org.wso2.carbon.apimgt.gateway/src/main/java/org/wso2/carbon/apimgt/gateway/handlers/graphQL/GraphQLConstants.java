@@ -48,5 +48,6 @@ public class GraphQLConstants {
         public static final String PAYLOAD_FIELD_NAME_PAYLOAD = "payload";
         public static final String PAYLOAD_FIELD_NAME_QUERY = "query";
         public static final String PAYLOAD_FIELD_NAME_ID = "id";
+        public static final String PAYLOAD_FIELD_TYPE_ERROR = "error";
     }
 }

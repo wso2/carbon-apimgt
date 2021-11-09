@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiC
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.GraphQLProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
@@ -219,6 +220,24 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
+     * Checks if the request is throttled for GraphQL subscriptions.
+     *
+     * @param msgSize               Websocket msg size
+     * @param verbInfoDTO           VerbInfoDTO for invoking operation.
+     * @param inboundMessageContext InboundMessageContext
+     * @param operationId           Operation ID
+     * @return InboundProcessorResponseDTO
+     */
+    public static InboundProcessorResponseDTO doThrottleForGraphQL(int msgSize, VerbInfoDTO verbInfoDTO,
+                                                                   InboundMessageContext inboundMessageContext,
+                                                                   String operationId) {
+
+        GraphQLProcessorResponseDTO responseDTO = new GraphQLProcessorResponseDTO();
+        responseDTO.setId(operationId);
+        return InboundWebsocketProcessorUtil.doThrottle(msgSize, verbInfoDTO, inboundMessageContext, responseDTO);
+    }
+
+    /**
      * Checks if the request is throttled.
      *
      * @param msgSize               Websocket msg size
@@ -227,9 +246,9 @@ public class InboundWebsocketProcessorUtil {
      * @return false if throttled
      */
     public static InboundProcessorResponseDTO doThrottle(int msgSize, VerbInfoDTO verbInfoDTO,
-                                                         InboundMessageContext inboundMessageContext) {
+                                                         InboundMessageContext inboundMessageContext,
+                                                         InboundProcessorResponseDTO responseDTO) {
 
-        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         APIKeyValidationInfoDTO infoDTO = inboundMessageContext.getInfoDTO();
         String applicationLevelTier = infoDTO.getApplicationTier();
         String apiLevelTier = infoDTO.getApiTier();
@@ -569,6 +588,27 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
+     * Get GraphQL subscription error frame DTO for error code and message closeConnection parameters.
+     *
+     * @param errorCode       Error code
+     * @param errorMessage    Error message
+     * @param closeConnection Whether to close connection after throwing the error frame
+     * @param operationId     Operation ID
+     * @return InboundProcessorResponseDTO
+     */
+    public static GraphQLProcessorResponseDTO getGraphQLFrameErrorDTO(int errorCode, String errorMessage,
+                                                                      boolean closeConnection, String operationId) {
+
+        GraphQLProcessorResponseDTO graphQLProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        graphQLProcessorResponseDTO.setError(true);
+        graphQLProcessorResponseDTO.setErrorCode(errorCode);
+        graphQLProcessorResponseDTO.setErrorMessage(errorMessage);
+        graphQLProcessorResponseDTO.setCloseConnection(closeConnection);
+        graphQLProcessorResponseDTO.setId(operationId);
+        return graphQLProcessorResponseDTO;
+    }
+
+    /**
      * Get bad request (error code 4010) error frame DTO for error message. The closeConnection parameter is false.
      *
      * @param errorMessage Error message
@@ -580,6 +620,25 @@ public class InboundWebsocketProcessorUtil {
         inboundProcessorResponseDTO.setError(true);
         inboundProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
         inboundProcessorResponseDTO.setErrorMessage(errorMessage);
+        return inboundProcessorResponseDTO;
+    }
+
+    /**
+     * Get bad request (error code 4010) error frame DTO for GraphQL subscriptions. The closeConnection parameter is
+     * false.
+     *
+     * @param errorMessage Error message
+     * @param operationId  Operation ID
+     * @return InboundProcessorResponseDTO
+     */
+    public static InboundProcessorResponseDTO getBadRequestGraphQLFrameErrorDTO(String errorMessage,
+                                                                                String operationId) {
+
+        GraphQLProcessorResponseDTO inboundProcessorResponseDTO = new GraphQLProcessorResponseDTO();
+        inboundProcessorResponseDTO.setError(true);
+        inboundProcessorResponseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.BAD_REQUEST);
+        inboundProcessorResponseDTO.setErrorMessage(errorMessage);
+        inboundProcessorResponseDTO.setId(operationId);
         return inboundProcessorResponseDTO;
     }
 
@@ -618,12 +677,13 @@ public class InboundWebsocketProcessorUtil {
      *
      * @param inboundMessageContext InboundMessageContext
      * @param subscriptionOperation Subscription operation
+     * @param operationId           GraphQL message Id
      * @return InboundProcessorResponseDTO
      */
     public static InboundProcessorResponseDTO validateScopes(InboundMessageContext inboundMessageContext,
-                                                             String subscriptionOperation) {
+                                                             String subscriptionOperation, String operationId) {
 
-        InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
+        InboundProcessorResponseDTO responseDTO = new GraphQLProcessorResponseDTO();
         // validate scopes based on subscription payload
         try {
             if (!InboundWebsocketProcessorUtil.authorizeGraphQLSubscriptionEvents(subscriptionOperation,
@@ -631,8 +691,9 @@ public class InboundWebsocketProcessorUtil {
                 String errorMessage = WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR_MESSAGE
                         + StringUtils.SPACE + subscriptionOperation;
                 log.error(errorMessage);
-                responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-                        WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, errorMessage, false);
+                responseDTO = InboundWebsocketProcessorUtil.getGraphQLFrameErrorDTO(
+                        WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, errorMessage, false,
+                        operationId);
             }
         } catch (APIManagementException e) {
             log.error(WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
@@ -641,8 +702,9 @@ public class InboundWebsocketProcessorUtil {
                     WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_MESSAGE, true);
         } catch (APISecurityException e) {
             log.error(WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR_MESSAGE, e);
-            responseDTO = InboundWebsocketProcessorUtil.getFrameErrorDTO(
-                    WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, e.getMessage(), false);
+            responseDTO = InboundWebsocketProcessorUtil.getGraphQLFrameErrorDTO(
+                    WebSocketApiConstants.FrameErrorConstants.RESOURCE_FORBIDDEN_ERROR, e.getMessage(), false,
+                    operationId);
         }
         return responseDTO;
     }

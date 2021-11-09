@@ -48,16 +48,18 @@ public class GraphQLResponseProcessor extends ResponseProcessor {
         JSONObject graphQLMsg = new JSONObject(msgText);
         if (!responseDTO.isError() && checkIfSubscribeMessageResponse(graphQLMsg)) {
             if (graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID) != null) {
+                String operationId = graphQLMsg.getString(
+                        GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID);
                 GraphQLOperationDTO graphQLOperationDTO =
                         inboundMessageContext.getVerbInfoForGraphQLMsgId(
                                 graphQLMsg.getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID));
                 // validate scopes based on subscription payload
                 responseDTO = InboundWebsocketProcessorUtil
-                        .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation());
+                        .validateScopes(inboundMessageContext, graphQLOperationDTO.getOperation(), operationId);
                 if (!responseDTO.isError()) {
                     //throttle for matching resource
-                    return InboundWebsocketProcessorUtil.doThrottle(msgSize, graphQLOperationDTO.getVerbInfoDTO(),
-                            inboundMessageContext);
+                    return InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize,
+                            graphQLOperationDTO.getVerbInfoDTO(), inboundMessageContext, operationId);
                 }
             } else {
                 responseDTO = InboundWebsocketProcessorUtil

@@ -46,6 +46,7 @@ public class RequestProcessor {
         if (log.isDebugEnabled()) {
             log.debug("Perform websocket request throttling for: " + inboundMessageContext.getApiContext());
         }
-        return InboundWebsocketProcessorUtil.doThrottle(msgSize, null, inboundMessageContext);
+        return InboundWebsocketProcessorUtil.doThrottle(msgSize, null, inboundMessageContext,
+                new InboundProcessorResponseDTO());
     }
 }

@@ -83,8 +83,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                     outboundHandler().flush(ctx);
                     outboundHandler().close(ctx, promise);
                 } else {
-                    String errorMessage = "Error code: " + responseDTO.getErrorCode() + " reason: "
-                            + responseDTO.getErrorMessage();
+                    String errorMessage = responseDTO.getErrorResponseString();
                     outboundHandler().write(ctx, new TextWebSocketFrame(errorMessage), promise);
                     if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR) {
                         if (log.isDebugEnabled()) {

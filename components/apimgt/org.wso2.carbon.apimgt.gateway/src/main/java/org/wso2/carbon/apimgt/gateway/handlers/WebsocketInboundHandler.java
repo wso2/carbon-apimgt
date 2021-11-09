@@ -125,8 +125,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                             responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"));
                     ctx.close();
                 } else {
-                    String errorMessage = "Error code: " + responseDTO.getErrorCode() + " reason: "
-                            + responseDTO.getErrorMessage();
+                    String errorMessage = responseDTO.getErrorResponseString();
                     ctx.writeAndFlush(new TextWebSocketFrame(errorMessage));
                     if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR) {
                         if (log.isDebugEnabled()) {

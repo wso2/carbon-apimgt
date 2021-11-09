@@ -58,4 +58,8 @@ public class InboundProcessorResponseDTO {
     public void setErrorCode(int errorCode) {
         this.errorCode = errorCode;
     }
+
+    public String getErrorResponseString() {
+        return "Error code: " + errorCode + " reason: " + errorMessage;
+    }
 }
