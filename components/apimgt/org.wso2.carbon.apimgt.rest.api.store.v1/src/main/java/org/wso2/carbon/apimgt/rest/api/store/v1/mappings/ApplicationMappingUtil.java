@@ -80,7 +80,6 @@ public class ApplicationMappingUtil {
         application.setTier(applicationDTO.getThrottlingPolicy());
         application.setDescription(applicationDTO.getDescription());
         application.setUUID(applicationDTO.getApplicationId());
-        application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
 
         //Check if the token type is not set in the request.
         if (StringUtils.isEmpty(applicationDTO.getTokenType().toString())) {
