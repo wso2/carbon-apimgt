@@ -1328,7 +1328,7 @@ public class TemplateBuilderUtil {
      * @return Updated endpoint config
      * @throws APIManagementException if an error occurs
      */
-    private static String populateSubscriptionEndpointConfig(String endpointConfig) throws APIManagementException {
+    public static String populateSubscriptionEndpointConfig(String endpointConfig) throws APIManagementException {
 
         try {
             JSONObject newEndpointConfigJson = new JSONObject();
@@ -1338,37 +1338,61 @@ public class TemplateBuilderUtil {
             newEndpointConfigJson.put(APIConstants.ENDPOINT_TYPE_HTTP, oldEndpointConfigJson);
             JSONObject wsEndpointConfig = new JSONObject();
             wsEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, APIConstants.WS_PROTOCOL);
-            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null &&
-                    ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
-                            .get(APIConstants.ENDPOINT_URL) != null) {
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
                 JSONObject prodWSEndpointConfig;
-                String httpProdEndpoint = (String)
-                        ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
-                                .get(APIConstants.ENDPOINT_URL);
+                String httpProdEndpoint = "";
                 String prodWsEndpoint = "";
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
+                        oldEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    // get first load balanced endpoint
+                    httpProdEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
+                            .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
+
+                } else if (((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                        .get(APIConstants.ENDPOINT_URL) != null) {
+                    httpProdEndpoint = (String)
+                            ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS))
+                                    .get(APIConstants.ENDPOINT_URL);
+                }
                 if (httpProdEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
                     prodWsEndpoint = httpProdEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
                             APIConstants.WS_PROTOCOL_URL_PREFIX);
                 } else if (httpProdEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
                     prodWsEndpoint = httpProdEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
                             APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(httpProdEndpoint)) {
+                    throw new APIManagementException("Unsupported URI scheme for Production endpoint: "
+                            + httpProdEndpoint);
                 }
                 prodWSEndpointConfig = new JSONObject();
                 prodWSEndpointConfig.put(APIConstants.ENDPOINT_URL, prodWsEndpoint);
                 wsEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS, prodWSEndpointConfig);
             }
-            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null
-                    && ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
-                    .get(APIConstants.ENDPOINT_URL) != null) {
+            if (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
                 JSONObject sandboxWSEndpointConfig;
                 String sandboxWsEndpoint = "";
-                String httpSandboxEndpoint = (String)
-                        ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
-                                .get(APIConstants.ENDPOINT_URL);
+                String httpSandboxEndpoint = "";
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
+                        oldEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    // get first load balanced endpoint
+                    httpSandboxEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
+                            .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
+
+                } else if (((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                        .get(APIConstants.ENDPOINT_URL) != null) {
+                    httpSandboxEndpoint = (String)
+                            ((JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS))
+                                    .get(APIConstants.ENDPOINT_URL);
+                }
                 if (httpSandboxEndpoint.indexOf(APIConstants.HTTP_PROTOCOL_URL_PREFIX) == 0) {
-                    sandboxWsEndpoint = httpSandboxEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, APIConstants.WS_PROTOCOL_URL_PREFIX);
+                    sandboxWsEndpoint = httpSandboxEndpoint.replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                            APIConstants.WS_PROTOCOL_URL_PREFIX);
                 } else if (httpSandboxEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
-                    sandboxWsEndpoint = httpSandboxEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                    sandboxWsEndpoint = httpSandboxEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                            APIConstants.WSS_PROTOCOL_URL_PREFIX);
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(httpSandboxEndpoint)) {
+                    throw new APIManagementException("Unsupported URI scheme for Sandbox endpoint: "
+                            + httpSandboxEndpoint);
                 }
                 sandboxWSEndpointConfig = new JSONObject();
                 sandboxWSEndpointConfig.put(APIConstants.ENDPOINT_URL, sandboxWsEndpoint);
@@ -1377,7 +1401,7 @@ public class TemplateBuilderUtil {
             newEndpointConfigJson.put(APIConstants.WS_PROTOCOL, wsEndpointConfig);
             return newEndpointConfigJson.toJSONString();
         } catch (ParseException e) {
-            throw new APIManagementException(e.getMessage());
+            throw new APIManagementException("Error while deriving subscription endpoint for GraphQL API", e);
         }
     }
 
