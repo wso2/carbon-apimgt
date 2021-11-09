@@ -140,20 +140,20 @@ public class InboundWebsocketProcessorUtil {
     /**
      * Authenticates JWT token in incoming Websocket handshake requests.
      *
-     * @param matchingResource      Websocket API resource
      * @param inboundMessageContext InboundMessageContext
      * @return true if authenticated
      * @throws APIManagementException if an internal error occurs
      * @throws APISecurityException   if authentication fails
      */
-    public static boolean authenticateWSJWTToken(String matchingResource, InboundMessageContext inboundMessageContext)
+    public static boolean authenticateWSJWTToken(InboundMessageContext inboundMessageContext)
             throws APIManagementException, APISecurityException {
 
         AuthenticationContext authenticationContext;
         JWTValidator jwtValidator = new JWTValidator(new APIKeyValidator(), inboundMessageContext.getTenantDomain());
         authenticationContext = jwtValidator.
                 authenticateForWebSocket(inboundMessageContext.getSignedJWTInfo(),
-                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(), matchingResource);
+                        inboundMessageContext.getApiContext(), inboundMessageContext.getVersion(),
+                        inboundMessageContext.getMatchingResource());
         return validateAuthenticationContext(authenticationContext, inboundMessageContext);
     }
 
@@ -386,13 +386,12 @@ public class InboundWebsocketProcessorUtil {
     /**
      * Authenticate inbound websocket request handshake.
      *
-     * @param matchingResource      resource template matching invocation
      * @param inboundMessageContext InboundMessageContext
      * @return whether authenticated or not
      * @throws APIManagementException if an internal error occurs
      * @throws APISecurityException   if authentication fails
      */
-    public static boolean isAuthenticated(String matchingResource, InboundMessageContext inboundMessageContext)
+    public static boolean isAuthenticated(InboundMessageContext inboundMessageContext)
             throws APISecurityException, APIManagementException {
 
         try {
@@ -440,14 +439,14 @@ public class InboundWebsocketProcessorUtil {
                     if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
                         return InboundWebsocketProcessorUtil.authenticateGraphQLJWTToken(inboundMessageContext);
                     } else {
-                        return InboundWebsocketProcessorUtil.authenticateWSJWTToken(matchingResource, inboundMessageContext);
+                        return InboundWebsocketProcessorUtil.authenticateWSJWTToken(inboundMessageContext);
                     }
                 } else {
                     log.debug("The token was identified as an OAuth token");
                     //If the key have already been validated
                     if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
                         cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey, inboundMessageContext.getApiContext(),
-                                matchingResource);
+                                inboundMessageContext.getMatchingResource());
                         info = WebsocketUtil.validateCache(apiKey, cacheKey);
                         if (info != null) {
                             inboundMessageContext.setKeyType(info.getType());
@@ -462,7 +461,7 @@ public class InboundWebsocketProcessorUtil {
                     }
                     if (WebsocketUtil.isGatewayTokenCacheEnabled()) {
                         cacheKey = WebsocketUtil.getAccessTokenCacheKey(apiKey,
-                                inboundMessageContext.getApiContext(), matchingResource);
+                                inboundMessageContext.getApiContext(), inboundMessageContext.getMatchingResource());
                         WebsocketUtil.putCache(info, apiKey, cacheKey);
                     }
                     inboundMessageContext.setKeyType(info.getType());

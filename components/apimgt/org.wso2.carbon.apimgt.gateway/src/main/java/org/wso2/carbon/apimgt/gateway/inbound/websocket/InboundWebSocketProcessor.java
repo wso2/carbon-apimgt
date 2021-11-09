@@ -102,7 +102,7 @@ public class InboundWebSocketProcessor {
             setUris(req, inboundMessageContext);
             inboundMessageContext.setInboundName(getInboundName(ctx));
             InboundWebsocketProcessorUtil.setTenantDomainToContext(inboundMessageContext);
-            String matchingResource = getMatchingResource(ctx, req, inboundMessageContext);
+            setMatchingResource(ctx, req, inboundMessageContext);
             String userAgent = req.headers().get(HttpHeaders.USER_AGENT);
 
             // '-' is used for empty values to avoid possible errors in DAS side.
@@ -119,14 +119,14 @@ public class InboundWebSocketProcessor {
                 inboundMessageContext.getRequestHeaders().put(HttpHeaders.AUTHORIZATION, req.headers()
                         .get(HttpHeaders.AUTHORIZATION));
                 inboundProcessorResponseDTO =
-                        handshakeProcessor.processHandshake(matchingResource, inboundMessageContext);
+                        handshakeProcessor.processHandshake(inboundMessageContext);
                 if (!inboundProcessorResponseDTO.isError()) {
                     setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
                     if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
                         req.headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, inboundMessageContext.getToken());
                     }
                     ctx.fireChannelRead(req);
-                    publishHandshakeEvent(ctx, inboundMessageContext, matchingResource);
+                    publishHandshakeEvent(ctx, inboundMessageContext);
                     InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
                             ctx.channel().remoteAddress().toString());
                     return inboundProcessorResponseDTO;
@@ -277,12 +277,11 @@ public class InboundWebSocketProcessor {
      * @param ctx                   Channel context
      * @param req                   Handshake request
      * @param inboundMessageContext InboundMessageContext
-     * @return resource
      * @throws WebSocketApiException     If an error occurs
      * @throws ResourceNotFoundException If no matching API or resource found
      */
-    protected String getMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
-                                         InboundMessageContext inboundMessageContext) throws WebSocketApiException,
+    protected void setMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
+                                       InboundMessageContext inboundMessageContext) throws WebSocketApiException,
             ResourceNotFoundException {
 
         String matchingResource;
@@ -326,7 +325,7 @@ public class InboundWebSocketProcessor {
         } catch (AxisFault | URISyntaxException e) {
             throw new WebSocketApiException("Error while getting matching resource for Websocket API");
         }
-        return matchingResource;
+        inboundMessageContext.setMatchingResource(matchingResource);
     }
 
     /**
@@ -427,16 +426,17 @@ public class InboundWebSocketProcessor {
     /**
      * Publish handshake event if analytics enabled.
      *
-     * @param ctx Channel context
+     * @param ctx                   Channel context
+     * @param inboundMessageContext InboundMessageContext
      */
-    private void publishHandshakeEvent(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext,
-                                       String matchingResource) {
+    private void publishHandshakeEvent(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
 
         if (APIUtil.isAnalyticsEnabled()) {
             WebSocketUtils.setApiPropertyToChannel(ctx,
                     org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_AGENT_PROPERTY,
                     inboundMessageContext.getRequestHeaders().get(HttpHeaders.USER_AGENT));
-            WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE, matchingResource);
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE,
+                    inboundMessageContext.getMatchingResource());
             metricsHandler.handleHandshake(ctx);
         }
     }

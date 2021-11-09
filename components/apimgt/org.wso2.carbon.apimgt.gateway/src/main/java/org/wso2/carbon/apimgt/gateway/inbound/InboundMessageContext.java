@@ -58,6 +58,8 @@ public class InboundMessageContext {
     private SignedJWTInfo signedJWTInfo;
     private Map<String, ResourceInfoDTO> resourcesMap = new HashMap<>();
     private String userIP;
+    private String matchingResource;
+
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
     private Map<String, GraphQLOperationDTO> graphQLMsgIdToVerbInfo = new HashMap<>();
@@ -230,4 +232,11 @@ public class InboundMessageContext {
         return headersToAdd;
     }
 
+    public String getMatchingResource() {
+        return matchingResource;
+    }
+
+    public void setMatchingResource(String matchingResource) {
+        this.matchingResource = matchingResource;
+    }
 }

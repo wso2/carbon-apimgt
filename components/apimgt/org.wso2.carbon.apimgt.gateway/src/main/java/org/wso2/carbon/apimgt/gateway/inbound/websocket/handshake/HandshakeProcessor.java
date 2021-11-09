@@ -44,17 +44,15 @@ public class HandshakeProcessor {
      * This method process websocket handshake and perform authentication using the inbound message context.
      * For successful authentications, it sets the resource map of the invoking API to the context.
      *
-     * @param matchingResource      Matching websocket resource
      * @param inboundMessageContext InboundMessageContext
      * @return InboundProcessorResponseDTO with handshake processing response
      */
-    public InboundProcessorResponseDTO processHandshake(String matchingResource,
-                                                        InboundMessageContext inboundMessageContext) {
+    public InboundProcessorResponseDTO processHandshake(InboundMessageContext inboundMessageContext) {
 
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
         boolean isOAuthHeaderValid;
         try {
-            isOAuthHeaderValid = InboundWebsocketProcessorUtil.isAuthenticated(matchingResource, inboundMessageContext);
+            isOAuthHeaderValid = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         } catch (APIManagementException e) {
             log.error(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
             return InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
