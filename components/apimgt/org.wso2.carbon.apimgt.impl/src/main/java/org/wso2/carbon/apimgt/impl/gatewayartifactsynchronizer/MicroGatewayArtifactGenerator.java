@@ -49,8 +49,8 @@ import java.util.Map;
 public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
 
     @Override
-    public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList,
-                                                      String organization) throws APIManagementException {
+    public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
+            throws APIManagementException {
 
         try {
             DeploymentDescriptorDto descriptorDto = new DeploymentDescriptorDto();
