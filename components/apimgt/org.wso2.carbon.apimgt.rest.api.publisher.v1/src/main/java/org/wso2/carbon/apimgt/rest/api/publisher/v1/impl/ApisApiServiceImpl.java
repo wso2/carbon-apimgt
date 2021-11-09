@@ -27,6 +27,7 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
@@ -61,6 +62,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -70,6 +72,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
@@ -154,7 +157,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
@@ -197,6 +199,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -5136,14 +5139,16 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // get properties
-        String properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
-        return Response.ok().entity(properties).build();
+        EnvironmentPropertiesDTO properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
+        // convert to string to remove null values
+        String jsonContent = new Gson().toJson(properties);
+
+        return Response.ok().entity(jsonContent).build();
     }
 
     @Override
-    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId,
-            EnvironmentPropertiesDTO environmentPropertyDTO, MessageContext messageContext)
-            throws APIManagementException {
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody,
+            MessageContext messageContext) throws APIManagementException {
         // validate api UUID
         validateAPIExistence(apiId);
         // validate environment UUID
@@ -5151,11 +5156,27 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         // adding properties
-        String properties = new Gson().toJson(environmentPropertyDTO);
+
+        EnvironmentPropertiesDTO properties = validateRequestPayload(requestBody);
         apiProvider.addEnvironmentSpecificAPIProperties(apiId, envId, properties);
         // get properties
         properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
-        return Response.ok().entity(properties).build();
+        // convert to string to remove null values
+        String jsonContent = new Gson().toJson(properties);
+
+        return Response.ok().entity(jsonContent).build();
+    }
+
+    private EnvironmentPropertiesDTO validateRequestPayload(Map<String, String> requestBody)
+            throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(requestBody, new TypeReference<EnvironmentPropertiesDTO>() {     });
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Possible keys are productionEndpoint,sandboxEndpoint";
+            throw new APIManagementException(e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.INVALID_ENV_API_PROP_CONFIG, errorMessage));
+        }
     }
 
     private void validateEnvironment(String envId) throws APIManagementException {

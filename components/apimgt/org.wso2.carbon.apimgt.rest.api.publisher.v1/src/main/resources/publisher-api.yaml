@@ -11232,17 +11232,13 @@ components:
           format: int32
           example: 3600
     EnvironmentProperties:
-      title: Environment specific API properties
+      title: Envionment specific API properties request body
       type: object
-      properties:
-        productionEndpoint:
-          type: string
-          description: Production endpoints
-          example: https://localhost:9443/am/sample/pizzashack/v1/api/
-        sandboxEndpoint:
-          type: string
-          description: Sandbox endpoints
-          example: https://localhost:9443/am/sample/pizzashack/v1/api/
+      additionalProperties:
+        type: string
+      example:
+        productionEndpoint: https://localhost:9443/pizzashack/v1/api/
+        sandboxEndpoint: https://localhost:9443/pizzashack/v1/api/
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:

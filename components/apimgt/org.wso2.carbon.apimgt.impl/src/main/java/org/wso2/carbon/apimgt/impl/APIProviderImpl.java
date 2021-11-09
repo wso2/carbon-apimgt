@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
@@ -54,6 +53,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -9139,17 +9139,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
-            throws APIManagementException {
+    public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
+            EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
+        String content = new Gson().toJson(environmentPropertyDTO);
         environmentSpecificAPIPropertyDAO.addOrUpdateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
     }
 
     @Override
-    public String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException {
+    public EnvironmentPropertiesDTO getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid)
+            throws APIManagementException {
         String content = environmentSpecificAPIPropertyDAO.getEnvironmentSpecificAPIProperties(apiUuid, envUuid);
         if (StringUtils.isBlank(content)) {
-            content = "{}";
+            return new EnvironmentPropertiesDTO();
         }
-        return content;
+        return new Gson().fromJson(content, EnvironmentPropertiesDTO.class);
     }
 }

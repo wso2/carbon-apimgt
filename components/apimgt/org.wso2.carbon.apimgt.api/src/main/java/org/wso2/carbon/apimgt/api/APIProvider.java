@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -1824,8 +1825,9 @@ public interface APIProvider extends APIManager {
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 
-    void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
-            throws APIManagementException;
+    void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
+            EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException;
 
-    String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException;
+    EnvironmentPropertiesDTO getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid)
+            throws APIManagementException;
 }
