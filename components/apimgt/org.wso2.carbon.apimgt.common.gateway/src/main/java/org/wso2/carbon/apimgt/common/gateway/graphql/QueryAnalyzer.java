@@ -143,4 +143,7 @@ public class QueryAnalyzer {
         return queryAnalyzerResponseDTO;
     }
 
+    public GraphQLSchema getSchema() {
+        return schema;
+    }
 }

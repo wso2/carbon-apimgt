@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.graphQL.analyzer;
 
 import graphql.analysis.FieldComplexityCalculator;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
@@ -27,6 +28,11 @@ import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.FieldComplexityCalculatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Set;
 
 /**
  * QueryAnalyzer class extension for GraphQL subscription operations.
@@ -86,7 +92,9 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
 
         FieldComplexityCalculator fieldComplexityCalculator;
         try {
-            fieldComplexityCalculator = new FieldComplexityCalculatorImpl(null);
+            //get access control policy
+            String accessControlInfo = getGraphQLAccessControlInfo();
+            fieldComplexityCalculator = new FieldComplexityCalculatorImpl(accessControlInfo);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing policy definition.");
         }
@@ -114,5 +122,27 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
             log.debug("Maximum query complexity value is 0");
             return 0;
         }
+    }
+
+    /**
+     * Get GraphQL complexity access control information from schema.
+     *
+     * @return Access Control policy
+     * @throws APIManagementException if an error occurs
+     */
+    private String getGraphQLAccessControlInfo() throws APIManagementException {
+        String graphQLAccessControlPolicy;
+        Set<GraphQLType> additionalTypes = getSchema().getAdditionalTypes();
+        for (GraphQLType additionalType : additionalTypes) {
+            if (additionalType.getName().startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX)) {
+                for (GraphQLType type : additionalType.getChildren()) {
+                    if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                        graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                        return graphQLAccessControlPolicy;
+                    }
+                }
+            }
+        }
+        throw new APIManagementException(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY + " not found in schema");
     }
 }
