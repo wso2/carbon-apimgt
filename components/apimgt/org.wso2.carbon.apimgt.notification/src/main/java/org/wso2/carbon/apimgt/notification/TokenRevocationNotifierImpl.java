@@ -71,7 +71,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         Object[] objects =
                 new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(APIConstants.TOKEN_REVOCATION_STREAM_ID,
-                System.currentTimeMillis(), null, null, objects);
+                                                                           System.currentTimeMillis(), objects);
         APIUtil.publishEvent(EventPublisherType.TOKEN_REVOCATION, tokenRevocationEvent,
                 tokenRevocationEvent.toString());
     }
