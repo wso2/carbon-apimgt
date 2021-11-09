@@ -47,14 +47,14 @@ public class RuntimeArtifactGeneratorUtil {
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
     public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
-                                                             String gatewayLabel, String type, String tenantDomain,
-                                                             String organization) throws APIManagementException {
+                                                             String gatewayLabel, String type, String tenantDomain)
+            throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
             List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
-            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts, organization);
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
                     ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
