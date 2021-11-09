@@ -83,6 +83,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1151,6 +1152,12 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
         }
     }
+
+    @Override
+    public String getTenantConfigSchema(String organization) throws APIManagementException {
+        return APIUtil.retrieveTenantConfigJsonSchema().toString();
+    }
+
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         IdentityProvider identityProvider = new IdentityProvider();
