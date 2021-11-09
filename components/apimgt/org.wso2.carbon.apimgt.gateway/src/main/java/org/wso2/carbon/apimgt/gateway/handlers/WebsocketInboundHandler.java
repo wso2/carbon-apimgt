@@ -23,6 +23,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -104,8 +105,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                         HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
                         Unpooled.copiedBuffer(responseDTO.getErrorMessage(), CharsetUtil.UTF_8));
-                httpResponse.headers().set("content-type", "text/plain; charset=UTF-8");
-                httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
+                httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
             } else {
                 ctx.fireChannelRead(msg);

@@ -104,6 +104,8 @@ public class InboundWebsocketProcessorUtil {
         info.setConsumerKey(authenticationContext.getConsumerKey());
         info.setEndUserName(authenticationContext.getUsername());
         info.setApiTier(authenticationContext.getApiTier());
+        info.setGraphQLMaxDepth(authenticationContext.getGraphQLMaxDepth());
+        info.setGraphQLMaxComplexity(authenticationContext.getGraphQLMaxComplexity());
 
         inboundMessageContext.setKeyType(info.getType());
         inboundMessageContext.setInfoDTO(info);

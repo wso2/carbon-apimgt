@@ -200,9 +200,10 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         String validationErrorMessage = queryValidator.validatePayload(
                 inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema(), document);
         if (validationErrorMessage != null) {
-            String error = GraphQLConstants.GRAPHQL_INVALID_QUERY_MESSAGE + " : " + validationErrorMessage;
+            String error = WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY_MESSAGE + " : " + validationErrorMessage;
             log.error(error);
             responseDTO.setError(true);
+            responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_INVALID_QUERY);
             responseDTO.setErrorMessage(error);
             return responseDTO;
         }

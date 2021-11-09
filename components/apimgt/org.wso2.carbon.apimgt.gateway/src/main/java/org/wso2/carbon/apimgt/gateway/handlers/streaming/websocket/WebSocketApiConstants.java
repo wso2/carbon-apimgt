@@ -46,6 +46,9 @@ public class WebSocketApiConstants {
         public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
         public static final int GRAPHQL_QUERY_TOO_COMPLEX = 4021;
         public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
+        public static final int GRAPHQL_INVALID_QUERY = 4022;
+        public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
+
     }
 
     //Constants for Websocket handshake error codes and messages

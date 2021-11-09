@@ -51,6 +51,8 @@ public class AuthenticationContext {
     private String apiVersion;
     private String issuer;
     private List requestTokenScopes;
+    private int graphQLMaxDepth;
+    private int graphQLMaxComplexity;
 
     public List getRequestTokenScopes() {
         return requestTokenScopes;
@@ -261,5 +263,21 @@ public class AuthenticationContext {
 
     public void setApplicationUUID(String applicationUUID) {
         this.applicationUUID = applicationUUID;
+    }
+
+    public int getGraphQLMaxDepth() {
+        return graphQLMaxDepth;
+    }
+
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) {
+        this.graphQLMaxDepth = graphQLMaxDepth;
+    }
+
+    public int getGraphQLMaxComplexity() {
+        return graphQLMaxComplexity;
+    }
+
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
+        this.graphQLMaxComplexity = graphQLMaxComplexity;
     }
 }
