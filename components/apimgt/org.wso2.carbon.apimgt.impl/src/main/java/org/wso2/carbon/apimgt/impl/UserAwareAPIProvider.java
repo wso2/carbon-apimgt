@@ -439,10 +439,4 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void deleteWorkflowTask(String uuid) throws APIManagementException {
         super.deleteWorkflowTask(uuid);
     }
-
-    @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAsyncAPIDefinition(apiId);
-    }
 }
