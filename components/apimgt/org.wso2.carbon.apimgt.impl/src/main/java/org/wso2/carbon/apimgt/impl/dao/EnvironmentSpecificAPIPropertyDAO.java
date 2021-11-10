@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.EnvironmentSpecificAPIPropertyConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecificproperty.Environment;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
  */
 public class EnvironmentSpecificAPIPropertyDAO {
 
+    private static final Log log = LogFactory.getLog(EnvironmentSpecificAPIPropertyDAO.class);
     private static EnvironmentSpecificAPIPropertyDAO INSTANCE = null;
 
     private EnvironmentSpecificAPIPropertyDAO() {
@@ -69,30 +72,42 @@ public class EnvironmentSpecificAPIPropertyDAO {
 
     private void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = conn.prepareStatement(
-                        EnvironmentSpecificAPIPropertyConstants.ADD_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
-            preparedStatement.setString(1, UUID.randomUUID().toString());
-            preparedStatement.setString(2, apiUuid);
-            preparedStatement.setString(3, envUuid);
-            preparedStatement.setBlob(4, new ByteArrayInputStream(content.getBytes()));
-            preparedStatement.execute();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn.prepareStatement(
+                    EnvironmentSpecificAPIPropertyConstants.ADD_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
+                preparedStatement.setString(1, UUID.randomUUID().toString());
+                preparedStatement.setString(2, apiUuid);
+                preparedStatement.setString(3, envUuid);
+                preparedStatement.setBlob(4, new ByteArrayInputStream(content.getBytes()));
+                preparedStatement.execute();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error occurred when adding environment specific api properties", e);
+            }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when adding environment specific api properties", e);
+            handleException("Error occurred when adding environment specific api properties", e);
         }
     }
 
     private void updateEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = conn.prepareStatement(
-                        EnvironmentSpecificAPIPropertyConstants.UPDATE_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
-            preparedStatement.setBlob(1, new ByteArrayInputStream(content.getBytes()));
-            preparedStatement.setString(2, apiUuid);
-            preparedStatement.setString(3, envUuid);
-            preparedStatement.execute();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn.prepareStatement(
+                    EnvironmentSpecificAPIPropertyConstants.UPDATE_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
+                preparedStatement.setBlob(1, new ByteArrayInputStream(content.getBytes()));
+                preparedStatement.setString(2, apiUuid);
+                preparedStatement.setString(3, envUuid);
+                preparedStatement.execute();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error occurred when updating environment specific api properties", e);
+            }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when updating environment specific api properties", e);
+            handleException("Error occurred when updating environment specific api properties", e);
         }
     }
 
@@ -113,8 +128,9 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 return propertyConfig;
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting environment specific api properties", e);
+            handleException("Error occurred when getting environment specific api properties", e);
         }
+        return null;
     }
 
     private boolean isEnvironmentSpecificAPIPropertiesExist(String apiUuid, String envUuid)
@@ -130,7 +146,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when checking environment specific api properties", e);
+            handleException("Error occurred when checking environment specific api properties", e);
         }
         return false;
     }
@@ -191,7 +207,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting MG environment specific api properties", e);
+            handleException("Error occurred when getting MG environment specific api properties", e);
         }
         return apiEnvironmentMap;
     }
@@ -249,9 +265,14 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error occurred when getting default environment specific api properties",
-                    e);
+            handleException("Error occurred when getting default environment specific api properties", e);
         }
         return apiEnvironmentMap;
+    }
+
+    private void handleException(String msg, Throwable t) throws APIManagementException {
+
+        log.error(msg, t);
+        throw new APIManagementException(msg, t);
     }
 }
