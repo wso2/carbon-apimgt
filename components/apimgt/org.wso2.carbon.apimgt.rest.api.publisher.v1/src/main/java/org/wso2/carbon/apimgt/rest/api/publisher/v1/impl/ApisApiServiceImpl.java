@@ -3339,7 +3339,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
                 return Response.created(createdApiUri).entity(createdApiDTO).build();
             }
-        } catch (URISyntaxException | APIManagementException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -4939,7 +4939,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
                                            APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service,
-                                           String organization) {
+                                           String organization) throws APIManagementException {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         boolean isServiceAPI = false;
@@ -4970,63 +4970,52 @@ public class ApisApiServiceImpl implements ApisApiService {
                     "The API's type is not supported when importing an OpenAPI definition");
         }
         // Import the API and Definition
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (isServiceAPI) {
-                apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
-            }
-            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername(), organization);
-            if (isServiceAPI) {
-                apiToAdd.setServiceInfo("key", service.getKey());
-                apiToAdd.setServiceInfo("md5", service.getMd5());
-                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
-                        .getServiceUrl(), null));
-            }
-            boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
-            // Rearrange paths according to the API payload and save the OpenAPI definition
-
-            APIDefinition apiDefinition = validationResponse.getParser();
-            SwaggerData swaggerData;
-            String definitionToAdd = validationResponse.getJsonContent();
-            if (syncOperations) {
-                PublisherCommonUtils.validateScopes(apiToAdd);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
-            }
-            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
-            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
-            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-            apiToAdd.setUriTemplates(uriTemplates);
-            apiToAdd.setScopes(scopes);
-            //Set extensions from API definition to API object
-            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
-            if (!syncOperations) {
-                PublisherCommonUtils.validateScopes(apiToAdd);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition
-                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
-            }
-
-            // adding the API and definition
-            apiToAdd.setSwaggerDefinition(definitionToAdd);
-            API addedAPI = apiProvider.addAPI(apiToAdd);
-            //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
-
-            // retrieving the added API for returning as the response
-            // this would provide the updated templates
-            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organization);
-            return APIMappingUtil.fromAPItoDTO(addedAPI);
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
-                    apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
-            if (ExceptionCodes.SCOPE_ALREADY_ASSIGNED.getErrorCode() == e.getErrorHandler().getErrorCode()) {
-                RestApiUtil.handleBadRequest(errorMessage, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError(errorMessage,e, log);
-            }
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (isServiceAPI) {
+            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
         }
-        return null;
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+                RestApiCommonUtil.getLoggedInUsername(), organization);
+        if (isServiceAPI) {
+            apiToAdd.setServiceInfo("key", service.getKey());
+            apiToAdd.setServiceInfo("md5", service.getMd5());
+            apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
+                    .getServiceUrl(), null));
+        }
+        boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
+        // Rearrange paths according to the API payload and save the OpenAPI definition
+
+        APIDefinition apiDefinition = validationResponse.getParser();
+        SwaggerData swaggerData;
+        String definitionToAdd = validationResponse.getJsonContent();
+        if (syncOperations) {
+            PublisherCommonUtils.validateScopes(apiToAdd);
+            swaggerData = new SwaggerData(apiToAdd);
+            definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
+        }
+        definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+        Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
+        apiToAdd.setUriTemplates(uriTemplates);
+        apiToAdd.setScopes(scopes);
+        //Set extensions from API definition to API object
+        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
+        if (!syncOperations) {
+            PublisherCommonUtils.validateScopes(apiToAdd);
+            swaggerData = new SwaggerData(apiToAdd);
+            definitionToAdd = apiDefinition
+                    .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+        }
+
+        // adding the API and definition
+        apiToAdd.setSwaggerDefinition(definitionToAdd);
+        API addedAPI = apiProvider.addAPI(apiToAdd);
+        //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
+
+        // retrieving the added API for returning as the response
+        // this would provide the updated templates
+        addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organization);
+        return APIMappingUtil.fromAPItoDTO(addedAPI);
     }
 
     private APIDTO importAsyncAPISpecification(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
