@@ -19,11 +19,18 @@ package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
 import graphql.language.Field;
 import graphql.language.FragmentSpread;
+import graphql.language.OperationDefinition;
 import graphql.language.Selection;
+import graphql.language.SelectionSet;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,5 +54,35 @@ public class GraphQLProcessorUtilTest {
         Assert.assertEquals("Different no of operations are found", 2, operationArray.size());
         Assert.assertFalse("Fragment should not in the operation list",
                 operationArray.contains(newSearchField.getName()));
+    }
+
+    @Test
+    public void testGetSubscriptionOperation() throws Exception {
+
+        // Build subscription operation definition for:
+        // subscription checkLiftStatusChange {liftStatusChange { name id } }
+        Field subField1 = new Field("name");
+        Field subField2 = new Field("id");
+        List<Selection> subSelections = new ArrayList<>();
+        subSelections.add(subField1);
+        subSelections.add(subField2);
+        SelectionSet subSelectionSet = new SelectionSet(subSelections);
+        Field operationField = new Field("liftStatusChange", subSelectionSet);
+        List<Selection> operationSelections = new ArrayList<>();
+        operationSelections.add(operationField);
+        SelectionSet selectionSet = new SelectionSet(operationSelections);
+        OperationDefinition.Builder builder = OperationDefinition.newOperationDefinition();
+        builder.name("checkLiftStatusChange");
+        builder.operation(OperationDefinition.Operation.SUBSCRIPTION);
+        builder.selectionSet(selectionSet);
+        OperationDefinition operation = builder.build();
+        // Get schema and parse
+        String graphqlDirPath = File.separator + "graphQL" + File.separator;
+        String relativePath = graphqlDirPath + "schema_with_subscriptions.graphql";
+        String schema = IOUtils.toString(this.getClass().getResourceAsStream(relativePath), StandardCharsets.UTF_8);
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry registry = schemaParser.parse(schema);
+        String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation, registry);
+        Assert.assertEquals(subscriptionOperation, "liftStatusChange");
     }
 }
