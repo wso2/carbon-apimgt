@@ -56,11 +56,6 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
 
         int updatedMaxQueryDepth = getMaxQueryDepth(maxQueryDepth);
         QueryAnalyzerResponseDTO analyzerResponseDTO = analyseQueryDepth(updatedMaxQueryDepth, payload);
-        if (!analyzerResponseDTO.isSuccess() && !analyzerResponseDTO.getErrorList().isEmpty()) {
-            analyzerResponseDTO.addErrorToList(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE);
-            log.error(analyzerResponseDTO.getErrorList().toString());
-            return analyzerResponseDTO;
-        }
         return analyzerResponseDTO;
     }
 
@@ -99,14 +94,8 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
             throw new APIManagementException("Error while parsing policy definition.");
         }
         int updatedMaxQueryComplexity = getMaxQueryComplexity(maxQueryComplexity);
-        QueryAnalyzerResponseDTO responseDTO = analyseQueryComplexity(updatedMaxQueryComplexity, payload,
+        return analyseQueryComplexity(updatedMaxQueryComplexity, payload,
                 fieldComplexityCalculator);
-        if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
-            responseDTO.addErrorToList(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE);
-            log.error(responseDTO.getErrorList().toString());
-            return responseDTO;
-        }
-        return responseDTO;
     }
 
     /**
