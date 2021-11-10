@@ -19,16 +19,33 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.TemplateBuilderUtil;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class TemplateBuilderUtilTest {
+
+    private static final String wsProdEndpoint = "wss://production.com";
+    private static final String wsSandEndpoint = "wss://sandbox.com";
+    private static final String wsProdEpName = "API--v1.0_APIproductionEndpoint_mapping__wildcard";
+    private static final String wsSandEpName = "API--v1.0_APIsandboxEndpoint_mapping__wildcard";
+    private static final String wildCardResource = "/*";
+    private static final String mappingWildCard = "mapping__wildcard";
 
     @Test
     public void testAdditionalPropertyWithStoreVisibilityReplacement() {
@@ -57,11 +74,113 @@ public class TemplateBuilderUtilTest {
     }
 
     @Test
+    public void addAddGqlWebSocketResourceEndpoints() throws Exception {
+        APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
+        API api = new API(new APIIdentifier("admin", "API", "1.0"));
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        URITemplate template = new URITemplate();
+        template.setAuthType("Any");
+        template.setHTTPVerb("POST");
+        template.setHttpVerbs("POST");
+        template.setUriTemplate(wildCardResource);
+        uriTemplates.add(template);
+        template = new URITemplate();
+        template.setUriTemplate(wildCardResource);
+        uriTemplates.add(template);
+        api.setUriTemplates(uriTemplates);
+        Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
+        Map<String, String> endpoints = new HashMap<>();
+        endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, wsProdEndpoint);
+        endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, wsSandEndpoint);
+        perTopicMappings.put(wildCardResource, endpoints);
+        WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration=
+                new WebSocketTopicMappingConfiguration(perTopicMappings);
+        webSocketTopicMappingConfiguration.setResourceKey(wildCardResource, mappingWildCard);
+        api.setWebSocketTopicMappingConfiguration(webSocketTopicMappingConfiguration);
+        api.setType(APIConstants.GRAPHQL_API);
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        GatewayContentDTO dummyHttpProdEpContentDTO = new GatewayContentDTO();
+        dummyHttpProdEpContentDTO.setName("API--v1.0_APIproductionEndpoint");
+        dummyHttpProdEpContentDTO.setContent("dummy content");
+        GatewayContentDTO[] gatewayContentDTOS = new GatewayContentDTO[1];
+        gatewayContentDTOS[0] = dummyHttpProdEpContentDTO;
+        gatewayAPIDTO.setEndpointEntriesToBeAdd(gatewayContentDTOS);
+        String dummyProdEndpointConfig = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><endpoint name=\""
+                + wsProdEpName + "\">dummy prod content</endpoint>";
+        String dummySandboxEndpointConfig = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><endpoint name=\""
+                + wsSandEpName + "\">dummy sandbox content</endpoint>";
+        Mockito.when(apiTemplateBuilder.getConfigStringForWebSocketEndpointTemplate(
+                APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, mappingWildCard, wsProdEndpoint)).thenReturn(
+                        dummyProdEndpointConfig);
+        Mockito.when(apiTemplateBuilder.getConfigStringForWebSocketEndpointTemplate(
+                APIConstants.GATEWAY_ENV_TYPE_SANDBOX, mappingWildCard, wsSandEndpoint)).thenReturn(
+                        dummySandboxEndpointConfig);
+        TemplateBuilderUtil.addWebSocketResourceEndpoints(api, apiTemplateBuilder, gatewayAPIDTO);
+        GatewayContentDTO[] endpointEntries = gatewayAPIDTO.getEndpointEntriesToBeAdd();
+        Assert.assertEquals(endpointEntries.length, 3);
+        boolean httpEpConfigPresent = false;
+        boolean wsProdEpConfigPresent = false;
+        boolean wsSandEPConfigPresent = false;
+        for (int i = 0; i < 3; i++) {
+            if (dummyHttpProdEpContentDTO.getName().equals(endpointEntries[i].getName())) {
+                httpEpConfigPresent = true;
+                Assert.assertEquals(endpointEntries[i].getContent(), dummyHttpProdEpContentDTO.getContent());
+            }
+            if (wsProdEpName.equals(endpointEntries[i].getName())) {
+                wsProdEpConfigPresent = true;
+                Assert.assertEquals(endpointEntries[i].getContent(), dummyProdEndpointConfig);
+            }
+            if (wsSandEpName.equals(endpointEntries[i].getName())) {
+                wsSandEPConfigPresent = true;
+                Assert.assertEquals(endpointEntries[i].getContent(), dummySandboxEndpointConfig);
+            }
+        }
+        Assert.assertTrue(wsProdEpConfigPresent);
+        Assert.assertTrue(wsSandEPConfigPresent);
+        Assert.assertTrue(httpEpConfigPresent);
+    }
+
+    @Test
+    public void testAddGqlWebSocketTopicMappings() {
+
+        API api = new API(new APIIdentifier("admin", "GraphQLAPI", "1.0"));
+        String endpointConfig = "{\"endpoint_type\":\"graphql\", \n" +
+                "\"http\":{\"endpoint_type\":\"http\",\n" +
+                "\"sandbox_endpoints\":{\"url\":\"https://sandbox.com\"},\n" +
+                "\"production_endpoints\":{\"url\":\"https://production.com\"}},\n" +
+                "\"ws\":{\"endpoint_type\":\"ws\",\n" +
+                "\"sandbox_endpoints\":{\"url\":\"" + wsSandEndpoint + "\"},\n" +
+                "\"production_endpoints\":{\"url\":\"" + wsProdEndpoint + "\"}}}";
+        api.setEndpointConfig(endpointConfig);
+        TemplateBuilderUtil.addGqlWebSocketTopicMappings(api);
+        WebSocketTopicMappingConfiguration topicMappingConfiguration = api.getWebSocketTopicMappingConfiguration();
+        Assert.assertNotNull(topicMappingConfiguration);
+        Map<String, String> mappings = topicMappingConfiguration.getMappings().get(wildCardResource);
+        Assert.assertNotNull(mappings);
+        Assert.assertEquals(mappings.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX), wsSandEndpoint);
+        Assert.assertEquals(mappings.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION), wsProdEndpoint);
+        Assert.assertEquals(mappings.get("resourceKey"), mappingWildCard);
+
+        //test endpoint config wit only production type endpoints
+        api = new API(new APIIdentifier("admin", "GraphQLAPI", "1.0"));
+        api.setEndpointConfig("{\"endpoint_type\":\"graphql\", \n" +
+                "\"http\":{\"endpoint_type\":\"http\",\n" +
+                "\"production_endpoints\":{\"url\":\"https://production.com\"}},\n" +
+                "\"ws\":{\"endpoint_type\":\"ws\",\n" +
+                "\"production_endpoints\":{\"url\":\""+ wsProdEndpoint + "\"}}}");
+        TemplateBuilderUtil.addGqlWebSocketTopicMappings(api);
+        topicMappingConfiguration = api.getWebSocketTopicMappingConfiguration();
+        mappings = topicMappingConfiguration.getMappings().get(wildCardResource);
+        Assert.assertNull(mappings.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX));
+        Assert.assertEquals(mappings.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION), wsProdEndpoint);
+    }
+
+    @Test
     public void testSubEPConfigFromSimpleRestEp() throws Exception {
         String endpointConfig = "{\"endpoint_type\": \"http\",\"sandbox_endpoints\": {\n" +
-                "\"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"},\n" +
+                "\"url\": \"https://sandbox.com/\"},\n" +
                 "\"production_endpoints\":{\n" +
-                "\"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"\n" +
+                "\"url\": \"https://production.com/\"\n" +
                 "}\n}";
         JSONObject oldEpConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
         String newEpConfig = TemplateBuilderUtil.populateSubscriptionEndpointConfig(endpointConfig);
@@ -77,22 +196,23 @@ public class TemplateBuilderUtilTest {
                 "                \"sessionManagement\": \"\",\n" +
                 "                \"sandbox_endpoints\":       [\n" +
                 "                            {\n" +
-                "                      \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"\n" +
+                "                      \"url\": \"https://sandbox.com/1\"\n" +
                 "                   },\n" +
                 "                            {\n" +
                 "                      \"endpoint_type\": \"http\",\n" +
                 "                      \"template_not_supported\": false,\n" +
-                "                      \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"\n" +
+
+                "                      \"url\": \"https://sandbox.com/2\"\n" +
                 "                   }\n" +
                 "                ],\n" +
                 "                \"production_endpoints\":       [\n" +
                 "                            {\n" +
-                "                      \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"\n" +
+                "                      \"url\": \"https://production.com/1\"\n" +
                 "                   },\n" +
                 "                            {\n" +
                 "                      \"endpoint_type\": \"http\",\n" +
                 "                      \"template_not_supported\": false,\n" +
-                "                      \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"\n" +
+                "                      \"url\": \"https://production.com/2\"\n" +
                 "                   }\n" +
                 "                ],\n" +
                 "                \"sessionTimeOut\": \"\",\n" +
@@ -111,21 +231,21 @@ public class TemplateBuilderUtilTest {
                 "                   {\n" +
                 "                      \"endpoint_type\":\"http\",\n" +
                 "                      \"template_not_supported\":false,\n" +
-                "                      \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"\n" +
+                "                      \"url\":\"https://production.com/2\"\n" +
                 "                   }\n" +
                 "                ],\n" +
                 "                \"endpoint_type\":\"failover\",\n" +
                 "                \"sandbox_endpoints\":{\n" +
-                "                   \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"\n" +
+                "                   \"url\":\"https://sandbox.com/1\"\n" +
                 "                },\n" +
                 "                \"production_endpoints\":{\n" +
-                "                   \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"\n" +
+                "                   \"url\":\"https://production.com/1\"\n" +
                 "                },\n" +
                 "                \"sandbox_failovers\":[\n" +
                 "                   {\n" +
                 "                      \"endpoint_type\":\"http\",\n" +
                 "                      \"template_not_supported\":false,\n" +
-                "                      \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"\n" +
+                "                      \"url\":\"https://sandbox.com/2\"\n" +
                 "                   }\n" +
                 "                ]\n" +
                 "              }";
@@ -138,9 +258,9 @@ public class TemplateBuilderUtilTest {
     @Test
     public void testSubEPConfigForWSScheme() throws Exception {
         String endpointConfig = "{\"endpoint_type\": \"http\",\"sandbox_endpoints\": {\n" +
-                "\"url\": \"http://localhost:9443/am/sample/pizzashack/v1/api/\"},\n" +
+                "\"url\": \"http://sandbox.com/\"},\n" +
                 "\"production_endpoints\":{\n" +
-                "\"url\": \"http://localhost:9443/am/sample/pizzashack/v1/api/\"\n" +
+                "\"url\": \"http://production.com/\"\n" +
                 "}\n}";
         JSONObject oldEpConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
         String newEpConfig = TemplateBuilderUtil.populateSubscriptionEndpointConfig(endpointConfig);
@@ -149,16 +269,17 @@ public class TemplateBuilderUtilTest {
     }
 
     @Test
-    public void testSubEPConfigForUnsupportedScheme() throws ParseException {
+    public void testSubEPConfigForUnsupportedScheme() {
         String endpointConfig = "{\"endpoint_type\": \"http\",\"sandbox_endpoints\": {\n" +
-                "\"url\": \"ws://localhost:9443/am/sample/pizzashack/v1/api/\"},\n" +
+                "\"url\": \"wss://sandbox.com\"},\n" +
                 "\"production_endpoints\":{\n" +
-                "\"url\": \"wss://localhost:9443/am/sample/pizzashack/v1/api/\"\n" +
+                "\"url\": \"wss://production.com\"\n" +
                 "}\n}";
         try {
             TemplateBuilderUtil.populateSubscriptionEndpointConfig(endpointConfig);
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Unsupported URI scheme for Production endpoint"));
+            Assert.assertTrue(e.getMessage().contains("Unsupported URI scheme present for Production endpoint: "
+            + wsProdEndpoint));
         }
     }
 

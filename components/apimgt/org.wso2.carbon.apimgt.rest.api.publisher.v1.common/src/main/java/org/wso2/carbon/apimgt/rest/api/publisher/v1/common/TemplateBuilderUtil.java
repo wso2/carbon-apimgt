@@ -742,7 +742,7 @@ public class TemplateBuilderUtil {
      *
      * @param api GraphQL API
      */
-    private static void addGqlWebSocketTopicMappings(API api) {
+    public static void addGqlWebSocketTopicMappings(API api) {
 
         org.json.JSONObject endpointConfiguration =
                 new org.json.JSONObject(api.getEndpointConfig()).getJSONObject(APIConstants.WS_PROTOCOL);
@@ -893,7 +893,7 @@ public class TemplateBuilderUtil {
                 .replaceAll("\\*", "wildcard");
     }
 
-    private static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
+    public static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
 
         Set<URITemplate> uriTemplates = api.getUriTemplates();
