@@ -1281,6 +1281,9 @@ public final class APIConstants {
     public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
 
+    public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
+    public static final String VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS = "topicMappings";
+
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<String>(
