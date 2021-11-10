@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.utils.GraphQLProcessorUtil;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,9 +76,9 @@ public class GraphQLProcessorUtilTest {
         builder.selectionSet(selectionSet);
         OperationDefinition operation = builder.build();
         // Get schema and parse
-        String graphqlDirPath = File.separator + "graphQL" + File.separator;
+        String graphqlDirPath = "graphQL" + File.separator;
         String relativePath = graphqlDirPath + "schema_with_subscriptions.graphql";
-        String schema = IOUtils.toString(this.getClass().getResourceAsStream(relativePath), StandardCharsets.UTF_8);
+        String schema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath));
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry registry = schemaParser.parse(schema);
         String subscriptionOperation = GraphQLProcessorUtil.getOperationList(operation, registry);
