@@ -18,14 +18,12 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
@@ -68,13 +66,6 @@ public class APIUtils {
                 String[] gwEndpoints = null;
                 if ("WS".equalsIgnoreCase(api.getType())) {
                     gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
-                } else if (APIConstants.GRAPHQL_API.equalsIgnoreCase(api.getType())) {
-                    gwEndpoints = environment.getApiGatewayEndpoint().split(",");
-                    GraphQLSchemaDefinition gqlSchema = new GraphQLSchemaDefinition();
-                    if (gqlSchema.isSubscriptionAvailable(api.getGraphQLSchema())) {
-                        String[] gwWSEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
-                        gwEndpoints = ArrayUtils.addAll(gwEndpoints, gwWSEndpoints);
-                    }
                 } else {
                     gwEndpoints = environment.getApiGatewayEndpoint().split(",");
                 }
