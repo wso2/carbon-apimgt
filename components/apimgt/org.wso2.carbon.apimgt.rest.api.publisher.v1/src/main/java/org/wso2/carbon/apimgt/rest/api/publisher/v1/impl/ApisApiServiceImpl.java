@@ -5020,7 +5020,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
-            RestApiUtil.handleBadRequest(errorMessage, e, log);
+            if (ExceptionCodes.SCOPE_ALREADY_ASSIGNED.getErrorCode() == e.getErrorHandler().getErrorCode()) {
+                RestApiUtil.handleBadRequest(errorMessage, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError(errorMessage,e, log);
+            }
         }
         return null;
     }
