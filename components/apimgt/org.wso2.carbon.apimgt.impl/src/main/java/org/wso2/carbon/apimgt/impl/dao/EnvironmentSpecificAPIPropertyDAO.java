@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,16 +48,13 @@ import java.util.stream.Collectors;
 public class EnvironmentSpecificAPIPropertyDAO {
 
     private static final Log log = LogFactory.getLog(EnvironmentSpecificAPIPropertyDAO.class);
-    private static EnvironmentSpecificAPIPropertyDAO INSTANCE = null;
+    private static EnvironmentSpecificAPIPropertyDAO INSTANCE = new EnvironmentSpecificAPIPropertyDAO();
 
     private EnvironmentSpecificAPIPropertyDAO() {
 
     }
 
     public static EnvironmentSpecificAPIPropertyDAO getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new EnvironmentSpecificAPIPropertyDAO();
-        }
         return INSTANCE;
     }
 
@@ -79,7 +77,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 preparedStatement.setString(1, UUID.randomUUID().toString());
                 preparedStatement.setString(2, apiUuid);
                 preparedStatement.setString(3, envUuid);
-                preparedStatement.setBlob(4, new ByteArrayInputStream(content.getBytes()));
+                preparedStatement.setBinaryStream(4, new ByteArrayInputStream(content.getBytes()));
                 preparedStatement.execute();
                 conn.commit();
             } catch (SQLException e) {
@@ -97,7 +95,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn.prepareStatement(
                     EnvironmentSpecificAPIPropertyConstants.UPDATE_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
-                preparedStatement.setBlob(1, new ByteArrayInputStream(content.getBytes()));
+                preparedStatement.setBinaryStream(1, new ByteArrayInputStream(content.getBytes()));
                 preparedStatement.setString(2, apiUuid);
                 preparedStatement.setString(3, envUuid);
                 preparedStatement.execute();
@@ -118,16 +116,15 @@ public class EnvironmentSpecificAPIPropertyDAO {
             preparedStatement.setString(1, apiUuid);
             preparedStatement.setString(2, envUuid);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                String propertyConfig = null;
                 if (resultSet.next()) {
-                    InputStream propertyConfigBlob = resultSet.getBinaryStream(1);
-                    if (propertyConfigBlob != null) {
-                        propertyConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
+                    try (InputStream propertyConfigBlob = resultSet.getBinaryStream(1)) {
+                        if (propertyConfigBlob != null) {
+                            return APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
+                        }
                     }
                 }
-                return propertyConfig;
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error occurred when getting environment specific api properties", e);
         }
         return null;
@@ -185,12 +182,12 @@ public class EnvironmentSpecificAPIPropertyDAO {
                     String envName = resultSet.getString(2);
                     String apiId = resultSet.getString(3);
                     JsonObject jsonConfig = null;
-                    InputStream propertyConfigBlob = resultSet.getBinaryStream(4);
-                    if (propertyConfigBlob != null) {
-                        String apiJsonConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
-                        jsonConfig = new Gson().fromJson(apiJsonConfig, JsonObject.class);
+                    try (InputStream propertyConfigBlob = resultSet.getBinaryStream(4)) {
+                        if (propertyConfigBlob != null) {
+                            String apiJsonConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
+                            jsonConfig = new Gson().fromJson(apiJsonConfig, JsonObject.class);
+                        }
                     }
-
                     Map<String, Environment> environmentMap;
                     Environment environment;
                     if (apiEnvironmentMap.containsKey(apiId)) {
@@ -206,7 +203,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                     environmentMap.put(envName, environment);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error occurred when getting MG environment specific api properties", e);
         }
         return apiEnvironmentMap;
@@ -244,10 +241,11 @@ public class EnvironmentSpecificAPIPropertyDAO {
                     String envName = envId; // for default envs envId and envName is same
                     String apiId = resultSet.getString(2);
                     JsonObject jsonConfig = null;
-                    InputStream propertyConfigBlob = resultSet.getBinaryStream(3);
-                    if (propertyConfigBlob != null) {
-                        String apiJsonConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
-                        jsonConfig = new Gson().fromJson(apiJsonConfig, JsonObject.class);
+                    try (InputStream propertyConfigBlob = resultSet.getBinaryStream(3)) {
+                        if (propertyConfigBlob != null) {
+                            String apiJsonConfig = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
+                            jsonConfig = new Gson().fromJson(apiJsonConfig, JsonObject.class);
+                        }
                     }
                     Map<String, Environment> environmentMap;
                     Environment environment;
@@ -264,7 +262,7 @@ public class EnvironmentSpecificAPIPropertyDAO {
                     environmentMap.put(envName, environment);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error occurred when getting default environment specific api properties", e);
         }
         return apiEnvironmentMap;
