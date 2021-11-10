@@ -327,6 +327,11 @@ public class InMemoryAPIDeployer {
         }
     }
 
+    /**
+     * Add GraphQLSchemaDTO of deployed GraphQL API to Gateway internal data holder.
+     *
+     * @param gatewayAPIDTO GatewayAPIDTO
+     */
     private void addDeployedGraphqlQLToAPI(GatewayAPIDTO gatewayAPIDTO) {
 
         if (gatewayAPIDTO != null && gatewayAPIDTO.getGraphQLSchema() != null) {
@@ -335,7 +340,7 @@ public class InMemoryAPIDeployer {
             TypeDefinitionRegistry registry = schemaParser.parse(gatewayAPIDTO.getGraphQLSchema());
             GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
             GraphQLSchemaDTO schemaDTO = new GraphQLSchemaDTO(schema, registry);
-            DataHolder.getInstance().addApiToGraphQLSchemaDTO(apiId,  schemaDTO);
+            DataHolder.getInstance().addApiToGraphQLSchemaDTO(apiId, schemaDTO);
         }
     }
 
