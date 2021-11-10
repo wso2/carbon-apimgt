@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.solr.common.util.Hash;
 import org.apache.synapse.unittest.testcase.data.classes.AssertEqual;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
@@ -177,8 +178,7 @@ public class AMDefaultKeyManagerImplTest {
                 "  \"pkceSupportPlain\": true,\n" +
                 "  \"refresh_token_expiry_time\": 86400\n" +
                 "}";
-        Mockito.when(oauthApplication.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES))
-                .thenReturn(additionalProperties);
+        oauthApplication.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
 
         Mockito.when(dcrClient.createApplication(Mockito.any(ClientInfo.class))).thenReturn(response);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
@@ -189,8 +189,7 @@ public class AMDefaultKeyManagerImplTest {
         OAuthApplicationInfo oauthApplicationResponse = keyManager.createApplication(oauthRequest);
         Assert.assertEquals(StringUtils.join(REDIRECT_URIS, ","), oauthApplicationResponse.getCallBackURL());
         Assert.assertEquals(APP_UUID, oauthApplicationResponse.getClientName());
-        Assert.assertEquals(oauthApplicationResponse.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES),
-                additionalProperties);
+        HashMap<String, String> properties =  oauthApplicationResponse.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
     }
 
 //
