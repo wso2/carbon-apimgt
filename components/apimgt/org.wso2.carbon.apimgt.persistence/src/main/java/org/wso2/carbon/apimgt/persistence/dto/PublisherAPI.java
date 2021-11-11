@@ -92,6 +92,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
+    private String gatewayVendor;
+    private String asyncTransportProtocols;
     
     private String audience;
 
@@ -560,6 +562,23 @@ public class PublisherAPI extends PublisherAPIInfo {
     }
 
     @Override
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    @Override
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
+
+    @Override
     public String toString() {
         return "PublisherAPI [isDefaultVersion=" + isDefaultVersion + ", description=" + description + ", wsdlUrl="
                 + wsdlUrl + ", wadlUrl=" + wadlUrl + ", technicalOwner=" + technicalOwner + ", technicalOwnerEmail="
@@ -581,8 +600,9 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + websubSubscriptionConfiguration + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", monetizationProperties="
                 + monetizationProperties + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
-                + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl
-                + ", accessControlRoles=" + accessControlRoles + ", additionalProperties=" + additionalProperties
+                + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl + ", gatewayVendor="
+                + gatewayVendor +  ", asyncTransportProtocols=" + asyncTransportProtocols + ", accessControlRoles="
+                + accessControlRoles + ", additionalProperties=" + additionalProperties
                 + ", thumbnail=" + thumbnail + ", createdTime=" + createdTime + ", lastUpdated=" + lastUpdated
                 + ", toString()=" + super.toString() + "]";
     }
