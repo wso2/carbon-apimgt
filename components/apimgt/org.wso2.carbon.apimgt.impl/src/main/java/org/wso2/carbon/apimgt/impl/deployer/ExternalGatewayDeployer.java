@@ -20,8 +20,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 
+/**
+ * This class controls the API artifact deployments on the External gateways
+ */
 public interface ExternalGatewayDeployer {
-
 
     /**
      * Deploy API artifact to provided environment in the external gateway
