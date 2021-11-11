@@ -32,6 +32,11 @@ public class EventPublisherEvent extends Event {
      */
     private String loggingEvent;
 
+    public EventPublisherEvent(java.lang.String streamId, long timeStamp, java.lang.Object[] metaDataArray,
+                               java.lang.Object[] correlationDataArray, java.lang.Object[] payloadDataArray) {
+        super(streamId, timeStamp, metaDataArray, correlationDataArray, payloadDataArray);
+    }
+
     public EventPublisherEvent(String streamId, long timeStamp, Object[] payloadDataArray) {
         super(streamId, timeStamp, null, null, payloadDataArray);
     }
