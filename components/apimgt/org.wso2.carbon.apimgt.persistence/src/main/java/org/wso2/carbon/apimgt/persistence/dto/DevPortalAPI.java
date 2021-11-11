@@ -61,6 +61,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String visibility;
     private String visibleRoles;
     private String gatewayVendor;
+    private String asyncTransportProtocols;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -308,6 +309,16 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     }
 
 
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
+
+    public void setAsyncTransportProtocols(String asyncTransportProtocols) {
+        this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
 
     @Override
     public String toString() {
@@ -318,8 +329,9 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", gatewayVendor=" + gatewayVendor + ", apiCategories="
-                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
+                + ", environments=" + environments + ", gatewayVendor=" + gatewayVendor +  ", asyncTransportProtocols="
+                + asyncTransportProtocols  + ", apiCategories=" + apiCategories + ", isMonetizationEnabled="
+                + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
                 + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate
