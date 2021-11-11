@@ -25,7 +25,7 @@ public class InboundProcessorResponseDTO {
     boolean isError = false;
     int errorCode;
     String errorMessage;
-    boolean closeConnection = false; // whether to close the connection if during frame handling
+    boolean closeConnection = false; // whether to close the connection if during frame validation
 
     public boolean isError() {
         return isError;

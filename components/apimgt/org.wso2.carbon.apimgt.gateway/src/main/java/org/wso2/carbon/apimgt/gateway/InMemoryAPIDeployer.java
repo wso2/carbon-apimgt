@@ -66,7 +66,7 @@ import java.util.UUID;
  */
 public class InMemoryAPIDeployer {
 
-    private static Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
+    private static final Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
     ArtifactRetriever artifactRetriever;
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     private boolean debugEnabled = log.isDebugEnabled();

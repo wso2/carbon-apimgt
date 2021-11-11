@@ -37,8 +37,6 @@ public class QueryAnalyzerTestCase {
 
     private final String subscriptionSchemaRelativePath = File.separator + "graphQL" + File.separator
             + "schema_with_subscriptions.graphql";
-    private final String complexityPolicy = "{\"complexity\":{\"Subscription\":{\"liftStatusChange\":3},"
-            + "\"Lift\":{\"night\":1,\"name\":1,\"elevationGain\":1,\"id\":1,\"capacity\":1}}}";
     private QueryAnalyzer queryAnalyzer;
     private FieldComplexityCalculatorImpl fieldComplexityCalculator;
 
@@ -50,6 +48,8 @@ public class QueryAnalyzerTestCase {
         TypeDefinitionRegistry registry = schemaParser.parse(schemaString);
         GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
         queryAnalyzer = new QueryAnalyzer(graphQLSchema);
+        String complexityPolicy = "{\"complexity\":{\"Subscription\":{\"liftStatusChange\":3},"
+                + "\"Lift\":{\"night\":1,\"name\":1,\"elevationGain\":1,\"id\":1,\"capacity\":1}}}";
         fieldComplexityCalculator = new FieldComplexityCalculatorImpl(complexityPolicy);
     }
 

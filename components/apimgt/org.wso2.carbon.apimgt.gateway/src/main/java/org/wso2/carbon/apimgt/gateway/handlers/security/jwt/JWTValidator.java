@@ -514,8 +514,8 @@ public class JWTValidator {
                 }
                 String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
                         apiVersion, tokenSignature);
-                return generateAuthenticationContextForWS(jti, jwtValidationInfo,
-                        apiKeyValidationInfoDTO, endUserToken, apiVersion);
+                return generateAuthenticationContextForWS(jti, jwtValidationInfo, apiKeyValidationInfoDTO, endUserToken,
+                        apiVersion);
             } else {
                 String message = "User is NOT authorized to access the Resource. API Subscription validation failed.";
                 log.error(message);

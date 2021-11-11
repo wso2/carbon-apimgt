@@ -52,6 +52,9 @@ public class QueryAnalyzer {
      */
     public QueryAnalyzerResponseDTO analyseQueryDepth(int maxQueryDepth, String payload) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Analyzing query depth for " + payload + " and max query depth:" + maxQueryDepth);
+        }
         QueryAnalyzerResponseDTO queryAnalyzerResponseDTO = new QueryAnalyzerResponseDTO();
         if (maxQueryDepth > 0) {
             MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
@@ -102,6 +105,9 @@ public class QueryAnalyzer {
     public QueryAnalyzerResponseDTO analyseQueryComplexity(int maxQueryComplexity, String payload,
                                                            FieldComplexityCalculator fieldComplexityCalculator) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Analyzing query complexity for " + payload + " and max complexity: " + maxQueryComplexity);
+        }
         QueryAnalyzerResponseDTO queryAnalyzerResponseDTO = new QueryAnalyzerResponseDTO();
         if (maxQueryComplexity > 0) {
             MaxQueryComplexityInstrumentation maxQueryComplexityInstrumentation =

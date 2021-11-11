@@ -509,7 +509,7 @@ public class InboundWebsocketProcessorUtil {
     }
 
     /**
-     * Get Websocket API Key data from webservice client.
+     * Get Websocket API Key data from websocket client.
      *
      * @param key           API key
      * @param domain        tenant domain

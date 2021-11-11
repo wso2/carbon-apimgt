@@ -100,7 +100,6 @@ public class InboundWebSocketProcessor {
         try {
             HandshakeProcessor handshakeProcessor = new HandshakeProcessor();
             setUris(req, inboundMessageContext);
-            inboundMessageContext.setInboundName(getInboundName(ctx));
             InboundWebsocketProcessorUtil.setTenantDomainToContext(inboundMessageContext);
             setMatchingResource(ctx, req, inboundMessageContext);
             String userAgent = req.headers().get(HttpHeaders.USER_AGENT);
@@ -217,6 +216,7 @@ public class InboundWebSocketProcessor {
      */
     private boolean validateOAuthHeader(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
+
         if (!inboundMessageContext.getRequestHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
@@ -238,7 +238,7 @@ public class InboundWebSocketProcessor {
      * @param req                   Request object
      * @param inboundMessageContext InboundMessageContext
      */
-    protected void setUris(FullHttpRequest req, InboundMessageContext inboundMessageContext)
+    private void setUris(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws WebSocketApiException {
 
         try {
@@ -256,19 +256,8 @@ public class InboundWebSocketProcessor {
                 log.debug("Websocket API fullRequestPath = " + inboundMessageContext.getRequestPath());
             }
         } catch (URISyntaxException e) {
-            throw new WebSocketApiException("Error while parsing uri");
+            throw new WebSocketApiException("Error while parsing uri: " + e.getMessage());
         }
-    }
-
-    /**
-     * Get inbound websocket protocol name.
-     *
-     * @param ctx Netty websocket channel context
-     * @return WS protocol
-     */
-    protected String getInboundName(ChannelHandlerContext ctx) {
-        return ctx.channel().pipeline().get(WebSocketApiConstants.WS_SSL_CHANNEL_HANDLER_NAME) != null
-                ? WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME : WebSocketApiConstants.WS_ENDPOINT_NAME;
     }
 
     /**
@@ -280,7 +269,7 @@ public class InboundWebSocketProcessor {
      * @throws WebSocketApiException     If an error occurs
      * @throws ResourceNotFoundException If no matching API or resource found
      */
-    protected void setMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
+    private void setMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
                                        InboundMessageContext inboundMessageContext) throws WebSocketApiException,
             ResourceNotFoundException {
 

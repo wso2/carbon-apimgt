@@ -41,10 +41,6 @@ public class QueryAnalyzerResponseDTO {
         return errorList;
     }
 
-    public void setErrorList(List<String> errorList) {
-        this.errorList = errorList;
-    }
-
     public void addErrorToList(String error) {
         this.errorList.add(error);
     }

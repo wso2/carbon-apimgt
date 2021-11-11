@@ -38,17 +38,15 @@ public class InboundMessageContext {
 
     private MessageContext axis2MessageContext;
     private String tenantDomain;
-
     private String fullRequestPath;
     private String requestPath; // request path without query param section
     private String version;
     private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
-    private Map<String, String> requestHeaders = new HashMap<>();
-    private List<String> headersToRemove = new ArrayList<>();
-    private Map<String, String> headersToAdd = new HashMap<>();
+    private Map<String, String> requestHeaders = new HashMap<>();   //Current request headers
+    private List<String> headersToRemove = new ArrayList<>();   //Headers to remove from requestHeaders
+    private Map<String, String> headersToAdd = new HashMap<>(); //Headers to add to requestHeaders
     private String token;
     private String apiContext;
-    private String inboundName;
     private String apiName;
     private String keyType;
     private API api;
@@ -56,9 +54,9 @@ public class InboundMessageContext {
     private AuthenticationContext authContext;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
     private SignedJWTInfo signedJWTInfo;
-    private Map<String, ResourceInfoDTO> resourcesMap = new HashMap<>();
+    private Map<String, ResourceInfoDTO> resourcesMap = new HashMap<>(); //elected API resources
     private String userIP;
-    private String matchingResource;
+    private String matchingResource; //invoking API resource
 
     //Graphql Subscription specific connection context information
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -138,10 +136,6 @@ public class InboundMessageContext {
 
     public void setApiContext(String apiContext) {
         this.apiContext = apiContext;
-    }
-
-    public void setInboundName(String inboundName) {
-        this.inboundName = inboundName;
     }
 
     public String getApiName() {

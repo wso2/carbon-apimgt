@@ -50,15 +50,15 @@ public class AuthenticationContext {
     private String apiPublisher;
     private String apiVersion;
     private String issuer;
-    private List requestTokenScopes;
+    private List<String> requestTokenScopes;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
 
-    public List getRequestTokenScopes() {
+    public List<String> getRequestTokenScopes() {
         return requestTokenScopes;
     }
 
-    public void setRequestTokenScopes(List requestTokenScopes) {
+    public void setRequestTokenScopes(List<String> requestTokenScopes) {
         this.requestTokenScopes = requestTokenScopes;
     }
 
@@ -69,7 +69,7 @@ public class AuthenticationContext {
     public void setThrottlingDataList(List<String> throttlingDataList) {
         this.throttlingDataList = throttlingDataList;
     }
-    //Following throttle data list can be use to hold throttle data and api level throttle key
+    //Following throttle data list can be used to hold throttle data and api level throttle key
     //should be its first element.
 
     public boolean isContentAwareTierPresent() {

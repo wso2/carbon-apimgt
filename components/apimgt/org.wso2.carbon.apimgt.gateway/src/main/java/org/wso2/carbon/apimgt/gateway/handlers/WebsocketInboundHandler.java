@@ -74,7 +74,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         String channelId = ctx.channel().id().asLongText();
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
@@ -121,6 +121,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     webSocketProcessor.handleRequest((WebSocketFrame) msg, inboundMessageContext);
             if (responseDTO.isError()) {
                 if (responseDTO.isCloseConnection()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error while handling Outbound Websocket frame. Closing connection for "
+                                + ctx.channel().toString());
+                    }
                     ctx.writeAndFlush(new CloseWebSocketFrame(responseDTO.getErrorCode(),
                             responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"));
                     ctx.close();
@@ -135,6 +139,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     }
                 }
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Sending Inbound Websocket frame." + ctx.channel().toString());
+                }
                 ctx.fireChannelRead(msg);
                 // publish analytics events if analytics is enabled
                 publishPublishEvent(ctx);

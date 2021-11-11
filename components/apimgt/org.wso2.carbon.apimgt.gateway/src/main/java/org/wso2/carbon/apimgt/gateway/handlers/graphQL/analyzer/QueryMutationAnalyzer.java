@@ -33,9 +33,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * QueryAnalyzer class extension for GraphQL query and mutation operations.
  */
@@ -99,7 +96,6 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
      */
     public boolean analyseQueryMutationComplexity(MessageContext messageContext, String payload) {
 
-        List<String> errorList = new ArrayList<>();
         FieldComplexityCalculator fieldComplexityCalculator = null;
         try {
             fieldComplexityCalculator = new FieldComplexityCalculatorImpl((String) messageContext
@@ -113,8 +109,8 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
                 fieldComplexityCalculator);
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
-                    GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
-            log.error(errorList.toString());
+                    GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, responseDTO.getErrorList().toString());
+            log.error(responseDTO.getErrorList().toString());
             return false;
         }
         return true;

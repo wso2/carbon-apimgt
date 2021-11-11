@@ -70,14 +70,20 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
         }
 
         if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PongWebSocketFrame)) {
+            //remove inbound message context from data holder
+            InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
             //if the inbound frame is a closed frame, throttling, analytics will not be published.
             outboundHandler().write(ctx, msg, promise);
-
         } else if (msg instanceof WebSocketFrame) {
             InboundProcessorResponseDTO responseDTO = inboundHandler().getWebSocketProcessor().handleResponse(
                     (WebSocketFrame) msg, inboundMessageContext);
             if (responseDTO.isError()) {
                 if (responseDTO.isCloseConnection()) {
+                    InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error while handling Outbound Websocket frame. Closing connection for "
+                                + ctx.channel().toString());
+                    }
                     outboundHandler().write(ctx, new CloseWebSocketFrame(responseDTO.getErrorCode(),
                             responseDTO.getErrorMessage() + StringUtils.SPACE + "Connection closed" + "!"), promise);
                     outboundHandler().flush(ctx);
@@ -93,24 +99,25 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                     }
                 }
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Sending Outbound Websocket frame." + ctx.channel().toString());
+                }
                 outboundHandler().write(ctx, msg, promise);
                 // publish analytics events if analytics is enabled
                 publishSubscribeEvent(ctx);
             }
-
-
         } else {
             outboundHandler().write(ctx, msg, promise);
         }
     }
 
-    public void publishSubscribeEvent(ChannelHandlerContext ctx) {
+    private void publishSubscribeEvent(ChannelHandlerContext ctx) {
         if (APIUtil.isAnalyticsEnabled()) {
             metricsHandler.handleSubscribe(ctx);
         }
     }
 
-    public void publishSubscribeThrottledEvent(ChannelHandlerContext ctx) {
+    private void publishSubscribeThrottledEvent(ChannelHandlerContext ctx) {
         addThrottledErrorPropertiesToChannel(ctx);
         metricsHandler.handleSubscribe(ctx);
         removeErrorPropertiesFromChannel(ctx);

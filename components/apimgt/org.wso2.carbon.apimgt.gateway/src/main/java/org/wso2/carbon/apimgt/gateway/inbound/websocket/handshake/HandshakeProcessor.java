@@ -49,6 +49,10 @@ public class HandshakeProcessor {
      */
     public InboundProcessorResponseDTO processHandshake(InboundMessageContext inboundMessageContext) {
 
+        if(log.isDebugEnabled()) {
+            log.debug("Processing handshake message for inbound websocket context: "
+                    + inboundMessageContext.getApiContext());
+        }
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
         boolean isOAuthHeaderValid;
         try {
@@ -65,6 +69,11 @@ public class HandshakeProcessor {
                     e.getMessage());
         }
         if (isOAuthHeaderValid) {
+            if(log.isDebugEnabled()) {
+                log.debug("Handshake authentication success for inbound websocket context: "
+                        + inboundMessageContext.getApiContext() + " Setting ResourceInfoDTOs of elected API "
+                        + "to inbound message context");
+            }
             setResourcesMapToContext(inboundMessageContext);
         } else {
             log.error("Authentication failed for " + inboundMessageContext.getApiContext());
@@ -92,7 +101,7 @@ public class HandshakeProcessor {
             if (resourceInfoDTO == null) {
                 resourceInfoDTO = new ResourceInfoDTO();
                 resourceInfoDTO.setUrlPattern(urlMapping.getUrlPattern());
-                resourceInfoDTO.setHttpVerbs(new LinkedHashSet());
+                resourceInfoDTO.setHttpVerbs(new LinkedHashSet<>());
                 resourcesMap.put(urlMapping.getUrlPattern(), resourceInfoDTO);
             }
             verbInfoDTO = new VerbInfoDTO();

@@ -27,10 +27,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.FieldComplexityCalculatorImpl;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Set;
 
@@ -55,8 +53,7 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
     public QueryAnalyzerResponseDTO analyseSubscriptionQueryDepth(int maxQueryDepth, String payload) {
 
         int updatedMaxQueryDepth = getMaxQueryDepth(maxQueryDepth);
-        QueryAnalyzerResponseDTO analyzerResponseDTO = analyseQueryDepth(updatedMaxQueryDepth, payload);
-        return analyzerResponseDTO;
+        return analyseQueryDepth(updatedMaxQueryDepth, payload);
     }
 
     /**
@@ -91,7 +88,7 @@ public class SubscriptionAnalyzer extends QueryAnalyzer {
             String accessControlInfo = getGraphQLAccessControlInfo();
             fieldComplexityCalculator = new FieldComplexityCalculatorImpl(accessControlInfo);
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing policy definition.");
+            throw new APIManagementException("Error while parsing policy definition.", e);
         }
         int updatedMaxQueryComplexity = getMaxQueryComplexity(maxQueryComplexity);
         return analyseQueryComplexity(updatedMaxQueryComplexity, payload,
