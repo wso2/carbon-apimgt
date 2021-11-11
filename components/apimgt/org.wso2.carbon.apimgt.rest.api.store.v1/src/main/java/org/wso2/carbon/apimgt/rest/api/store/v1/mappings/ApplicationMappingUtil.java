@@ -18,22 +18,12 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
@@ -42,12 +32,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SolaceTopicsDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
-import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +42,7 @@ import java.util.Set;
 
 public class ApplicationMappingUtil {
 
-    public static ApplicationDTO fromApplicationToDTO(Application application) throws APIManagementException {
+    public static ApplicationDTO fromApplicationtoDTO(Application application) throws APIManagementException {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingPolicy(application.getTier());

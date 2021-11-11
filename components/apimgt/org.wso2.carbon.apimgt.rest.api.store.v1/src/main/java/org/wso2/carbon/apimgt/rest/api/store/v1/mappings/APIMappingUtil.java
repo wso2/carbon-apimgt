@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -475,7 +476,7 @@ public class APIMappingUtil {
         }
 
         // Set Async protocols of API based on the gateway vendor
-        if (APIConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
+        if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
             apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
                     model.getApi(), organization));
         }

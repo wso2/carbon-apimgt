@@ -162,7 +162,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
   public String getGatewayVendor() {
@@ -180,7 +180,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "contains available transports for an async API")
   @JsonProperty("asyncTransportProtocols")
   public List<String> getAsyncTransportProtocols() {
@@ -189,6 +189,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
     this.asyncTransportProtocols = asyncTransportProtocols;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {

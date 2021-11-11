@@ -1,14 +1,17 @@
-package org.wso2.carbon.apimgt.solace.Parser;
+package org.wso2.carbon.apimgt.solace.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.core.models.Extension;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 
 import java.util.Map;
 
+/**
+ * This Parser class will validate the Solace Async API Specifications.
+ */
 public class SolaceApiParser extends AsyncApiParser {
 
 
@@ -26,8 +29,8 @@ public class SolaceApiParser extends AsyncApiParser {
             ObjectMapper objectMapper = new ObjectMapper();
             Map originMap = objectMapper.convertValue(origin.value, Map.class);
             if (originMap.containsKey("vendor")) {
-                if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(originMap.get("vendor").toString())) {
-                    return APIConstants.SOLACE_ENVIRONMENT;
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(originMap.get("vendor").toString())) {
+                    return SolaceConstants.SOLACE_ENVIRONMENT;
                 }
             }
         }
@@ -35,6 +38,6 @@ public class SolaceApiParser extends AsyncApiParser {
     }
 
     public static boolean isSolaceAPIFromAsyncAPIDefinition(String definitionJSON)  {
-        return APIConstants.SOLACE_ENVIRONMENT.equals(new SolaceApiParser().getVendorFromExtension(definitionJSON));
+        return SolaceConstants.SOLACE_ENVIRONMENT.equals(new SolaceApiParser().getVendorFromExtension(definitionJSON));
     }
 }

@@ -35,7 +35,6 @@ public class APIInfoDTO   {
     private String version = null;
     private String provider = null;
     private String type = null;
-  private String gatewayVendor = null;
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -74,6 +73,7 @@ return null;
     private List<String> securityScheme = new ArrayList<String>();
     private String createdTime = null;
     private String updatedTime = null;
+    private String gatewayVendor = null;
 
   /**
    **/
@@ -359,7 +359,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("gatewayVendor")
   public String getGatewayVendor() {
