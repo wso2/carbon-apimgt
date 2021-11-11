@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
@@ -67,6 +68,8 @@ import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -198,6 +201,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
+            bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
@@ -765,6 +770,21 @@ public class APIManagerComponent {
     protected void removeNotifiers(Notifier notifier) {
 
         ServiceReferenceHolder.getInstance().getNotifiersMap().remove(notifier.getType());
+    }
+
+    @Reference(
+            name = "externalGatewayDeployer.component",
+            service = ExternalGatewayDeployer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalGatewayDeployers")
+    protected void addExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
+        ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
+    }
+
+    protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
+
+        ServiceReferenceHolder.getInstance().getNotifiersMap().remove(deployer.getType());
     }
 
     @Reference(
