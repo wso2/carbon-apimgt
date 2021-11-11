@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -9153,5 +9154,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return new EnvironmentPropertiesDTO();
         }
         return new Gson().fromJson(content, EnvironmentPropertiesDTO.class);
+    }
+
+    @Override
+    public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
+        if (env == null) {
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+            if (env == null) {
+                String errorMessage =
+                        String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
+                        .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
+            }
+        }
+        return env;
     }
 }

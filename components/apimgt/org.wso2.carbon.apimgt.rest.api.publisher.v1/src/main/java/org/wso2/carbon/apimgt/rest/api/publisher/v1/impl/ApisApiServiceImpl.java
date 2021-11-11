@@ -5180,17 +5180,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private void validateEnvironment(String envId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        Environment env = APIUtil.getReadOnlyEnvironments().get(envId);
-        if (env == null) {
-            env = ApiMgtDAO.getInstance().getEnvironment(tenantDomain, envId);
-            if (env == null) {
-                String errorMessage =
-                        String.format("Failed to retrieve Environment with ID %s. Environment not found", envId);
-                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("Env ID '%s'", envId)));
-            }
-        }
+        // if apiProvider.getEnvironment(tenantDomain, envId) return null, it will throw an exception
+        apiProvider.getEnvironment(tenantDomain, envId);
     }
 
 }

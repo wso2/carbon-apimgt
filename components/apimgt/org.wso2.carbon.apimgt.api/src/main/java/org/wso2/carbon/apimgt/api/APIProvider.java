@@ -1830,4 +1830,12 @@ public interface APIProvider extends APIManager {
 
     EnvironmentPropertiesDTO getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid)
             throws APIManagementException;
+
+    /**
+     * Returns environment of a given uuid
+     *
+     * @param tenantDomain tenant domain
+     * @return List of environments related to the given tenant
+     */
+    Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException;
 }
