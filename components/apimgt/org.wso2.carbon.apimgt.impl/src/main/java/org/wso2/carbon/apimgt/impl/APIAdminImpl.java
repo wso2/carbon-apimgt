@@ -1146,7 +1146,8 @@ public class APIAdminImpl implements APIAdmin {
                 APIUtil.validateRestAPIScopes(config);
                 ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(organization, config);
             } catch (ValidationException | JSONException e) {
-                throw new APIManagementException("tenant-config validation failure", e, ExceptionCodes.INVALID_TENANT_CONFIG);
+                throw new APIManagementException("tenant-config validation failure",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, e.getMessage()));
             }
         } else {
             throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
