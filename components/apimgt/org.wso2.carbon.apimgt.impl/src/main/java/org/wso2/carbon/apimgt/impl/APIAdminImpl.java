@@ -386,6 +386,8 @@ public class APIAdminImpl implements APIAdmin {
 
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByOrganization) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType()) ||
+                    StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                     keyManagerConfigurationDTO.getTokenType())) {
                 try {
                     if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
@@ -409,6 +411,8 @@ public class APIAdminImpl implements APIAdmin {
                                                      String tenantDomain) throws APIManagementException {
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                    keyManagerConfigurationDTO.getTokenType()) ||
+                    StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                     keyManagerConfigurationDTO.getTokenType())) {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
                     IdentityProvider identityProvider;
@@ -468,6 +472,8 @@ public class APIAdminImpl implements APIAdmin {
             maskValues(keyManagerConfigurationDTO);
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                 keyManagerConfigurationDTO.getTokenType())) {
             try {
                 if (keyManagerConfigurationDTO.getExternalReferenceId() != null) {
@@ -516,6 +522,8 @@ public class APIAdminImpl implements APIAdmin {
             validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
                 keyManagerConfigurationDTO.getTokenType())) {
             keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
             try {
@@ -643,7 +651,9 @@ public class APIAdminImpl implements APIAdmin {
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                keyManagerConfigurationDTO.getTokenType())) {
+                keyManagerConfigurationDTO.getTokenType()) ||
+                StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
+                        keyManagerConfigurationDTO.getTokenType())) {
             IdentityProvider identityProvider = null;
             try {
                 identityProvider = IdentityProviderManager.getInstance()
@@ -671,7 +681,9 @@ public class APIAdminImpl implements APIAdmin {
             throws APIManagementException {
         if (kmConfig != null) {
             if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
-                    kmConfig.getTokenType())) {
+                    kmConfig.getTokenType()) ||
+                    StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
+                            kmConfig.getTokenType())) {
                 try {
                     if (kmConfig.getExternalReferenceId() != null) {
                         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();

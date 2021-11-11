@@ -987,12 +987,13 @@ definitions:
       tokenType:
         type: string
         description: The type of the tokens to be used (exchanged or without exchanged).
-          Accepted values are EXCHANGED and ORIGINAL.
+          Accepted values are EXCHANGED, ORIGINAL or BOTH.
         example: EXCHANGED
         default: ORIGINAL
         enum:
           - EXCHANGED
           - ORIGINAL
+          - BOTH
 
   #-----------------------------------------------------
   # The Subscription List resource

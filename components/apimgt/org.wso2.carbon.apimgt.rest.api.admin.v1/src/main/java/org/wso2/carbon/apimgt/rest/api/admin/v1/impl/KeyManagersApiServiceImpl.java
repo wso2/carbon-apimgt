@@ -171,7 +171,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         String tokenType = keyManagerConfigurationDTO.getTokenType();
         String keyManagerType = keyManagerConfigurationDTO.getType();
-        if (StringUtils.equalsIgnoreCase(tokenType, KeyManagerConfiguration.TokenType.EXCHANGED.toString())) {
+        if (StringUtils.equalsIgnoreCase(tokenType, KeyManagerConfiguration.TokenType.EXCHANGED.toString()) ||
+                StringUtils.equalsIgnoreCase(tokenType, KeyManagerConfiguration.TokenType.BOTH.toString())) {
             Stream<KeyManagerConfiguration.IdpTypeOfExchangedTokens> streamIdpType = Stream
                     .of(KeyManagerConfiguration.IdpTypeOfExchangedTokens.values());
             boolean isAllowedIdP = streamIdpType

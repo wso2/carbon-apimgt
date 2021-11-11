@@ -35,7 +35,7 @@ public class KeyManagerConfiguration {
     private String tenantDomain;
 
     public enum TokenType {
-        EXCHANGED, ORIGINAL
+        EXCHANGED, ORIGINAL, BOTH
     }
 
     public enum IdpTypeOfExchangedTokens {

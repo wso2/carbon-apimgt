@@ -5917,6 +5917,16 @@ definitions:
           $ref: '#/definitions/KeyManagerApplicationConfiguration'
       additionalProperties:
         type: object
+      tokenType:
+        type: string
+        description: The type of the tokens to be used (exchanged or without exchanged).
+          Accepted values are EXCHANGED, ORIGINAL and BOTH.
+        example: EXCHANGED
+        default: ORIGINAL
+        enum:
+          - EXCHANGED
+          - ORIGINAL
+          - BOTH
   #-----------------------------------------------------
   # The KeyManager Configuration
   #-----------------------------------------------------
