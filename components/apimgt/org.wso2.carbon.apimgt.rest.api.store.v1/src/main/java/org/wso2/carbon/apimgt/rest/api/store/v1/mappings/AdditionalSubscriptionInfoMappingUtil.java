@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -8,7 +7,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONString;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -17,17 +15,26 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoSolaceTopicsObjectDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdditionalSubscriptionInfoSolaceURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SolaceTopicsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 public class AdditionalSubscriptionInfoMappingUtil {
@@ -48,7 +55,8 @@ public class AdditionalSubscriptionInfoMappingUtil {
          subscriptions, Integer limit, Integer offset, String organization) throws APIManagementException {
 
         AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO = new AdditionalSubscriptionInfoListDTO();
-        List<AdditionalSubscriptionInfoDTO> additionalSubscriptionInfoDTOs = additionalSubscriptionInfoListDTO.getList();
+        List<AdditionalSubscriptionInfoDTO> additionalSubscriptionInfoDTOs = additionalSubscriptionInfoListDTO.
+                getList();
         if (additionalSubscriptionInfoDTOs == null) {
             additionalSubscriptionInfoDTOs = new ArrayList<>();
             additionalSubscriptionInfoListDTO.setList(additionalSubscriptionInfoDTOs);
@@ -104,25 +112,27 @@ public class AdditionalSubscriptionInfoMappingUtil {
         application = apiConsumer.getApplicationByUUID(application.getUUID());
         additionalSubscriptionInfoDTO.setApplicationId(subscription.getApplication().getUUID());
         additionalSubscriptionInfoDTO.setApplicationName(application.getName());
-        additionalSubscriptionInfoDTO.setIsSolaceAPI(SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision(api));
+        additionalSubscriptionInfoDTO.setIsSolaceAPI(SolaceNotifierUtils.checkWhetherAPIDeployedToSolaceUsingRevision
+                (api));
 
         if (additionalSubscriptionInfoDTO.isIsSolaceAPI()) {
             //Set Solace organization details if API is a Solace API
-            additionalSubscriptionInfoDTO.setSolaceOrganization(SolaceNotifierUtils.getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
+            additionalSubscriptionInfoDTO.setSolaceOrganization(SolaceNotifierUtils.
+                    getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api));
 
             Map<String, Environment> gatewayEnvironmentMap = APIUtil.getReadOnlyGatewayEnvironments();
             Environment solaceEnvironment = null;
             for (Map.Entry<String,Environment> entry: gatewayEnvironmentMap.entrySet()) {
-                if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                     solaceEnvironment = entry.getValue();
                 }
             }
 
             if (solaceEnvironment != null) {
                 // Create solace admin APIs instance
-                SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.getUserName(),
-                        solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
-                        get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+                SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(),
+                        solaceEnvironment.getUserName(), solaceEnvironment.getPassword(),
+                        solaceEnvironment.getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
                 HttpResponse response = solaceAdminApis.applicationGet(additionalSubscriptionInfoDTO.
                         getSolaceOrganization(), application.getUUID(), "default");
                 List<AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO> solaceEnvironments = new ArrayList<>();
@@ -144,19 +154,26 @@ public class AdditionalSubscriptionInfoMappingUtil {
                                     if (gatewayEnvironment != null) {
                                         // Set Solace environment details
                                         solaceDeployedEnvironmentsDTO.setEnvironmentName(gatewayEnvironment.getName());
-                                        solaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(gatewayEnvironment.getDisplayName());
+                                        solaceDeployedEnvironmentsDTO.setEnvironmentDisplayName(gatewayEnvironment.
+                                                getDisplayName());
                                         solaceDeployedEnvironmentsDTO.setOrganizationName(gatewayEnvironment.
-                                                getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
+                                                getAdditionalProperties().get(SolaceConstants.
+                                                        SOLACE_ENVIRONMENT_ORGANIZATION));
 
                                         boolean containsMQTTProtocol = false;
                                         // Get messaging protocols from the response body
                                         if (environmentObject.getJSONArray("messagingProtocols") != null) {
-                                            List<AdditionalSubscriptionInfoSolaceURLsDTO> endpointUrls = new ArrayList<>();
-                                            JSONArray protocolsArray = environmentObject.getJSONArray("messagingProtocols");
+                                            List<AdditionalSubscriptionInfoSolaceURLsDTO> endpointUrls = new
+                                                    ArrayList<>();
+                                            JSONArray protocolsArray = environmentObject.
+                                                    getJSONArray("messagingProtocols");
                                             for (int j = 0; j < protocolsArray.length(); j++) {
-                                                AdditionalSubscriptionInfoSolaceURLsDTO solaceURLsDTO = new AdditionalSubscriptionInfoSolaceURLsDTO();
-                                                String protocol = protocolsArray.getJSONObject(j).getJSONObject("protocol").getString("name");
-                                                if (APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME.equalsIgnoreCase(protocol)) {
+                                                AdditionalSubscriptionInfoSolaceURLsDTO solaceURLsDTO = new
+                                                        AdditionalSubscriptionInfoSolaceURLsDTO();
+                                                String protocol = protocolsArray.getJSONObject(j).getJSONObject
+                                                        ("protocol").getString("name");
+                                                if (SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME.
+                                                        equalsIgnoreCase(protocol)) {
                                                     containsMQTTProtocol = true;
                                                 }
                                                 String uri = protocolsArray.getJSONObject(j).getString("uri");
@@ -168,14 +185,17 @@ public class AdditionalSubscriptionInfoMappingUtil {
                                         }
                                         // Get topic permissions from the solace application response body
                                         if (environmentObject.getJSONObject("permissions") != null) {
-                                            org.json.JSONObject permissionsObject = environmentObject.getJSONObject("permissions");
-                                            AdditionalSubscriptionInfoSolaceTopicsObjectDTO solaceTopicsObjectDTO = new AdditionalSubscriptionInfoSolaceTopicsObjectDTO();
-                                            populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject, "default");
+                                            org.json.JSONObject permissionsObject = environmentObject.getJSONObject
+                                                    ("permissions");
+                                            AdditionalSubscriptionInfoSolaceTopicsObjectDTO solaceTopicsObjectDTO =
+                                                    new AdditionalSubscriptionInfoSolaceTopicsObjectDTO();
+                                            populateSolaceTopics(solaceTopicsObjectDTO, permissionsObject,
+                                                    "default");
                                             // Handle the special case of MQTT protocol
                                             if (containsMQTTProtocol) {
                                                 HttpResponse responseForMqtt = solaceAdminApis.applicationGet
                                                         (additionalSubscriptionInfoDTO.getSolaceOrganization(),
-                                                                application.getUUID(), APIConstants.
+                                                                application.getUUID(), SolaceConstants.
                                                                         MQTT_TRANSPORT_PROTOCOL_NAME.toUpperCase());
 
                                                 org.json.JSONObject permissionsObjectForMqtt =
@@ -183,8 +203,9 @@ public class AdditionalSubscriptionInfoMappingUtil {
                                                         responseForMqtt, i, gatewayEnvironmentMap);
 
                                                 if (permissionsObjectForMqtt != null) {
-                                                    populateSolaceTopics(solaceTopicsObjectDTO, permissionsObjectForMqtt,
-                                                            APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME.toUpperCase());
+                                                    populateSolaceTopics(solaceTopicsObjectDTO,
+                                                            permissionsObjectForMqtt,
+                                                            SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME.toUpperCase());
                                                 }
                                             }
                                             solaceDeployedEnvironmentsDTO.setSolaceTopicsObject(solaceTopicsObjectDTO);
@@ -216,8 +237,8 @@ public class AdditionalSubscriptionInfoMappingUtil {
      * @return List containing AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO
      * @throws APIManagementException if error occurred when retrieving protocols URLs
      */
-    private static List<AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO> setSolaceEnvironmentDetailsForSubscription
-                    (API api,String tenantDomain) throws APIManagementException {
+    private static List<AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO>
+    setSolaceEnvironmentDetailsForSubscription (API api,String tenantDomain) throws APIManagementException {
 
         APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, tenantDomain);
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
@@ -233,17 +254,17 @@ public class AdditionalSubscriptionInfoMappingUtil {
                     Environment environment = gatewayEnvironments.get(revisionDeployment.getDeployment());
                     if (environment != null) {
                         // Set solace environment details if deployment is in Solace broker
-                        if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
+                        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
                             AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO solaceEnvironmentDTO = new
                                     AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO();
                             solaceEnvironmentDTO.setEnvironmentName(environment.getName());
                             solaceEnvironmentDTO.setEnvironmentDisplayName(environment.getDisplayName());
                             solaceEnvironmentDTO.setOrganizationName(environment.getAdditionalProperties().
-                                    get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
+                                    get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION));
 
                             // Get Solace endpoint URLs for provided protocols
                             solaceEnvironmentDTO.setSolaceURLs(getSolaceURLs(environment.
-                                    getAdditionalProperties().get(APIConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
+                                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
                                     environment.getName(), apidto.getAsyncTransportProtocols()));
                             solaceEndpointURLsList.add(solaceEnvironmentDTO);
                         }
@@ -264,7 +285,8 @@ public class AdditionalSubscriptionInfoMappingUtil {
      * @throws APIManagementException if error occurred when retrieving protocols URLs
      */
     public static List<String> setEndpointURLsForApiDto(API api, String tenantDomain) throws APIManagementException {
-        List<AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO> urlsList = setSolaceEnvironmentDetailsForSubscription(api,tenantDomain);
+        List<AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO> urlsList =
+                setSolaceEnvironmentDetailsForSubscription(api,tenantDomain);
         List<String> urlsStringList = new ArrayList<>();
         if (!urlsList.isEmpty()) {
             for (AdditionalSubscriptionInfoSolaceDeployedEnvironmentsDTO item: urlsList) {
@@ -296,7 +318,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
         Environment solaceEnvironment = null;
         // Get Solace broker environment details
         for (Map.Entry<String,Environment> entry: gatewayEnvironments.entrySet()) {
-            if (APIConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(entry.getValue().getProvider())) {
                 solaceEnvironment = entry.getValue();
             }
         }
@@ -305,7 +327,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
             // Create solace admin APIs instance
             SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
                     getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
-                    get(APIConstants.SOLACE_ENVIRONMENT_DEV_NAME));
+                    get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
             List<AdditionalSubscriptionInfoSolaceURLsDTO> solaceURLsDTOs = new ArrayList<>();
             HttpResponse response = solaceAdminApis.environmentGET(organizationName, environmentName);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -339,7 +361,8 @@ public class AdditionalSubscriptionInfoMappingUtil {
     }
 
     private static org.json.JSONObject extractPermissionsFromSolaceApplicationGetResponse
-            (HttpResponse response, int environmentIndex, Map<String, Environment> gatewayEnvironmentMap) throws IOException {
+            (HttpResponse response, int environmentIndex, Map<String, Environment> gatewayEnvironmentMap)
+            throws IOException {
 
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String responseString = EntityUtils.toString(response.getEntity());
@@ -361,8 +384,9 @@ public class AdditionalSubscriptionInfoMappingUtil {
         return null;
     }
 
-    private static void populateSolaceTopics(AdditionalSubscriptionInfoSolaceTopicsObjectDTO subscriptionInfoSolaceTopicsObjectDTO
-            , org.json.JSONObject permissionsObject, String syntax) {
+    private static void populateSolaceTopics
+            (AdditionalSubscriptionInfoSolaceTopicsObjectDTO subscriptionInfoSolaceTopicsObjectDTO,
+             org.json.JSONObject permissionsObject, String syntax) {
 
         SolaceTopicsDTO topicsDTO = new SolaceTopicsDTO();
         if (permissionsObject.getJSONArray("publish") != null) {
@@ -393,7 +417,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
             }
             topicsDTO.setSubscribeTopics(subscribeTopics);
         }
-        if (APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME.equalsIgnoreCase(syntax)) {
+        if (SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME.equalsIgnoreCase(syntax)) {
             subscriptionInfoSolaceTopicsObjectDTO.setMqttSyntax(topicsDTO);
         } else {
             subscriptionInfoSolaceTopicsObjectDTO.setDefaultSyntax(topicsDTO);
@@ -401,7 +425,8 @@ public class AdditionalSubscriptionInfoMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a AdditionalSubscriptionInfoListDTO object given pagination parameters and url parameters
+     * Sets pagination urls for a AdditionalSubscriptionInfoListDTO object given pagination parameters and url
+     * parameters
      *
      * @param additionalSubscriptionInfoListDTO a AdditionalSubscriptionInfoListDTO object
      * @param apiId               uuid/id of API
@@ -410,8 +435,8 @@ public class AdditionalSubscriptionInfoMappingUtil {
      * @param offset              starting index
      * @param size                max offset
      */
-    public static void setPaginationParams(AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO, String apiId,
-                                           String groupId, int limit, int offset, int size) {
+    public static void setPaginationParams(AdditionalSubscriptionInfoListDTO additionalSubscriptionInfoListDTO,
+                                           String apiId, String groupId, int limit, int offset, int size) {
 
         String paginatedPrevious = "";
         String paginatedNext = "";

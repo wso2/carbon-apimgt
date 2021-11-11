@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayEnvironmentProtocolURIDTO;
-import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
@@ -24,7 +24,7 @@ import javax.validation.Valid;
 
 
 public class EnvironmentDTO   {
-
+  
     private String id = null;
     private String name = null;
     private String displayName = null;
@@ -42,7 +42,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", value = "")
   @JsonProperty("id")
   public String getId() {
@@ -59,7 +59,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "us-region", required = true, value = "")
   @JsonProperty("name")
   @NotNull
@@ -77,7 +77,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "US Region", value = "")
   @JsonProperty("displayName")
  @Size(min=1,max=255)  public String getDisplayName() {
@@ -87,31 +87,31 @@ public class EnvironmentDTO   {
     this.displayName = displayName;
   }
 
-    /**
-     **/
-    public EnvironmentDTO provider(String provider) {
-        this.provider = provider;
-        return this;
-    }
+  /**
+   **/
+  public EnvironmentDTO provider(String provider) {
+    this.provider = provider;
+    return this;
+  }
 
+  
+  @ApiModelProperty(example = "wso2", value = "")
+  @JsonProperty("provider")
+  public String getProvider() {
+    return provider;
+  }
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
 
-    @ApiModelProperty(example = "wso2", value = "")
-    @JsonProperty("provider")
-    public String getProvider() {
-        return provider;
-    }
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    /**
+  /**
    **/
   public EnvironmentDTO description(String description) {
     this.description = description;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "Gateway environment in US Region", value = "")
   @JsonProperty("description")
  @Size(max=1023)  public String getDescription() {
@@ -128,7 +128,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("isReadOnly")
   public Boolean isIsReadOnly() {
@@ -145,7 +145,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(required = true, value = "")
       @Valid
   @JsonProperty("vhosts")
@@ -157,41 +157,42 @@ public class EnvironmentDTO   {
     this.vhosts = vhosts;
   }
 
-    /**
-     **/
-    public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
-        this.endpointURIs = endpointURIs;
-        return this;
-    }
+  /**
+   **/
+  public EnvironmentDTO endpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+    return this;
+  }
 
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("endpointURIs")
+  public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
+    return endpointURIs;
+  }
+  public void setEndpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
+    this.endpointURIs = endpointURIs;
+  }
 
-    @ApiModelProperty(value = "")
-    @Valid
-    @JsonProperty("endpointURIs")
-    public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
-        return endpointURIs;
-    }
-    public void setEndpointURIs(List<GatewayEnvironmentProtocolURIDTO> endpointURIs) {
-        this.endpointURIs = endpointURIs;
-    }
+  /**
+   **/
+  public EnvironmentDTO additionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
 
-    /**
-     **/
-    public EnvironmentDTO additionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
-        this.additionalProperties = additionalProperties;
-        return this;
-    }
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("additionalProperties")
+  public List<AdditionalPropertyDTO> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
 
-
-    @ApiModelProperty(value = "")
-    @Valid
-    @JsonProperty("additionalProperties")
-    public List<AdditionalPropertyDTO> getAdditionalProperties() {
-        return additionalProperties;
-    }
-    public void setAdditionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
-        this.additionalProperties = additionalProperties;
-    }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -215,7 +216,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-      return Objects.hash(id, name, displayName, provider, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, provider, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override

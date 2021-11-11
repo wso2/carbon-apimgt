@@ -116,7 +116,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.solace.Parser.SolaceApiParser;
+import org.wso2.carbon.apimgt.solace.parser.SolaceApiParser;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -1902,9 +1903,9 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
-                if (APIConstants.SOLACE_ENVIRONMENT.equals(new SolaceApiParser().getVendorFromExtension(model.
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equals(new SolaceApiParser().getVendorFromExtension(model.
                         getContent()))) {
-                    infoDTO.setGatewayVendor(APIConstants.SOLACE_ENVIRONMENT);
+                    infoDTO.setGatewayVendor(SolaceConstants.SOLACE_ENVIRONMENT);
                     infoDTO.asyncTransportProtocols(SolaceNotifierUtils.getTransportProtocolsForSolaceAPI
                             (model.getContent()));
                 }

@@ -106,7 +106,6 @@ public class EnvironmentDTO   {
     this.serverUrl = serverUrl;
   }
 
-
   /**
    **/
   public EnvironmentDTO provider(String provider) {
@@ -114,7 +113,7 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "wso2", value = "")
   @JsonProperty("provider")
   public String getProvider() {
@@ -167,9 +166,9 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
-  @Valid
+      @Valid
   @JsonProperty("endpointURIs")
   public List<GatewayEnvironmentProtocolURIDTO> getEndpointURIs() {
     return endpointURIs;
@@ -185,9 +184,9 @@ public class EnvironmentDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
-  @Valid
+      @Valid
   @JsonProperty("additionalProperties")
   public List<AdditionalPropertyDTO> getAdditionalProperties() {
     return additionalProperties;
@@ -195,6 +194,7 @@ public class EnvironmentDTO   {
   public void setAdditionalProperties(List<AdditionalPropertyDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {

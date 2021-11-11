@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
@@ -2062,20 +2061,4 @@ public class AsyncApiParser extends APIDefinition {
         }
         return wsUriMapping;
     }
-
-//    public boolean isSolaceAPI(String definition) {
-//        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
-//        Extension origin = aai20Document.info.getExtension("x-origin");
-//        if (origin != null) {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            Map originMap = objectMapper.convertValue(origin.value, Map.class);
-//            if (originMap.containsKey("vendor")) {
-//                if (APIConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(originMap.get("vendor").toString())) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
-
 }
