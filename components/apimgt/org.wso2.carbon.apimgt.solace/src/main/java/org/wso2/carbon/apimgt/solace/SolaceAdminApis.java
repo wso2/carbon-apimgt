@@ -74,7 +74,7 @@ public class SolaceAdminApis {
         this.developerUserName = developerUserName;
     }
 
-    private String getEncoding() {
+    private String getBase64EncodedCredentials() {
         String toEncode = userName + ":" + password;
         return Base64.getEncoder().encodeToString((toEncode).getBytes());
     }
@@ -91,7 +91,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + environment);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -112,7 +112,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPut httpPut = new HttpPut(baseUrl + "/" + organization + "/apis/" + title);
-        httpPut.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPut.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPut.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
         JsonNode jsonNodeTree;
         String jsonAsYaml = null;
@@ -156,7 +156,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
-        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         //setRequestBody
         org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName,
@@ -187,7 +187,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -207,7 +207,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -226,7 +226,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -254,7 +254,7 @@ public class SolaceAdminApis {
             httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/"
                     + uuid);
         }
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -277,7 +277,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         try {
@@ -312,7 +312,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         // retrieve existing API products in the app
         ArrayList<String> apiProducts = new ArrayList<>();
@@ -350,7 +350,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
-        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application, apiProducts);
         StringEntity params = null;
@@ -375,7 +375,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
-        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpDelete, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -395,7 +395,7 @@ public class SolaceAdminApis {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/apis/" + title);
-        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpDelete, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -417,7 +417,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpDelete httpDelete = new HttpDelete(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + uuid);
-        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpDelete.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         try {
             return APIUtil.executeHTTPRequest(httpDelete, httpClient);
         } catch (IOException | APIManagementException e) {
@@ -438,7 +438,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForRenamingApp(application);
         StringEntity params = null;
@@ -467,7 +467,7 @@ public class SolaceAdminApis {
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPatch httpPatch = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName +
                 "/apps/" + application.getUUID());
-        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getEncoding());
+        httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPatch.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         org.json.JSONObject requestBody = buildRequestBodyForClientIdPatch(application, consumerKey, consumerSecret);
         StringEntity params = null;
