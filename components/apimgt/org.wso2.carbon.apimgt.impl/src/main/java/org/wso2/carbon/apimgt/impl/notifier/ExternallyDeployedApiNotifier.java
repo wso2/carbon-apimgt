@@ -56,11 +56,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
      */
     private void process (Event event) throws NotifierException {
         APIEvent apiEvent;
-        try {
-            apiEvent = (APIEvent) event;
-        } catch (ExceptionInInitializerError e) {
-            throw new NotifierException("Event types is not provided correctly");
-        }
+        apiEvent = (APIEvent) event;
 
         if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
             // Handle API retiring life cycle change in external gateway
@@ -81,10 +77,10 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
 
         apiMgtDAO = ApiMgtDAO.getInstance();
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        boolean deletedFromSolace;
+        boolean deleted;
         String apiId = apiEvent.getUuid();
 
-        if (!apiEvent.getApiStatus().equals(APIConstants.RETIRED)) {
+        if (!APIConstants.RETIRED.equals(apiEvent.getApiStatus())) {
             return;
         }
 
@@ -101,8 +97,8 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             (gatewayEnvironments.get(deploymentEnv).getProvider());
                     if (deployer != null) {
                         try {
-                            deletedFromSolace = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv));
-                            if (!deletedFromSolace) {
+                            deleted = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv));
+                            if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
                         } catch (DeployerException e) {
@@ -126,7 +122,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
     private void undeployWhenDeleting(APIEvent apiEvent) throws NotifierException {
 
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        boolean deletedFromSolace;
+        boolean deleted;
         String apiId = apiEvent.getUuid();
 
         try {
@@ -138,9 +134,9 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             (gatewayEnvironments.get(deploymentEnv).getProvider());
                     if (deployer != null) {
                         try {
-                            deletedFromSolace = deployer.undeploy(apiEvent.getApiName(), apiEvent.getApiVersion(),
+                            deleted = deployer.undeploy(apiEvent.getApiName(), apiEvent.getApiVersion(),
                                     apiEvent.getApiContext(), gatewayEnvironments.get(deploymentEnv));
-                            if (!deletedFromSolace) {
+                            if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
                         } catch (DeployerException e) {

@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.apimgt.impl.deployer.exceptions;
 
+/**
+ * This class will provide the Exception handling for the Deployer task failures.
+ */
 public class DeployerException extends Exception {
 
     public DeployerException(String msg) {

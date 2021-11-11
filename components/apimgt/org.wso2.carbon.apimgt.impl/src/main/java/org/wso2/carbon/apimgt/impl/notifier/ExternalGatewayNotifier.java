@@ -56,11 +56,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
      */
     private void process (Event event) throws NotifierException {
         DeployAPIInGatewayEvent deployAPIInGatewayEvent;
-        try {
-            deployAPIInGatewayEvent = (DeployAPIInGatewayEvent) event;
-        } catch (ExceptionInInitializerError e) {
-            throw new NotifierException("Event types is not provided correctly");
-        }
+        deployAPIInGatewayEvent = (DeployAPIInGatewayEvent) event;
 
         if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
             deployApi(deployAPIInGatewayEvent);
@@ -78,7 +74,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
     private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
 
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        boolean deployedToSolace;
+        boolean deployed;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
 
@@ -93,8 +89,8 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
                             (gatewayEnvironments.get(deploymentEnv).getProvider());
                     if ( deployer!= null) {
                         try {
-                            deployedToSolace = deployer.deploy(api, gatewayEnvironments.get(deploymentEnv));
-                            if (!deployedToSolace) {
+                            deployed = deployer.deploy(api, gatewayEnvironments.get(deploymentEnv));
+                            if (!deployed) {
                                 throw new APIManagementException("Error while deploying API product to Solace broker");
                             }
                         } catch (DeployerException e) {
@@ -117,7 +113,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
     private void unDeployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
 
         Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        boolean deletedFromSolace;
+        boolean deleted;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
 
@@ -132,9 +128,9 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier{
                             (gatewayEnvironments.get(deploymentEnv).getProvider());
                     if (deployer != null) {
                         try {
-                            deletedFromSolace = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
+                            deleted = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
                                     api.getContext(), gatewayEnvironments.get(deploymentEnv));
-                            if (!deletedFromSolace) {
+                            if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
                         } catch (DeployerException e) {
