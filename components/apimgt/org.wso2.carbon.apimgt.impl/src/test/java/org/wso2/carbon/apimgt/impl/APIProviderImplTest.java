@@ -1117,6 +1117,7 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        api.setOrganization("carbon.super");
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
 
@@ -1321,6 +1322,7 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        api.setOrganization("carbon.super");
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
@@ -1404,6 +1406,7 @@ public class APIProviderImplTest {
         api.setVisibility("Public");
         api.setStatus(APIConstants.CREATED);
         api.setWsdlUrl("https://localhost:9443/services/echo?wsdl");
+        api.setOrganization("carbon.super");
         long time = System.currentTimeMillis();
 
         String newVersion = "1.0.1";
@@ -1957,6 +1960,7 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setEnvironments(environments);
         api.setUriTemplates(newUriTemplates);
+        api.setOrganization("carbon.super");
 
         API oldApi = new API(identifier);
         oldApi.setStatus(APIConstants.CREATED);
@@ -1965,6 +1969,7 @@ public class APIProviderImplTest {
         oldApi.setContext("/test");
         oldApi.setEnvironments(environments);
         api.setUriTemplates(uriTemplates);
+        oldApi.setOrganization("carbon.super");
 
 
         List<Documentation> documentationList = getDocumentationList();
@@ -2115,6 +2120,8 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setEnvironments(newEnvironments);
         api.setUriTemplates(newUriTemplates);
+        api.setOrganization("carbon.super");
+
 
         API oldApi = new API(identifier);
         oldApi.setStatus(APIConstants.PUBLISHED);
@@ -2122,6 +2129,8 @@ public class APIProviderImplTest {
         oldApi.setAccessControl("all");
         oldApi.setContext("/test");
         oldApi.setEnvironments(environments);
+        oldApi.setOrganization("carbon.super");
+
         api.setUriTemplates(uriTemplates);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("test", "new_test");
@@ -2346,6 +2355,7 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
         Map<String, String> failedGWEnv = new HashMap<String, String>();
@@ -2400,6 +2410,7 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
         Map<String, String> failedGWEnv = new HashMap<String, String>();
@@ -2456,6 +2467,7 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
 
@@ -2514,6 +2526,7 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setAsDefaultVersion(true);
         api.setEnvironments(environments);
+        api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
 
@@ -3497,6 +3510,7 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setEnvironments(environments);
         api.setUriTemplates(uriTemplates);
+        api.setOrganization("carbon.super");
 
 
         List<Documentation> documentationList = getDocumentationList();

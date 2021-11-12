@@ -14286,6 +14286,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.setString(10, apiProduct.getState());
             prepStmtAddAPIProduct.setString(11, organization);
+            prepStmtAddAPIProduct.setString(12, apiProduct.getVersionTimestamp());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();

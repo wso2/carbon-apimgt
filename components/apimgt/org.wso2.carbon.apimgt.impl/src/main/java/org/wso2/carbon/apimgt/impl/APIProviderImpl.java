@@ -685,31 +685,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (XMLStreamException e) {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
-
-        TreeMap<String, API> apiSortedMap = new TreeMap<>();
-
-        List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName, api.getOrganization());
-            for (API mappedAPI : apiList) {
-                apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
-            }
-
-            APIVersionStringComparator comparator = new APIVersionStringComparator();
-            String latestVersion = api.getId().getVersion();
-            long previousTimestamp = 0L;
-            String latestTimestamp = "";
-            for (API tempAPI : apiSortedMap.values()) {
-                if (comparator.compare(tempAPI.getId().getVersion(), latestVersion) > 0){
-                    latestTimestamp = String.valueOf((previousTimestamp + Long.valueOf(tempAPI.getVersionTimestamp()))/2) ;
-                    break;
-                } else {
-                    previousTimestamp = Long.valueOf(tempAPI.getVersionTimestamp());
-
-                }
-
-            }
-        if (StringUtils.isEmpty(latestTimestamp)) {
-            latestTimestamp = String.valueOf(System.currentTimeMillis());
-        }
+        //Set version timestamp to the API
+        String latestTimestamp = calculateVersionTimestamp(provider, apiName,
+                api.getId().getVersion(), api.getOrganization());
         api.setVersionTimestamp(latestTimestamp);
 
         try {
@@ -6964,6 +6942,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //set the valid resources only
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
+        String provider = APIUtil.replaceEmailDomain(product.getId().getProviderName());
+        // Set version timestamp
+        product.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
 
         // Create registry artifact
         String apiProductUUID = createAPIProduct(product);
@@ -6975,6 +6956,42 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiToProductResourceMapping;
     }
 
+    private String calculateVersionTimestamp(String provider, String name, String version, String org)
+            throws APIManagementException {
+
+        if (StringUtils.isEmpty(provider) ||
+        StringUtils.isEmpty(name) ||
+        StringUtils.isEmpty(org)) {
+            throw new APIManagementException("Invalid API information, name=" + name + " provider=" + provider +
+                    " organization=" + org);
+        }
+        TreeMap<String, API> apiSortedMap = new TreeMap<>();
+
+        List<API> apiList = getAPIVersionsByProviderAndName(provider,
+                name, org);
+        for (API mappedAPI : apiList) {
+            apiSortedMap.put(mappedAPI.getVersionTimestamp(), mappedAPI);
+        }
+
+        APIVersionStringComparator comparator = new APIVersionStringComparator();
+        String latestVersion = version;
+        long previousTimestamp = 0L;
+        String latestTimestamp = "";
+        for (API tempAPI : apiSortedMap.values()) {
+            if (comparator.compare(tempAPI.getId().getVersion(), latestVersion) > 0) {
+                latestTimestamp = String.valueOf((previousTimestamp + Long.valueOf(tempAPI.getVersionTimestamp())) / 2);
+                break;
+            } else {
+                previousTimestamp = Long.valueOf(tempAPI.getVersionTimestamp());
+
+            }
+
+        }
+        if (StringUtils.isEmpty(latestTimestamp)) {
+            latestTimestamp = String.valueOf(System.currentTimeMillis());
+        }
+        return latestTimestamp;
+    }
 
     @Override
     public void saveToGateway(APIProduct product) throws APIManagementException {

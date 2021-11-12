@@ -1484,6 +1484,9 @@ public class RegistryPersistenceUtil {
                     artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
                 }
             }
+
+            //set version timestamp
+            artifact.addAttribute(APIConstants.API_OVERVIEW_VERSION_TIMESTAMP, apiProduct.getVersionTimestamp());
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
