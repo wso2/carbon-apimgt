@@ -171,7 +171,7 @@ public class InboundWebSocketProcessor {
 
         RequestProcessor requestProcessor;
         String msgText = null;
-        if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)
+        if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())
                 && msg instanceof TextWebSocketFrame) {
             requestProcessor = new GraphQLRequestProcessor();
             msgText = ((TextWebSocketFrame) msg).text();
