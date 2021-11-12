@@ -274,7 +274,7 @@ public class ImportUtils {
                 String apiUUID = importedApi.getUuid();
                 for (ResourceEndpointDTO resourceEndpointDTO : resourceEndpoints) {
                     String endpointId = apiProvider.addResourceEndpoint(apiUUID,
-                            ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO), organization);
+                            ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO));
                     updateEndpointIdInChangeEndpointPolicyList(operationsWithChangeEndpointPolicies,
                             resourceEndpointDTO.getId(), endpointId);
                     resourceEndpointDTO.setId(endpointId);
@@ -295,8 +295,7 @@ public class ImportUtils {
                     int policyId = apiProvider.addOperationPolicy(uriTemplate.getId(), operationPolicy);
 
                     String endpointUUID = (String) operationPolicy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
-                    ResourceEndpoint resourceEndpoint = apiProvider
-                            .getResourceEndpointByUUID(endpointUUID, organization);
+                    ResourceEndpoint resourceEndpoint = apiProvider.getResourceEndpointByUUID(endpointUUID);
                     apiProvider.addResourceEndpointMapping(policyId, resourceEndpoint.getId());
                 }
             }
