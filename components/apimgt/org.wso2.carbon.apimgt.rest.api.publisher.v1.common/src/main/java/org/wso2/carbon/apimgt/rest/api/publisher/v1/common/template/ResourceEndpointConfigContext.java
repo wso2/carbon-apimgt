@@ -28,7 +28,6 @@ public class ResourceEndpointConfigContext extends ConfigContextDecorator {
     private JSONObject resourceEndpointConfig;
     private Map<String, Map<String, EndpointSecurityModel>> resourceEndpointSecurityConfig;
 
-
     public ResourceEndpointConfigContext(ConfigContext context, List<ResourceEndpoint> resourceEndpoints, API api) {
         super(context);
         this.resourceEndpoints = resourceEndpoints;
@@ -98,10 +97,10 @@ public class ResourceEndpointConfigContext extends ConfigContextDecorator {
             //Add support for BASIC
             if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
                 if (StringUtils.isNotBlank(endpointSecurityModel.getUsername()) && StringUtils
-                    .isNotBlank(endpointSecurityModel.getPassword())) {
+                        .isNotBlank(endpointSecurityModel.getPassword())) {
                     endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                        endpointSecurityModel.getUsername().concat(":").concat(endpointSecurityModel.getPassword())
-                                .getBytes())));
+                            endpointSecurityModel.getUsername().concat(":").concat(endpointSecurityModel.getPassword())
+                                    .getBytes())));
                 }
             }
 

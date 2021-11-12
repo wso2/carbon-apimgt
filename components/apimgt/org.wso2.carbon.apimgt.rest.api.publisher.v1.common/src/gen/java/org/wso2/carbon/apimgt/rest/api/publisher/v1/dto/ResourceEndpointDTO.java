@@ -87,7 +87,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "EP1", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -105,7 +105,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "HTTP", required = true, value = "")
   @JsonProperty("endpointType")
   @NotNull
   public EndpointTypeEnum getEndpointType() {
@@ -123,7 +123,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "http://localhost:8080/example", required = true, value = "")
   @JsonProperty("url")
   @NotNull
   public String getUrl() {
@@ -176,7 +176,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Usage count of Resource Endpoint ")
+  @ApiModelProperty(example = "1", value = "Usage count of Resource Endpoint ")
   @JsonProperty("usageCount")
   public Integer getUsageCount() {
     return usageCount;
