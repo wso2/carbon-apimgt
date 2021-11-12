@@ -2770,7 +2770,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Required 'endpointId' parameter for " + policy.getPolicyType() + " operation policy is empty",
                         ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
                                 policy.getPolicyType().toString()));
-            } else if (!isAPIResourceEndpointExists(apiId, null, endpointId, tenantDomain)) {
+            } else if (!isAPIResourceEndpointExists(apiId, null, endpointId)) {
                 throw new APIManagementException(
                         "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM)
                                 + " not found for API",
@@ -9732,15 +9732,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addResourceEndpoint(String uuid, ResourceEndpoint endpoint, String organization)
+    public String addResourceEndpoint(String uuid, ResourceEndpoint endpoint)
             throws APIManagementException {
-        return apiMgtDAO.addResourceEndpoint(uuid, endpoint, organization);
+        return apiMgtDAO.addResourceEndpoint(uuid, endpoint);
     }
 
     @Override
-    public ResourceEndpoint getResourceEndpointByUUID(String uuid, String organization)
+    public ResourceEndpoint getResourceEndpointByUUID(String uuid)
             throws APIManagementException {
-        ResourceEndpoint resourceEndpoint = apiMgtDAO.getResourceEndpointByUUID(null, uuid, organization);
+        ResourceEndpoint resourceEndpoint = apiMgtDAO.getResourceEndpointByUUID(uuid);
         if (resourceEndpoint == null) {
             throw new APIMgtResourceNotFoundException("Resource Endpoint not found for specified endpoint ID: " + uuid,
                     ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, uuid));
@@ -9749,25 +9749,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<ResourceEndpoint> getResourceEndpoints(String uuid, String organization)
+    public List<ResourceEndpoint> getResourceEndpoints(String uuid)
             throws APIManagementException {
-        return apiMgtDAO.getResourceEndpoints(uuid, organization);
+        return apiMgtDAO.getResourceEndpoints(uuid);
     }
 
     @Override
-    public void updateResourceEndpoint(ResourceEndpoint endpoint, String organization)
+    public void updateResourceEndpoint(ResourceEndpoint endpoint)
             throws APIManagementException {
-        apiMgtDAO.updateResourceEndpoint(endpoint, organization);
+        apiMgtDAO.updateResourceEndpoint(endpoint);
     }
 
     @Override
-    public void deleteResourceEndpoint(String uuid, String organization) throws APIManagementException {
-        apiMgtDAO.deleteResourceEndpoint(uuid, organization);
+    public void deleteResourceEndpoint(String uuid) throws APIManagementException {
+        apiMgtDAO.deleteResourceEndpoint(uuid);
     }
 
     @Override
-    public boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId, String organization) throws APIManagementException {
-        return apiMgtDAO.isAPIResourceEndpointExists(apiId, revisionUUID, endpointId, organization);
+    public boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId)
+            throws APIManagementException {
+        return apiMgtDAO.isAPIResourceEndpointExists(apiId, revisionUUID, endpointId);
     }
 
     @Override

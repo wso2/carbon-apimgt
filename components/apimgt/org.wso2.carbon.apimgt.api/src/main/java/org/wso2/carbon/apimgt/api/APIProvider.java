@@ -1862,61 +1862,55 @@ public interface APIProvider extends APIManager {
      *
      * @param uuid                API Identifier
      * @param endpoint            Resource Endpoint
-     * @param organization        Identifier of an organization
      * @return UUID of the resource endpoint
      * @throws APIManagementException if failed to add resource endpoint
      */
-    String addResourceEndpoint(String uuid, ResourceEndpoint endpoint, String organization)
+    String addResourceEndpoint(String uuid, ResourceEndpoint endpoint)
             throws APIManagementException;
 
     /**
      * Update Resource Endpoint
      *
      * @param endpoint      Resource endpoint
-     * @param organization  Organization
      * @throws APIManagementException
      */
-    void updateResourceEndpoint(ResourceEndpoint endpoint, String organization) throws APIManagementException;
+    void updateResourceEndpoint(ResourceEndpoint endpoint) throws APIManagementException;
 
     /**
      * Deletes Resource Endpoint
      *
      * @param uuid          Resource Endpoint UUID
-     * @param organization  Organization
      * @throws APIManagementException
      */
-    void deleteResourceEndpoint(String uuid, String organization) throws  APIManagementException;
+    void deleteResourceEndpoint(String uuid) throws  APIManagementException;
 
     /**
      * Gets API Resource Endpoint by UUID
      *
      * @param uuid          Resource Endpoint UUID
-     * @param organization  Organization
      * @return
      * @throws APIManagementException
      */
-    ResourceEndpoint getResourceEndpointByUUID(String uuid, String organization) throws APIManagementException;
+    ResourceEndpoint getResourceEndpointByUUID(String uuid) throws APIManagementException;
 
     /**
      * Get resource endpoints list of an API
      *
      * @param apiId         API UUID
-     * @param organization  Organization
      * @return List of Resource Endpoints
      * @throws APIManagementException
      */
-    List<ResourceEndpoint> getResourceEndpoints(String apiId, String organization) throws APIManagementException;
+    List<ResourceEndpoint> getResourceEndpoints(String apiId) throws APIManagementException;
 
     /**
      * Checks whether a resource endpoint by the given UUID exists under the API specified by apiId
      *
      * @param apiId             API UUID
      * @param endpointId        Endpoint UUID
-     * @param organization      Organization
      * @return
      * @throws APIManagementException
      */
-    boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId, String organization)
+    boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId)
             throws APIManagementException;
 
     /**
