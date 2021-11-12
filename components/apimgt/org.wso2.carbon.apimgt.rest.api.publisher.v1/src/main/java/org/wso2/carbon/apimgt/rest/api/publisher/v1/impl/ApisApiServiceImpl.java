@@ -4949,11 +4949,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIInfo apiInfo = validateAPIExistence(apiId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-            String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
-            ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+            String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd);
+            ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId);
             ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil
                     .fromResourceEndpointToDTO(createdEndpoint);
 
@@ -4972,14 +4971,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateResourceEndpoint(String apiId, String endpointId,
             ResourceEndpointDTO resourceEndpointDTO, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         ResourceEndpoint resourceEndpoint = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
         resourceEndpoint.setId(endpointId);
-        apiProvider.updateResourceEndpoint(resourceEndpoint, organization);
+        apiProvider.updateResourceEndpoint(resourceEndpoint);
 
         //get updated resource endpoint
-        ResourceEndpoint updatedResourceEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+        ResourceEndpoint updatedResourceEndpoint = apiProvider.getResourceEndpointByUUID(endpointId);
         ResourceEndpointDTO updatedEndpointDTO = ResourceEndpointMappingUtil
                 .fromResourceEndpointToDTO(updatedResourceEndpoint);
         return Response.ok().entity(updatedEndpointDTO).build();
@@ -4996,7 +4994,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + "an operation level mediation policy",
                     ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_ALREADY_USED, endpointId));
         }
-        apiProvider.deleteResourceEndpoint(endpointId, organization);
+        apiProvider.deleteResourceEndpoint(endpointId);
         return Response.ok().build();
     }
 
@@ -5008,9 +5006,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        List<ResourceEndpoint> resourceEndpoints = apiProvider.getResourceEndpoints(apiId, organization);
+        List<ResourceEndpoint> resourceEndpoints = apiProvider.getResourceEndpoints(apiId);
         ResourceEndpointListDTO resourceEndpointListDTO = ResourceEndpointMappingUtil
                 .fromResourceEndpointListToDTO(resourceEndpoints, offset, limit);
         ResourceEndpointMappingUtil
@@ -5022,9 +5019,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getResourceEndpoint(String apiId, String endpointId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-        ResourceEndpoint endpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
+        ResourceEndpoint endpoint = apiProvider.getResourceEndpointByUUID(endpointId);
         ResourceEndpointDTO endpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(endpoint);
         if (endpoint != null) {
             return Response.ok().entity(endpointDTO).build();
