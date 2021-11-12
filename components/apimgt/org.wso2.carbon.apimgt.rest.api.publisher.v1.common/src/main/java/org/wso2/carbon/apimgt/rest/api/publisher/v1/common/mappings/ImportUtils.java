@@ -254,7 +254,7 @@ public class ImportUtils {
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
 
-                //We need to deter addition of change_endpoint policies until the resource endpoint
+                //We need to delay addition of change_endpoint policies until the resource endpoint
                 //entries are added, hence removing them from the APIDTO
                 boolean isResourceEndpointsAvailable = CommonUtil.checkFileExistence(
                         extractedFolderPath + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY);
@@ -263,8 +263,8 @@ public class ImportUtils {
                 if (isResourceEndpointsAvailable) {
                     resourceEndpoints = retrieveAPIResourceEndpoints(extractedFolderPath);
                 }
-                operationsWithChangeEndpointPolicies = filterOutChangeEndpointPolicies(
-                        importedApiDTO, resourceEndpoints);
+                operationsWithChangeEndpointPolicies = filterOutChangeEndpointPolicies(importedApiDTO,
+                        resourceEndpoints);
 
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
@@ -273,7 +273,7 @@ public class ImportUtils {
                 //Add resource endpoints and change_endpoint policies if exists
                 String apiUUID = importedApi.getUuid();
                 for (ResourceEndpointDTO resourceEndpointDTO : resourceEndpoints) {
-                    String endpointId = apiProvider.addResourceEndpoint(apiUUID, null,
+                    String endpointId = apiProvider.addResourceEndpoint(apiUUID,
                             ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO), organization);
                     updateEndpointIdInChangeEndpointPolicyList(operationsWithChangeEndpointPolicies,
                             resourceEndpointDTO.getId(), endpointId);
@@ -460,7 +460,7 @@ public class ImportUtils {
     private static Map<String, OperationPolicyDTO> filterOutChangeEndpointPolicies(APIDTO importedApiDTO,
             ArrayList<ResourceEndpointDTO> resourceEndpoints) throws IOException, APIManagementException {
         Map<String, OperationPolicyDTO> operationsWithChangeEndpointPolicy = new HashMap<>();
-        //check whether there are any CHANGE_ENDPOINT policies in the operation policies list
+        //check whether there are any CHANGE_ENDPOINT or CALL_VALIDATION_SERVICE policies in the operation policies list
         List<APIOperationsDTO> operations = importedApiDTO.getOperations();
         for (APIOperationsDTO operation : operations) {
             if (operation.getOperationPolicies() != null) {
@@ -469,16 +469,19 @@ public class ImportUtils {
                 Iterator<OperationPolicyDTO> iterator = inPolicies.iterator();
                 while (iterator.hasNext()) {
                     OperationPolicyDTO policy = iterator.next();
-                    if (policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CHANGE_ENDPOINT)) {
+                    if (policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CHANGE_ENDPOINT) ||
+                            policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CALL_VALIDATION_SERVICE)) {
                         Map<String, Object> policyParameters = policy.getParameters();
                         String endpointId = (String) policyParameters.get(APIConstants.ENDPOINT_ID_PARAM);
                         if (isResourceEndpointExists(endpointId, resourceEndpoints)) {
                             operationsWithChangeEndpointPolicy
                                     .put(operation.getTarget() + ":" + operation.getVerb(), policy);
                         } else {
-                            log.warn("Resource endpoint record for " + endpointId + "cannot be found in the "
-                                    + "resource-endpoints file, hence skipping the CHNAGE_ENDPOINT policy that "
-                                    + "involves the endpoint");
+                            if (log.isDebugEnabled()) {
+                                log.debug("Resource endpoint record for " + endpointId + "cannot be found in the "
+                                        + "resource-endpoints file, hence skipping the " + policy.getPolicyType()
+                                        + " policy that " + "involves the endpoint");
+                            }
                         }
                         iterator.remove();
                     }

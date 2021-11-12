@@ -4958,7 +4958,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-            String endpointId = apiProvider.addResourceEndpoint(apiId, null, endpointToAdd, organization);
+            String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd, organization);
             ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId, organization);
             ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil
                     .fromResourceEndpointToDTO(createdEndpoint);
@@ -4981,12 +4981,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         ResourceEndpoint resourceEndpoint = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-        if (StringUtils.isEmpty(resourceEndpoint.getName())) {
-            throw new APIManagementException("Resource Endpoint name cannot be null or empty",
-                    ExceptionCodes.RESOURCE_ENDPOINT_NAME_NOT_SPECIFIED);
-        }
-
-        //todo: check whether resource endpoint exists by ID
         resourceEndpoint.setId(endpointId);
         apiProvider.updateResourceEndpoint(resourceEndpoint, organization);
 
