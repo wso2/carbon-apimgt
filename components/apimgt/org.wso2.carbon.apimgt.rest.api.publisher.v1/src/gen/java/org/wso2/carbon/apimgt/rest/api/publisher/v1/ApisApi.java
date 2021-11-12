@@ -527,7 +527,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
-    }, tags={ "Resource Endpoint",  })
+    }, tags={ "Resource Endpoints",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Updated Resource Endpoints is returned. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -1311,7 +1311,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={ "Resource Endpoint",  })
+    }, tags={ "Resource Endpoints",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource Endpoints is returned. ", response = ResourceEndpointDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -1767,7 +1767,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
-    }, tags={ "Resource Endpoint",  })
+    }, tags={ "Resource Endpoints",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Updated Resource Endpoints is returned. ", response = ResourceEndpointDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

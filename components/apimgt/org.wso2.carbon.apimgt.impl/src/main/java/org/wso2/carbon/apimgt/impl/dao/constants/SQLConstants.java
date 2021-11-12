@@ -3716,23 +3716,17 @@ public class SQLConstants {
         public static final String ADD_RESOURCE_ENDPOINT =
                 "INSERT INTO " +
                 "AM_API_RESOURCE_ENDPOINTS " +
-                "(API_ID, UUID, ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG, TENANT_ID, " +
-                "REVISION_UUID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        public static final String ADD_REVISION_RESOURCE_ENDPOINT =
-                "INSERT INTO " + "AM_API_RESOURCE_ENDPOINTS " +
-                "(API_ID, UUID, ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG, TENANT_ID, " +
-                "REVISION_UUID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "(API_UUID, UUID, ENDPOINT_NAME, ENDPOINT_TYPE, URL, SECURITY_CONFIG, ENDPOINT_CONFIG, " +
+                "REVISION_UUID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         public static final String GET_RESOURCE_ENDPOINT_OF_CURRENT_API_BY_UUID =
                 "SELECT " +
                 "RE.RESOURCE_ENDPOINT_ID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, " +
                 "RE.ENDPOINT_CONFIG, (SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM WHERE " +
-                "REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID " +
-                "AND RE.TENANT_ID = ?) USAGES " +
+                "REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID) USAGES " +
                 "FROM "+
                 "AM_API_RESOURCE_ENDPOINTS RE " +
-                "WHERE RE.UUID = ? AND RE.TENANT_ID = ? AND RE.REVISION_UUID IS NULL";
+                "WHERE RE.UUID = ? AND RE.REVISION_UUID IS NULL";
 
         public static final String GET_RESOURCE_ENDPOINT_ID =
                 "SELECT RESOURCE_ENDPOINT_ID FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND REVISION_UUID = ?";
@@ -3742,39 +3736,36 @@ public class SQLConstants {
 
         public static final String GET_RESOURCE_ENDPOINT_OF_REVISION_BY_UUID =
                 "SELECT " +
-                "RE.API_ID, RE.RESOURCE_ENDPOINT_ID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, " +
+                "RE.API_UUID, RE.RESOURCE_ENDPOINT_ID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, " +
                 "RE.ENDPOINT_CONFIG, " +
                 "(SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM " +
-                "WHERE REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID " +
-                "AND RE.TENANT_ID = ?) USAGES " +
+                "WHERE REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID) USAGES " +
                 "FROM "+
                 "AM_API_RESOURCE_ENDPOINTS RE " +
-                "WHERE RE.UUID = ? AND RE.TENANT_ID = ? AND RE.REVISION_UUID = ?";
+                "WHERE RE.UUID = ? AND RE.REVISION_UUID = ?";
 
         public static final String GET_RESOURCE_ENDPOINTS_OF_API_WITH_USAGE_COUNT =
                 "SELECT " +
                 "RE.UUID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, RE.ENDPOINT_CONFIG, " +
                 "(SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM WHERE " +
-                "REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID " +
-                "AND RE.TENANT_ID = ?) USAGES " +
+                "REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID) USAGES " +
                 "FROM "+
                 "AM_API_RESOURCE_ENDPOINTS RE " +
-                "WHERE RE.API_ID = ? AND RE.TENANT_ID = ? AND RE.REVISION_UUID IS NULL";
+                "WHERE RE.API_UUID = ? AND RE.REVISION_UUID IS NULL";
 
         public static final String GET_RESOURCE_ENDPOINTS_OF_API_REVISION_WITH_USAGE_COUNT =
                 "SELECT " +
                 "RE.UUID, RE.ENDPOINT_NAME, RE.ENDPOINT_TYPE, RE.URL, RE.SECURITY_CONFIG, RE.ENDPOINT_CONFIG, " +
                 "(SELECT COUNT(*) FROM AM_API_RESOURCE_ENDPOINT_MAPPING REM WHERE " +
-                "REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID " +
-                "AND RE.TENANT_ID = ?) USAGES " +
+                "REM.RESOURCE_ENDPOINT_ID=RE.RESOURCE_ENDPOINT_ID) USAGES " +
                 "FROM "+
                 "AM_API_RESOURCE_ENDPOINTS RE " +
-                "WHERE RE.API_ID = ? AND RE.TENANT_ID = ? AND RE.REVISION_UUID = ?";
+                "WHERE RE.API_UUID = ? AND RE.REVISION_UUID = ?";
 
         public static final String UPDATE_RESOURCE_ENDPOINT =
                 "UPDATE AM_API_RESOURCE_ENDPOINTS " +
                 "SET ENDPOINT_NAME = ?, ENDPOINT_TYPE = ?, URL = ?, SECURITY_CONFIG = ?, ENDPOINT_CONFIG = ? " +
-                "WHERE UUID = ? AND TENANT_ID = ? AND REVISION_UUID IS NULL";
+                "WHERE UUID = ? AND REVISION_UUID IS NULL";
 
         public static final String DELETE_RESOURCE_ENDPOINT =
                 "DELETE FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND TENANT_ID = ? AND REVISION_UUID IS NULL";
@@ -3783,12 +3774,10 @@ public class SQLConstants {
                 "DELETE FROM AM_API_RESOURCE_ENDPOINTS WHERE REVISION_UUID = ?";
 
         public static final String IS_API_RESOURCE_ENDPOINT_EXISTS =
-                "SELECT * FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND API_ID = ? AND TENANT_ID = ? AND " +
-                "REVISION_UUID IS NULL";
+                "SELECT * FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND API_UUID = ? AND REVISION_UUID IS NULL";
 
         public static final String IS_REVISION_RESOURCE_ENDPOINT_EXISTS =
-                "SELECT * FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND API_ID = ? AND TENANT_ID = ? AND " +
-                "REVISION_UUID = ?";
+                "SELECT * FROM AM_API_RESOURCE_ENDPOINTS WHERE UUID = ? AND API_UUID = ? AND REVISION_UUID = ?";
 
         public static final String ADD_RESOURCE_ENDPOINT_MAPPING =
                 "INSERT INTO AM_API_RESOURCE_ENDPOINT_MAPPING " +
@@ -3800,28 +3789,30 @@ public class SQLConstants {
                 "ON RE.RESOURCE_ENDPOINT_ID=REM.RESOURCE_ENDPOINT_ID " +
                 "WHERE RE.UUID = ? AND RE.REVISION_UUID IS NULL";
 
-        public static final String GET_CHANGE_ENDPOINT_POLICY_UUIDS_OF_CURRENT_API =
+        public static final String GET_ENDPOINT_POLICY_UUIDS_OF_CURRENT_API =
                 "SELECT " +
                 "OPM.OPERATION_POLICY_MAPPING_ID, OPM.DIRECTION, OPM.PARAMETERS " +
                 "FROM AM_API_OPERATION_POLICY_MAPPING OPM " +
                 "LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? " +
-                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
+                "AND (OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
+                "OR OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE + "') " +
                 "AND AUM.REVISION_UUID IS NULL";
 
-        public static final String GET_CHANGE_ENDPOINT_POLICY_UUIDS_OF_REVISION =
+        public static final String GET_ENDPOINT_POLICY_UUIDS_OF_REVISION =
                 "SELECT " +
                 "OPM.OPERATION_POLICY_MAPPING_ID, OPM.DIRECTION, OPM.PARAMETERS " +
                 "FROM AM_API_OPERATION_POLICY_MAPPING OPM " +
                 "LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? " +
-                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
+                "AND (OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
+                "OR OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE + "') " +
                 "AND AUM.REVISION_UUID = ?";
 
         public static final String REMOVE_CURRENT_API_ENTRIES_FROM_RESOURCE_ENDPOINTS_TABLE =
-                "DELETE FROM AM_API_RESOURCE_ENDPOINTS WHERE API_ID = ? AND REVISION_UUID=NULL";
+                "DELETE FROM AM_API_RESOURCE_ENDPOINTS WHERE API_UUID = ? AND REVISION_UUID=NULL";
     }
 
     /**
