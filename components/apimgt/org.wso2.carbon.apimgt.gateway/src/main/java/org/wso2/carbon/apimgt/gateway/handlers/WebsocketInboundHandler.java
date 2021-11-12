@@ -34,7 +34,10 @@ import io.netty.util.CharsetUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
@@ -43,6 +46,8 @@ import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.InetSocketAddress;
@@ -74,7 +79,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
         String channelId = ctx.channel().id().asLongText();
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
@@ -100,7 +106,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             populateContextHeaders(req, inboundMessageContext);
             InboundProcessorResponseDTO responseDTO =
                     webSocketProcessor.handleHandshake(req, ctx, inboundMessageContext);
-            if (responseDTO.isError()) {
+            if (!responseDTO.isError()) {
+                setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
+                if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
+                    req.headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, inboundMessageContext.getToken());
+                }
+                ctx.fireChannelRead(req);
+                publishHandshakeEvent(ctx, inboundMessageContext);
+                InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
+                        ctx.channel().remoteAddress().toString());
+            } else {
                 InboundMessageContextDataHolder.getInstance().removeInboundMessageContextForConnection(channelId);
                 FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                         HttpResponseStatus.valueOf(responseDTO.getErrorCode()),
@@ -108,8 +123,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
                 httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
-            } else {
-                ctx.fireChannelRead(msg);
             }
         } else if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PingWebSocketFrame)) {
             //remove inbound message context from data holder
@@ -149,6 +162,20 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    /**
+     * Set API auth properties to channel.
+     *
+     * @param ctx                   Channel context
+     * @param inboundMessageContext InboundMessageContext
+     */
+    private void setApiAuthPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
+        apiPropertiesMap.put(APIConstants.API_KEY_TYPE, inboundMessageContext.getKeyType());
+        apiPropertiesMap.put(APISecurityUtils.API_AUTH_CONTEXT, inboundMessageContext.getAuthContext());
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
+    }
+
     private void publishPublishThrottledEvent(ChannelHandlerContext ctx) {
         if (APIUtil.isAnalyticsEnabled()) {
             addThrottledErrorPropertiesToChannel(ctx);
@@ -180,9 +207,27 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void publishPublishEvent(ChannelHandlerContext ctx) {
-        if (APIUtil.isAnalyticsEnabled()) {
 
+        if (APIUtil.isAnalyticsEnabled()) {
             metricsHandler.handlePublish(ctx);
+        }
+    }
+
+    /**
+     * Publish handshake event if analytics enabled.
+     *
+     * @param ctx                   Channel context
+     * @param inboundMessageContext InboundMessageContext
+     */
+    private void publishHandshakeEvent(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_AGENT_PROPERTY,
+                    inboundMessageContext.getRequestHeaders().get(HttpHeaders.USER_AGENT));
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE,
+                    inboundMessageContext.getMatchingResource());
+            metricsHandler.handleHandshake(ctx);
         }
     }
 }

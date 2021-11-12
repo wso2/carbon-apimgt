@@ -119,17 +119,6 @@ public class InboundWebSocketProcessor {
                         .get(HttpHeaders.AUTHORIZATION));
                 inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
-                if (!inboundProcessorResponseDTO.isError()) {
-                    setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
-                    if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
-                        req.headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, inboundMessageContext.getToken());
-                    }
-                    ctx.fireChannelRead(req);
-                    publishHandshakeEvent(ctx, inboundMessageContext);
-                    InboundWebsocketProcessorUtil.publishGoogleAnalyticsData(inboundMessageContext,
-                            ctx.channel().remoteAddress().toString());
-                    return inboundProcessorResponseDTO;
-                }
             } else {
                 String errorMessage = "No Authorization Header or access_token query parameter present";
                 log.error(errorMessage + " in request for the websocket context "
@@ -413,24 +402,6 @@ public class InboundWebSocketProcessor {
     }
 
     /**
-     * Publish handshake event if analytics enabled.
-     *
-     * @param ctx                   Channel context
-     * @param inboundMessageContext InboundMessageContext
-     */
-    private void publishHandshakeEvent(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
-
-        if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx,
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_AGENT_PROPERTY,
-                    inboundMessageContext.getRequestHeaders().get(HttpHeaders.USER_AGENT));
-            WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE,
-                    inboundMessageContext.getMatchingResource());
-            metricsHandler.handleHandshake(ctx);
-        }
-    }
-
-    /**
      * Remove error properties from channel properties.
      *
      * @param ctx Channel context
@@ -438,20 +409,6 @@ public class InboundWebSocketProcessor {
     private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
         WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
         WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
-    }
-
-    /**
-     * Set API auth properties to channel.
-     *
-     * @param ctx                   Channel context
-     * @param inboundMessageContext InboundMessageContext
-     */
-    private void setApiAuthPropertiesToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
-
-        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
-        apiPropertiesMap.put(APIConstants.API_KEY_TYPE, inboundMessageContext.getKeyType());
-        apiPropertiesMap.put(APISecurityUtils.API_AUTH_CONTEXT, inboundMessageContext.getAuthContext());
-        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
     /**
