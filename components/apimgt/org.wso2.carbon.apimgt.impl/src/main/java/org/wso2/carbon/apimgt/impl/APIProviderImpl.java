@@ -9157,12 +9157,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+    public Environment getEnvironment(String organization, String uuid) throws APIManagementException {
         // priority for configured environments over dynamic environments
         // name is the UUID of environments configured in api-manager.xml
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
-            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+            env = apiMgtDAO.getEnvironment(organization, uuid);
             if (env == null) {
                 String errorMessage =
                         String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);

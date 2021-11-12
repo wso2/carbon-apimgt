@@ -1834,8 +1834,8 @@ public interface APIProvider extends APIManager {
     /**
      * Returns environment of a given uuid
      *
-     * @param tenantDomain tenant domain
+     * @param organization Organization
      * @return List of environments related to the given tenant
      */
-    Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+    Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 }
