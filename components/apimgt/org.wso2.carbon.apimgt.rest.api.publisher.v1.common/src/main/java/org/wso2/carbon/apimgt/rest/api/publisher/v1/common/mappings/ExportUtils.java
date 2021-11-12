@@ -1115,7 +1115,7 @@ public class ExportUtils {
             ExportFormat exportFormat, APIProvider apiProvider, String organization) throws APIImportExportException {
         try {
             List<ResourceEndpoint> resourceEndpoints = apiProvider
-                    .getResourceEndpoints(apiDtoToReturn.getId(), organization);
+                    .getResourceEndpoints(apiDtoToReturn.getId());
 
             if (!resourceEndpoints.isEmpty()) {
                 String resourceEndpointsDirectoryPath =
