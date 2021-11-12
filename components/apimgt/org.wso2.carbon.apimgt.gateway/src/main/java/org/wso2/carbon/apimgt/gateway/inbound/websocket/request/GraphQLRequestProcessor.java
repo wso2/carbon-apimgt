@@ -93,11 +93,6 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                 // extract verb info dto with throttle policy for matching verb
                                 VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil.findMatchingVerb(
                                         subscriptionOperation, inboundMessageContext);
-                                // add verb info dto for the invoking subscription operation request
-                                inboundMessageContext
-                                        .addVerbInfoForGraphQLMsgId(graphQLMsg.getString(
-                                                        GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID),
-                                                new GraphQLOperationDTO(verbInfoDTO, subscriptionOperation));
                                 SubscriptionAnalyzer subscriptionAnalyzer =
                                         new SubscriptionAnalyzer(inboundMessageContext.getGraphQLSchemaDTO()
                                                 .getGraphQLSchema());
@@ -106,8 +101,13 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                         inboundMessageContext, graphQLSubscriptionPayload, operationId);
                                 if (!responseDTO.isError()) {
                                     //throttle for matching resource
-                                    return InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
+                                    responseDTO = InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO,
                                             inboundMessageContext, operationId);
+                                    // add verb info dto for the successful invoking subscription operation request
+                                    inboundMessageContext.addVerbInfoForGraphQLMsgId(
+                                            graphQLMsg.getString(
+                                                    GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_ID),
+                                            new GraphQLOperationDTO(verbInfoDTO, subscriptionOperation));
                                 }
                             }
                         }
