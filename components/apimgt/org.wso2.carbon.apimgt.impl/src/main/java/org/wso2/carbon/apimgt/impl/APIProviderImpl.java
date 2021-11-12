@@ -2490,6 +2490,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void validateOperationPolicyParameters(API api) throws APIManagementException {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         String apiId = api.getUuid();
+
+        if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
+                || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Operation policies are not allowed for " + api.getType() + " APIs");
+            }
+        }
+
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
 
@@ -2751,17 +2759,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Object> parameters = policy.getParameters();
         String endpointId;
         if (!parameters.containsKey(APIConstants.ENDPOINT_ID_PARAM)) {
-            throw new APIManagementException(
-                    "Required 'endpointId' parameter for " + policy.getPolicyType() + " operation policy is either missing or empty",
-                    ExceptionCodes
-                            .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
-                                    policy.getPolicyType().toString()));
+            throw new APIManagementException("Required 'endpointId' parameter for " + policy.getPolicyType()
+                    + " operation policy is either missing", ExceptionCodes
+                    .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
+                            policy.getPolicyType().toString()));
         } else {
             endpointId = (String) parameters.get(APIConstants.ENDPOINT_ID_PARAM);
-            if (StringUtils.isEmpty(endpointId) && !isAPIResourceEndpointExists(apiId, null, endpointId,
-                    tenantDomain)) {
+            if (StringUtils.isEmpty(endpointId)) {
                 throw new APIManagementException(
-                        "Resource endpoint " + (String) parameters.get(APIConstants.ENDPOINT_ID_PARAM)
+                        "Required 'endpointId' parameter for " + policy.getPolicyType() + " operation policy is empty",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
+                                policy.getPolicyType().toString()));
+            } else if (!isAPIResourceEndpointExists(apiId, null, endpointId, tenantDomain)) {
+                throw new APIManagementException(
+                        "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM)
                                 + " not found for API",
                         ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, endpointId));
             }
@@ -9721,9 +9732,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addResourceEndpoint(String uuid, String revisionId, ResourceEndpoint endpoint, String organization)
+    public String addResourceEndpoint(String uuid, ResourceEndpoint endpoint, String organization)
             throws APIManagementException {
-        return apiMgtDAO.addResourceEndpoint(uuid, revisionId, endpoint, organization);
+        return apiMgtDAO.addResourceEndpoint(uuid, endpoint, organization);
     }
 
     @Override
