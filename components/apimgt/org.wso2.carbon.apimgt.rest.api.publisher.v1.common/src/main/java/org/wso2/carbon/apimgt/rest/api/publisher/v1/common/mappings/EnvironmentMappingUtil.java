@@ -45,6 +45,7 @@ public class EnvironmentMappingUtil {
     public static EnvironmentDTO fromEnvironmentToDTO(Environment environment) {
 
         EnvironmentDTO environmentDTO = new EnvironmentDTO();
+        environmentDTO.setId(environment.getUuid());
         environmentDTO.setName(environment.getName());
         environmentDTO.setDisplayName(environment.getDisplayName());
         environmentDTO.setType(environment.getType());

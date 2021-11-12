@@ -27,6 +27,7 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.ListFunctionsResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
@@ -61,6 +62,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -70,6 +72,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
@@ -180,6 +183,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -195,6 +199,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -5116,4 +5121,62 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         return Response.status(status).entity(apiRevisionDeploymentDTO).build();
     }
+
+    @Override
+    public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext)
+            throws APIManagementException {
+        // validate api UUID
+        validateAPIExistence(apiId);
+        // validate environment UUID
+        validateEnvironment(envId);
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        // get properties
+        EnvironmentPropertiesDTO properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
+        // convert to string to remove null values
+        String jsonContent = new Gson().toJson(properties);
+
+        return Response.ok().entity(jsonContent).build();
+    }
+
+    @Override
+    public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody,
+            MessageContext messageContext) throws APIManagementException {
+        // validate api UUID
+        validateAPIExistence(apiId);
+        // validate environment UUID
+        validateEnvironment(envId);
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        // adding properties
+
+        EnvironmentPropertiesDTO properties = validateRequestPayload(requestBody);
+        apiProvider.addEnvironmentSpecificAPIProperties(apiId, envId, properties);
+        // get properties
+        properties = apiProvider.getEnvironmentSpecificAPIProperties(apiId, envId);
+        // convert to string to remove null values
+        String jsonContent = new Gson().toJson(properties);
+
+        return Response.ok().entity(jsonContent).build();
+    }
+
+    private EnvironmentPropertiesDTO validateRequestPayload(Map<String, String> requestBody)
+            throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(requestBody, new TypeReference<EnvironmentPropertiesDTO>() {     });
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Possible keys are productionEndpoint,sandboxEndpoint";
+            throw new APIManagementException(e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.INVALID_ENV_API_PROP_CONFIG, errorMessage));
+        }
+    }
+
+    private void validateEnvironment(String envId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        // if apiProvider.getEnvironment(tenantDomain, envId) return null, it will throw an exception
+        apiProvider.getEnvironment(tenantDomain, envId);
+    }
+
 }

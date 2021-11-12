@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -76,6 +77,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -9135,5 +9137,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
+    }
+
+    @Override
+    public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
+            EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
+        String content = new Gson().toJson(environmentPropertyDTO);
+        environmentSpecificAPIPropertyDAO.addOrUpdateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
+    }
+
+    @Override
+    public EnvironmentPropertiesDTO getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid)
+            throws APIManagementException {
+        String content = environmentSpecificAPIPropertyDAO.getEnvironmentSpecificAPIProperties(apiUuid, envUuid);
+        if (StringUtils.isBlank(content)) {
+            return new EnvironmentPropertiesDTO();
+        }
+        return new Gson().fromJson(content, EnvironmentPropertiesDTO.class);
+    }
+
+    @Override
+    public Environment getEnvironment(String organization, String uuid) throws APIManagementException {
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
+        if (env == null) {
+            env = apiMgtDAO.getEnvironment(organization, uuid);
+            if (env == null) {
+                String errorMessage =
+                        String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
+                        .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
+            }
+        }
+        return env;
     }
 }
