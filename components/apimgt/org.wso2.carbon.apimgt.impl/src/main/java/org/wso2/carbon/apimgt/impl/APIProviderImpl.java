@@ -2749,7 +2749,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     private void validateEndpointPolicy(String apiId, OperationPolicy policy) throws APIManagementException {
-        if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.equals(policy.getPolicyType().toString())
+        if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policy.getPolicyType().toString())
                 && APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
             throw new APIManagementException("CHANGE_ENDPOINT policy is not allowed in response flow",
                     ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
