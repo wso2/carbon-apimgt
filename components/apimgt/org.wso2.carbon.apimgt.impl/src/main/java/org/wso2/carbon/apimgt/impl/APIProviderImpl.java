@@ -2524,21 +2524,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         validateAddQueryParamPolicy(policy);
                     } else if (OperationPolicy.PolicyType.REMOVE_QUERY_PARAM.equals(policy.getPolicyType())) {
                         validateRemoveQueryParamPolicy(policy);
-                    } else if (OperationPolicy.PolicyType.MOCK_RESPONSE.equals(policy.getPolicyType())) {
-                        if (++mockResponsePolicyCount > 1) {
-                            throw new APIManagementException(
-                                    "Resource" + uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb() +
-                                    " has more than one MOCK_RESPONSE policy");
-                        }
-                        validateMockResponsePolicy(policy);
-                    } else if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.equals(policy.getPolicyType())) {
-                        if (++changeEndpointPolicyCount > 1) {
-                            throw new APIManagementException(
-                                    "Resource" + uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb()
-                                            + " has more than one CHANGE_ENDPOINT policy");
-                        }
-                        validateEndpointPolicy(apiId, policy);
-                    } else if (OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.equals(policy.getPolicyType())) {
+                    } else if (OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.equals(policy.getPolicyType())) {
                         validateEndpointPolicy(apiId, policy);
                     } else {
                         throw new APIManagementException("Unsupported Operation Policy Type " + policy.getPolicyType());
@@ -2749,13 +2735,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     private void validateEndpointPolicy(String apiId, OperationPolicy policy) throws APIManagementException {
-        if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policy.getPolicyType().toString())
-                && APIConstants.OPERATION_SEQUENCE_TYPE_OUT.equals(policy.getDirection())) {
-            throw new APIManagementException("CHANGE_ENDPOINT policy is not allowed in response flow",
-                    ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_RESPONSE_FLOW,
-                            policy.getPolicyType().toString()));
-        }
-
         Map<String, Object> parameters = policy.getParameters();
         String endpointId;
         if (!parameters.containsKey(APIConstants.ENDPOINT_ID_PARAM)) {

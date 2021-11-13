@@ -3796,8 +3796,7 @@ public class SQLConstants {
                 "LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? " +
-                "AND (OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
-                "OR OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE + "') " +
+                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE + "'" +
                 "AND AUM.REVISION_UUID IS NULL";
 
         public static final String GET_ENDPOINT_POLICY_UUIDS_OF_REVISION =
@@ -3807,8 +3806,7 @@ public class SQLConstants {
                 "LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON OPM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? " +
-                "AND (OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CHANGE_ENDPOINT + "' " +
-                "OR OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE + "') " +
+                "AND OPM.POLICY_TYPE = '" + OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE + "'" +
                 "AND AUM.REVISION_UUID = ?";
 
         public static final String REMOVE_CURRENT_API_ENTRIES_FROM_RESOURCE_ENDPOINTS_TABLE =
