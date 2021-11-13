@@ -5759,10 +5759,8 @@ public class ApiMgtDAO {
                     if (uriTemplate.getOperationPolicies() != null) {
                         for (OperationPolicy policy : uriTemplate.getOperationPolicies()) {
                             String policyType = policy.getPolicyType().toString();
-                            if (!StringUtils.isEmpty(policyType) && (
-                                    policyType.equalsIgnoreCase(OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString())
-                                            || policyType.equalsIgnoreCase(
-                                            OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.toString()))) {
+                            if (!StringUtils.isEmpty(policyType) && (policyType.equalsIgnoreCase(
+                                    OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.toString()))) {
                                 endpointPolicyExists = true;
                             }
                             Gson gson = new Gson();
@@ -14549,9 +14547,7 @@ public class ApiMgtDAO {
                                 insertOperationPolicyMappingStatement.executeUpdate();
 
                                 String policyType = policy.getPolicyType().toString();
-                                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-                                if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policyType)
-                                        || OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.toString()
+                                if (OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.toString()
                                         .equals(policyType)) {
                                     //copy duplicate resource endpoint record for API Product
                                     String endpointId = (String) policy.getParameters()
@@ -16394,10 +16390,8 @@ public class ApiMgtDAO {
                             if (urlMapping.getOperationPolicies().size() > 0) {
                                 for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
                                     String policyType = policy.getPolicyType().toString();
-                                    if (!StringUtils.isEmpty(policyType) && (policyType
-                                            .equalsIgnoreCase(OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString())
-                                            || policyType.equalsIgnoreCase(
-                                            OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.toString()))) {
+                                    if (StringUtils.isEmpty(policyType) && policyType.equalsIgnoreCase(
+                                            OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.toString())) {
                                         endpointPolicyExists = true;
                                     }
 
@@ -17208,10 +17202,8 @@ public class ApiMgtDAO {
                             while (rs.next()) {
                                 for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
                                     String policyType = policy.getPolicyType().toString();
-                                    if (!StringUtils.isEmpty(policyType) && (policyType
-                                            .equalsIgnoreCase(OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString())
-                                            || policyType.equalsIgnoreCase(
-                                            OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.toString()))) {
+                                    if (!StringUtils.isEmpty(policyType) && policyType.equalsIgnoreCase(
+                                            OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.toString())) {
                                         endpointPolicyExists = true;
                                     }
 
@@ -17529,9 +17521,7 @@ public class ApiMgtDAO {
                                 insertOperationPolicyMappingStatement.executeUpdate();
 
                                 String policyType = policy.getPolicyType().toString();
-                                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-                                if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policyType)
-                                        || OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.toString()
+                                if (OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.toString()
                                         .equals(policyType)) {
                                     String endpointId = (String) policy.getParameters()
                                             .get(APIConstants.ENDPOINT_ID_PARAM);
@@ -17795,9 +17785,7 @@ public class ApiMgtDAO {
                                     addOperationPolicyStatement.executeUpdate();
 
                                     String policyType = policy.getPolicyType().toString();
-                                    String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-                                    if (OperationPolicy.PolicyType.CHANGE_ENDPOINT.toString().equals(policyType)
-                                            || OperationPolicy.PolicyType.CALL_VALIDATION_SERVICE.toString()
+                                    if (OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.toString()
                                             .equals(policyType)) {
                                         String endpointId = (String) policy.getParameters()
                                                 .get(APIConstants.ENDPOINT_ID_PARAM);

@@ -8,10 +8,8 @@ public class OperationPolicy {
     public enum PolicyType {
         SET_HEADER,
         REMOVE_HEADER,
-        CHANGE_ENDPOINT,
         REWRITE_HTTP_METHOD,
-        CALL_VALIDATION_SERVICE,
-        MOCK_RESPONSE,
+        CALL_INTERCEPTOR_SERVICE,
         REWRITE_RESOURCE_PATH,
         ADD_QUERY_PARAM,
         REMOVE_QUERY_PARAM
