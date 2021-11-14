@@ -216,7 +216,7 @@ public class AdditionalSubscriptionInfoMappingUtil {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                     additionalSubscriptionInfoDTO.setSolaceDeployedEnvironments(solaceEnvironments);
                 } else {

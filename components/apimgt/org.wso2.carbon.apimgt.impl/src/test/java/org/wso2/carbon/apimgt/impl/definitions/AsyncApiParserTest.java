@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -61,5 +62,37 @@ public class AsyncApiParserTest {
         api.setAsyncApiDefinition(asyncAPIDefinition);
         String definitionForStore = asyncApiParser.getAsyncApiDefinitionForStore(api, asyncAPIDefinition, hostsWithSchemes);
         Assert.assertNotNull(definitionForStore);
+    }
+
+    @Test
+    public void testGenerateAsyncAPIDefinitionFail() throws Exception {
+        APIIdentifier identifier = new APIIdentifier("admin", "HelloServer", "1.0");
+        API api = new API(identifier);
+        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        try {
+            asyncApiParser.generateAsyncAPIDefinition(api);
+        } catch (JSONException e) {
+            Assert.assertNotNull(e);
+        }
+    }
+
+    @Test
+    public void testGetAsyncAPIDefinitionForStoreFail() throws Exception {
+        Map<String, String> hostsWithSchemes = new HashMap<>();
+        hostsWithSchemes.put("ws", "ws://localhost:9099");
+        hostsWithSchemes.put("wss", "wss://localhost:8099");
+        APIIdentifier identifier = new APIIdentifier("admin", "HelloServer2", "1.0");
+        API api = new API(identifier);
+        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        String asyncAPIDefinition = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
+                        File.separator + "incorrectWebSocket.yml"),
+                "UTF-8");
+        api.setAsyncApiDefinition(asyncAPIDefinition);
+        try {
+            asyncApiParser.getAsyncApiDefinitionForStore(api, asyncAPIDefinition, hostsWithSchemes);
+        } catch (RuntimeException e) {
+            Assert.assertNotNull(e);
+        }
     }
 }

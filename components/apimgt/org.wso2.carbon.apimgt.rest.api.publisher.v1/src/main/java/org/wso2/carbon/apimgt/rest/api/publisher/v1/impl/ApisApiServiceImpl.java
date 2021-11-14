@@ -5059,8 +5059,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
             }
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
-                apiDTOFromProperties.getPolicies().add("AsyncUnlimited");
-                apiDTOFromProperties.getTags().add("SolaceAPI");
+                apiDTOFromProperties.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
+                apiDTOFromProperties.getTags().add(SolaceConstants.SOLACE_API_TAG);
                 apiDTOFromProperties.setAsyncTransportProtocols(SolaceNotifierUtils.
                         getTransportProtocolsForSolaceAPI(definitionToAdd));
             }
