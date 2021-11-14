@@ -184,7 +184,7 @@ public class InboundWebSocketProcessor {
 
         ResponseProcessor responseProcessor;
         String msgText = null;
-        if (inboundMessageContext.getElectedAPI().getApiType().equals(APIConstants.GRAPHQL_API)
+        if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())
                 && msg instanceof TextWebSocketFrame) {
             responseProcessor = new GraphQLResponseProcessor();
             msgText = ((TextWebSocketFrame) msg).text();
@@ -259,7 +259,7 @@ public class InboundWebSocketProcessor {
      * @throws ResourceNotFoundException If no matching API or resource found
      */
     private void setMatchingResource(ChannelHandlerContext ctx, FullHttpRequest req,
-                                       InboundMessageContext inboundMessageContext) throws WebSocketApiException,
+                                     InboundMessageContext inboundMessageContext) throws WebSocketApiException,
             ResourceNotFoundException {
 
         String matchingResource;
