@@ -63,8 +63,8 @@ public class EnvironmentMappingUtil {
         environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (environment.getAdditionalProperties()));
 
-        ExternalEnvironment parser = ServiceReferenceHolder.getInstance().getExternalEnvironmentParser
-                (environment.getProvider());
+        ExternalEnvironment parser = ServiceReferenceHolder.getInstance().getExternalEnvironment(environment.
+                getProvider());
         if (parser != null) {
             List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
             List<AsyncProtocolEndpoint> endpointUrlsList = parser.getExternalEndpointURLs(environment);

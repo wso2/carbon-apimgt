@@ -256,4 +256,11 @@ public abstract class APIDefinition {
      * @return String
      */
     public abstract String getVendorFromExtension(String swaggerContent);
+
+    /**
+     * Get parser Type
+     *
+     * @return String parserType
+     */
+    public abstract String getType();
 }

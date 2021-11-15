@@ -1996,4 +1996,8 @@ public class OAS3Parser extends APIDefinition {
         return null;
     }
 
+    @Override
+    public String getType() {
+        return null;
+    }
 }

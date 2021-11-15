@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -73,6 +74,7 @@ public class ServiceReferenceHolder {
     private APIMConfigService apimConfigService;
     private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
     private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
+    private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
 
     private ServiceReferenceHolder() {
 
@@ -354,6 +356,21 @@ public class ServiceReferenceHolder {
     public void removeExternalEnvironments(String type) {
 
         externalEnvironmentsMap.remove(type);
+    }
+
+    public void addAPIDefinitionParser(String type, APIDefinition apiDefinition) {
+
+        apiDefinitionMap.put(type, apiDefinition);
+    }
+
+    public Map<String, APIDefinition> getApiDefinitionMap() {
+
+        return apiDefinitionMap;
+    }
+
+    public void removeAPIDefinitionParser(String type) {
+
+        apiDefinitionMap.remove(type);
     }
 
 }

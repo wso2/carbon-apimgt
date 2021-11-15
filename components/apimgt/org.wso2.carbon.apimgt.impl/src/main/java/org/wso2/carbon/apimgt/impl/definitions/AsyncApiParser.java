@@ -4,6 +4,7 @@ import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import io.apicurio.datamodels.asyncapi.models.AaiOperation;
+import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ImplicitOAuthFlow;
@@ -22,6 +23,7 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -47,6 +49,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component(
+        name = "wso2.async.definition.parser.component",
+        immediate = true,
+        service = APIDefinition.class
+)
 public class AsyncApiParser extends APIDefinition {
 
     String metaSchema = "{\n" +
@@ -1913,7 +1920,7 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public String getVendorFromExtension(String swaggerContent) {
-        return null;
+        return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 
     @Override
@@ -2060,5 +2067,108 @@ public class AsyncApiParser extends APIDefinition {
             }
         }
         return wsUriMapping;
+    }
+
+    /**
+     * Get available transport protocols for the Async API
+     *
+     * @param definition Solace API Definition
+     * @return List<String> List of available transport protocols
+     * @throws APIManagementException If the Solace env configuration if not provided properly
+     */
+    public static List<String> getTransportProtocolsForSolaceAPI(String definition) throws APIManagementException {
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
+        HashSet<String> solaceTransportProtocols = new HashSet<>();
+        for (AaiChannelItem channel : aai20Document.getChannels()) {
+            solaceTransportProtocols.addAll(getProtocols(channel));
+        }
+        ArrayList<String> solaceTransportProtocolsList = new ArrayList<>(solaceTransportProtocols);
+        return solaceTransportProtocolsList;
+    }
+
+    /**
+     * Get the transport protocols
+     *
+     * @param channel AaiChannelItem to get protocol
+     * @return HashSet<String> set of transport protocols
+     */
+    public static HashSet<String> getProtocols(AaiChannelItem channel) {
+
+        HashSet<String> protocols = new HashSet<>();
+
+        if (channel.subscribe != null) {
+            if (channel.subscribe.bindings != null) {
+                protocols.addAll(getProtocolsFromBindings(channel.subscribe.bindings));
+            }
+        }
+        if (channel.publish != null) {
+            if (channel.publish.bindings != null) {
+                protocols.addAll(getProtocolsFromBindings(channel.publish.bindings));
+            }
+        }
+
+        return protocols;
+    }
+
+    /**
+     * Get the transport protocols the bindings
+     *
+     * @param bindings AaiOperationBindings to get protocols
+     * @return HashSet<String> set of transport protocols
+     */
+    private static HashSet<String> getProtocolsFromBindings(AaiOperationBindings bindings) {
+
+        HashSet<String> protocolsFromBindings = new HashSet<>();
+
+        if (bindings.http != null) {
+            protocolsFromBindings.add(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.ws != null) {
+            protocolsFromBindings.add(APIConstants.WS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.kafka != null) {
+            protocolsFromBindings.add(APIConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.amqp != null) {
+            protocolsFromBindings.add(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.amqp1 != null) {
+            protocolsFromBindings.add(APIConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.mqtt != null) {
+            protocolsFromBindings.add(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.mqtt5 != null) {
+            protocolsFromBindings.add(APIConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.nats != null) {
+            protocolsFromBindings.add(APIConstants.NATS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.jms != null) {
+            protocolsFromBindings.add(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.sns != null) {
+            protocolsFromBindings.add(APIConstants.SNS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.sqs != null) {
+            protocolsFromBindings.add(APIConstants.SQS_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.stomp != null) {
+            protocolsFromBindings.add(APIConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
+        }
+        if (bindings.redis != null) {
+            protocolsFromBindings.add(APIConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
+        }
+
+        if (bindings.hasExtraProperties()) {
+            protocolsFromBindings.addAll(bindings.getExtraPropertyNames());
+        }
+
+        return protocolsFromBindings;
+    }
+
+    @Override
+    public String getType() {
+        return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 }

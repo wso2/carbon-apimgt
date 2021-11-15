@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
@@ -802,6 +803,20 @@ public class APIManagerComponent {
     protected void removeExternalEnvironments(ExternalEnvironment externalEnvironment) {
 
         ServiceReferenceHolder.getInstance().removeExternalEnvironments(externalEnvironment.getType());
+    }
+
+    @Reference(
+            name = "apiDefinitionParser.component",
+            service = APIDefinition.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeAPIDefinitionParsers")
+    protected void addAPIDefinitionParser(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().addAPIDefinitionParser(apiDefinitionParser.getType(), apiDefinitionParser);
+    }
+
+    protected void removeAPIDefinitionParsers(APIDefinition apiDefinitionParser) {
+        ServiceReferenceHolder.getInstance().removeAPIDefinitionParser(apiDefinitionParser.getType());
     }
 
     @Reference(
