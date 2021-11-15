@@ -1103,6 +1103,11 @@ public class PublisherCommonUtils {
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
+
+        // Set default gatewayVendor
+        if (body.getGatewayVendor() == null) {
+            apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        }
         apiToAdd.setOrganization(organization);
         return apiToAdd;
     }
