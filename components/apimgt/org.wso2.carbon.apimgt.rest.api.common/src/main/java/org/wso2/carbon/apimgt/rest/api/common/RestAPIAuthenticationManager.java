@@ -20,20 +20,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 
+import java.util.HashMap;
+
+/**
+ * RestAPIAuthenticationManager class handling authenticators for each request. Requests may receive via different
+ * authentication options like access_token, JWT under auth header , backend JWT and so on. This class will select the
+ * appropriate authenticator for each request.
+ */
+
 public class RestAPIAuthenticationManager {
 
     private static final Log log = LogFactory.getLog(RestAPIAuthenticationManager.class);
-    private static RestAPIAuthenticator authenticator = null;
 
-    public static RestAPIAuthenticator getAuthenticator() {
-        if (authenticator == null) {
-            ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
-            if (serviceReferenceHolder.getAuthenticator() != null) {
-                log.debug("Authenticating in Back-end JWT");
-                authenticator = serviceReferenceHolder.getAuthenticator();
+    public static RestAPIAuthenticator getAuthenticator(HashMap<String, Object> authContext) {
+        ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
+        if (serviceReferenceHolder.getAuthenticators() != null) {
+            for (RestAPIAuthenticator restAPIAuthenticator : serviceReferenceHolder.getAuthenticators()) {
+                if (restAPIAuthenticator.canHandle(authContext)) {
+                    log.debug("Detected an appropriate authenticator to handle the request");
+                    return restAPIAuthenticator;
+                };
             }
         }
-
-        return authenticator;
+        return null;
     }
 }

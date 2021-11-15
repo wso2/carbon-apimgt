@@ -21,6 +21,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,7 +38,7 @@ public class ServiceReferenceHolder {
 
     private Map<String, JWTValidator> jwtValidatorMap;
 
-    private RestAPIAuthenticator authenticator;
+    private List<RestAPIAuthenticator> authenticators = new ArrayList<>();
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
@@ -64,11 +67,15 @@ public class ServiceReferenceHolder {
         this.jwtValidatorMap = jwtValidatorMap;
     }
 
-    public void setAuthenticator(RestAPIAuthenticator authenticator) {
-        this.authenticator = authenticator;
+    public void addAuthenticator(RestAPIAuthenticator authenticator) {
+        this.authenticators.add(authenticator);
     }
 
-    public RestAPIAuthenticator getAuthenticator() {
-        return authenticator;
+    public void removeAuthenticator(RestAPIAuthenticator authenticator) {
+        this.authenticators.remove(authenticator);
+    }
+
+    public List<RestAPIAuthenticator> getAuthenticators() {
+        return authenticators;
     }
 }

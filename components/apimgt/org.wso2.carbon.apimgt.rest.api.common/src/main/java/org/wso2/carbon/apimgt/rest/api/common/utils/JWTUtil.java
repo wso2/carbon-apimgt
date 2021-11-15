@@ -1,5 +1,3 @@
-package org.wso2.carbon.apimgt.rest.api.common.utils;
-
 /*
  *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,6 +15,8 @@ package org.wso2.carbon.apimgt.rest.api.common.utils;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.wso2.carbon.apimgt.rest.api.common.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +40,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+/**
+ * JWTUtil consists of utility methods relevant to the JWT based authentications.
+ *
+ */
 
 public class JWTUtil {
 

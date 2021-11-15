@@ -82,16 +82,16 @@ public class APIMRestAPICommonComponent {
 
     @Reference(
             name = "rest.api.authentication.service",
-            cardinality = ReferenceCardinality.OPTIONAL,
+            cardinality = ReferenceCardinality.MULTIPLE,
             service = RestAPIAuthenticator.class,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRestAPIAuthenticationService"
+            unbind = "removeRestAPIAuthenticationService"
     )
-    protected void setRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
-        ServiceReferenceHolder.getInstance().setAuthenticator(authenticator);
+    protected void addRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
+        ServiceReferenceHolder.getInstance().addAuthenticator(authenticator);
     }
 
-    protected void unsetRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
-        ServiceReferenceHolder.getInstance().setAuthenticator(null);
+    protected void removeRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
+        ServiceReferenceHolder.getInstance().removeAuthenticator(authenticator);
     }
 }

@@ -16,11 +16,14 @@
 
 package org.wso2.carbon.apimgt.rest.api.common;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import java.util.HashMap;
 
 public interface RestAPIAuthenticator {
 
-    boolean authenticate(HashMap<String,Object> message) throws APIManagementException;
+    boolean authenticate(HashMap<String,Object> message) throws APIMgtAuthorizationFailedException;
+    boolean canHandle(HashMap<String, Object> message);
+    String getAuthenticationType();
+    int getPriority(HashMap<String, Object> message);
 
 }

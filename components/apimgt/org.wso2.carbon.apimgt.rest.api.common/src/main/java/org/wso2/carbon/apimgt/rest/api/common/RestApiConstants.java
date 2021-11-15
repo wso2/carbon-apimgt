@@ -191,6 +191,7 @@ public final class RestApiConstants {
     public static final String REQUEST_URL = "org.apache.cxf.request.uri";
     public static final String REQUEST_METHOD = "org.apache.cxf.request.method";
     public static final String BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
+    public static final String PROTOCOL_HEADERS = "org.apache.cxf.message.Message.PROTOCOL_HEADERS";
     public static final String URI_TEMPLATES = "TEMPLATES";
     public static final String ORG_ID = "ORG_ID";
 
