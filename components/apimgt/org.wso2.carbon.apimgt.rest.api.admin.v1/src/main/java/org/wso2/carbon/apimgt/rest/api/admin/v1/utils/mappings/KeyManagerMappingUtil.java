@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
@@ -65,6 +66,7 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
+
         JsonElement clientRegistrationElement = jsonObject.get(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
         if (clientRegistrationElement != null) {
             keyManagerDTO.setClientRegistrationEndpoint(clientRegistrationElement.getAsString());
@@ -199,6 +201,7 @@ public class KeyManagerMappingUtil {
             KeyManagerDTO keyManagerDTO) {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+        Map<String,String> endpoints = new HashMap<>();
         keyManagerConfigurationDTO.setName(keyManagerDTO.getName());
         keyManagerConfigurationDTO.setDisplayName(keyManagerDTO.getDisplayName());
         keyManagerConfigurationDTO.setDescription(keyManagerDTO.getDescription());
@@ -214,26 +217,36 @@ public class KeyManagerMappingUtil {
         if (StringUtils.isNotEmpty(keyManagerDTO.getClientRegistrationEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT,
                     keyManagerDTO.getClientRegistrationEndpoint());
+            endpoints.put(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT,
+                    keyManagerDTO.getClientRegistrationEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getIntrospectionEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.INTROSPECTION_ENDPOINT,
                     keyManagerDTO.getIntrospectionEndpoint());
+            endpoints.put(APIConstants.KeyManager.INTROSPECTION_ENDPOINT,
+                    keyManagerDTO.getIntrospectionEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getTokenEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.TOKEN_ENDPOINT, keyManagerDTO.getTokenEndpoint());
+            endpoints.put(APIConstants.KeyManager.TOKEN_ENDPOINT, keyManagerDTO.getTokenEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getDisplayTokenEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT, keyManagerDTO.getDisplayTokenEndpoint());
+            endpoints.put(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT, keyManagerDTO.getDisplayTokenEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getRevokeEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.REVOKE_ENDPOINT, keyManagerDTO.getRevokeEndpoint());
+            endpoints.put(APIConstants.KeyManager.REVOKE_ENDPOINT, keyManagerDTO.getRevokeEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getDisplayRevokeEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT, keyManagerDTO.getDisplayRevokeEndpoint());
+            endpoints.put(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT, keyManagerDTO.getDisplayRevokeEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getScopeManagementEndpoint())) {
             additionalProperties
                     .put(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT, keyManagerDTO.getScopeManagementEndpoint());
+            endpoints.put(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT,
+                    keyManagerDTO.getScopeManagementEndpoint());
         }
         if (keyManagerDTO.getAvailableGrantTypes() != null) {
             additionalProperties.put(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
@@ -255,13 +268,21 @@ public class KeyManagerMappingUtil {
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getUserInfoEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.USERINFO_ENDPOINT, keyManagerDTO.getUserInfoEndpoint());
+            endpoints.put(APIConstants.KeyManager.USERINFO_ENDPOINT, keyManagerDTO.getUserInfoEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getAuthorizeEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT, keyManagerDTO.getAuthorizeEndpoint());
+            endpoints.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT, keyManagerDTO.getAuthorizeEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getWellKnownEndpoint())) {
             additionalProperties.put(APIConstants.KeyManager.WELL_KNOWN_ENDPOINT, keyManagerDTO.getWellKnownEndpoint());
         }
+        if (keyManagerDTO.getEndpoints() != null) {
+            for (KeyManagerEndpointDTO endpoint : keyManagerDTO.getEndpoints()) {
+                endpoints.put(endpoint.getName(), endpoint.getValue());
+            }
+        }
+        keyManagerConfigurationDTO.setEndpoints(endpoints);
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.isEnableOAuthAppCreation());
         additionalProperties.put(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS,

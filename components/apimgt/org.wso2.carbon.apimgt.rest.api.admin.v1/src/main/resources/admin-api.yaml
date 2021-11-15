@@ -3959,8 +3959,7 @@ components:
         subscriptionScopes:
           type: array
           items:
-            $ref: '#/definitions/ScopeInfo'
-          example: []
+            $ref: '#/components/schemas/ScopeInfo'
         owner:
           description: |
             Application created user
@@ -4262,6 +4261,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
+              endpointConfigurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyManagerConfiguration'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
@@ -4357,27 +4360,39 @@ components:
         introspectionEndpoint:
           type: string
           example: https://localhost:9444/oauth2/introspect
+          deprecated: true
         clientRegistrationEndpoint:
           type: string
           example: https://localhost:9444/keymanager-operations/dcr/register
+          deprecated: true
         tokenEndpoint:
           type: string
           example: https://localhost:9444/oauth2/token
+          deprecated: true
         displayTokenEndpoint:
           type: string
           example: https://localhost:9444/oauth2/token
+          deprecated: true
         revokeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/revoke
+          deprecated: true
         displayRevokeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/revoke
+          deprecated: true
         userInfoEndpoint:
           type: string
           example: https://localhost:9444/oauth2/userinfo?schema=openid
+          deprecated: true
         authorizeEndpoint:
           type: string
           example: https://localhost:9444/oauth2/authorize
+          deprecated: true
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyManagerEndpoint'
         certificates:
           type: object
           properties:
@@ -4400,6 +4415,7 @@ components:
         scopeManagementEndpoint:
           type: string
           example: https://wso2is.com:9444/api/identity/oauth2/v1.0/scopes
+          deprecated: true
         availableGrantTypes:
           type: array
           items:
@@ -4462,6 +4478,20 @@ components:
             - EXCHANGED
             - DIRECT
             - BOTH
+
+    KeyManagerEndpoint:
+      title: Key Manager Endpoint.
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'TokenEndpoint'
+        value:
+          type: string
+          example: 'https://localhost:9443/oauth2/token'
     KeyManagerInfo:
       title: Key Manager Info
       required:
@@ -4487,7 +4517,7 @@ components:
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
-             Accepted values are EXCHANGED, DIRECT and BOTH.
+            Accepted values are EXCHANGED, DIRECT and BOTH.
           example: EXCHANGED
           default: DIRECT
           enum:
