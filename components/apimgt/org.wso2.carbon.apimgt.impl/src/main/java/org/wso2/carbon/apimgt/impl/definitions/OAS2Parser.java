@@ -1730,4 +1730,8 @@ public class OAS2Parser extends APIDefinition {
         return null;
     }
 
+    @Override
+    public String getType() {
+        return null;
+    }
 }

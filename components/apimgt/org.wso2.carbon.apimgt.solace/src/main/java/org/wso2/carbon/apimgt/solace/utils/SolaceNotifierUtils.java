@@ -16,9 +16,6 @@
 package org.wso2.carbon.apimgt.solace.utils;
 
 import com.hazelcast.aws.utility.StringUtil;
-import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
-import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -71,24 +68,6 @@ public class SolaceNotifierUtils {
         } else {
             throw new APIManagementException("Solace Environment configurations are not provided properly");
         }
-    }
-
-    /**
-     * Get available transport protocols for the Solace API
-     *
-     * @param definition Solace API Definition
-     * @return List<String> List of available transport protocols
-     * @throws APIManagementException If the Solace env configuration if not provided properly
-     */
-    public static List<String> getTransportProtocolsForSolaceAPI(String definition) throws APIManagementException {
-        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
-        SolaceAdminApis solaceAdminApis = getSolaceAdminApis();
-        HashSet<String> solaceTransportProtocols = new HashSet<>();
-        for (AaiChannelItem channel : aai20Document.getChannels()) {
-            solaceTransportProtocols.addAll(solaceAdminApis.getProtocols(channel));
-        }
-        ArrayList<String> solaceTransportProtocolsList = new ArrayList<>(solaceTransportProtocols);
-        return solaceTransportProtocolsList;
     }
 
     /**

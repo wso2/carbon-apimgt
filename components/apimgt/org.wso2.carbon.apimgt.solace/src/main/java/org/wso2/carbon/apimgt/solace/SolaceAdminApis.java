@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
-import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
 import io.apicurio.datamodels.asyncapi.models.AaiParameter;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.axis2.util.URL;
@@ -43,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 
@@ -566,7 +566,7 @@ public class SolaceAdminApis {
 
         HashSet<String> protocolsHashSet = new HashSet<>();
         for (AaiChannelItem channel : aai20Document.getChannels()) {
-            protocolsHashSet.addAll(getProtocols(channel));
+            protocolsHashSet.addAll(AsyncApiParser.getProtocols(channel));
         }
         org.json.JSONArray protocols = new org.json.JSONArray();
         for (String protocol : protocolsHashSet) {
@@ -611,87 +611,6 @@ public class SolaceAdminApis {
             return attributeObject;
         }
         return null;
-    }
-
-    /**
-     * Get the transport protocols
-     *
-     * @param channel AaiChannelItem to get protocol
-     * @return HashSet<String> set of transport protocols
-     */
-    public HashSet<String> getProtocols(AaiChannelItem channel) {
-
-        HashSet<String> protocols = new HashSet<>();
-
-        if (channel.subscribe != null) {
-            if (channel.subscribe.bindings != null) {
-                protocols.addAll(getProtocolsFromBindings(channel.subscribe.bindings));
-            }
-        }
-        if (channel.publish != null) {
-            if (channel.publish.bindings != null) {
-                protocols.addAll(getProtocolsFromBindings(channel.publish.bindings));
-            }
-        }
-
-        return protocols;
-    }
-
-    /**
-     * Get the transport protocols the bindings
-     *
-     * @param bindings AaiOperationBindings to get protocols
-     * @return HashSet<String> set of transport protocols
-     */
-    private HashSet<String> getProtocolsFromBindings(AaiOperationBindings bindings) {
-
-        HashSet<String> protocolsFromBindings = new HashSet<>();
-
-        if (bindings.http != null) {
-            protocolsFromBindings.add(SolaceConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.ws != null) {
-            protocolsFromBindings.add(SolaceConstants.WS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.kafka != null) {
-            protocolsFromBindings.add(SolaceConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.amqp != null) {
-            protocolsFromBindings.add(SolaceConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.amqp1 != null) {
-            protocolsFromBindings.add(SolaceConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.mqtt != null) {
-            protocolsFromBindings.add(SolaceConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.mqtt5 != null) {
-            protocolsFromBindings.add(SolaceConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.nats != null) {
-            protocolsFromBindings.add(SolaceConstants.NATS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.jms != null) {
-            protocolsFromBindings.add(SolaceConstants.JMS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.sns != null) {
-            protocolsFromBindings.add(SolaceConstants.SNS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.sqs != null) {
-            protocolsFromBindings.add(SolaceConstants.SQS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.stomp != null) {
-            protocolsFromBindings.add(SolaceConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.redis != null) {
-            protocolsFromBindings.add(SolaceConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
-        }
-
-        if (bindings.hasExtraProperties()) {
-            protocolsFromBindings.addAll(bindings.getExtraPropertyNames());
-        }
-
-        return protocolsFromBindings;
     }
 
     /**

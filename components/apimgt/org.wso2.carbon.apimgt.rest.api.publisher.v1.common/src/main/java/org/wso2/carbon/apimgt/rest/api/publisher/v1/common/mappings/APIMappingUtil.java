@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -116,9 +117,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.solace.parser.SolaceApiParser;
-import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
-import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -1886,8 +1884,6 @@ public class APIMappingUtil {
     public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
             APIDefinitionValidationResponse model, boolean returnContent) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
         AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
 
@@ -1903,11 +1899,25 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 infoDTO.setProtocol(model.getProtocol());
-                if (SolaceConstants.SOLACE_ENVIRONMENT.equals(new SolaceApiParser().getVendorFromExtension(model.
-                        getContent()))) {
-                    infoDTO.setGatewayVendor(SolaceConstants.SOLACE_ENVIRONMENT);
-                    infoDTO.asyncTransportProtocols(SolaceNotifierUtils.getTransportProtocolsForSolaceAPI
+
+                Map<String, APIDefinition> apiDefinitionMap = ServiceReferenceHolder.getInstance().
+                        getApiDefinitionMap();
+                apiDefinitionMap.remove(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+                if (!apiDefinitionMap.isEmpty()) {
+                    for (Map.Entry<String, APIDefinition> apiDefinitionEntry : apiDefinitionMap.entrySet()) {
+                        APIDefinition apiParser = apiDefinitionEntry.getValue();
+                        String gatewayVendor = apiParser.getVendorFromExtension(model.getContent());
+                        if (gatewayVendor != null) {
+                            infoDTO.setGatewayVendor(gatewayVendor);
+                            break;
+                        }
+                    }
+                    infoDTO.asyncTransportProtocols(AsyncApiParser.getTransportProtocolsForSolaceAPI
                             (model.getContent()));
+                }
+                // Set default value
+                if (infoDTO.getGatewayVendor() == null) {
+                    infoDTO.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
                 }
                 responseDTO.setInfo(infoDTO);
             }
