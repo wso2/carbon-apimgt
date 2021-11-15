@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -784,7 +785,23 @@ public class APIManagerComponent {
 
     protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
 
-        ServiceReferenceHolder.getInstance().getNotifiersMap().remove(deployer.getType());
+        ServiceReferenceHolder.getInstance().removeExternalGatewayDeployer(deployer.getType());
+    }
+
+    @Reference(
+            name = "externalEnvironment.component",
+            service = ExternalEnvironment.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeExternalEnvironments")
+    protected void addExternalEnvironmentParser(ExternalEnvironment externalEnvironment) {
+        ServiceReferenceHolder.getInstance().addExternalEnvironment(externalEnvironment.getType(),
+                externalEnvironment);
+    }
+
+    protected void removeExternalEnvironments(ExternalEnvironment externalEnvironment) {
+
+        ServiceReferenceHolder.getInstance().removeExternalEnvironments(externalEnvironment.getType());
     }
 
     @Reference(

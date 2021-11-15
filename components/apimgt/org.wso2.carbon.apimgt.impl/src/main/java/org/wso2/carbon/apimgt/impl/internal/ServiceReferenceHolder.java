@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
@@ -71,6 +72,7 @@ public class ServiceReferenceHolder {
     private EventPublisherFactory eventPublisherFactory;
     private APIMConfigService apimConfigService;
     private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
+    private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
 
     private ServiceReferenceHolder() {
 
@@ -338,4 +340,20 @@ public class ServiceReferenceHolder {
 
         return externalGatewayDeployers.get(type);
     }
+
+    public void addExternalEnvironment(String type, ExternalEnvironment externalEnvironment) {
+
+        externalEnvironmentsMap.put(type, externalEnvironment);
+    }
+
+    public ExternalEnvironment getExternalEnvironment(String type) {
+
+        return externalEnvironmentsMap.get(type);
+    }
+
+    public void removeExternalEnvironments(String type) {
+
+        externalEnvironmentsMap.remove(type);
+    }
+
 }

@@ -20,22 +20,17 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.model.AsyncProtocolEndpoint;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
-import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
-import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -68,36 +63,20 @@ public class EnvironmentMappingUtil {
         environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (environment.getAdditionalProperties()));
 
-        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(environment.getProvider())) {
-            SolaceAdminApis solaceAdminApis = new SolaceAdminApis(environment.getServerURL(),
-                    environment.getUserName(), environment.getPassword(), environment.
-                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
-            HttpResponse response = solaceAdminApis.environmentGET(
-                    environment.getAdditionalProperties()
-                            .get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION), environment.getName());
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                String responseString = null;
-                try {
-                    responseString = EntityUtils.toString(response.getEntity());
-                } catch (IOException e) {
-                    return environmentDTO;
+        ExternalEnvironment parser = ServiceReferenceHolder.getInstance().getExternalEnvironmentParser
+                (environment.getProvider());
+        if (parser != null) {
+            List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
+            List<AsyncProtocolEndpoint> endpointUrlsList = parser.getExternalEndpointURLs(environment);
+            if (endpointUrlsList != null || endpointUrlsList.size() > 0) {
+                for (AsyncProtocolEndpoint asyncProtocolEndpoint : endpointUrlsList) {
+                    GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURIDTO =
+                            new GatewayEnvironmentProtocolURIDTO();
+                    gatewayEnvironmentProtocolURIDTO.setProtocol(asyncProtocolEndpoint.getProtocol());
+                    gatewayEnvironmentProtocolURIDTO.setEndpointURI(asyncProtocolEndpoint.getProtocolUrl());
+                    endpointsList.add(gatewayEnvironmentProtocolURIDTO);
                 }
-                JSONObject jsonObject = new JSONObject(responseString);
-                if (jsonObject.has("messagingProtocols")) {
-                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
-                    List<GatewayEnvironmentProtocolURIDTO> endpointsList = new ArrayList<>();
-                    for (int i = 0; i < protocols.length(); i++) {
-                        JSONObject protocolDetails = protocols.getJSONObject(i);
-                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
-                        String endpointURI = protocolDetails.getString("uri");
-                        GatewayEnvironmentProtocolURIDTO gatewayEnvironmentProtocolURIDTO =
-                                new GatewayEnvironmentProtocolURIDTO();
-                        gatewayEnvironmentProtocolURIDTO.setProtocol(protocolName);
-                        gatewayEnvironmentProtocolURIDTO.setEndpointURI(endpointURI);
-                        endpointsList.add(gatewayEnvironmentProtocolURIDTO);
-                    }
-                    environmentDTO.setEndpointURIs(endpointsList);
-                }
+                environmentDTO.setEndpointURIs(endpointsList);
             }
         }
         return environmentDTO;
