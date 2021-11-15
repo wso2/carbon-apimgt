@@ -175,6 +175,7 @@ public class GraphQLSchemaDefinition {
 
         String operationScopeType;
         StringBuilder schemaDefinitionBuilder = new StringBuilder(api.getGraphQLSchema());
+        schemaDefinitionBuilder.append("\n");
         StringBuilder operationScopeMappingBuilder = new StringBuilder();
         StringBuilder scopeRoleMappingBuilder = new StringBuilder();
         StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
