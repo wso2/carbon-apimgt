@@ -115,6 +115,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
@@ -180,7 +181,7 @@ public class APIConsumerImplTest {
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
         Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(keyManagerConfigurationDTO);
-        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString(),Mockito.anyString()))
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString(),Mockito.anyString()))
                 .thenReturn(keyManager);
         PowerMockito.when(APIUtil.replaceSystemProperty(anyString())).thenAnswer((Answer<String>) invocation -> {
             Object[] args = invocation.getArguments();
@@ -658,7 +659,12 @@ public class APIConsumerImplTest {
     public void testRenewConsumerSecret() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         String clientId = UUID.randomUUID().toString();
-        Mockito.when(keyManager.getNewApplicationConsumerSecret((AccessTokenRequest) Mockito.anyObject())).thenReturn
+        apiConsumer.apiMgtDAO = apiMgtDAO;
+        KeyManagerConfigurationDTO keyManagerConfiguration = new KeyManagerConfigurationDTO();
+        keyManagerConfiguration.setEnabled(true);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(keyManagerConfiguration);
+        Mockito.when(keyManager.getNewApplicationConsumerSecret(Mockito.anyObject())).thenReturn
                 ("updatedClientSecret");
         assertNotNull(apiConsumer.renewConsumerSecret(clientId, APIConstants.KeyManager.DEFAULT_KEY_MANAGER));
     }
