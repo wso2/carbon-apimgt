@@ -83,6 +83,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -880,7 +881,7 @@ public class APIAdminImpl implements APIAdmin {
         String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + "=*" + category.getName() + "*";
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         Map<String, Object> result = apiProvider
-                .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, "apiName", "ascending");
+                .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
         return (int) (Integer) result.get("length");
     }
 
@@ -1145,12 +1146,19 @@ public class APIAdminImpl implements APIAdmin {
                 APIUtil.validateRestAPIScopes(config);
                 ServiceReferenceHolder.getInstance().getApimConfigService().updateTenantConfig(organization, config);
             } catch (ValidationException | JSONException e) {
-                throw new APIManagementException("tenant-config validation failure", e, ExceptionCodes.INVALID_TENANT_CONFIG);
+                throw new APIManagementException("tenant-config validation failure",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_TENANT_CONFIG, e.getMessage()));
             }
         } else {
             throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
         }
     }
+
+    @Override
+    public String getTenantConfigSchema(String organization) throws APIManagementException {
+        return APIUtil.retrieveTenantConfigJsonSchema().toString();
+    }
+
     private IdentityProvider createIdp(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         IdentityProvider identityProvider = new IdentityProvider();

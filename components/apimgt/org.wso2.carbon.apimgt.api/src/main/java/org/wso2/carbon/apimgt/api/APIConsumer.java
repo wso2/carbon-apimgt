@@ -61,6 +61,51 @@ public interface APIConsumer extends APIManager {
     Subscriber getSubscriber(String subscriberId) throws APIManagementException;
 
     /**
+     * Returns a list of #{@link org.wso2.carbon.apimgt.api.model.API} bearing the selected tag
+     *
+     * @param tag name of the tag
+     * @return set of API having the given tag name
+     * @throws APIManagementException if failed to get set of API
+     */
+    Set<API> getAPIsWithTag(String tag, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of #{@link org.wso2.carbon.apimgt.api.model.API} bearing the selected tag
+     *
+     * @param tag name of the tag
+     * @param start starting number
+     * @param end ending number
+     * @return set of API having the given tag name
+     * @throws APIManagementException if failed to get set of API
+     */
+    Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all published APIs. If a given API has multiple APIs,
+     * only the latest version will be included
+     * in this list.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all published APIs. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * Light weight implementation of getAllPaginatedPublishesAPIs.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedPublishedLightWeightAPIs(String tenantDomain, int start, int end)
+            throws APIManagementException;
+
+    /**
      * Returns top rated APIs
      *
      * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
@@ -68,6 +113,15 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get top rated APIs
      */
     Set<API> getTopRatedAPIs(int limit) throws APIManagementException;
+
+    /**
+     * Get recently added APIs to the store
+     *
+     * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
+     * @return set of API
+     * @throws APIManagementException if failed to get recently added APIs
+     */
+    Set<API> getRecentlyAddedAPIs(int limit,String tenantDomain) throws APIManagementException;
 
     /**
      * Get all tags of published APIs
@@ -592,6 +646,8 @@ public interface APIConsumer extends APIManager {
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
+    Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
+
     int getUserRating(String apiId, String user) throws APIManagementException;
 
     JSONObject getUserRatingInfo(String id, String user) throws APIManagementException;
@@ -599,6 +655,28 @@ public interface APIConsumer extends APIManager {
     float getAverageAPIRating(String apiId) throws APIManagementException;
 
     JSONArray getAPIRatings(String apiId) throws APIManagementException;
+
+    /**
+     * Get a list of published APIs by the given provider.
+     *
+     * @param providerId , provider id
+     * @param loggedUser logged user
+     * @param limit Maximum number of results to return. Pass -1 to get all.
+     * @param apiOwner Owner name which is used to filter APIs
+     * @return set of API
+     * @throws APIManagementException if failed to get set of API
+     */
+    Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner,
+                                        String apiBizOwner) throws APIManagementException;
+
+    /** Get a list of published APIs by the given provider.
+     *
+     * @param providerId , provider id
+     * @param limit Maximum number of results to return. Pass -1 to get all.
+     * @return set of API
+     * @throws APIManagementException if failed to get set of API
+     */
+    Set<API> getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
 
     /**
      * Returns a list of Tiers denied for the current user
@@ -641,6 +719,48 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
+     * only the latest version will be included
+     * in this list.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+
+    Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
+                                                   boolean returnAPITags) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @param Status One or more Statuses
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
+                                                   boolean returnAPITags) throws APIManagementException;
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * Light wieght implementation of getAllPaginatedAPIsByStatus
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending numbeer
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
+                                                              boolean returnAPITags) throws APIManagementException;
 
     /**
      * Returns the swagger definition of the API for the given gateway environment as a string
@@ -739,6 +859,20 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to load monetization implementation class
      */
     Monetization getMonetizationImplClass() throws APIManagementException;
+
+    /**
+     * Returns wsdl document resource to be downloaded from the API store for a SOAP api
+     *
+     * @param username           user name of the logged in user
+     * @param tenantDomain       tenant domain
+     * @param resourceUrl        registry resource url to the wsdl
+     * @param environmentDetails map of gateway names and types
+     * @param apiDetails         api details
+     * @return converted wsdl document to be download
+     * @throws APIManagementException
+     */
+    String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
+                           Map apiDetails) throws APIManagementException;
 
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details

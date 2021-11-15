@@ -227,17 +227,289 @@ public class APIConsumerImplTest {
         }
     }
 
+    @Test
+    public void testGetAPIsWithTag() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
+                thenReturn(artifactManager);
+        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        governanceArtifacts.add(artifact);
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(),(UserRegistry)Mockito.anyObject(),
+                Mockito.anyString())).thenReturn(governanceArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
+        Mockito.when(artifact.getAttribute("overview_status")).thenReturn("PUBLISHED");
+        assertNotNull(apiConsumer.getAPIsWithTag("testTag", "testDomain"));
+    }
 
+    @Test
+    public void testGetAllPaginatedPublishedAPIs() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
+        System.setProperty(CARBON_HOME, "");
 
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(genericArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+        assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
+        //artifact manager null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
+        //generic artifact null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+    }
 
+    @Test
+    public void testGetAllPaginatedPublishedLightWeightAPIs() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
+        System.setProperty(CARBON_HOME, "");
 
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(genericArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getLightWeightAPI(artifact)).thenReturn(api);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
+        //artifact manager null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
+        //generic artifact null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+    }
 
+    @Test
+    public void testGetAllPaginatedAPIs() throws Exception {
+        Registry userRegistry = Mockito.mock(Registry.class);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
+        UserRegistry userRegistry1 = Mockito.mock(UserRegistry.class);
+        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).
+                thenReturn(userRegistry1);
+        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry1);
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(genericArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
+        assertNotNull(apiConsumer.getAllPaginatedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+        assertNotNull(apiConsumer.getAllPaginatedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
+        //artifact manager null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
+        //generic artifact null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+    }
+
+    @Test
+    public void testGetAllPaginatedAPIsByStatus() throws Exception {
+        Registry userRegistry = Mockito.mock(Registry.class);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        System.setProperty(CARBON_HOME, "");
+
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("10", "20");
+
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(genericArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
+        String artifactPath = "artifact/path";
+        PowerMockito.when(GovernanceUtils.getArtifactPath(userRegistry, artifact.getId())).
+                thenReturn(artifactPath);
+        Tag tag = new Tag();
+        Tag[] tags = new Tag[]{tag};
+        Mockito.when(userRegistry.getTags(artifactPath)).thenReturn(tags);
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", false));
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", true));
+
+        //artifact manager null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", true));
+
+        //generic artifact null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", true));
+    }
+
+    @Test
+    public void testGetAllPaginatedAPIsByStatusSet() throws Exception {
+        Registry userRegistry = Mockito.mock(Registry.class);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("10", "20");
+
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        governanceArtifacts.add(artifact);
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(),(UserRegistry)Mockito.anyObject(),
+                Mockito.anyString())).thenReturn(governanceArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
+        String artifactPath = "artifact/path";
+        PowerMockito.when(GovernanceUtils.getArtifactPath(userRegistry, artifact.getId())).
+                thenReturn(artifactPath);
+        Tag tag = new Tag();
+        Tag[] tags = new Tag[]{tag};
+        Mockito.when(userRegistry.getTags(artifactPath)).thenReturn(tags);
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, false));
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, true));
+
+        //artifact manager null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, true));
+
+        //generic artifact null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(),(UserRegistry)Mockito.anyObject(),
+                Mockito.anyString())).thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, true));
+    }
+
+    @Test
+    public void testGetRecentlyAddedAPIs() throws Exception {
+        Registry userRegistry = Mockito.mock(Registry.class);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        UserRegistry userRegistry1 = Mockito.mock(UserRegistry.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("true", "false");
+
+        API api = Mockito.mock(API.class);
+        Set<API> recentlyAddedAPI = new HashSet<API>();
+        recentlyAddedAPI.add(api);
+        PowerMockito.mockStatic(Caching.class);
+
+        CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        Cache<Object, Object> cache = Mockito.mock(Cache.class);
+        Mockito.when(Caching.getCacheManager(Mockito.anyString())).thenReturn(cacheManager);
+        Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
+        Mockito.when(cache.get(Mockito.anyObject())).thenReturn(recentlyAddedAPI);
+        Resource resource = new ResourceImpl();
+        resource.setProperty("overview_status", "overview_status");
+        resource.setProperty("store_view_roles", "store_view_roles");
+        String path = "testPath";
+        Mockito.when(APIUtil.getAPIPath((APIIdentifier) Mockito.anyObject())).thenReturn(path);
+        Mockito.when(userRegistry1.get(Mockito.anyString())).thenReturn(resource);
+
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
+        System.setProperty(CARBON_HOME, "");
+
+        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).
+                thenReturn(userRegistry1);
+        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry1);
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        Mockito.when(artifactManager.findGovernanceArtifacts(Mockito.anyString())).thenReturn(genericArtifacts);
+
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api1 = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api1);
+        //set isAllowDisplayMultipleVersions true
+        assertNotNull(apiConsumer.getRecentlyAddedAPIs(10, "testDomain"));
+        //set isAllowDisplayMultipleVersions false
+        assertNotNull(apiConsumer.getRecentlyAddedAPIs(10, "testDomain"));
+    }
 
     @Test
     public void testGetTagsWithAttributes() throws Exception {
@@ -283,7 +555,31 @@ public class APIConsumerImplTest {
     }
 
 
-
+    @Test
+    public void testGetPublishedAPIsByProvider() throws APIManagementException, RegistryException {
+        Registry userRegistry = Mockito.mock(Registry.class);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
+        PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true, false);
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Association association = Mockito.mock(Association.class);
+        Association[] associations = new Association[]{association};
+        Mockito.when(userRegistry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
+        Mockito.when(association.getDestinationPath()).thenReturn("testPath");
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(userRegistry.get("testPath")).thenReturn(resource);
+        Mockito.when(resource.getUUID()).thenReturn("testID");
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        Mockito.when(genericArtifact.getAttribute("overview_status")).thenReturn("PUBLISHED");
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getAPI(genericArtifact)).thenReturn(api);
+        assertNotNull(apiConsumer.getPublishedAPIsByProvider("testID", 10));
+        assertNotNull(apiConsumer.getPublishedAPIsByProvider("testID", 10));
+    }
 
     @Test
     public void testGetUserRating() throws APIManagementException {
@@ -341,7 +637,22 @@ public class APIConsumerImplTest {
 
     }
 
+    @Test
+    public void testGetPaginatedAPIsWithTag() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
 
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        GovernanceArtifact governanceArtifact = new GenericArtifactImpl(UUID.randomUUID().toString(), new QName(UUID.randomUUID().toString(), "UUID.randomUUID().toString()"),
+                "api");
+        List<GovernanceArtifact> governanceArtifactList = new ArrayList();
+        governanceArtifactList.add(governanceArtifact);
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(), (Registry) Mockito.anyObject(),
+                Mockito.anyString())).thenReturn(governanceArtifactList);
+
+        assertNotNull(apiConsumer.getPaginatedAPIsWithTag("testTag", 0, 10, MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME));
+    }
 
     @Test
     public void testRenewConsumerSecret() throws APIManagementException {
@@ -429,7 +740,27 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.getSubscribedAPIs("testorg", subscriber, "testID"));
     }
 
+    @Test
+    public void testGetAllPublishedAPIs() throws APIManagementException, GovernanceException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        APINameComparator apiNameComparator = Mockito.mock(APINameComparator.class);
+        SortedSet<API> apiSortedSet = new TreeSet<API>(apiNameComparator);
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        APIIdentifier apiId1 = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        API api = new API(apiId1);
 
+        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("PUBLISHED");
+        Mockito.when(APIUtil.getAPI(artifact)).thenReturn(api);
+
+        Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
+        latestPublishedAPIs.put("user:key", api);
+        apiSortedSet.addAll(latestPublishedAPIs.values());
+    }
 
     @Test
     public void testAddApplication() throws APIManagementException, UserStoreException {
@@ -921,8 +1252,132 @@ public class APIConsumerImplTest {
                 .deleteApplicationRegistration(Mockito.anyInt(), Mockito.anyString(),Mockito.anyString());
     }
 
+    @Test
+    public void testGetPublishedAPIsByProvider1()
+            throws APIManagementException, RegistryException, org.wso2.carbon.user.core.UserStoreException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        String providerId = "1";
+        API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
+        API api1 = new API(new APIIdentifier(API_PROVIDER, "pizza_api", "2.0.0"));
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
+        PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true, false);
+        PowerMockito.when(APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY))
+                .thenReturn(genericArtifactManager);
+        PowerMockito.when(APIUtil.getMountedPath(Mockito.any(), Mockito.anyString())).thenReturn("system/governance");
+        PowerMockito.when(APIUtil.getAPI(Mockito.any())).thenReturn(api);
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(providerId);
+        PowerMockito.when(APIUtil.getLcStateFromArtifact((GovernanceArtifact) Mockito.any()))
+                .thenReturn(APIConstants.PUBLISHED);
+        GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
+        GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
+        GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
+        Mockito.when(genericArtifactManager.findGenericArtifacts((Map<String, List<String>>) Mockito.any()))
+                .thenThrow(GovernanceException.class).thenReturn(genericArtifacts);
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito.when(GovernanceUtils.getArtifactPath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
+        PowerMockito.when(RegistryUtils.getAbsolutePath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
+        Assert.assertNull(apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "John"));
+        Assert.assertEquals(0,
+                apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "John").size());
+        Mockito.when(
+                authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Resource resource = new ResourceImpl();
+        resource.setUUID(UUID.randomUUID().toString());
+        Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifactImpl.class);
+        Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        Assert.assertEquals(1,
+                apiConsumer.getPublishedAPIsByProvider("1", "test_user", 1, API_PROVIDER, "John").size());
+        api.setVisibility("specific_to_roles");
+        PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString()))
+                .thenReturn("carbon.super", "carbon.super", SAMPLE_TENANT_DOMAIN_1);
+        PowerMockito.when(APIUtil.getAPI((GenericArtifact) Mockito.any())).thenReturn(api, api1);
+        Assert.assertEquals(1,
+                apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "John").size());
+        Mockito.when(
+                authorizationManager.isRoleAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Assert.assertEquals(1, apiConsumer.getPublishedAPIsByProvider("1", "", 5, API_PROVIDER, "John").size());
 
+    }
 
+    @Test
+    public void testGetPublishedAPIsByProvider2()
+            throws APIManagementException, RegistryException, org.wso2.carbon.user.core.UserStoreException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
+        String providerId = "2";
+        API api = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION));
+        API api1 = new API(new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, "2.0.0"));
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
+        PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true, false);
+        PowerMockito.when(APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY))
+                .thenReturn(genericArtifactManager);
+        PowerMockito.when(APIUtil.getMountedPath(Mockito.any(), Mockito.anyString())).thenReturn("system/governance");
+        PowerMockito.when(APIUtil.getAPI(Mockito.any())).thenReturn(api);
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(providerId);
+        PowerMockito.when(APIUtil.getLcStateFromArtifact((GovernanceArtifact) Mockito.any()))
+                .thenReturn(APIConstants.PUBLISHED);
+        GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
+        GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
+        GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
+        Mockito.when(genericArtifactManager.findGenericArtifacts((Map<String, List<String>>) Mockito.any()))
+                .thenReturn(genericArtifacts);
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito.when(GovernanceUtils.getArtifactPath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
+        PowerMockito.when(RegistryUtils.getAbsolutePath(Mockito.any(), Mockito.anyString())).thenReturn("/path1");
+        Association association = new Association();
+        association.setDestinationPath("/destPath1");
+        Association association2 = new Association();
+        association2.setDestinationPath("/destPath2");
+        Association[] associations = new Association[] { association, association2 };
+        Mockito.when(userRegistry.getAssociations(Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(RegistryException.class).thenReturn(associations);
+        try {
+            apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "");
+            Assert.fail("Registry exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Failed to get Published APIs for provider :"));
+        }
+        Assert.assertEquals(0, apiConsumer.getPublishedAPIsByProvider("1", "test_user", 2, API_PROVIDER, "").size());
+        Mockito.when(
+                authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(UserStoreException.class).thenThrow(org.wso2.carbon.user.core.UserStoreException.class)
+                .thenReturn(true);
+        try {
+            apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "");
+            Assert.fail("User store exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Failed to get Published APIs for provider :"));
+        }
+        try {
+            apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "");
+            Assert.fail("User store exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Failed to get Published APIs for provider :"));
+        }
+        Resource resource = new ResourceImpl();
+        resource.setUUID(UUID.randomUUID().toString());
+        Mockito.when(userRegistry.get(Mockito.anyString())).thenReturn(resource);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifactImpl.class);
+        Mockito.when(genericArtifact.getLifecycleState(Mockito.anyString())).thenReturn(APIConstants.PUBLISHED);
+        Mockito.when(genericArtifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        Assert.assertEquals(1, apiConsumer.getPublishedAPIsByProvider("1", "test_user", 1, API_PROVIDER, "").size());
+        PowerMockito.when(APIUtil.getAPI((GenericArtifact) Mockito.any())).thenReturn(api, api1);
+        Assert.assertEquals(1, apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "").size());
+        PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true);
+        Set<API> apiSet = apiConsumer.getPublishedAPIsByProvider("1", "test_user", 5, API_PROVIDER, "");
+        Assert.assertEquals(1, apiSet.size());
+        Assert.assertTrue(apiSet.contains(api1));
+
+        String apiOwner = "Smith";
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(apiOwner)).thenReturn(apiOwner);
+        api.setApiOwner("John");
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true);
+        Assert.assertEquals(1, apiConsumer.getPublishedAPIsByProvider(apiOwner, "test_user", 1, apiOwner, "").size());
+        Assert.assertEquals(0, apiConsumer.getPublishedAPIsByProvider("1", "test_user", 1, apiOwner, "").size());
+    }
 
     @Test
     public void testRemoveAPIRating() throws APIManagementException {

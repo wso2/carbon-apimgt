@@ -268,7 +268,37 @@ public class APIProviderImplTest {
         superTenantDomain = "carbon.super";
     }
 
+    @Test
+    public void testGetAllProviders() throws APIManagementException, GovernanceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        UserRegistry userReg = Mockito.mock(UserRegistry.class);
 
+        API api1 = new API(new APIIdentifier("admin", "API1", "1.0.1"));
+        api1.setContext("api1context");
+        api1.setStatus(APIConstants.PUBLISHED);
+        api1.setDescription("API 1 Desciption");
+        GenericArtifact genericArtifact1 = Mockito.mock(GenericArtifact.class);
+        GenericArtifact genericArtifact2 = Mockito.mock(GenericArtifact.class);
+
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.1");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn("api1context");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION)).thenReturn(
+                "API 1 Desciption");
+        Mockito.when(APIUtil.getAPI(genericArtifact1, apiProvider.registry)).thenReturn(api1);
+        Mockito.when(APIUtil.getAPI(genericArtifact1)).thenReturn(api1);
+        GenericArtifact[] genericArtifacts = {genericArtifact1, genericArtifact2};
+        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
+        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
+        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
+        Assert.assertNotNull(apiProvider.getAllProviders());
+
+        //generic artifact null
+        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
+        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
+        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(null);
+        Assert.assertNotNull(apiProvider.getAllProviders());
+    }
 
     @Test
     public void testGetSubscribersOfProvider() throws APIManagementException {
@@ -285,7 +315,22 @@ public class APIProviderImplTest {
         }
     }
 
-
+    @Test
+    public void testGetProvider() throws APIManagementException, RegistryException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        Mockito.when(APIUtil.getMountedPath((RegistryContext) Mockito.anyObject(),
+                Mockito.anyString())).thenReturn("testPath");
+        UserRegistry userReg = Mockito.mock(UserRegistry.class);
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(apiProvider.registry.get("testPath/providers/testProvider")).thenReturn(resource);
+        Mockito.when(resource.getUUID()).thenReturn("testID");
+        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
+        GenericArtifact providerArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact("testID")).thenReturn(providerArtifact);
+        Provider provider = Mockito.mock(Provider.class);
+        Mockito.when(APIUtil.getProvider(providerArtifact)).thenReturn(provider);
+        Assert.assertNotNull(apiProvider.getProvider("testProvider"));
+    }
 
     @Test
     public void testGetAllAPIUsageByProvider() throws APIManagementException {
@@ -2524,7 +2569,71 @@ public class APIProviderImplTest {
     }
 
 
+    @Test
+    public void testGetAllPaginatedAPIs()
+            throws RegistryException, UserStoreException, APIManagementException, XMLStreamException {
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api1 = new API(apiId1);
+        api1.setContext("/test");
 
+        APIIdentifier apiId2 = new APIIdentifier("admin", "API2", "1.0.0");
+        API api2 = new API(apiId2);
+        api2.setContext("/test1");
+
+        PaginationContext paginationCtx = Mockito.mock(PaginationContext.class);
+        PowerMockito.when(PaginationContext.getInstance()).thenReturn(paginationCtx);
+        Mockito.when(paginationCtx.getLength()).thenReturn(2);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
+        ServiceReferenceHolder sh = TestUtils.getServiceReferenceHolder();
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry userReg = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME,
+                -1234)).thenReturn(userReg);
+        PowerMockito.when(APIUtil.getArtifactManager(userReg, APIConstants.API_KEY)).thenReturn(artifactManager);
+
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_PUBLISHER_APIS_PER_PAGE)).thenReturn("2");
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tm = Mockito.mock(TenantManager.class);
+        PowerMockito.when(sh.getRealmService()).thenReturn(realmService);
+        PowerMockito.when(realmService.getTenantManager()).thenReturn(tm);
+        PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(-1234);
+
+        GenericArtifact genericArtifact1 = Mockito.mock(GenericArtifact.class);
+        GenericArtifact genericArtifact2 = Mockito.mock(GenericArtifact.class);
+        Mockito.when(APIUtil.getAPI(genericArtifact1)).thenReturn(api1);
+        Mockito.when(APIUtil.getAPI(genericArtifact2)).thenReturn(api2);
+        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
+        governanceArtifacts.add(genericArtifact1);
+        governanceArtifacts.add(genericArtifact2);
+        List<GovernanceArtifact> governanceArtifacts1 = new ArrayList<GovernanceArtifact>();
+        PowerMockito.when(GovernanceUtils
+                .findGovernanceArtifacts(Mockito.anyMap(), any(Registry.class), Mockito.anyString()))
+                .thenReturn(governanceArtifacts, governanceArtifacts1);
+        Map<String, Object> result = apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
+        List<API> apiList = (List<API>) result.get("apis");
+        Assert.assertEquals(2, apiList.size());
+        Assert.assertEquals("API1", apiList.get(0).getId().getApiName());
+        Assert.assertEquals("API2", apiList.get(1).getId().getApiName());
+        Assert.assertEquals(2, result.get("totalLength"));
+
+        //No APIs available
+        Map<String, Object> result1 = apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
+        List<API> apiList1 = (List<API>) result1.get("apis");
+        Assert.assertEquals(0, apiList1.size());
+        //Registry Exception while retrieving artifacts
+        Mockito.when(artifactManager.findGenericArtifacts(Matchers.anyMap())).thenThrow(RegistryException.class);
+        try {
+            apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
+        } catch (APIManagementException e) {
+            Assert.assertEquals("Failed to get all APIs", e.getMessage());
+        }
+    }
 
     @Test
     public void testAddDocumentationContent() throws Exception {
@@ -2653,7 +2762,104 @@ public class APIProviderImplTest {
         Assert.assertEquals(2, foundApiList9.size());
     }
 
+    @Test
+    public void testSearchAPIs_NoProviderId() throws APIManagementException, RegistryException {
+        API api1 = new API(new APIIdentifier("admin", "API1", "1.0.1"));
+        api1.setContext("api1context");
+        api1.setStatus(APIConstants.PUBLISHED);
+        api1.setDescription("API 1 Desciption");
 
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        api1.setUriTemplates(uriTemplates);
+
+        API api2 = new API(new APIIdentifier("admin", "API2", "1.0.0"));
+        api2.setContext("api2context");
+        api2.setStatus(APIConstants.CREATED);
+        api2.setDescription("API 2 Desciption");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO,scopesDAO);
+        GenericArtifact genericArtifact1 = Mockito.mock(GenericArtifact.class);
+        GenericArtifact genericArtifact2 = Mockito.mock(GenericArtifact.class);
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.1");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn("api1context");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION)).thenReturn(
+                "API 1 Desciption");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn("admin");
+        Mockito.when(genericArtifact1.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("Published");
+        Mockito.when(genericArtifact2.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API2");
+        Mockito.when(genericArtifact2.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
+        Mockito.when(genericArtifact2.getAttribute(APIConstants.API_OVERVIEW_CONTEXT)).thenReturn("api2context");
+        Mockito.when(genericArtifact2.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION)).thenReturn(
+                "API 2 Desciption");
+        Mockito.when(genericArtifact2.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn("admin");
+        Mockito.when(genericArtifact2.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("Created");
+        Mockito.when(APIUtil.getAPI(genericArtifact1, apiProvider.registry)).thenReturn(api1);
+        Mockito.when(APIUtil.getAPI(genericArtifact2, apiProvider.registry)).thenReturn(api2);
+        Mockito.when(APIUtil.getAPI(genericArtifact1)).thenReturn(api1);
+        Mockito.when(APIUtil.getAPI(genericArtifact2)).thenReturn(api2);
+        GenericArtifact[] genericArtifacts = {genericArtifact1, genericArtifact2};
+        Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
+
+        //Search by Name matching both APIs
+        List<API> foundApiList0 = apiProvider.searchAPIs("API", "Name", null);
+        Assert.assertNotNull(foundApiList0);
+        Assert.assertEquals(2, foundApiList0.size());
+
+        //Search by exact name
+        List<API> foundApiList1 = apiProvider.searchAPIs("API1", "Name", null);
+        Assert.assertNotNull(foundApiList1);
+        Assert.assertEquals(1, foundApiList1.size());
+
+        //Search by exact provider
+        List<API> foundApiList2 = apiProvider.searchAPIs("admin", "Provider", null);
+        Assert.assertNotNull(foundApiList2);
+        Assert.assertEquals(2, foundApiList2.size());
+
+        //Search by exact version
+        List<API> foundApiList3 = apiProvider.searchAPIs("1.0.0", "Version", null);
+        Assert.assertNotNull(foundApiList3);
+        Assert.assertEquals(1, foundApiList3.size());
+
+        //Search by exact context
+        List<API> foundApiList4 = apiProvider.searchAPIs("api1context", "Context", null);
+        Assert.assertNotNull(foundApiList4);
+        Assert.assertEquals(1, foundApiList4.size());
+
+        //Search by exact context
+        List<API> foundApiList5 = apiProvider.searchAPIs("api2context", "Context", null);
+        Assert.assertNotNull(foundApiList5);
+        Assert.assertEquals(1, foundApiList5.size());
+
+        //Search by wrong context
+        List<API> foundApiList6 = apiProvider.searchAPIs("test", "Context", null);
+        Assert.assertNotNull(foundApiList6);
+        Assert.assertEquals(0, foundApiList6.size());
+
+        //Search by status
+        List<API> foundApiList7 = apiProvider.searchAPIs("Published", "Status", null);
+        Assert.assertNotNull(foundApiList7);
+        Assert.assertEquals(1, foundApiList7.size());
+
+        //Search by Description
+        List<API> foundApiList8 = apiProvider.searchAPIs("API 1 Desciption", "Description", null);
+        Assert.assertNotNull(foundApiList8);
+        Assert.assertEquals(1, foundApiList8.size());
+
+        //Search by Description
+        List<API> foundApiList9 = apiProvider.searchAPIs("API", "Description", null);
+        Assert.assertNotNull(foundApiList9);
+        Assert.assertEquals(2, foundApiList9.size());
+
+    }
 
     @Test
     public void testSearchAPIs_WhenNoAPIs() throws APIManagementException, RegistryException {

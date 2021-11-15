@@ -22,7 +22,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -88,8 +90,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             //if a revision number is not provided, working copy's id is used
             exportAPIUUID = apiId;
         }
-        //If an incorrect revision num provided or revision does not exists, working copy will be exported
-        exportAPIUUID = (exportAPIUUID == null) ? apiId : exportAPIUUID;
+
+        // If an incorrect revision num provided (revision does not exist)
+        if (StringUtils.isBlank(exportAPIUUID)) {
+            throw new APIMgtResourceNotFoundException("Incorrect revision number provided: " + revisionNum,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionNum));
+        }
+
         api = apiProvider.getAPIbyUUID(exportAPIUUID, organization);
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
@@ -162,7 +169,12 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             exportAPIProductUUID = apiId;
         }
 
-        exportAPIProductUUID = (exportAPIProductUUID == null) ? apiId : exportAPIProductUUID;
+        // If an incorrect revision num provided (revision does not exist)
+        if (StringUtils.isBlank(exportAPIProductUUID)) {
+            throw new APIMgtResourceNotFoundException("Incorrect revision number provided: " + revisionNum,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionNum));
+        }
+
         apiProduct = apiProvider.getAPIProductbyUUID(exportAPIProductUUID, tenantDomain);
         apiProductIdentifier.setUUID(exportAPIProductUUID);
         if (apiProduct != null) {
