@@ -182,8 +182,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
-import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
@@ -5058,11 +5056,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isServiceAPI) {
                 apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
             }
-            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
+            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDTOFromProperties.getGatewayVendor())) {
                 apiDTOFromProperties.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
-                apiDTOFromProperties.getTags().add(SolaceConstants.SOLACE_API_TAG);
                 apiDTOFromProperties.setAsyncTransportProtocols(AsyncApiParser.
-                        getTransportProtocolsForSolaceAPI(definitionToAdd));
+                        getTransportProtocolsForAsyncAPI(definitionToAdd));
             }
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
@@ -5079,7 +5076,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //load topics from AsyncAPI
             apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
                     definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())
-                            || SolaceConstants.SOLACE_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
+                            || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
             apiToAdd.setOrganization(organization);
             apiToAdd.setAsyncApiDefinition(definitionToAdd);
 

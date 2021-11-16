@@ -2072,18 +2072,18 @@ public class AsyncApiParser extends APIDefinition {
     /**
      * Get available transport protocols for the Async API
      *
-     * @param definition Solace API Definition
+     * @param definition Async API Definition
      * @return List<String> List of available transport protocols
-     * @throws APIManagementException If the Solace env configuration if not provided properly
+     * @throws APIManagementException If the async env configuration if not provided properly
      */
-    public static List<String> getTransportProtocolsForSolaceAPI(String definition) throws APIManagementException {
+    public static List<String> getTransportProtocolsForAsyncAPI(String definition) throws APIManagementException {
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
-        HashSet<String> solaceTransportProtocols = new HashSet<>();
+        HashSet<String> asyncTransportProtocols = new HashSet<>();
         for (AaiChannelItem channel : aai20Document.getChannels()) {
-            solaceTransportProtocols.addAll(getProtocols(channel));
+            asyncTransportProtocols.addAll(getProtocols(channel));
         }
-        ArrayList<String> solaceTransportProtocolsList = new ArrayList<>(solaceTransportProtocols);
-        return solaceTransportProtocolsList;
+        ArrayList<String> asyncTransportProtocolsList = new ArrayList<>(asyncTransportProtocols);
+        return asyncTransportProtocolsList;
     }
 
     /**
