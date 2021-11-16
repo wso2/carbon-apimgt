@@ -5920,12 +5920,12 @@ definitions:
       tokenType:
         type: string
         description: The type of the tokens to be used (exchanged or without exchanged).
-          Accepted values are EXCHANGED, ORIGINAL and BOTH.
+          Accepted values are EXCHANGED, DIRECT and BOTH.
         example: EXCHANGED
-        default: ORIGINAL
+        default: DIRECT
         enum:
           - EXCHANGED
-          - ORIGINAL
+          - DIRECT
           - BOTH
   #-----------------------------------------------------
   # The KeyManager Configuration
