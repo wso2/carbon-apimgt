@@ -23,12 +23,31 @@ import javax.validation.Valid;
 
 public class EnvironmentDTO   {
   
+    private String id = null;
     private String name = null;
     private String displayName = null;
     private String type = null;
     private String serverUrl = null;
     private Boolean showInApiConsole = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
+
+  /**
+   **/
+  public EnvironmentDTO id(String id) {
+    this.id = id;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("id")
+  @NotNull
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
 
   /**
    **/
@@ -147,7 +166,8 @@ public class EnvironmentDTO   {
       return false;
     }
     EnvironmentDTO environment = (EnvironmentDTO) o;
-    return Objects.equals(name, environment.name) &&
+    return Objects.equals(id, environment.id) &&
+        Objects.equals(name, environment.name) &&
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(type, environment.type) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
@@ -157,7 +177,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, type, serverUrl, showInApiConsole, vhosts);
+    return Objects.hash(id, name, displayName, type, serverUrl, showInApiConsole, vhosts);
   }
 
   @Override
@@ -165,6 +185,7 @@ public class EnvironmentDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class EnvironmentDTO {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

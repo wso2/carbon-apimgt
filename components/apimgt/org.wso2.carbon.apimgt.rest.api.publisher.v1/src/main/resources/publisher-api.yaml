@@ -7879,7 +7879,69 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
-
+  /apis/{apiId}/environments/{envId}/keys:
+    get:
+      tags:
+        - APIs
+      summary: get environment specific API properties
+      description: |
+        This operation can be used to retrieve environment specific API properties from an existing API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/envId'
+      responses:
+        '200':
+          description: |
+            OK.
+            Successful response with environment specific API properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentProperties'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+    put:
+      tags:
+        - APIs
+      summary: Update environment specific API properties
+      description: |
+        This operation can be used to update the environment specific API properties of an existing API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/envId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentProperties'
+        required: true
+      responses:
+        '200':
+          description: |
+            OK.
+            Successful response with environment specific API properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentProperties'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
 components:
   schemas:
     Comment:
@@ -9839,12 +9901,15 @@ components:
       title: Environment
       required:
         - endpoints
+        - id
         - name
         - serverUrl
         - showInApiConsole
         - type
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
           example: default
@@ -11166,6 +11231,14 @@ components:
           type: integer
           format: int32
           example: 3600
+    EnvironmentProperties:
+      title: Envionment specific API properties request body
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        productionEndpoint: https://localhost:9443/pizzashack/v1/api/
+        sandboxEndpoint: https://localhost:9443/pizzashack/v1/api/
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:
@@ -11724,6 +11797,14 @@ components:
       name: tierQuotaType
       description: Filter the subscription base on tier quota type
       in: query
+      schema:
+        type: string
+    envId:
+      name: envId
+      in: path
+      description: |
+        **Env ID** consisting of the **UUID** of the gateway environment.
+      required: true
       schema:
         type: string
   requestBodies:
