@@ -2391,7 +2391,7 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED, failedGWEnv);
+        apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED);
         //From the 2 environments, only 1 was successful
         Assert.assertEquals(2, api.getEnvironments().size());
     }
@@ -2448,8 +2448,7 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
         WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
-        boolean status = apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED,
-                failedGWEnv);
+        boolean status = apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED);
         Assert.assertEquals(2, api.getEnvironments().size());
         Assert.assertEquals(true, status);
     }
@@ -2471,8 +2470,6 @@ public class APIProviderImplTest {
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
 
-        Map<String, String> failedGWEnv = new HashMap<String, String>();
-        failedGWEnv.put("Production", "Failed to publish");
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
                 null, null);
         Mockito.when(artifactManager.newGovernanceArtifact(any(QName.class))).thenReturn(artifact);
@@ -2506,12 +2503,11 @@ public class APIProviderImplTest {
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
         try {
-            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED, failedGWEnv);
+            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.PUBLISHED);
         } catch(FaultGatewaysException e) {
             Assert.assertTrue(e.getFaultMap().contains("Failed to publish"));
         }
-        //From the 2 environments, only 1 was successful
-        Assert.assertEquals(1, api.getEnvironments().size());
+        Assert.assertEquals(2, api.getEnvironments().size());
     }
 
     @Test
@@ -2529,9 +2525,6 @@ public class APIProviderImplTest {
         api.setOrganization("carbon.super");
 
         Mockito.when(apimgtDAO.getPublishedDefaultVersion(apiId)).thenReturn("1.0.0");
-
-        Map<String, String> failedGWEnv = new HashMap<String, String>();
-        failedGWEnv.put("Sandbox", "Failed to un-publish");
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
                 null, null);
@@ -2567,14 +2560,12 @@ public class APIProviderImplTest {
         WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
         Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
         try {
-            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED, failedGWEnv);
+            apiProvider.updateAPIforStateChange(api, APIConstants.CREATED, APIConstants.RETIRED);
         } catch(FaultGatewaysException e) {
             Assert.assertTrue(e.getFaultMap().contains("Failed to un-publish"));
         }
 
-        //API was going to be removed from 1 gateway, but removal has failed. Therefore API is available
-        // in both environments
-        Assert.assertEquals(2, api.getEnvironments().size());
+        Assert.assertEquals(1, api.getEnvironments().size());
     }
 
 
