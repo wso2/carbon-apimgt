@@ -93,7 +93,7 @@ public class TemplateBuilderUtilTest {
         endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, wsProdEndpoint);
         endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, wsSandEndpoint);
         perTopicMappings.put(wildCardResource, endpoints);
-        WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration=
+        WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration =
                 new WebSocketTopicMappingConfiguration(perTopicMappings);
         webSocketTopicMappingConfiguration.setResourceKey(wildCardResource, mappingWildCard);
         api.setWebSocketTopicMappingConfiguration(webSocketTopicMappingConfiguration);
@@ -111,10 +111,10 @@ public class TemplateBuilderUtilTest {
                 + wsSandEpName + "\">dummy sandbox content</endpoint>";
         Mockito.when(apiTemplateBuilder.getConfigStringForWebSocketEndpointTemplate(
                 APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, mappingWildCard, wsProdEndpoint)).thenReturn(
-                        dummyProdEndpointConfig);
+                dummyProdEndpointConfig);
         Mockito.when(apiTemplateBuilder.getConfigStringForWebSocketEndpointTemplate(
                 APIConstants.GATEWAY_ENV_TYPE_SANDBOX, mappingWildCard, wsSandEndpoint)).thenReturn(
-                        dummySandboxEndpointConfig);
+                dummySandboxEndpointConfig);
         TemplateBuilderUtil.addWebSocketResourceEndpoints(api, apiTemplateBuilder, gatewayAPIDTO);
         GatewayContentDTO[] endpointEntries = gatewayAPIDTO.getEndpointEntriesToBeAdd();
         Assert.assertEquals(endpointEntries.length, 3);
@@ -167,7 +167,7 @@ public class TemplateBuilderUtilTest {
                 "\"http\":{\"endpoint_type\":\"http\",\n" +
                 "\"production_endpoints\":{\"url\":\"https://production.com\"}},\n" +
                 "\"ws\":{\"endpoint_type\":\"ws\",\n" +
-                "\"production_endpoints\":{\"url\":\""+ wsProdEndpoint + "\"}}}");
+                "\"production_endpoints\":{\"url\":\"" + wsProdEndpoint + "\"}}}");
         TemplateBuilderUtil.addGqlWebSocketTopicMappings(api);
         topicMappingConfiguration = api.getWebSocketTopicMappingConfiguration();
         mappings = topicMappingConfiguration.getMappings().get(wildCardResource);
@@ -279,7 +279,7 @@ public class TemplateBuilderUtilTest {
             TemplateBuilderUtil.populateSubscriptionEndpointConfig(endpointConfig);
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Unsupported URI scheme present for Production endpoint: "
-            + wsProdEndpoint));
+                    + wsProdEndpoint));
         }
     }
 

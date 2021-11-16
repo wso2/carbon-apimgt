@@ -1412,8 +1412,8 @@ public class TemplateBuilderUtil {
             }
             return newEndpointConfigJson.toJSONString();
         } catch (ParseException e) {
-            throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint config: "
-                    + endpointConfig, e);
+            throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
+                    + "config: " + endpointConfig, e);
         }
     }
 
