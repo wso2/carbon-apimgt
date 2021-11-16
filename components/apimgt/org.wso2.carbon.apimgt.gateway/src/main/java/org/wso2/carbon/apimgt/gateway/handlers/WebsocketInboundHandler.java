@@ -64,12 +64,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private InboundWebSocketProcessor webSocketProcessor;
 
     public WebsocketInboundHandler() {
-        webSocketProcessor = new InboundWebSocketProcessor();
+        webSocketProcessor = initializeWebSocketProcessor();
         initializeDataPublisher();
     }
 
     public InboundWebSocketProcessor getWebSocketProcessor() {
         return webSocketProcessor;
+    }
+
+    public InboundWebSocketProcessor initializeWebSocketProcessor() {
+        return new InboundWebSocketProcessor();
     }
 
     private void initializeDataPublisher() {
@@ -134,6 +138,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     webSocketProcessor.handleRequest((WebSocketFrame) msg, inboundMessageContext);
             if (responseDTO.isError()) {
                 if (responseDTO.isCloseConnection()) {
+                    //remove inbound message context from data holder
+                    InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().remove(channelId);
                     if (log.isDebugEnabled()) {
                         log.debug("Error while handling Outbound Websocket frame. Closing connection for "
                                 + ctx.channel().toString());
