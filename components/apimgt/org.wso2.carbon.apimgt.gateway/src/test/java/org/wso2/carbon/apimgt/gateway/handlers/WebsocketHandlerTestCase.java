@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketPr
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.UUID;
 
@@ -51,13 +50,11 @@ import java.util.UUID;
  * Test class for WebsocketHandler
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PrivilegedCarbonContext.class, DataPublisherUtil.class, InboundWebsocketProcessorUtil.class})
+@PrepareForTest({InboundWebsocketProcessorUtil.class})
 public class WebsocketHandlerTestCase {
 
     private static final String channelIdString = "11111";
     private ChannelHandlerContext channelHandlerContext;
-    private Channel channel;
-    private ChannelId channelId;
     private ChannelPromise channelPromise;
     private WebsocketHandler websocketHandler;
     private WebSocketFrame msg;
@@ -66,16 +63,10 @@ public class WebsocketHandlerTestCase {
 
     @Before
     public void setup() {
-        System.setProperty("carbon.home", "jhkjn");
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         PowerMockito.mockStatic(InboundWebsocketProcessorUtil.class);
-        PowerMockito.mockStatic(DataPublisherUtil.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
-        channel = Mockito.mock(Channel.class);
-        channelId = Mockito.mock(ChannelId.class);
+        Channel channel = Mockito.mock(Channel.class);
+        ChannelId channelId = Mockito.mock(ChannelId.class);
         channelPromise = Mockito.mock(ChannelPromise.class);
         msg = Mockito.mock(WebSocketFrame.class);
         ByteBuf content = Mockito.mock(ByteBuf.class);
