@@ -2878,6 +2878,9 @@ public final class APIConstants {
     public static final String REQ_HEADER_PREFIX = "req.header.";
     public static final String REQ_PATH_PARAM_PREFIX = "req.path.";
     public static final String REQ_QUERY_PARAM_PREFIX = "req.query.";
+    public static final String RESPONSE_HEADER_PREFIX = "resp.header.";
+    public static final String RESPONSE_PATH_PARAM_PREFIX = "resp.path.";
+    public static final String RESPONSE_QUERY_PARAM_PREFIX = "resp.query.";
 
 
 
