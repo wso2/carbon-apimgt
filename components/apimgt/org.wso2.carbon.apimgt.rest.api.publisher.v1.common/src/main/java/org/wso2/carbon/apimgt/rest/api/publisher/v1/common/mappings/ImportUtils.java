@@ -468,8 +468,7 @@ public class ImportUtils {
                 Iterator<OperationPolicyDTO> iterator = inPolicies.iterator();
                 while (iterator.hasNext()) {
                     OperationPolicyDTO policy = iterator.next();
-                    if (policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CHANGE_ENDPOINT) ||
-                            policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CALL_VALIDATION_SERVICE)) {
+                    if (policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CALL_INTERCEPTOR_SERVICE)) {
                         Map<String, Object> policyParameters = policy.getParameters();
                         String endpointId = (String) policyParameters.get(APIConstants.ENDPOINT_ID_PARAM);
                         if (isResourceEndpointExists(endpointId, resourceEndpoints)) {
