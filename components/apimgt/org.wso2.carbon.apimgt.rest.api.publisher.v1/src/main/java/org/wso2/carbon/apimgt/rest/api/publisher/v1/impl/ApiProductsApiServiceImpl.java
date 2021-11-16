@@ -31,8 +31,11 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -62,9 +65,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.identity.entitlement.stub.types.axis2.Publish;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -760,6 +766,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         String provider = body.getProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
+            validateLCStateOfApiProduct(body);
             APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
@@ -788,6 +795,15 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
+    }
+
+    private void validateLCStateOfApiProduct(APIProductDTO productDTO) {
+
+        if (productDTO.getState() != null && APIStatus.PUBLISHED.getStatus().equals(productDTO.getState().value()) &&
+                productDTO.getPolicies().isEmpty()) {
+            RestApiUtil.handleBadRequest("Unable to publish the API Product " + productDTO.getId()
+                    + " as the subscription policies are not selected", log);
+        }
     }
 
     @Override
@@ -1038,5 +1054,49 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 fromAPIRevisionDeploymenttoDTO(apiRevisionDeploymentsResponse);
         Response.Status status = Response.Status.OK;
         return Response.status(status).entity(apiRevisionDeploymentDTO).build();
+    }
+
+    @Override
+    public Response changeAPIProductLifecycle(String action, String apiProductId, String lifecycleChecklist,
+                                              String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
+                apiProductId, lifecycleChecklist, organization);
+
+        LifecycleStateDTO stateDTO = getLifecycleState(apiProductId, organization);
+        WorkflowResponseDTO workflowResponseDTO = APIMappingUtil.toWorkflowResponseDTO(stateDTO, stateChangeResponse);
+        return Response.ok().entity(workflowResponseDTO).build();
+    }
+
+    private LifecycleStateDTO getLifecycleState(String apiProductId, String organization) {
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier productIdentifier;
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId) != null) {
+                productIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiProductId, organization).getId();
+            } else {
+                productIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiProductId);
+            }
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiProductId, organization);
+            if (apiLCData == null) {
+                String errorMessage = "Error while getting lifecycle state for API Product : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, false);
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 }

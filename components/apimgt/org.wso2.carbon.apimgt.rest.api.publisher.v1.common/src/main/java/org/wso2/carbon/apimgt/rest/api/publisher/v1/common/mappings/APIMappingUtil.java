@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
+//import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -2416,7 +2416,7 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        product.setState(APIStatus.PUBLISHED.toString());
+        product.setState(dto.getState().toString());
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 
