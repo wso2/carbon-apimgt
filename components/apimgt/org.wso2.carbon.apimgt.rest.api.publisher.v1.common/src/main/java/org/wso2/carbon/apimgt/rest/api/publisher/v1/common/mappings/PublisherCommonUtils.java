@@ -30,6 +30,7 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -50,6 +52,8 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -89,6 +93,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1772,5 +1777,56 @@ public class PublisherCommonUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Change the lifecycle state of an API or API Product identified by UUID
+     *
+     * @param action       LC state change action
+     * @param uuid         UUID of API or API Product
+     * @param lcChecklist  LC state change check list
+     * @param organization Organization of logged-in user
+     * @return APIStateChangeResponse
+     * @throws APIManagementException Exception if there is an error when changing the LC state of API or API Product
+     */
+    public static APIStateChangeResponse changeApiOrApiProductLifecycle(String action, String uuid,
+                                                                        String lcChecklist, String organization)
+            throws APIManagementException {
+
+        String[] checkListItems = lcChecklist != null ? lcChecklist.split(APIConstants.DELEM_COMMA) : new String[0];
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(uuid, organization);
+
+        if (apiTypeWrapper == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API or API Product with UUID: "
+                    + uuid, ExceptionCodes.from(ExceptionCodes.API_OR_API_PRODUCT_NOT_FOUND, uuid));
+        }
+
+        Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(uuid, organization);
+
+        String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
+        if (!ArrayUtils.contains(nextAllowedStates, action)) {
+            throw new APIManagementException("Action '" + action + "' is not allowed. Allowed actions are "
+                    + Arrays.toString(nextAllowedStates), ExceptionCodes.from(ExceptionCodes
+                    .UNSUPPORTED_LIFECYCLE_ACTION, action));
+        }
+
+        //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
+        Map<String, Boolean> lcMap = new HashMap<>();
+        for (String checkListItem : checkListItems) {
+            String[] attributeValPair = checkListItem.split(APIConstants.DELEM_COLON);
+            if (attributeValPair.length == 2) {
+                String checkListItemName = attributeValPair[0].trim();
+                boolean checkListItemValue = Boolean.parseBoolean(attributeValPair[1].trim());
+                lcMap.put(checkListItemName, checkListItemValue);
+            }
+        }
+
+        try {
+            return apiProvider.changeLifeCycleStatus(organization, apiTypeWrapper, action, lcMap);
+        } catch (FaultGatewaysException e) {
+            throw new APIManagementException("Error while change the state of artifact with name - "
+                    + apiTypeWrapper.getName(), e);
+        }
     }
 }

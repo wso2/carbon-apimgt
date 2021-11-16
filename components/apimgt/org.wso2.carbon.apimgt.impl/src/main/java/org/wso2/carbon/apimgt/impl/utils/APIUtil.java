@@ -11246,6 +11246,17 @@ public final class APIUtil {
     }
 
     /**
+     * Get API or API Product Identifier by passing the UUID
+     *
+     * @param uuid - Unique UUID of API or API Product
+     * @return Instance of API Identifier or API Product Identifier
+     * @throws APIManagementException
+     */
+    public static Identifier getApiOrApiProductIdentifierFromUUID(String uuid) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getApiOrApiProductIdentifierFromUUID(uuid);
+    }
+
+    /**
      * Get the API Identifier from UUID.
      *
      * @param uuid UUID of the API

@@ -3722,42 +3722,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist,
                                             String ifMatch, MessageContext messageContext) {
-        //pre-processing
-        String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
-            }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, organization);
-            String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
-            if (!ArrayUtils.contains(nextAllowedStates, action)) {
-                RestApiUtil.handleBadRequest(
-                        "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
-                                .toString(nextAllowedStates), log);
-            }
-
-            //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
-            Map<String, Boolean> lcMap = new HashMap<String, Boolean>();
-            for (String checkListItem : checkListItems) {
-                String[] attributeValPair = checkListItem.split(":");
-                if (attributeValPair.length == 2) {
-                    String checkListItemName = attributeValPair[0].trim();
-                    boolean checkListItemValue = Boolean.valueOf(attributeValPair[1].trim());
-                    lcMap.put(checkListItemName, checkListItemValue);
-                    //apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
-                }
-            }
-
-            //todo: check if API's tiers are properly set before Publishing
-            //APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
-            APIStateChangeResponse stateChangeResponse = apiProvider
-                    .changeLifeCycleStatus(organization, apiId, action.toString(), lcMap);
+            APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
+                    apiId, lifecycleChecklist, organization);
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
@@ -3775,9 +3744,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
             }
-        } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating the API in Gateway " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

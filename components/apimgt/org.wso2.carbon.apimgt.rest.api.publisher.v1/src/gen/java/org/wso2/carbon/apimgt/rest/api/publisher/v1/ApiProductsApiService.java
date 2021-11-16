@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 
 import java.util.List;
 
@@ -34,6 +35,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApiProductsApiService {
       public Response addAPIProductDocument(String apiProductId, DocumentDTO documentDTO, MessageContext messageContext) throws APIManagementException;
       public Response addAPIProductDocumentContent(String apiProductId, String documentId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
+      public Response changeAPIProductLifecycle(String action, String apiProductId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createAPIProduct(APIProductDTO apIProductDTO, MessageContext messageContext) throws APIManagementException;
       public Response createAPIProductRevision(String apiProductId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProduct(String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;

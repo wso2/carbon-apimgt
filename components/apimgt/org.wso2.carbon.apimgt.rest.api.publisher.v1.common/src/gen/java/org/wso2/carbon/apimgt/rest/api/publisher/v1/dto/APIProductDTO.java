@@ -42,7 +42,11 @@ public class APIProductDTO   {
     @XmlEnum(String.class)
     public enum StateEnum {
         CREATED("CREATED"),
-        PUBLISHED("PUBLISHED");
+        PUBLISHED("PUBLISHED"),
+        DEPRECATED("DEPRECATED"),
+        RETIRED("RETIRED"),
+        BLOCKED("BLOCKED"),
+        PROTOTYPED("PROTOTYPED");
         private String value;
 
         StateEnum (String v) {
@@ -68,7 +72,7 @@ public class APIProductDTO   {
 return null;
         }
     }
-    private StateEnum state = null;
+    private StateEnum state = StateEnum.CREATED;
     private Boolean enableSchemaValidation = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;

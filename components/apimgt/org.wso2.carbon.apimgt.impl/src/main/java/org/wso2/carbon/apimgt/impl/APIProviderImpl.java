@@ -1953,7 +1953,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -1987,7 +1987,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -2021,7 +2021,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -2043,11 +2043,57 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public boolean updateAPIforStateChange(API api, String currentStatus, String newStatus,
-            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
+    public boolean updateAPIProductForStateChange(APIProduct apiProduct, String currentStatus, String newStatus)
+            throws APIManagementException, FaultGatewaysException {
+        boolean isSuccess = false;
+        String provider = apiProduct.getId().getProviderName();
+        String name = apiProduct.getId().getName();
+        String version = apiProduct.getId().getVersion();
+
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            if (apiProduct != null) {
+
+                if (!currentStatus.equals(newStatus)) {
+                    apiProduct.setState(newStatus);
+
+                    // If API status changed to publish we should add it to recently added APIs list
+                    // this should happen in store-publisher cluster domain if deployment is distributed
+                    // IF new API published we will add it to recently added APIs
+                    Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                            .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
+
+                    PublisherAPIProduct publisherAPIProduct =  APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+                    try {
+                        apiPersistenceInstance.updateAPIProduct(new Organization(apiProduct.getOrganization()),
+                                publisherAPIProduct);
+                    } catch (APIPersistenceException e) {
+                        handleException("Error while persisting the updated API Product", e);
+                    }
+                }
+                isSuccess = true;
+            } else {
+                handleException("Couldn't find an API Product with the name - " + name + " and version  " + version);
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return isSuccess;
+    }
+
+    public boolean updateAPIforStateChange(API api, String currentStatus, String newStatus)
+            throws APIManagementException, FaultGatewaysException {
 
         boolean isSuccess = false;
-        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         String provider = api.getId().getProviderName();
         String providerTenantMode = api.getId().getProviderName();
         provider = APIUtil.replaceEmailDomain(provider);
@@ -2081,41 +2127,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-                    if (failedGatewaysMap != null) {
-
-                        if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
-                            || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
-                            Map<String, String> failedToPublishEnvironments = failedGatewaysMap;
-                            if (!failedToPublishEnvironments.isEmpty()) {
-                                Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
-                                publishedEnvironments.removeAll(new ArrayList<String>(failedToPublishEnvironments
-                                        .keySet()));
-                                api.setEnvironments(publishedEnvironments);
-                                //updateApiArtifactNew(api, true, false);
-                                failedGateways.clear();
-                                failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
-                                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-
-                            }
-                        } else { // API Status : RETIRED or CREATED
-                            Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
-                            if(!APIConstants.CREATED.equals(newStatus)) {
-                                cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
-                                apiMgtDAO.removeAllSubscriptions(api.getUuid());
-                            }
-                            if (!failedToRemoveEnvironments.isEmpty()) {
-                                Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
-                                publishedEnvironments.addAll(failedToRemoveEnvironments.keySet());
-                                api.setEnvironments(publishedEnvironments);
-                                //updateApiArtifactNew(api, true, false);
-                                failedGateways.clear();
-                                failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
-                                failedGateways.put("PUBLISHED", Collections.<String, String>emptyMap());
-
-                            }
-                        }
-                    }
-
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
                     try {
@@ -2134,11 +2145,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
-        }
-
-        if (!failedGateways.isEmpty()
-                && (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
-            throw new FaultGatewaysException(failedGateways);
         }
         return isSuccess;
     }
@@ -2660,7 +2666,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // copy wsdl 
+        // copy wsdl
         if (existingAPI.getWsdlUrl() != null) {
             ResourceFile wsdl = getWSDL(existingApiId, organization);
             if (wsdl != null) {
@@ -4863,9 +4869,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return response;
     }
 
+    /**
+     * This method is to change registry lifecycle states for an API or API Product artifact
+     *
+     * @param orgId          UUID of the organization
+     * @param apiTypeWrapper API Type Wrapper
+     * @param action         Action which need to execute from registry lifecycle
+     * @param checklist      checklist items
+     * @return APIStateChangeResponse API workflow state and WorkflowResponse
+     */
     @Override
-    public APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action,
-                            Map<String, Boolean> checklist) throws APIManagementException, FaultGatewaysException {
+    public APIStateChangeResponse changeLifeCycleStatus(String orgId, ApiTypeWrapper apiTypeWrapper, String action,
+                                                        Map<String, Boolean> checklist) throws APIManagementException,
+            FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -4873,117 +4889,82 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
             //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
-            API api = getLightweightAPIByUUID(uuid, orgId);
             String targetStatus;
-            if (api != null) {
+            String providerName;
+            String apiName;
+            String apiContext;
+            String apiType;
+            String apiVersion;
+            String currentStatus;
+            String uuid = apiTypeWrapper.getId().getUUID();
+            int apiOrApiProductId;
 
-                String providerName = api.getId().getProviderName();
-                String apiName = api.getId().getApiName();
-                String apiContext = api.getContext();
-                String apiType = api.getType();//check
-                String apiVersion = api.getId().getVersion();
-                String currentStatus = api.getStatus();
+            if (apiTypeWrapper.isAPIProduct()) {
+                APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+                providerName = apiProduct.getId().getProviderName();
+                apiName = apiProduct.getId().getName();
+                apiContext = apiProduct.getContext();
+                apiType = apiProduct.getType();
+                apiVersion = apiProduct.getId().getVersion();
+                currentStatus = apiProduct.getState();
+                apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
+            } else {
+                API api = apiTypeWrapper.getApi();
+                providerName = api.getId().getProviderName();
+                apiName = api.getId().getApiName();
+                apiContext = api.getContext();
+                apiType = api.getType();
+                apiVersion = api.getId().getVersion();
+                currentStatus = api.getStatus();
+                apiOrApiProductId = apiMgtDAO.getAPIID(api.getId().getUUID());
+            }
 
-                int apiId = apiMgtDAO.getAPIID(api.getUuid());
+            WorkflowStatus apiWFState = null;
+            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+                    WorkflowConstants.WF_TYPE_AM_API_STATE);
+            if (wfDTO != null) {
+                apiWFState = wfDTO.getStatus();
+            }
 
-                WorkflowStatus apiWFState = null;
-                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                        WorkflowConstants.WF_TYPE_AM_API_STATE);
-                if (wfDTO != null) {
-                    apiWFState = wfDTO.getStatus();
-                }
+            // if the workflow has started, then executor should not fire again
+            if (!WorkflowStatus.CREATED.equals(apiWFState)) {
+                response = executeStateChangeWorkflow(wfDTO, currentStatus, action, apiName, apiContext, apiType,
+                        apiVersion, providerName, apiOrApiProductId, uuid);
+            }
 
-                // if the workflow has started, then executor should not fire again
-                if (!WorkflowStatus.CREATED.equals(apiWFState)) {
-
-                    try {
-                        WorkflowProperties workflowProperties = getAPIManagerConfiguration().getWorkflowProperties();
-                        WorkflowExecutor apiStateWFExecutor = WorkflowExecutorFactory.getInstance()
-                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-                        APIStateWorkflowDTO apiStateWorkflow = new APIStateWorkflowDTO();
-                        apiStateWorkflow.setApiCurrentState(currentStatus);
-                        apiStateWorkflow.setApiLCAction(action);
-                        apiStateWorkflow.setApiName(apiName);
-                        apiStateWorkflow.setApiContext(apiContext);
-                        apiStateWorkflow.setApiType(apiType);
-                        apiStateWorkflow.setApiVersion(apiVersion);
-                        apiStateWorkflow.setApiProvider(providerName);
-                        apiStateWorkflow.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
-                        apiStateWorkflow.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
-                        apiStateWorkflow.setTenantId(tenantId);
-                        apiStateWorkflow.setTenantDomain(this.tenantDomain);
-                        apiStateWorkflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
-                        apiStateWorkflow.setStatus(WorkflowStatus.CREATED);
-                        apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
-                        apiStateWorkflow.setWorkflowReference(Integer.toString(apiId));
-                        apiStateWorkflow.setInvoker(this.username);
-                        apiStateWorkflow.setApiUUID(uuid);
-                        String workflowDescription = "Pending lifecycle state change action: " + action;
-                        apiStateWorkflow.setWorkflowDescription(workflowDescription);
-
-                        WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
-                        response.setWorkflowResponse(workflowResponse);
-                    } catch (WorkflowException e) {
-                        handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(),
-                                e);
-                    }
-
-                    // get the workflow state once the executor is executed.
-                    wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
-                            WorkflowConstants.WF_TYPE_AM_API_STATE);
-                    if (wfDTO != null) {
-                        apiWFState = wfDTO.getStatus();
-                        response.setStateChangeStatus(apiWFState.toString());
-                    } else {
-                        response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
-                    }
-                }
-
-                // only change the lifecycle if approved
-                // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
-                if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
-                    targetStatus = "";
-                    //RegistryLCManager.getInstance().getStateForTransition(action);
-                    //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
-                    //targetStatus = apiArtifact.getLifecycleState();
-                    targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-                    apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
+            // only change the lifecycle if approved
+            // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
+            if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
+                targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
+                apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
+                if (!apiTypeWrapper.isAPIProduct()) {
+                    API api = apiTypeWrapper.getApi();
                     api.setOrganization(orgId);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     //Sending Notifications to existing subscribers
-                    if (APIConstants.PUBLISHED.equals(targetStatus)) {
-                        sendEmailNotification(api);
-                    }
+                    sendEmailNotification(api);
                     // if retired Delete Existing Gateway Deployments.
-                    if (APIConstants.RETIRED.equals(targetStatus)){
-                        deleteAPIRevisions(uuid, orgId);
-                    }
-                    if (!currentStatus.equalsIgnoreCase(targetStatus)) {
-                        apiMgtDAO.recordAPILifeCycleEvent(apiId, currentStatus.toUpperCase(),
-                                targetStatus.toUpperCase(), this.username, this.tenantId);
-                    }
-                    if (log.isDebugEnabled()) {
-                        String logMessage = "API Status changed successfully. API Name: " + api.getId().getApiName()
-                                + ", API Version " + api.getId().getVersion() + ", New Status : " + targetStatus;
-                        log.debug(logMessage);
-                    }
-                    APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                            APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, tenantDomain, apiName, apiId,
-                            uuid,apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(providerName), targetStatus);
-                    APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-
-                    // Extracting API details for the recommendation system
-                    if (recommendationEnvironment != null) {
-                        RecommenderEventPublisher
-                                extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
-                        Thread recommendationThread = new Thread(extractor);
-                        recommendationThread.start();
-                    }
-                    return response;
+                    deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, false);
+                } else {
+                    APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+                    changeLifecycle(apiProduct, currentStatus, targetStatus);
+                    // if retired Delete Existing Gateway Deployments.
+                    deleteApiOrApiProductRevisions(uuid, targetStatus, orgId, true);
                 }
+
+                recordLCStateChange(currentStatus, targetStatus, uuid);
+                if (log.isDebugEnabled()) {
+                    String logMessage = "LC Status changed successfully for artifact with name: " + apiName
+                            + ", version " + apiVersion + ", New Status : " + targetStatus;
+                    log.debug(logMessage);
+                }
+                sendLCStateChangeNotification(apiName, apiType, apiContext, apiVersion, targetStatus, providerName,
+                        apiOrApiProductId, uuid);
+                extractRecommendationDetails(apiTypeWrapper);
+                return response;
             }
         } catch (APIPersistenceException e) {
-            handleException("Error while accessing persistance layer", e);
+            handleException("Error while accessing persistence layer", e);
         } catch (PersistenceException e) {
             handleException("Error while accessing lifecycle information ", e);
         }  finally {
@@ -4992,8 +4973,181 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return response;
     }
 
-    private void changeLifeCycle(API api,
-            String currentState, String targetState, Map<String, Boolean> checklist)
+    /**
+     * Execute state change workflow
+     *
+     * @param wfDTO             Workflow DTO Object
+     * @param currentStatus     Current Status of the API or API Product
+     * @param action            LC state change action
+     * @param apiName           Name of API or API Product
+     * @param apiContext        Context of API or API Product
+     * @param apiType           API Type
+     * @param apiVersion        Version of API or API Product
+     * @param providerName      Provider of API or API Product
+     * @param apiOrApiProductId Unique ID API or API Product
+     * @param uuid              UUID of the API or API Product
+     * @return  APIStateChangeResponse
+     * @throws APIManagementException Error when executing the state change workflow
+     */
+    private APIStateChangeResponse executeStateChangeWorkflow(WorkflowDTO wfDTO, String currentStatus, String action,
+                                                              String apiName, String apiContext, String apiType,
+                                                              String apiVersion, String providerName,
+                                                              int apiOrApiProductId, String uuid)
+            throws APIManagementException {
+
+        APIStateChangeResponse response = new APIStateChangeResponse();
+        try {
+            WorkflowExecutor apiStateWFExecutor =
+             WorkflowExecutorFactory.getInstance().getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+            APIStateWorkflowDTO apiStateWorkflow = setAPIStateWorkflowDTOParameters(currentStatus, action, apiName,
+             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, apiStateWFExecutor);
+            WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
+            response.setWorkflowResponse(workflowResponse);
+        } catch (WorkflowException e) {
+            handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(), e);
+        }
+
+        // get the workflow state once the executor is executed.
+        wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiOrApiProductId),
+         WorkflowConstants.WF_TYPE_AM_API_STATE);
+        if (wfDTO != null) {
+            response.setStateChangeStatus(wfDTO.getStatus().toString());
+        } else {
+            response.setStateChangeStatus(WorkflowStatus.APPROVED.toString());
+        }
+        return response;
+    }
+
+    /**
+     * Set API or API Product state change workflow parameters
+     *
+     * @param currentStatus Current state of the API or API Product
+     * @param action        LC state change action
+     * @param name          Name of the API or API Product
+     * @param context       Context of the API or API Product
+     * @param apiType       API or API Product
+     * @param version       Version of API or API Product
+     * @param providerName  Owner of the API or API Product
+     * @param apiOrApiProductId Unique ID of the API or API Product
+     * @param uuid              Unique UUID of the API or API Product
+     * @param apiStateWFExecutor    WorkflowExecutor
+     * @return APIStateWorkflowDTO Object
+     */
+    private APIStateWorkflowDTO setAPIStateWorkflowDTOParameters(String currentStatus, String action, String name,
+                                                                 String context, String apiType, String version,
+                                                                 String providerName, int apiOrApiProductId,
+                                                                 String uuid, WorkflowExecutor apiStateWFExecutor) {
+
+        WorkflowProperties workflowProperties = getAPIManagerConfiguration().getWorkflowProperties();
+        APIStateWorkflowDTO stateWorkflowDTO = new APIStateWorkflowDTO();
+        stateWorkflowDTO.setApiCurrentState(currentStatus);
+        stateWorkflowDTO.setApiLCAction(action);
+        stateWorkflowDTO.setApiName(name);
+        stateWorkflowDTO.setApiContext(context);
+        stateWorkflowDTO.setApiType(apiType);
+        stateWorkflowDTO.setApiVersion(version);
+        stateWorkflowDTO.setApiProvider(providerName);
+        stateWorkflowDTO.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
+        stateWorkflowDTO.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
+        stateWorkflowDTO.setTenantId(tenantId);
+        stateWorkflowDTO.setTenantDomain(this.tenantDomain);
+        stateWorkflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
+        stateWorkflowDTO.setStatus(WorkflowStatus.CREATED);
+        stateWorkflowDTO.setCreatedTime(System.currentTimeMillis());
+        stateWorkflowDTO.setWorkflowReference(Integer.toString(apiOrApiProductId));
+        stateWorkflowDTO.setInvoker(this.username);
+        stateWorkflowDTO.setApiUUID(uuid);
+        String workflowDescription = "Pending lifecycle state change action: " + action;
+        stateWorkflowDTO.setWorkflowDescription(workflowDescription);
+        return stateWorkflowDTO;
+    }
+
+    /**
+     * Delete API or API Product revisions
+     *
+     * @param uuid          Unique UUID of the API or API Product
+     * @param targetStatus  Target LC state
+     * @param orgId         Organization ID of the logged-in user
+     * @param isProduct     Boolean represents if it's an API Products
+     * @throws APIManagementException error when deleting the revisions
+     */
+    private void deleteApiOrApiProductRevisions(String uuid, String targetStatus, String orgId, boolean isProduct)
+            throws APIManagementException {
+        if (APIConstants.RETIRED.equals(targetStatus)){
+            if (isProduct) {
+                deleteAPIProductRevisions(uuid, orgId);
+            } else {
+                deleteAPIRevisions(uuid, orgId);
+            }
+        }
+    }
+
+    /**
+     * Record LC state change to database
+     *
+     * @param currentStatus     Current state of the artifact
+     * @param targetStatus      Target state of the artifact
+     * @param uuid              Unique UUID of the artifact
+     * @throws APIManagementException   Exception if there are any errors when updating LC state change in database
+     */
+    private void recordLCStateChange(String currentStatus, String targetStatus, String uuid)
+            throws APIManagementException {
+        if (!currentStatus.equalsIgnoreCase(targetStatus)) {
+            apiMgtDAO.recordAPILifeCycleEvent(uuid, currentStatus.toUpperCase(),
+                    targetStatus.toUpperCase(), this.username, this.tenantId);
+        }
+    }
+
+    /**
+     *
+     * @param apiName
+     * @param apiType
+     * @param apiContext
+     * @param apiVersion
+     * @param targetStatus
+     * @param provider
+     * @param apiOrApiProductId
+     * @param uuid
+     */
+    private void sendLCStateChangeNotification(String apiName, String apiType, String apiContext, String apiVersion,
+                                               String targetStatus, String provider, int apiOrApiProductId,
+                                               String uuid) {
+
+        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, tenantDomain, apiName, apiOrApiProductId,
+                uuid, apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(provider), targetStatus);
+        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    private void extractRecommendationDetails(ApiTypeWrapper apiTypeWrapper) {
+        // Extracting API or API Product details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher
+                    extractor = new RecommenderDetailsExtractor(apiTypeWrapper, tenantDomain, APIConstants.ADD_API);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+    }
+
+    private void changeLifecycle(APIProduct apiProduct, String currentState, String targetState)
+            throws APIManagementException, FaultGatewaysException {
+
+        if (targetState != null) {
+            String newStatus = targetState.toUpperCase();
+            if (log.isDebugEnabled()) {
+                String logMessage = "Publish changed status to the Gateway. API Name: " + apiProduct.getId().getName()
+                        + ", API Version " + apiProduct.getId().getVersion() + ", API Context: "
+                        + apiProduct.getContext() + ", New Status : " + newStatus;
+                log.debug(logMessage);
+            }
+            // update api product related information for state change
+            updateAPIProductForStateChange(apiProduct, currentState, newStatus);
+        } else {
+            throw new APIManagementException("Invalid Lifecycle status provided for default APIExecutor");
+        }
+    }
+
+    private void changeLifeCycle(API api, String currentState, String targetState, Map<String, Boolean> checklist)
             throws APIManagementException, FaultGatewaysException {
 
         String oldStatus = currentState.toUpperCase();
@@ -5057,7 +5211,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             // update api related information for state change
-            updateAPIforStateChange(api, currentState, newStatus, failedGateways);
+            updateAPIforStateChange(api, currentState, newStatus);
 
 
             if (log.isDebugEnabled()) {
@@ -5097,7 +5251,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
                             && versionComparator.compare(oldAPI, api) < 0
                             && (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                        changeLifeCycleStatus(tenantDomain, oldAPI.getUuid(), APIConstants.API_LC_ACTION_DEPRECATE, null);
+                        changeLifeCycleStatus(tenantDomain, new ApiTypeWrapper(oldAPI),
+                                APIConstants.API_LC_ACTION_DEPRECATE, null);
 
                     }
                 }
@@ -5314,41 +5469,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return lcData;
     }
 
+    /**
+     * This method returns the lifecycle data for an API including current state,next states.
+     *
+     * @param uuid  ID of the API
+     * @param orgId Identifier of an organization
+     * @return Map<String, Object> a map with lifecycle data
+     */
     public Map<String, Object> getAPILifeCycleData(String uuid, String orgId) throws APIManagementException {
 
-        Map<String, Object> lcData = new HashMap<String, Object>();
         API api = getLightweightAPIByUUID(uuid, orgId);
+        return getApiOrApiProductLifecycleData(api.getStatus());
+    }
 
+    private Map<String, Object> getApiOrApiProductLifecycleData(String status) throws APIManagementException {
+
+        Map<String, Object> lcData = new HashMap<String, Object>();
         List<String> actionsList;
         try {
-            actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(api.getStatus());
+            actionsList = LCManagerFactory.getInstance().getLCManager().getAllowedActionsForState(status);
             if (actionsList != null) {
                 String[] actionsArray = new String[actionsList.size()];
                 actionsArray = actionsList.toArray(actionsArray);
                 lcData.put(APIConstants.LC_NEXT_STATES, actionsArray);
-
             }
             ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
-            List<String> checklistItemsList = LCManagerFactory.getInstance().getLCManager()
-                    .getCheckListItemsForState(api.getStatus());
+            List<String> checklistItemsList =
+                    LCManagerFactory.getInstance().getLCManager().getCheckListItemsForState(status);
             if (checklistItemsList != null) {
                 for (String name : checklistItemsList) {
                     CheckListItem item = new CheckListItem();
                     item.setName(name);
                     item.setValue("false");
                     checkListItems.add(item);
-
                 }
             }
             lcData.put("items", checkListItems);
-
         } catch (PersistenceException e) {
             throw new APIManagementException("Error while parsing the lifecycle ", e);
         }
-        String status = api.getStatus();
         status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase(); // First letter capital
         lcData.put(APIConstants.LC_STATUS, status);
-
         return lcData;
     }
 
