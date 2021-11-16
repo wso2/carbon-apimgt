@@ -1912,7 +1912,7 @@ public class APIMappingUtil {
                             break;
                         }
                     }
-                    infoDTO.asyncTransportProtocols(AsyncApiParser.getTransportProtocolsForSolaceAPI
+                    infoDTO.asyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI
                             (model.getContent()));
                 }
                 // Set default value
