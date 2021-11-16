@@ -8,13 +8,11 @@ public class OperationPolicy {
     public enum PolicyType {
         SET_HEADER,
         REMOVE_HEADER,
-        REMAP_HEADER,
         REWRITE_HTTP_METHOD,
         CALL_INTERCEPTOR_SERVICE,
         REWRITE_RESOURCE_PATH,
         ADD_QUERY_PARAM,
         REMOVE_QUERY_PARAM,
-        REMAP_QUERY_PARAM
     };
 
     private PolicyType policyType = null;
