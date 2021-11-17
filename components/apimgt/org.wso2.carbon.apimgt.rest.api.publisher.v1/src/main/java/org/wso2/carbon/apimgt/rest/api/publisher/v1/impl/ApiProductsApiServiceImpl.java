@@ -1070,6 +1070,37 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return Response.ok().entity(workflowResponseDTO).build();
     }
 
+    @Override
+    public Response getAPIProductLifecycleHistory(String apiProductId, String ifNoneMatch,
+                                                  MessageContext messageContext) {
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIProductIdentifier productIdentifier;
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID(),
+                        organization);
+            } else {
+                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
+            }
+            return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(productIdentifier, organization))
+                    .build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the " +
+                        "lifecycle history of the API Product with id : " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving the lifecycle history of  API Product with id : "
+                        + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+
     private LifecycleStateDTO getLifecycleState(String apiProductId, String organization) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();

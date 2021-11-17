@@ -6786,7 +6786,7 @@ public class ApiMgtDAO {
                     String msg = "Unable to find the API Product : " + apiProductIdentifier.getName() + "-" +
                             APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()) + "-" +
                             apiProductIdentifier.getVersion() + " in the database";
-                    throw new APIManagementException(msg);
+                    throw new APIMgtResourceNotFoundException(msg);
                 }
             }
         } catch (SQLException e) {
