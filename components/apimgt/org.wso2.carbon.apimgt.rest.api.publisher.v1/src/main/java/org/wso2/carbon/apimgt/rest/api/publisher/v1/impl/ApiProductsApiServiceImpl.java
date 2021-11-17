@@ -1100,31 +1100,34 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
+    @Override
+    public Response getAPIProductLifecycleState(String apiProductId, String ifNoneMatch,
+                                                MessageContext messageContext) throws APIManagementException {
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiProductId, organization);
+        return Response.ok().entity(lifecycleStateDTO).build();
+    }
 
     private LifecycleStateDTO getLifecycleState(String apiProductId, String organization) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            APIIdentifier productIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId) != null) {
-                productIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiProductId, organization).getId();
-            } else {
-                productIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiProductId);
-            }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiProductId, organization);
-            if (apiLCData == null) {
-                String errorMessage = "Error while getting lifecycle state for API Product : " + apiProductId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
-            }
 
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, false);
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiProductId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiProductId, e, log);
+        try {
+            APIProductIdentifier productIdentifier;
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId) != null) {
+                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             } else {
-                String errorMessage = "Error while deleting API : " + apiProductId;
+                productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
+            }
+            return PublisherCommonUtils.getLifecycleStateInformation(productIdentifier, organization);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle " +
+                        "state information of API Product with id : " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving the lifecycle state information of the API Product with" +
+                        " " + "id : " + apiProductId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }

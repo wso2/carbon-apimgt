@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 
@@ -49,6 +50,7 @@ public interface ApiProductsApiService {
       public Response getAPIProductDocumentContent(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductDocuments(String apiProductId, Integer limit, Integer offset, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductLifecycleHistory(String apiProductId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductLifecycleState(String apiProductId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductRevision(String apiProductId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductRevisionDeployments(String apiProductId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductRevisions(String apiProductId, String query, MessageContext messageContext) throws APIManagementException;
