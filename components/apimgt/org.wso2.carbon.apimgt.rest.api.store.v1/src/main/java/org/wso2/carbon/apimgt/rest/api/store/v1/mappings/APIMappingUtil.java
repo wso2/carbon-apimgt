@@ -539,7 +539,8 @@ public class APIMappingUtil {
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
         boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
-        boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType());
+        boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
+                && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
             if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                 apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
@@ -573,6 +574,20 @@ public class APIMappingUtil {
         apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
 
         return apiEndpointURLsDTO;
+    }
+
+    /**
+     * Check if GraphQL API has at least one of SUBSCRIPTION type operations.
+     *
+     * @param apidto GraphQL APIDTO
+     * @return true if subscriptions exists
+     */
+    private static boolean isGraphQLSubscriptionsAvailable(APIDTO apidto) {
+
+        return apidto.getOperations().stream()
+                .filter(apiOperationsDTO -> APIConstants.GRAPHQL_SUBSCRIPTION.equalsIgnoreCase(
+                        apiOperationsDTO.getVerb()))
+                .findAny().orElse(null) != null;
     }
 
     /**
