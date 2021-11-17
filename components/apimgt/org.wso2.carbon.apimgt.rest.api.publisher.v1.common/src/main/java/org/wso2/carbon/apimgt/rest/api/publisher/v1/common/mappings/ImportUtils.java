@@ -247,7 +247,6 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
-
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                 importedApiDTO.getProvider(), organization);
