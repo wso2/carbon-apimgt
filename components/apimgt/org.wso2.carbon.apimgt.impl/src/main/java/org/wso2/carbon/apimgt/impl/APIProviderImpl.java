@@ -2522,7 +2522,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     } else if (OperationPolicy.PolicyType.REMOVE_QUERY_PARAM.equals(policy.getPolicyType())) {
                         validateRemoveQueryParamPolicy(policy);
                     } else if (OperationPolicy.PolicyType.CALL_INTERCEPTOR_SERVICE.equals(policy.getPolicyType())) {
-                        validateEndpointPolicy(apiId, policy);
+
                     } else {
                         throw new APIManagementException("Unsupported Operation Policy Type " + policy.getPolicyType());
                     }
@@ -2616,28 +2616,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "paramName", "ADD_QUERY_PARAM"));
         }
 
-        //in case both paramValue and paramExpression are defined precedence is given to paramValue
-        if (parameters.containsKey(APIConstants.QUERY_PARAM_VALUE)) {
-            if (StringUtils.isEmpty((String) parameters.get(APIConstants.QUERY_PARAM_VALUE))) {
-                throw new APIManagementException("Required 'paramValue' parameter for ADD_QUERY_PARAM "
-                        + "operation policy is either missing or empty", ExceptionCodes
-                        .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "paramValue", "ADD_QUERY_PARAM"));
-            }
-        } else if (parameters.containsKey(APIConstants.QUERY_PARAM_EXPRESSION)) {
-            if (StringUtils.isEmpty((String) parameters.get(APIConstants.QUERY_PARAM_EXPRESSION))) {
-                throw new APIManagementException("Required 'paramExpression' parameter for ADD_QUERY_PARAM "
-                        + "operation policy is either missing or empty", ExceptionCodes
-                        .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "paramExpression",
-                                "ADD_QUERY_PARAM"));
-            }
-        } else {
-            throw new APIManagementException(
-                    "Either 'paramValue' or 'paramExpression' must be specified for ADD_QUERY_PARAM "
-                            + "operation policy", ExceptionCodes
-                    .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'paramValue' or 'paramExpression'",
-                            "ADD_QUERY_PARAM"));
+        if (!parameters.containsKey(APIConstants.QUERY_PARAM_VALUE) || StringUtils
+                .isEmpty((String) parameters.get(APIConstants.QUERY_PARAM_VALUE))) {
+            throw new APIManagementException("Required 'paramValue' parameter for ADD_QUERY_PARAM "
+                    + "operation policy is either missing or empty", ExceptionCodes
+                    .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "paramValue", "ADD_QUERY_PARAM"));
         }
     }
+
 
     private void validateRemoveQueryParamPolicy(OperationPolicy policy) throws APIManagementException {
         Map<String, Object> parameters = policy.getParameters();
@@ -2654,32 +2640,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "Required 'paramName' parameter for REMOVE_QUERY_PARAM operation policy is either missing or empty",
                     ExceptionCodes
                             .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "paramName", "REMOVE_QUERY_PARAM"));
-        }
-    }
-    
-    /**
-     * Validates parameters for CHANGE_ENDPOINT and CALL_VALIDATION_SERVICE policies
-     *
-     * @param apiId
-     * @param policy
-     * @throws APIManagementException
-     */
-    private void validateEndpointPolicy(String apiId, OperationPolicy policy) throws APIManagementException {
-        Map<String, Object> parameters = policy.getParameters();
-        String endpointId;
-        if (!parameters.containsKey(APIConstants.ENDPOINT_ID_PARAM)) {
-            throw new APIManagementException("Required 'endpointId' parameter for " + policy.getPolicyType()
-                    + " operation policy is either missing", ExceptionCodes
-                    .from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
-                            policy.getPolicyType().toString()));
-        } else {
-            endpointId = (String) parameters.get(APIConstants.ENDPOINT_ID_PARAM);
-            if (StringUtils.isEmpty(endpointId)) {
-                throw new APIManagementException(
-                        "Required 'endpointId' parameter for " + policy.getPolicyType() + " operation policy is empty",
-                        ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
-                                policy.getPolicyType().toString()));
-            }
         }
     }
 
@@ -9595,8 +9555,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (env == null) {
             env = apiMgtDAO.getEnvironment(organization, uuid);
             if (env == null) {
-                String errorMessage = String
-                        .format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
+                String errorMessage =
+                        String.format("Failed to retrieve Environment with UUID %s. Environment not found", uuid);
                 throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
                         .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
             }

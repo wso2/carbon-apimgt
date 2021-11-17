@@ -2863,24 +2863,12 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_OUT = "out";
     public static final String HEADER_NAME_PARAM = "headerName";
     public static final String HEADER_VALUE_PARAM = "headerValue";
-    public static final String HEADER_EXPRESSION_PARAM = "headerExpression";
     public static final String HTTP_METHOD_PARAM = "httpMethod";
     public static final String RESOURCE_PATH_PARAM = "resourcePath";
     public static final String QUERY_PARAM_NAME = "paramName";
     public static final String QUERY_PARAM_VALUE = "paramValue";
-    public static final String QUERY_PARAM_EXPRESSION = "paramExpression";
     public static final String ENDPOINT_ID_PARAM = "endpointId";
-    public static final String PAYLOAD = "payload";
-    public static final String CONTENT_TYPE = "contentType";
-    public static final String HEADERS = "headers";
-    public static final String STATUS_CODE = "statusCode";
     public static final String PATH_PARAM_PREFIX = "uri.var.";
-    public static final String REQ_HEADER_PREFIX = "req.header.";
-    public static final String REQ_PATH_PARAM_PREFIX = "req.path.";
-    public static final String REQ_QUERY_PARAM_PREFIX = "req.query.";
-    public static final String RESPONSE_HEADER_PREFIX = "resp.header.";
-    public static final String RESPONSE_PATH_PARAM_PREFIX = "resp.path.";
-    public static final String RESPONSE_QUERY_PARAM_PREFIX = "resp.query.";
 
 
 
