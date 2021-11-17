@@ -42,6 +42,7 @@ public interface ApiProductsApiService {
       public Response createAPIProductRevision(String apiProductId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProduct(String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProductDocument(String apiProductId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response deleteAPIProductLifecycleStatePendingTasks(String apiProductId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIProductRevision(String apiProductId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIProductRevision(String apiProductId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;

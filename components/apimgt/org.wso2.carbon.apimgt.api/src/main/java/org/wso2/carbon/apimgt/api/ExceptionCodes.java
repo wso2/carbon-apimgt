@@ -113,6 +113,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_ENV_API_PROP_CONFIG(900358, "Invalid environment specific api property config", 400,
             "Environment specific api property config is not valid. %s", false),
     API_OR_API_PRODUCT_NOT_FOUND(900359, "API or API Product Not Found", 404, "Requested API or API Product with id '%s' not found"),
+    API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,

@@ -185,6 +185,24 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     }
 
     @DELETE
+    @Path("/{apiProductId}/lifecycle-state/pending-tasks")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Pending Lifecycle State Change Tasks", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Product Lifecycle",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Lifecycle state change pending task removed successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response deleteAPIProductLifecycleStatePendingTasks(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId) throws APIManagementException{
+        return delegate.deleteAPIProductLifecycleStatePendingTasks(apiProductId, securityContext);
+    }
+
+    @DELETE
     @Path("/{apiProductId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
