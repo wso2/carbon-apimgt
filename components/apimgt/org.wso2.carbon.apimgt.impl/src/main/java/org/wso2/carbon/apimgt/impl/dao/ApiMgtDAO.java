@@ -17530,7 +17530,6 @@ public class ApiMgtDAO {
                 while (result.next()) {
                     if (index >= offset && index < limit) {
                         String apiType = result.getString("TYPE");
-
                         if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
