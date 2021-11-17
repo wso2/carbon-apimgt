@@ -4488,7 +4488,7 @@ components:
       properties:
         name:
           type: string
-          example: 'TokenEndpoint'
+          example: 'token_endpoint'
         value:
           type: string
           example: 'https://localhost:9443/oauth2/token'
