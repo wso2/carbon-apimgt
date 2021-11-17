@@ -3213,15 +3213,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns the details of all the life-cycle changes done per api
+     * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param apiId API Identifier
+     * @param identifier     Identifier of the API or API Product
      * @param organization Organization
-     * @return List of lifecycle events per given api
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get Lifecycle Events
+     * @return List of lifecycle events per given API or API Product
+     * @throws APIManagementException if failed to copy docs
      */
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException {
-        return apiMgtDAO.getLifeCycleEvents(apiId, organization);
+    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier, String organization)
+            throws APIManagementException {
+        return apiMgtDAO.getLifeCycleEvents(identifier, organization);
     }
 
     /**

@@ -517,14 +517,14 @@ public interface APIProvider extends APIManager {
     void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException;
 
     /**
-     * Returns the details of all the life-cycle changes done per API.
+     * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param apiId     id of the APIIdentifier
+     * @param identifier     Identifier of the API or API Product
      * @param organization Organization
-     * @return List of life-cycle events per given API
+     * @return List of life-cycle events per given API or API Product
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier, String organization) throws APIManagementException;
 
     /**
      * Search API

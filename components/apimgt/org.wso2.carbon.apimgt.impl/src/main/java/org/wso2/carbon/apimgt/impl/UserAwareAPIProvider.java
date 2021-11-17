@@ -173,9 +173,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getLifeCycleEvents(apiId, organization);
+    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier, String organization)
+            throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getLifeCycleEvents(identifier, organization);
     }
 
     @Override

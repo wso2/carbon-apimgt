@@ -56,6 +56,8 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -83,6 +85,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -1828,5 +1831,21 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Error while change the state of artifact with name - "
                     + apiTypeWrapper.getName(), e);
         }
+    }
+
+    /**
+     * Retrieve lifecycle history of API or API Product by Identifier
+     *
+     * @param identifier    Unique identifier of API or API Product
+     * @param organization  Organization of logged-in user
+     * @return LifecycleHistoryDTO object
+     * @throws APIManagementException exception if there is an error when retrieving the LC history
+     */
+    public static LifecycleHistoryDTO getLifecycleHistoryDTO(Identifier identifier, String organization)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(identifier, organization);
+        return APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
     }
 }

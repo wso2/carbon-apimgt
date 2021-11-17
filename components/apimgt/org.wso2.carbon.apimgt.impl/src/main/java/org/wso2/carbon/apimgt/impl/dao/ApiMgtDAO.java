@@ -4947,26 +4947,42 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId, String organization) throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(Identifier identifier, String organization)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_LIFECYCLE_EVENT_SQL;
+        String name;
+        String version;
+        String provider;
+
+        if (identifier instanceof APIProductIdentifier) {
+            APIProductIdentifier productIdentifier = (APIProductIdentifier) identifier;
+            name = productIdentifier.getName();
+            version = productIdentifier.getVersion();
+            provider = productIdentifier.getProviderName();
+        } else {
+            APIIdentifier apiIdentifier = (APIIdentifier) identifier;
+            name = apiIdentifier.getName();
+            version = apiIdentifier.getVersion();
+            provider = apiIdentifier.getProviderName();
+        }
 
         List<LifeCycleEvent> events = new ArrayList<LifeCycleEvent>();
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmt.setString(2, apiId.getApiName());
-            prepStmt.setString(3, apiId.getVersion());
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
+            prepStmt.setString(2, name);
+            prepStmt.setString(3, version);
             prepStmt.setString(4, organization);
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {
                 LifeCycleEvent event = new LifeCycleEvent();
-                event.setApi(apiId);
+                event.setApiOrApiProductIdentifier(identifier);
                 String oldState = rs.getString("PREVIOUS_STATE");
                 //event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
                 event.setOldStatus(oldState != null ? oldState : null);
