@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -86,6 +87,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -1847,5 +1849,46 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(identifier, organization);
         return APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
+    }
+
+    /**
+     * Get lifecycle state information of API or API Product
+     *
+     * @param identifier   Unique identifier of API or API Product
+     * @param organization Organization of logged-in user
+     * @return LifecycleStateDTO object
+     * @throws APIManagementException if there is en error while retrieving the lifecycle state information
+     */
+    public static LifecycleStateDTO getLifecycleStateInformation(Identifier identifier, String organization)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(identifier.getUUID(), organization);
+        if (apiLCData == null) {
+            String type;
+            if (identifier instanceof APIProductIdentifier) {
+                type = APIConstants.API_PRODUCT;
+            } else {
+                type = APIConstants.API_IDENTIFIER_TYPE;
+            }
+            throw new APIManagementException("Error while getting lifecycle state for " + type + " with ID "
+                    + identifier, ExceptionCodes.from(ExceptionCodes.LIFECYCLE_STATE_INFORMATION_NOT_FOUND, type,
+                    identifier.getUUID()));
+        } else {
+            boolean apiOlderVersionExist = false;
+            // check whether other versions of the current API exists
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            Set<String> versions =
+                    apiProvider.getAPIVersions(APIUtil.replaceEmailDomain(identifier.getProviderName()),
+                            identifier.getName(), organization);
+
+            for (String tempVersion : versions) {
+                if (comparator.compare(tempVersion, identifier.getVersion()) < 0) {
+                    apiOlderVersionExist = true;
+                    break;
+                }
+            }
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
+        }
     }
 }

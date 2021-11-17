@@ -2126,7 +2126,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPILifecycleState(String apiId, String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException{
+            throws APIManagementException {
+
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId, organization);
         return Response.ok().entity(lifecycleStateDTO).build();
@@ -2140,34 +2141,15 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Lifecycle state information
      */
     private LifecycleStateDTO getLifecycleState(String apiId, String organization) {
+
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier;
             if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                 apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, organization);
-            if (apiLCData == null) {
-                String errorMessage = "Error while getting lifecycle state for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
-            }
-
-            boolean apiOlderVersionExist = false;
-            // check whether other versions of the current API exists
-            APIVersionStringComparator comparator = new APIVersionStringComparator();
-            Set<String> versions = apiProvider.getAPIVersions(
-                    APIUtil.replaceEmailDomain(apiIdentifier.getProviderName()), apiIdentifier.getName(), organization);
-
-            for (String tempVersion : versions) {
-                if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
-                    apiOlderVersionExist = true;
-                    break;
-                }
-            }
-
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
+            return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
