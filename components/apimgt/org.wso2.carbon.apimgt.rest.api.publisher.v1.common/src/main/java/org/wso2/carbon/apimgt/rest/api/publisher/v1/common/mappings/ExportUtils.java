@@ -49,7 +49,6 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -215,7 +214,6 @@ public class ExportUtils {
             addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                     organization);
         }
-        addResourceEndpointsToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, organization);
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                 organization);
         CommonUtil.archiveDirectory(exportAPIBasePath);
@@ -1097,31 +1095,6 @@ public class ExportUtils {
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
                     isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
-        }
-    }
-
-    public static void addResourceEndpointsToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, String organization) throws APIImportExportException {
-        try {
-            List<ResourceEndpoint> resourceEndpoints = apiProvider
-                    .getResourceEndpoints(apiDtoToReturn.getId());
-
-            if (!resourceEndpoints.isEmpty()) {
-                String resourceEndpointsDirectoryPath =
-                        archivePath + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY;
-                CommonUtil.createDirectory(resourceEndpointsDirectoryPath);
-
-                CommonUtil.writeDtoToFile(
-                        resourceEndpointsDirectoryPath + ImportExportConstants.RESOURCE_ENDPOINTS_FILE_NAME,
-                        exportFormat, ImportExportConstants.TYPE_RESOURCE_ENDPOINTS, ResourceEndpointMappingUtil
-                                .fromResourceEndpointListToDTO(resourceEndpoints, 0, Integer.MAX_VALUE));
-            }
-        } catch (APIManagementException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving Resource Endpoints of API : " + apiDtoToReturn.getName(), e);
-        } catch (IOException e) {
-            throw new APIImportExportException(
-                    "Error while archiving Resource Endpoint details of API : " + apiDtoToReturn.getName(), e);
         }
     }
 }
