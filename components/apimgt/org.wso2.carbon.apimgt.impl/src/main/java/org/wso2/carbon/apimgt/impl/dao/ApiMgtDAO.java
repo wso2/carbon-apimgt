@@ -17565,7 +17565,6 @@ public class ApiMgtDAO {
         }
 
         return subscribedAPIs;
-
     }
 
     private class SubscriptionInfo {
