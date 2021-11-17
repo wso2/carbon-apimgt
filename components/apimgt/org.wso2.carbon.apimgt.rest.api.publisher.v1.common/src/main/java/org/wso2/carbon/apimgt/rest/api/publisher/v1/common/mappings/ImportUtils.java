@@ -59,8 +59,6 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -82,15 +80,12 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourceEndpointDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -118,7 +113,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -254,50 +248,9 @@ public class ImportUtils {
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
 
-                //We need to delay addition of change_endpoint policies until the resource endpoint
-                //entries are added, hence removing them from the APIDTO
-                boolean isResourceEndpointsAvailable = CommonUtil.checkFileExistence(
-                        extractedFolderPath + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY);
-                ArrayList<ResourceEndpointDTO> resourceEndpoints = new ArrayList<>();
-                Map<String, OperationPolicyDTO> operationsWithChangeEndpointPolicies = new HashMap<>();
-                if (isResourceEndpointsAvailable) {
-                    resourceEndpoints = retrieveAPIResourceEndpoints(extractedFolderPath);
-                }
-                operationsWithChangeEndpointPolicies = filterOutChangeEndpointPolicies(importedApiDTO,
-                        resourceEndpoints);
-
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
                                 importedApiDTO.getProvider(), organization);
-
-                //Add resource endpoints and change_endpoint policies if exists
-                String apiUUID = importedApi.getUuid();
-                for (ResourceEndpointDTO resourceEndpointDTO : resourceEndpoints) {
-                    String endpointId = apiProvider.addResourceEndpoint(apiUUID,
-                            ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO));
-                    updateEndpointIdInChangeEndpointPolicyList(operationsWithChangeEndpointPolicies,
-                            resourceEndpointDTO.getId(), endpointId);
-                    resourceEndpointDTO.setId(endpointId);
-                }
-
-                Set<URITemplate> apiURITemplates = apiProvider.getURITemplatesOfAPI(apiUUID);
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
-                for (URITemplate uriTemplate : apiURITemplates) {
-                    String key = uriTemplate.getUriTemplate() + ":" + uriTemplate.getHTTPVerb();
-                    uriTemplateMap.put(key, uriTemplate);
-                }
-
-                for (Map.Entry<String, OperationPolicyDTO> entry : operationsWithChangeEndpointPolicies.entrySet()) {
-                    URITemplate uriTemplate = uriTemplateMap.get(entry.getKey());
-                    OperationPolicy operationPolicy = OperationPolicyMappingUtil
-                            .fromDTOToOperationPolicy(entry.getValue());
-                    operationPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_IN);
-                    int policyId = apiProvider.addOperationPolicy(uriTemplate.getId(), operationPolicy);
-
-                    String endpointUUID = (String) operationPolicy.getParameters().get(APIConstants.ENDPOINT_ID_PARAM);
-                    ResourceEndpoint resourceEndpoint = apiProvider.getResourceEndpointByUUID(endpointUUID);
-                    apiProvider.addResourceEndpointMapping(policyId, resourceEndpoint.getId());
-                }
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -442,61 +395,6 @@ public class ImportUtils {
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
-    }
-
-    private static void updateEndpointIdInChangeEndpointPolicyList(
-            Map<String, OperationPolicyDTO> operationsWithChangeEndpointPolicies, String oldEndpointId,
-            String newEndpointId) {
-        for (OperationPolicyDTO operationPolicy : operationsWithChangeEndpointPolicies.values()) {
-            Map<String, Object> policyParams = operationPolicy.getParameters();
-            String endpointId = (String) policyParams.get(APIConstants.ENDPOINT_ID_PARAM);
-            if (StringUtils.isNotEmpty(endpointId) && endpointId.equals(oldEndpointId)) {
-                policyParams.put(APIConstants.ENDPOINT_ID_PARAM, newEndpointId);
-            }
-        }
-    }
-
-    private static Map<String, OperationPolicyDTO> filterOutChangeEndpointPolicies(APIDTO importedApiDTO,
-            ArrayList<ResourceEndpointDTO> resourceEndpoints) throws IOException, APIManagementException {
-        Map<String, OperationPolicyDTO> operationsWithChangeEndpointPolicy = new HashMap<>();
-        //check whether there are any CHANGE_ENDPOINT or CALL_VALIDATION_SERVICE policies in the operation policies list
-        List<APIOperationsDTO> operations = importedApiDTO.getOperations();
-        for (APIOperationsDTO operation : operations) {
-            if (operation.getOperationPolicies() != null) {
-                APIOperationPoliciesDTO operationPolicies = operation.getOperationPolicies();
-                List<OperationPolicyDTO> inPolicies = operationPolicies.getIn();
-                Iterator<OperationPolicyDTO> iterator = inPolicies.iterator();
-                while (iterator.hasNext()) {
-                    OperationPolicyDTO policy = iterator.next();
-                    if (policy.getPolicyType().equals(OperationPolicyDTO.PolicyTypeEnum.CALL_INTERCEPTOR_SERVICE)) {
-                        Map<String, Object> policyParameters = policy.getParameters();
-                        String endpointId = (String) policyParameters.get(APIConstants.ENDPOINT_ID_PARAM);
-                        if (isResourceEndpointExists(endpointId, resourceEndpoints)) {
-                            operationsWithChangeEndpointPolicy
-                                    .put(operation.getTarget() + ":" + operation.getVerb(), policy);
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Resource endpoint record for " + endpointId + "cannot be found in the "
-                                        + "resource-endpoints file, hence skipping the " + policy.getPolicyType()
-                                        + " policy that " + "involves the endpoint");
-                            }
-                        }
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-        return operationsWithChangeEndpointPolicy;
-    }
-
-    private static boolean isResourceEndpointExists(String endpointId,
-            ArrayList<ResourceEndpointDTO> resourceEndpoints) {
-        for (ResourceEndpointDTO endpoint : resourceEndpoints) {
-            if (endpointId != null && endpointId.equals(endpoint.getId())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -781,33 +679,6 @@ public class ImportUtils {
                     ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return processRetrievedDefinition(jsonContent);
-    }
-
-    /**
-     * Fetch resource-endpoint.json or resource-endpoint.yaml file content and process into a resource endpoint dto
-     * array
-     *
-     * @param pathToArchive     Path to the extracted folder
-     * @return
-     * @throws IOException
-     * @throws APIManagementException
-     */
-    private static ArrayList<ResourceEndpointDTO> retrieveAPIResourceEndpoints(String pathToArchive)
-            throws IOException, APIManagementException {
-        ArrayList<ResourceEndpointDTO> resourceEndpointDTOs = new ArrayList<>();
-        String jsonContent =
-                getFileContentAsJson(pathToArchive + ImportExportConstants.RESOURCE_ENDPOINTS_FILE_LOCATION);
-        if (jsonContent == null) {
-            log.info("Cannot find Resource Endpoints definition.");
-        } else {
-            JsonElement dataElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
-            JsonArray endpointsArray = dataElement.getAsJsonObject().get("list").getAsJsonArray();
-            for (JsonElement endpoint : endpointsArray) {
-                ResourceEndpointDTO ep = new Gson().fromJson(endpoint, ResourceEndpointDTO.class);
-                resourceEndpointDTOs.add(ep);
-            }
-        }
-        return resourceEndpointDTOs;
     }
 
     /**
@@ -1890,70 +1761,6 @@ public class ImportUtils {
         } catch (IOException e) {
             throw new APIManagementException("Error in reading certificates file", e);
         }
-    }
-
-    public static List<ResourceEndpoint> retrieveProductResourceEndpoints(String pathToArchive)
-            throws APIManagementException {
-        List<ResourceEndpoint> resourceEndpoints = new ArrayList<>();
-        String apisDirectoryPath = pathToArchive + File.separator + ImportExportConstants.APIS_DIRECTORY;
-
-        File apisDirectory = new File(apisDirectoryPath);
-        File[] apisDirectoryListing = apisDirectory.listFiles();
-
-        if (apisDirectoryListing != null) {
-            for (File apiDirectory : apisDirectoryListing) {
-                String apiDirectoryPath = apisDirectoryPath + File.separator + apiDirectory.getName();
-                String resourceEndpointsDirectoryPath =
-                        apiDirectoryPath + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY;
-                boolean isResourceEndpointsAvailable = CommonUtil.checkFileExistence(resourceEndpointsDirectoryPath);
-                if (isResourceEndpointsAvailable) {
-                    resourceEndpoints.addAll(retrieveResourceEndpoints(apiDirectoryPath));
-                }
-            }
-        }
-        return resourceEndpoints;
-    }
-
-    public static List<ResourceEndpoint> retrieveResourceEndpoints(String pathToArchive) throws APIManagementException {
-        String jsonContent = null;
-        List<ResourceEndpoint> resourceEndpoints = new ArrayList<>();
-        String pathToResourceEndpointsDirectory =
-                pathToArchive + File.separator + ImportExportConstants.RESOURCE_ENDPOINTS_DIRECTORY;
-        String pathToYamlFile = pathToResourceEndpointsDirectory + ImportExportConstants.RESOURCE_ENDPOINTS_FILE_NAME
-                + ImportExportConstants.YAML_EXTENSION;
-        String pathToJsonFile = pathToResourceEndpointsDirectory + ImportExportConstants.RESOURCE_ENDPOINTS_FILE_NAME
-                + ImportExportConstants.JSON_EXTENSION;
-
-        try {
-            // try loading file as YAML
-            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-                log.debug("Found resource-endpoints file " + pathToYamlFile);
-                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-                jsonContent = CommonUtil.yamlToJson(yamlContent);
-            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-                // load as a json fallback
-                log.debug("Found resource-endpoints file " + pathToJsonFile);
-                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
-            }
-            if (jsonContent == null) {
-                log.debug("No resource-endpoints file found, skipping");
-            } else {
-                JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject()
-                        .get(APIConstants.DATA);
-                if (configElement != null) {
-                    JsonElement endpointList = configElement.getAsJsonObject().get("list");
-                    if (endpointList != null) {
-                        Gson gson = new Gson();
-                        resourceEndpoints = gson.fromJson(endpointList.getAsJsonArray(),
-                                new TypeToken<ArrayList<ResourceEndpoint>>() {
-                                }.getType());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error in reading resource-endpoints file", e);
-        }
-        return resourceEndpoints;
     }
 
     /**
