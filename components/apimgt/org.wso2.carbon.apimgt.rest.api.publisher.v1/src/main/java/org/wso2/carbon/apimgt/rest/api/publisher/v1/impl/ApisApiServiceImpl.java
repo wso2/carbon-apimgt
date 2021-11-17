@@ -61,7 +61,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtBadRequestException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -90,7 +89,6 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -186,7 +184,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStor
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ResourceEndpointMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
@@ -218,8 +215,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidat
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourceEndpointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourceEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -249,7 +244,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -4938,95 +4932,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    @Override
-    public Response addResourceEndpoint(String apiId, ResourceEndpointDTO resourceEndpointDTO,
-            MessageContext messageContext) throws APIManagementException {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            //validate if api exists
-            APIInfo apiInfo = validateAPIExistence(apiId);
-            //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
-
-            ResourceEndpoint endpointToAdd = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-            String endpointId = apiProvider.addResourceEndpoint(apiId, endpointToAdd);
-            ResourceEndpoint createdEndpoint = apiProvider.getResourceEndpointByUUID(endpointId);
-            ResourceEndpointDTO createdEndpointDTO = ResourceEndpointMappingUtil
-                    .fromResourceEndpointToDTO(createdEndpoint);
-
-            String createdEndpointURIString = (RestApiConstants.RESOURCE_PATH_RESOURCE_ENDPOINTS + "/"
-                    + RestApiConstants.RESOURCE_ENDPOINT_ID_PARAM).replace(RestApiConstants.APIID_PARAM, apiId)
-                    .replace(RestApiConstants.RESOURCE_ENDPOINT_ID_PARAM, endpointId);
-            URI createdEndpointURI = new URI(createdEndpointURIString);
-            return Response.created(createdEndpointURI).entity(createdEndpointDTO).build();
-        } catch (URISyntaxException e) {
-            throw new APIManagementException("Error while adding resource endpoint : " + resourceEndpointDTO.getName(),
-                    e);
-        }
-    }
-
-    @Override
-    public Response updateResourceEndpoint(String apiId, String endpointId,
-            ResourceEndpointDTO resourceEndpointDTO, MessageContext messageContext) throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        ResourceEndpoint resourceEndpoint = ResourceEndpointMappingUtil.fromDTOtoResourceEndpoint(resourceEndpointDTO);
-        resourceEndpoint.setId(endpointId);
-        apiProvider.updateResourceEndpoint(resourceEndpoint);
-
-        //get updated resource endpoint
-        ResourceEndpoint updatedResourceEndpoint = apiProvider.getResourceEndpointByUUID(endpointId);
-        ResourceEndpointDTO updatedEndpointDTO = ResourceEndpointMappingUtil
-                .fromResourceEndpointToDTO(updatedResourceEndpoint);
-        return Response.ok().entity(updatedEndpointDTO).build();
-    }
-
-    @Override
-    public Response deleteResourceEndpoint(String apiId, String endpointId, MessageContext messageContext)
-            throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-
-        if (apiProvider.isResourceEndpointUsed(endpointId)) {
-            throw new APIManagementException("Cannot remove the Resource Endpoint " + endpointId + " as it is used in "
-                    + "an operation level mediation policy",
-                    ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_ALREADY_USED, endpointId));
-        }
-        apiProvider.deleteResourceEndpoint(endpointId);
-        return Response.ok().build();
-    }
-
-    @Override
-    public Response getResourceEndpoints(String apiId, Integer limit, Integer offset,
-            MessageContext messageContext) throws APIManagementException {
-        validateAPIExistence(apiId);
-        //set default limit and offset values if they are not set
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        List<ResourceEndpoint> resourceEndpoints = apiProvider.getResourceEndpoints(apiId);
-        ResourceEndpointListDTO resourceEndpointListDTO = ResourceEndpointMappingUtil
-                .fromResourceEndpointListToDTO(resourceEndpoints, offset, limit);
-        ResourceEndpointMappingUtil
-                .setPaginationParams(resourceEndpointListDTO, apiId, limit, offset, resourceEndpoints.size());
-        return Response.ok().entity(resourceEndpointListDTO).build();
-    }
-
-    @Override
-    public Response getResourceEndpoint(String apiId, String endpointId, MessageContext messageContext)
-            throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
-        ResourceEndpoint endpoint = apiProvider.getResourceEndpointByUUID(endpointId);
-        ResourceEndpointDTO endpointDTO = ResourceEndpointMappingUtil.fromResourceEndpointToDTO(endpoint);
-        if (endpoint != null) {
-            return Response.ok().entity(endpointDTO).build();
-        } else {
-            return Response.noContent().build();
-        }
     }
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,

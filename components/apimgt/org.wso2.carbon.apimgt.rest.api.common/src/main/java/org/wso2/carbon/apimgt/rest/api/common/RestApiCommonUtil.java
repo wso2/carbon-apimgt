@@ -387,22 +387,6 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /**
-     * Returns the paginated url for product documentations
-     *
-     * @param offset starting index
-     * @param limit  max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getResourceEndpointsPaginatedURL(Integer offset, Integer limit, String apiId) {
-
-        String paginatedURL = RestApiConstants.RESOURCE_ENDPOINTS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
-        return paginatedURL;
-    }
-
     public static APIProvider getProvider(String username) throws APIManagementException {
 
         return APIManagerFactory.getInstance().getAPIProvider(username);
