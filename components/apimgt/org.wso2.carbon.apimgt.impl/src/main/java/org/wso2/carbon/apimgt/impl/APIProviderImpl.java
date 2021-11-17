@@ -6568,9 +6568,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiId = apiMgtDAO.getAPIID(uuid);
             cleanUpPendingAPIStateChangeTask(apiId);
-        } catch (APIManagementException e) {
-            handleException("Error while deleting the workflow task.", e);
-        } catch (WorkflowException e) {
+        } catch (APIManagementException | WorkflowException e) {
             handleException("Error while deleting the workflow task.", e);
         }
     }

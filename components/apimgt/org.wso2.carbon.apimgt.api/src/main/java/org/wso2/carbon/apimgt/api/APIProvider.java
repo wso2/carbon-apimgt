@@ -1377,9 +1377,9 @@ public interface APIProvider extends APIManager {
     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
-     * Remove pending lifecycle state change task for the given api.
+     * Remove pending lifecycle state change task for the given api or api product.
      *
-     * @param uuid api uuid
+     * @param uuid unique uuid of api or api product
      * @throws APIManagementException if API Manager core level exception occurred
      */
     void deleteWorkflowTask(String uuid) throws APIManagementException;
