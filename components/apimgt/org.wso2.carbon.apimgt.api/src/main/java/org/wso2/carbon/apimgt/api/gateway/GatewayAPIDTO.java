@@ -48,8 +48,6 @@ public class GatewayAPIDTO implements Serializable {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
-    private GatewayContentDTO[] resourceEndpointsToBeAdd;
-    private String[] resourceEndpointsToBeRemove;
 
     private List<String> keyManagers = new ArrayList<>();
     public String getName() {
@@ -228,21 +226,5 @@ public class GatewayAPIDTO implements Serializable {
     public void setKeyManagers(List<String> keyManagers) {
 
         this.keyManagers = keyManagers;
-    }
-
-    public void setResourceEndpointsToBeAdd(GatewayContentDTO[] resourceEndpointsToBeAdd) {
-        this.resourceEndpointsToBeAdd = resourceEndpointsToBeAdd;
-    }
-
-    public GatewayContentDTO[] getResourceEndpointsToBeAdd() {
-        return resourceEndpointsToBeAdd;
-    }
-
-    public void setResourceEndpointsToBeRemove(String[] resourceEndpointsToBeRemove) {
-        this.resourceEndpointsToBeRemove = resourceEndpointsToBeRemove;
-    }
-
-    public String[] getResourceEndpointsToBeRemove() {
-        return resourceEndpointsToBeRemove;
     }
 }

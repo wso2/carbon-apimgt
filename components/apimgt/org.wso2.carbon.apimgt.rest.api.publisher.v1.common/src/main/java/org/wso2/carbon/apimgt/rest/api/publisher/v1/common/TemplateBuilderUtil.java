@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -91,12 +90,12 @@ public class TemplateBuilderUtil {
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
             List<ClientCertificateDTO> clientCertificateDTOS, List<SoapToRestMediationDto> soapToRestInMediationDtos,
-            List<SoapToRestMediationDto> soapToRestMediationDtos, List<ResourceEndpoint> resourceEndpoints)
+            List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api, soapToRestInMediationDtos, soapToRestMediationDtos,
-                resourceEndpoints);
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api, soapToRestInMediationDtos,
+                soapToRestMediationDtos);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
         if (!APIUtil.isStreamingApi(api)) {
@@ -265,11 +264,11 @@ public class TemplateBuilderUtil {
     }
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(APIProduct apiProduct, String tenantDomain,
-            List<ClientCertificateDTO> clientCertificateDTOS, Map<String, APIDTO> associatedAPIMap,
-            List<ResourceEndpoint> resourceEndpoints) throws APIManagementException {
+            List<ClientCertificateDTO> clientCertificateDTOS, Map<String, APIDTO> associatedAPIMap)
+            throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct, associatedAPIMap, resourceEndpoints);
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct, associatedAPIMap);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, apiProduct.getUuid());
         if (!APIUtil.isStreamingApi(apiProduct)) {
@@ -431,7 +430,6 @@ public class TemplateBuilderUtil {
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.IN);
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
-        List<ResourceEndpoint> resourceEndpoints = ImportUtils.retrieveResourceEndpoints(extractedFolderPath);
 
         JSONObject originalProperties = api.getAdditionalProperties();
         // add new property for entires that has a __display suffix
@@ -439,9 +437,9 @@ public class TemplateBuilderUtil {
         api.setAdditionalProperties(modifiedProperties);
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil
                 .getAPITemplateBuilder(api, tenantDomain, clientCertificatesDTOList, soapToRestInMediationDtoList,
-                        soapToRestOutMediationDtoList, resourceEndpoints);
+                        soapToRestOutMediationDtoList);
         GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
-                extractedFolderPath, apidto, clientCertificatesDTOList, resourceEndpoints);
+                extractedFolderPath, apidto, clientCertificatesDTOList);
         // Reset the additional properties to the original values
         if (originalProperties != null) {
             api.setAdditionalProperties(originalProperties);
@@ -490,7 +488,6 @@ public class TemplateBuilderUtil {
 
         List<ClientCertificateDTO> clientCertificatesDTOList =
                 ImportUtils.retrieveClientCertificates(extractedFolderPath);
-        List<ResourceEndpoint> resourceEndpoints = ImportUtils.retrieveProductResourceEndpoints(extractedFolderPath);
         Map<String, APIDTO> apidtoMap = retrieveAssociatedApis(extractedFolderPath);
         Map<String, APIDTO> associatedAPIsMap = convertAPIIdToDto(apidtoMap.values());
         for (APIProductResource productResource : apiProduct.getProductResources()) {
@@ -526,14 +523,14 @@ public class TemplateBuilderUtil {
         APITemplateBuilder
                 apiTemplateBuilder =
                 TemplateBuilderUtil.getAPITemplateBuilder(apiProduct, tenantDomain, clientCertificatesDTOList,
-                        convertAPIIdToDto(associatedAPIsMap.values()), resourceEndpoints);
+                        convertAPIIdToDto(associatedAPIsMap.values()));
         return createAPIGatewayDTOtoPublishAPI(environment, apiProduct, apiTemplateBuilder, tenantDomain,
-                apidtoMap, clientCertificatesDTOList, resourceEndpoints);
+                apidtoMap, clientCertificatesDTOList);
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
             APITemplateBuilder builder, String tenantDomain, Map<String, APIDTO> associatedAPIsMap,
-            List<ClientCertificateDTO> clientCertificatesDTOList, List<ResourceEndpoint> resourceEndpoints)
+            List<ClientCertificateDTO> clientCertificatesDTOList)
             throws APITemplateException, XMLStreamException, APIManagementException {
 
         APIProductIdentifier id = apiProduct.getId();
@@ -571,10 +568,6 @@ public class TemplateBuilderUtil {
             setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
         }
 
-        if (resourceEndpoints != null && !resourceEndpoints.isEmpty()) {
-            addResourceEndpoints(resourceEndpoints, builder, productAPIDto);
-        }
-
         return productAPIDto;
     }
 
@@ -597,7 +590,7 @@ public class TemplateBuilderUtil {
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
             APITemplateBuilder builder, String tenantDomain, String extractedPath, APIDTO apidto,
-            List<ClientCertificateDTO> clientCertificatesDTOList, List<ResourceEndpoint> resourceEndpoints)
+            List<ClientCertificateDTO> clientCertificatesDTOList)
             throws APIManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
@@ -712,10 +705,6 @@ public class TemplateBuilderUtil {
                 if (isWsApi || isGraphQLSubscriptionAPI) {
                     addWebSocketResourceEndpoints(api, builder, gatewayAPIDTO);
                 }
-            }
-
-            if (resourceEndpoints != null && !resourceEndpoints.isEmpty()) {
-                addResourceEndpoints(resourceEndpoints, builder, gatewayAPIDTO);
             }
         }
         setSecureVaultPropertyToBeAdded(null, api, gatewayAPIDTO);
@@ -881,23 +870,6 @@ public class TemplateBuilderUtil {
             endpoint.setContent(endpointConfigContext);
             gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentToList(endpoint,
                     gatewayAPIDTO.getEndpointEntriesToBeAdd()));
-        }
-    }
-
-    private static void addResourceEndpoints(List<ResourceEndpoint> resourceEndpoints, APITemplateBuilder builder,
-            GatewayAPIDTO gatewayAPIDTO) throws APITemplateException {
-        for (ResourceEndpoint resourceEndpoint : resourceEndpoints) {
-            String resourceEndpointConfigContext = builder
-                    .getConfigStringForResourceEndpointTemplate(resourceEndpoint.getId());
-            GatewayContentDTO resourceEndpointContentDTO = new GatewayContentDTO();
-            try {
-                resourceEndpointContentDTO.setName(getEndpointName(resourceEndpointConfigContext));
-            } catch (XMLStreamException e) {
-                throw new APITemplateException("Error while reading resource endpoint name from config", e);
-            }
-            resourceEndpointContentDTO.setContent(resourceEndpointConfigContext);
-            gatewayAPIDTO.setResourceEndpointsToBeAdd(addGatewayContentToList(resourceEndpointContentDTO,
-                    gatewayAPIDTO.getResourceEndpointsToBeAdd()));
         }
     }
 

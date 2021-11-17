@@ -85,7 +85,6 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.ResourceEndpoint;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -2680,11 +2679,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Required 'endpointId' parameter for " + policy.getPolicyType() + " operation policy is empty",
                         ExceptionCodes.from(ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS, "'endpointId'",
                                 policy.getPolicyType().toString()));
-            } else if (!isAPIResourceEndpointExists(apiId, null, endpointId)) {
-                throw new APIManagementException(
-                        "Resource endpoint " + parameters.get(APIConstants.ENDPOINT_ID_PARAM)
-                                + " not found for API",
-                        ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, endpointId));
             }
         }
     }
@@ -9639,60 +9633,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public int addOperationPolicy(int urlMappingId, OperationPolicy policy) throws APIManagementException {
         return apiMgtDAO.addOperationPolicy(urlMappingId, policy);
-    }
-
-    @Override
-    public String addResourceEndpoint(String uuid, ResourceEndpoint endpoint)
-            throws APIManagementException {
-        return apiMgtDAO.addResourceEndpoint(uuid, endpoint);
-    }
-
-    @Override
-    public ResourceEndpoint getResourceEndpointByUUID(String uuid)
-            throws APIManagementException {
-        ResourceEndpoint resourceEndpoint = apiMgtDAO.getResourceEndpointByUUID(uuid);
-        if (resourceEndpoint == null) {
-            throw new APIMgtResourceNotFoundException("Resource Endpoint not found for specified endpoint ID: " + uuid,
-                    ExceptionCodes.from(ExceptionCodes.RESOURCE_ENDPOINT_NOT_FOUND, uuid));
-        }
-        return resourceEndpoint;
-    }
-
-    @Override
-    public List<ResourceEndpoint> getResourceEndpoints(String uuid)
-            throws APIManagementException {
-        return apiMgtDAO.getResourceEndpoints(uuid);
-    }
-
-    @Override
-    public void updateResourceEndpoint(ResourceEndpoint endpoint)
-            throws APIManagementException {
-        apiMgtDAO.updateResourceEndpoint(endpoint);
-    }
-
-    @Override
-    public void deleteResourceEndpoint(String uuid) throws APIManagementException {
-        apiMgtDAO.deleteResourceEndpoint(uuid);
-    }
-
-    @Override
-    public boolean isAPIResourceEndpointExists(String apiId, String revisionUUID, String endpointId)
-            throws APIManagementException {
-        return apiMgtDAO.isAPIResourceEndpointExists(apiId, revisionUUID, endpointId);
-    }
-
-    @Override
-    public boolean isResourceEndpointUsed(String uuid) throws APIManagementException {
-        return apiMgtDAO.isResourceEndpointUsed(uuid);
-    }
-
-    @Override
-    public void addResourceEndpointMapping(int policyId, String endpointUUID) throws APIManagementException {
-        try {
-            apiMgtDAO.addResourceEndpointMapping(policyId, endpointUUID, null);
-        } catch (SQLException e) {
-            handleException("Error while adding resource endpoint mapping.", e);
-        }
     }
 
     @Override
