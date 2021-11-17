@@ -697,7 +697,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 }
             }
         }
-
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Endpoints deployed");
             log.debug("Start to deploy Client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
@@ -833,11 +832,10 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 }
             }
         }
-
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " endpoints undeployed " +
                     "successfully");
-            log.debug("Start to undeploy client certificates " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+            log.debug("Start to undeploy client certificates" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
         // Remove clientCertificates

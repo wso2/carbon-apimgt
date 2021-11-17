@@ -7238,6 +7238,14 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Get operation polcies attached to the resource identified by the url mapping ID
+     *
+     * @param urlMappingId      URL Mapping ID of the resource
+     * @return
+     * @throws SQLException
+     * @throws APIManagementException
+     */
     private List<OperationPolicy> getOperationPoliciesOfURITemplate(int urlMappingId)
             throws SQLException, APIManagementException {
         List<OperationPolicy> operationPolicies = new ArrayList<>();
@@ -7351,6 +7359,14 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Populates operation policy mappings in the API Product URITemplate map
+     *
+     * @param productRevisionId     Product Revision ID
+     * @param uriTemplates          Map of URI Templates
+     * @throws SQLException
+     * @throws APIManagementException
+     */
     private void setAPIProductOperationPoliciesToURITemplatesMap(String productRevisionId, Map<String, URITemplate> uriTemplates)
             throws SQLException, APIManagementException {
         try (Connection conn = APIMgtDBUtil.getConnection();
