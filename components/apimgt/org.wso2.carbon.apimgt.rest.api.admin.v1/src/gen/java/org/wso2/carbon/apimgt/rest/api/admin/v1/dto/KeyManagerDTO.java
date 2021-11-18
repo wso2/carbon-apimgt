@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 import javax.validation.constraints.*;
 
@@ -39,6 +40,7 @@ public class KeyManagerDTO   {
     private String displayRevokeEndpoint = null;
     private String userInfoEndpoint = null;
     private String authorizeEndpoint = null;
+    private List<KeyManagerEndpointDTO> endpoints = new ArrayList<KeyManagerEndpointDTO>();
     private KeyManagerCertificatesDTO certificates = null;
     private String issuer = null;
     private String alias = null;
@@ -330,6 +332,24 @@ return null;
   }
   public void setAuthorizeEndpoint(String authorizeEndpoint) {
     this.authorizeEndpoint = authorizeEndpoint;
+  }
+
+  /**
+   **/
+  public KeyManagerDTO endpoints(List<KeyManagerEndpointDTO> endpoints) {
+    this.endpoints = endpoints;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("endpoints")
+  public List<KeyManagerEndpointDTO> getEndpoints() {
+    return endpoints;
+  }
+  public void setEndpoints(List<KeyManagerEndpointDTO> endpoints) {
+    this.endpoints = endpoints;
   }
 
   /**
@@ -668,6 +688,7 @@ return null;
         Objects.equals(displayRevokeEndpoint, keyManager.displayRevokeEndpoint) &&
         Objects.equals(userInfoEndpoint, keyManager.userInfoEndpoint) &&
         Objects.equals(authorizeEndpoint, keyManager.authorizeEndpoint) &&
+        Objects.equals(endpoints, keyManager.endpoints) &&
         Objects.equals(certificates, keyManager.certificates) &&
         Objects.equals(issuer, keyManager.issuer) &&
         Objects.equals(alias, keyManager.alias) &&
@@ -690,7 +711,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, displayTokenEndpoint, revokeEndpoint, displayRevokeEndpoint, userInfoEndpoint, authorizeEndpoint, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
+    return Objects.hash(id, name, displayName, type, description, wellKnownEndpoint, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, displayTokenEndpoint, revokeEndpoint, displayRevokeEndpoint, userInfoEndpoint, authorizeEndpoint, endpoints, certificates, issuer, alias, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties, tokenType);
   }
 
   @Override
@@ -712,6 +733,7 @@ return null;
     sb.append("    displayRevokeEndpoint: ").append(toIndentedString(displayRevokeEndpoint)).append("\n");
     sb.append("    userInfoEndpoint: ").append(toIndentedString(userInfoEndpoint)).append("\n");
     sb.append("    authorizeEndpoint: ").append(toIndentedString(authorizeEndpoint)).append("\n");
+    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("    certificates: ").append(toIndentedString(certificates)).append("\n");
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
     sb.append("    alias: ").append(toIndentedString(alias)).append("\n");

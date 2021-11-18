@@ -230,7 +230,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[]", value = "")
+  @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("subscriptionScopes")
   public List<ScopeInfoDTO> getSubscriptionScopes() {
