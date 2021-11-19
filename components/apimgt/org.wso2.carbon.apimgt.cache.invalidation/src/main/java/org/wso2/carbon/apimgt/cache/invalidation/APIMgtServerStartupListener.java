@@ -21,17 +21,20 @@ package org.wso2.carbon.apimgt.cache.invalidation;
 import org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 /**
  * This class used to initialize and stop Message listening capability.
  */
-public class APIMgtServerStartupListener implements ServerStartupObserver, ServerShutdownHandler {
+public class APIMgtServerStartupListener implements ServerStartupObserver, ServerShutdownHandler,
+        JMSListenerShutDownService {
 
-    private  JMSTransportHandler jmsTransportHandlerForEventHub;
+    private JMSTransportHandler jmsTransportHandlerForEventHub;
 
     public APIMgtServerStartupListener() {
+
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 DataHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getEventHubConfigurationDto().getEventHubReceiverConfiguration();
@@ -48,6 +51,7 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
 
     @Override
     public void completedServerStartup() {
+
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
@@ -59,6 +63,18 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
 
     @Override
     public void invoke() {
+
+        if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
+                DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
+                jmsTransportHandlerForEventHub != null) {
+            jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+            DataHolder.getInstance().setStarted(false);
+        }
+    }
+
+    @Override
+    public void shutDownListener() {
+
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
