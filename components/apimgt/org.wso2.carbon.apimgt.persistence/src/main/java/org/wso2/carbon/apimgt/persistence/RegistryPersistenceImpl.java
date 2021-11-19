@@ -1003,7 +1003,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
-           UserContext ctx, boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
+           UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
         boolean isTenantFlowStarted = false;
         DevPortalAPISearchResult result = null;
@@ -1014,7 +1014,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             log.debug("Requested query for devportal search: " + searchQuery);
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
-                    isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayMultipleVersions);
+                    isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
             String userNameLocal;
@@ -1039,12 +1039,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
         return result;
-    }
-    @Override
-    public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
-            UserContext ctx) throws APIPersistenceException {
-
-        return searchAPIsForDevPortal(org, searchQuery, start, offset, ctx, true);
     }
 
     private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(Registry userRegistry, int tenantIDLocal,
@@ -1362,6 +1356,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     private boolean isAllowDisplayAPIsWithMultipleStatus() {
         if (properties != null) {
             return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_STATUS);
+        }
+        return false;
+    }
+
+    private boolean isAllowDisplayAPIsWithMultipleVersions() {
+        if (properties != null) {
+            return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_VERSIONS);
         }
         return false;
     }

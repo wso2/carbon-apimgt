@@ -5604,7 +5604,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
-                    start, end, userCtx, APIUtil.isAllowDisplayMultipleVersions());
+                    start, end, userCtx);
             if (log.isDebugEnabled()) {
                 log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }

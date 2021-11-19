@@ -191,20 +191,6 @@ public interface APIPersistence {
                                     UserContext ctx) throws APIPersistenceException;
 
     /**
-     * Search APIs to be displayed on Dev Portal API listing
-     *
-     * @param org         Organization the APIs are owned by
-     * @param searchQuery search query
-     * @param start       starting index
-     * @param offset      search offset
-     * @param isAllowDisplayMultipleVersions      whether to display multiple versions
-     * @return Dev Portal API Search Result
-     * @throws APIPersistenceException
-     */
-    DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
-            UserContext ctx, boolean isAllowDisplayMultipleVersions) throws APIPersistenceException;
-
-    /**
      * Search based on content to display on publisher
      *
      * @param org         Organization the APIs are owned by
