@@ -166,6 +166,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
 
@@ -1003,7 +1004,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
-           UserContext ctx) throws APIPersistenceException {
+            UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
         boolean isTenantFlowStarted = false;
         DevPortalAPISearchResult result = null;

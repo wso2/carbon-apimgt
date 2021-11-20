@@ -64,16 +64,6 @@ public interface APIPersistence {
     /**
      * Add API to the persistence layer
      *
-     * @param org Organization the API is owned by
-     * @param publisherAPI API to add
-     * @param isLatest whether the API is the latest version
-     * @return ID of Added API
-     * @throws APIPersistenceException
-     */
-
-    /**
-     * Add API to the persistence layer
-     *
      * @param org          Organization the API is owned by
      * @param publisherAPI API to add
      * @return ID of Added API
